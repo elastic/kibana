@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -16,6 +17,7 @@ export const transformIdsSchema = schema.arrayOf(
 
 export type TransformIdsSchema = TypeOf<typeof transformIdsSchema>;
 
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 export const transformStateSchema = schema.oneOf([
   schema.literal(TRANSFORM_STATE.ABORTING),
   schema.literal(TRANSFORM_STATE.FAILED),
@@ -23,10 +25,11 @@ export const transformStateSchema = schema.oneOf([
   schema.literal(TRANSFORM_STATE.STARTED),
   schema.literal(TRANSFORM_STATE.STOPPED),
   schema.literal(TRANSFORM_STATE.STOPPING),
+  schema.literal(TRANSFORM_STATE.WAITING),
 ]);
 
 export const indexPatternTitleSchema = schema.object({
-  /** Title of the index pattern for which to return stats. */
+  /** Title of the data view for which to return stats. */
   indexPatternTitle: schema.string(),
 });
 
@@ -52,3 +55,28 @@ export interface ResponseStatus {
 export interface CommonResponseStatusSchema {
   [key: string]: ResponseStatus;
 }
+
+export const runtimeMappingsSchema = schema.maybe(
+  schema.recordOf(
+    schema.string(),
+    schema.object({
+      type: schema.oneOf([
+        schema.literal('keyword'),
+        schema.literal('long'),
+        schema.literal('double'),
+        schema.literal('date'),
+        schema.literal('ip'),
+        schema.literal('boolean'),
+        schema.literal('geo_point'),
+      ]),
+      script: schema.maybe(
+        schema.oneOf([
+          schema.string(),
+          schema.object({
+            source: schema.string(),
+          }),
+        ])
+      ),
+    })
+  )
+);

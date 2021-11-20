@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -20,6 +21,7 @@ interface RequestArgs {
   jobOverrides?: SetupMlModuleJobOverrides[];
   datafeedOverrides?: SetupMlModuleDatafeedOverrides[];
   query?: object;
+  useDedicatedIndex?: boolean;
 }
 
 export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
@@ -33,6 +35,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
     jobOverrides = [],
     datafeedOverrides = [],
     query,
+    useDedicatedIndex = false,
   } = requestArgs;
 
   const response = await fetch(`/api/ml/modules/setup/${moduleId}`, {
@@ -47,6 +50,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
         jobOverrides,
         datafeedOverrides,
         query,
+        useDedicatedIndex,
       })
     ),
   });
@@ -77,6 +81,7 @@ const setupMlModuleRequestParamsRT = rt.intersection([
     startDatafeed: rt.boolean,
     jobOverrides: rt.array(setupMlModuleJobOverridesRT),
     datafeedOverrides: rt.array(setupMlModuleDatafeedOverridesRT),
+    useDedicatedIndex: rt.boolean,
   }),
   rt.exact(
     rt.partial({
@@ -90,8 +95,19 @@ const setupMlModuleRequestPayloadRT = rt.intersection([
   setupMlModuleRequestParamsRT,
 ]);
 
+const setupErrorRT = rt.type({
+  reason: rt.string,
+  type: rt.string,
+});
+
 const setupErrorResponseRT = rt.type({
-  msg: rt.string,
+  status: rt.number,
+  error: rt.intersection([
+    setupErrorRT,
+    rt.type({
+      root_cause: rt.array(setupErrorRT),
+    }),
+  ]),
 });
 
 const datafeedSetupResponseRT = rt.intersection([
@@ -101,6 +117,7 @@ const datafeedSetupResponseRT = rt.intersection([
     success: rt.boolean,
   }),
   rt.partial({
+    awaitingNodeAssignment: rt.boolean,
     error: setupErrorResponseRT,
   }),
 ]);

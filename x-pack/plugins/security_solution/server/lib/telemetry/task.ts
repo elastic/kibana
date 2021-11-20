@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 import { Logger } from 'src/core/server';
 import {
@@ -10,48 +12,94 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { TelemetryEventsSender, TelemetryEvent } from './sender';
+import { TelemetryReceiver } from './receiver';
+import { TelemetryEventsSender } from './sender';
 
-export const TelemetryDiagTaskConstants = {
-  TIMEOUT: '1m',
-  TYPE: 'security:endpoint-diagnostics',
-  INTERVAL: '5m',
-  VERSION: '1.0.0',
-};
+export interface SecurityTelemetryTaskConfig {
+  type: string;
+  title: string;
+  interval: string;
+  timeout: string;
+  version: string;
+  getLastExecutionTime?: LastExecutionTimestampCalculator;
+  runTask: SecurityTelemetryTaskRunner;
+}
 
-export class TelemetryDiagTask {
+export type SecurityTelemetryTaskRunner = (
+  taskId: string,
+  logger: Logger,
+  receiver: TelemetryReceiver,
+  sender: TelemetryEventsSender,
+  taskExecutionPeriod: TaskExecutionPeriod
+) => Promise<number>;
+
+export interface TaskExecutionPeriod {
+  last?: string;
+  current: string;
+}
+
+export type LastExecutionTimestampCalculator = (
+  executeTo: string,
+  lastExecutionTimestamp?: string
+) => string;
+
+export class SecurityTelemetryTask {
+  private readonly config: SecurityTelemetryTaskConfig;
   private readonly logger: Logger;
   private readonly sender: TelemetryEventsSender;
+  private readonly receiver: TelemetryReceiver;
 
   constructor(
+    config: SecurityTelemetryTaskConfig,
     logger: Logger,
-    taskManager: TaskManagerSetupContract,
-    sender: TelemetryEventsSender
+    sender: TelemetryEventsSender,
+    receiver: TelemetryReceiver
   ) {
+    this.config = config;
     this.logger = logger;
     this.sender = sender;
+    this.receiver = receiver;
+  }
 
+  public getLastExecutionTime = (
+    taskExecutionTime: string,
+    taskInstance: ConcreteTaskInstance
+  ): string | undefined => {
+    return this.config.getLastExecutionTime
+      ? this.config.getLastExecutionTime(
+          taskExecutionTime,
+          taskInstance.state?.lastExecutionTimestamp
+        )
+      : undefined;
+  };
+
+  public getTaskId = (): string => {
+    return `${this.config.type}:${this.config.version}`;
+  };
+
+  public register = (taskManager: TaskManagerSetupContract) => {
     taskManager.registerTaskDefinitions({
-      [TelemetryDiagTaskConstants.TYPE]: {
-        title: 'Security Solution Telemetry Diagnostics task',
-        timeout: TelemetryDiagTaskConstants.TIMEOUT,
+      [this.config.type]: {
+        title: this.config.title,
+        timeout: this.config.timeout,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           const { state } = taskInstance;
 
           return {
             run: async () => {
-              const executeTo = moment().utc().toISOString();
-              const executeFrom = this.getLastExecutionTimestamp(
-                executeTo,
-                taskInstance.state?.lastExecutionTimestamp
-              );
-              const hits = await this.runTask(taskInstance.id, executeFrom, executeTo);
+              const taskExecutionTime = moment().utc().toISOString();
+              const executionPeriod = {
+                last: this.getLastExecutionTime(taskExecutionTime, taskInstance),
+                current: taskExecutionTime,
+              };
+
+              const hits = await this.runTask(taskInstance.id, executionPeriod);
 
               return {
                 state: {
-                  lastExecutionTimestamp: executeTo,
-                  lastDiagAlertCount: hits,
+                  lastExecutionTimestamp: taskExecutionTime,
                   runs: (state.runs || 0) + 1,
+                  hits,
                 },
               };
             },
@@ -60,67 +108,41 @@ export class TelemetryDiagTask {
         },
       },
     });
-  }
-
-  public getLastExecutionTimestamp(executeTo: string, lastExecutionTimestamp?: string) {
-    if (lastExecutionTimestamp === undefined) {
-      this.logger.debug(`No last execution timestamp defined`);
-      return moment(executeTo).subtract(5, 'minutes').toISOString();
-    }
-
-    if (moment(executeTo).diff(lastExecutionTimestamp, 'minutes') >= 10) {
-      this.logger.debug(`last execution timestamp was greater than 10 minutes`);
-      return moment(executeTo).subtract(10, 'minutes').toISOString();
-    }
-
-    return lastExecutionTimestamp;
-  }
+  };
 
   public start = async (taskManager: TaskManagerStartContract) => {
+    const taskId = this.getTaskId();
+    this.logger.debug(`[task ${taskId}]: attempting to schedule`);
     try {
       await taskManager.ensureScheduled({
-        id: this.getTaskId(),
-        taskType: TelemetryDiagTaskConstants.TYPE,
+        id: taskId,
+        taskType: this.config.type,
         scope: ['securitySolution'],
         schedule: {
-          interval: TelemetryDiagTaskConstants.INTERVAL,
+          interval: this.config.interval,
         },
         state: { runs: 0 },
-        params: { version: TelemetryDiagTaskConstants.VERSION },
+        params: { version: this.config.version },
       });
     } catch (e) {
-      this.logger.error(`Error scheduling task, received ${e.message}`);
+      this.logger.error(`[task ${taskId}]: error scheduling task, received ${e.message}`);
     }
   };
 
-  private getTaskId = (): string => {
-    return `${TelemetryDiagTaskConstants.TYPE}:${TelemetryDiagTaskConstants.VERSION}`;
-  };
-
-  public runTask = async (taskId: string, searchFrom: string, searchTo: string) => {
-    this.logger.debug(`Running task ${taskId}`);
+  public runTask = async (taskId: string, executionPeriod: TaskExecutionPeriod) => {
+    this.logger.debug(`[task ${taskId}]: attempting to run`);
     if (taskId !== this.getTaskId()) {
-      this.logger.debug(`Outdated task running: ${taskId}`);
+      this.logger.debug(`[task ${taskId}]: outdated task`);
       return 0;
     }
 
     const isOptedIn = await this.sender.isTelemetryOptedIn();
     if (!isOptedIn) {
-      this.logger.debug(`Telemetry is not opted-in.`);
+      this.logger.debug(`[task ${taskId}]: telemetry is not opted-in`);
       return 0;
     }
 
-    const response = await this.sender.fetchDiagnosticAlerts(searchFrom, searchTo);
-
-    const hits = response.hits?.hits || [];
-    if (!Array.isArray(hits) || !hits.length) {
-      this.logger.debug('no diagnostic alerts retrieved');
-      return 0;
-    }
-    this.logger.debug(`Received ${hits.length} diagnostic alerts`);
-
-    const diagAlerts: TelemetryEvent[] = hits.map((h) => h._source);
-    this.sender.queueTelemetryEvents(diagAlerts);
-    return diagAlerts.length;
+    this.logger.debug(`[task ${taskId}]: running task`);
+    return this.config.runTask(taskId, this.logger, this.receiver, this.sender, executionPeriod);
   };
 }

@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { Direction } from '../../../../../../graphql/types';
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
-import { Sort, SortDirection } from '../../sort';
+import { Direction } from '../../../../../../../common/search_strategy';
+import { ColumnHeaderOptions, SortDirection } from '../../../../../../../common/types/timeline';
+import { Sort } from '../../sort';
 
 interface GetNewSortDirectionOnClickParams {
   clickedHeader: ColumnHeaderOptions;
@@ -34,7 +34,7 @@ export const getNextSortDirection = (currentSort: Sort): Direction => {
     case 'none':
       return Direction.desc;
     default:
-      return assertUnreachable(currentSort.sortDirection, 'Unhandled sort direction');
+      return Direction.desc;
   }
 };
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { range } from 'lodash';
@@ -50,8 +51,11 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
       return pageId !== null;
     }
 
-    clickRowByResolver(nodeResolver) {
-      return testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver);
+    async clickRowByResolver(nodeResolver) {
+      await retry.waitForWithTimeout('redirection to node detail', 30000, async () => {
+        await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver, 5000);
+        return testSubjects.exists('elasticsearchNodeDetailStatus', { timeout: 5000 });
+      });
     }
 
     async waitForTableToFinishLoading() {
@@ -62,6 +66,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
 
     async clickNameCol() {
       await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_NAME_COL}"] > button`);
+      await find.byCssSelector('.euiBasicTable-loading');
       await this.waitForTableToFinishLoading();
     }
 

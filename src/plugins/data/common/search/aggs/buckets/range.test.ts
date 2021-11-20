@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../common/field_formats';
+import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../../field_formats/common';
 
 describe('Range Agg', () => {
   const getConfig = (() => {}) as FieldFormatsGetConfigFn;
@@ -72,7 +72,40 @@ describe('Range Agg', () => {
                 "1",
               ],
               "ranges": Array [
-                "[{\\"from\\":0,\\"to\\":1000},{\\"from\\":1000,\\"to\\":2000}]",
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "from": Array [
+                          0,
+                        ],
+                        "to": Array [
+                          1000,
+                        ],
+                      },
+                      "function": "numericalRange",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "from": Array [
+                          1000,
+                        ],
+                        "to": Array [
+                          2000,
+                        ],
+                      },
+                      "function": "numericalRange",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
               ],
               "schema": Array [
                 "segment",

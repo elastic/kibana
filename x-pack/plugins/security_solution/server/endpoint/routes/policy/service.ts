@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import {
   ElasticsearchClient,
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '../../../../../../../src/core/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from './index';
 import { Agent } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext } from '../../types';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../../../fleet/common/constants';
+import type { ISearchRequestParams } from '../../../../../../../src/plugins/data/common';
 
-export function getESQueryPolicyResponseByAgentID(agentID: string, index: string) {
+export const getESQueryPolicyResponseByAgentID = (
+  agentID: string,
+  index: string
+): ISearchRequestParams => {
   return {
     body: {
       query: {
@@ -44,26 +47,23 @@ export function getESQueryPolicyResponseByAgentID(agentID: string, index: string
     },
     index,
   };
-}
+};
 
 export async function getPolicyResponseByAgentId(
   index: string,
   agentID: string,
-  dataClient: ILegacyScopedClusterClient
+  dataClient: IScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
   const query = getESQueryPolicyResponseByAgentID(agentID, index);
-  const response = (await dataClient.callAsCurrentUser(
-    'search',
-    query
-  )) as SearchResponse<HostPolicyResponse>;
+  const response = await dataClient.asCurrentUser.search<HostPolicyResponse>(query);
 
-  if (response.hits.hits.length === 0) {
-    return undefined;
+  if (response.body.hits.hits.length > 0 && response.body.hits.hits[0]._source != null) {
+    return {
+      policy_response: response.body.hits.hits[0]._source,
+    };
   }
 
-  return {
-    policy_response: response.hits.hits[0]._source,
-  };
+  return undefined;
 }
 
 const transformAgentVersionMap = (versionMap: Map<string, number>): { [key: string]: number } => {
@@ -82,14 +82,14 @@ export async function getAgentPolicySummary(
   policyId?: string,
   pageSize: number = 1000
 ): Promise<{ [key: string]: number }> {
-  const agentQuery = `${AGENT_SAVED_OBJECT_TYPE}.packages:"${packageName}"`;
+  const agentQuery = `packages:"${packageName}"`;
   if (policyId) {
     return transformAgentVersionMap(
       await agentVersionsMap(
         endpointAppContext,
         soClient,
         esClient,
-        `${agentQuery} AND ${AGENT_SAVED_OBJECT_TYPE}.policy_id:${policyId}`,
+        `${agentQuery} AND policy_id:${policyId}`,
         pageSize
       )
     );
@@ -120,12 +120,14 @@ export async function agentVersionsMap(
   const result: Map<string, number> = new Map<string, number>();
   let hasMore = true;
   while (hasMore) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const queryResult = await endpointAppContext.service
       .getAgentService()!
-      .listAgents(soClient, esClient, searchOptions(page++));
+      .listAgents(esClient, searchOptions(page++));
     queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         result.set(agentVersion, result.get(agentVersion)! + 1);
       } else {
         result.set(agentVersion, 1);

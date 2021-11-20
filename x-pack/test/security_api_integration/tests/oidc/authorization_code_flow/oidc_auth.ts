@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import request, { Cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import url from 'url';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { adminTestUser } from '@kbn/test';
 import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -17,7 +18,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('OpenID Connect authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
+      await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' });
     });
 
     it('does not prevent basic login', async () => {
@@ -38,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: user } = await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Cookie', request.cookie(cookies[0])!.cookieString())
+        .set('Cookie', parseCookie(cookies[0])!.cookieString())
         .expect(200);
 
       expect(user.username).to.eql(adminTestUser.username);
@@ -55,32 +59,30 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(handshakeResponse.headers['set-cookie']).to.be(undefined);
         expect(handshakeResponse.headers.location).to.be(
-          '/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc'
+          '/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2Bthree%26auth_provider_hint%3Doidc'
         );
       });
 
       it('should properly set cookie, return all parameters and redirect user', async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'oidc',
-            providerName: 'oidc',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const handshakeCookie = request.cookie(cookies[0])!;
+        const handshakeCookie = parseCookie(cookies[0])!;
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(handshakeResponse.body.location, true /* parseQueryString */);
+        const redirectURL = url.parse(
+          handshakeResponse.headers.location,
+          true /* parseQueryString */
+        );
         expect(
           redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
         ).to.be(true);
@@ -101,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const handshakeCookie = request.cookie(cookies[0])!;
+        const handshakeCookie = parseCookie(cookies[0])!;
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -124,17 +126,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should not allow access to the API with the handshake cookie', async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'oidc',
-            providerName: 'oidc',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
@@ -158,18 +155,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'oidc',
-            providerName: 'oidc',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
-        handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        stateAndNonce = getStateAndNonce(handshakeResponse.body.location);
+        handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
@@ -179,36 +171,43 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail if OpenID Connect response is not complemented with handshake cookie', async () => {
-        await supertest
+        const unauthenticatedResponse = await supertest
           .get(`/api/security/oidc/callback?code=thisisthecode&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('should fail if state is not matching', async () => {
-        await supertest
+        const unauthenticatedResponse = await supertest
           .get(`/api/security/oidc/callback?code=thisisthecode&state=someothervalue`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 
         // User should be redirected to the URL that initiated handshake.
         expect(oidcAuthenticationResponse.headers.location).to.be(
-          '/abc/xyz/handshake?one=two%20three#/workpad'
+          '/abc/xyz/handshake?one=two+three#/workpad'
         );
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         expect(sessionCookie.key).to.be('sid');
         expect(sessionCookie.value).to.not.be.empty();
         expect(sessionCookie.path).to.be('/');
@@ -244,7 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
         const handshakeResponse = await supertest
           .get('/api/security/oidc/initiate_login?iss=https://test-op.elastic.co')
           .expect(302);
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
 
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
@@ -256,13 +255,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code2&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         expect(sessionCookie.key).to.be('sid');
         expect(sessionCookie.value).to.not.be.empty();
         expect(sessionCookie.path).to.be('/');
@@ -299,18 +297,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'oidc',
-            providerName: 'oidc',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
-        sessionCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        stateAndNonce = getStateAndNonce(handshakeResponse.body.location);
+        sessionCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
@@ -320,11 +313,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        sessionCookie = request.cookie(oidcAuthenticationResponse.headers['set-cookie'][0])!;
+        sessionCookie = parseCookie(oidcAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
       it('should extend cookie on every successful non-system API call', async () => {
@@ -335,7 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieOne = request.cookie(apiResponseOne.headers['set-cookie'][0])!;
+        const sessionCookieOne = parseCookie(apiResponseOne.headers['set-cookie'][0])!;
 
         expect(sessionCookieOne.value).to.not.be.empty();
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
@@ -347,7 +339,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieTwo = request.cookie(apiResponseTwo.headers['set-cookie'][0])!;
+        const sessionCookieTwo = parseCookie(apiResponseTwo.headers['set-cookie'][0])!;
 
         expect(sessionCookieTwo.value).to.not.be.empty();
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
@@ -381,18 +373,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'oidc',
-            providerName: 'oidc',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        const stateAndNonce = getStateAndNonce(handshakeResponse.body.location);
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
@@ -402,21 +389,20 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
       });
 
       it('should redirect to the OPs endsession endpoint to complete logout', async () => {
@@ -428,7 +414,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const logoutCookie = request.cookie(cookies[0])!;
+        const logoutCookie = parseCookie(cookies[0])!;
         expect(logoutCookie.key).to.be('sid');
         expect(logoutCookie.value).to.be.empty();
         expect(logoutCookie.path).to.be('/');
@@ -470,18 +456,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'oidc',
-            providerName: 'oidc',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        const stateAndNonce = getStateAndNonce(handshakeResponse.body.location);
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
@@ -491,14 +472,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
       });
 
       const expectNewSessionCookie = (cookie: Cookie) => {
@@ -514,7 +494,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await setTimeoutAsync(20000);
 
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
@@ -527,7 +507,7 @@ export default function ({ getService }: FtrProviderContext) {
         const firstResponseCookies = firstResponse.headers['set-cookie'];
         expect(firstResponseCookies).to.have.length(1);
 
-        const firstNewCookie = request.cookie(firstResponseCookies[0])!;
+        const firstNewCookie = parseCookie(firstResponseCookies[0])!;
         expectNewSessionCookie(firstNewCookie);
 
         // Request with old cookie should reuse the same refresh token if within 60 seconds.
@@ -541,7 +521,7 @@ export default function ({ getService }: FtrProviderContext) {
         const secondResponseCookies = secondResponse.headers['set-cookie'];
         expect(secondResponseCookies).to.have.length(1);
 
-        const secondNewCookie = request.cookie(secondResponseCookies[0])!;
+        const secondNewCookie = parseCookie(secondResponseCookies[0])!;
         expectNewSessionCookie(secondNewCookie);
 
         expect(firstNewCookie.value).not.to.eql(secondNewCookie.value);
@@ -567,18 +547,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'oidc',
-            providerName: 'oidc',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        const stateAndNonce = getStateAndNonce(handshakeResponse.body.location);
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
           .post('/api/oidc_provider/setup')
@@ -588,14 +563,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         const oidcAuthenticationResponse = await supertest
           .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
       });
 
       it('should properly set cookie and start new OIDC handshake', async function () {
@@ -607,30 +581,28 @@ export default function ({ getService }: FtrProviderContext) {
           body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
 
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
           .set('Cookie', sessionCookie.cookieString())
-          .send({
-            providerType: 'oidc',
-            providerName: 'oidc',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc#/workpad',
-          })
-          .expect(200);
+          .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const handshakeCookie = request.cookie(cookies[0])!;
+        const handshakeCookie = parseCookie(cookies[0])!;
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(handshakeResponse.body.location, true /* parseQueryString */);
+        const redirectURL = url.parse(
+          handshakeResponse.headers.location,
+          true /* parseQueryString */
+        );
         expect(
           redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
         ).to.be(true);

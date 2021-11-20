@@ -20,7 +20,7 @@ experimental[] Update the attributes for existing {kib} saved objects.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `type`::
-  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
 
 `id`::
   (Required, string) The object ID to update.
@@ -36,11 +36,20 @@ WARNING: When you update, attributes are not validated, which allows you to pass
 `references`::
   (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. To refer to the other saved object, use `name` in the attributes, but never the `id`, which automatically updates during migrations or import/export.
 
+`upsert`::
+  (Optional, object) If specified, will create the document with the given upsert attributes if it doesn't exist. 
+
 [[saved-objects-api-update-errors-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
+
+`404`::
+    Indicates the object was not found.
+
+`409`::
+    Indicates a <<saved-objects-api-update-conflict-errors,conflict error>>.
 
 [[saved-objects-api-update-example]]
 ==== Example
@@ -71,3 +80,10 @@ The API returns the following:
   }
 }
 --------------------------------------------------
+
+[[saved-objects-api-update-conflict-errors]]
+==== Conflict errors
+
+Starting in {kib} 8.0, saved objects can exist in multiple spaces. As a result, you may encounter a 409 *alias conflict* error when using
+the `upsert` option. The Update API response is limited and does not include additional metadata. You can get more details about this error
+by using the <<saved-objects-api-bulk-create,Bulk create API>> instead.

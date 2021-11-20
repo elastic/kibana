@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useState, useEffect } from 'react';
@@ -28,6 +29,7 @@ import {
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
+import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { SourceSelection } from '../source_selection';
@@ -36,6 +38,8 @@ import { AnalyticsEmptyPrompt } from './empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
+import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { useRefresh } from '../../../../../routing/use_refresh';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -82,7 +86,7 @@ function getItemIdToExpandedRowMap(
 interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
-  spacesEnabled?: boolean;
+  spacesApi?: SpacesPluginStart;
   blockRefresh?: boolean;
   pageState: ListingPageUrlState;
   updatePageState: (update: Partial<ListingPageUrlState>) => void;
@@ -90,7 +94,7 @@ interface Props {
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
   isMlEnabledInSpace = true,
-  spacesEnabled = false,
+  spacesApi,
   blockRefresh = false,
   pageState,
   updatePageState,
@@ -114,6 +118,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   );
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameAnalyticsId[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
+  const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
+
+  const refreshObs = useRefresh();
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -124,6 +131,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
+    setJobsAwaitingNodeCount,
     blockRefresh,
     isManagementTable
   );
@@ -169,12 +177,19 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isManagementTable
   );
 
+  useEffect(
+    function updateOnTimerRefresh() {
+      getAnalyticsCallback();
+    },
+    [refreshObs]
+  );
+
   const { columns, modals } = useColumns(
     expandedRowItemIds,
     setExpandedRowItemIds,
     isManagementTable,
     isMlEnabledInSpace,
-    spacesEnabled,
+    spacesApi,
     refresh
   );
 
@@ -261,6 +276,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     <div data-test-subj="mlAnalyticsJobList">
       {modals}
       {!isManagementTable && <EuiSpacer size="m" />}
+      <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
       <EuiFlexGroup justifyContent="spaceBetween">
         {!isManagementTable && stats}
         {isManagementTable && managementStats}

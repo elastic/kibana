@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
+import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { KibanaRequest } from 'src/core/server';
 import type { ExecutionContext } from 'src/plugins/expressions/server';
-import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns';
+import type { IndexPatternsContract } from '../../../common';
 import type {
   AggsCommonStart,
   ISearchStartSearchSource,
@@ -21,7 +23,7 @@ import { getFunctionDefinition } from './esaggs';
 
 jest.mock('../../../common/search/expressions', () => ({
   getEsaggsMeta: jest.fn().mockReturnValue({ name: 'esaggs' }),
-  handleEsaggsRequest: jest.fn().mockResolvedValue({}),
+  handleEsaggsRequest: jest.fn(() => mockOf({})),
 }));
 
 import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
@@ -54,47 +56,53 @@ describe('esaggs expression function - server', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockHandlers = {
-      abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
+      abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
       getKibanaRequest: jest.fn().mockReturnValue({ id: 'hi' } as KibanaRequest),
       getSearchContext: jest.fn(),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
+      getExecutionContext: jest.fn(),
       inspectorAdapters: jest.fn(),
       variables: {},
       types: {},
     };
     startDependencies = {
-      aggs: ({
+      aggs: {
         createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
-      } as unknown) as jest.Mocked<AggsCommonStart>,
-      deserializeFieldFormat: jest.fn().mockImplementation((f: any) => f),
-      indexPatterns: ({
+      } as unknown as jest.Mocked<AggsCommonStart>,
+      indexPatterns: {
         create: jest.fn().mockResolvedValue({}),
-      } as unknown) as jest.Mocked<IndexPatternsContract>,
-      searchSource: ({} as unknown) as jest.Mocked<ISearchStartSearchSource>,
+      } as unknown as jest.Mocked<IndexPatternsContract>,
+      searchSource: {} as unknown as jest.Mocked<ISearchStartSearchSource>,
     };
     getStartDependencies = jest.fn().mockResolvedValue(startDependencies);
     definition = getFunctionDefinition({ getStartDependencies });
   });
 
   test('calls getStartDependencies with the KibanaRequest', async () => {
-    await definition().fn(null, args, mockHandlers);
+    await definition().fn(null, args, mockHandlers).toPromise();
 
     expect(getStartDependencies).toHaveBeenCalledWith({ id: 'hi' });
   });
 
   test('calls indexPatterns.create with the values provided by the subexpression arg', async () => {
-    await definition().fn(null, args, mockHandlers);
+    await definition().fn(null, args, mockHandlers).toPromise();
 
     expect(startDependencies.indexPatterns.create).toHaveBeenCalledWith(args.index.value, true);
   });
 
   test('calls aggs.createAggConfigs with the values provided by the subexpression arg', async () => {
-    await definition().fn(null, args, mockHandlers);
+    await definition().fn(null, args, mockHandlers).toPromise();
 
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith(
       {},
       args.aggs.map((agg) => agg.value)
     );
+  });
+
+  test('calls aggs.createAggConfigs with the empty aggs array when not provided', async () => {
+    await definition().fn(null, omit(args, 'aggs'), mockHandlers).toPromise();
+
+    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, []);
   });
 
   test('calls getEsaggsMeta to retrieve meta', () => {
@@ -105,16 +113,17 @@ describe('esaggs expression function - server', () => {
   });
 
   test('calls handleEsaggsRequest with all of the right dependencies', async () => {
-    await definition().fn(null, args, mockHandlers);
+    await definition().fn(null, args, mockHandlers).toPromise();
 
-    expect(handleEsaggsRequest).toHaveBeenCalledWith(null, args, {
+    expect(handleEsaggsRequest).toHaveBeenCalledWith({
       abortSignal: mockHandlers.abortSignal,
-      aggs: { foo: 'bar' },
-      deserializeFieldFormat: startDependencies.deserializeFieldFormat,
+      aggs: {
+        foo: 'bar',
+        hierarchical: args.metricsAtAllLevels,
+      },
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
-      metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       query: undefined,
       searchSessionId: 'abc123',
@@ -135,11 +144,9 @@ describe('esaggs expression function - server', () => {
       timeRange: { from: 'a', to: 'b' },
     } as KibanaContext;
 
-    await definition().fn(input, args, mockHandlers);
+    await definition().fn(input, args, mockHandlers).toPromise();
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith(
-      input,
-      args,
       expect.objectContaining({
         filters: input.filters,
         query: input.query,

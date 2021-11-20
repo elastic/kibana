@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -18,10 +19,18 @@ import { IndexDetailStatus } from '../index_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
 import { Logs } from '../../logs';
+import { AlertsCallout } from '../../../alerts/callout';
 
-export const Index = ({ scope, indexSummary, metrics, clusterUuid, indexUuid, logs, ...props }) => {
+export const Index = ({
+  indexSummary,
+  metrics,
+  clusterUuid,
+  indexUuid,
+  logs,
+  alerts,
+  ...props
+}) => {
   const metricsToShow = [
-    metrics.index_mem,
     metrics.index_size,
     metrics.index_search_request_rate,
     metrics.index_request_rate,
@@ -33,8 +42,10 @@ export const Index = ({ scope, indexSummary, metrics, clusterUuid, indexUuid, lo
     <EuiPage>
       <EuiPageBody>
         <EuiPanel>
-          <IndexDetailStatus stats={indexSummary} />
+          <IndexDetailStatus stats={indexSummary} alerts={alerts} />
         </EuiPanel>
+        <EuiSpacer size="m" />
+        <AlertsCallout alerts={alerts} />
         <EuiSpacer size="m" />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
@@ -50,7 +61,7 @@ export const Index = ({ scope, indexSummary, metrics, clusterUuid, indexUuid, lo
             <Logs logs={logs} indexUuid={indexUuid} clusterUuid={clusterUuid} />
           </EuiPanel>
           <EuiSpacer size="m" />
-          <ShardAllocation scope={scope} type="index" />
+          <ShardAllocation {...props} />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

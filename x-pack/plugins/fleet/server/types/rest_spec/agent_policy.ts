@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
+
 import { NewAgentPolicySchema } from '../models';
+
 import { ListWithKuerySchema } from './index';
 
 export const GetAgentPoliciesRequestSchema = {
@@ -52,5 +56,6 @@ export const GetFullAgentPolicyRequestSchema = {
   query: schema.object({
     download: schema.maybe(schema.boolean()),
     standalone: schema.maybe(schema.boolean()),
+    kubernetes: schema.maybe(schema.boolean()),
   }),
 };

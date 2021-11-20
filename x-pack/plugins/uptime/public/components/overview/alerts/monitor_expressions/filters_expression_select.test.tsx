@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { FiltersExpressionsSelect } from './filters_expression_select';
 import { render } from '../../../../lib/helper/rtl_helpers';
 import { filterAriaLabels as aria } from './translations';
-import { filterLabels } from '../../filter_group/translations';
+import * as Hooks from '../../../../../../observability/public/hooks/use_values_list';
 
 describe('FiltersExpressionSelect', () => {
   const LOCATION_FIELD_NAME = 'observer.geo.name';
@@ -18,30 +18,22 @@ describe('FiltersExpressionSelect', () => {
   const SCHEME_FIELD_NAME = 'monitor.type';
   const TAG_FIELD_NAME = 'tags';
 
-  it('is empty when no filters available', () => {
-    const component = shallowWithIntl(
+  it('is empty when no filters available', async () => {
+    const { queryByLabelText } = render(
       <FiltersExpressionsSelect
         alertParams={{}}
         newFilters={[]}
         onRemoveFilter={jest.fn()}
-        filters={{
-          locations: [],
-          ports: [],
-          schemes: [],
-          tags: [],
-        }}
         setAlertParams={jest.fn()}
-        setUpdatedFieldValues={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <Fragment>
-        <EuiSpacer
-          size="xs"
-        />
-      </Fragment>
-    `);
+
+    await waitFor(() => {
+      for (const label of Object.values(aria)) {
+        expect(queryByLabelText(label)).toBeNull();
+      }
+    });
   });
 
   it.each([
@@ -57,25 +49,20 @@ describe('FiltersExpressionSelect', () => {
       [aria.LOCATION, aria.TAG],
     ],
     [[TAG_FIELD_NAME], [aria.TAG], [aria.LOCATION, aria.PORT, aria.SCHEME]],
-  ])('contains provided new filter values', (newFilters, expectedLabels, absentLabels) => {
+  ])('contains provided new filter values', async (newFilters, expectedLabels, absentLabels) => {
     const { getByLabelText, queryByLabelText } = render(
       <FiltersExpressionsSelect
         alertParams={{}}
         newFilters={newFilters}
         onRemoveFilter={jest.fn()}
-        filters={{
-          tags: [],
-          ports: [],
-          schemes: [],
-          locations: [],
-        }}
         setAlertParams={jest.fn()}
-        setUpdatedFieldValues={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
-    expectedLabels.forEach((label) => expect(getByLabelText(label)));
-    absentLabels.forEach((label) => expect(queryByLabelText(label)).toBeNull());
+    await waitFor(() => {
+      expectedLabels.forEach((label) => expect(getByLabelText(label)));
+      absentLabels.forEach((label) => expect(queryByLabelText(label)).toBeNull());
+    });
   });
 
   it.each([
@@ -91,14 +78,7 @@ describe('FiltersExpressionSelect', () => {
         alertParams={{}}
         newFilters={[LOCATION_FIELD_NAME, SCHEME_FIELD_NAME, PORT_FIELD_NAME, TAG_FIELD_NAME]}
         onRemoveFilter={onRemoveFilterMock}
-        filters={{
-          tags: ['prod'],
-          ports: [5601],
-          schemes: ['http'],
-          locations: ['nyc'],
-        }}
         setAlertParams={setAlertParamsMock}
-        setUpdatedFieldValues={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
@@ -116,60 +96,11 @@ describe('FiltersExpressionSelect', () => {
     });
   });
 
-  const TEST_TAGS = ['foo', 'bar'];
-  const TEST_PORTS = [5601, 9200];
-  const TEST_SCHEMES = ['http', 'tcp'];
-  const TEST_LOCATIONS = ['nyc', 'fairbanks'];
-
   it.each([
-    [
-      {
-        tags: TEST_TAGS,
-        ports: [5601, 9200],
-        schemes: ['http', 'tcp'],
-        locations: ['nyc', 'fairbanks'],
-      },
-      [TAG_FIELD_NAME],
-      aria.TAG,
-      filterLabels.TAG,
-      TEST_TAGS,
-    ],
-    [
-      {
-        tags: [],
-        ports: TEST_PORTS,
-        schemes: [],
-        locations: [],
-      },
-      [PORT_FIELD_NAME],
-      aria.PORT,
-      filterLabels.PORT,
-      TEST_PORTS,
-    ],
-    [
-      {
-        tags: [],
-        ports: [],
-        schemes: TEST_SCHEMES,
-        locations: [],
-      },
-      [SCHEME_FIELD_NAME],
-      aria.SCHEME,
-      filterLabels.SCHEME,
-      TEST_SCHEMES,
-    ],
-    [
-      {
-        tags: [],
-        ports: [],
-        schemes: [],
-        locations: TEST_LOCATIONS,
-      },
-      [LOCATION_FIELD_NAME],
-      aria.LOCATION,
-      filterLabels.LOCATION,
-      TEST_LOCATIONS,
-    ],
+    [[TAG_FIELD_NAME], aria.TAG],
+    [[PORT_FIELD_NAME], aria.PORT],
+    [[SCHEME_FIELD_NAME], aria.SCHEME],
+    [[LOCATION_FIELD_NAME], aria.LOCATION],
   ])(
     'applies accessible label to filter expressions, and contains selected filters',
     /**
@@ -179,21 +110,15 @@ describe('FiltersExpressionSelect', () => {
      * @param filterLabel the name of the filter label expected in each item's aria-label
      * @param expectedFilterItems the set of filter options the component should render
      */
-    async (
-      filters,
-      newFilters,
-      expectedFilterButtonAriaLabel,
-      filterLabel,
-      expectedFilterItems
-    ) => {
-      const { getByLabelText } = render(
+    async (newFilters, expectedFilterButtonAriaLabel) => {
+      const spy = jest.spyOn(Hooks, 'useValuesList');
+      spy.mockReturnValue({ loading: false, values: [{ label: 'test-label', count: 3 }] });
+      const { getByLabelText, getByText } = render(
         <FiltersExpressionsSelect
           alertParams={{}}
           newFilters={newFilters}
           onRemoveFilter={jest.fn()}
-          filters={filters}
           setAlertParams={jest.fn()}
-          setUpdatedFieldValues={jest.fn()}
           shouldUpdateUrl={false}
         />
       );
@@ -203,9 +128,7 @@ describe('FiltersExpressionSelect', () => {
       fireEvent.click(filterButton);
 
       await waitFor(() => {
-        expectedFilterItems.forEach((filterItem: string | number) =>
-          expect(getByLabelText(`Filter by ${filterLabel} ${filterItem}.`))
-        );
+        expect(getByText('Apply'));
       });
     }
   );

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,16 +24,16 @@ export function gsuiteLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'gsuiteLogs',
     name: i18n.translate('home.tutorials.gsuiteLogs.nameTitle', {
-      defaultMessage: 'GSuite logs',
+      defaultMessage: 'GSuite Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.gsuiteLogs.shortDescription', {
-      defaultMessage: 'Collect GSuite activity reports.',
+      defaultMessage: 'Collect and parse activity reports from GSuite with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.gsuiteLogs.longDescription', {
       defaultMessage:
-        'This is a module for ingesting data from the different GSuite audit reports APIs. \
+        'This is a module for ingesting data from different GSuite audit reports APIs. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-gsuite.html',
@@ -56,5 +56,6 @@ export function gsuiteLogsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['security'],
   };
 }

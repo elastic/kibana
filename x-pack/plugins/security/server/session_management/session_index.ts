@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
+
 import type { AuthenticationProvider } from '../../common/model';
 import type { ConfigType } from '../config';
 
@@ -16,6 +18,18 @@ export interface SessionIndexOptions {
 }
 
 /**
+ * Filter provided for the `SessionIndex.invalidate` method that determines which session index
+ * values should be invalidated (removed from the index). It can have three possible types:
+ *   - `all` means that all existing active and inactive sessions should be invalidated.
+ *   - `sid` means that only session with the specified SID should be invalidated.
+ *   - `query` means that only sessions that match specified query should be invalidated.
+ */
+export type InvalidateSessionsFilter =
+  | { match: 'all' }
+  | { match: 'sid'; sid: string }
+  | { match: 'query'; query: { provider: { type: string; name?: string }; usernameHash?: string } };
+
+/**
  * Version of the current session index template.
  */
 const SESSION_INDEX_TEMPLATE_VERSION = 1;
@@ -25,7 +39,7 @@ const SESSION_INDEX_TEMPLATE_VERSION = 1;
  */
 export function getSessionIndexTemplate(indexName: string) {
   return Object.freeze({
-    index_patterns: indexName,
+    index_patterns: [indexName],
     order: 1000,
     settings: {
       index: {
@@ -47,7 +61,7 @@ export function getSessionIndexTemplate(indexName: string) {
         accessAgreementAcknowledged: { type: 'boolean' },
         content: { type: 'binary' },
       },
-    },
+    } as const,
   });
 }
 
@@ -118,7 +132,7 @@ export class SessionIndex {
   /**
    * Name of the index to store session information in.
    */
-  private readonly indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+  private readonly indexName: string;
 
   /**
    * Promise that tracks session index initialization process. We'll need to get rid of this as soon
@@ -128,7 +142,9 @@ export class SessionIndex {
    */
   private indexInitialization?: Promise<void>;
 
-  constructor(private readonly options: Readonly<SessionIndexOptions>) {}
+  constructor(private readonly options: Readonly<SessionIndexOptions>) {
+    this.indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+  }
 
   /**
    * Retrieves session value with the specified ID from the index. If session value isn't found
@@ -137,13 +153,14 @@ export class SessionIndex {
    */
   async get(sid: string) {
     try {
-      const { body: response } = await this.options.elasticsearchClient.get(
-        { id: sid, index: this.indexName },
-        { ignore: [404] }
-      );
+      const { body: response, statusCode } =
+        await this.options.elasticsearchClient.get<SessionIndexValue>(
+          { id: sid, index: this.indexName },
+          { ignore: [404] }
+        );
 
       const docNotFound = response.found === false;
-      const indexNotFound = response.status === 404;
+      const indexNotFound = statusCode === 404;
       if (docNotFound || indexNotFound) {
         this.options.logger.debug('Cannot find session value with the specified ID.');
         return null;
@@ -201,7 +218,7 @@ export class SessionIndex {
   async update(sessionValue: Readonly<SessionIndexValue>) {
     const { sid, metadata, ...sessionValueToStore } = sessionValue;
     try {
-      const { body: response } = await this.options.elasticsearchClient.index(
+      const { body: response, statusCode } = await this.options.elasticsearchClient.index(
         {
           id: sid,
           index: this.indexName,
@@ -216,7 +233,7 @@ export class SessionIndex {
       // We don't want to override changes that were made after we fetched session value or
       // re-create it if has been deleted already. If we detect such a case we discard changes and
       // return latest copy of the session value instead or `null` if doesn't exist anymore.
-      const sessionIndexValueUpdateConflict = response.status === 409;
+      const sessionIndexValueUpdateConflict = statusCode === 409;
       if (sessionIndexValueUpdateConflict) {
         this.options.logger.debug(
           'Cannot update session value due to conflict, session either does not exist or was already updated.'
@@ -235,19 +252,57 @@ export class SessionIndex {
   }
 
   /**
-   * Clears session value with the specified ID.
-   * @param sid Session ID to clear.
+   * Clears session value(s) determined by the specified filter.
+   * @param filter Filter that narrows down the list of the session values that should be cleared.
    */
-  async clear(sid: string) {
+  async invalidate(filter: InvalidateSessionsFilter) {
+    if (filter.match === 'sid') {
+      try {
+        // We don't specify primary term and sequence number as delete should always take precedence
+        // over any updates that could happen in the meantime.
+        const { statusCode } = await this.options.elasticsearchClient.delete(
+          { id: filter.sid, index: this.indexName, refresh: 'wait_for' },
+          { ignore: [404] }
+        );
+
+        // 404 means the session with such SID wasn't found and hence nothing was removed.
+        return statusCode !== 404 ? 1 : 0;
+      } catch (err) {
+        this.options.logger.error(`Failed to clear session value: ${err.message}`);
+        throw err;
+      }
+    }
+
+    // If filter is specified we should clear only session values that are matched by the filter.
+    // Otherwise all session values should be cleared.
+    let deleteQuery;
+    if (filter.match === 'query') {
+      deleteQuery = {
+        bool: {
+          must: [
+            { term: { 'provider.type': filter.query.provider.type } },
+            ...(filter.query.provider.name
+              ? [{ term: { 'provider.name': filter.query.provider.name } }]
+              : []),
+            ...(filter.query.usernameHash
+              ? [{ term: { usernameHash: filter.query.usernameHash } }]
+              : []),
+          ],
+        },
+      };
+    } else {
+      deleteQuery = { match_all: {} };
+    }
+
     try {
-      // We don't specify primary term and sequence number as delete should always take precedence
-      // over any updates that could happen in the meantime.
-      await this.options.elasticsearchClient.delete(
-        { id: sid, index: this.indexName, refresh: 'wait_for' },
-        { ignore: [404] }
-      );
+      const { body: response } = await this.options.elasticsearchClient.deleteByQuery({
+        index: this.indexName,
+        refresh: true,
+        body: { query: deleteQuery },
+      });
+      return response.deleted as number;
     } catch (err) {
-      this.options.logger.error(`Failed to clear session value: ${err.message}`);
+      this.options.logger.error(`Failed to clear session value(s): ${err.message}`);
       throw err;
     }
   }
@@ -262,69 +317,73 @@ export class SessionIndex {
 
     const sessionIndexTemplateName = `${this.options.kibanaIndexName}_security_session_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`;
     return (this.indexInitialization = new Promise<void>(async (resolve, reject) => {
-      // Check if required index template exists.
-      let indexTemplateExists = false;
       try {
-        indexTemplateExists = (
-          await this.options.elasticsearchClient.indices.existsTemplate({
-            name: sessionIndexTemplateName,
-          })
-        ).body;
-      } catch (err) {
-        this.options.logger.error(
-          `Failed to check if session index template exists: ${err.message}`
-        );
-        return reject(err);
-      }
-
-      // Create index template if it doesn't exist.
-      if (indexTemplateExists) {
-        this.options.logger.debug('Session index template already exists.');
-      } else {
+        // Check if required index template exists.
+        let indexTemplateExists = false;
         try {
-          await this.options.elasticsearchClient.indices.putTemplate({
-            name: sessionIndexTemplateName,
-            body: getSessionIndexTemplate(this.indexName),
-          });
-          this.options.logger.debug('Successfully created session index template.');
+          indexTemplateExists = (
+            await this.options.elasticsearchClient.indices.existsTemplate({
+              name: sessionIndexTemplateName,
+            })
+          ).body;
         } catch (err) {
-          this.options.logger.error(`Failed to create session index template: ${err.message}`);
+          this.options.logger.error(
+            `Failed to check if session index template exists: ${err.message}`
+          );
           return reject(err);
         }
-      }
 
-      // Check if required index exists. We cannot be sure that automatic creation of indices is
-      // always enabled, so we create session index explicitly.
-      let indexExists = false;
-      try {
-        indexExists = (
-          await this.options.elasticsearchClient.indices.exists({ index: this.indexName })
-        ).body;
-      } catch (err) {
-        this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
-        return reject(err);
-      }
-
-      // Create index if it doesn't exist.
-      if (indexExists) {
-        this.options.logger.debug('Session index already exists.');
-      } else {
-        try {
-          await this.options.elasticsearchClient.indices.create({ index: this.indexName });
-          this.options.logger.debug('Successfully created session index.');
-        } catch (err) {
-          // There can be a race condition if index is created by another Kibana instance.
-          if (err?.body?.error?.type === 'resource_already_exists_exception') {
-            this.options.logger.debug('Session index already exists.');
-          } else {
-            this.options.logger.error(`Failed to create session index: ${err.message}`);
+        // Create index template if it doesn't exist.
+        if (indexTemplateExists) {
+          this.options.logger.debug('Session index template already exists.');
+        } else {
+          try {
+            await this.options.elasticsearchClient.indices.putTemplate({
+              name: sessionIndexTemplateName,
+              body: getSessionIndexTemplate(this.indexName),
+            });
+            this.options.logger.debug('Successfully created session index template.');
+          } catch (err) {
+            this.options.logger.error(`Failed to create session index template: ${err.message}`);
             return reject(err);
           }
         }
-      }
 
-      // Notify any consumers that are awaiting on this promise and immediately reset it.
-      resolve();
+        // Check if required index exists. We cannot be sure that automatic creation of indices is
+        // always enabled, so we create session index explicitly.
+        let indexExists = false;
+        try {
+          indexExists = (
+            await this.options.elasticsearchClient.indices.exists({ index: this.indexName })
+          ).body;
+        } catch (err) {
+          this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
+          return reject(err);
+        }
+
+        // Create index if it doesn't exist.
+        if (indexExists) {
+          this.options.logger.debug('Session index already exists.');
+        } else {
+          try {
+            await this.options.elasticsearchClient.indices.create({ index: this.indexName });
+            this.options.logger.debug('Successfully created session index.');
+          } catch (err) {
+            // There can be a race condition if index is created by another Kibana instance.
+            if (err?.body?.error?.type === 'resource_already_exists_exception') {
+              this.options.logger.debug('Session index already exists.');
+            } else {
+              this.options.logger.error(`Failed to create session index: ${err.message}`);
+              return reject(err);
+            }
+          }
+        }
+
+        // Notify any consumers that are awaiting on this promise and immediately reset it.
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     }).finally(() => {
       this.indexInitialization = undefined;
     }));
@@ -405,7 +464,7 @@ export class SessionIndex {
         { ignore: [409, 404] }
       );
 
-      if (response.deleted > 0) {
+      if (response.deleted! > 0) {
         this.options.logger.debug(
           `Cleaned up ${response.deleted} invalid or expired session values.`
         );

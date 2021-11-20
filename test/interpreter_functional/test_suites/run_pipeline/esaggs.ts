@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -49,7 +49,7 @@ export default function ({
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
-          kibana_context timeRange='${JSON.stringify(timeRange)}'
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
           aggs={aggCount id="1" enabled=true schema="metric"}
         `;
@@ -63,7 +63,7 @@ export default function ({
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
-          kibana_context timeRange='${JSON.stringify(timeRange)}'
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
           timeFields='relatedContent.article:published_time'
           aggs={aggCount id="1" enabled=true schema="metric"}
@@ -78,7 +78,7 @@ export default function ({
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
-          kibana_context timeRange='${JSON.stringify(timeRange)}'
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
           timeFields='relatedContent.article:published_time'
           timeFields='@timestamp'

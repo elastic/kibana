@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component, Fragment, ComponentType } from 'react';
@@ -14,13 +14,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IIndexPattern, IFieldType, IndexPatternSelectProps } from '../../../../data/public';
+import { IndexPattern, IndexPatternField, IndexPatternSelectProps } from '../../../../data/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface RangeControlEditorProps {
   controlIndex: number;
   controlParams: ControlParams;
-  getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
   handleFieldNameChange: (fieldName: string) => void;
   handleIndexPatternChange: (indexPatternId: string) => void;
   handleOptionsChange: <T extends keyof ControlParamsOptions>(
@@ -35,7 +35,7 @@ interface RangeControlEditorState {
   IndexPatternSelect: ComponentType<IndexPatternSelectProps> | null;
 }
 
-function filterField(field: IFieldType) {
+function filterField(field: IndexPatternField) {
   return field.type === 'number';
 }
 

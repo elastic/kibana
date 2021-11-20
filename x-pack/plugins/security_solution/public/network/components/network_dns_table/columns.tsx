@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import numeral from '@elastic/numeral';
@@ -33,7 +34,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     field: `node.${NetworkDnsFields.dnsName}`,
     name: i18n.REGISTERED_DOMAIN,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (dnsName) => {
       if (dnsName != null) {
@@ -76,7 +77,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     name: i18n.TOTAL_QUERIES,
     sortable: true,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (queryCount) => {
       if (queryCount != null) {
         return numeral(queryCount).format('0');
@@ -91,7 +92,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     name: i18n.UNIQUE_DOMAINS,
     sortable: true,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (uniqueDomains) => {
       if (uniqueDomains != null) {
         return numeral(uniqueDomains).format('0');
@@ -106,7 +107,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     name: i18n.DNS_BYTES_IN,
     sortable: true,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (dnsBytesIn) => {
       if (dnsBytesIn != null) {
         return <PreferenceFormattedBytes value={dnsBytesIn} />;
@@ -121,7 +122,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     name: i18n.DNS_BYTES_OUT,
     sortable: true,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (dnsBytesOut) => {
       if (dnsBytesOut != null) {
         return <PreferenceFormattedBytes value={dnsBytesOut} />;

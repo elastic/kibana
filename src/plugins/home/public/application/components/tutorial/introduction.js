@@ -1,23 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
 import {
-  EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiSpacer,
   EuiImage,
-  EuiButton,
-  EuiIcon,
+  EuiLink,
   EuiBetaBadge,
+  EuiPageHeader,
+  EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -30,13 +28,14 @@ function IntroductionUI({
   iconType,
   isBeta,
   intl,
+  notices,
+  basePath,
 }) {
-  let img;
+  let rightSideItems;
   if (previewUrl) {
-    img = (
+    rightSideItems = [
       <EuiImage
         size="l"
-        hasShadow
         allowFullScreen
         fullScreenIconColor="dark"
         alt={intl.formatMessage({
@@ -44,29 +43,21 @@ function IntroductionUI({
           defaultMessage: 'screenshot of primary dashboard.',
         })}
         url={previewUrl}
-      />
-    );
+      />,
+    ];
   }
   let exportedFields;
   if (exportedFieldsUrl) {
     exportedFields = (
-      <div>
-        <EuiSpacer />
-        <EuiButton href={exportedFieldsUrl} target="_blank" rel="noopener">
+      <>
+        <br />
+        <EuiLink href={exportedFieldsUrl} target="_blank" rel="noopener">
           <FormattedMessage
             id="home.tutorial.introduction.viewButtonLabel"
             defaultMessage="View exported fields"
           />
-        </EuiButton>
-      </div>
-    );
-  }
-  let icon;
-  if (iconType) {
-    icon = (
-      <EuiFlexItem grow={false}>
-        <EuiIcon size="xl" title="" type={iconType} />
-      </EuiFlexItem>
+        </EuiLink>
+      </>
     );
   }
   let betaBadge;
@@ -81,31 +72,44 @@ function IntroductionUI({
     );
   }
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          {icon}
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>
-                {title}
-                {betaBadge && (
-                  <>
-                    &nbsp;
-                    {betaBadge}
-                  </>
-                )}
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <Content text={description} />
-        {exportedFields}
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>{img}</EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <div>
+        <EuiButtonEmpty
+          iconType="arrowLeft"
+          size="xs"
+          flush="left"
+          href={basePath.prepend(`/app/integrations`)}
+        >
+          <FormattedMessage
+            id="home.tutorial.introduction.browseAllIntegrationsButton"
+            defaultMessage="Browse all integrations"
+          />
+        </EuiButtonEmpty>
+      </div>
+      <EuiSpacer />
+      <EuiPageHeader
+        iconType={iconType}
+        pageTitle={
+          <>
+            {title}
+            {betaBadge && (
+              <>
+                &nbsp;
+                {betaBadge}
+              </>
+            )}
+          </>
+        }
+        description={
+          <>
+            <Content text={description} />
+            {exportedFields}
+            {notices}
+          </>
+        }
+        rightSideItems={rightSideItems}
+      />
+    </>
   );
 }
 
@@ -116,6 +120,7 @@ IntroductionUI.propTypes = {
   exportedFieldsUrl: PropTypes.string,
   iconType: PropTypes.string,
   isBeta: PropTypes.bool,
+  notices: PropTypes.node,
 };
 
 IntroductionUI.defaultProps = {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -34,7 +35,7 @@ interface TooltipOffset {
 
 export const getChartTooltipDefaultState = (): ChartTooltipState => ({
   isTooltipVisible: false,
-  tooltipData: ([] as unknown) as TooltipData,
+  tooltipData: [] as unknown as TooltipData,
   offset: { x: 0, y: 0 },
   target: null,
 });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // ESLint disabled dot-notation we can access the private key telemetryService['http']
@@ -137,13 +137,46 @@ describe('TelemetryService', () => {
   });
 
   describe('getTelemetryUrl', () => {
-    it('should return the config.url parameter', async () => {
-      const url = 'http://test.com';
+    it('should return staging endpoint when sendUsageTo is set to staging', async () => {
       const telemetryService = mockTelemetryService({
-        config: { url },
+        config: { sendUsageTo: 'staging' },
       });
 
-      expect(telemetryService.getTelemetryUrl()).toBe(url);
+      expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
+        `"https://telemetry-staging.elastic.co/xpack/v2/send"`
+      );
+    });
+
+    it('should return prod endpoint when sendUsageTo is set to prod', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'prod' },
+      });
+
+      expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
+        `"https://telemetry.elastic.co/xpack/v2/send"`
+      );
+    });
+  });
+
+  describe('getOptInStatusUrl', () => {
+    it('should return staging endpoint when sendUsageTo is set to staging', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'staging' },
+      });
+
+      expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
+        `"https://telemetry-staging.elastic.co/opt_in_status/v2/send"`
+      );
+    });
+
+    it('should return prod endpoint when sendUsageTo is set to prod', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'prod' },
+      });
+
+      expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
+        `"https://telemetry.elastic.co/opt_in_status/v2/send"`
+      );
     });
   });
 
@@ -211,16 +244,14 @@ describe('TelemetryService', () => {
       originalFetch = window.fetch;
     });
 
-    // @ts-ignore
     beforeEach(() => (window.fetch = mockFetch = jest.fn()));
-    // @ts-ignore
     afterAll(() => (window.fetch = originalFetch));
 
     it('reports opt-in status to telemetry url', async () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
       });
-      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
       const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
@@ -230,21 +261,28 @@ describe('TelemetryService', () => {
       expect(mockGetOptInStatusUrl).toBeCalledTimes(1);
       expect(mockFetch).toBeCalledTimes(1);
 
-      expect(mockFetch).toBeCalledWith(mockUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Elastic-Stack-Version': 'mockKibanaVersion',
-        },
-        body: JSON.stringify(mockPayload),
-      });
+      expect(mockFetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "mock_telemetry_optin_status_url",
+          Object {
+            "body": "mock_hashed_opt_in_status_payload",
+            "headers": Object {
+              "Content-Type": "application/json",
+              "X-Elastic-Cluster-ID": "mk_uuid",
+              "X-Elastic-Content-Encoding": "aes256gcm",
+              "X-Elastic-Stack-Version": "mockKibanaVersion",
+            },
+            "method": "POST",
+          },
+        ]
+      `);
     });
 
     it('swallows errors if fetch fails', async () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
       });
-      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
       const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
@@ -256,6 +294,26 @@ describe('TelemetryService', () => {
       const result = await telemetryService['reportOptInStatus'](mockPayload);
       expect(result).toBeUndefined();
       expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('canSendTelemetry', () => {
+    it('does not send telemetry if screenshotMode is true', () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: true,
+        config: { optIn: true },
+      });
+
+      expect(telemetryService.canSendTelemetry()).toBe(false);
+    });
+
+    it('does send telemetry if screenshotMode is false and we are opted in', () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: false,
+        config: { optIn: true },
+      });
+
+      expect(telemetryService.canSendTelemetry()).toBe(true);
     });
   });
 });

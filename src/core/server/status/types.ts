@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -196,6 +196,9 @@ export interface StatusServiceSetup {
    * Completely overrides the default inherited status.
    *
    * @remarks
+   * The first emission from this Observable should occur within 30s, else this plugin's status will fallback to
+   * `unavailable` until the first emission.
+   *
    * See the {@link StatusServiceSetup.derivedStatus$} API for leveraging the default status
    * calculation that is provided by Core.
    */
@@ -214,7 +217,7 @@ export interface StatusServiceSetup {
    * By default, plugins inherit this derived status from their dependencies.
    * Calling {@link StatusSetup.set} overrides this default status.
    *
-   * This may emit multliple times for a single status change event as propagates
+   * This may emit multiple times for a single status change event as propagates
    * through the dependency tree
    */
   derivedStatus$: Observable<ServiceStatus>;
@@ -229,6 +232,11 @@ export interface StatusServiceSetup {
 /** @internal */
 export interface InternalStatusServiceSetup
   extends Pick<StatusServiceSetup, 'core$' | 'overall$' | 'isStatusPageAnonymous'> {
+  /**
+   * Overall status of core's service.
+   */
+  coreOverall$: Observable<ServiceStatus>;
+
   // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
   plugins: {
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;

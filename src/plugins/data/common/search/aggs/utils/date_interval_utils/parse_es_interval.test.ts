@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
@@ -20,6 +20,13 @@ describe('parseEsInterval', () => {
     expect(parseEsInterval('1w')).toEqual({ value: 1, unit: 'w', type: 'calendar' });
     expect(parseEsInterval('1M')).toEqual({ value: 1, unit: 'M', type: 'calendar' });
     expect(parseEsInterval('1y')).toEqual({ value: 1, unit: 'y', type: 'calendar' });
+  });
+
+  it('should correctly parse an user-friendly intervals', () => {
+    expect(parseEsInterval('minute')).toEqual({ value: 1, unit: 'm', type: 'calendar' });
+    expect(parseEsInterval('hour')).toEqual({ value: 1, unit: 'h', type: 'calendar' });
+    expect(parseEsInterval('month')).toEqual({ value: 1, unit: 'M', type: 'calendar' });
+    expect(parseEsInterval('year')).toEqual({ value: 1, unit: 'y', type: 'calendar' });
   });
 
   it('should correctly parse an interval containing unit and multiple value', () => {

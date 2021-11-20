@@ -1,32 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { Type, LanguageOrUndefined, Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import {
-  LanguageOrUndefined,
   QueryOrUndefined,
-  Type,
   SavedIdOrUndefined,
   IndexOrUndefined,
-  Language,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { PartialFilter } from '../types';
-import { BadRequestError } from '../errors/bad_request_error';
 import { QueryFilter } from './types';
 
 interface GetFilterArgs {
   type: Type;
-  filters: PartialFilter[] | undefined;
+  filters: unknown | undefined;
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;
@@ -95,9 +94,7 @@ export const getFilter = async ({
 
   switch (type) {
     case 'threat_match':
-    case 'threshold': {
-      return savedId != null ? savedQueryFilter() : queryFilter();
-    }
+    case 'threshold':
     case 'query': {
       return queryFilter();
     }

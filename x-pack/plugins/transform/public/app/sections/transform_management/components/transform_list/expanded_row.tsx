@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
 
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import moment from 'moment-timezone';
 import { TransformListRow } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
-import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
+import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -43,18 +45,16 @@ export function stringHash(str: string): number {
   return hash < 0 ? hash * -2 : hash;
 }
 
-interface Item {
-  title: string;
-  description: any;
-}
+type Item = SectionItem;
 
 interface Props {
   item: TransformListRow;
+  onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
 type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
 
-export const ExpandedRow: FC<Props> = ({ item }) => {
+export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const {
     ml: { formatHumanReadableDateTimeSeconds },
   } = useAppDependencies();
@@ -165,9 +165,37 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     }
   }
 
+  const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {
+    return {
+      title: (
+        <EuiButtonEmpty
+          iconType={'documentEdit'}
+          iconSide={'left'}
+          onClick={() => {
+            onAlertEdit(rule);
+          }}
+          flush="left"
+          size={'xs'}
+          iconSize={'s'}
+        >
+          {rule.name}
+        </EuiButtonEmpty>
+      ),
+      description: rule.executionStatus.status,
+    };
+  });
+
   const checkpointing: SectionConfig = {
     title: 'Checkpointing',
     items: checkpointingItems,
+    position: 'right',
+  };
+
+  const alertingRules: SectionConfig = {
+    title: i18n.translate('xpack.transform.transformList.transformDetails.alertRulesTitle', {
+      defaultMessage: 'Alert rules',
+    }),
+    items: alertRuleItems!,
     position: 'right',
   };
 
@@ -191,7 +219,16 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           defaultMessage: 'Details',
         }
       ),
-      content: <ExpandedRowDetailsPane sections={[general, state, checkpointing]} />,
+      content: (
+        <ExpandedRowDetailsPane
+          sections={[
+            general,
+            state,
+            checkpointing,
+            ...(alertingRules.items ? [alertingRules] : []),
+          ]}
+        />
+      ),
     },
     {
       id: `transform-stats-tab-${tabId}`,
@@ -246,6 +283,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       onTabClick={() => {}}
       expand={false}
       style={{ width: '100%' }}
+      data-test-subj="transformExpandedRowTabbedContent"
     />
   );
 };

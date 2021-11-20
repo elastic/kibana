@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
+import { IIndexPatternFieldList } from '../../../data/common';
 import { IndexPattern } from '../../../data/common';
-import { indexPatterns } from '../../../data/public';
 
 const fields = [
   {
@@ -22,6 +21,8 @@ const fields = [
     type: 'date',
     scripted: false,
     filterable: true,
+    aggregatable: true,
+    sortable: true,
   },
   {
     name: 'message',
@@ -34,12 +35,14 @@ const fields = [
     type: 'string',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'bytes',
     type: 'number',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'scripted',
@@ -52,21 +55,24 @@ const fields = [
 fields.getByName = (name: string) => {
   return fields.find((field) => field.name === name);
 };
+fields.getAll = () => {
+  return fields;
+};
 
-const indexPattern = ({
+const indexPattern = {
   id: 'index-pattern-with-timefield-id',
-  title: 'index-pattern-without-timefield',
+  title: 'index-pattern-with-timefield',
   metaFields: ['_index', '_score'],
-  flattenHit: undefined,
-  formatHit: jest.fn((hit) => hit._source),
   fields,
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
-  getFieldByName: () => ({}),
+  getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
-} as unknown) as IndexPattern;
+  getFormatterForField: () => ({ convert: (value: unknown) => value }),
+  isTimeNanosBased: () => false,
+  popularizeField: () => {},
+} as unknown as IndexPattern;
 
-indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
 
 export const indexPatternWithTimefieldMock = indexPattern;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { WMSCreateSourceEditor } from './wms_create_source_editor';
 // @ts-ignore
 import { sourceTitle, WMSSource } from './wms_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { TileLayer } from '../../layers/tile_layer/tile_layer';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { WebMapServiceLayerIcon } from '../../layers/icons/web_map_service_layer_icon';
+import { WebMapServiceLayerIcon } from '../../layers/wizards/icons/web_map_service_layer_icon';
 
 export const wmsLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DynamicActionsState } from '../../common';
@@ -9,8 +10,9 @@ import { getMetricKey } from './get_metric_key';
 
 export const dynamicActionsCollector = (
   state: DynamicActionsState,
-  stats: Record<string, any>
-): Record<string, any> => {
+  currentStats: Record<string, number>
+): Record<string, number> => {
+  const stats: Record<string, number> = { ...currentStats };
   const countMetricKey = getMetricKey('count');
 
   stats[countMetricKey] = state.events.length + (stats[countMetricKey] || 0);

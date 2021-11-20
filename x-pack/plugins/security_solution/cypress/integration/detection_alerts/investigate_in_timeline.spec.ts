@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import { PROVIDER_BADGE } from '../../screens/timeline';
 
 import {
@@ -18,17 +19,17 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Alerts timeline', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPage(DETECTIONS_URL);
+    loginAndWaitForPage(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(newRule);
+    createCustomRuleActivated(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate();
+    waitForAlertsToPopulate(500);
   });
 
   it('Investigate alert in default timeline', () => {

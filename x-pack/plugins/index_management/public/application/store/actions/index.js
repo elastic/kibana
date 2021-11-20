@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export * from './clear_cache_indices';
@@ -14,7 +15,6 @@ export * from './load_indices';
 export * from './load_index_data';
 export * from './open_indices';
 export * from './refresh_indices';
-export * from './freeze_indices';
 export * from './unfreeze_indices';
 export * from './reload_indices';
 export * from './table_state';

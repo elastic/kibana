@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -35,7 +37,43 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       );
     },
 
-    // for now we expect this to be used only for opening the accordion
+    async assertTransformEditFlyoutRetentionPolicySelectEnabled(expectedValue: boolean) {
+      await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
+        timeout: 1000,
+      });
+      const isEnabled = await testSubjects.isEnabled(
+        `transformEditFlyoutRetentionPolicyFieldSelect`
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected 'transformEditFlyoutRetentionPolicyFieldSelect' input to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
+    async assertTransformEditFlyoutInputEnabled(input: string, expectedValue: boolean) {
+      await testSubjects.existOrFail(`transformEditFlyout${input}Input`, { timeout: 1000 });
+      const isEnabled = await testSubjects.isEnabled(`transformEditFlyout${input}Input`);
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected '${input}' input to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
+    // for now we expect these to be used only for opening the accordion
+    async openTransformEditAccordionDestinationSettings() {
+      await testSubjects.click('transformEditAccordionDestination');
+      await testSubjects.existOrFail('transformEditAccordionDestinationContent');
+    },
+
+    async openTransformEditAccordionRetentionPolicySettings() {
+      await testSubjects.click('transformEditAccordionRetentionPolicy');
+      await testSubjects.existOrFail('transformEditAccordionRetentionPolicyContent');
+    },
+
     async openTransformEditAccordionAdvancedSettings() {
       await testSubjects.click('transformEditAccordionAdvancedSettings');
       await testSubjects.existOrFail('transformEditAccordionAdvancedSettingsContent');
@@ -46,6 +84,20 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
         clearWithKeyboard: true,
       });
       await this.assertTransformEditFlyoutInputValue(input, value);
+    },
+
+    async assertUpdateTransformButtonExists() {
+      await testSubjects.existOrFail('transformEditFlyoutUpdateButton');
+    },
+
+    async assertUpdateTransformButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('transformEditFlyoutUpdateButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "Update" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
     },
 
     async updateTransform() {

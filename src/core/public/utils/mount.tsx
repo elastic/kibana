@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -30,7 +30,9 @@ export const MountWrapper: React.FunctionComponent<{ mount: MountPoint; classNam
  *
  * @param node to get a mount for
  */
-export const mountReactNode = (node: React.ReactNode): MountPoint => (element: HTMLElement) => {
-  render(<I18nProvider>{node}</I18nProvider>, element);
-  return () => unmountComponentAtNode(element);
-};
+export const mountReactNode =
+  (node: React.ReactNode): MountPoint =>
+  (element: HTMLElement) => {
+    render(<I18nProvider>{node}</I18nProvider>, element);
+    return () => unmountComponentAtNode(element);
+  };

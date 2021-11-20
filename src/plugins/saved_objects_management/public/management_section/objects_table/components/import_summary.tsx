@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import './import_summary.scss';
 import _ from 'lodash';
 import React, { Fragment, FC, useMemo } from 'react';
 import {
@@ -29,7 +28,9 @@ import type {
   SavedObjectsImportWarning,
   IBasePath,
 } from 'kibana/public';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
+import './import_summary.scss';
 
 const DEFAULT_ICON = 'apps';
 
@@ -38,6 +39,7 @@ export interface ImportSummaryProps {
   successfulImports: SavedObjectsImportSuccess[];
   importWarnings: SavedObjectsImportWarning[];
   basePath: IBasePath;
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 interface ImportItem {
@@ -123,7 +125,10 @@ const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => 
       {errorCount && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4 className="savedObjectsManagementImportSummary__errorCount">
+            <h4
+              data-test-subj="importSavedObjectsErrorsCount"
+              className="savedObjectsManagementImportSummary__errorCount"
+            >
               <FormattedMessage
                 id="savedObjectsManagement.importSummary.errorCountHeader"
                 defaultMessage="{errorCount} error"
@@ -241,6 +246,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
   successfulImports,
   importWarnings,
   basePath,
+  allowedTypes,
 }) => {
   const importItems: ImportItem[] = useMemo(
     () =>
@@ -276,6 +282,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
       <EuiHorizontalRule />
       {importItems.map((item, index) => {
         const { type, title, icon } = item;
+        const typeLabel = getSavedObjectLabel(type, allowedTypes);
         return (
           <EuiFlexGroup
             responsive={false}
@@ -285,8 +292,8 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
             className="savedObjectsManagementImportSummary__row"
           >
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                <EuiIcon aria-label={getSavedObjectLabel(type)} type={icon} size="s" />
+              <EuiToolTip position="top" content={typeLabel}>
+                <EuiIcon aria-label={typeLabel} type={icon} size="s" />
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem className="savedObjectsManagementImportSummary__title">

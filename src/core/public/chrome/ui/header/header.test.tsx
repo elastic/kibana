@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -13,10 +13,7 @@ import { StubBrowserStorage, mountWithIntl } from '@kbn/test/jest';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
-
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => 'mockId',
-}));
+import { ChromeBreadcrumbsAppendExtension } from '../../types';
 
 function mockProps() {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
@@ -60,17 +57,22 @@ describe('Header', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
     const isLocked$ = new BehaviorSubject(false);
     const navLinks$ = new BehaviorSubject([
-      { id: 'kibana', title: 'kibana', baseUrl: '', href: '' },
+      { id: 'kibana', title: 'kibana', baseUrl: '', href: '', url: '' },
     ]);
+    const headerBanner$ = new BehaviorSubject(undefined);
     const customNavLink$ = new BehaviorSubject({
       id: 'cloud-deployment-link',
       title: 'Manage cloud deployment',
       baseUrl: '',
+      url: '',
       href: '',
     });
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
     ]);
+    const breadcrumbsAppendExtension$ = new BehaviorSubject<
+      undefined | ChromeBreadcrumbsAppendExtension
+    >(undefined);
     const component = mountWithIntl(
       <Header
         {...mockProps()}
@@ -80,6 +82,8 @@ describe('Header', () => {
         recentlyAccessed$={recentlyAccessed$}
         isLocked$={isLocked$}
         customNavLink$={customNavLink$}
+        breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
+        headerBanner$={headerBanner$}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeFalsy();
@@ -91,7 +95,21 @@ describe('Header', () => {
 
     act(() => isLocked$.next(true));
     component.update();
-    expect(component.find('nav[aria-label="Primary"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="collapsibleNav"]').exists()).toBeTruthy();
     expect(component).toMatchSnapshot();
+
+    act(() =>
+      breadcrumbsAppendExtension$.next({
+        content: (root: HTMLDivElement) => {
+          root.innerHTML = '<div class="my-extension">__render__</div>';
+          return () => (root.innerHTML = '');
+        },
+      })
+    );
+    component.update();
+    expect(component.find('HeaderExtension').exists()).toBeTruthy();
+    expect(
+      component.find('HeaderExtension').getDOMNode().querySelector('.my-extension')
+    ).toBeTruthy();
   });
 });

@@ -1,51 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useContext } from 'react';
-import styled, { ThemeContext } from 'styled-components';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiPanel } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { WithHeaderLayout } from '../../components/app/layout/with_header';
 
-const CentralizedFlexGroup = styled(EuiFlexGroup)`
-  justify-content: center;
-  align-items: center;
-  // place the element in the center of the page
-  min-height: calc(100vh - ${(props) => props.theme.eui.euiHeaderChildSize});
-`;
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { ObservabilityHeaderMenu } from '../../components/app/header';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 export function LoadingObservability() {
-  const theme = useContext(ThemeContext);
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   return (
-    <WithHeaderLayout
-      headerColor={theme.eui.euiColorEmptyShade}
-      bodyColor={theme.eui.euiPageBackgroundColor}
-    >
-      <CentralizedFlexGroup>
+    <ObservabilityPageTemplate template="centeredContent" showSolutionNav={false}>
+      <ObservabilityHeaderMenu />
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiPanel>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="xl" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-                <EuiText>
-                  {i18n.translate('xpack.observability.overview.loadingObservability', {
-                    defaultMessage: 'Loading Observability',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+          <EuiLoadingSpinner size="xl" />
         </EuiFlexItem>
-      </CentralizedFlexGroup>
-    </WithHeaderLayout>
+        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+          <EuiText>{observabilityLoadingMessage}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ObservabilityPageTemplate>
   );
 }
+
+const observabilityLoadingMessage = i18n.translate(
+  'xpack.observability.overview.loadingObservability',
+  {
+    defaultMessage: 'Loading Observability',
+  }
+);

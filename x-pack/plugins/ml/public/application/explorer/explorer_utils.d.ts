@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import { Moment } from 'moment';
 
 import { AnnotationsTable } from '../../../common/types/annotations';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { SwimlaneType } from './explorer_constants';
+import { TimeRangeBounds } from '../util/time_buckets';
+import { RecordForInfluencer } from '../services/results_service/results_service';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { MlResultsService } from '../services/results_service';
+import { EntityField } from '../../../common/util/anomaly_utils';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -28,6 +32,9 @@ export declare interface SwimlaneData {
   laneLabels: string[];
   points: SwimlanePoint[];
   interval: number;
+}
+interface ChartRecord extends RecordForInfluencer {
+  function: string;
 }
 
 export declare interface OverallSwimlaneData extends SwimlaneData {
@@ -53,7 +60,7 @@ export declare const getSelectionJobIds: (
 export declare const getSelectionInfluencers: (
   selectedCells: AppStateSelectedCells | undefined,
   fieldName: string
-) => string[];
+) => EntityField[];
 
 interface SelectionTimeRange {
   earliestMs: number;
@@ -97,15 +104,16 @@ export declare interface ExplorerJob {
 
 export declare const createJobs: (jobs: CombinedJob[]) => ExplorerJob[];
 
-export declare interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
-}
-
 declare interface SwimlaneBounds {
   earliest: number;
   latest: number;
 }
+
+export declare const loadOverallAnnotations: (
+  selectedJobs: ExplorerJob[],
+  interval: number,
+  bounds: TimeRangeBounds
+) => Promise<AnnotationsTable>;
 
 export declare const loadAnnotationsTableData: (
   selectedCells: AppStateSelectedCells | undefined,
@@ -131,29 +139,34 @@ export declare const loadAnomaliesTableData: (
   fieldName: string,
   tableInterval: string,
   tableSeverity: number,
-  influencersFilterQuery: any
+  influencersFilterQuery: InfluencersFilterQuery
 ) => Promise<AnomaliesTableData>;
 
 export declare const loadDataForCharts: (
+  mlResultsService: MlResultsService,
   jobIds: string[],
   earliestMs: number,
   latestMs: number,
   influencers: any[],
   selectedCells: AppStateSelectedCells | undefined,
-  influencersFilterQuery: any
-) => Promise<any[] | undefined>;
+  influencersFilterQuery: InfluencersFilterQuery,
+  // choose whether or not to keep track of the request that could be out of date
+  takeLatestOnly: boolean
+) => Promise<ChartRecord[] | undefined>;
 
 export declare const loadFilteredTopInfluencers: (
+  mlResultsService: MlResultsService,
   jobIds: string[],
   earliestMs: number,
   latestMs: number,
   records: any[],
   influencers: any[],
   noInfluencersConfigured: boolean,
-  influencersFilterQuery: any
+  influencersFilterQuery: InfluencersFilterQuery
 ) => Promise<any[]>;
 
 export declare const loadTopInfluencers: (
+  mlResultsService: MlResultsService,
   selectedJobIds: string[],
   earliestMs: number,
   latestMs: number,
@@ -167,17 +180,8 @@ declare interface LoadOverallDataResponse {
   overallSwimlaneData: OverallSwimlaneData;
 }
 
-export declare const loadViewByTopFieldValuesForSelectedTime: (
-  earliestMs: number,
-  latestMs: number,
-  selectedJobs: ExplorerJob[],
-  viewBySwimlaneFieldName: string,
-  swimlaneLimit: number,
-  noInfluencersConfigured: boolean
-) => Promise<any>;
-
 export declare interface FilterData {
-  influencersFilterQuery: any;
+  influencersFilterQuery: InfluencersFilterQuery;
   filterActive: boolean;
   filteredFields: string[];
   queryString: string;

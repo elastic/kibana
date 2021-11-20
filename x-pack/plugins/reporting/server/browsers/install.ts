@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import del from 'del';
@@ -9,37 +10,10 @@ import os from 'os';
 import path from 'path';
 import * as Rx from 'rxjs';
 import { GenericLevelLogger } from '../lib/level_logger';
-import { paths } from './chromium/paths';
+import { ChromiumArchivePaths } from './chromium';
 import { ensureBrowserDownloaded } from './download';
-// @ts-ignore
 import { md5 } from './download/checksum';
-// @ts-ignore
 import { extract } from './extract';
-
-interface Package {
-  platforms: string[];
-  architecture: string;
-}
-
-/**
- * Small helper util to resolve where chromium is installed
- */
-export const getBinaryPath = (
-  chromiumPath: string = path.resolve(__dirname, '../../chromium'),
-  platform: string = process.platform,
-  architecture: string = os.arch()
-) => {
-  const pkg = paths.packages.find((p: Package) => {
-    return p.platforms.includes(platform) && p.architecture === architecture;
-  });
-
-  if (!pkg) {
-    // TODO: validate this
-    throw new Error(`Unsupported platform: ${platform}-${architecture}`);
-  }
-
-  return path.join(chromiumPath, pkg.binaryRelativePath);
-};
 
 /**
  * "install" a browser by type into installs path by extracting the downloaded
@@ -52,30 +26,40 @@ export function installBrowser(
   architecture: string = os.arch()
 ): { binaryPath$: Rx.Subject<string> } {
   const binaryPath$ = new Rx.Subject<string>();
+
+  const paths = new ChromiumArchivePaths();
+  const pkg = paths.find(platform, architecture);
+
+  if (!pkg) {
+    throw new Error(`Unsupported platform: ${platform}-${architecture}`);
+  }
+
   const backgroundInstall = async () => {
-    const pkg = paths.packages.find((p: Package) => {
-      return p.platforms.includes(platform) && p.architecture === architecture;
-    });
-
-    if (!pkg) {
-      // TODO: validate this
-      throw new Error(`Unsupported platform: ${platform}-${architecture}`);
-    }
-
-    const binaryPath = getBinaryPath(chromiumPath, platform, architecture);
+    const binaryPath = paths.getBinaryPath(pkg);
     const binaryChecksum = await md5(binaryPath).catch(() => '');
 
     if (binaryChecksum !== pkg.binaryChecksum) {
-      await ensureBrowserDownloaded(logger);
+      logger.warning(
+        `Found browser binary checksum for ${pkg.platform}/${pkg.architecture} ` +
+          `is ${binaryChecksum} but ${pkg.binaryChecksum} was expected. Re-installing...`
+      );
+      try {
+        await del(chromiumPath);
+      } catch (err) {
+        logger.error(err);
+      }
 
-      const archive = path.join(paths.archivesPath, pkg.archiveFilename);
-      logger.info(`Extracting [${archive}] to [${binaryPath}]`);
-
-      await del(chromiumPath);
-      await extract(archive, chromiumPath);
+      try {
+        await ensureBrowserDownloaded(logger);
+        const archive = path.join(paths.archivesPath, pkg.architecture, pkg.archiveFilename);
+        logger.info(`Extracting [${archive}] to [${chromiumPath}]`);
+        await extract(archive, chromiumPath);
+      } catch (err) {
+        logger.error(err);
+      }
     }
 
-    logger.debug(`Browser executable: ${binaryPath}`);
+    logger.info(`Browser executable: ${binaryPath}`);
 
     binaryPath$.next(binaryPath); // subscribers wait for download and extract to complete
   };

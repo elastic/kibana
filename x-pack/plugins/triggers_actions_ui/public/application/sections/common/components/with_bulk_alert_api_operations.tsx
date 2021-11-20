@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,8 +11,9 @@ import {
   Alert,
   AlertType,
   AlertTaskState,
-  AlertInstanceSummary,
+  AlertSummary,
   AlertingFrameworkHealth,
+  ResolvedRule,
 } from '../../../../types';
 import {
   deleteAlerts,
@@ -27,9 +29,10 @@ import {
   unmuteAlertInstance,
   loadAlert,
   loadAlertState,
-  loadAlertInstanceSummary,
+  loadAlertSummary,
   loadAlertTypes,
-  health,
+  alertingFrameworkHealth,
+  resolveRule,
 } from '../../../lib/alert_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -38,9 +41,7 @@ export interface ComponentOpts {
   unmuteAlerts: (alerts: Alert[]) => Promise<void>;
   enableAlerts: (alerts: Alert[]) => Promise<void>;
   disableAlerts: (alerts: Alert[]) => Promise<void>;
-  deleteAlerts: (
-    alerts: Alert[]
-  ) => Promise<{
+  deleteAlerts: (alerts: Alert[]) => Promise<{
     successes: string[];
     errors: string[];
   }>;
@@ -50,17 +51,16 @@ export interface ComponentOpts {
   unmuteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
   enableAlert: (alert: Alert) => Promise<void>;
   disableAlert: (alert: Alert) => Promise<void>;
-  deleteAlert: (
-    alert: Alert
-  ) => Promise<{
+  deleteAlert: (alert: Alert) => Promise<{
     successes: string[];
     errors: string[];
   }>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
-  loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
+  loadAlertSummary: (id: Alert['id']) => Promise<AlertSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
+  resolveRule: (id: Alert['id']) => Promise<ResolvedRule>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -96,12 +96,12 @@ export function withBulkAlertOperations<T>(
         }
         muteAlert={async (alert: Alert) => {
           if (!isAlertMuted(alert)) {
-            return muteAlert({ http, id: alert.id });
+            return await muteAlert({ http, id: alert.id });
           }
         }}
         unmuteAlert={async (alert: Alert) => {
           if (isAlertMuted(alert)) {
-            return unmuteAlert({ http, id: alert.id });
+            return await unmuteAlert({ http, id: alert.id });
           }
         }}
         muteAlertInstance={async (alert: Alert, instanceId: string) => {
@@ -116,22 +116,21 @@ export function withBulkAlertOperations<T>(
         }}
         enableAlert={async (alert: Alert) => {
           if (isAlertDisabled(alert)) {
-            return enableAlert({ http, id: alert.id });
+            return await enableAlert({ http, id: alert.id });
           }
         }}
         disableAlert={async (alert: Alert) => {
           if (!isAlertDisabled(alert)) {
-            return disableAlert({ http, id: alert.id });
+            return await disableAlert({ http, id: alert.id });
           }
         }}
         deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
-        loadAlertInstanceSummary={async (alertId: Alert['id']) =>
-          loadAlertInstanceSummary({ http, alertId })
-        }
+        loadAlertSummary={async (ruleId: Alert['id']) => loadAlertSummary({ http, ruleId })}
         loadAlertTypes={async () => loadAlertTypes({ http })}
-        getHealth={async () => health({ http })}
+        resolveRule={async (ruleId: Alert['id']) => resolveRule({ http, ruleId })}
+        getHealth={async () => alertingFrameworkHealth({ http })}
       />
     );
   };

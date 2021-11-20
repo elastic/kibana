@@ -1,22 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
-
-import {
+import { ElasticsearchClient } from 'kibana/server';
+import type {
   Filter,
   FoundListItemSchema,
   ListId,
   Page,
   PerPage,
-  SearchEsListItemSchema,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { getList } from '../lists';
 import {
   encodeCursor,
@@ -36,13 +36,13 @@ export interface FindListItemOptions {
   page: Page;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listIndex: string;
   listItemIndex: string;
 }
 
 export const findListItem = async ({
-  callCluster,
+  esClient,
   currentIndexPosition,
   filter,
   listId,
@@ -54,7 +54,7 @@ export const findListItem = async ({
   listItemIndex,
   sortOrder,
 }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
-  const list = await getList({ callCluster, id: listId, listIndex });
+  const list = await getList({ esClient, id: listId, listIndex });
   if (list == null) {
     return null;
   } else {
@@ -62,8 +62,8 @@ export const findListItem = async ({
     const sortField =
       sortFieldWithPossibleValue === 'value' ? list.type : sortFieldWithPossibleValue;
     const scroll = await scrollToStartPage({
-      callCluster,
       currentIndexPosition,
+      esClient,
       filter,
       hopSize: 100,
       index: listItemIndex,
@@ -74,25 +74,25 @@ export const findListItem = async ({
       sortOrder,
     });
 
-    const { count } = await callCluster('count', {
+    const { body: respose } = await esClient.count({
       body: {
         query,
       },
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       index: listItemIndex,
     });
 
     if (scroll.validSearchAfterFound) {
-      // Note: This typing of response = await callCluster<SearchResponse<SearchEsListSchema>>
+      // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
       // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
       // to explicitly define the type <T>.
-      const response = await callCluster<SearchResponse<SearchEsListItemSchema>>('search', {
+      const { body: response } = await esClient.search<SearchEsListItemSchema>({
         body: {
           query,
           search_after: scroll.searchAfter,
           sort: getSortWithTieBreaker({ sortField, sortOrder }),
         },
-        ignoreUnavailable: true,
+        ignore_unavailable: true,
         index: listItemIndex,
         seq_no_primary_term: true,
         size: perPage,
@@ -106,7 +106,7 @@ export const findListItem = async ({
         data: transformElasticToListItem({ response, type: list.type }),
         page,
         per_page: perPage,
-        total: count,
+        total: respose.count,
       };
     } else {
       return {
@@ -114,7 +114,7 @@ export const findListItem = async ({
         data: [],
         page,
         per_page: perPage,
-        total: count,
+        total: respose.count,
       };
     }
   }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import DateMath from '@elastic/datemath';
@@ -64,7 +65,7 @@ describe('useUrlParams', () => {
     setUrlParamsButton.simulate('click');
     expect(history.push).toHaveBeenCalledWith({
       pathname: '/',
-      search: 'dateRangeStart=now-12d&dateRangeEnd=now',
+      search: 'dateRangeEnd=now&dateRangeStart=now-12d',
     });
   });
 
@@ -121,7 +122,7 @@ describe('useUrlParams', () => {
 
     expect(history.push).toHaveBeenCalledWith({
       pathname: '/',
-      search: 'g=%22%22&dateRangeStart=now-12&dateRangeEnd=now',
+      search: 'dateRangeEnd=now&dateRangeStart=now-12&g=%22%22',
     });
   });
 });

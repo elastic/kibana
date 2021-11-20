@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { pick } from 'lodash';
@@ -37,7 +37,7 @@ interface LegacyStatusOverall {
 
 type LegacyStatusState = 'green' | 'yellow' | 'red';
 type LegacyStatusIcon = 'danger' | 'warning' | 'success';
-type LegacyStatusUiColor = 'secondary' | 'warning' | 'danger';
+type LegacyStatusUiColor = 'success' | 'warning' | 'danger';
 
 interface LegacyStateAttr {
   id: LegacyStatusState;
@@ -95,7 +95,7 @@ const serviceStatusToHttpComponent = (
   since: string
 ): StatusComponentHttp => ({
   id: serviceName,
-  message: status.summary,
+  message: [status.summary, status.detail].filter(Boolean).join(' '),
   since,
   ...serviceStatusAttrs(status),
 });
@@ -141,7 +141,7 @@ const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
       defaultMessage: 'Green',
     }),
     icon: 'success',
-    uiColor: 'secondary',
+    uiColor: 'success',
     nickname: 'Looking good',
   },
 });

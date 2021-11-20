@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 import { Cluster } from '../../models/cluster';
 import { checkLicense } from '../../lib/check_license';
@@ -16,8 +18,8 @@ export function registerClusterLoadRoute(router: LogstashPluginRouter) {
     },
     wrapRouteWithLicenseCheck(checkLicense, async (context, request, response) => {
       try {
-        const client = context.logstash!.esClient;
-        const info = await client.callAsCurrentUser('info');
+        const { client } = context.core.elasticsearch;
+        const { body: info } = await client.asCurrentUser.info();
         return response.ok({
           body: {
             cluster: Cluster.fromUpstreamJSON(info).downstreamJSON,
@@ -27,7 +29,7 @@ export function registerClusterLoadRoute(router: LogstashPluginRouter) {
         if (err.status === 403) {
           return response.ok();
         }
-        return response.internalError();
+        throw err;
       }
     })
   );

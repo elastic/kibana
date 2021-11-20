@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -9,15 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerCredentialsRoutes } from './credentials';
 
 describe('credentials routes', () => {
-  describe('GET /api/app_search/credentials', () => {
+  describe('GET /internal/app_search/credentials', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/credentials',
-        payload: 'query',
+        path: '/internal/app_search/credentials',
       });
 
       registerCredentialsRoutes({
@@ -34,26 +34,30 @@ describe('credentials routes', () => {
 
     describe('validates', () => {
       it('correctly', () => {
-        const request = { query: { 'page[current]': 1 } };
+        const request = {
+          query: {
+            'page[current]': 1,
+            'page[size]': 10,
+          },
+        };
         mockRouter.shouldValidate(request);
       });
 
-      it('missing page[current]', () => {
+      it('missing page query params', () => {
         const request = { query: {} };
         mockRouter.shouldThrow(request);
       });
     });
   });
 
-  describe('POST /api/app_search/credentials', () => {
+  describe('POST /internal/app_search/credentials', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/credentials',
-        payload: 'body',
+        path: '/internal/app_search/credentials',
       });
 
       registerCredentialsRoutes({
@@ -158,15 +162,14 @@ describe('credentials routes', () => {
     });
   });
 
-  describe('GET /api/app_search/credentials/details', () => {
+  describe('GET /internal/app_search/credentials/details', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/credentials/details',
-        payload: 'query',
+        path: '/internal/app_search/credentials/details',
       });
 
       registerCredentialsRoutes({
@@ -182,15 +185,14 @@ describe('credentials routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/credentials/{name}', () => {
+  describe('PUT /internal/app_search/credentials/{name}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/credentials/{name}',
-        payload: 'body',
+        path: '/internal/app_search/credentials/{name}',
       });
 
       registerCredentialsRoutes({
@@ -295,14 +297,14 @@ describe('credentials routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/credentials/{name}', () => {
+  describe('DELETE /internal/app_search/credentials/{name}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/credentials/{name}',
+        path: '/internal/app_search/credentials/{name}',
       });
 
       registerCredentialsRoutes({

@@ -1,22 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { memo, useEffect, useState, useMemo } from 'react';
+import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
+  pagePathGetters,
 } from '../../../../../../../fleet/public';
-import { getPolicyDetailPath } from '../../../../common/routing';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../fleet/common';
+import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
+import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { getPolicyDetailPath, getPolicyTrustedAppsPath } from '../../../../common/routing';
 import { PolicyDetailsForm } from '../policy_details_form';
 import { AppAction } from '../../../../../common/store/actions';
 import { usePolicyDetailsSelector } from '../policy_hooks';
-import { policyDetailsForUpdate } from '../../store/policy_details/selectors';
-
+import {
+  apiError,
+  policyDetails,
+  policyDetailsForUpdate,
+} from '../../store/policy_details/selectors';
+import { FleetTrustedAppsCard } from './endpoint_package_custom_extension/components/fleet_trusted_apps_card';
+import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -39,7 +52,14 @@ const WrappedPolicyDetailsForm = memo<{
 }>(({ policyId, onChange }) => {
   const dispatch = useDispatch<(a: AppAction) => void>();
   const updatedPolicy = usePolicyDetailsSelector(policyDetailsForUpdate);
+  const endpointPolicyDetails = usePolicyDetailsSelector(policyDetails);
+  const endpointDetailsLoadingError = usePolicyDetailsSelector(apiError);
+  const { getAppUrl } = useAppUrl();
   const [, setLastUpdatedPolicy] = useState(updatedPolicy);
+  // TODO: Remove this and related code when removing FF
+  const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
+    'trustedAppsByPolicyEnabled'
+  );
 
   // When the form is initially displayed, trigger the Redux middleware which is based on
   // the location information stored via the `userChangedUrl` action.
@@ -83,7 +103,7 @@ const WrappedPolicyDetailsForm = memo<{
           // ensure we don't override it.
           updatedPolicy: {
             // Casting is needed due to the use of `Immutable<>` in our store data
-            inputs: (updatedPolicy.inputs as unknown) as NewPackagePolicy['inputs'],
+            inputs: updatedPolicy.inputs as unknown as NewPackagePolicy['inputs'],
           },
         });
       }
@@ -92,9 +112,109 @@ const WrappedPolicyDetailsForm = memo<{
     });
   }, [onChange, updatedPolicy]);
 
+  const policyTrustedAppsPath = useMemo(() => getPolicyTrustedAppsPath(policyId), [policyId]);
+  const policyTrustedAppRouteState = useMemo<PolicyDetailsRouteState>(() => {
+    const fleetPackageIntegrationCustomUrlPath = `#${
+      pagePathGetters.integration_policy_edit({ packagePolicyId: policyId })[1]
+    }`;
+
+    return {
+      backLink: {
+        label: i18n.translate(
+          'xpack.securitySolution.endpoint.fleetCustomExtension.artifacts.backButtonLabel',
+          {
+            defaultMessage: `Back to Fleet integration policy`,
+          }
+        ),
+        navigateTo: [
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: fleetPackageIntegrationCustomUrlPath,
+          },
+        ],
+        href: getAppUrl({
+          appId: INTEGRATIONS_PLUGIN_ID,
+          path: fleetPackageIntegrationCustomUrlPath,
+        }),
+      },
+    };
+  }, [getAppUrl, policyId]);
+
+  const policyTrustedAppsLink = useMemo(
+    () => (
+      <LinkWithIcon
+        href={getAppUrl({
+          path: policyTrustedAppsPath,
+        })}
+        appPath={policyTrustedAppsPath}
+        appState={policyTrustedAppRouteState}
+        data-test-subj="linkToTrustedApps"
+        size="m"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
+          defaultMessage="Manage trusted applications"
+        />
+      </LinkWithIcon>
+    ),
+    [getAppUrl, policyTrustedAppsPath, policyTrustedAppRouteState]
+  );
+
   return (
     <div data-test-subj="endpointIntegrationPolicyForm">
-      <PolicyDetailsForm />
+      {isTrustedAppsByPolicyEnabled ? (
+        <>
+          <div>
+            <EuiText>
+              <h5>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyDetails.artifacts.title"
+                  defaultMessage="Artifacts"
+                />
+              </h5>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <FleetTrustedAppsCard
+              policyId={policyId}
+              cardSize="m"
+              customLink={policyTrustedAppsLink}
+            />
+          </div>
+          <EuiSpacer size="l" />
+          <div>
+            <EuiText>
+              <h5>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyDetails.settings.title"
+                  defaultMessage="Policy settings"
+                />
+              </h5>
+            </EuiText>
+            <EuiSpacer size="s" />
+            {endpointDetailsLoadingError ? (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policyDetails.loadError"
+                    defaultMessage="Failed to load endpoint policy settings"
+                  />
+                }
+                iconType="alert"
+                color="warning"
+                data-test-subj="endpiontPolicySettingsLoadingError"
+              >
+                {endpointDetailsLoadingError.message}
+              </EuiCallOut>
+            ) : !endpointPolicyDetails ? (
+              <EuiLoadingSpinner size="l" className="essentialAnimation" />
+            ) : (
+              <PolicyDetailsForm />
+            )}
+          </div>
+        </>
+      ) : (
+        <PolicyDetailsForm />
+      )}
     </div>
   );
 });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { format } from 'util';
@@ -62,6 +62,7 @@ export function MochaReporterProvider({ getService }) {
         log.setWriters([
           new ToolingLogTextWriter({
             level: 'error',
+            ignoreSources: ['ProcRunner', '@kbn/es Cluster'],
             writeTo: process.stdout,
           }),
           new ToolingLogTextWriter({
@@ -136,7 +137,7 @@ export function MochaReporterProvider({ getService }) {
     onPass = (test) => {
       const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
-      log.write(`- ${pass} ${time} "${test.fullTitle()}"`);
+      log.write(`- ${pass} ${time}`);
     };
 
     onFail = (runnable) => {

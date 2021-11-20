@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, ButtonHTMLAttributes } from 'react';
@@ -19,17 +20,16 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiKeyboardAccessible,
   EuiForm,
   EuiSpacer,
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
 import { LegacyIcon } from '../legacy_icon';
-import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 import { UpdateableFieldProperties } from './field_manager';
 
 import { isEqual } from '../helpers';
@@ -69,6 +69,14 @@ export function FieldEditor({
     // it's meant to reset the internal state on changes outside of the component.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialField]);
+
+  // In case of cleared field and the user closes the popover, restore the initial field
+  useEffect(() => {
+    if (!open) {
+      setCurrentField(initialField);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   function updateField() {
     const { name, selected, type, ...updatableProperties } = currentField;
@@ -203,12 +211,9 @@ export function FieldEditor({
               defaultMessage: 'Edit',
             }),
             width: 380,
+            initialFocusedItemIndex: -1,
             content: (
               <EuiForm className="gphFieldEditor__displayForm">
-                {/* This is a workaround to prevent the field combo box from being focussed when opening the panel. */}
-                <EuiKeyboardAccessible>
-                  <span style={{ opacity: 0 }} onClick={() => {}} onKeyPress={() => {}} />
-                </EuiKeyboardAccessible>
                 <EuiFormRow
                   display="columnCompressed"
                   label={i18n.translate('xpack.graph.fieldManager.fieldLabel', {
@@ -217,8 +222,8 @@ export function FieldEditor({
                 >
                   <EuiComboBox
                     onChange={(choices) => {
-                      // value is always defined because it's an unclearable single selection
-                      const newFieldName = choices[0].value!;
+                      // when user hits backspace the selection gets cleared, so prevent it from breaking
+                      const newFieldName = choices.length ? choices[0].value! : '';
 
                       updateProp('name', newFieldName);
                     }}
@@ -356,7 +361,7 @@ export function FieldEditor({
                     <EuiButton
                       size="s"
                       fill
-                      disabled={isEqual(initialField, currentField)}
+                      disabled={isEqual(initialField, currentField) || currentField.name === ''}
                       onClick={updateField}
                     >
                       {i18n.translate('xpack.graph.fieldManager.updateLabel', {

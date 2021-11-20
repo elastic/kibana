@@ -1,14 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { SearchResponse } from 'elasticsearch';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HostAuthenticationsStrategyResponse } from '../../../../common/search_strategy/security_solution/hosts/authentications';
 
 export const mockData: { Authentications: HostAuthenticationsStrategyResponse } = {
   Authentications: {
     rawResponse: {
+      took: 880,
+      timed_out: false,
+      _shards: {
+        total: 26,
+        successful: 26,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 2,
+        hits: [],
+      },
       aggregations: {
         group_by_users: {
           buckets: [
@@ -30,7 +44,7 @@ export const mockData: { Authentications: HostAuthenticationsStrategyResponse } 
           sum_other_doc_count: 566,
         },
       },
-    } as SearchResponse<unknown>,
+    } as estypes.SearchResponse<unknown>,
     totalCount: 54,
     edges: [
       {

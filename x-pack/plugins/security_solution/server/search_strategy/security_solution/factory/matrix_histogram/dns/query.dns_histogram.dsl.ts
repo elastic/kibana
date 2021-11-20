@@ -1,20 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
 
 import moment from 'moment';
 
-import { Direction, MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';
+import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';
 import {
   calculateTimeSeriesInterval,
   createQueryFilterClauses,
 } from '../../../../../utils/build_query';
-
-const HUGE_QUERY_SIZE = 1000000;
 
 const getCountAgg = () => ({
   dns_count: {
@@ -78,9 +77,9 @@ export const buildDnsHistogramQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
@@ -88,25 +87,18 @@ export const buildDnsHistogramQuery = ({
         dns_name_query_count: {
           terms: {
             field: stackByField,
-            size: HUGE_QUERY_SIZE,
+            order: {
+              unique_domains: 'desc',
+            },
+            size: 10,
           },
           aggs: {
-            dns_question_name: getHistogramAggregation({ from, to }),
-            bucket_sort: {
-              bucket_sort: {
-                sort: [
-                  { unique_domains: { order: Direction.desc } },
-                  { _key: { order: Direction.asc } },
-                ],
-                from: 0,
-                size: 10,
-              },
-            },
             unique_domains: {
               cardinality: {
                 field: 'dns.question.name',
               },
             },
+            dns_question_name: getHistogramAggregation({ from, to }),
           },
         },
       },

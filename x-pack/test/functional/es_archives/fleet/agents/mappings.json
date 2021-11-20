@@ -51,7 +51,6 @@
           "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
           "alert": "7b44fba6773e37c806ce290ea9b7024e",
           "siem-detection-engine-rule-status": "ae783f41c6937db6b7a2ef5c93a9e9b0",
-          "map": "23d7aa4a720d4938ccde3983f87bd58d",
           "uptime-dynamic-settings": "fcdb453a30092f022f2642db29523d80",
           "cases": "32aa96a6d3855ddda53010ae2048ac22",
           "apm-telemetry": "3525d7c22c42bc80f5e6e9cb3f2b26a2",
@@ -66,7 +65,6 @@
           "maps-telemetry": "bfd39d88aadadb4be597ea984d433dbe",
           "namespace": "2f4316de49999235636386fe51dc06c1",
           "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
-          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
           "config": "ae24d22d5986d04124cc6568f771066f",
           "tsvb-validation-telemetry": "3a37ef6c8700ae6fc97d5c7da00e9215"
@@ -191,27 +189,23 @@
         },
         "apm-indices": {
           "properties": {
-            "apm_oss": {
-              "properties": {
-                "errorIndices": {
-                  "type": "keyword"
-                },
-                "metricsIndices": {
-                  "type": "keyword"
-                },
-                "onboardingIndices": {
-                  "type": "keyword"
-                },
-                "sourcemapIndices": {
-                  "type": "keyword"
-                },
-                "spanIndices": {
-                  "type": "keyword"
-                },
-                "transactionIndices": {
-                  "type": "keyword"
-                }
-              }
+            "error": {
+              "type": "keyword"
+            },
+            "metric": {
+              "type": "keyword"
+            },
+            "onboarding": {
+              "type": "keyword"
+            },
+            "sourcemap": {
+              "type": "keyword"
+            },
+            "span": {
+              "type": "keyword"
+            },
+            "transaction": {
+              "type": "keyword"
             }
           }
         },
@@ -2128,7 +2122,8 @@
         "map": {
           "properties": {
             "bounds": {
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"
@@ -2846,47 +2841,6 @@
             }
           }
         },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
         "tsvb-validation-telemetry": {
           "properties": {
             "failedRequests": {
@@ -3076,6 +3030,447 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".fleet-actions": {
+      }
+    },
+    "index": ".fleet-actions-7",
+    "mappings": {
+      "_meta": {
+        "migrationHash": "6527beea5a4a2f33acb599585ed4710442ece7f2"
+      },
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "action_id": {
+          "type": "keyword"
+        },
+        "agents": {
+          "type": "keyword"
+        },
+        "data": {
+          "enabled": false,
+          "type": "object"
+        },
+        "expiration": {
+          "type": "date"
+        },
+        "input_type": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".fleet-agents": {
+      }
+    },
+    "index": ".fleet-agent-7",
+    "mappings": {
+      "_meta": {
+        "migrationHash": "87cab95ac988d78a78d0d66bbf05361b65dcbacf"
+      },
+      "dynamic": "false",
+      "properties": {
+        "access_api_key_id": {
+          "type": "keyword"
+        },
+        "action_seq_no": {
+          "type": "integer"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "agent": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "default_api_key": {
+          "type": "keyword"
+        },
+        "default_api_key_id": {
+          "type": "keyword"
+        },
+        "enrolled_at": {
+          "type": "date"
+        },
+        "last_checkin": {
+          "type": "date"
+        },
+        "last_checkin_status": {
+          "type": "keyword"
+        },
+        "last_updated": {
+          "type": "date"
+        },
+        "local_metadata": {
+          "properties": {
+            "elastic": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "build": {
+                      "properties": {
+                        "original": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "log_level": {
+                      "type": "keyword"
+                    },
+                    "snapshot": {
+                      "type": "boolean"
+                    },
+                    "upgradeable": {
+                      "type": "boolean"
+                    },
+                    "version": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 16,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "architecture": {
+                  "type": "keyword"
+                },
+                "hostname": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "ip": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 64,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "mac": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 17,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            },
+            "os": {
+              "properties": {
+                "family": {
+                  "type": "keyword"
+                },
+                "full": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 128,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "kernel": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 128,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "platform": {
+                  "type": "keyword"
+                },
+                "version": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 32,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            }
+          }
+        },
+        "packages": {
+          "type": "keyword"
+        },
+        "policy_coordinator_idx": {
+          "type": "integer"
+        },
+        "policy_id": {
+          "type": "keyword"
+        },
+        "policy_revision_idx": {
+          "type": "integer"
+        },
+        "shared_id": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "unenrolled_at": {
+          "type": "date"
+        },
+        "unenrollment_started_at": {
+          "type": "date"
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "upgrade_started_at": {
+          "type": "date"
+        },
+        "upgraded_at": {
+          "type": "date"
+        },
+        "user_provided_metadata": {
+          "enabled": false,
+          "type": "object"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".fleet-enrollment-api-keys": {
+      }
+    },
+    "index": ".fleet-enrollment-api-keys-7",
+    "mappings": {
+      "_meta": {
+        "migrationHash": "06bef724726f3bea9f474a09be0a7f7881c28d4a"
+      },
+      "dynamic": "false",
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "api_key": {
+          "type": "keyword"
+        },
+        "api_key_id": {
+          "type": "keyword"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "expire_at": {
+          "type": "date"
+        },
+        "name": {
+          "type": "keyword"
+        },
+        "policy_id": {
+          "type": "keyword"
+        },
+        "updated_at": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".fleet-policies": {
+      }
+    },
+    "index": ".fleet-policies-7",
+    "mappings": {
+      "_meta": {
+        "migrationHash": "c2c2a49b19562942fa7c1ff1537e66e751cdb4fa"
+      },
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "coordinator_idx": {
+          "type": "integer"
+        },
+        "data": {
+          "enabled": false,
+          "type": "object"
+        },
+        "default_fleet_server": {
+          "type": "boolean"
+        },
+        "policy_id": {
+          "type": "keyword"
+        },
+        "revision_idx": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".fleet-servers": {
+      }
+    },
+    "index": ".fleet-servers-7",
+    "mappings": {
+      "_meta": {
+        "migrationHash": "e2782448c7235ec9af66ca7997e867d715ac379c"
+      },
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "agent": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "architecture": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "ip": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "server": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
         "number_of_shards": "1"
       }
     }

@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiButtonGroup, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { NO_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import {
+
+import type {
   SecuredSubFeature,
-  SubFeaturePrivilegeGroup,
   SubFeaturePrivilege,
+  SubFeaturePrivilegeGroup,
 } from '../../../../model';
+import { NO_PRIVILEGE_VALUE } from '../constants';
+import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface Props {
   featureId: string;
@@ -97,11 +99,12 @@ export const SubFeatureForm = (props: Props) => {
     privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
-    const firstSelectedPrivilege = props.privilegeCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege(
-      props.featureId,
-      privilegeGroup,
-      props.privilegeIndex
-    );
+    const firstSelectedPrivilege =
+      props.privilegeCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege(
+        props.featureId,
+        privilegeGroup,
+        props.privilegeIndex
+      );
 
     const options = [
       ...privilegeGroup.privileges.map((privilege, privilegeIndex) => {

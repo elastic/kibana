@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import { Agent } from '../../../types';
+
+import { euiLightVars as euiVars } from '@kbn/ui-shared-deps-src/theme';
+
+import type { Agent } from '../../../types';
 
 interface Props {
   agent: Agent;
@@ -14,7 +19,7 @@ interface Props {
 
 const Status = {
   Healthy: (
-    <EuiBadge color="secondary">
+    <EuiBadge color="success">
       <FormattedMessage id="xpack.fleet.agentHealth.healthyStatusText" defaultMessage="Healthy" />
     </EuiBadge>
   ),
@@ -24,7 +29,7 @@ const Status = {
     </EuiBadge>
   ),
   Inactive: (
-    <EuiBadge color="default">
+    <EuiBadge color={euiVars.euiColorDarkShade}>
       <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
     </EuiBadge>
   ),
@@ -79,9 +84,6 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent }) => {
                 lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
               }}
             />
-            {agent.current_error_events.map((event, idx) => (
-              <p key={idx}>{event.message}</p>
-            ))}
           </>
         ) : (
           <FormattedMessage

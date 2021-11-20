@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const CLOUD = 'cloud';
@@ -9,6 +10,9 @@ export const CLOUD_AVAILABILITY_ZONE = 'cloud.availability_zone';
 export const CLOUD_PROVIDER = 'cloud.provider';
 export const CLOUD_REGION = 'cloud.region';
 export const CLOUD_MACHINE_TYPE = 'cloud.machine.type';
+export const CLOUD_ACCOUNT_ID = 'cloud.account.id';
+export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
+export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
@@ -47,7 +51,6 @@ export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
-export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
@@ -74,6 +77,7 @@ export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM =
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 
+export const ERROR_ID = 'error.id';
 export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';
@@ -104,10 +108,13 @@ export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
 export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
 export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 
+export const METRICSET_NAME = 'metricset.name';
+
 export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
 export const HOST_NAME = 'host.hostname';
+export const HOSTNAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';
@@ -131,3 +138,17 @@ export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';
 export const TBT_FIELD = 'transaction.experience.tbt';
 export const FID_FIELD = 'transaction.experience.fid';
 export const CLS_FIELD = 'transaction.experience.cls';
+
+export const PROFILE_ID = 'profile.id';
+export const PROFILE_DURATION = 'profile.duration';
+export const PROFILE_TOP_ID = 'profile.top.id';
+export const PROFILE_STACK = 'profile.stack';
+
+export const PROFILE_SAMPLES_COUNT = 'profile.samples.count';
+export const PROFILE_CPU_NS = 'profile.cpu.ns';
+export const PROFILE_WALL_US = 'profile.wall.us';
+
+export const PROFILE_ALLOC_OBJECTS = 'profile.alloc_objects.count';
+export const PROFILE_ALLOC_SPACE = 'profile.alloc_space.bytes';
+export const PROFILE_INUSE_OBJECTS = 'profile.inuse_objects.count';
+export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';

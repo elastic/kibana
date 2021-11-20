@@ -1,14 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  Annotation,
-  FieldToBucket,
-  GetAnnotationsResponse,
-} from '../../../../common/types/annotations';
+import { Annotation, GetAnnotationsResponse } from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
 import { basePath } from './index';
 
@@ -18,9 +15,8 @@ export const annotations = {
     earliestMs: number;
     latestMs: number;
     maxAnnotations: number;
-    fields: FieldToBucket[];
-    detectorIndex: number;
-    entities: any[];
+    detectorIndex?: number;
+    entities?: any[];
   }) {
     const body = JSON.stringify(obj);
     return http$<GetAnnotationsResponse>({
@@ -35,7 +31,6 @@ export const annotations = {
     earliestMs: number | null;
     latestMs: number | null;
     maxAnnotations: number;
-    fields?: FieldToBucket[];
     detectorIndex?: number;
     entities?: any[];
   }) {

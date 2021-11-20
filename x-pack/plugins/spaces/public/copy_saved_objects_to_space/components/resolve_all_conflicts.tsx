@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './resolve_all_conflicts.scss';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component } from 'react';
-import { ImportRetry } from '../types';
-import { SummarizedCopyToSpaceResult } from '..';
+
+import type { SummarizedCopyToSpaceResult } from '../lib';
+import type { ImportRetry } from '../types';
 
 export interface ResolveAllConflictsProps {
   summarizedCopyResult: SummarizedCopyToSpaceResult;

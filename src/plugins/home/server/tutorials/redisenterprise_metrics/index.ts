@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,16 +23,16 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
   return {
     id: 'redisenterpriseMetrics',
     name: i18n.translate('home.tutorials.redisenterpriseMetrics.nameTitle', {
-      defaultMessage: 'Redis Enterprise metrics',
+      defaultMessage: 'Redis Enterprise Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from Redis Enterprise Server.',
+      defaultMessage: 'Collect metrics from Redis Enterprise servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.redisenterpriseMetrics.longDescription', {
       defaultMessage:
-        'The `redisenterprise` Metricbeat module fetches monitoring metrics from Redis Enterprise Server \
+        'The `redisenterprise` Metricbeat module fetches metrics from Redis Enterprise Server \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-redisenterprise.html',
@@ -57,5 +57,6 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['datastore', 'message_queue'],
   };
 }

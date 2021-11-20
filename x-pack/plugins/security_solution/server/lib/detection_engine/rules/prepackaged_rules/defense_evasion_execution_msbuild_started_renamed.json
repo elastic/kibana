@@ -9,12 +9,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "Microsoft Build Engine Using an Alternate Name",
-  "query": "event.category:process and event.type:(start or process_started) and process.pe.original_file_name:MSBuild.exe and not process.name: MSBuild.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.pe.original_file_name == \"MSBuild.exe\" and\n  not process.name : \"MSBuild.exe\"\n",
   "risk_score": 21,
   "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae4",
   "severity": "low",
@@ -37,11 +38,19 @@
         {
           "id": "T1036",
           "name": "Masquerading",
-          "reference": "https://attack.mitre.org/techniques/T1036/"
+          "reference": "https://attack.mitre.org/techniques/T1036/",
+          "subtechnique": [
+            {
+              "id": "T1036.003",
+              "name": "Rename System Utilities",
+              "reference": "https://attack.mitre.org/techniques/T1036/003/"
+            }
+          ]
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 5
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 9
 }

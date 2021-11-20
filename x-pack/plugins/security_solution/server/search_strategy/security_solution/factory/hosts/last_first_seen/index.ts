@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { get } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
-  HostAggEsData,
-  HostAggEsItem,
   HostFirstLastSeenStrategyResponse,
   HostsQueries,
   HostFirstLastSeenRequestOptions,
@@ -17,24 +16,40 @@ import {
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
-import { buildFirstLastSeenHostQuery } from './query.last_first_seen_host.dsl';
+import { buildFirstOrLastSeenHostQuery } from './query.first_or_last_seen_host.dsl';
 
-export const firstLastSeenHost: SecuritySolutionFactory<HostsQueries.firstLastSeen> = {
-  buildDsl: (options: HostFirstLastSeenRequestOptions) => buildFirstLastSeenHostQuery(options),
+export const firstOrLastSeenHost: SecuritySolutionFactory<HostsQueries.firstOrLastSeen> = {
+  buildDsl: (options: HostFirstLastSeenRequestOptions) => buildFirstOrLastSeenHostQuery(options),
   parse: async (
     options: HostFirstLastSeenRequestOptions,
-    response: IEsSearchResponse<HostAggEsData>
+    response: IEsSearchResponse<unknown>
   ): Promise<HostFirstLastSeenStrategyResponse> => {
-    const aggregations: HostAggEsItem = get('aggregations', response.rawResponse) || {};
+    // First try to get the formatted field if it exists or not.
+    const formattedField: string | null = getOr(
+      null,
+      'hits.hits[0].fields.@timestamp[0]',
+      response.rawResponse
+    );
+    // If it doesn't exist, fall back on _source as a last try.
+    const seen: string | null =
+      formattedField || getOr(null, 'hits.hits[0]._source.@timestamp', response.rawResponse);
+
     const inspect = {
-      dsl: [inspectStringifyObject(buildFirstLastSeenHostQuery(options))],
+      dsl: [inspectStringifyObject(buildFirstOrLastSeenHostQuery(options))],
     };
 
-    return {
-      ...response,
-      inspect,
-      firstSeen: get('firstSeen.value_as_string', aggregations),
-      lastSeen: get('lastSeen.value_as_string', aggregations),
-    };
+    if (options.order === 'asc') {
+      return {
+        ...response,
+        inspect,
+        firstSeen: seen,
+      };
+    } else {
+      return {
+        ...response,
+        inspect,
+        lastSeen: seen,
+      };
+    }
   },
 };

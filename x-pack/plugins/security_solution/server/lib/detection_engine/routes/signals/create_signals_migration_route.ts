@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { transformError, BadRequestError, getIndexAliases } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { createSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { buildSiemResponse, transformError } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { getTemplateVersion } from '../index/check_template_version';
-import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
-import { getIndexAliases } from '../../index/get_index_aliases';
-import { BadRequestError } from '../../errors/bad_request_error';
 import { signalsMigrationService } from '../../migrations/migration_service';
+import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
+import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
-import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 
 export const createSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,
@@ -62,6 +63,7 @@ export const createSignalsMigrationRoute = (
             `Cannot migrate due to the signals template being out of date. Latest version: [${SIGNALS_TEMPLATE_VERSION}], template version: [${currentVersion}]. Please visit Detections to automatically update your template, then try again.`
           );
         }
+
         const signalsIndexAliases = await getIndexAliases({ esClient, alias: signalsAlias });
 
         const nonSignalsIndices = indices.filter(

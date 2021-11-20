@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
-import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '../../../../common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
 import { IBucketAggConfig } from './bucket_agg_type';
@@ -42,7 +43,7 @@ const getNestedAggDSL = (aggNestedDsl: Record<string, any>, startFromAggId: stri
  */
 const getAggResultBuckets = (
   aggConfigs: IAggConfigs,
-  response: any,
+  response: estypes.SearchResponse<any>['aggregations'],
   aggWithOtherBucket: IBucketAggConfig,
   key: string
 ) => {
@@ -72,8 +73,8 @@ const getAggResultBuckets = (
       }
     }
   }
-  if (responseAgg[aggWithOtherBucket.id]) {
-    return responseAgg[aggWithOtherBucket.id].buckets;
+  if (responseAgg?.[aggWithOtherBucket.id]) {
+    return (responseAgg[aggWithOtherBucket.id] as any).buckets;
   }
   return [];
 };
@@ -128,7 +129,9 @@ export const buildOtherBucketAgg = (
   aggWithOtherBucket: IBucketAggConfig,
   response: any
 ) => {
-  const bucketAggs = aggConfigs.aggs.filter((agg) => agg.type.type === AggGroupNames.Buckets);
+  const bucketAggs = aggConfigs.aggs.filter(
+    (agg) => agg.type.type === AggGroupNames.Buckets && agg.enabled
+  );
   const index = bucketAggs.findIndex((agg) => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.aggConfigs.indexPattern;
@@ -155,6 +158,7 @@ export const buildOtherBucketAgg = (
   };
 
   let noAggBucketResults = false;
+  let exhaustiveBuckets = true;
 
   // recursively create filters for all parent aggregation buckets
   const walkBucketTree = (
@@ -165,7 +169,7 @@ export const buildOtherBucketAgg = (
     key: string
   ) => {
     // make sure there are actually results for the buckets
-    if (aggregations[aggId].buckets.length < 1) {
+    if (aggregations[aggId]?.buckets.length < 1) {
       noAggBucketResults = true;
       return;
     }
@@ -174,6 +178,9 @@ export const buildOtherBucketAgg = (
     const newAggIndex = aggIndex + 1;
     const newAgg = bucketAggs[newAggIndex];
     const currentAgg = bucketAggs[aggIndex];
+    if (aggIndex === index && agg && agg.sum_other_doc_count > 0) {
+      exhaustiveBuckets = false;
+    }
     if (aggIndex < index) {
       each(agg.buckets, (bucket: any, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(
@@ -222,7 +229,7 @@ export const buildOtherBucketAgg = (
   walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
 
   // bail if there were no bucket results
-  if (noAggBucketResults) {
+  if (noAggBucketResults || exhaustiveBuckets) {
     return false;
   }
 
@@ -235,11 +242,11 @@ export const buildOtherBucketAgg = (
 
 export const mergeOtherBucketAggResponse = (
   aggsConfig: IAggConfigs,
-  response: any,
+  response: estypes.SearchResponse<any>,
   otherResponse: any,
   otherAgg: IBucketAggConfig,
   requestAgg: Record<string, any>
-) => {
+): estypes.SearchResponse<any> => {
   const updatedResponse = cloneDeep(response);
   each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
     if (!bucket.doc_count || key === undefined) return;
@@ -276,7 +283,7 @@ export const mergeOtherBucketAggResponse = (
 };
 
 export const updateMissingBucket = (
-  response: any,
+  response: estypes.SearchResponse<any>,
   aggConfigs: IAggConfigs,
   agg: IBucketAggConfig
 ) => {

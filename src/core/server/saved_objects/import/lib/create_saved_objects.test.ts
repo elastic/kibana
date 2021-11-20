@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { savedObjectsClientMock } from '../../../mocks';
@@ -120,7 +120,7 @@ describe('#createSavedObjects', () => {
     }),
     conflict: (type: string, id: string) => {
       const error = SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
-      return ({ type, id, error } as unknown) as SavedObject;
+      return { type, id, error } as unknown as SavedObject;
     },
     unresolvableConflict: (type: string, id: string) => {
       const conflictMock = getResultMock.conflict(type, id);
@@ -253,7 +253,7 @@ describe('#createSavedObjects', () => {
     expectBulkCreateArgs.objects(1, argObjs);
   };
   const testBulkCreateOptions = async (namespace?: string) => {
-    const overwrite = (Symbol() as unknown) as boolean;
+    const overwrite = Symbol() as unknown as boolean;
     const options = setupParams({ objects: objs, namespace, overwrite });
     setupMockResults(options);
 

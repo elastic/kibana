@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+
+import { GeoBoundingBoxOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggGeoHashFnName = 'aggGeoHash';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.GEOHASH_GRID>;
 
-type Arguments = Assign<AggArgs, { boundingBox?: string }>;
+type Arguments = Assign<AggArgs, { boundingBox?: GeoBoundingBoxOutput }>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
   typeof aggGeoHashFnName,
@@ -78,7 +80,7 @@ export const aggGeoHash = (): FunctionDefinition => ({
       }),
     },
     boundingBox: {
-      types: ['string'],
+      types: ['geo_bounding_box'],
       help: i18n.translate('data.search.aggs.buckets.geoHash.boundingBox.help', {
         defaultMessage: 'Filter results based on a point location within a bounding box',
       }),
@@ -102,20 +104,18 @@ export const aggGeoHash = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
-
+  fn: (input, { id, enabled, schema, boundingBox, ...params }) => {
     return {
       type: 'agg_type',
       value: {
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.GEOHASH_GRID,
         params: {
-          ...rest,
-          boundingBox: getParsedValue(args, 'boundingBox'),
+          ...params,
+          boundingBox: boundingBox && omit(boundingBox, 'type'),
         },
+        type: BUCKET_TYPES.GEOHASH_GRID,
       },
     };
   },

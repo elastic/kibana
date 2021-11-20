@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+
 import { mountWithIntl } from '@kbn/test/jest';
-import { CopyModeControl, CopyModeControlProps } from './copy_mode_control';
+
+import type { CopyModeControlProps } from './copy_mode_control';
+import { CopyModeControl } from './copy_mode_control';
 
 describe('CopyModeControl', () => {
   const initialValues = { createNewCopies: true, overwrite: true }; // some test cases below make assumptions based on these initial values

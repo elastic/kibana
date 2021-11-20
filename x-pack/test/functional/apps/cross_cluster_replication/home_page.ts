@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -27,7 +28,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const appTitleText = await pageObjects.crossClusterReplication.appTitleText();
       expect(appTitleText).to.be('Cross-Cluster Replication');
 
-      const followerIndexButton = await pageObjects.crossClusterReplication.createFollowerIndexButton();
+      const followerIndexButton =
+        await pageObjects.crossClusterReplication.createFollowerIndexButton();
       expect(await followerIndexButton.isDisplayed()).to.be(true);
     });
   });

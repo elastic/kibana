@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { LocationDurationLine, MonitorDurationResult } from '../../../common/types';
-import { QUERY } from '../../../common/constants';
+import { QUERY, UNNAMED_LOCATION } from '../../../common/constants';
 
 export interface GetMonitorChartsParams {
   /** @member monitorId ID value for the selected monitor */
@@ -31,7 +33,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
           { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
           { term: { 'monitor.id': monitorId } },
           { range: { 'monitor.duration.us': { gt: 0 } } },
-        ],
+        ] as QueryDslQueryContainer[],
       },
     },
     size: 0,
@@ -45,7 +47,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
           location: {
             terms: {
               field: 'observer.geo.name',
-              missing: 'N/A',
+              missing: UNNAMED_LOCATION,
             },
             aggs: {
               duration: { stats: { field: 'monitor.duration.us' } },

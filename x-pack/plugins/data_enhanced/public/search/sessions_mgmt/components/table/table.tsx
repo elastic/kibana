@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
-import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
-import { SessionsConfigSchema } from '../..';
+import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../..';
+import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../../../src/plugins/data/common/';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';
@@ -20,16 +22,24 @@ import { OnActionComplete } from '../actions';
 import { getAppFilter } from './app_filter';
 import { getStatusFilter } from './status_filter';
 
-const TABLE_ID = 'searchSessionsMgmtTable';
-
 interface Props {
   core: CoreStart;
   api: SearchSessionsMgmtAPI;
   timezone: string;
   config: SessionsConfigSchema;
+  plugins: IManagementSectionsPluginsSetup;
+  kibanaVersion: string;
 }
 
-export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props }: Props) {
+export function SearchSessionsMgmtTable({
+  core,
+  api,
+  timezone,
+  config,
+  plugins,
+  kibanaVersion,
+  ...props
+}: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
@@ -70,7 +80,8 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
   // initial data load
   useEffect(() => {
     doRefresh();
-  }, [doRefresh]);
+    plugins.data.search.usageCollector?.trackSessionsListLoaded();
+  }, [doRefresh, plugins]);
 
   useInterval(doRefresh, refreshInterval);
 
@@ -104,12 +115,12 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
   return (
     <EuiInMemoryTable<UISession>
       {...props}
-      id={TABLE_ID}
-      data-test-subj={TABLE_ID}
+      id={SEARCH_SESSIONS_TABLE_ID}
+      data-test-subj={SEARCH_SESSIONS_TABLE_ID}
       rowProps={() => ({
         'data-test-subj': 'searchSessionsRow',
       })}
-      columns={getColumns(core, api, config, timezone, onActionComplete)}
+      columns={getColumns(core, plugins, api, config, timezone, onActionComplete, kibanaVersion)}
       items={tableData}
       pagination={pagination}
       search={search}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MouseEventHandler, useCallback } from 'react';
@@ -25,7 +26,7 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
  *
  * @example
  *
- * const handleOnClick = useNavigateToAppEventHandler('fleet', {path: '#/policies'})
+ * const handleOnClick = useNavigateToAppEventHandler('fleet', {path: '/policies'})
  * return <EuiLink onClick={handleOnClick}>See policies</EuiLink>
  */
 export const useNavigateToAppEventHandler = <S = unknown>(
@@ -36,7 +37,8 @@ export const useNavigateToAppEventHandler = <S = unknown>(
   options?: NavigateToAppHandlerOptions<S>
 ): EventHandlerCallback => {
   const { services } = useKibana();
-  const { path, state, onClick } = options || {};
+  const { path, state, onClick, deepLinkId, openInNewTab } = options || {};
+
   return useCallback(
     (ev) => {
       try {
@@ -69,8 +71,8 @@ export const useNavigateToAppEventHandler = <S = unknown>(
       }
 
       ev.preventDefault();
-      services.application.navigateToApp(appId, { path, state });
+      services.application.navigateToApp(appId, { deepLinkId, path, state, openInNewTab });
     },
-    [appId, onClick, path, services.application, state]
+    [appId, deepLinkId, onClick, path, services.application, state, openInNewTab]
   );
 };

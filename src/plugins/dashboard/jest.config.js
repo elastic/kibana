@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 module.exports = {
@@ -11,4 +11,7 @@ module.exports = {
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/dashboard'],
   testRunner: 'jasmine2',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/dashboard',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/src/plugins/dashboard/{common,public,server}/**/*.{ts,tsx}'],
 };

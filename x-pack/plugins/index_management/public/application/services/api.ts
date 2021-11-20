@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -18,8 +19,6 @@ import {
   UIM_INDEX_FLUSH_MANY,
   UIM_INDEX_FORCE_MERGE,
   UIM_INDEX_FORCE_MERGE_MANY,
-  UIM_INDEX_FREEZE,
-  UIM_INDEX_FREEZE_MANY,
   UIM_INDEX_OPEN,
   UIM_INDEX_OPEN_MANY,
   UIM_INDEX_REFRESH,
@@ -38,6 +37,10 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
+
+interface ReloadIndicesOptions {
+  asSystemRequest?: boolean;
+}
 
 // Temporary hack to provide the uiMetricService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
@@ -73,15 +76,21 @@ export async function deleteDataStreams(dataStreams: string[]) {
 }
 
 export async function loadIndices() {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/indices`);
+  const response = await httpService.httpClient.get<any>(`${API_BASE_PATH}/indices`);
   return response.data ? response.data : response;
 }
 
-export async function reloadIndices(indexNames: string[]) {
+export async function reloadIndices(
+  indexNames: string[],
+  { asSystemRequest }: ReloadIndicesOptions = {}
+) {
   const body = JSON.stringify({
     indexNames,
   });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/reload`, { body });
+  const response = await httpService.httpClient.post<any>(`${API_BASE_PATH}/indices/reload`, {
+    body,
+    asSystemRequest,
+  });
   return response.data ? response.data : response;
 }
 
@@ -163,16 +172,6 @@ export async function clearCacheIndices(indices: string[]) {
   });
   // Only track successful requests.
   const eventName = indices.length > 1 ? UIM_INDEX_CLEAR_CACHE_MANY : UIM_INDEX_CLEAR_CACHE;
-  uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
-  return response;
-}
-export async function freezeIndices(indices: string[]) {
-  const body = JSON.stringify({
-    indices,
-  });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/freeze`, { body });
-  // Only track successful requests.
-  const eventName = indices.length > 1 ? UIM_INDEX_FREEZE_MANY : UIM_INDEX_FREEZE;
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
   return response;
 }

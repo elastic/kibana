@@ -1,18 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
+import { MlCustomUrls } from './custom_urls';
 
-export function MachineLearningJobTableProvider({ getService }: FtrProviderContext) {
+import {
+  TimeRangeType,
+  TIME_RANGE_TYPE,
+  URL_TYPE,
+} from '../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
+
+export type MlADJobTable = ProvidedType<typeof MachineLearningJobTableProvider>;
+
+export function MachineLearningJobTableProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI,
+  customUrls: MlCustomUrls
+) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
   return new (class MlJobTable {
-    public async parseJobTable() {
+    public async parseJobTable(
+      tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
+    ) {
       const table = await testSubjects.find('~mlJobListTable');
       const $ = await table.parseDomContent();
       const rows = [];
@@ -33,7 +52,17 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
           $(el).remove();
         }
 
-        rows.push({
+        const rowObject: {
+          id: string;
+          description: string;
+          jobGroups: string[];
+          recordCount: string;
+          memoryStatus: string;
+          jobState: string;
+          datafeedState: string;
+          latestTimestamp?: string;
+          spaces?: string[];
+        } = {
           id: $tr.findTestSubject('mlJobListColumnId').find('.euiTableCellContent').text().trim(),
           description: $description
             .text()
@@ -60,12 +89,33 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
             .find('.euiTableCellContent')
             .text()
             .trim(),
-          latestTimestamp: $tr
+        };
+
+        if (tableEnvironment === 'mlAnomalyDetection') {
+          const latestTimestamp = $tr
             .findTestSubject('mlJobListColumnLatestTimestamp')
             .find('.euiTableCellContent')
             .text()
-            .trim(),
-        });
+            .trim();
+
+          rowObject.latestTimestamp = latestTimestamp;
+        }
+
+        if (tableEnvironment === 'stackMgmtJobList') {
+          const $spaces = $tr
+            .findTestSubject('mlJobListColumnSpaces')
+            .find('.euiTableCellContent')
+            .find('.euiAvatar--space');
+          const spaces = [];
+          for (const el of $spaces.toArray()) {
+            // extract the space id from data-test-subj and add to list
+            spaces.push($(el).attr('data-test-subj').replace('space-avatar-', ''));
+          }
+
+          rowObject.spaces = spaces;
+        }
+
+        rows.push(rowObject);
       }
 
       return rows;
@@ -141,6 +191,14 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       });
     }
 
+    public async openAnnotationsTab<T>(jobId: string) {
+      await retry.tryForTime(10000, async () => {
+        await this.ensureDetailsOpen(jobId);
+        await testSubjects.click(this.detailsSelector(jobId, 'mlJobListTab-annotations'));
+        await testSubjects.existOrFail('mlAnnotationsTable');
+      });
+    }
+
     public async waitForRefreshButtonLoaded() {
       await testSubjects.existOrFail('~mlRefreshJobListButton', { timeout: 10 * 1000 });
       await testSubjects.existOrFail('mlRefreshJobListButton loaded', { timeout: 30 * 1000 });
@@ -169,18 +227,24 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       const filteredRows = rows.filter((row) => row.id === filter);
       expect(filteredRows).to.have.length(
         expectedRowCount,
-        `Filtered AD job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
+        `Filtered AD job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${JSON.stringify(
+          filteredRows
+        )}')`
       );
     }
 
     public async assertJobRowFields(jobId: string, expectedRow: object) {
-      await this.refreshJobList();
-      const rows = await this.parseJobTable();
-      const jobRow = rows.filter((row) => row.id === jobId)[0];
-      expect(jobRow).to.eql(
-        expectedRow,
-        `Expected job row to be '${JSON.stringify(expectedRow)}' (got '${JSON.stringify(jobRow)}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        await this.refreshJobList();
+        const rows = await this.parseJobTable();
+        const jobRow = rows.filter((row) => row.id === jobId)[0];
+        expect(jobRow).to.eql(
+          expectedRow,
+          `Expected job row to be '${JSON.stringify(expectedRow)}' (got '${JSON.stringify(
+            jobRow
+          )}')`
+        );
+      });
     }
 
     public async assertJobRowDetailsCounts(
@@ -307,6 +371,22 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonCloneJob');
       await testSubjects.existOrFail('~mlPageJobWizard');
+    }
+
+    public async clickCloneJobActionWhenNoDataViewExists(jobId: string) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      await testSubjects.click('mlActionButtonCloneJob');
+      await this.assertNoDataViewForCloneJobWarningToastExist();
+    }
+
+    public async assertNoDataViewForCloneJobWarningToastExist() {
+      await testSubjects.existOrFail('mlCloneJobNoDataViewExistsWarningToast', { timeout: 5000 });
+    }
+
+    public async clickEditJobAction(jobId: string) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      await testSubjects.click('mlActionButtonEditJob');
+      await testSubjects.existOrFail('mlJobEditFlyout');
     }
 
     public async clickDeleteJobAction(jobId: string) {
@@ -453,6 +533,205 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
           });
         }
       });
+    }
+
+    public async openEditCustomUrlsForJobTab(jobId: string) {
+      await this.clickEditJobAction(jobId);
+      // click Custom URLs tab
+      await testSubjects.click('mlEditJobFlyout-customUrls');
+      await this.ensureEditCustomUrlTabOpen();
+    }
+
+    public async ensureEditCustomUrlTabOpen() {
+      await testSubjects.existOrFail('mlJobOpenCustomUrlFormButton', { timeout: 5000 });
+    }
+
+    public async closeEditJobFlyout() {
+      if (await testSubjects.exists('mlEditJobFlyoutCloseButton')) {
+        await testSubjects.click('mlEditJobFlyoutCloseButton');
+        await testSubjects.missingOrFail('mlJobEditFlyout');
+      }
+    }
+
+    public async saveEditJobFlyoutChanges() {
+      await testSubjects.click('mlEditJobFlyoutSaveButton');
+      await testSubjects.missingOrFail('mlJobEditFlyout', { timeout: 5000 });
+    }
+
+    public async clickOpenCustomUrlEditor() {
+      await this.ensureEditCustomUrlTabOpen();
+      await testSubjects.click('mlJobOpenCustomUrlFormButton');
+      await testSubjects.existOrFail('mlJobCustomUrlForm');
+    }
+
+    public async addDiscoverCustomUrl(
+      jobId: string,
+      customUrl: {
+        label: string;
+        indexPattern: string;
+        queryEntityFieldNames: string[];
+        timeRange: TimeRangeType;
+        timeRangeInterval?: string;
+      }
+    ) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.closeEditJobFlyout();
+        await this.openEditCustomUrlsForJobTab(jobId);
+
+        const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+
+        // Fill-in the form
+        await this.clickOpenCustomUrlEditor();
+        await customUrls.setCustomUrlLabel(customUrl.label);
+        await mlCommonUI.selectRadioGroupValue(
+          `mlJobCustomUrlLinkToTypeInput`,
+          URL_TYPE.KIBANA_DISCOVER
+        );
+        await mlCommonUI.selectSelectValueByVisibleText(
+          'mlJobCustomUrlDiscoverIndexPatternInput',
+          customUrl.indexPattern
+        );
+        await customUrls.setCustomUrlQueryEntityFieldNames(customUrl.queryEntityFieldNames);
+        await mlCommonUI.selectSelectValueByVisibleText(
+          'mlJobCustomUrlTimeRangeInput',
+          customUrl.timeRange
+        );
+        if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
+          await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
+        }
+
+        // Save custom URL
+        await retry.tryForTime(5000, async () => {
+          await testSubjects.click('mlJobAddCustomUrl');
+          const expectedIndex = existingCustomUrls.length;
+          await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+        });
+      });
+
+      // Save the job
+      await this.saveEditJobFlyoutChanges();
+    }
+
+    public async addDashboardCustomUrl(
+      jobId: string,
+      customUrl: {
+        label: string;
+        dashboardName: string;
+        queryEntityFieldNames: string[];
+        timeRange: TimeRangeType;
+        timeRangeInterval?: string;
+      }
+    ) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.closeEditJobFlyout();
+        await this.openEditCustomUrlsForJobTab(jobId);
+
+        const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+
+        // Fill-in the form
+        await this.clickOpenCustomUrlEditor();
+        await customUrls.setCustomUrlLabel(customUrl.label);
+        await mlCommonUI.selectRadioGroupValue(
+          `mlJobCustomUrlLinkToTypeInput`,
+          URL_TYPE.KIBANA_DASHBOARD
+        );
+        await mlCommonUI.selectSelectValueByVisibleText(
+          'mlJobCustomUrlDashboardNameInput',
+          customUrl.dashboardName
+        );
+        await customUrls.setCustomUrlQueryEntityFieldNames(customUrl.queryEntityFieldNames);
+        await mlCommonUI.selectSelectValueByVisibleText(
+          'mlJobCustomUrlTimeRangeInput',
+          customUrl.timeRange
+        );
+        if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
+          await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
+        }
+
+        // Save custom URL
+        await retry.tryForTime(5000, async () => {
+          await testSubjects.click('mlJobAddCustomUrl');
+          const expectedIndex = existingCustomUrls.length;
+          await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+        });
+      });
+
+      // Save the job
+      await this.saveEditJobFlyoutChanges();
+    }
+
+    public async addOtherTypeCustomUrl(jobId: string, customUrl: { label: string; url: string }) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.closeEditJobFlyout();
+        await this.openEditCustomUrlsForJobTab(jobId);
+
+        const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+
+        // Fill-in the form
+        await this.clickOpenCustomUrlEditor();
+        await customUrls.setCustomUrlLabel(customUrl.label);
+        await mlCommonUI.selectRadioGroupValue(`mlJobCustomUrlLinkToTypeInput`, URL_TYPE.OTHER);
+        await customUrls.setCustomUrlOtherTypeUrl(customUrl.url);
+
+        // Save custom URL
+        await retry.tryForTime(5000, async () => {
+          await testSubjects.click('mlJobAddCustomUrl');
+          const expectedIndex = existingCustomUrls.length;
+          await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+        });
+      });
+
+      // Save the job
+      await this.saveEditJobFlyoutChanges();
+    }
+
+    public async editCustomUrl(
+      jobId: string,
+      indexInList: number,
+      customUrl: { label: string; url: string }
+    ) {
+      await this.openEditCustomUrlsForJobTab(jobId);
+      await customUrls.editCustomUrlLabel(indexInList, customUrl.label);
+      await customUrls.editCustomUrlUrlValue(indexInList, customUrl.url);
+
+      // Save the edit
+      await this.saveEditJobFlyoutChanges();
+    }
+
+    public async deleteCustomUrl(jobId: string, indexInList: number) {
+      await this.openEditCustomUrlsForJobTab(jobId);
+      const beforeCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+      await customUrls.deleteCustomUrl(indexInList);
+
+      // Save the edit and check the custom URL has been deleted.
+      await testSubjects.click('mlEditJobFlyoutSaveButton');
+      await this.openEditCustomUrlsForJobTab(jobId);
+      await customUrls.assertCustomUrlsLength(beforeCustomUrls.length - 1);
+      await this.closeEditJobFlyout();
+    }
+
+    public async openTestCustomUrl(jobId: string, indexInList: number) {
+      await this.openEditCustomUrlsForJobTab(jobId);
+      await customUrls.clickTestCustomUrl(indexInList);
+    }
+
+    public async testDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
+      await customUrls.assertDiscoverCustomUrlAction(expectedHitCountFormatted);
+    }
+
+    public async testDashboardCustomUrlAction(expectedPanelCount: number) {
+      await customUrls.assertDashboardCustomUrlAction(expectedPanelCount);
+    }
+
+    public async testOtherTypeCustomUrlAction(
+      jobId: string,
+      indexInList: number,
+      expectedUrl: string
+    ) {
+      // Can't test the contents of the external page, so just check the expected URL.
+      await this.openEditCustomUrlsForJobTab(jobId);
+      await customUrls.assertCustomUrlUrlValue(indexInList, expectedUrl);
+      await this.closeEditJobFlyout();
     }
   })();
 }

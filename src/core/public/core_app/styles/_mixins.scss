@@ -1,3 +1,5 @@
+@import '../../variables';
+
 @mixin flexParent($grow: 1, $shrink: 1, $basis: auto, $direction: column) {
   flex: $grow $shrink $basis;
   display: flex;
@@ -81,6 +83,12 @@
   opacity: 0;
   overflow: auto;
   animation: kibanaFullScreenGraphics_FadeIn $euiAnimSpeedExtraSlow $euiAnimSlightResistance 0s forwards;
+
+  @at-root {
+    .kbnBody--hasHeaderBanner & {
+      top: $kbnHeaderBannerHeight;
+    }
+  }
 
   &::before {
     position: absolute;

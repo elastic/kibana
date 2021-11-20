@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, get, pick } from 'lodash';
-
-import { WEEK } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
 import { validateId } from './validate_id';
 import { validateIndexPattern } from './validate_index_pattern';
@@ -65,7 +64,7 @@ export const stepIdToStepConfigMap = {
         // a few hours as they're being restarted. A delay of 1d would allow them that period to reboot
         // and the "expense" is pretty negligible in most cases: 1 day of extra non-rolled-up data.
         rollupDelay: '1d',
-        cronFrequency: WEEK,
+        cronFrequency: 'WEEK',
         fieldToPreferredValueMap: {},
       };
 

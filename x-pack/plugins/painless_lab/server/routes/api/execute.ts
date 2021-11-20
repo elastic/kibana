@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
@@ -25,6 +27,7 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
       try {
         const client = ctx.core.elasticsearch.client.asCurrentUser;
         const response = await client.scriptsPainlessExecute({
+          // @ts-expect-error `ExecutePainlessScriptRequest.body` does not allow `string`
           body,
         });
 

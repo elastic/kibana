@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
@@ -19,12 +21,12 @@ import {
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkDetailsQuery';
+export const ID = 'networkDetailsQuery';
 
 export interface NetworkDetailsArgs {
   id: string;
@@ -51,15 +53,14 @@ export const useNetworkDetails = ({
   skip,
   ip,
 }: UseNetworkDetails): [boolean, NetworkDetailsArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
 
-  const [
-    networkDetailsRequest,
-    setNetworkDetailsRequest,
-  ] = useState<NetworkDetailsRequestOptions | null>(null);
+  const [networkDetailsRequest, setNetworkDetailsRequest] =
+    useState<NetworkDetailsRequestOptions | null>(null);
 
   const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
     networkDetails: {},
@@ -71,19 +72,17 @@ export const useNetworkDetails = ({
     isInspected: false,
     refetch: refetch.current,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const networkDetailsSearch = useCallback(
     (request: NetworkDetailsRequestOptions | null) => {
       if (request == null || skip) {
         return;
       }
-
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<NetworkDetailsRequestOptions, NetworkDetailsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
@@ -91,44 +90,35 @@ export const useNetworkDetails = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setNetworkDetailsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    networkDetails: response.networkDetails,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    refetch: refetch.current,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setNetworkDetailsResponse((prevResponse) => ({
+                  ...prevResponse,
+                  networkDetails: response.networkDetails,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  refetch: refetch.current,
+                }));
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_DETAILS);
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                addWarning(i18n.ERROR_NETWORK_DETAILS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_NETWORK_DETAILS,
-                  text: msg.message,
-                });
-              }
+              setLoading(false);
+              addError(msg, {
+                title: i18n.FAIL_NETWORK_DETAILS,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
@@ -150,6 +140,10 @@ export const useNetworkDetails = ({
 
   useEffect(() => {
     networkDetailsSearch(networkDetailsRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [networkDetailsRequest, networkDetailsSearch]);
 
   return [loading, networkDetailsResponse];

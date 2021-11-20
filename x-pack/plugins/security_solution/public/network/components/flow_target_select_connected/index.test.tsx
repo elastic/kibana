@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -11,7 +12,7 @@ import { MemoryRouter } from 'react-router-dom';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 import { FlowTargetSelectConnectedComponent } from './index';
-import { FlowTarget } from '../../../graphql/types';
+import { FlowTarget } from '../../../../common/search_strategy';
 
 describe('Flow Target Select Connected', () => {
   test('renders correctly against snapshot flowTarget source', () => {

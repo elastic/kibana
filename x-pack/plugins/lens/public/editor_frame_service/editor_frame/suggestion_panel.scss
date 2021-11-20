@@ -1,10 +1,6 @@
 @import '../../mixins';
 @import '../../variables';
 
-.lnsSuggestionPanel__title {
-  margin-left: $euiSizeXS / 2;
-}
-
 .lnsSuggestionPanel__suggestions {
   @include euiScrollBar;
   @include lnsOverflowShadowHorizontal;
@@ -16,7 +12,10 @@
   // Padding / negative margins to make room for overflow shadow
   padding-left: $euiSizeXS;
   margin-left: -$euiSizeXS;
-  padding-bottom: $euiSizeXS;
+}
+
+.lnsSuggestionPanel {
+  padding-bottom: $euiSizeS;
 }
 
 .lnsSuggestionPanel__button {
@@ -27,6 +26,7 @@
   margin-right: $euiSizeS;
   margin-left: $euiSizeXS / 2;
   margin-bottom: $euiSizeXS / 2;
+  box-shadow: none !important; // sass-lint:disable-line no-important
 
   &:focus {
     @include euiFocusRing;
@@ -40,7 +40,7 @@
 
 .lnsSuggestionPanel__button-isSelected {
   background-color: $euiColorLightestShade !important; // sass-lint:disable-line no-important
-  border-color: $euiColorMediumShade;
+  border-color: $euiColorMediumShade !important; // sass-lint:disable-line no-important
 
   &:not(:focus) {
     box-shadow: none !important; // sass-lint:disable-line no-important

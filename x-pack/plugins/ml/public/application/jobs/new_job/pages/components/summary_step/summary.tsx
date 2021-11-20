@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,6 +31,7 @@ import { DetectorChart } from './components/detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
 import { StartDatafeedSwitch } from './components/start_datafeed_switch';
+import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
   convertToAdvancedJob,
@@ -47,14 +50,14 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   const navigateToPath = useNavigateToPath();
 
-  const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } =
+    useContext(JobCreatorContext);
   const [progress, setProgress] = useState(resultsLoader.progress);
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
   const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
   const [startDatafeed, setStartDatafeed] = useState(true);
+  const [showJobAssignWarning, setShowJobAssignWarning] = useState(false);
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);
   const jsonEditorMode = isAdvanced ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
@@ -62,6 +65,20 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
   }, []);
+
+  useEffect(() => {
+    let s: Subscription | null = null;
+    if (jobRunner !== null) {
+      s = jobRunner.subscribeToJobAssignment((assigned: boolean) =>
+        setShowJobAssignWarning(!assigned)
+      );
+    }
+    return () => {
+      if (s !== null) {
+        s?.unsubscribe();
+      }
+    };
+  }, [jobRunner]);
 
   async function start() {
     setCreatingJob(true);
@@ -155,6 +172,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           )}
 
           <EuiHorizontalRule />
+          {showJobAssignWarning && <NewJobAwaitingNodeWarning jobType="anomaly-detector" />}
           <EuiFlexGroup>
             {progress < 100 && (
               <Fragment>

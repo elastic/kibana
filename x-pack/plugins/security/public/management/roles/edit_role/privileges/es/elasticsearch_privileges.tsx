@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -15,16 +16,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import React, { Component, Fragment } from 'react';
 import type { DocLinksStart } from 'src/core/public';
-import { Role, BuiltinESPrivileges } from '../../../../../../common/model';
-import { SecurityLicense } from '../../../../../../common/licensing';
-import { IndicesAPIClient } from '../../../indices_api_client';
-import { RoleValidator } from '../../validate_role';
+
+import type { SecurityLicense } from '../../../../../../common/licensing';
+import type { BuiltinESPrivileges, Role } from '../../../../../../common/model';
+import type { IndicesAPIClient } from '../../../indices_api_client';
 import { CollapsiblePanel } from '../../collapsible_panel';
+import type { RoleValidator } from '../../validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
 
@@ -173,7 +176,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
         <EuiHorizontalRule />
 
         {this.props.editable && (
-          <EuiButton iconType={'plusInCircleFilled'} onClick={this.addIndexPrivilege}>
+          <EuiButton iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
             <FormattedMessage
               id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
               defaultMessage="Add index privilege"

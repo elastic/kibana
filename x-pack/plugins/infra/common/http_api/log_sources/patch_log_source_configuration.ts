@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
 import { badRequestErrorRT, forbiddenErrorRT } from '../shared';
 import { getLogSourceConfigurationSuccessResponsePayloadRT } from './get_log_source_configuration';
-import { logSourceConfigurationPropertiesRT } from './log_source_configuration';
+import { logSourceConfigurationPropertiesRT } from '../../log_sources/log_source_configuration';
 
 /**
  * request
@@ -43,7 +44,8 @@ export type PatchLogSourceConfigurationRequestBody = rt.TypeOf<
  * response
  */
 
-export const patchLogSourceConfigurationSuccessResponsePayloadRT = getLogSourceConfigurationSuccessResponsePayloadRT;
+export const patchLogSourceConfigurationSuccessResponsePayloadRT =
+  getLogSourceConfigurationSuccessResponsePayloadRT;
 
 export type PatchLogSourceConfigurationSuccessResponsePayload = rt.TypeOf<
   typeof patchLogSourceConfigurationSuccessResponsePayloadRT

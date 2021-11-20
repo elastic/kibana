@@ -1,29 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { PINGS_DATE_RANGE_START, PINGS_DATE_RANGE_END } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { API_URLS } from '../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('get_all_pings', () => {
-    const archive = 'uptime/pings';
+    const archive = 'x-pack/test/functional/es_archives/uptime/pings';
 
     before('load heartbeat data', async () => await esArchiver.load(archive));
     after('unload heartbeat data', async () => await esArchiver.unload(archive));
 
     it('should get all pings stored in index', async () => {
       const { body: apiResponse } = await supertest
-        .get(
-          `/api/uptime/pings?sort=desc&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`
-        )
+        .get(API_URLS.PINGS)
+        .query({
+          sort: 'desc',
+          from: PINGS_DATE_RANGE_START,
+          to: PINGS_DATE_RANGE_END,
+        })
         .expect(200);
 
       expect(apiResponse.total).to.be(2);
@@ -33,7 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should sort pings according to timestamp', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/uptime/pings?sort=asc&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`)
+        .get(API_URLS.PINGS)
+        .query({
+          sort: 'asc',
+          from: PINGS_DATE_RANGE_START,
+          to: PINGS_DATE_RANGE_END,
+        })
         .expect(200);
 
       expect(apiResponse.total).to.be(2);
@@ -44,9 +54,13 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return results of n length', async () => {
       const { body: apiResponse } = await supertest
-        .get(
-          `/api/uptime/pings?sort=desc&size=1&from=${PINGS_DATE_RANGE_START}&to=${PINGS_DATE_RANGE_END}`
-        )
+        .get(API_URLS.PINGS)
+        .query({
+          sort: 'desc',
+          size: 1,
+          from: PINGS_DATE_RANGE_START,
+          to: PINGS_DATE_RANGE_END,
+        })
         .expect(200);
 
       expect(apiResponse.total).to.be(2);
@@ -58,7 +72,8 @@ export default function ({ getService }: FtrProviderContext) {
       const from = moment('2002-01-01').valueOf();
       const to = moment('2002-01-02').valueOf();
       const { body: apiResponse } = await supertest
-        .get(`/api/uptime/pings?from=${from}&to=${to}`)
+        .get(API_URLS.PINGS)
+        .query({ from, to })
         .expect(200);
 
       expect(apiResponse.total).to.be(0);

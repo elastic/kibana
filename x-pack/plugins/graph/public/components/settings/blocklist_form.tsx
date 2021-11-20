@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,14 +17,15 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { SettingsProps } from './settings';
+import { SettingsWorkspaceProps } from './settings';
 import { LegacyIcon } from '../legacy_icon';
 import { useListKeys } from './use_list_keys';
 
 export function BlocklistForm({
   blocklistedNodes,
-  unblocklistNode,
-}: Pick<SettingsProps, 'blocklistedNodes' | 'unblocklistNode'>) {
+  unblockNode,
+  unblockAll,
+}: Pick<SettingsWorkspaceProps, 'blocklistedNodes' | 'unblockNode' | 'unblockAll'>) {
   const getListKey = useListKeys(blocklistedNodes || []);
   return (
     <>
@@ -45,7 +47,7 @@ export function BlocklistForm({
         />
       )}
       <EuiSpacer />
-      {blocklistedNodes && unblocklistNode && blocklistedNodes.length > 0 && (
+      {blocklistedNodes && blocklistedNodes.length > 0 && (
         <>
           <EuiListGroup bordered maxWidth={false}>
             {blocklistedNodes.map((node) => (
@@ -62,9 +64,7 @@ export function BlocklistForm({
                     defaultMessage: 'Delete',
                   }),
                   color: 'danger',
-                  onClick: () => {
-                    unblocklistNode(node);
-                  },
+                  onClick: () => unblockNode(node),
                 }}
               />
             ))}
@@ -76,11 +76,7 @@ export function BlocklistForm({
             iconType="trash"
             size="s"
             fill
-            onClick={() => {
-              blocklistedNodes.forEach((node) => {
-                unblocklistNode(node);
-              });
-            }}
+            onClick={() => unblockAll()}
           >
             {i18n.translate('xpack.graph.settings.blocklist.clearButtonLabel', {
               defaultMessage: 'Delete all',

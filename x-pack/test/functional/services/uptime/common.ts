@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -41,7 +42,7 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       await browser.pressKeys(browser.keys.ENTER);
     },
     async setFilterText(filterQuery: string) {
-      await this.setKueryBarText('xpack.uptime.filterBar', filterQuery);
+      await this.setKueryBarText('queryInput', filterQuery);
     },
     async goToNextPage() {
       await testSubjects.click('xpack.uptime.monitorList.nextButton', 5000);
@@ -69,14 +70,25 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
         await this.setStatusFilterDown();
       }
     },
-    async selectFilterItem(filterType: string, option: string) {
-      const popoverId = `filter-popover_${filterType}`;
-      const optionId = `filter-popover-item_${option}`;
-      await testSubjects.existOrFail(popoverId);
-      await testSubjects.click(popoverId);
-      await testSubjects.existOrFail(optionId);
-      await testSubjects.click(optionId);
-      await testSubjects.click(popoverId);
+    async selectFilterItem(filterType: string, itemArg: string | string[]) {
+      const itemList = Array.isArray(itemArg) ? itemArg : [itemArg];
+      const filterPopoverButton = await find.byCssSelector(
+        `[aria-label="expands filter group for ${filterType} filter"]`
+      );
+      await filterPopoverButton.click();
+      await this.clickFilterItems(itemList);
+      return this.applyFilterItems(filterType);
+    },
+    async clickFilterItems(itemList: string[]) {
+      for (const title of itemList) {
+        await find.clickByCssSelector(`li[title="${title}"]`);
+      }
+    },
+    async applyFilterItems(filterType: string) {
+      const applyButton = await find.byCssSelector(
+        `[aria-label="Apply the selected filters for ${filterType}"]`
+      );
+      await applyButton.click();
     },
     async getSnapshotCount() {
       return {
@@ -102,6 +114,9 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
         }
         await testSubjects.missingOrFail('data-missing');
       });
+    },
+    async hasMappingsError() {
+      return testSubjects.exists('xpack.uptime.mappingsErrorPage');
     },
   };
 }

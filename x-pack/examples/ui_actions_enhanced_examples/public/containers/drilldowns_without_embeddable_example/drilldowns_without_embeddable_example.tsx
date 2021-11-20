@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -31,7 +32,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
   const { plugins, managerWithoutEmbeddable } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
-  const viewRef = React.useRef<'create' | 'manage'>('create');
+  const viewRef = React.useRef<'/create' | '/manage'>('/create');
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -42,7 +43,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
           icon: 'plusInCircle',
           onClick: () => {
             setOpenPopup(false);
-            viewRef.current = 'create';
+            viewRef.current = '/create';
             setShowManager((x) => !x);
           },
         },
@@ -51,7 +52,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
           icon: 'list',
           onClick: () => {
             setOpenPopup(false);
-            viewRef.current = 'manage';
+            viewRef.current = '/manage';
             setShowManager((x) => !x);
           },
         },
@@ -100,7 +101,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
         <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            color="secondary"
+            color="success"
             fill
             iconType="play"
             iconSide="left"
@@ -115,11 +116,12 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
 
       {showManager && (
         <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
-          <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
-            onClose={() => setShowManager(false)}
-            viewMode={viewRef.current}
+          <plugins.uiActionsEnhanced.DrilldownManager
+            key={viewRef.current}
+            initialRoute={viewRef.current}
             dynamicActionManager={managerWithoutEmbeddable}
             triggers={[SAMPLE_APP1_CLICK_TRIGGER]}
+            onClose={() => setShowManager(false)}
           />
         </EuiFlyout>
       )}

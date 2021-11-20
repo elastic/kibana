@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { FC } from 'react';
 import {
-  EuiOverlayMask,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -47,80 +46,78 @@ export const ExportModal: FC<ExportModalProps> = ({
   onIncludeReferenceChange,
 }) => {
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={onCancel}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
-              defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-              values={{
-                filteredItemCount,
-              }}
-            />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
-                defaultMessage="Select which types to export"
-              />
-            }
-            labelType="legend"
-          >
-            <EuiCheckboxGroup
-              options={options}
-              idToSelectedMap={selectedOptions}
-              onChange={(optionId) => {
-                onSelectedOptionsChange({
-                  ...selectedOptions,
-                  ...{
-                    [optionId]: !selectedOptions[optionId],
-                  },
-                });
-              }}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiSwitch
-            name="includeReferencesDeep"
-            label={
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                defaultMessage="Include related objects"
-              />
-            }
-            checked={includeReferences}
-            onChange={() => onIncludeReferenceChange(!includeReferences)}
+    <EuiModal onClose={onCancel}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
+            defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+            values={{
+              filteredItemCount,
+            }}
           />
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onCancel}>
-                    <FormattedMessage
-                      id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
-                      defaultMessage="Cancel"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={onExport}>
-                    <FormattedMessage
-                      id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
-                      defaultMessage="Export all"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
+              defaultMessage="Select which types to export"
+            />
+          }
+          labelType="legend"
+        >
+          <EuiCheckboxGroup
+            options={options}
+            idToSelectedMap={selectedOptions}
+            onChange={(optionId) => {
+              onSelectedOptionsChange({
+                ...selectedOptions,
+                ...{
+                  [optionId]: !selectedOptions[optionId],
+                },
+              });
+            }}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiSwitch
+          name="includeReferencesDeep"
+          label={
+            <FormattedMessage
+              id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+              defaultMessage="Include related objects"
+            />
+          }
+          checked={includeReferences}
+          onChange={() => onIncludeReferenceChange(!includeReferences)}
+        />
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onCancel}>
+                  <FormattedMessage
+                    id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={onExport}>
+                  <FormattedMessage
+                    id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
+                    defaultMessage="Export all"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

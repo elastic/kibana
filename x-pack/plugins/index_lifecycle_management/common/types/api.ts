@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AnyDataRole } from '.';
@@ -18,6 +19,16 @@ export interface ListNodesRouteResponse {
    */
   isUsingDeprecatedDataRoleConfig: boolean;
 }
+
+export interface NodesDetails {
+  nodeId: string;
+  stats: {
+    name: string;
+    host: string;
+  };
+}
+
+export type NodesDetailsResponse = NodesDetails[];
 
 export interface ListSnapshotReposResponse {
   /**

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { coreMock } from 'src/core/public/mocks';
@@ -55,7 +56,8 @@ describe('Metrics UI Observability Homepage Functions', () => {
       const fetchData = createMetricsFetchData(mockedGetStartServices);
       const endTime = moment('2020-07-02T13:25:11.629Z');
       const startTime = endTime.clone().subtract(1, 'h');
-      const bucketSize = '300s';
+      const bucketSize = 300;
+      const intervalString = '300s';
       const response = await fetchData({
         absoluteTime: {
           start: startTime.valueOf(),
@@ -66,11 +68,14 @@ describe('Metrics UI Observability Homepage Functions', () => {
           end: 'now',
         },
         bucketSize,
+        intervalString,
       });
       expect(core.http.post).toHaveBeenCalledTimes(1);
-      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview', {
+      expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview/top', {
         body: JSON.stringify({
           sourceId: 'default',
+          bucketSize: intervalString,
+          size: 5,
           timerange: {
             from: startTime.valueOf(),
             to: endTime.valueOf(),

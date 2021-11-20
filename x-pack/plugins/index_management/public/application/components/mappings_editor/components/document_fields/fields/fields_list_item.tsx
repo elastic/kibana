@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { forwardRef } from 'react';
 import classNames from 'classnames';
 import {
@@ -129,12 +131,8 @@ function FieldListItemComponent(
       return null;
     }
 
-    const {
-      addMultiFieldButtonLabel,
-      addPropertyButtonLabel,
-      editButtonLabel,
-      deleteButtonLabel,
-    } = i18nTexts;
+    const { addMultiFieldButtonLabel, addPropertyButtonLabel, editButtonLabel, deleteButtonLabel } =
+      i18nTexts;
 
     return (
       <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">

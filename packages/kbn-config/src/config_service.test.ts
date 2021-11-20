@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
-import { mockApplyDeprecations } from './config_service.test.mocks';
+import { mockApplyDeprecations, mockedChangedPaths } from './config_service.test.mocks';
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
-import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 
+import type { ConfigDeprecationContext } from './deprecation';
 import { ConfigService, Env, RawPackageInfo } from '.';
 
 import { getEnvOptions } from './__mocks__/env';
@@ -37,6 +38,7 @@ const getRawConfigProvider = (rawConfig: Record<string, any>) =>
 
 beforeEach(() => {
   logger = loggerMock.create();
+  mockApplyDeprecations.mockClear();
 });
 
 test('returns config at path as observable', async () => {
@@ -72,10 +74,10 @@ test('throws if config at path does not match schema', async () => {
     );
 
   await expect(valuesReceived).toMatchInlineSnapshot(`
-      Array [
-        [Error: [config validation of [key]]: expected value of type [string] but got [number]],
-      ]
-  `);
+                Array [
+                  [Error: [config validation of [key]]: expected value of type [string] but got [number]],
+                ]
+          `);
 });
 
 test('re-validate config when updated', async () => {
@@ -97,33 +99,12 @@ test('re-validate config when updated', async () => {
 
   rawConfig$.next({ key: 123 });
 
-  await expect(valuesReceived).toMatchInlineSnapshot(`
-        Array [
-          "value",
-          [Error: [config validation of [key]]: expected value of type [string] but got [number]],
-        ]
+  expect(valuesReceived).toMatchInlineSnapshot(`
+    Array [
+      "value",
+      [Error: [config validation of [key]]: expected value of type [string] but got [number]],
+    ]
   `);
-});
-
-test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
-  const rawConfig = getRawConfigProvider({});
-  const configService = new ConfigService(rawConfig, defaultEnv, logger);
-
-  const value$ = configService.optionalAtPath('unique-name');
-  const value = await value$.pipe(first()).toPromise();
-
-  expect(value).toBeUndefined();
-});
-
-test('returns observable config at optional path if it exists', async () => {
-  const rawConfig = getRawConfigProvider({ value: 'bar' });
-  const configService = new ConfigService(rawConfig, defaultEnv, logger);
-  await configService.setSchema('value', schema.string());
-
-  const value$ = configService.optionalAtPath('value');
-  const value: any = await value$.pipe(first()).toPromise();
-
-  expect(value).toBe('bar');
 });
 
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
@@ -209,34 +190,38 @@ test('flags schema paths as handled when registering a schema', async () => {
 
 test('tracks unhandled paths', async () => {
   const initialConfig = {
-    bar: {
-      deep1: {
-        key: '123',
-      },
-      deep2: {
-        key: '321',
-      },
+    service: {
+      string: 'str',
+      number: 42,
     },
-    foo: 'value',
-    quux: {
-      deep1: {
-        key: 'hello',
-      },
-      deep2: {
-        key: 'world',
-      },
+    plugin: {
+      foo: 'bar',
+    },
+    unknown: {
+      hello: 'dolly',
+      number: 9000,
     },
   };
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-
-  configService.atPath('foo');
-  configService.atPath(['bar', 'deep2']);
+  await configService.setSchema(
+    'service',
+    schema.object({
+      string: schema.string(),
+      number: schema.number(),
+    })
+  );
+  await configService.setSchema(
+    'plugin',
+    schema.object({
+      foo: schema.string(),
+    })
+  );
 
   const unused = await configService.getUnusedPaths();
 
-  expect(unused).toEqual(['bar.deep1.key', 'quux.deep1.key', 'quux.deep2.key']);
+  expect(unused).toEqual(['unknown.hello', 'unknown.number']);
 });
 
 test('correctly passes context', async () => {
@@ -276,42 +261,6 @@ test('correctly passes context', async () => {
   expect(await value$.pipe(first()).toPromise()).toMatchSnapshot();
 });
 
-test('handles enabled path, but only marks the enabled path as used', async () => {
-  const initialConfig = {
-    pid: {
-      enabled: true,
-      file: '/some/file.pid',
-    },
-  };
-
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
-  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-
-  const isEnabled = await configService.isEnabledAtPath('pid');
-  expect(isEnabled).toBe(true);
-
-  const unusedPaths = await configService.getUnusedPaths();
-  expect(unusedPaths).toEqual(['pid.file']);
-});
-
-test('handles enabled path when path is array', async () => {
-  const initialConfig = {
-    pid: {
-      enabled: true,
-      file: '/some/file.pid',
-    },
-  };
-
-  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
-  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-
-  const isEnabled = await configService.isEnabledAtPath(['pid']);
-  expect(isEnabled).toBe(true);
-
-  const unusedPaths = await configService.getUnusedPaths();
-  expect(unusedPaths).toEqual(['pid.file']);
-});
-
 test('handles disabled path and marks config as used', async () => {
   const initialConfig = {
     pid: {
@@ -322,6 +271,14 @@ test('handles disabled path and marks config as used', async () => {
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+
+  configService.setSchema(
+    'pid',
+    schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      file: schema.string(),
+    })
+  );
 
   const isEnabled = await configService.isEnabledAtPath('pid');
   expect(isEnabled).toBe(false);
@@ -339,25 +296,21 @@ test('does not throw if schema does not define "enabled" schema', async () => {
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-  await expect(
+  expect(
     configService.setSchema(
       'pid',
       schema.object({
         file: schema.string(),
       })
     )
-  ).resolves.toBeUndefined();
+  ).toBeUndefined();
 
   const value$ = configService.atPath('pid');
   const value: any = await value$.pipe(first()).toPromise();
   expect(value.enabled).toBe(undefined);
-
-  const valueOptional$ = configService.optionalAtPath('pid');
-  const valueOptional: any = await valueOptional$.pipe(first()).toPromise();
-  expect(valueOptional.enabled).toBe(undefined);
 });
 
-test('treats config as enabled if config path is not present in config', async () => {
+test('treats config as enabled if config path is not present in schema', async () => {
   const initialConfig = {};
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
@@ -370,18 +323,58 @@ test('treats config as enabled if config path is not present in config', async (
   expect(unusedPaths).toEqual([]);
 });
 
-test('read "enabled" even if its schema is not present', async () => {
+test('throws if reading "enabled" when it is not present in the schema', async () => {
   const initialConfig = {
     foo: {
-      enabled: true,
+      enabled: false,
     },
   };
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
-  const isEnabled = await configService.isEnabledAtPath('foo');
-  expect(isEnabled).toBe(true);
+  configService.setSchema(
+    'foo',
+    schema.object({
+      bar: schema.maybe(schema.string()),
+    })
+  );
+
+  expect(
+    async () => await configService.isEnabledAtPath('foo')
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"[config validation of [foo].enabled]: definition for this key is missing"`
+  );
+});
+
+test('throws if reading "enabled" when no schema exists', async () => {
+  const initialConfig = {
+    foo: {
+      enabled: false,
+    },
+  };
+
+  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+
+  expect(
+    async () => await configService.isEnabledAtPath('foo')
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`"No validation schema has been defined for [foo]"`);
+});
+
+test('throws if reading any config value when no schema exists', async () => {
+  const initialConfig = {
+    foo: {
+      whatever: 'hi',
+    },
+  };
+
+  const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+
+  expect(
+    async () => await configService.isEnabledAtPath('foo')
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`"No validation schema has been defined for [foo]"`);
 });
 
 test('allows plugins to specify "enabled" flag via validation schema', async () => {
@@ -412,7 +405,7 @@ test('allows plugins to specify "enabled" flag via validation schema', async () 
   expect(await configService.isEnabledAtPath('baz')).toBe(true);
 });
 
-test('does not throw during validation is every schema is valid', async () => {
+test('does not throw during validation if every schema is valid', async () => {
   const rawConfig = getRawConfigProvider({ stringKey: 'foo', numberKey: 42 });
 
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
@@ -422,7 +415,7 @@ test('does not throw during validation is every schema is valid', async () => {
   await expect(configService.validate()).resolves.toBeUndefined();
 });
 
-test('throws during validation is any schema is invalid', async () => {
+test('throws during validation if any schema is invalid', async () => {
   const rawConfig = getRawConfigProvider({ stringKey: 123, numberKey: 42 });
 
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
@@ -437,11 +430,19 @@ test('throws during validation is any schema is invalid', async () => {
 test('logs deprecation warning during validation', async () => {
   const rawConfig = getRawConfigProvider({});
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
-
-  mockApplyDeprecations.mockImplementationOnce((config, deprecations, log) => {
-    log('some deprecation message');
-    log('another deprecation message');
-    return config;
+  mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+    const addDeprecation = createAddDeprecation!('');
+    addDeprecation({
+      configPath: 'test1',
+      message: 'some deprecation message',
+      correctiveActions: { manualSteps: ['do X'] },
+    });
+    addDeprecation({
+      configPath: 'test2',
+      message: 'another deprecation message',
+      correctiveActions: { manualSteps: ['do Y'] },
+    });
+    return { config, changedPaths: mockedChangedPaths };
   });
 
   loggerMock.clear(logger);
@@ -456,4 +457,196 @@ test('logs deprecation warning during validation', async () => {
       ],
     ]
   `);
+});
+
+test('calls `applyDeprecations` with the correct parameters', async () => {
+  const cfg = { foo: { bar: 1 } };
+  const rawConfig = getRawConfigProvider(cfg);
+  const configService = new ConfigService(rawConfig, defaultEnv, logger);
+
+  const context: ConfigDeprecationContext = {
+    branch: defaultEnv.packageInfo.branch,
+    version: defaultEnv.packageInfo.version,
+  };
+
+  const deprecationA = jest.fn();
+  const deprecationB = jest.fn();
+
+  configService.addDeprecationProvider('foo', () => [deprecationA]);
+  configService.addDeprecationProvider('bar', () => [deprecationB]);
+
+  await configService.validate();
+
+  expect(mockApplyDeprecations).toHaveBeenCalledTimes(1);
+  expect(mockApplyDeprecations).toHaveBeenCalledWith(
+    cfg,
+    [
+      {
+        deprecation: deprecationA,
+        path: 'foo',
+        context,
+      },
+      {
+        deprecation: deprecationB,
+        path: 'bar',
+        context,
+      },
+    ],
+    expect.any(Function)
+  );
+});
+
+test('does not log warnings for silent deprecations during validation', async () => {
+  const rawConfig = getRawConfigProvider({});
+  const configService = new ConfigService(rawConfig, defaultEnv, logger);
+
+  mockApplyDeprecations
+    .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+      const addDeprecation = createAddDeprecation!('');
+      addDeprecation({
+        configPath: 'test1',
+        message: 'some deprecation message',
+        correctiveActions: { manualSteps: ['do X'] },
+        silent: true,
+      });
+      addDeprecation({
+        configPath: 'test2',
+        message: 'another deprecation message',
+        correctiveActions: { manualSteps: ['do Y'] },
+      });
+      return { config, changedPaths: mockedChangedPaths };
+    })
+    .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+      const addDeprecation = createAddDeprecation!('');
+      addDeprecation({
+        configPath: 'silent',
+        message: 'I am silent',
+        silent: true,
+        correctiveActions: { manualSteps: ['do Z'] },
+      });
+      return { config, changedPaths: mockedChangedPaths };
+    });
+
+  loggerMock.clear(logger);
+  await configService.validate();
+  expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "another deprecation message",
+      ],
+    ]
+  `);
+  loggerMock.clear(logger);
+  await configService.validate();
+  expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
+});
+
+test('does not log warnings during validation if specifically requested', async () => {
+  const configService = new ConfigService(getRawConfigProvider({}), defaultEnv, logger);
+  loggerMock.clear(logger);
+
+  await configService.validate({ logDeprecations: false });
+
+  expect(mockApplyDeprecations).not.toHaveBeenCalled();
+  expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
+});
+
+describe('atPathSync', () => {
+  test('returns the value at path', async () => {
+    const rawConfig = getRawConfigProvider({ key: 'foo' });
+    const configService = new ConfigService(rawConfig, defaultEnv, logger);
+    const stringSchema = schema.string();
+    await configService.setSchema('key', stringSchema);
+
+    await configService.validate();
+
+    const value = configService.atPathSync('key');
+    expect(value).toBe('foo');
+  });
+
+  test('throws if called before `validate`', async () => {
+    const rawConfig = getRawConfigProvider({ key: 'foo' });
+    const configService = new ConfigService(rawConfig, defaultEnv, logger);
+    const stringSchema = schema.string();
+    await configService.setSchema('key', stringSchema);
+
+    expect(() => configService.atPathSync('key')).toThrowErrorMatchingInlineSnapshot(
+      `"\`atPathSync\` called before config was validated"`
+    );
+  });
+
+  test('returns the last config value', async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
+    const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+
+    const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    await configService.setSchema('key', schema.string());
+
+    await configService.validate();
+
+    expect(configService.atPathSync('key')).toEqual('value');
+
+    rawConfig$.next({ key: 'new-value' });
+
+    expect(configService.atPathSync('key')).toEqual('new-value');
+  });
+});
+
+describe('getHandledDeprecatedConfigs', () => {
+  it('returns all handled deprecated configs', async () => {
+    const rawConfig = getRawConfigProvider({ base: { unused: 'unusedConfig' } });
+    const configService = new ConfigService(rawConfig, defaultEnv, logger);
+
+    configService.addDeprecationProvider('base', ({ unused }) => [unused('unused')]);
+
+    mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+      deprecations.forEach((deprecation) => {
+        const addDeprecation = createAddDeprecation!(deprecation.path);
+        addDeprecation({
+          configPath: 'test1',
+          message: `some deprecation message`,
+          documentationUrl: 'some-url',
+          correctiveActions: { manualSteps: ['do X'] },
+        });
+      });
+      return { config, changedPaths: mockedChangedPaths };
+    });
+
+    await configService.validate();
+
+    expect(configService.getHandledDeprecatedConfigs()).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "base",
+          Array [
+            Object {
+              "configPath": "test1",
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "do X",
+                ],
+              },
+              "documentationUrl": "some-url",
+              "message": "some deprecation message",
+            },
+          ],
+        ],
+      ]
+    `);
+  });
+});
+
+describe('getDeprecatedConfigPath$', () => {
+  it('returns all config paths changes during deprecation', async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
+    const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+
+    const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    await configService.setSchema('key', schema.string());
+    await configService.validate();
+
+    const deprecatedConfigPath$ = configService.getDeprecatedConfigPath$();
+    const deprecatedConfigPath = await deprecatedConfigPath$.pipe(first()).toPromise();
+    expect(deprecatedConfigPath).toEqual(mockedChangedPaths);
+  });
 });

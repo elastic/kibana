@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch } from 'redux';
+import type { Filter, Query } from '@kbn/es-query';
 import { InputsModelId } from './constants';
 import { CONSTANTS } from '../../components/url_state/constants';
-import { Query, Filter, SavedQuery } from '../../../../../../../src/plugins/data/public';
+import type { SavedQuery } from '../../../../../../../src/plugins/data/public';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';
@@ -59,6 +61,7 @@ export interface GlobalGenericQuery {
   isInspected: boolean;
   loading: boolean;
   selectedInspectIndex: number;
+  invalidKqlQuery?: Error;
 }
 
 export interface GlobalGraphqlQuery extends GlobalGenericQuery {

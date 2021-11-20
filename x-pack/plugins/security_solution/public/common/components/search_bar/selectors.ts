@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector } from 'reselect';
+import type { Query } from '@kbn/es-query';
 import { InputsRange } from '../../store/inputs/model';
-import { Query, SavedQuery } from '../../../../../../../src/plugins/data/public';
+import type { SavedQuery } from '../../../../../../../src/plugins/data/public';
 
 export {
   endSelector,

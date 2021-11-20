@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as React from 'react';
@@ -43,23 +43,23 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   items: ItemDescriptor[];
 };
 
-const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
-  event: React.MouseEvent
-) => {
-  if (event.currentTarget instanceof HTMLAnchorElement) {
-    // from react-router's <Link/>
-    if (
-      !event.defaultPrevented && // onClick prevented default
-      event.button === 0 && // ignore everything but left clicks
-      (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
-      !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
-    ) {
-      event.preventDefault();
-      action.execute(context);
-    }
-  } else action.execute(context);
-  close();
-};
+const onClick =
+  (action: Action, context: ActionExecutionContext<object>, close: () => void) =>
+  (event: React.MouseEvent) => {
+    if (event.currentTarget instanceof HTMLAnchorElement) {
+      // from react-router's <Link/>
+      if (
+        !event.defaultPrevented && // onClick prevented default
+        event.button === 0 && // ignore everything but left clicks
+        (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
+        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
+      ) {
+        event.preventDefault();
+        action.execute(context);
+      }
+    } else action.execute(context);
+    close();
+  };
 
 /**
  * This method adds "More" item to panels, which have more than 4 items; and

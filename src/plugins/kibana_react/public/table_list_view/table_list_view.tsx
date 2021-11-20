@@ -1,53 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import {
-  EuiTitle,
-  EuiInMemoryTable,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiSpacer,
-  EuiOverlayMask,
-  EuiConfirmModal,
-  EuiCallOut,
   EuiBasicTableColumn,
+  EuiButton,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiEmptyPrompt,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiSpacer,
   EuiTableActionsColumnType,
   SearchFilterConfig,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpFetchError, ToastsStart } from 'kibana/public';
+import { debounce, keyBy, sortBy, uniq } from 'lodash';
+import React from 'react';
+import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
 
-interface Item {
-  id?: string;
-}
-
-export interface TableListViewProps {
+export interface TableListViewProps<V> {
   createItem?(): void;
-  deleteItems?(items: object[]): Promise<void>;
-  editItem?(item: object): void;
+  deleteItems?(items: V[]): Promise<void>;
+  editItem?(item: V): void;
   entityName: string;
   entityNamePlural: string;
-  findItems(query: string): Promise<{ total: number; hits: object[] }>;
+  findItems(query: string): Promise<{ total: number; hits: V[] }>;
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
-  noItemsFragment?: JSX.Element;
-  tableColumns: Array<EuiBasicTableColumn<any>>;
+  /**
+   * Should be an EuiEmptyPrompt (but TS doesn't support this typing)
+   */
+  emptyPrompt?: JSX.Element;
+  tableColumns: Array<EuiBasicTableColumn<V>>;
   tableListTitle: string;
   toastNotifications: ToastsStart;
   /**
@@ -62,12 +55,12 @@ export interface TableListViewProps {
   /**
    * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
    */
-  tableCaption?: string;
+  tableCaption: string;
   searchFilters?: SearchFilterConfig[];
 }
 
-export interface TableListViewState {
-  items: object[];
+export interface TableListViewState<V> {
+  items: V[];
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -84,11 +77,14 @@ export interface TableListViewState {
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-class TableListView extends React.Component<TableListViewProps, TableListViewState> {
+class TableListView<V extends {}> extends React.Component<
+  TableListViewProps<V>,
+  TableListViewState<V>
+> {
   private pagination = {};
   private _isMounted = false;
 
-  constructor(props: TableListViewProps) {
+  constructor(props: TableListViewProps<V>) {
     super(props);
 
     this.pagination = {
@@ -137,7 +133,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         this.setState({
           hasInitialFetchReturned: true,
           isFetchingItems: false,
-          items: !filter ? sortBy(response.hits, 'title') : response.hits,
+          items: !filter ? sortBy<V>(response.hits, 'title') : response.hits,
           totalItems: response.total,
           showLimitError: response.total > this.props.listingLimit,
         });
@@ -238,42 +234,40 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.deleteSelectedConfirmModal.title"
-              defaultMessage="Delete {itemCount} {entityName}?"
-              values={{
-                itemCount: this.state.selectedIds.length,
-                entityName:
-                  this.state.selectedIds.length === 1
-                    ? this.props.entityName
-                    : this.props.entityNamePlural,
-              }}
-            />
-          }
-          buttonColor="danger"
-          onCancel={this.closeDeleteModal}
-          onConfirm={this.deleteSelectedItems}
-          cancelButtonText={
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={deleteButton}
-          defaultFocusedButton="cancel"
-        >
-          <p>
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.deleteConfirmModalDescription"
-              defaultMessage="You can't recover deleted {entityNamePlural}."
-              values={{ entityNamePlural: this.props.entityNamePlural }}
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="kibana-react.tableListView.listing.deleteSelectedConfirmModal.title"
+            defaultMessage="Delete {itemCount} {entityName}?"
+            values={{
+              itemCount: this.state.selectedIds.length,
+              entityName:
+                this.state.selectedIds.length === 1
+                  ? this.props.entityName
+                  : this.props.entityNamePlural,
+            }}
+          />
+        }
+        buttonColor="danger"
+        onCancel={this.closeDeleteModal}
+        onConfirm={this.deleteSelectedItems}
+        cancelButtonText={
+          <FormattedMessage
+            id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={deleteButton}
+        defaultFocusedButton="cancel"
+      >
+        <p>
+          <FormattedMessage
+            id="kibana-react.tableListView.listing.deleteConfirmModalDescription"
+            defaultMessage="You can't recover deleted {entityNamePlural}."
+            values={{ entityNamePlural: this.props.entityNamePlural }}
+          />
+        </p>
+      </EuiConfirmModal>
     );
   }
 
@@ -351,14 +345,23 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderNoItemsMessage() {
-    if (this.props.noItemsFragment) {
-      return this.props.noItemsFragment;
+    if (this.props.emptyPrompt) {
+      return this.props.emptyPrompt;
     } else {
       return (
-        <FormattedMessage
-          id="kibana-react.tableListView.listing.noAvailableItemsMessage"
-          defaultMessage="No {entityNamePlural} available."
-          values={{ entityNamePlural: this.props.entityNamePlural }}
+        <EuiEmptyPrompt
+          title={
+            <h1>
+              {
+                <FormattedMessage
+                  id="kibana-react.tableListView.listing.noAvailableItemsMessage"
+                  defaultMessage="No {entityNamePlural} available."
+                  values={{ entityNamePlural: this.props.entityNamePlural }}
+                />
+              }
+            </h1>
+          }
+          actions={this.renderCreateButton()}
         />
       );
     }
@@ -400,17 +403,17 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
     const selection = this.props.deleteItems
       ? {
-          onSelectionChange: (obj: Item[]) => {
+          onSelectionChange: (obj: V[]) => {
             this.setState({
               selectedIds: obj
-                .map((item) => item.id)
-                .filter((id: undefined | string): id is string => Boolean(id)),
+                .map((item) => (item as Record<string, undefined | string>)?.id)
+                .filter((id): id is string => Boolean(id)),
             });
           },
         }
       : undefined;
 
-    const actions: EuiTableActionsColumnType<any>['actions'] = [
+    const actions: EuiTableActionsColumnType<V>['actions'] = [
       {
         name: i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
           defaultMessage: 'Edit',
@@ -423,7 +426,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         ),
         icon: 'pencil',
         type: 'icon',
-        enabled: ({ error }: { error: string }) => !error,
+        enabled: (v) => !(v as unknown as { error: string })?.error,
         onClick: this.props.editItem,
       },
     ];
@@ -475,83 +478,66 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     );
   }
 
-  renderListingOrEmptyState() {
-    if (!this.state.fetchError && this.hasNoItems()) {
-      return this.renderNoItemsMessage();
-    }
-
-    return this.renderListing();
-  }
-
-  renderListing() {
-    let createButton;
+  renderCreateButton() {
     if (this.props.createItem) {
-      createButton = (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={this.props.createItem}
-            data-test-subj="newItemButton"
-            iconType="plusInCircle"
-            fill
-          >
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.createNewItemButtonLabel"
-              defaultMessage="Create {entityName}"
-              values={{ entityName: this.props.entityName }}
-            />
-          </EuiButton>
-        </EuiFlexItem>
+      return (
+        <EuiButton
+          onClick={this.props.createItem}
+          data-test-subj="newItemButton"
+          iconType="plusInCircleFilled"
+          fill
+        >
+          <FormattedMessage
+            id="kibana-react.tableListView.listing.createNewItemButtonLabel"
+            defaultMessage="Create {entityName}"
+            values={{ entityName: this.props.entityName }}
+          />
+        </EuiButton>
       );
     }
-    return (
-      <div>
-        {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
-
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          {createButton}
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-
-        {this.renderListingLimitWarning()}
-        {this.renderFetchError()}
-
-        {this.renderTable()}
-      </div>
-    );
-  }
-
-  renderPageContent() {
-    if (!this.state.hasInitialFetchReturned) {
-      return;
-    }
-
-    return (
-      <EuiPageContent horizontalPosition="center">
-        {this.renderListingOrEmptyState()}
-      </EuiPageContent>
-    );
   }
 
   render() {
-    return (
-      <EuiPage
-        data-test-subj={this.props.entityName + 'LandingPage'}
-        className="itemListing__page"
-        restrictWidth
-      >
-        <EuiPageBody
-          aria-labelledby={this.state.hasInitialFetchReturned ? this.props.headingId : undefined}
+    const pageDTS = `${this.props.entityName}LandingPage`;
+
+    if (!this.state.hasInitialFetchReturned) {
+      return <></>;
+    }
+
+    if (!this.state.fetchError && this.hasNoItems()) {
+      return (
+        <KibanaPageTemplate
+          data-test-subj={pageDTS}
+          pageBodyProps={{
+            'aria-labelledby': this.state.hasInitialFetchReturned
+              ? this.props.headingId
+              : undefined,
+          }}
+          isEmptyState={true}
         >
-          {this.renderPageContent()}
-        </EuiPageBody>
-      </EuiPage>
+          {this.renderNoItemsMessage()}
+        </KibanaPageTemplate>
+      );
+    }
+
+    return (
+      <KibanaPageTemplate
+        data-test-subj={pageDTS}
+        pageHeader={{
+          pageTitle: <span id={this.props.headingId}>{this.props.tableListTitle}</span>,
+          rightSideItems: [this.renderCreateButton()],
+          'data-test-subj': 'top-nav',
+        }}
+        pageBodyProps={{
+          'aria-labelledby': this.state.hasInitialFetchReturned ? this.props.headingId : undefined,
+        }}
+      >
+        {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
+        {this.props.children}
+        {this.renderListingLimitWarning()}
+        {this.renderFetchError()}
+        {this.renderTable()}
+      </KibanaPageTemplate>
     );
   }
 }

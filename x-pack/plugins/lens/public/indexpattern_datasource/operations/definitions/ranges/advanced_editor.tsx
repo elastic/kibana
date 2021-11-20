@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './advanced_editor.scss';
@@ -21,7 +22,8 @@ import {
   htmlIdGenerator,
   keys,
 } from '@elastic/eui';
-import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
+import { useDebounceWithOptions } from '../../../../shared_components';
+import { IFieldFormat } from '../../../../../../../../src/plugins/field_formats/common';
 import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import {
@@ -30,7 +32,7 @@ import {
   DraggableBucketContainer,
   LabelInput,
 } from '../shared_components';
-import { isValidNumber, useDebounceWithOptions } from '../helpers';
+import { isValidNumber } from '../helpers';
 
 const generateId = htmlIdGenerator();
 

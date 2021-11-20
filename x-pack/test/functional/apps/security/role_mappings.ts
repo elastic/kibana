@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -80,7 +81,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('allows a role mapping to be deleted', async () => {
-      await testSubjects.click(`deleteRoleMappingButton-new_role_mapping`);
+      await testSubjects.click('euiCollapsedItemActionsButton');
+      await testSubjects.click('deleteRoleMappingButton-new_role_mapping');
       await testSubjects.click('confirmModalConfirmButton');
       await testSubjects.existOrFail('deletedRoleMappingSuccessToast');
     });
@@ -159,6 +161,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(name).to.eql(mapping.name);
           expect(enabled).to.eql(mapping.enabled);
         }
+      });
+
+      it('allows a role mapping to be cloned', async () => {
+        await testSubjects.click('cloneRoleMappingButton-a_enabled_role_mapping');
+        await testSubjects.setValue('roleMappingFormNameInput', 'cloned_role_mapping');
+        await testSubjects.click('saveRoleMappingButton');
+        await testSubjects.existOrFail('savedRoleMappingSuccessToast');
+        const rows = await testSubjects.findAll('roleMappingRow');
+        expect(rows.length).to.eql(mappings.length + 1);
       });
 
       it('allows a role mapping to be edited', async () => {

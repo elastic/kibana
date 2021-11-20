@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { merge } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import { AggregationInputMap } from '../../../../../typings/elasticsearch';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { getTransactionDurationFieldForTransactions } from '../helpers/transactions';
 
 interface MetricParams {
   request: TransactionGroupRequestBase;
@@ -16,12 +18,15 @@ interface MetricParams {
   searchAggregatedTransactions: boolean;
 }
 
-type BucketKey = string | Record<string, string>;
+type BucketKey = Record<string, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
-  TInputMap extends AggregationInputMap
->(request: TRequestBase, aggs: TInputMap) {
+  TAggregationMap extends Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  >
+>(request: TRequestBase, aggs: TAggregationMap) {
   return merge({}, request, {
     body: {
       aggs: {
@@ -41,14 +46,17 @@ export async function getAverages({
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },
     },
   });
 
-  const response = await setup.apmEventClient.search(params);
+  const response = await setup.apmEventClient.search(
+    'get_avg_transaction_group_duration',
+    params
+  );
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
@@ -60,40 +68,36 @@ export async function getAverages({
   });
 }
 
-export async function getCounts({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
+export async function getCounts({ request, setup }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
-    count: {
-      value_count: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      },
-    },
     transaction_type: {
-      top_hits: {
-        size: 1,
-        _source: [TRANSACTION_TYPE],
+      top_metrics: {
+        sort: {
+          '@timestamp': 'desc' as const,
+        },
+        metrics: [
+          {
+            field: TRANSACTION_TYPE,
+          } as const,
+        ],
       },
     },
   });
 
-  const response = await setup.apmEventClient.search(params);
+  const response = await setup.apmEventClient.search(
+    'get_transaction_group_transaction_count',
+    params
+  );
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
   ).map((bucket) => {
-    // type is Transaction | APMBaseDoc because it could be a metric document
-    const source = (bucket.transaction_type.hits.hits[0]
-      ._source as unknown) as { transaction: { type: string } };
-
     return {
       key: bucket.key as BucketKey,
-      count: bucket.count.value,
-      transactionType: source.transaction.type,
+      count: bucket.doc_count,
+      transactionType: bucket.transaction_type.top[0].metrics[
+        TRANSACTION_TYPE
+      ] as string,
     };
   });
 }
@@ -106,14 +110,17 @@ export async function getSums({
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },
     },
   });
 
-  const response = await setup.apmEventClient.search(params);
+  const response = await setup.apmEventClient.search(
+    'get_transaction_group_latency_sums',
+    params
+  );
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
@@ -121,35 +128,6 @@ export async function getSums({
     return {
       key: bucket.key as BucketKey,
       sum: bucket.sum.value,
-    };
-  });
-}
-
-export async function getPercentiles({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
-  const params = mergeRequestWithAggs(request, {
-    p95: {
-      percentiles: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-        hdr: { number_of_significant_value_digits: 2 },
-        percents: [95],
-      },
-    },
-  });
-
-  const response = await setup.apmEventClient.search(params);
-
-  return arrayUnionToCallable(
-    response.aggregations?.transaction_groups.buckets ?? []
-  ).map((bucket) => {
-    return {
-      key: bucket.key as BucketKey,
-      p95: Object.values(bucket.p95.values)[0],
     };
   });
 }

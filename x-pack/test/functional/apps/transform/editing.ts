@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getLatestTransformConfig } from './index';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
@@ -19,7 +21,7 @@ function getTransformConfig(): TransformPivotConfig {
       aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
     },
     description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
+      'ecommerce batch transform with avg(products.base_price) grouped by terms(category)',
     dest: { index: `user-ec_2_${date}` },
   };
 }
@@ -30,20 +32,20 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('editing', function () {
     const transformConfigWithPivot = getTransformConfig();
-    // const transformConfigWithLatest = getLatestTransformConfig();
+    const transformConfigWithLatest = getLatestTransformConfig('editing');
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
 
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,
         transformConfigWithPivot
       );
-      // await transform.api.createAndRunTransform(
-      //   transformConfigWithLatest.id,
-      //   transformConfigWithLatest
-      // );
+      await transform.api.createAndRunTransform(
+        transformConfigWithLatest.id,
+        transformConfigWithLatest
+      );
 
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.securityUI.loginAsTransformPowerUser();
@@ -52,8 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
-      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
-      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
     });
 
@@ -68,27 +70,28 @@ export default function ({ getService }: FtrProviderContext) {
           messageText: 'updated transform.',
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'pivot',
             mode: 'batch',
             progress: '100',
           },
         },
       },
-      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
-      // {
-      //   suiteTitle: 'edit transform with latest configuration',
-      //   originalConfig: transformConfigWithLatest,
-      //   transformDescription: 'updated description',
-      //   transformDocsPerSecond: '1000',
-      //   transformFrequency: '10m',
-      //   expected: {
-      //     messageText: 'updated transform.',
-      //     row: {
-      //       status: TRANSFORM_STATE.STOPPED,
-      //       mode: 'batch',
-      //       progress: '100',
-      //     },
-      //   },
-      // },
+      {
+        suiteTitle: 'edit transform with latest configuration',
+        originalConfig: transformConfigWithLatest,
+        transformDescription: 'updated description',
+        transformDocsPerSecond: '1000',
+        transformFrequency: '10m',
+        expected: {
+          messageText: 'updated transform.',
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            type: 'latest',
+            mode: 'batch',
+            progress: '100',
+          },
+        },
+      },
     ];
 
     for (const testData of testDataList) {
@@ -108,10 +111,10 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.filterWithSearchString(testData.originalConfig.id, 1);
 
           await transform.testExecution.logTestStep('should show the actions popover');
-          await transform.table.assertTransformRowActions(false);
+          await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should show the edit flyout');
-          await transform.table.clickTransformRowAction('Edit');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Edit');
           await transform.editFlyout.assertTransformEditFlyoutExists();
         });
 
@@ -140,7 +143,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should update the transform frequency');
           await transform.editFlyout.assertTransformEditFlyoutInputExists('Frequency');
-          await transform.editFlyout.assertTransformEditFlyoutInputValue('Frequency', '');
+          await transform.editFlyout.assertTransformEditFlyoutInputValue(
+            'Frequency',
+            testData.originalConfig.frequency || ''
+          );
           await transform.editFlyout.setTransformEditFlyoutInputValue(
             'Frequency',
             testData.transformFrequency
@@ -166,6 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.originalConfig.id, {
             id: testData.originalConfig.id,
             description: testData.transformDescription,
+            type: testData.expected.row.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

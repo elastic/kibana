@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { omitBy } from 'lodash';
@@ -22,6 +22,7 @@ import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
+import { ExecutionContextContainer } from '../execution_context';
 
 interface Params {
   basePath: IBasePath;
@@ -30,6 +31,7 @@ interface Params {
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
+const ZIP_CONTENT = /^(application\/zip)(;.*)?$/;
 
 const removedUndefined = (obj: Record<string, any> | undefined) => {
   return omitBy(obj, (v) => v === undefined);
@@ -90,9 +92,9 @@ export class Fetch {
         );
 
         if (optionsWithPath.asResponse) {
-          resolve(interceptedResponse);
+          resolve(interceptedResponse as HttpResponse<TResponseBody>);
         } else {
-          resolve(interceptedResponse.body);
+          resolve(interceptedResponse.body as TResponseBody);
         }
       } catch (error) {
         if (!(error instanceof HttpInterceptHaltError)) {
@@ -123,6 +125,7 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
+        ...(options.context ? new ExecutionContextContainer(options.context).toHeader() : {}),
       }),
     };
 
@@ -139,7 +142,9 @@ export class Fetch {
     return new Request(url, fetchOptions as RequestInit);
   }
 
-  private async fetchResponse(fetchOptions: HttpFetchOptionsWithPath): Promise<HttpResponse<any>> {
+  private async fetchResponse(
+    fetchOptions: HttpFetchOptionsWithPath
+  ): Promise<HttpResponse<unknown>> {
     const request = this.createRequest(fetchOptions);
     let response: Response;
     let body = null;
@@ -153,7 +158,7 @@ export class Fetch {
     const contentType = response.headers.get('Content-Type') || '';
 
     try {
-      if (NDJSON_CONTENT.test(contentType)) {
+      if (NDJSON_CONTENT.test(contentType) || ZIP_CONTENT.test(contentType)) {
         body = await response.blob();
       } else if (JSON_CONTENT.test(contentType)) {
         body = await response.json();
@@ -178,9 +183,15 @@ export class Fetch {
   }
 
   private shorthand(method: string): HttpHandler {
-    return (pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
-      const optionsWithPath = validateFetchArguments(pathOrOptions, options);
-      return this.fetch({ ...optionsWithPath, method });
+    return <T = unknown>(
+      pathOrOptions: string | HttpFetchOptionsWithPath,
+      options?: HttpFetchOptions
+    ) => {
+      const optionsWithPath: HttpFetchOptionsWithPath = validateFetchArguments(
+        pathOrOptions,
+        options
+      );
+      return this.fetch<HttpResponse<T>>({ ...optionsWithPath, method });
     };
   }
 }

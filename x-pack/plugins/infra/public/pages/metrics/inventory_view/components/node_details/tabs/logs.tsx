@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import useThrottle from 'react-use/lib/useThrottle';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch } from '@elastic/eui';
@@ -23,18 +25,21 @@ const TabComponent = (props: TabProps) => {
   const endTimestamp = props.currentTime;
   const startTimestamp = endTimestamp - 60 * 60 * 1000; // 60 minutes
   const { nodeType } = useWaffleOptionsContext();
-  const { options, node } = props;
+  const { node } = props;
+
+  const throttledTextQuery = useThrottle(textQuery, textQueryThrottleInterval);
 
   const filter = useMemo(() => {
-    let query = options.fields
-      ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-      : ``;
+    const query = [
+      `${findInventoryFields(nodeType).id}: "${node.id}"`,
+      ...(throttledTextQuery !== '' ? [throttledTextQuery] : []),
+    ].join(' and ');
 
-    if (textQuery) {
-      query += ` and message: ${textQuery}`;
-    }
-    return query;
-  }, [options, nodeType, node.id, textQuery]);
+    return {
+      language: 'kuery',
+      query,
+    };
+  }, [nodeType, node.id, throttledTextQuery]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -88,3 +93,5 @@ export const LogsTab = {
   }),
   content: TabComponent,
 };
+
+const textQueryThrottleInterval = 1000; // milliseconds

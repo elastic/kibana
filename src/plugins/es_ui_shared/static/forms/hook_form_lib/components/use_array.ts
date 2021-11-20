@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useEffect, useRef, useCallback, useMemo } from 'react';
@@ -62,7 +62,7 @@ export const UseArray = ({
   const uniqueId = useRef(0);
 
   const form = useFormContext();
-  const { __getFieldDefaultValue } = form;
+  const { getFieldDefaultValue } = form;
 
   const getNewItemAtIndex = useCallback(
     (index: number): ArrayItem => ({
@@ -75,7 +75,7 @@ export const UseArray = ({
 
   const fieldDefaultValue = useMemo<ArrayItem[]>(() => {
     const defaultValues = readDefaultValueOnForm
-      ? (__getFieldDefaultValue(path) as any[])
+      ? (getFieldDefaultValue(path) as any[])
       : undefined;
 
     const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
@@ -88,13 +88,7 @@ export const UseArray = ({
     return defaultValues
       ? getInitialItemsFromValues(defaultValues)
       : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
-  }, [
-    path,
-    initialNumberOfItems,
-    readDefaultValueOnForm,
-    __getFieldDefaultValue,
-    getNewItemAtIndex,
-  ]);
+  }, [path, initialNumberOfItems, readDefaultValueOnForm, getFieldDefaultValue, getNewItemAtIndex]);
 
   // Create a new hook field with the "isIncludedInOutput" set to false so we don't use its value to build the final form data.
   // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.

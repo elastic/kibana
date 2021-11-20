@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
+import { TIEBREAKER_FIELD } from '../../../../common/constants';
+import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
   createJobIdsFilters,
@@ -12,11 +15,11 @@ import {
   createResultTypeFilters,
   defaultRequestParameters,
   createAnomalyScoreFilter,
+  createInfluencerFilter,
+  createJobIdsQuery,
 } from './common';
+import { InfluencerFilter } from '../common';
 import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
-
-// TODO: Reassess validity of this against ML docs
-const TIEBREAKER_FIELD = '_doc';
 
 const sortToMlFieldMap = {
   dataset: 'partition_field_value',
@@ -24,28 +27,47 @@ const sortToMlFieldMap = {
   startTime: 'timestamp',
 };
 
-export const createMetricsK8sAnomaliesQuery = (
-  jobIds: string[],
-  startTime: number,
-  endTime: number,
-  sort: Sort,
-  pagination: Pagination
-) => {
+export const createMetricsK8sAnomaliesQuery = ({
+  jobIds,
+  anomalyThreshold,
+  startTime,
+  endTime,
+  sort,
+  pagination,
+  influencerFilter,
+  jobQuery,
+}: {
+  jobIds: string[];
+  anomalyThreshold: ANOMALY_THRESHOLD;
+  startTime: number;
+  endTime: number;
+  sort: Sort;
+  pagination: Pagination;
+  influencerFilter?: InfluencerFilter;
+  jobQuery?: string;
+}) => {
   const { field } = sort;
   const { pageSize } = pagination;
 
-  const filters = [
+  let filters: any = [
     ...createJobIdsFilters(jobIds),
-    ...createAnomalyScoreFilter(50),
+    ...createAnomalyScoreFilter(anomalyThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];
+  if (jobQuery) {
+    filters = [...filters, ...createJobIdsQuery(jobQuery)];
+  }
+  const influencerQuery = influencerFilter
+    ? { must: createInfluencerFilter(influencerFilter) }
+    : {};
 
   const sourceFields = [
     'job_id',
     'record_score',
     'typical',
     'actual',
+    'partition_field_name',
     'partition_field_value',
     'timestamp',
     'bucket_span',
@@ -67,6 +89,7 @@ export const createMetricsK8sAnomaliesQuery = (
       query: {
         bool: {
           filter: filters,
+          ...influencerQuery,
         },
       },
       search_after: queryCursor,
@@ -97,6 +120,8 @@ export const metricsK8sAnomalyHitRT = rt.type({
       timestamp: rt.number,
     }),
     rt.partial({
+      partition_field_name: rt.string,
+      partition_field_value: rt.string,
       by_field_value: rt.string,
     }),
   ]),

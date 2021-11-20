@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
@@ -10,6 +11,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { isTab } from '../../../../timelines/public';
 
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
@@ -17,10 +19,10 @@ import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
-import { SiemNavigation } from '../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { TimelineId } from '../../../common/types/timeline';
@@ -31,7 +33,7 @@ import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
@@ -41,7 +43,6 @@ import * as i18n from './translations';
 import { filterHostData } from './navigation';
 import { hostsModel } from '../store';
 import { HostsTableType } from '../store/model';
-import { isTab } from '../../common/components/accessibility/helpers';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
@@ -49,8 +50,10 @@ import {
 } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
+import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import { ID } from '../containers/hosts';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -108,27 +111,29 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const filterQuery = useMemo(
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,
       }),
     [filters, indexPattern, uiSettings, query]
   );
-  const tabsFilterQuery = useMemo(
+  const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters: tabsFilters,
       }),
     [indexPattern, query, tabsFilters, uiSettings]
   );
+
+  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
@@ -163,10 +168,9 @@ const HostsComponent = () => {
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
-          <WrapperPage noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <HeaderPage
-                border
                 subtitle={
                   <LastEventTime
                     docValueFields={docValueFields}
@@ -175,6 +179,7 @@ const HostsComponent = () => {
                   />
                 }
                 title={i18n.PAGE_TITLE}
+                border
               />
 
               <HostsKpiComponent
@@ -183,13 +188,15 @@ const HostsComponent = () => {
                 from={from}
                 setQuery={setQuery}
                 to={to}
-                skip={isInitializing}
+                skip={isInitializing || !filterQuery}
                 narrowDateRange={narrowDateRange}
               />
 
               <EuiSpacer />
 
-              <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
+              <SecuritySolutionTabNavigation
+                navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
+              />
 
               <EuiSpacer />
             </Display>
@@ -198,7 +205,7 @@ const HostsComponent = () => {
               deleteQuery={deleteQuery}
               docValueFields={docValueFields}
               to={to}
-              filterQuery={tabsFilterQuery}
+              filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
               setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
@@ -206,14 +213,12 @@ const HostsComponent = () => {
               from={from}
               type={hostsModel.HostsType.page}
             />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
-
+        <SecuritySolutionPageWrapper>
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

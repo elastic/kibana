@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState } from 'react';
@@ -18,19 +19,24 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useNavigateToPath } from '../../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 import { useMlContext } from '../../../../contexts/ml';
 import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
-import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
+import { LinkCard } from '../../../../components/link_card';
 import { CategorizationIcon } from './categorization_job_icon';
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
+import { RareIcon } from './rare_job_icon';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 
 export const Page: FC = () => {
+  const {
+    services: { share },
+  } = useMlKibana();
+
   const mlContext = useMlContext();
   const navigateToPath = useNavigateToPath();
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
@@ -39,25 +45,25 @@ export const Page: FC = () => {
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
-  const { currentSavedSearch, currentIndexPattern } = mlContext;
+  const { currentSavedSearch, currentDataView } = mlContext;
 
-  const isTimeBasedIndex = timeBasedIndexCheck(currentIndexPattern);
+  const isTimeBasedIndex = timeBasedIndexCheck(currentDataView);
   const indexWarningTitle =
     !isTimeBasedIndex && isSavedSearchSavedObject(currentSavedSearch)
       ? i18n.translate(
-          'xpack.ml.newJob.wizard.jobType.indexPatternFromSavedSearchNotTimeBasedMessage',
+          'xpack.ml.newJob.wizard.jobType.dataViewFromSavedSearchNotTimeBasedMessage',
           {
             defaultMessage:
-              '{savedSearchTitle} uses index pattern {indexPatternTitle} which is not time based',
+              '{savedSearchTitle} uses data view {dataViewName} which is not time based',
             values: {
               savedSearchTitle: currentSavedSearch.attributes.title as string,
-              indexPatternTitle: currentIndexPattern.title,
+              dataViewName: currentDataView.title,
             },
           }
         )
-      : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternNotTimeBasedMessage', {
-          defaultMessage: 'Index pattern {indexPatternTitle} is not time based',
-          values: { indexPatternTitle: currentIndexPattern.title },
+      : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewNotTimeBasedMessage', {
+          defaultMessage: 'Data view {dataViewName} is not time based',
+          values: { dataViewName: currentDataView.title },
         });
 
   const pageTitleLabel = isSavedSearchSavedObject(currentSavedSearch)
@@ -65,9 +71,9 @@ export const Page: FC = () => {
         defaultMessage: 'saved search {savedSearchTitle}',
         values: { savedSearchTitle: currentSavedSearch.attributes.title as string },
       })
-    : i18n.translate('xpack.ml.newJob.wizard.jobType.indexPatternPageTitleLabel', {
-        defaultMessage: 'index pattern {indexPatternTitle}',
-        values: { indexPatternTitle: currentIndexPattern.title },
+    : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewPageTitleLabel', {
+        defaultMessage: 'data view {dataViewName}',
+        values: { dataViewName: currentDataView.title },
       });
 
   const recognizerResults = {
@@ -79,15 +85,29 @@ export const Page: FC = () => {
 
   const getUrlParams = () => {
     return !isSavedSearchSavedObject(currentSavedSearch)
-      ? `?index=${currentIndexPattern.id}`
+      ? `?index=${currentDataView.id}`
       : `?savedSearchId=${currentSavedSearch.id}`;
   };
 
-  const addSelectionToRecentlyAccessed = () => {
+  const addSelectionToRecentlyAccessed = async () => {
     const title = !isSavedSearchSavedObject(currentSavedSearch)
-      ? currentIndexPattern.title
+      ? currentDataView.title
       : (currentSavedSearch.attributes.title as string);
-    addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, '');
+    const mlLocator = share.url.locators.get(ML_APP_LOCATOR)!;
+
+    const dataVisualizerLink = await mlLocator.getUrl(
+      {
+        page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
+        pageState: {
+          ...(currentSavedSearch?.id
+            ? { savedSearchId: currentSavedSearch.id }
+            : { index: currentDataView.id }),
+        },
+      },
+      { absolute: true }
+    );
+
+    addItemToRecentlyAccessed(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER, title, dataVisualizerLink);
     navigateToPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
   };
 
@@ -175,6 +195,22 @@ export const Page: FC = () => {
       }),
       id: 'mlJobTypeLinkCategorizationJob',
     },
+    {
+      onClick: () => navigateToPath(`/jobs/new_job/rare${getUrlParams()}`),
+      icon: {
+        type: RareIcon,
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.rareAriaLabel', {
+          defaultMessage: 'Rare job',
+        }),
+      },
+      title: i18n.translate('xpack.ml.newJob.wizard.jobType.rareTitle', {
+        defaultMessage: 'Rare',
+      }),
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.rareDescription', {
+        defaultMessage: 'Detect rare values in time series data.',
+      }),
+      id: 'mlJobTypeLinkrareJob',
+    },
   ];
 
   return (
@@ -202,7 +238,7 @@ export const Page: FC = () => {
               <EuiLink onClick={onSelectDifferentIndex}>
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
-                  defaultMessage="Select a different index"
+                  defaultMessage="Select a different data view or saved search"
                 />
               </EuiLink>
             </EuiCallOut>
@@ -234,7 +270,7 @@ export const Page: FC = () => {
 
           <EuiFlexGrid gutterSize="l" columns={4}>
             <DataRecognizer
-              indexPattern={currentIndexPattern}
+              indexPattern={currentDataView}
               savedSearch={currentSavedSearch}
               results={recognizerResults}
             />
@@ -256,7 +292,7 @@ export const Page: FC = () => {
         <EuiFlexGrid gutterSize="l" columns={4}>
           {jobTypes.map(({ onClick, icon, title, description, id }) => (
             <EuiFlexItem key={id}>
-              <CreateJobLinkCard
+              <LinkCard
                 data-test-subj={id}
                 onClick={onClick}
                 icon={icon.type}
@@ -293,7 +329,7 @@ export const Page: FC = () => {
 
         <EuiFlexGrid gutterSize="l" columns={4}>
           <EuiFlexItem>
-            <CreateJobLinkCard
+            <LinkCard
               icon="dataVisualizer"
               iconAreaLabel={i18n.translate(
                 'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',

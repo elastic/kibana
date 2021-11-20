@@ -1,19 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsType } from 'kibana/server';
+import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';
+import { searchSessionSavedObjectMigrations } from './search_session_migration';
 
-export const SEARCH_SESSION_TYPE = 'search-session';
-
-export const searchSessionMapping: SavedObjectsType = {
+export const searchSessionSavedObjectType: SavedObjectsType = {
   name: SEARCH_SESSION_TYPE,
   namespaceType: 'single',
   hidden: true,
   mappings: {
     properties: {
+      persisted: {
+        type: 'boolean',
+      },
       sessionId: {
         type: 'keyword',
       },
@@ -26,13 +30,19 @@ export const searchSessionMapping: SavedObjectsType = {
       expires: {
         type: 'date',
       },
+      touched: {
+        type: 'date',
+      },
+      completed: {
+        type: 'date',
+      },
       status: {
         type: 'keyword',
       },
       appId: {
         type: 'keyword',
       },
-      urlGeneratorId: {
+      locatorId: {
         type: 'keyword',
       },
       initialState: {
@@ -47,6 +57,19 @@ export const searchSessionMapping: SavedObjectsType = {
         type: 'object',
         enabled: false,
       },
+      realmType: {
+        type: 'keyword',
+      },
+      realmName: {
+        type: 'keyword',
+      },
+      username: {
+        type: 'keyword',
+      },
+      version: {
+        type: 'keyword',
+      },
     },
   },
+  migrations: searchSessionSavedObjectMigrations,
 };

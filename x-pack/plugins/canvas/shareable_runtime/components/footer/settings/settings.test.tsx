@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount, ReactWrapper } from 'enzyme';
@@ -13,17 +14,13 @@ import {
   getSettingsTrigger as trigger,
   getPopover as popover,
   getPortal as portal,
+  getContextMenu as contextMenu,
   getContextMenuItems as menuItems,
 } from '../../../test/selectors';
 import { Settings } from './settings';
 
 jest.mock('../../../supported_renderers');
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
-jest.mock('@elastic/eui/lib/services/accessibility', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
+
 jest.mock('@elastic/eui/lib/components/portal/portal', () => {
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const React = jest.requireActual('react');
@@ -56,7 +53,7 @@ describe('<Settings />', () => {
     expect(portal(wrapper).exists()).toEqual(true);
     expect(popover(wrapper).prop('isOpen')).toEqual(true);
     expect(menuItems(wrapper).length).toEqual(2);
-    expect(portal(wrapper).text()).toEqual('SettingsAuto PlayToolbar');
+    expect(contextMenu(wrapper).text()).toEqual('SettingsAuto PlayToolbar');
     trigger(wrapper).simulate('click');
     expect(popover(wrapper).prop('isOpen')).toEqual(false);
   });

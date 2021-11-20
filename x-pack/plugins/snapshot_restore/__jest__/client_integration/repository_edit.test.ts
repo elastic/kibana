@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -214,7 +215,7 @@ describe('<RepositoryEdit />', () => {
       );
       expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
 
-      const codeEditor = testBed.component.find('EuiCodeEditor');
+      const codeEditor = testBed.component.find('EuiCodeEditor').at(1);
       expect(JSON.parse(codeEditor.props().value as string)).toEqual({
         loadDefault: true,
         conf1: 'foo',

@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
 import { debounce } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { EuiSpacer, Query, EuiPageContent } from '@elastic/eui';
+import { EuiSpacer, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   SavedObjectsClientContract,
@@ -23,6 +23,7 @@ import {
 import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
 import { IndexPatternsContract } from '../../../../data/public';
+import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import {
   parseQuery,
   getSavedObjectCounts,
@@ -30,14 +31,13 @@ import {
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   findObjects,
-  findObject,
+  bulkGetObjects,
   extractExportDetails,
   SavedObjectsExportResultDetails,
   getTagFindReferences,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
-  ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../../services';
@@ -57,8 +57,7 @@ interface ExportAllOption {
 }
 
 export interface SavedObjectsTableProps {
-  allowedTypes: string[];
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
+  allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
@@ -96,6 +95,15 @@ export interface SavedObjectsTableState {
   isIncludeReferencesDeepChecked: boolean;
 }
 
+const unableFindSavedObjectsNotificationMessage = i18n.translate(
+  'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
+  { defaultMessage: 'Unable find saved objects' }
+);
+const unableFindSavedObjectNotificationMessage = i18n.translate(
+  'savedObjectsManagement.objectsTable.unableFindSavedObjectNotificationMessage',
+  { defaultMessage: 'Unable to find saved object' }
+);
+
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
 
@@ -108,7 +116,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       perPage: props.perPageConfig || 50,
       savedObjects: [],
       savedObjectCounts: props.allowedTypes.reduce((typeToCountMap, type) => {
-        typeToCountMap[type] = 0;
+        typeToCountMap[type.name] = 0;
         return typeToCountMap;
       }, {} as Record<string, number>),
       activeQuery: props.initialQuery ?? Query.parse(''),
@@ -129,18 +137,24 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   componentDidMount() {
     this._isMounted = true;
-    this.fetchSavedObjects();
+    this.fetchAllSavedObjects();
     this.fetchCounts();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.debouncedFetchObjects.cancel();
+    this.debouncedFindObjects.cancel();
+    this.debouncedBulkGetObjects.cancel();
   }
 
   fetchCounts = async () => {
-    const { allowedTypes, taggingApi } = this.props;
-    const { queryText, visibleTypes, selectedTags } = parseQuery(this.state.activeQuery);
+    const { taggingApi } = this.props;
+    const { queryText, visibleTypes, selectedTags } = parseQuery(
+      this.state.activeQuery,
+      this.props.allowedTypes
+    );
+
+    const allowedTypes = this.props.allowedTypes.map((type) => type.name);
 
     const selectedTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
@@ -188,18 +202,23 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }));
   };
 
-  fetchSavedObjects = () => {
-    this.setState({ isSearching: true }, this.debouncedFetchObjects);
+  fetchAllSavedObjects = () => {
+    this.setState({ isSearching: true }, this.debouncedFindObjects);
   };
 
-  fetchSavedObject = (type: string, id: string) => {
-    this.setState({ isSearching: true }, () => this.debouncedFetchObject(type, id));
+  fetchSavedObjects = (objects: Array<{ type: string; id: string }>) => {
+    this.setState({ isSearching: true }, () => this.debouncedBulkGetObjects(objects));
   };
 
-  debouncedFetchObjects = debounce(async () => {
+  debouncedFindObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
     const { notifications, http, allowedTypes, taggingApi } = this.props;
-    const { queryText, visibleTypes, selectedTags } = parseQuery(query);
+    const { queryText, visibleTypes, selectedTags } = parseQuery(query, allowedTypes);
+
+    const searchTypes = allowedTypes
+      .map((type) => type.name)
+      .filter((type) => !visibleTypes || visibleTypes.includes(type));
+
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -207,7 +226,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: allowedTypes.filter((type) => !visibleTypes || visibleTypes.includes(type)),
+      type: searchTypes,
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -240,27 +259,45 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         });
       }
       notifications.toasts.addDanger({
-        title: i18n.translate(
-          'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
-          { defaultMessage: 'Unable find saved objects' }
-        ),
+        title: unableFindSavedObjectsNotificationMessage,
         text: `${error}`,
       });
     }
   }, 300);
 
-  debouncedFetchObject = debounce(async (type: string, id: string) => {
+  debouncedBulkGetObjects = debounce(async (objects: Array<{ type: string; id: string }>) => {
     const { notifications, http } = this.props;
     try {
-      const resp = await findObject(http, type, id);
+      const resp = await bulkGetObjects(http, objects);
       if (!this._isMounted) {
         return;
       }
 
+      const { map: fetchedObjectsMap, errors: objectErrors } = resp.reduce(
+        ({ map, errors }, obj) => {
+          if (obj.error) {
+            errors.push(obj.error.message);
+          } else {
+            map.set(getObjectKey(obj), obj);
+          }
+          return { map, errors };
+        },
+        { map: new Map<string, SavedObjectWithMetadata>(), errors: [] as string[] }
+      );
+
+      if (objectErrors.length) {
+        notifications.toasts.addDanger({
+          title: unableFindSavedObjectNotificationMessage,
+          text: objectErrors.join(', '),
+        });
+      }
+
       this.setState(({ savedObjects, filteredItemCount }) => {
-        const refreshedSavedObjects = savedObjects.map((object) =>
-          object.type === type && object.id === id ? resp : object
-        );
+        // modify the existing objects array, replacing any existing objects with the newly fetched ones
+        const refreshedSavedObjects = savedObjects.map((obj) => {
+          const fetchedObject = fetchedObjectsMap.get(getObjectKey(obj));
+          return fetchedObject ?? obj;
+        });
         return {
           savedObjects: refreshedSavedObjects,
           filteredItemCount,
@@ -274,21 +311,25 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         });
       }
       notifications.toasts.addDanger({
-        title: i18n.translate(
-          'savedObjectsManagement.objectsTable.unableFindSavedObjectNotificationMessage',
-          { defaultMessage: 'Unable to find saved object' }
-        ),
+        title: unableFindSavedObjectsNotificationMessage,
         text: `${error}`,
       });
     }
   }, 300);
 
-  refreshObjects = async () => {
-    await Promise.all([this.fetchSavedObjects(), this.fetchCounts()]);
+  refreshAllObjects = async () => {
+    await Promise.all([this.fetchAllSavedObjects(), this.fetchCounts()]);
   };
 
-  refreshObject = async ({ type, id }: SavedObjectWithMetadata) => {
-    await this.fetchSavedObject(type, id);
+  refreshObjects = async (objects: Array<{ type: string; id: string }>) => {
+    const currentObjectsSet = this.state.savedObjects.reduce(
+      (acc, obj) => acc.add(getObjectKey(obj)),
+      new Set<string>()
+    );
+    const objectsToFetch = objects.filter((obj) => currentObjectsSet.has(getObjectKey(obj)));
+    if (objectsToFetch.length) {
+      this.fetchSavedObjects(objectsToFetch);
+    }
   };
 
   onSelectionChanged = (selection: SavedObjectWithMetadata[]) => {
@@ -305,7 +346,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         selectedSavedObjects: [],
       },
       () => {
-        this.fetchSavedObjects();
+        this.fetchAllSavedObjects();
         this.fetchCounts();
       }
     );
@@ -320,7 +361,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         perPage,
         selectedSavedObjects: [],
       },
-      this.fetchSavedObjects
+      this.fetchAllSavedObjects
     );
   };
 
@@ -348,8 +389,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
     } catch (e) {
       notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
-          defaultMessage: 'Unable to generate export',
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
+          defaultMessage: 'Unable to generate export: {error}',
+          values: {
+            error: e.body?.message ?? e,
+          },
         }),
       });
       throw e;
@@ -358,13 +402,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     saveAs(blob, 'export.ndjson');
 
     const exportDetails = await extractExportDetails(blob);
-    this.showExportSuccessMessage(exportDetails);
+    this.showExportCompleteMessage(exportDetails);
   };
 
   onExportAll = async () => {
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
-    const { notifications, http, taggingApi } = this.props;
-    const { queryText, selectedTags } = parseQuery(activeQuery);
+    const { notifications, http, taggingApi, allowedTypes } = this.props;
+    const { queryText, selectedTags } = parseQuery(activeQuery, allowedTypes);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
         accum.push(id);
@@ -385,8 +429,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       });
     } catch (e) {
       notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
-          defaultMessage: 'Unable to generate export',
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
+          defaultMessage: 'Unable to generate export: {error}',
+          values: {
+            error: e.body?.message ?? e,
+          },
         }),
       });
       throw e;
@@ -395,36 +442,50 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     saveAs(blob, 'export.ndjson');
 
     const exportDetails = await extractExportDetails(blob);
-    this.showExportSuccessMessage(exportDetails);
+    this.showExportCompleteMessage(exportDetails);
     this.setState({ isShowingExportAllOptionsModal: false });
   };
 
-  showExportSuccessMessage = (exportDetails: SavedObjectsExportResultDetails | undefined) => {
+  showExportCompleteMessage = (exportDetails: SavedObjectsExportResultDetails | undefined) => {
     const { notifications } = this.props;
-    if (exportDetails && exportDetails.missingReferences.length > 0) {
-      notifications.toasts.addWarning({
-        title: i18n.translate(
-          'savedObjectsManagement.objectsTable.export.successWithMissingRefsNotification',
-          {
-            defaultMessage:
-              'Your file is downloading in the background. ' +
-              'Some related objects could not be found. ' +
-              'Please see the last line in the exported file for a list of missing objects.',
-          }
-        ),
-      });
-    } else {
-      notifications.toasts.addSuccess({
-        title: i18n.translate('savedObjectsManagement.objectsTable.export.successNotification', {
-          defaultMessage: 'Your file is downloading in the background',
-        }),
-      });
+    if (exportDetails) {
+      if (exportDetails.missingReferences.length > 0) {
+        return notifications.toasts.addWarning({
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.export.successWithMissingRefsNotification',
+            {
+              defaultMessage:
+                'Your file is downloading in the background. ' +
+                'Some related objects could not be found. ' +
+                'Please see the last line in the exported file for a list of missing objects.',
+            }
+          ),
+        });
+      }
+      if (exportDetails.excludedObjects.length > 0) {
+        return notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.export.successWithExcludedObjectsNotification',
+            {
+              defaultMessage:
+                'Your file is downloading in the background. ' +
+                'Some objects were excluded from the export. ' +
+                'Please see the last line in the exported file for a list of excluded objects.',
+            }
+          ),
+        });
+      }
     }
+    return notifications.toasts.addSuccess({
+      title: i18n.translate('savedObjectsManagement.objectsTable.export.successNotification', {
+        defaultMessage: 'Your file is downloading in the background',
+      }),
+    });
   };
 
   finishImport = () => {
     this.hideImportFlyout();
-    this.fetchSavedObjects();
+    this.fetchAllSavedObjects();
     this.fetchCounts();
   };
 
@@ -455,10 +516,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       await this.props.indexPatterns.clearCache();
     }
 
-    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    const deletes = objects.savedObjects.map((object) =>
-      savedObjectsClient.delete(object.type, object.id, { force: true })
-    );
+    const deletes = selectedSavedObjects
+      .filter((object) => !object.meta.hiddenType)
+      .map((object) => savedObjectsClient.delete(object.type, object.id, { force: true }));
     await Promise.all(deletes);
 
     // Unset this
@@ -467,7 +527,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
 
     // Fetching all data
-    await this.fetchSavedObjects();
+    this.fetchAllSavedObjects();
     await this.fetchCounts();
 
     // Allow the user to interact with the table once the saved objects have been re-fetched.
@@ -478,8 +538,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   getRelationships = async (type: string, id: string) => {
-    const { allowedTypes, http } = this.props;
-    return await getRelationships(http, type, id, allowedTypes);
+    const { http } = this.props;
+    const allowedTypeNames = this.props.allowedTypes.map((t) => t.name);
+    return await getRelationships(http, type, id, allowedTypeNames);
   };
 
   renderFlyout() {
@@ -496,13 +557,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.hideImportFlyout}
         done={this.finishImport}
         http={this.props.http}
-        serviceRegistry={this.props.serviceRegistry}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={newIndexPatternUrl}
-        allowedTypes={this.props.allowedTypes}
-        overlays={this.props.overlays}
         basePath={this.props.http.basePath}
         search={this.props.search}
+        allowedTypes={this.props.allowedTypes}
       />
     );
   }
@@ -520,12 +579,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.onHideRelationships}
         goInspectObject={this.props.goInspectObject}
         canGoInApp={this.props.canGoInApp}
+        allowedTypes={this.props.allowedTypes}
       />
     );
   }
 
   renderDeleteConfirmModal() {
     const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
+    const { allowedTypes } = this.props;
+
     if (!isShowingDeleteConfirmModal) {
       return null;
     }
@@ -540,6 +602,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           this.setState({ isShowingDeleteConfirmModal: false });
         }}
         selectedObjects={selectedSavedObjects}
+        allowedTypes={allowedTypes}
       />
     );
   }
@@ -598,13 +661,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
 
     const filterOptions = allowedTypes.map((type) => ({
-      value: type,
-      name: type,
-      view: `${type} (${savedObjectCounts[type] || 0})`,
+      value: type.displayName,
+      name: type.displayName,
+      view: `${type.displayName} (${savedObjectCounts[type.name] || 0})`,
     }));
 
     return (
-      <EuiPageContent horizontalPosition="center">
+      <div>
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
@@ -612,15 +675,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
-          onRefresh={this.refreshObjects}
+          onRefresh={this.refreshAllObjects}
           filteredCount={filteredItemCount}
         />
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="l" />
         <RedirectAppLinks application={applications}>
           <Table
             basePath={http.basePath}
             taggingApi={taggingApi}
             initialQuery={this.props.initialQuery}
+            allowedTypes={allowedTypes}
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}
@@ -632,7 +696,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             capabilities={applications.capabilities}
             onDelete={this.onDelete}
-            onActionRefresh={this.refreshObject}
+            onActionRefresh={this.refreshObjects}
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}
             pageSize={perPage}
@@ -643,7 +707,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             canGoInApp={this.props.canGoInApp}
           />
         </RedirectAppLinks>
-      </EuiPageContent>
+      </div>
     );
   }
+}
+
+function getObjectKey(obj: { type: string; id: string }) {
+  return `${obj.type}:${obj.id}`;
 }

@@ -1,15 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
-import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
-import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
-import {
+import type {
   CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
@@ -18,6 +15,7 @@ import {
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
+  ExportExceptionDetails,
   FilterOrUndefined,
   Id,
   IdOrUndefined,
@@ -30,6 +28,7 @@ import {
   Name,
   NameOrUndefined,
   NamespaceType,
+  NamespaceTypeArray,
   OsTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
@@ -38,10 +37,14 @@ import {
   Tags,
   TagsOrUndefined,
   UpdateCommentsArray,
+  _VersionOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  EmptyStringArrayDecoded,
+  NonEmptyStringArrayDecoded,
   Version,
   VersionOrUndefined,
-  _VersionOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-types';
 
 export interface ConstructorOptions {
   user: string;
@@ -49,6 +52,12 @@ export interface ConstructorOptions {
 }
 
 export interface GetExceptionListOptions {
+  listId: ListIdOrUndefined;
+  id: IdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
+export interface GetExceptionListSummaryOptions {
   listId: ListIdOrUndefined;
   id: IdOrUndefined;
   namespaceType: NamespaceType;
@@ -211,4 +220,15 @@ export interface FindExceptionListOptions {
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
+}
+
+export interface ExportExceptionListAndItemsOptions {
+  listId: ListIdOrUndefined;
+  id: IdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
+export interface ExportExceptionListAndItemsReturn {
+  exportData: string;
+  exportDetails: ExportExceptionDetails;
 }

@@ -1,74 +1,121 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   GEO_JSON_TYPE,
   FEATURE_VISIBLE_PROPERTY_NAME,
   KBN_IS_CENTROID_FEATURE,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
 } from '../../../common/constants';
 
-export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true];
-const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
+import { Timeslice } from '../../../common/descriptor_types';
 
-const VISIBILITY_FILTER_CLAUSE = ['all', ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]];
-// Kibana features are features added by kibana that do not exist in real data
-const EXCLUDE_KBN_FEATURES = ['all', EXCLUDE_TOO_MANY_FEATURES_BOX, EXCLUDE_CENTROID_FEATURES];
-
-const CLOSED_SHAPE_MB_FILTER = [
-  ...EXCLUDE_KBN_FEATURES,
-  [
-    'any',
-    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
-  ],
-];
-
-const VISIBLE_CLOSED_SHAPE_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, CLOSED_SHAPE_MB_FILTER];
-
-const ALL_SHAPE_MB_FILTER = [
-  ...EXCLUDE_KBN_FEATURES,
-  [
-    'any',
-    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING],
-  ],
-];
-
-const VISIBLE_ALL_SHAPE_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, ALL_SHAPE_MB_FILTER];
-
-const POINT_MB_FILTER = [
-  ...EXCLUDE_KBN_FEATURES,
-  [
-    'any',
-    ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
-  ],
-];
-
-const VISIBLE_POINT_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, POINT_MB_FILTER];
-
-const CENTROID_MB_FILTER = ['all', ['==', ['get', KBN_IS_CENTROID_FEATURE], true]];
-
-const VISIBLE_CENTROID_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, CENTROID_MB_FILTER];
-
-export function getFillFilterExpression(hasJoins: boolean): unknown[] {
-  return hasJoins ? VISIBLE_CLOSED_SHAPE_MB_FILTER : CLOSED_SHAPE_MB_FILTER;
+export interface TimesliceMaskConfig {
+  timesliceMaskField: string;
+  timeslice: Timeslice;
 }
 
-export function getLineFilterExpression(hasJoins: boolean): unknown[] {
-  return hasJoins ? VISIBLE_ALL_SHAPE_MB_FILTER : ALL_SHAPE_MB_FILTER;
+export const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
+
+function getFilterExpression(
+  filters: unknown[],
+  hasJoins: boolean,
+  timesliceMaskConfig?: TimesliceMaskConfig
+) {
+  const allFilters: unknown[] = [...filters];
+
+  if (hasJoins) {
+    allFilters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
+  }
+
+  if (timesliceMaskConfig) {
+    allFilters.push(['has', timesliceMaskConfig.timesliceMaskField]);
+    allFilters.push([
+      '>=',
+      ['get', timesliceMaskConfig.timesliceMaskField],
+      timesliceMaskConfig.timeslice.from,
+    ]);
+    allFilters.push([
+      '<',
+      ['get', timesliceMaskConfig.timesliceMaskField],
+      timesliceMaskConfig.timeslice.to,
+    ]);
+  }
+
+  return ['all', ...allFilters];
 }
 
-export function getPointFilterExpression(hasJoins: boolean): unknown[] {
-  return hasJoins ? VISIBLE_POINT_MB_FILTER : POINT_MB_FILTER;
+export function getFillFilterExpression(
+  hasJoins: boolean,
+  timesliceMaskConfig?: TimesliceMaskConfig
+): unknown[] {
+  return getFilterExpression(
+    [
+      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
+      [
+        'any',
+        ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+        ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
+      ],
+    ],
+    hasJoins,
+    timesliceMaskConfig
+  );
 }
 
-export function getCentroidFilterExpression(hasJoins: boolean): unknown[] {
-  return hasJoins ? VISIBLE_CENTROID_MB_FILTER : CENTROID_MB_FILTER;
+export function getLineFilterExpression(
+  hasJoins: boolean,
+  timesliceMaskConfig?: TimesliceMaskConfig
+): unknown[] {
+  return getFilterExpression(
+    [
+      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
+      [
+        'any',
+        ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
+        ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
+        ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
+        ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING],
+      ],
+    ],
+    hasJoins,
+    timesliceMaskConfig
+  );
+}
+
+const IS_POINT_FEATURE = [
+  'any',
+  ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
+];
+
+export function getPointFilterExpression(
+  hasJoins: boolean,
+  timesliceMaskConfig?: TimesliceMaskConfig
+): unknown[] {
+  return getFilterExpression(
+    [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
+    hasJoins,
+    timesliceMaskConfig
+  );
+}
+
+export function getLabelFilterExpression(
+  hasJoins: boolean,
+  isSourceGeoJson: boolean,
+  timesliceMaskConfig?: TimesliceMaskConfig
+): unknown[] {
+  const filters: unknown[] = [];
+
+  if (isSourceGeoJson) {
+    // Centroid feature added to GeoJSON feature collection for LINE_STRING, MULTI_LINE_STRING, POLYGON, MULTI_POLYGON, and GEOMETRY_COLLECTION geometries
+    // For GeoJSON sources, show label for centroid features or point/multi-point features only.
+    // no explicit isCentroidFeature filter is needed, centroids are points and are included in the geometry filter.
+    filters.push(IS_POINT_FEATURE);
+  }
+
+  return getFilterExpression(filters, hasJoins, timesliceMaskConfig);
 }

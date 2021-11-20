@@ -1,38 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {
   asDecimal,
-  asDuration,
   asInteger,
   asPercent,
+  getDurationFormatter,
   getFixedByteFormatter,
 } from '../../../../../common/utils/formatters';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
 import { Maybe } from '../../../../../typings/common';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../timeseries_chart';
+import {
+  getMaxY,
+  getResponseTimeTickFormatter,
+} from '../transaction_charts/helper';
 
-function getYTickFormatter(chart: GenericMetricsChart) {
+type MetricChartApiResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/charts'>;
+type MetricChart = MetricChartApiResponse['charts'][0];
+
+function getYTickFormatter(chart: MetricChart) {
+  const max = getMaxY(chart.series);
+
   switch (chart.yUnit) {
     case 'bytes': {
-      const max = Math.max(
-        ...chart.series.map(({ data }) =>
-          Math.max(...data.map(({ y }) => y || 0))
-        )
-      );
       return getFixedByteFormatter(max);
     }
     case 'percent': {
       return (y: Maybe<number>) => asPercent(y || 0, 1);
     }
     case 'time': {
-      return asDuration;
+      const durationFormatter = getDurationFormatter(max);
+      return getResponseTimeTickFormatter(durationFormatter);
     }
     case 'integer': {
       return asInteger;
@@ -46,7 +53,7 @@ function getYTickFormatter(chart: GenericMetricsChart) {
 interface Props {
   start: Maybe<number | string>;
   end: Maybe<number | string>;
-  chart: GenericMetricsChart;
+  chart: MetricChart;
   fetchStatus: FETCH_STATUS;
 }
 

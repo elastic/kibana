@@ -1,40 +1,68 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
-export function useTransactionBreakdown() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
-  const { start, end, transactionName } = urlParams;
-  const { transactionType } = useApmServiceContext();
+export function useTransactionBreakdown({
+  kuery,
+  environment,
+}: {
+  kuery: string;
+  environment: string;
+}) {
+  const {
+    urlParams: { transactionName },
+  } = useLegacyUrlParams();
 
-  const { data = { timeseries: undefined }, error, status } = useFetcher(
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { transactionType, serviceName } = useApmServiceContext();
+
+  const {
+    data = { timeseries: undefined },
+    error,
+    status,
+  } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transaction/charts/breakdown',
+            'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
           params: {
             path: { serviceName },
             query: {
+              environment,
+              kuery,
               start,
               end,
               transactionName,
               transactionType,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, start, end, transactionType, transactionName, uiFilters]
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+    ]
   );
 
   return {

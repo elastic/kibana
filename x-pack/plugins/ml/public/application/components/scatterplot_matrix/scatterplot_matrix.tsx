@@ -1,43 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useEffect, useState, FC } from 'react';
 
-// There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
-// @ts-ignore
-import { compile } from 'vega-lite/build-es5/vega-lite';
-import { parse, View, Warn } from 'vega';
-import { Handler } from 'vega-tooltip';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
-  htmlIdGenerator,
+  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLoadingSpinner,
+  EuiIconTip,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import type { SearchResponse7 } from '../../../../common/types/es_client';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
+import { extractErrorMessage } from '../../../../common';
+import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
+import { stringHash } from '../../../../common/util/string_utils';
+import { RuntimeMappings } from '../../../../common/types/fields';
+import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
+import { getCombinedRuntimeMappings } from '../../components/data_grid';
 
 import { useMlApiContext } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
 import { useCurrentEuiTheme } from '../color_range_legend';
 
+// Separate imports for lazy loadable VegaChart and related code
+import { VegaChart } from '../vega_chart';
+import type { LegendType } from '../vega_chart/common';
+import { VegaChartLoading } from '../vega_chart/vega_chart_loading';
+
 import {
   getScatterplotMatrixVegaLiteSpec,
-  LegendType,
   OUTLIER_SCORE_FIELD,
 } from './scatterplot_matrix_vega_lite_spec';
 
@@ -57,12 +63,33 @@ const TOGGLE_OFF = i18n.translate('xpack.ml.splom.toggleOff', {
 
 const sampleSizeOptions = [100, 1000, 10000].map((d) => ({ value: d, text: '' + d }));
 
-interface ScatterplotMatrixProps {
+interface OptionLabelWithIconTipProps {
+  label: string;
+  tooltip: string;
+}
+
+const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, tooltip }) => (
+  <>
+    {label}
+    <EuiIconTip
+      content={tooltip}
+      iconProps={{
+        className: 'eui-alignTop',
+      }}
+      size="s"
+    />
+  </>
+);
+
+export interface ScatterplotMatrixProps {
   fields: string[];
   index: string;
   resultsField?: string;
   color?: string;
   legendType?: LegendType;
+  searchQuery?: ResultsSearchQuery;
+  runtimeMappings?: RuntimeMappings;
+  indexPattern?: DataView;
 }
 
 export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
@@ -71,6 +98,9 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   resultsField,
   color,
   legendType,
+  searchQuery,
+  runtimeMappings,
+  indexPattern,
 }) => {
   const { esSearch } = useMlApiContext();
 
@@ -78,7 +108,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   // are sized according to outlier_score
   const [dynamicSize, setDynamicSize] = useState<boolean>(false);
 
-  // used to give the use the option to customize the fields used for the matrix axes
+  // used to give the user the option to customize the fields used for the matrix axes
   const [fields, setFields] = useState<string[]>([]);
 
   useEffect(() => {
@@ -97,7 +127,9 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // contains the fetched documents and columns to be passed on to the Vega spec.
-  const [splom, setSplom] = useState<{ items: any[]; columns: string[] } | undefined>();
+  const [splom, setSplom] = useState<
+    { items: any[]; columns: string[]; messages: string[] } | undefined
+  >();
 
   // formats the array of field names for EuiComboBox
   const fieldOptions = useMemo(
@@ -132,24 +164,39 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   const { euiTheme } = useCurrentEuiTheme();
 
   useEffect(() => {
+    if (fields.length === 0) {
+      setSplom({ columns: [], items: [], messages: [] });
+      setIsLoading(false);
+      return;
+    }
+
     async function fetchSplom(options: { didCancel: boolean }) {
       setIsLoading(true);
+      const messages: string[] = [];
+
       try {
+        const outlierScoreField = `${resultsField}.${OUTLIER_SCORE_FIELD}`;
+        const includeOutlierScoreField = resultsField !== undefined;
+
         const queryFields = [
           ...fields,
           ...(color !== undefined ? [color] : []),
-          ...(legendType !== undefined ? [] : [`${resultsField}.${OUTLIER_SCORE_FIELD}`]),
+          ...(includeOutlierScoreField ? [outlierScoreField] : []),
         ];
 
         const query = randomizeQuery
           ? {
               function_score: {
+                query: searchQuery,
                 random_score: { seed: 10, field: '_seq_no' },
               },
             }
-          : { match_all: {} };
+          : searchQuery;
 
-        const resp: SearchResponse7 = await esSearch({
+        const combinedRuntimeMappings =
+          indexPattern && getCombinedRuntimeMappings(indexPattern, runtimeMappings);
+
+        const resp: estypes.SearchResponse = await esSearch({
           index,
           body: {
             fields: queryFields,
@@ -157,22 +204,50 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             query,
             from: 0,
             size: fetchSize,
+            ...(isRuntimeMappings(combinedRuntimeMappings)
+              ? { runtime_mappings: combinedRuntimeMappings }
+              : {}),
           },
         });
 
         if (!options.didCancel) {
-          const items = resp.hits.hits.map((d) =>
-            getProcessedFields(d.fields, (key: string) =>
-              key.startsWith(`${resultsField}.feature_importance`)
+          const items = resp.hits.hits
+            .map((d) =>
+              getProcessedFields(d.fields ?? {}, (key: string) =>
+                key.startsWith(`${resultsField}.feature_importance`)
+              )
             )
-          );
+            .filter((d) => !Object.keys(d).some((field) => Array.isArray(d[field])));
 
-          setSplom({ columns: fields, items });
+          const originalDocsCount = resp.hits.hits.length;
+          const filteredDocsCount = originalDocsCount - items.length;
+
+          if (originalDocsCount === filteredDocsCount) {
+            messages.push(
+              i18n.translate('xpack.ml.splom.allDocsFilteredWarningMessage', {
+                defaultMessage:
+                  'All fetched documents included fields with arrays of values and cannot be visualized.',
+              })
+            );
+          } else if (resp.hits.hits.length !== items.length) {
+            messages.push(
+              i18n.translate('xpack.ml.splom.arrayFieldsWarningMessage', {
+                defaultMessage:
+                  '{filteredDocsCount} out of {originalDocsCount} fetched documents include fields with arrays of values and cannot be visualized.',
+                values: {
+                  originalDocsCount,
+                  filteredDocsCount,
+                },
+              })
+            );
+          }
+
+          setSplom({ columns: fields, items, messages });
           setIsLoading(false);
         }
       } catch (e) {
-        // TODO error handling
         setIsLoading(false);
+        setSplom({ columns: [], items: [], messages: [extractErrorMessage(e)] });
       }
     }
 
@@ -181,28 +256,18 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     return () => {
       options.didCancel = true;
     };
-    // stringify the fields array, otherwise the comparator will trigger on new but identical instances.
-  }, [fetchSize, JSON.stringify(fields), index, randomizeQuery, resultsField]);
+    // stringify the fields array and search, otherwise the comparator will trigger on new but identical instances.
+  }, [fetchSize, JSON.stringify({ fields, searchQuery }), index, randomizeQuery, resultsField]);
 
-  const htmlId = useMemo(() => htmlIdGenerator()(), []);
-
-  useEffect(() => {
+  const vegaSpec = useMemo(() => {
     if (splom === undefined) {
       return;
     }
 
     const { items, columns } = splom;
 
-    const values =
-      resultsField !== undefined
-        ? items
-        : items.map((d) => {
-            d[`${resultsField}.${OUTLIER_SCORE_FIELD}`] = 0;
-            return d;
-          });
-
-    const vegaSpec = getScatterplotMatrixVegaLiteSpec(
-      values,
+    return getScatterplotMatrixVegaLiteSpec(
+      items,
       columns,
       euiTheme,
       resultsField,
@@ -210,34 +275,27 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       legendType,
       dynamicSize
     );
-
-    const vgSpec = compile(vegaSpec).spec;
-
-    const view = new View(parse(vgSpec))
-      .logLevel(Warn)
-      .renderer('canvas')
-      .tooltip(new Handler().call)
-      .initialize(`#${htmlId}`);
-
-    view.runAsync(); // evaluate and render the view
   }, [resultsField, splom, color, legendType, dynamicSize]);
 
   return (
     <>
-      {splom === undefined ? (
-        <EuiText textAlign="center">
-          <EuiSpacer size="l" />
-          <EuiLoadingSpinner size="l" />
-          <EuiSpacer size="l" />
-        </EuiText>
+      {splom === undefined || vegaSpec === undefined ? (
+        <VegaChartLoading />
       ) : (
-        <>
+        <div data-test-subj={`mlScatterplotMatrix ${isLoading ? 'loading' : 'loaded'}`}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.fieldSelectionLabel', {
-                  defaultMessage: 'Fields',
-                })}
+                label={
+                  <OptionLabelWithIconTip
+                    label={i18n.translate('xpack.ml.splom.fieldSelectionLabel', {
+                      defaultMessage: 'Fields',
+                    })}
+                    tooltip={i18n.translate('xpack.ml.splom.fieldSelectionInfoTooltip', {
+                      defaultMessage: 'Pick fields to explore their relationships.',
+                    })}
+                  />
+                }
                 display="rowCompressed"
                 fullWidth
               >
@@ -259,13 +317,21 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '200px' }} grow={false}>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.SampleSizeLabel', {
-                  defaultMessage: 'Sample size',
-                })}
+                label={
+                  <OptionLabelWithIconTip
+                    label={i18n.translate('xpack.ml.splom.sampleSizeLabel', {
+                      defaultMessage: 'Sample size',
+                    })}
+                    tooltip={i18n.translate('xpack.ml.splom.sampleSizeInfoTooltip', {
+                      defaultMessage: 'Amount of documents to display in the scatterplot matrix.',
+                    })}
+                  />
+                }
                 display="rowCompressed"
                 fullWidth
               >
                 <EuiSelect
+                  data-test-subj="mlScatterplotMatrixSampleSizeSelect"
                   compressed
                   options={sampleSizeOptions}
                   value={fetchSize}
@@ -275,13 +341,22 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '120px' }} grow={false}>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.RandomScoringLabel', {
-                  defaultMessage: 'Random scoring',
-                })}
+                label={
+                  <OptionLabelWithIconTip
+                    label={i18n.translate('xpack.ml.splom.randomScoringLabel', {
+                      defaultMessage: 'Random scoring',
+                    })}
+                    tooltip={i18n.translate('xpack.ml.splom.randomScoringInfoTooltip', {
+                      defaultMessage:
+                        'Uses a function score query to get randomly selected documents as the sample.',
+                    })}
+                  />
+                }
                 display="rowCompressed"
                 fullWidth
               >
                 <EuiSwitch
+                  data-test-subj="mlScatterplotMatrixRandomizeQuerySwitch"
                   name="mlScatterplotMatrixRandomizeQuery"
                   label={randomizeQuery ? TOGGLE_ON : TOGGLE_OFF}
                   checked={randomizeQuery}
@@ -293,9 +368,16 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             {resultsField !== undefined && legendType === undefined && (
               <EuiFlexItem style={{ width: '120px' }} grow={false}>
                 <EuiFormRow
-                  label={i18n.translate('xpack.ml.splom.dynamicSizeLabel', {
-                    defaultMessage: 'Dynamic size',
-                  })}
+                  label={
+                    <OptionLabelWithIconTip
+                      label={i18n.translate('xpack.ml.splom.dynamicSizeLabel', {
+                        defaultMessage: 'Dynamic size',
+                      })}
+                      tooltip={i18n.translate('xpack.ml.splom.dynamicSizeInfoTooltip', {
+                        defaultMessage: 'Scales the size of each point by its outlier score.',
+                      })}
+                    />
+                  }
                   display="rowCompressed"
                   fullWidth
                 >
@@ -311,8 +393,22 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             )}
           </EuiFlexGroup>
 
-          <div id={htmlId} className="mlScatterplotMatrix" />
-        </>
+          {splom.messages.length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut color="warning">
+                {splom.messages.map((m) => (
+                  <span key={stringHash(m)}>
+                    {m}
+                    <br />
+                  </span>
+                ))}
+              </EuiCallOut>
+            </>
+          )}
+
+          {splom.items.length > 0 && <VegaChart vegaSpec={vegaSpec} />}
+        </div>
       )}
     </>
   );

@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subscription } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { FieldFormatsStart } from '../../field_formats';
+import { FieldFormatsStart } from '../../../../field_formats/public';
 import { calculateBounds, TimeRange } from '../../../common';
 import {
   aggsRequiredUiSettings,
@@ -20,7 +20,7 @@ import {
   AggTypesDependencies,
 } from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
-import { IndexPatternsContract } from '../../index_patterns';
+import { IndexPatternsContract } from '../..';
 import { NowProviderInternalContract } from '../../now_provider';
 
 /**
@@ -91,16 +91,13 @@ export class AggsService {
   public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
     const isDefaultTimezone = () => uiSettings.isDefault('dateFormat:tz');
 
-    const {
-      calculateAutoTimeExpression,
-      getDateMetaByDatatableColumn,
-      datatableUtilities,
-      types,
-    } = this.aggsCommonService.start({
-      getConfig: this.getConfig!,
-      getIndexPattern: indexPatterns.get,
-      isDefaultTimezone,
-    });
+    const { calculateAutoTimeExpression, datatableUtilities, types } = this.aggsCommonService.start(
+      {
+        getConfig: this.getConfig!,
+        getIndexPattern: indexPatterns.get,
+        isDefaultTimezone,
+      }
+    );
 
     const aggTypesDependencies: AggTypesDependencies = {
       calculateBounds: this.calculateBounds,
@@ -140,7 +137,6 @@ export class AggsService {
 
     return {
       calculateAutoTimeExpression,
-      getDateMetaByDatatableColumn,
       datatableUtilities,
       createAggConfigs: (indexPattern, configStates = []) => {
         return new AggConfigs(indexPattern, configStates, { typesRegistry });

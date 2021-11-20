@@ -1,105 +1,136 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { timeline } from '../../objects/timeline';
+
+import { getTimeline } from '../../objects/timeline';
 
 import {
-  FAVORITE_TIMELINE,
   LOCKED_ICON,
-  UNLOCKED_ICON,
-  NOTES_TAB_BUTTON,
   NOTES_TEXT,
-  // NOTES_COUNT,
-  NOTES_TEXT_AREA,
   PIN_EVENT,
+  SERVER_SIDE_EVENT_COUNT,
   TIMELINE_DESCRIPTION,
   TIMELINE_FILTER,
-  // TIMELINE_FILTER,
+  TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
-  TIMELINE_TITLE,
-  OPEN_TIMELINE_MODAL,
+  TIMELINE_PANEL,
+  TIMELINE_TAB_CONTENT_EQL,
+  TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
 } from '../../screens/timeline';
-import {
-  TIMELINES_DESCRIPTION,
-  TIMELINES_PINNED_EVENT_COUNT,
-  TIMELINES_NOTES_COUNT,
-  TIMELINES_FAVORITE,
-} from '../../screens/timelines';
-import { cleanKibana } from '../../tasks/common';
+import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { cleanKibana } from '../../tasks/common';
+import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
+import { selectCustomTemplates } from '../../tasks/templates';
 import {
+  addEqlToTimeline,
   addFilter,
   addNameAndDescriptionToTimeline,
   addNotesToTimeline,
+  clickingOnCreateTimelineFormTemplateBtn,
   closeTimeline,
   createNewTimeline,
-  markAsFavorite,
-  openTimelineFromSettings,
+  expandEventAction,
+  goToQueryTab,
   pinFirstEvent,
   populateTimeline,
-  waitForTimelineChanges,
 } from '../../tasks/timeline';
-import { openTimeline } from '../../tasks/timelines';
 
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
+import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
-describe('Timelines', () => {
-  beforeEach(() => {
+describe('Timelines', (): void => {
+  before(() => {
     cleanKibana();
+    loginAndWaitForPage(OVERVIEW_URL);
   });
 
-  it('Creates a timeline', () => {
-    cy.intercept('PATCH', '/api/timeline').as('timeline');
-
-    loginAndWaitForPage(OVERVIEW_URL);
-    openTimelineUsingToggle();
-    addNameAndDescriptionToTimeline(timeline);
-
-    cy.wait('@timeline').then(({ response }) => {
-      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
-
-      populateTimeline();
-      addFilter(timeline.filter);
-      pinFirstEvent();
-
-      cy.get(PIN_EVENT)
-        .should('have.attr', 'aria-label')
-        .and('match', /Unpin the event in row 2/);
-      cy.get(LOCKED_ICON).should('be.visible');
-
-      addNotesToTimeline(timeline.notes);
-      markAsFavorite();
-      waitForTimelineChanges();
-      createNewTimeline();
+  describe('Toggle create timeline from plus icon', () => {
+    after(() => {
       closeTimeline();
-      openTimelineFromSettings();
+    });
 
-      cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
-      cy.contains(timeline.title).should('exist');
-      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
-      cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
-      cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
-      cy.get(TIMELINES_FAVORITE).first().should('exist');
+    it('toggle create timeline ', () => {
+      createNewTimeline();
+      cy.get(TIMELINE_PANEL).should('be.visible');
+    });
+  });
 
-      openTimeline(timelineId);
+  describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
+    after(() => {
+      closeTimeline();
+    });
 
-      cy.get(FAVORITE_TIMELINE).should('exist');
-      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
-      cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query} `);
-      cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
+    before(() => {
+      openTimelineUsingToggle();
+      addNameAndDescriptionToTimeline(getTimeline());
+      populateTimeline();
+    });
+
+    beforeEach(() => {
+      goToQueryTab();
+    });
+
+    it('can be added filter', () => {
+      addFilter(getTimeline().filter);
+      cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
+    });
+
+    it('pins an event', () => {
+      pinFirstEvent();
       cy.get(PIN_EVENT)
         .should('have.attr', 'aria-label')
         .and('match', /Unpin the event in row 2/);
-      cy.get(UNLOCKED_ICON).should('be.visible');
-      cy.get(NOTES_TAB_BUTTON).click();
-      cy.get(NOTES_TEXT_AREA).should('exist');
-
-      cy.get(NOTES_TEXT).should('have.text', timeline.notes);
     });
+
+    it('has a lock icon', () => {
+      cy.get(LOCKED_ICON).should('be.visible');
+    });
+
+    it('can be added notes', () => {
+      addNotesToTimeline(getTimeline().notes);
+      cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
+        .find(NOTES_TEXT)
+        .should('have.text', getTimeline().notes);
+    });
+
+    it('should update timeline after adding eql', () => {
+      cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+      const eql = 'any where process.name == "which"';
+      addEqlToTimeline(eql);
+
+      cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
+
+      cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
+        .invoke('text')
+        .then(parseInt)
+        .should('be.gt', 0);
+    });
+  });
+});
+
+describe('Create a timeline from a template', () => {
+  before(() => {
+    cy.intercept('/api/timeline*').as('timeline');
+    cleanKibana();
+    createTimelineTemplate(getTimeline());
+    loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    waitForTimelinesPanelToBeLoaded();
+  });
+  it('Should have the same query and open the timeline modal', () => {
+    selectCustomTemplates();
+    cy.wait('@timeline', { timeout: 100000 });
+    expandEventAction();
+    clickingOnCreateTimelineFormTemplateBtn();
+    cy.wait('@timeline', { timeout: 100000 });
+
+    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+    closeTimeline();
   });
 });

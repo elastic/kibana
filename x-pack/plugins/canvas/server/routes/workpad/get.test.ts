@@ -1,24 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeGetWorkpadRoute } from './get';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../__fixtures__/workpads';
 import { CanvasWorkpad } from '../../../types';
 import { getMockedRouterDeps } from '../test_helpers';
+import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 
-const mockRouteContext = ({
-  core: {
-    savedObjects: {
-      client: savedObjectsClientMock.create(),
-    },
-  },
-} as unknown) as RequestHandlerContext;
+const mockRouteContext = {
+  canvas: workpadRouteContextMock.create(),
+} as unknown as MockWorkpadRouteContext;
 
 describe('GET workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -30,6 +28,10 @@ describe('GET workpad', () => {
     routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it(`returns 200 when the workpad is found`, async () => {
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
@@ -39,15 +41,12 @@ describe('GET workpad', () => {
       },
     });
 
-    const savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.get.mockResolvedValueOnce({
+    mockRouteContext.canvas.workpad.get.mockResolvedValue({
       id: '123',
       type: CANVAS_TYPE,
       attributes: { foo: true },
       references: [],
     });
-
-    mockRouteContext.core.savedObjects.client = savedObjectsClient;
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
@@ -59,10 +58,9 @@ describe('GET workpad', () => {
       }
     `);
 
-    expect(savedObjectsClient.get.mock.calls).toMatchInlineSnapshot(`
+    expect(mockRouteContext.canvas.workpad.get.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "canvas-workpad",
           "123",
         ],
       ]
@@ -78,15 +76,12 @@ describe('GET workpad', () => {
       },
     });
 
-    const savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.get.mockResolvedValueOnce({
+    mockRouteContext.canvas.workpad.get.mockResolvedValue({
       id: '123',
       type: CANVAS_TYPE,
       attributes: workpadWithGroupAsElement as any,
       references: [],
     });
-
-    mockRouteContext.core.savedObjects.client = savedObjectsClient;
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
     const workpad = response.payload as CanvasWorkpad;
@@ -109,10 +104,9 @@ describe('GET workpad', () => {
     });
 
     const savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.get.mockImplementation(() => {
+    mockRouteContext.canvas.workpad.get.mockImplementation(() => {
       throw savedObjectsClient.errors.createGenericNotFoundError(CANVAS_TYPE, id);
     });
-    mockRouteContext.core.savedObjects.client = savedObjectsClient;
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 

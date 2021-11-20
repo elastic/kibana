@@ -1,12 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -31,11 +29,10 @@ import {
   mockNarrowDateRange,
 } from '../../../network/components/kpi_network/mock';
 import {
-  mockGlobalState,
-  apolloClientObservable,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
   createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
 } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -43,6 +40,7 @@ import {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
@@ -56,21 +54,15 @@ jest.mock('../charts/barchart', () => {
 });
 
 describe('Stat Items Component', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+  const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   describe.each([
     [
       mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <ReduxStoreProvider store={store}>
             <StatItemsComponent
               description="HOSTS"
@@ -87,7 +79,7 @@ describe('Stat Items Component', () => {
     ],
     [
       mount(
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={mockTheme}>
           <ReduxStoreProvider store={store}>
             <StatItemsComponent
               areaChart={[]}

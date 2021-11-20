@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -31,7 +32,8 @@ import {
 } from './common';
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
 import { JobSpacesList } from '../../../../../components/job_spaces_list';
 
 enum TASK_STATE_COLOR {
@@ -149,7 +151,7 @@ export const useColumns = (
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
   isMlEnabledInSpace: boolean = true,
-  spacesEnabled: boolean = true,
+  spacesApi?: SpacesPluginStart,
   refresh: () => void = () => {}
 ) => {
   const { actions, modals } = useActions(isManagementTable);
@@ -280,7 +282,7 @@ export const useColumns = (
   ];
 
   if (isManagementTable === true) {
-    if (spacesEnabled === true) {
+    if (spacesApi) {
       // insert before last column
       columns.splice(columns.length - 1, 0, {
         name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
@@ -289,6 +291,7 @@ export const useColumns = (
         render: (item: DataFrameAnalyticsListRow) =>
           Array.isArray(item.spaceIds) ? (
             <JobSpacesList
+              spacesApi={spacesApi}
               spaceIds={item.spaceIds ?? []}
               jobId={item.id}
               jobType="data-frame-analytics"
@@ -296,6 +299,7 @@ export const useColumns = (
             />
           ) : null,
         width: '90px',
+        'data-test-subj': 'mlAnalyticsTableColumnSpaces',
       });
     }
     // Remove actions if Ml not enabled in current space

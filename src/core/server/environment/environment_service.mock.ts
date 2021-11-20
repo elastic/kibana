@@ -1,31 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
+import type {
+  EnvironmentService,
+  InternalEnvironmentServicePreboot,
+  InternalEnvironmentServiceSetup,
+} from './environment_service';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalEnvironmentServiceSetup> = {
+const createPrebootContractMock = () => {
+  const prebootContract: jest.Mocked<InternalEnvironmentServicePreboot> = {
     instanceUuid: 'uuid',
   };
-  return setupContract;
+  return prebootContract;
+};
+
+const createSetupContractMock = () => {
+  const prebootContract: jest.Mocked<InternalEnvironmentServiceSetup> = {
+    instanceUuid: 'uuid',
+  };
+  return prebootContract;
 };
 
 type EnvironmentServiceContract = PublicMethodsOf<EnvironmentService>;
 const createMock = () => {
   const mocked: jest.Mocked<EnvironmentServiceContract> = {
+    preboot: jest.fn(),
     setup: jest.fn(),
   };
-  mocked.setup.mockResolvedValue(createSetupContractMock());
+  mocked.preboot.mockResolvedValue(createPrebootContractMock());
+  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
 export const environmentServiceMock = {
   create: createMock,
+  createPrebootContract: createPrebootContractMock,
   createSetupContract: createSetupContractMock,
 };

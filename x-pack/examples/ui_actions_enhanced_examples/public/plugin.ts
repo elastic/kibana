@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createElement as h } from 'react';
@@ -57,7 +58,8 @@ export interface UiActionsEnhancedExamplesStart {
 }
 
 export class UiActionsEnhancedExamplesPlugin
-  implements Plugin<void, UiActionsEnhancedExamplesStart, SetupDependencies, StartDependencies> {
+  implements Plugin<void, UiActionsEnhancedExamplesStart, SetupDependencies, StartDependencies>
+{
   public setup(
     core: CoreSetup<StartDependencies, UiActionsEnhancedExamplesStart>,
     { uiActionsEnhanced: uiActions, developerExamples }: SetupDependencies
@@ -85,9 +87,9 @@ export class UiActionsEnhancedExamplesPlugin
         const { core: coreStart, plugins: pluginsStart, self } = start();
         const handle = coreStart.overlays.openFlyout(
           toMountPoint(
-            h(pluginsStart.uiActionsEnhanced.FlyoutManageDrilldowns, {
+            h(pluginsStart.uiActionsEnhanced.DrilldownManager, {
               onClose: () => handle.close(),
-              viewMode: 'create',
+              initialRoute: '/create',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: {},
@@ -110,9 +112,9 @@ export class UiActionsEnhancedExamplesPlugin
         const { core: coreStart, plugins: pluginsStart, self } = start();
         const handle = coreStart.overlays.openFlyout(
           toMountPoint(
-            h(pluginsStart.uiActionsEnhanced.FlyoutManageDrilldowns, {
+            h(pluginsStart.uiActionsEnhanced.DrilldownManager, {
               onClose: () => handle.close(),
-              viewMode: 'manage',
+              initialRoute: '/manage',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: { sampleApp2ClickContext },
@@ -139,8 +141,7 @@ export class UiActionsEnhancedExamplesPlugin
       links: [
         {
           label: 'README',
-          href:
-            'https://github.com/elastic/kibana/tree/master/x-pack/examples/ui_actions_enhanced_examples#ui-actions-enhanced-examples',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/ui_actions_enhanced_examples#ui-actions-enhanced-examples',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

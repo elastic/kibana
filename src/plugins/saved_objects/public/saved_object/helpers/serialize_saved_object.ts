@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { forOwn } from 'lodash';
 import { SavedObject, SavedObjectConfig } from '../../types';
 import { extractSearchSourceReferences } from '../../../../data/public';
 import { expandShorthand } from './field_mapping';
@@ -17,7 +17,7 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
   const attributes = {} as Record<string, any>;
   const references = [];
 
-  _.forOwn(mapping, (fieldMapping, fieldName) => {
+  forOwn(mapping, (fieldMapping, fieldName) => {
     if (typeof fieldName !== 'string') {
       return;
     }
@@ -31,10 +31,8 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
   });
 
   if (savedObject.searchSource) {
-    const {
-      searchSourceJSON,
-      references: searchSourceReferences,
-    } = savedObject.searchSource.serialize();
+    const { searchSourceJSON, references: searchSourceReferences } =
+      savedObject.searchSource.serialize();
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }

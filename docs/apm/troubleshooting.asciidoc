@@ -1,14 +1,32 @@
 [[troubleshooting]]
-== Troubleshoot common problems
+== Troubleshooting
 
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-If you have something to add to this section, please consider creating a pull request with
-your proposed changes at https://github.com/elastic/kibana.
+This section describes common problems you might encounter with the APM app.
+To add to this page, please consider opening a
+https://github.com/elastic/kibana/pulls[pull request] with your proposed changes.
 
-Also, check out the https://discuss.elastic.co/c/apm[APM discussion forum].
+If your issue is potentially related to other components of the APM ecosystem,
+don't forget to check our other troubleshooting guides or discussion forum:
+
+* {apm-guide-ref}/troubleshoot-apm.html[APM Server troubleshooting]
+* {apm-dotnet-ref}/troubleshooting.html[.NET agent troubleshooting]
+* {apm-go-ref}/troubleshooting.html[Go agent troubleshooting]
+* {apm-ios-ref}/troubleshooting.html[iOS agent troubleshooting]
+* {apm-java-ref}/trouble-shooting.html[Java agent troubleshooting]
+* {apm-node-ref}/troubleshooting.html[Node.js agent troubleshooting]
+* {apm-php-ref}/troubleshooting.html[PHP agent troubleshooting]
+* {apm-py-ref}/troubleshooting.html[Python agent troubleshooting]
+* {apm-ruby-ref}/debugging.html[Ruby agent troubleshooting]
+* {apm-rum-ref}/troubleshooting.html[RUM troubleshooting]
+* https://discuss.elastic.co/c/apm[APM discussion forum].
+
+[discrete]
+[[troubleshooting-apm-app]]
+== Troubleshoot common APM app problems
 
 * <<no-apm-data-found>>
 * <<troubleshooting-too-many-transactions>>
@@ -35,7 +53,7 @@ By default, this index template is created by APM Server on startup.
 However, this only happens if `setup.template.enabled` is `true` in `apm-server.yml`.
 You can create the index template manually by running `apm-server setup`.
 Take note that index templates *cannot* be applied retroactively -- they are only applied at index creation time.
-More information is available in {apm-server-ref}/apm-server-configuration.html[Set up and configure].
+More information is available in {apm-guide-ref}/apm-server-configuration.html[Set up and configure].
 
 You can check for the existence of an APM index template using the
 {ref}/indices-get-template.html[Get index template API].
@@ -50,17 +68,15 @@ GET /_template/apm-{version}
 *Using Logstash, Kafka, etc.*
 If you're not outputting data directly from APM Server to Elasticsearch (perhaps you're using Logstash or Kafka),
 then the index template will not be set up automatically. Instead, you'll need to
-{apm-server-ref}/apm-server-template.html[load the template manually].
+{apm-guide-ref}/apm-server-template.html[load the template manually].
 
 *Using a custom index names*
 This problem can also occur if you've customized the index name that you write APM data to.
-The default index name that APM writes events to can be found
-{apm-server-ref}/elasticsearch-output.html#index-option-es[here].
 If you change the default, you must also configure the `setup.template.name` and `setup.template.pattern` options.
-See {apm-server-ref}/configuration-template.html[Load the Elasticsearch index template].
+See {apm-guide-ref}/configuration-template.html[Load the Elasticsearch index template].
 If the Elasticsearch index template has already been successfully loaded to the index,
 you can customize the indices that the APM app uses to display data.
-Navigate to *APM* > *Settings* > *Indices*, and change all `apm_oss.*Pattern` values to
+Navigate to *APM* > *Settings* > *Indices*, and change all `xpack.apm.indices.*` values to
 include the new index pattern. For example: `customIndexName-*`.
 
 [float]
@@ -102,8 +118,8 @@ Instead, we should strip away the unique information and group our transactions 
 In this case, that means naming all blog transactions, `/blog`, and all documentation transactions, `/guide`.
 
 If you feel like you'd be losing valuable information by following this naming convention, don't fret!
-You can always add additional metadata to your transactions using {apm-overview-ref-v}/metadata.html#labels-fields[labels] (indexed) or
-{apm-overview-ref-v}/metadata.html#custom-fields[custom context] (non-indexed).
+You can always add additional metadata to your transactions using {apm-guide-ref-v}/metadata.html#labels-fields[labels] (indexed) or
+{apm-guide-ref-v}/metadata.html#custom-fields[custom context] (non-indexed).
 
 After ensuring you've correctly named your transactions,
 you might still see an error in the APM app related to too many transaction names.
@@ -166,10 +182,10 @@ Selecting the `apm-*` index pattern shows a listing of every field defined in th
 *Ensure a field is searchable*
 There are two things you can do to if you'd like to ensure a field is searchable:
 
-1. Index your additional data as {apm-overview-ref-v}/metadata.html[labels] instead.
+1. Index your additional data as {apm-guide-ref}/metadata.html[labels] instead.
 These are dynamic by default, which means they will be indexed and become searchable and aggregatable.
 
-2. Use the {apm-server-ref}/configuration-template.html[`append_fields`] feature. As an example,
+2. Use the {apm-guide-ref}/configuration-template.html[`append_fields`] feature. As an example,
 adding the following to `apm-server.yml` will enable dynamic indexing for `http.request.cookies`:
 
 [source,yml]

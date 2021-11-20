@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { APMBaseDoc } from './apm_base_doc';
+import { EventOutcome } from './fields/event_outcome';
+import { Http } from './fields/http';
 import { Stackframe } from './fields/stackframe';
 import { TimestampUs } from './fields/timestamp_us';
+import { Url } from './fields/url';
 
 interface Processor {
   name: 'transaction';
@@ -16,6 +20,7 @@ interface Processor {
 export interface SpanRaw extends APMBaseDoc {
   processor: Processor;
   trace: { id: string }; // trace is required
+  event?: { outcome?: EventOutcome };
   service: {
     name: string;
     environment?: string;
@@ -53,10 +58,17 @@ export interface SpanRaw extends APMBaseDoc {
       body?: string;
       headers?: Record<string, unknown>;
     };
+    composite?: {
+      count: number;
+      sum: { us: number };
+      compression_strategy: string;
+    };
   };
   timestamp: TimestampUs;
   transaction?: {
     id: string;
   };
   child?: { id: string[] };
+  http?: Http;
+  url?: Url;
 }

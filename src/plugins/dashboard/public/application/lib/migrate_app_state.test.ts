@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedDashboardPanel } from '../../types';
@@ -29,7 +29,7 @@ test('migrate app state from 6.0', async () => {
   migrateAppState(appState as any, '8.0');
   expect(appState.uiState).toBeUndefined();
 
-  const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
+  const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;
 
   expect(newPanel.gridData.w).toBe(24);
   expect(newPanel.gridData.h).toBe(15);
@@ -62,7 +62,7 @@ test('migrate sort from 6.1', async () => {
   migrateAppState(appState as any, TARGET_VERSION);
   expect(appState.uiState).toBeUndefined();
 
-  const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
+  const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;
   expect(newPanel.gridData.w).toBe(24);
   expect(newPanel.gridData.h).toBe(15);
   expect((newPanel as any).sort).toBeUndefined();
@@ -89,7 +89,7 @@ test('migrates 6.0 even when uiState does not exist', async () => {
   migrateAppState(appState as any, '8.0');
   expect((appState as any).uiState).toBeUndefined();
 
-  const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
+  const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;
   expect(newPanel.gridData.w).toBe(24);
   expect(newPanel.gridData.h).toBe(15);
   expect((newPanel as any).sort).toBeUndefined();
@@ -119,7 +119,7 @@ test('6.2 migration adjusts w & h without margins', async () => {
   migrateAppState(appState as any, '8.0');
   expect((appState as any).uiState).toBeUndefined();
 
-  const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
+  const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;
   expect(newPanel.gridData.w).toBe(28);
   expect(newPanel.gridData.h).toBe(15);
   expect(newPanel.gridData.x).toBe(8);
@@ -151,7 +151,7 @@ test('6.2 migration adjusts w & h with margins', async () => {
   migrateAppState(appState as any, '8.0');
   expect((appState as any).uiState).toBeUndefined();
 
-  const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
+  const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;
   expect(newPanel.gridData.w).toBe(28);
   expect(newPanel.gridData.h).toBe(12);
   expect(newPanel.gridData.x).toBe(8);

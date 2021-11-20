@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { EuiAccordion } from '@elastic/eui';
 import React from 'react';
-import { FeatureTable } from './feature_table';
-import { Role } from '../../../../../../../common/model';
-import { mountWithIntl } from '@kbn/test/jest';
-import { KibanaFeature, SubFeatureConfig } from '../../../../../../../../features/public';
-import { kibanaFeatures, createFeature } from '../../../../__fixtures__/kibana_features';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+
+import type { KibanaFeature, SubFeatureConfig } from '../../../../../../../../features/public';
+import type { Role } from '../../../../../../../common/model';
+import { createFeature, kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
-import { findTestSubject } from '@kbn/test/jest';
-import { EuiAccordion } from '@elastic/eui';
+import { FeatureTable } from './feature_table';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {
@@ -675,7 +678,7 @@ describe('FeatureTable', () => {
     });
   });
 
-  it('renders with no privileges granted when minimal feature privileges are assigned, and sub-feature privileges are disallowed', () => {
+  it('renders with privileges granted when minimal feature privileges are assigned, and sub-feature privileges are disallowed', () => {
     const role = createRole([
       {
         spaces: ['foo'],
@@ -707,13 +710,13 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: [],
       },
       with_sub_features: {
-        primaryFeaturePrivilege: 'none',
+        primaryFeaturePrivilege: 'all',
         subFeaturePrivileges: [],
       },
     });
   });
 
-  it('renders with no privileges granted when sub feature privileges are assigned, and sub-feature privileges are disallowed', () => {
+  it('renders with privileges granted when sub feature privileges are assigned, and sub-feature privileges are disallowed', () => {
     const role = createRole([
       {
         spaces: ['foo'],
@@ -745,7 +748,7 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: [],
       },
       with_sub_features: {
-        primaryFeaturePrivilege: 'none',
+        primaryFeaturePrivilege: 'read',
         subFeaturePrivileges: [],
       },
     });

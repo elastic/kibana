@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useState, useContext, useEffect, useMemo } from 'react';
@@ -24,7 +25,9 @@ import { CombinedJob, Datafeed } from '../../../../../../../../common/types/anom
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
+import { isAdvancedJobCreator } from '../../../../common/job_creator';
 import { DatafeedPreview } from '../datafeed_preview_flyout';
+import { useToastNotificationService } from '../../../../../../services/toast_notification_service';
 
 export enum EDITOR_MODE {
   HIDDEN,
@@ -39,6 +42,7 @@ interface Props {
 }
 export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { displayErrorToast } = useToastNotificationService();
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
   const [showChangedIndicesWarning, setShowChangedIndicesWarning] = useState(false);
 
@@ -119,10 +123,23 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     setSaveable(valid);
   }
 
-  function onSave() {
+  async function onSave() {
     const jobConfig = JSON.parse(jobConfigString);
     const datafeedConfig = JSON.parse(collapseLiteralStrings(datafeedConfigString));
     jobCreator.cloneFromExistingJob(jobConfig, datafeedConfig);
+    if (isAdvancedJobCreator(jobCreator)) {
+      try {
+        await jobCreator.autoSetTimeRange();
+      } catch (error) {
+        const title = i18n.translate(
+          'xpack.ml.newJob.wizard.jsonFlyout.autoSetJobCreatorTimeRange.error',
+          {
+            defaultMessage: `Error retrieving beginning and end times of index`,
+          }
+        );
+        displayErrorToast(error, title);
+      }
+    }
     jobCreatorUpdate();
     setShowJsonFlyout(false);
   }
@@ -187,7 +204,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                 >
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutText"
-                    defaultMessage="It is not possible to alter the indices being used by the datafeed here. If you wish to select a different index pattern or saved search, please start the job creation again, selecting a different index pattern."
+                    defaultMessage="You cannot alter the indices being used by the datafeed here. To select a different data view or saved search, go to step 1 of the wizard and select the Change data view option."
                   />
                 </EuiCallOut>
               </>
@@ -255,9 +272,10 @@ const Contents: FC<{
   heightOffset?: number;
 }> = ({ title, value, editJson, onChange, heightOffset = 0 }) => {
   // the ace editor requires a fixed height
-  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
-    heightOffset,
-  ]);
+  const editorHeight = useMemo(
+    () => `${window.innerHeight - 230 - heightOffset}px`,
+    [heightOffset]
+  );
   return (
     <EuiFlexItem>
       <EuiTitle size="s">

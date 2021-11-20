@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { RoleMapping } from '../../../../../common/model';
 import {
+  validateRoleMappingForSave,
   validateRoleMappingName,
   validateRoleMappingRoles,
   validateRoleMappingRoleTemplates,
   validateRoleMappingRules,
-  validateRoleMappingForSave,
 } from './role_mapping_validation';
-import { RoleMapping } from '../../../../../common/model';
 
 describe('validateRoleMappingName', () => {
   it('requires a value', () => {
@@ -25,7 +27,7 @@ describe('validateRoleMappingName', () => {
 
 describe('validateRoleMappingRoles', () => {
   it('requires a value', () => {
-    expect(validateRoleMappingRoles(({ roles: [] } as unknown) as RoleMapping))
+    expect(validateRoleMappingRoles({ roles: [] } as unknown as RoleMapping))
       .toMatchInlineSnapshot(`
       Object {
         "error": "At least one role is required.",
@@ -37,7 +39,7 @@ describe('validateRoleMappingRoles', () => {
 
 describe('validateRoleMappingRoleTemplates', () => {
   it('requires a value', () => {
-    expect(validateRoleMappingRoleTemplates(({ role_templates: [] } as unknown) as RoleMapping))
+    expect(validateRoleMappingRoleTemplates({ role_templates: [] } as unknown as RoleMapping))
       .toMatchInlineSnapshot(`
       Object {
         "error": "At least one role template is required.",
@@ -59,7 +61,7 @@ describe('validateRoleMappingRules', () => {
 
   // more exhaustive testing is done in other unit tests
   it('requires rules to be valid', () => {
-    expect(validateRoleMappingRules(({ rules: { something: [] } } as unknown) as RoleMapping))
+    expect(validateRoleMappingRules({ rules: { something: [] } } as unknown as RoleMapping))
       .toMatchInlineSnapshot(`
       Object {
         "error": "Unknown rule type: something.",
@@ -72,11 +74,11 @@ describe('validateRoleMappingRules', () => {
 describe('validateRoleMappingForSave', () => {
   it('fails if the role mapping is missing a name', () => {
     expect(
-      validateRoleMappingForSave(({
+      validateRoleMappingForSave({
         enabled: true,
         roles: ['superuser'],
         rules: { field: { username: '*' } },
-      } as unknown) as RoleMapping)
+      } as unknown as RoleMapping)
     ).toMatchInlineSnapshot(`
       Object {
         "error": "Name is required.",
@@ -87,12 +89,12 @@ describe('validateRoleMappingForSave', () => {
 
   it('fails if the role mapping is missing rules', () => {
     expect(
-      validateRoleMappingForSave(({
+      validateRoleMappingForSave({
         name: 'foo',
         enabled: true,
         roles: ['superuser'],
         rules: {},
-      } as unknown) as RoleMapping)
+      } as unknown as RoleMapping)
     ).toMatchInlineSnapshot(`
       Object {
         "error": "At least one rule is required.",
@@ -103,13 +105,13 @@ describe('validateRoleMappingForSave', () => {
 
   it('fails if the role mapping is missing both roles and templates', () => {
     expect(
-      validateRoleMappingForSave(({
+      validateRoleMappingForSave({
         name: 'foo',
         enabled: true,
         roles: [],
         role_templates: [],
         rules: { field: { username: '*' } },
-      } as unknown) as RoleMapping)
+      } as unknown as RoleMapping)
     ).toMatchInlineSnapshot(`
       Object {
         "error": "At least one role is required.",
@@ -120,13 +122,13 @@ describe('validateRoleMappingForSave', () => {
 
   it('validates a correct role mapping using role templates', () => {
     expect(
-      validateRoleMappingForSave(({
+      validateRoleMappingForSave({
         name: 'foo',
         enabled: true,
         roles: [],
         role_templates: [{ template: { id: 'foo' } }],
         rules: { field: { username: '*' } },
-      } as unknown) as RoleMapping)
+      } as unknown as RoleMapping)
     ).toMatchInlineSnapshot(`
       Object {
         "isInvalid": false,
@@ -136,12 +138,12 @@ describe('validateRoleMappingForSave', () => {
 
   it('validates a correct role mapping using roles', () => {
     expect(
-      validateRoleMappingForSave(({
+      validateRoleMappingForSave({
         name: 'foo',
         enabled: true,
         roles: ['superuser'],
         rules: { field: { username: '*' } },
-      } as unknown) as RoleMapping)
+      } as unknown as RoleMapping)
     ).toMatchInlineSnapshot(`
       Object {
         "isInvalid": false,

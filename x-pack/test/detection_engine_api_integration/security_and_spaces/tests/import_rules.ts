@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,77 +16,25 @@ import {
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
+  getWebHookAction,
   removeServerGeneratedProperties,
   ruleToNdjson,
-  waitFor,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('import_rules', () => {
-    describe('importing rules without an index', () => {
-      it('should not create a rule if the index does not exist', async () => {
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .expect(400);
-
-        await waitFor(async () => {
-          const { body } = await supertest
-            .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
-            .send();
-          return body.status_code === 404;
-        }, `within should not create a rule if the index does not exist, ${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`);
-
-        // Try to fetch the rule which should still be a 404 (not found)
-        const { body } = await supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`).send();
-
-        expect(body).to.eql({
-          status_code: 404,
-          message: 'rule_id: "rule-1" not found',
-        });
-      });
-
-      it('should return an error that the index needs to be created before you are able to import a single rule', async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .expect(400);
-
-        expect(body).to.eql({
-          message:
-            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-          status_code: 400,
-        });
-      });
-
-      it('should return an error that the index needs to be created before you are able to import two rules', async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
-          .expect(400);
-
-        expect(body).to.eql({
-          message:
-            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-          status_code: 400,
-        });
-      });
-    });
-
     describe('importing rules with an index', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -367,6 +316,165 @@ export default ({ getService }: FtrProviderContext): void => {
           getSimpleRuleOutput('rule-2'),
           getSimpleRuleOutput('rule-3'),
         ]);
+      });
+
+      it('should give single connector error back if we have a single connector error message', async () => {
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: '123',
+              action_type_id: '456',
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          success: false,
+          success_count: 0,
+          errors: [
+            {
+              rule_id: 'rule-1',
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+            },
+          ],
+        });
+      });
+
+      it('should be able to import a rule with an action connector that exists', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+        expect(body).to.eql({ success: true, success_count: 1, errors: [] });
+      });
+
+      it('should be able to import 2 rules with action connectors that exist', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+
+        const rule2: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-2'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const rule1String = JSON.stringify(rule1);
+        const rule2String = JSON.stringify(rule2);
+        const buffer = Buffer.from(`${rule1String}\n${rule2String}\n`);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({ success: true, success_count: 2, errors: [] });
+      });
+
+      it('should be able to import 1 rule with an action connector that exists and get 1 other error back for a second rule that does not have the connector', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+
+        const rule2: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-2'),
+          actions: [
+            {
+              group: 'default',
+              id: '123', // <-- This does not exist
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const rule1String = JSON.stringify(rule1);
+        const rule2String = JSON.stringify(rule2);
+        const buffer = Buffer.from(`${rule1String}\n${rule2String}\n`);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          success: false,
+          success_count: 1,
+          errors: [
+            {
+              rule_id: 'rule-2',
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+            },
+          ],
+        });
       });
     });
   });

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
   patchRulesBulkSchema,
@@ -21,14 +22,14 @@ import { transformBulkError, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
+import { legacyMigrate } from '../../rules/utils';
 
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.patch(
     {
@@ -45,10 +46,11 @@ export const patchRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
+      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -58,7 +60,6 @@ export const patchRulesBulkRoute = (
         request,
         savedObjectsClient,
       });
-      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const {
@@ -122,15 +123,27 @@ export const patchRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const existingRule = await readRules({ alertsClient, ruleId, id });
+            const existingRule = await readRules({
+              isRuleRegistryEnabled,
+              rulesClient,
+              ruleId,
+              id,
+            });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
             }
 
-            const rule = await patchRules({
+            const migratedRule = await legacyMigrate({
+              rulesClient,
+              savedObjectsClient,
               rule: existingRule,
-              alertsClient,
+            });
+
+            const rule = await patchRules({
+              rule: migratedRule,
+              rulesClient,
+              savedObjectsClient,
               author,
               buildingBlockType,
               description,
@@ -143,7 +156,8 @@ export const patchRulesBulkRoute = (
               license,
               outputIndex,
               savedId,
-              savedObjectsClient,
+              spaceId: context.securitySolution.getSpaceId(),
+              ruleStatusClient,
               timelineId,
               timelineTitle,
               meta,
@@ -167,6 +181,7 @@ export const patchRulesBulkRoute = (
               threatQuery,
               threatMapping,
               threatLanguage,
+              throttle,
               concurrentSearches,
               itemsPerSearch,
               timestampOverride,
@@ -179,23 +194,11 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleActions = await updateRulesNotifications({
-                ruleAlertId: rule.id,
-                alertsClient,
-                savedObjectsClient,
-                enabled: rule.enabled,
-                actions,
-                throttle,
-                name: rule.name,
+              const ruleStatus = await ruleStatusClient.getCurrentStatus({
+                ruleId: rule.id,
+                spaceId: context.securitySolution.getSpaceId(),
               });
-              const ruleStatuses = await ruleStatusClient.find({
-                perPage: 1,
-                sortField: 'statusDate',
-                sortOrder: 'desc',
-                search: rule.id,
-                searchFields: ['alertId'],
-              });
-              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatus, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id, ruleId });
             }

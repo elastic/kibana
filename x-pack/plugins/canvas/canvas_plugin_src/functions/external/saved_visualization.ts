@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
@@ -11,9 +12,10 @@ import {
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
   id: string;
@@ -23,7 +25,7 @@ interface Arguments {
   title: string | null;
 }
 
-type Output = EmbeddableExpression<VisualizeInput>;
+type Output = EmbeddableExpression<VisualizeInput & { savedObjectId: string }>;
 
 const defaultTimeRange = {
   from: 'now-15m',
@@ -92,6 +94,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
+          savedObjectId: id,
           disableTriggers: true,
           timeRange: timerange || defaultTimeRange,
           filters: getQueryFilters(filters),
@@ -101,6 +104,31 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         embeddableType: EmbeddableTypes.visualization,
         generatedAt: Date.now(),
       };
+    },
+    extract(state) {
+      const refName = 'savedVisualization.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'visualization',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedVisualization.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
     },
   };
 }

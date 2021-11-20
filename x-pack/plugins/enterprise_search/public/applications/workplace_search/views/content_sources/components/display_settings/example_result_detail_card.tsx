@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,9 +12,10 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-import { DisplaySettingsLogic } from './display_settings_logic';
+import { URL_LABEL } from '../../../../constants';
 
 import { CustomSourceIcon } from './custom_source_icon';
+import { DisplaySettingsLogic } from './display_settings_logic';
 import { TitleField } from './title_field';
 
 export const ExampleResultDetailCard: React.FC = () => {
@@ -50,7 +52,7 @@ export const ExampleResultDetailCard: React.FC = () => {
               <div className="eui-textTruncate">{result[urlField]}</div>
             ) : (
               <span className="example-result-content-placeholder" data-test-subj="DefaultUrlLabel">
-                URL
+                {URL_LABEL}
               </span>
             )}
           </div>
@@ -58,20 +60,24 @@ export const ExampleResultDetailCard: React.FC = () => {
       </div>
       <div className="example-result-detail-card__content">
         {detailFields.length > 0 ? (
-          detailFields.map(({ fieldName, label }, index) => (
-            <div
-              data-test-subj="DetailField"
-              className="example-result-detail-card__field"
-              key={index}
-            >
-              <EuiTitle size="xs">
-                <h4>{label}</h4>
-              </EuiTitle>
-              <EuiText size="s" color="subdued">
-                <div className="eui-textBreakWord">{result[fieldName]}</div>
-              </EuiText>
-            </div>
-          ))
+          detailFields.map(({ fieldName, label }, index) => {
+            const value = result[fieldName];
+
+            return (
+              <div
+                className="example-result-detail-card__field"
+                key={index}
+                data-test-subj="DetailField"
+              >
+                <EuiTitle size="xs">
+                  <h4>{label}</h4>
+                </EuiTitle>
+                <EuiText size="s" color="subdued">
+                  <div className="eui-textBreakWord">{value}</div>
+                </EuiText>
+              </div>
+            );
+          })
         ) : (
           <EuiSpacer size="m" />
         )}

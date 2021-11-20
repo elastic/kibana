@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
 
-export const shardFailureRT = rt.type({
-  index: rt.string,
-  node: rt.string,
-  reason: rt.type({
-    reason: rt.string,
-    type: rt.string,
+export const shardFailureRT = rt.partial({
+  index: rt.union([rt.string, rt.null]),
+  node: rt.union([rt.string, rt.null]),
+  reason: rt.partial({
+    reason: rt.union([rt.string, rt.null]),
+    type: rt.union([rt.string, rt.null]),
   }),
   shard: rt.number,
 });

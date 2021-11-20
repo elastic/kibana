@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { LogRetentionOptions } from '../../log_retention';
+
 import { GenericConfirmationModal } from './generic_confirmation_modal';
 import { LogRetentionConfirmationModal } from './log_retention_confirmation_modal';
 
@@ -30,6 +33,13 @@ describe('<LogRetentionConfirmationModal />', () => {
         },
       },
       api: {
+        enabled: true,
+        retentionPolicy: {
+          isDefault: true,
+          minAgeDays: 7,
+        },
+      },
+      crawler: {
         enabled: true,
         retentionPolicy: {
           isDefault: true,
@@ -117,6 +127,44 @@ describe('<LogRetentionConfirmationModal />', () => {
       setMockValues({
         ...values,
         openedModal: LogRetentionOptions.API,
+      });
+
+      const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
+      const genericConfirmationModal = logRetentionPanel.find(GenericConfirmationModal);
+      genericConfirmationModal.prop('onClose')();
+      expect(actions.closeModals).toHaveBeenCalled();
+    });
+  });
+
+  describe('crawler', () => {
+    it('renders the Crawler panel when openedModal is set to Crawler', () => {
+      setMockValues({
+        ...values,
+        openedModal: LogRetentionOptions.Crawler,
+      });
+
+      const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
+      expect(
+        logRetentionPanel.find('[data-test-subj="CrawlerLogRetentionConfirmationModal"]').length
+      ).toBe(1);
+    });
+
+    it('calls saveLogRetention on save when showing crawler', () => {
+      setMockValues({
+        ...values,
+        openedModal: LogRetentionOptions.Crawler,
+      });
+
+      const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
+      const genericConfirmationModal = logRetentionPanel.find(GenericConfirmationModal);
+      genericConfirmationModal.prop('onSave')();
+      expect(actions.saveLogRetention).toHaveBeenCalledWith(LogRetentionOptions.Crawler, false);
+    });
+
+    it('calls closeModals on close', () => {
+      setMockValues({
+        ...values,
+        openedModal: LogRetentionOptions.Crawler,
       });
 
       const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);

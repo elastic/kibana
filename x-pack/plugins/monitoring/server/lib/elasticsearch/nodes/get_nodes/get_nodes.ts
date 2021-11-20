@@ -1,22 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
-// @ts-ignore
 import { checkParam } from '../../../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../../../create_query';
-// @ts-ignore
 import { calculateAuto } from '../../../calculate_auto';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../../metrics';
-// @ts-ignore
 import { getMetricAggs } from './get_metric_aggs';
 import { handleResponse } from './handle_response';
-// @ts-ignore
 import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
 import { LegacyRequest } from '../../../../types';
 import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
@@ -75,7 +70,7 @@ export async function getNodes(
   const params = {
     index: esIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'),
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         type: 'node_stats',
@@ -102,15 +97,16 @@ export async function getNodes(
                 min_doc_count: 0,
                 fixed_interval: bucketSize + 's',
               },
-              aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize),
+              aggs: getMetricAggs(LISTING_METRICS_NAMES),
             },
           },
         },
       },
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
-    filterPath: [
+    filter_path: [
       'hits.hits._source.source_node',
+      'hits.hits._source.service.address',
       'hits.hits._source.elasticsearch.node',
       'aggregations.nodes.buckets.key',
       ...LISTING_METRICS_PATHS,

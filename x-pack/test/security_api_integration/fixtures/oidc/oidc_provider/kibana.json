@@ -1,5 +1,6 @@
 {
-  "id": "oidc_provider_plugin",
+  "id": "oidcProviderPlugin",
+  "owner": { "name": "Platform Security", "githubTeam": "kibana-security" },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "server": true,

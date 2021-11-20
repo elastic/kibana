@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -20,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { getHistogramDetailsUrl } from '../../../services';
+import { documentationLinks } from '../../../services/documentation_links';
 
 import { FieldList } from '../../components';
 
@@ -96,7 +97,7 @@ export class StepHistogram extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={getHistogramDetailsUrl()}
+              href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateHistogramDocsButton"

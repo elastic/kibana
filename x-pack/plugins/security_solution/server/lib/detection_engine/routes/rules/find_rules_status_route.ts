@@ -1,26 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { RuleStatusResponse } from '../../rules/types';
-import { transformError, buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
 import {
   findRulesStatusesSchema,
   FindRulesStatusesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/find_rule_statuses_schema';
+import { mergeAlertWithSidecarStatus } from '../../schemas/rule_converters';
 
 /**
- * Given a list of rule ids, return the current status and
- * last five errors for each associated rule.
+ * Returns the current execution status and metrics for N rules.
+ * Accepts an array of rule ids.
+ *
+ * NOTE: This endpoint is used on the Rule Management page and will be reworked.
+ * See the plan in https://github.com/elastic/kibana/pull/115574
  *
  * @param router
- * @returns RuleStatusResponse
+ * @returns RuleStatusResponse containing data for N requested rules.
+ * RuleStatusResponse[ruleId].failures is always an empty array, because
+ * we don't need failure history of every rule when we render tables with rules.
  */
 export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -38,54 +44,38 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
     async (context, request, response) => {
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const rulesClient = context.alerting?.getRulesClient();
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
       const ids = body.ids;
       try {
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-        const failingRules = await getFailingRules(ids, alertsClient);
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const [currentStatusesByRuleId, failingRules] = await Promise.all([
+          ruleStatusClient.getCurrentStatusBulk({
+            ruleIds: ids,
+            spaceId: context.securitySolution.getSpaceId(),
+          }),
+          getFailingRules(ids, rulesClient),
+        ]);
 
-        const statuses = await ids.reduce(async (acc, id) => {
-          const accumulated = await acc;
-          const lastFiveErrorsForId = await ruleStatusClient.find({
-            perPage: 6,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: id,
-            searchFields: ['alertId'],
-          });
-
-          if (lastFiveErrorsForId.saved_objects.length === 0) {
-            return accumulated;
-          }
-
+        const statuses = ids.reduce((acc, id) => {
+          const currentStatus = currentStatusesByRuleId[id];
           const failingRule = failingRules[id];
-          const lastFailureAt = lastFiveErrorsForId.saved_objects[0].attributes.lastFailureAt;
 
-          if (
-            failingRule != null &&
-            (lastFailureAt == null ||
-              new Date(failingRule.executionStatus.lastExecutionDate) > new Date(lastFailureAt))
-          ) {
-            const currentStatus = lastFiveErrorsForId.saved_objects[0];
-            currentStatus.attributes.lastFailureMessage = `Reason: ${failingRule.executionStatus.error?.reason} Message: ${failingRule.executionStatus.error?.message}`;
-            currentStatus.attributes.lastFailureAt = failingRule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.statusDate = failingRule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.status = 'failed';
-            const updatedLastFiveErrorsSO = [
-              currentStatus,
-              ...lastFiveErrorsForId.saved_objects.slice(1),
-            ];
-
-            return mergeStatuses(id, updatedLastFiveErrorsSO, accumulated);
+          if (currentStatus == null) {
+            return acc;
           }
-          return mergeStatuses(id, [...lastFiveErrorsForId.saved_objects], accumulated);
-        }, Promise.resolve<RuleStatusResponse>({}));
+
+          const finalCurrentStatus =
+            failingRule != null
+              ? mergeAlertWithSidecarStatus(failingRule, currentStatus)
+              : currentStatus;
+
+          return mergeStatuses(id, [finalCurrentStatus], acc);
+        }, {});
 
         return response.ok({ body: statuses });
       } catch (err) {

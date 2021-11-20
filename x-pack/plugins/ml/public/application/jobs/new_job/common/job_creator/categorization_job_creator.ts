@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, mlCategory } from '../../../../../../common/types/fields';
@@ -23,10 +24,12 @@ import {
   CategorizationAnalyzer,
   CategoryFieldExample,
   FieldExampleCheck,
+  VALIDATION_RESULT,
 } from '../../../../../../common/types/categories';
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader } from '../results_loader';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
+import { isCcsIndexPattern } from '../../../../util/index_utils';
 
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
@@ -42,12 +45,9 @@ export class CategorizationJobCreator extends JobCreator {
   private _categorizationAnalyzer: CategorizationAnalyzer = {};
   private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
   private _partitionFieldName: string | null = null;
+  private _ccsVersionFailure: boolean = false;
 
-  constructor(
-    indexPattern: IndexPattern,
-    savedSearch: SavedSearchSavedObject | null,
-    query: object
-  ) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);
@@ -62,7 +62,7 @@ export class CategorizationJobCreator extends JobCreator {
     eventRate: Field | null
   ) {
     if (count === null || rare === null || eventRate === null) {
-      return;
+      throw Error('event_rate field or count or rare aggregations missing');
     }
 
     this._createCountDetector = () => {
@@ -115,19 +115,44 @@ export class CategorizationJobCreator extends JobCreator {
   }
 
   public async loadCategorizationFieldExamples() {
-    const {
-      examples,
-      sampleSize,
-      overallValidStatus,
-      validationChecks,
-    } = await this._examplesLoader.loadExamples();
+    const { examples, sampleSize, overallValidStatus, validationChecks } =
+      await this._examplesLoader.loadExamples();
     this._categoryFieldExamples = examples;
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;
 
+    this._ccsVersionFailure = this._checkCcsFailure(examples, overallValidStatus, validationChecks);
+    if (this._ccsVersionFailure === true) {
+      // if the data view contains a cross-cluster search, one of the clusters may
+      // be on a version which doesn't support the fields API (e.g. 6.8)
+      // and so the categorization examples endpoint will fail
+      // if this is the case, we need to allow the user to progress in the wizard.
+      this._overallValidStatus = CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
+    }
+
     this._wizardInitialized$.next(true);
 
-    return { examples, sampleSize, overallValidStatus, validationChecks };
+    return {
+      examples,
+      sampleSize,
+      overallValidStatus,
+      validationChecks,
+      ccsVersionFailure: this._ccsVersionFailure,
+    };
+  }
+
+  // Check to see if the examples failed due to a cross-cluster search being used
+  private _checkCcsFailure(
+    examples: CategoryFieldExample[],
+    status: CATEGORY_EXAMPLES_VALIDATION_STATUS,
+    checks: FieldExampleCheck[]
+  ) {
+    return (
+      examples.length === 0 &&
+      status === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID &&
+      checks[0]?.id === VALIDATION_RESULT.NO_EXAMPLES &&
+      isCcsIndexPattern(this.indexPatternTitle)
+    );
   }
 
   public get categoryFieldExamples() {

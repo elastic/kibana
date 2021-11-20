@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
+import type { EntityType } from '../../../../../timelines/common';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { NetworkComponentQueryProps } from '../../../network/pages/navigation/types';
@@ -22,5 +24,6 @@ export interface AlertsComponentsProps
   stackByOptions?: MatrixHistogramOption[];
   defaultFilters?: Filter[];
   defaultStackByOption?: MatrixHistogramOption;
+  entityType?: EntityType;
   indexNames: string[];
 }

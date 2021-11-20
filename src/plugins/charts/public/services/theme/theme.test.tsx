@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { render, act as renderAct } from '@testing-library/react';
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
@@ -105,6 +107,30 @@ describe('ThemeService', () => {
       act(() => darkMode$.next(false));
       expect(result.current).toBe(EUI_CHARTS_THEME_LIGHT.theme);
     });
+
+    it('should not rerender when emitting the same value', () => {
+      const darkMode$ = new BehaviorSubject(false);
+      setupMockUiSettings.get$.mockReturnValue(darkMode$);
+      const themeService = new ThemeService();
+      themeService.init(setupMockUiSettings);
+      const { useChartsTheme } = themeService;
+
+      const renderCounter = jest.fn();
+      const Wrapper = () => {
+        useChartsTheme();
+        renderCounter();
+        return null;
+      };
+
+      render(<Wrapper />);
+      expect(renderCounter).toHaveBeenCalledTimes(1);
+      renderAct(() => darkMode$.next(true));
+      expect(renderCounter).toHaveBeenCalledTimes(2);
+      renderAct(() => darkMode$.next(true));
+      renderAct(() => darkMode$.next(true));
+      renderAct(() => darkMode$.next(true));
+      expect(renderCounter).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('useBaseChartTheme', () => {
@@ -122,6 +148,30 @@ describe('ThemeService', () => {
       expect(result.current).toBe(DARK_THEME);
       act(() => darkMode$.next(false));
       expect(result.current).toBe(LIGHT_THEME);
+    });
+
+    it('should not rerender when emitting the same value', () => {
+      const darkMode$ = new BehaviorSubject(false);
+      setupMockUiSettings.get$.mockReturnValue(darkMode$);
+      const themeService = new ThemeService();
+      themeService.init(setupMockUiSettings);
+      const { useChartsBaseTheme } = themeService;
+
+      const renderCounter = jest.fn();
+      const Wrapper = () => {
+        useChartsBaseTheme();
+        renderCounter();
+        return null;
+      };
+
+      render(<Wrapper />);
+      expect(renderCounter).toHaveBeenCalledTimes(1);
+      renderAct(() => darkMode$.next(true));
+      expect(renderCounter).toHaveBeenCalledTimes(2);
+      renderAct(() => darkMode$.next(true));
+      renderAct(() => darkMode$.next(true));
+      renderAct(() => darkMode$.next(true));
+      expect(renderCounter).toHaveBeenCalledTimes(2);
     });
   });
 });

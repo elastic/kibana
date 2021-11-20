@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -17,41 +18,43 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
 
     it('should return 200 when creating a builtin server-log action', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A server.log action',
-          actionTypeId: '.server-log',
+          connector_type_id: '.server-log',
         })
         .expect(200);
 
       serverLogActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
+        is_missing_secrets: false,
         name: 'A server.log action',
-        actionTypeId: '.server-log',
+        connector_type_id: '.server-log',
         config: {},
       });
 
       expect(typeof createdAction.id).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/actions/action/${createdAction.id}`)
+        .get(`/api/actions/connector/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
         name: 'A server.log action',
-        actionTypeId: '.server-log',
+        connector_type_id: '.server-log',
+        is_missing_secrets: false,
         config: {},
       });
     });
 
     it('should handle firing the action', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${serverLogActionId}/_execute`)
+        .post(`/api/actions/connector/${serverLogActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

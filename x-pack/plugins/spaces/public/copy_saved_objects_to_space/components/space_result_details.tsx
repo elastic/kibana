@@ -1,37 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './space_result_details.scss';
-import React, { Fragment } from 'react';
+
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiToolTip,
   EuiIcon,
+  EuiSuperSelect,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-} from 'kibana/public';
-import { EuiSuperSelect } from '@elastic/eui';
 import moment from 'moment';
-import { SummarizedCopyToSpaceResult } from '../index';
-import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import React, { Fragment } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import type {
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportConflictError,
+} from 'src/core/public';
+
+import type { SpacesDataEntry } from '../../types';
+import type { SummarizedCopyToSpaceResult } from '../lib';
+import type { ImportRetry } from '../types';
 import { CopyStatusIndicator } from './copy_status_indicator';
-import { ImportRetry } from '../types';
 
 interface Props {
-  savedObject: SavedObjectsManagementRecord;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
-  space: Space;
+  space: SpacesDataEntry;
   retries: ImportRetry[];
   onRetriesChange: (retries: ImportRetry[]) => void;
   destinationMap: Map<string, string>;

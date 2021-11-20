@@ -1,20 +1,51 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { SavedObjectsClientContract } from 'src/core/server';
-import { NewOutput, Output, OutputSOAttributes } from '../types';
+
+import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import uuid from 'uuid/v5';
+
+import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
+import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT } from '../../common';
+import { OutputUnauthorizedError } from '../errors';
+
 import { appContextService } from './app_context';
-import { decodeCloudId } from '../../common';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
-let cachedAdminUser: null | { username: string; password: string } = null;
+const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
+
+// differentiate
+function isUUID(val: string) {
+  return (
+    typeof val === 'string' &&
+    val.match(/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/)
+  );
+}
+
+export function outputIdToUuid(id: string) {
+  if (isUUID(id)) {
+    return id;
+  }
+
+  // UUID v5 need a namespace (uuid.DNS), changing this params will result in loosing the ability to generate predicable uuid
+  return uuid(id, uuid.DNS);
+}
+
+function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
+  const { output_id: outputId, ...atributes } = so.attributes;
+  return {
+    id: outputId ?? so.id,
+    ...atributes,
+  };
+}
 
 class OutputService {
-  public async getDefaultOutput(soClient: SavedObjectsClientContract) {
+  private async _getDefaultDataOutputsSO(soClient: SavedObjectsClientContract) {
     return await soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
@@ -22,136 +53,247 @@ class OutputService {
     });
   }
 
-  public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
-    const outputs = await this.getDefaultOutput(soClient);
-    const cloud = appContextService.getCloud();
-    const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-    const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
-    const flagsUrl = appContextService.getConfig()!.agents.elasticsearch.host;
-    const defaultUrl = 'http://localhost:9200';
-    const defaultOutputUrl = cloudUrl || flagsUrl || defaultUrl;
+  private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
+    return await soClient.find<OutputSOAttributes>({
+      type: OUTPUT_SAVED_OBJECT_TYPE,
+      searchFields: ['is_default_monitoring'],
+      search: 'true',
+    });
+  }
 
-    if (!outputs.saved_objects.length) {
+  public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
+    const outputs = await this.list(soClient);
+
+    const defaultOutput = outputs.items.find((o) => o.is_default);
+    const defaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
+
+    if (!defaultOutput) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
-        hosts: [defaultOutputUrl],
+        hosts: this.getDefaultESHosts(),
         ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
+        is_default_monitoring: !defaultMonitoringOutput,
       } as NewOutput;
 
       return await this.create(soClient, newDefaultOutput);
     }
 
-    return {
-      id: outputs.saved_objects[0].id,
-      ...outputs.saved_objects[0].attributes,
-    };
+    return defaultOutput;
   }
 
-  public async updateOutput(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    data: Partial<NewOutput>
-  ) {
-    await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
+  public getDefaultESHosts(): string[] {
+    const cloud = appContextService.getCloud();
+    const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+    const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
+    const cloudHosts = cloudUrl ? [cloudUrl] : undefined;
+    const flagHosts =
+      appContextService.getConfig()!.agents?.elasticsearch?.hosts &&
+      appContextService.getConfig()!.agents.elasticsearch.hosts?.length
+        ? appContextService.getConfig()!.agents.elasticsearch.hosts
+        : undefined;
+
+    return cloudHosts || flagHosts || DEFAULT_ES_HOSTS;
   }
 
-  public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
-    const outputs = await this.getDefaultOutput(soClient);
+  public async getDefaultDataOutputId(soClient: SavedObjectsClientContract) {
+    const outputs = await this._getDefaultDataOutputsSO(soClient);
 
     if (!outputs.saved_objects.length) {
       return null;
     }
 
-    return outputs.saved_objects[0].id;
+    return outputSavedObjectToOutput(outputs.saved_objects[0]).id;
   }
 
-  public async getAdminUser(soClient: SavedObjectsClientContract, useCache = true) {
-    if (useCache && cachedAdminUser) {
-      return cachedAdminUser;
-    }
+  public async getDefaultMonitoringOutputId(soClient: SavedObjectsClientContract) {
+    const outputs = await this._getDefaultMonitoringOutputsSO(soClient);
 
-    const defaultOutputId = await this.getDefaultOutputId(soClient);
-    if (!defaultOutputId) {
-      return null;
-    }
-    const so = await appContextService
-      .getEncryptedSavedObjects()
-      ?.getDecryptedAsInternalUser<OutputSOAttributes>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
-
-    if (!so || !so.attributes.fleet_enroll_username || !so.attributes.fleet_enroll_password) {
+    if (!outputs.saved_objects.length) {
       return null;
     }
 
-    cachedAdminUser = {
-      username: so!.attributes.fleet_enroll_username,
-      password: so!.attributes.fleet_enroll_password,
-    };
-
-    return cachedAdminUser;
+    return outputSavedObjectToOutput(outputs.saved_objects[0]).id;
   }
 
   public async create(
     soClient: SavedObjectsClientContract,
     output: NewOutput,
-    options?: { id?: string }
+    options?: { id?: string; fromPreconfiguration?: boolean }
   ): Promise<Output> {
-    const newSo = await soClient.create<OutputSOAttributes>(
-      SAVED_OBJECT_TYPE,
-      output as Output,
-      options
-    );
+    const data: OutputSOAttributes = { ...output };
+
+    // ensure only default output exists
+    if (data.is_default) {
+      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
+      if (defaultDataOuputId) {
+        await this.update(
+          soClient,
+          defaultDataOuputId,
+          { is_default: false },
+          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
+        );
+      }
+    }
+    if (data.is_default_monitoring) {
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      if (defaultMonitoringOutputId) {
+        await this.update(
+          soClient,
+          defaultMonitoringOutputId,
+          { is_default_monitoring: false },
+          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
+        );
+      }
+    }
+
+    if (data.hosts) {
+      data.hosts = data.hosts.map(normalizeHostsForAgents);
+    }
+
+    if (options?.id) {
+      data.output_id = options?.id;
+    }
+
+    const newSo = await soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
+      overwrite: options?.fromPreconfiguration,
+      id: options?.id ? outputIdToUuid(options.id) : undefined,
+    });
 
     return {
-      id: newSo.id,
+      id: options?.id ?? newSo.id,
       ...newSo.attributes,
     };
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, id);
+  public async bulkGet(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    { ignoreNotFound = false } = { ignoreNotFound: true }
+  ) {
+    const res = await soClient.bulkGet<OutputSOAttributes>(
+      ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
+    );
 
-    if (outputSO.error) {
-      throw new Error(outputSO.error.message);
-    }
+    return res.saved_objects
+      .map((so) => {
+        if (so.error) {
+          if (!ignoreNotFound || so.error.statusCode !== 404) {
+            throw so.error;
+          }
+          return undefined;
+        }
 
-    return {
-      id: outputSO.id,
-      ...outputSO.attributes,
-    };
-  }
-
-  public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
-    const outputSO = await soClient.update<OutputSOAttributes>(SAVED_OBJECT_TYPE, id, data);
-
-    if (outputSO.error) {
-      throw new Error(outputSO.error.message);
-    }
+        return outputSavedObjectToOutput(so);
+      })
+      .filter((output): output is Output => typeof output !== 'undefined');
   }
 
   public async list(soClient: SavedObjectsClientContract) {
     const outputs = await soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
-      perPage: 1000,
+      perPage: SO_SEARCH_LIMIT,
     });
 
     return {
-      items: outputs.saved_objects.map<Output>((outputSO) => {
-        return {
-          id: outputSO.id,
-          ...outputSO.attributes,
-        };
-      }),
+      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
-      page: 1,
-      perPage: 1000,
+      page: outputs.page,
+      perPage: outputs.per_page,
     };
   }
 
-  // Warning! This method is not going to working in a scenario with multiple Kibana instances,
-  // in this case Kibana should be restarted if the Admin User change
-  public invalidateCache() {
-    cachedAdminUser = null;
+  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
+    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+
+    if (outputSO.error) {
+      throw new Error(outputSO.error.message);
+    }
+
+    return outputSavedObjectToOutput(outputSO);
+  }
+
+  public async delete(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
+      fromPreconfiguration: false,
+    }
+  ) {
+    const originalOutput = await this.get(soClient, id);
+
+    if (originalOutput.is_preconfigured && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(
+        `Preconfigured output ${id} cannot be deleted outside of kibana config file.`
+      );
+    }
+
+    if (originalOutput.is_default && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(`Default output ${id} cannot be deleted.`);
+    }
+
+    if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
+    }
+
+    return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+  }
+
+  public async update(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    data: Partial<Output>,
+    { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {
+      fromPreconfiguration: false,
+    }
+  ) {
+    const originalOutput = await this.get(soClient, id);
+
+    if (originalOutput.is_preconfigured && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(
+        `Preconfigured output ${id} cannot be updated outside of kibana config file.`
+      );
+    }
+
+    const updateData = { ...data };
+
+    // ensure only default output exists
+    if (data.is_default) {
+      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
+      if (defaultDataOuputId && defaultDataOuputId !== id) {
+        await this.update(
+          soClient,
+          defaultDataOuputId,
+          { is_default: false },
+          { fromPreconfiguration }
+        );
+      }
+    }
+    if (data.is_default_monitoring) {
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+
+      if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
+        await this.update(
+          soClient,
+          defaultMonitoringOutputId,
+          { is_default_monitoring: false },
+          { fromPreconfiguration }
+        );
+      }
+    }
+
+    if (updateData.hosts) {
+      updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    }
+    const outputSO = await soClient.update<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      outputIdToUuid(id),
+      updateData
+    );
+
+    if (outputSO.error) {
+      throw new Error(outputSO.error.message);
+    }
   }
 }
 

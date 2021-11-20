@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import mustache from 'mustache';
@@ -12,10 +13,6 @@ import {
   ActionTypeRegistryContract,
 } from '../../../../../../triggers_actions_ui/public';
 import * as I18n from './translations';
-
-const UUID_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
-
-export const isUuid = (id: AlertAction['id']) => !!id.match(UUID_REGEX);
 
 export const getActionTypeName = (actionTypeId: AlertAction['actionTypeId']) => {
   if (!actionTypeId) return '';
@@ -40,11 +37,11 @@ export const validateMustache = (params: AlertAction['params']) => {
   return errors;
 };
 
-export const validateActionParams = (
+export const validateActionParams = async (
   actionItem: AlertAction,
   actionTypeRegistry: ActionTypeRegistryContract
-): string[] => {
-  const actionErrors = actionTypeRegistry
+): Promise<string[]> => {
+  const actionErrors = await actionTypeRegistry
     .get(actionItem.actionTypeId)
     ?.validateParams(actionItem.params);
 

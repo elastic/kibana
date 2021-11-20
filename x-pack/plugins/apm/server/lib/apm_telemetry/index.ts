@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -22,7 +24,7 @@ import {
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 import {
   collectDataTelemetry,
   CollectTelemetryParams,
@@ -74,7 +76,7 @@ export async function createApmTelemetry({
     });
 
     const search: CollectTelemetryParams['search'] = (params) =>
-      unwrapEsResponse(esClient.asInternalUser.search<any>(params));
+      unwrapEsResponse(esClient.asInternalUser.search(params)) as any;
 
     const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
       unwrapEsResponse(esClient.asInternalUser.indices.stats(params));

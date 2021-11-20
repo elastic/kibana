@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
@@ -13,8 +13,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const returnTrue = () => true;
 
-const defaultOnFailure = (methodName: string) => (lastError: Error) => {
-  throw new Error(`${methodName} timeout: ${lastError.stack || lastError.message}`);
+const defaultOnFailure = (methodName: string) => (lastError: Error | undefined) => {
+  throw new Error(
+    `${methodName} timeout${lastError ? `: ${lastError.stack || lastError.message}` : ''}`
+  );
 };
 
 /**
@@ -53,7 +55,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   let lastError;
 
   while (true) {
-    if (lastError && Date.now() - start > timeout) {
+    if (Date.now() - start > timeout) {
       await onFailure(lastError);
       throw new Error('expected onFailure() option to throw an error');
     } else if (lastError && onFailureBlock) {

@@ -1,20 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
 
-import { Case } from './pages';
-import { NotFoundPage } from '../app/404';
+import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { SecuritySubPluginRoutes } from '../app/types';
+import { CASES_PATH } from '../../common/constants';
+import { Cases } from './pages';
 
-export const CasesRoutes: React.FC = () => (
-  <Switch>
-    <Route path="/">
-      <Case />
-    </Route>
-    <Route render={() => <NotFoundPage />} />
-  </Switch>
+export const CasesRoutes = () => (
+  <TrackApplicationView viewId="case">
+    <Cases />
+  </TrackApplicationView>
 );
+
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: CASES_PATH,
+    render: CasesRoutes,
+  },
+];

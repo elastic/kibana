@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useEffect, Fragment, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -17,6 +17,7 @@ import {
   EuiFieldSearch,
   EuiSelect,
   EuiSelectOption,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
@@ -34,11 +35,13 @@ import { SourceFiltersTable } from '../source_filters_table';
 import { IndexedFieldsTable } from '../indexed_fields_table';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 import { getTabs, getPath, convertToEuiSelectOption } from './utils';
+import { getFieldInfo } from '../../utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
   fields: IndexPatternField[];
   saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  refreshFields: () => void;
 }
 
 const searchAriaLabel = i18n.translate(
@@ -62,12 +65,23 @@ const filterPlaceholder = i18n.translate(
   }
 );
 
-export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
-  const {
-    uiSettings,
-    indexPatternManagementStart,
-    docLinks,
-  } = useKibana<IndexPatternManagmentContext>().services;
+const addFieldButtonLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.addFieldButtonLabel',
+  {
+    defaultMessage: 'Add field',
+  }
+);
+
+export function Tabs({
+  indexPattern,
+  saveIndexPattern,
+  fields,
+  history,
+  location,
+  refreshFields,
+}: TabsProps) {
+  const { application, uiSettings, docLinks, indexPatternFieldEditor } =
+    useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');
@@ -76,6 +90,8 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
   const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
+  const closeEditorHandler = useRef<() => void | undefined>();
+  const { DeleteRuntimeFieldProvider } = indexPatternFieldEditor;
 
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
@@ -86,7 +102,9 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           tempScriptedFieldLanguages.push(field.lang);
         }
       } else {
-        tempIndexedFieldTypes.push(field.type);
+        if (field.esTypes) {
+          tempIndexedFieldTypes.push(field.esTypes?.join(', '));
+        }
       }
     });
 
@@ -96,15 +114,42 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     );
   }, [indexPattern]);
 
+  const closeFieldEditor = useCallback(() => {
+    if (closeEditorHandler.current) {
+      closeEditorHandler.current();
+    }
+  }, []);
+
+  const openFieldEditor = useCallback(
+    (fieldName?: string) => {
+      closeEditorHandler.current = indexPatternFieldEditor.openEditor({
+        ctx: {
+          indexPattern,
+        },
+        onSave: refreshFields,
+        fieldName,
+      });
+    },
+    [indexPatternFieldEditor, indexPattern, refreshFields]
+  );
+
   useEffect(() => {
     refreshFilters();
   }, [indexPattern, indexPattern.fields, refreshFilters]);
+
+  useEffect(() => {
+    return () => {
+      // When the component unmounts, make sure to close the field editor
+      closeFieldEditor();
+    };
+  }, [closeFieldEditor]);
 
   const fieldWildcardMatcherDecorated = useCallback(
     (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get(UI_SETTINGS.META_FIELDS)),
     [uiSettings]
   );
 
+  const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
   const getFilterSection = useCallback(
     (type: string) => {
       return (
@@ -120,15 +165,24 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
             />
           </EuiFlexItem>
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiSelect
-                options={indexedFieldTypes}
-                value={indexedFieldTypeFilter}
-                onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
-                data-test-subj="indexedFieldTypeFilterDropdown"
-                aria-label={filterAriaLabel}
-              />
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  options={indexedFieldTypes}
+                  value={indexedFieldTypeFilter}
+                  onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
+                  data-test-subj="indexedFieldTypeFilterDropdown"
+                  aria-label={filterAriaLabel}
+                />
+              </EuiFlexItem>
+              {userEditPermission && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton fill onClick={() => openFieldEditor()} data-test-subj="addField">
+                    {addFieldButtonLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+            </>
           )}
           {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
             <EuiFlexItem grow={false}>
@@ -149,6 +203,8 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       indexedFieldTypes,
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
+      openFieldEditor,
+      userEditPermission,
     ]
   );
 
@@ -161,19 +217,22 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
               <EuiSpacer size="m" />
               {getFilterSection(type)}
               <EuiSpacer size="m" />
-              <IndexedFieldsTable
-                fields={fields}
-                indexPattern={indexPattern}
-                fieldFilter={fieldFilter}
-                fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-                indexedFieldTypeFilter={indexedFieldTypeFilter}
-                helpers={{
-                  redirectToRoute: (field: IndexPatternField) => {
-                    history.push(getPath(field, indexPattern));
-                  },
-                  getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
-                }}
-              />
+              <DeleteRuntimeFieldProvider indexPattern={indexPattern} onDelete={refreshFields}>
+                {(deleteField) => (
+                  <IndexedFieldsTable
+                    fields={fields}
+                    indexPattern={indexPattern}
+                    fieldFilter={fieldFilter}
+                    fieldWildcardMatcher={fieldWildcardMatcherDecorated}
+                    indexedFieldTypeFilter={indexedFieldTypeFilter}
+                    helpers={{
+                      editField: openFieldEditor,
+                      deleteField,
+                      getFieldInfo,
+                    }}
+                  />
+                )}
+              </DeleteRuntimeFieldProvider>
             </Fragment>
           );
         case TAB_SCRIPTED_FIELDS:
@@ -222,39 +281,35 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       getFilterSection,
       history,
       indexPattern,
-      indexPatternManagementStart.list.getFieldInfo,
       indexedFieldTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
+      openFieldEditor,
+      DeleteRuntimeFieldProvider,
+      refreshFields,
     ]
   );
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter, indexPatternManagementStart.list).map(
-        (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
-          return {
-            ...tab,
-            content: getContent(tab.id),
-          };
-        }
-      ),
-    [fieldFilter, getContent, indexPattern, indexPatternManagementStart.list]
+      getTabs(indexPattern, fieldFilter).map((tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
+        return {
+          ...tab,
+          content: getContent(tab.id),
+        };
+      }),
+    [fieldFilter, getContent, indexPattern]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
 
   useEffect(() => {
-    const {
-      startSyncingState,
-      stopSyncingState,
-      setCurrentTab,
-      getCurrentTab,
-    } = createEditIndexPatternPageStateContainer({
-      useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
-      defaultTab: TAB_INDEXED_FIELDS,
-    });
+    const { startSyncingState, stopSyncingState, setCurrentTab, getCurrentTab } =
+      createEditIndexPatternPageStateContainer({
+        useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
+        defaultTab: TAB_INDEXED_FIELDS,
+      });
 
     startSyncingState();
     setSyncingStateFunc({

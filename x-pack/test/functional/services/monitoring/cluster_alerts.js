@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { range } from 'lodash';
-import { map as mapAsync } from 'bluebird';
 
 export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
@@ -60,9 +60,11 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
       const listingRows = await this.getOverviewAlerts();
       const alertIcons = await retry.try(async () => {
         const elements = await find.allByCssSelector(SUBJ_OVERVIEW_ICONS);
-        return await mapAsync(elements, async (element) => {
-          return await element.getVisibleText();
-        });
+        return await Promise.all(
+          elements.map(async (element) => {
+            return await element.getVisibleText();
+          })
+        );
       });
 
       return await this._getAlertSetAll({

@@ -1,23 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { compose, branch, renderComponent } from 'recompose';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { NoDatasource } from './no_datasource';
 import { DatasourceComponent } from './datasource_component';
 
-const branches = [
-  // rendered when there is no datasource in the expression
-  branch(
-    ({ datasource, stateDatasource }) => !datasource || !stateDatasource,
-    renderComponent(NoDatasource)
-  ),
-];
+export const Datasource = (props) => {
+  const { datasource, stateDatasource } = props;
+  if (!datasource || !stateDatasource) {
+    return <NoDatasource {...props} />;
+  }
 
-export const Datasource = compose(...branches)(DatasourceComponent);
+  return <DatasourceComponent {...props} />;
+};
 
 Datasource.propTypes = {
   args: PropTypes.object,

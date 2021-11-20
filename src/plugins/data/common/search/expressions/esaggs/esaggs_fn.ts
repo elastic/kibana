@@ -1,34 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
 
-import {
-  Datatable,
-  DatatableColumn,
-  ExpressionFunctionDefinition,
-} from 'src/plugins/expressions/common';
+import type { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { buildExpressionFunction } from '../../../../../../plugins/expressions/common';
 
-import { FormatFactory } from '../../../field_formats/utils';
-import { IndexPatternExpressionType } from '../../../index_patterns/expressions';
-import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
-import { calculateBounds } from '../../../query';
+import { IndexPatternExpressionType } from '../../../../../data_views/common/expressions';
+import { IndexPatternsContract } from '../../..';
 
-import { AggsStart, AggExpressionType } from '../../aggs';
+import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 
 import { KibanaContext } from '../kibana_context_type';
-import { handleRequest, RequestHandlerParams } from './request_handler';
+import { handleRequest } from './request_handler';
 
 const name = 'esaggs';
 
 type Input = KibanaContext | null;
-type Output = Promise<Datatable>;
+type Output = Observable<Datatable>;
 
 interface Arguments {
   index: IndexPatternExpressionType;
@@ -48,7 +44,6 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
 /** @internal */
 export interface EsaggsStartDependencies {
   aggs: AggsStart;
-  deserializeFieldFormat: FormatFactory;
   indexPatterns: IndexPatternsContract;
   searchSource: ISearchStartSearchSource;
   getNow?: () => Date;
@@ -67,13 +62,13 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       types: ['index_pattern'],
       required: true,
       help: i18n.translate('data.search.functions.esaggs.index.help', {
-        defaultMessage: 'Index pattern retrieved with indexPatternLoad',
+        defaultMessage: 'Data view retrieved with indexPatternLoad',
       }),
     },
     aggs: {
       types: ['agg_type'],
       multi: true,
-      default: [],
+      default: `{${buildExpressionFunction(aggCountFnName, {}).toString()}}`,
       help: i18n.translate('data.search.functions.esaggs.aggConfigs.help', {
         defaultMessage: 'List of aggs configured with agg_type functions',
       }),
@@ -103,48 +98,4 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
 });
 
 /** @internal */
-export async function handleEsaggsRequest(
-  input: Input,
-  args: Arguments,
-  params: RequestHandlerParams
-): Promise<Datatable> {
-  const resolvedTimeRange =
-    input?.timeRange && calculateBounds(input.timeRange, { forceNow: params.getNow?.() });
-
-  const response = await handleRequest(params);
-
-  const table: Datatable = {
-    type: 'datatable',
-    rows: response.rows,
-    columns: response.columns.map((column) => {
-      const cleanedColumn: DatatableColumn = {
-        id: column.id,
-        name: column.name,
-        meta: {
-          type: column.aggConfig.params.field?.type || 'number',
-          field: column.aggConfig.params.field?.name,
-          index: params.indexPattern?.title,
-          params: column.aggConfig.toSerializedFieldFormat(),
-          source: name,
-          sourceParams: {
-            indexPatternId: params.indexPattern?.id,
-            appliedTimeRange:
-              column.aggConfig.params.field?.name &&
-              input?.timeRange &&
-              args.timeFields &&
-              args.timeFields.includes(column.aggConfig.params.field?.name)
-                ? {
-                    from: resolvedTimeRange?.min?.toISOString(),
-                    to: resolvedTimeRange?.max?.toISOString(),
-                  }
-                : undefined,
-            ...column.aggConfig.serialize(),
-          },
-        },
-      };
-      return cleanedColumn;
-    }),
-  };
-
-  return table;
-}
+export { handleRequest as handleEsaggsRequest };

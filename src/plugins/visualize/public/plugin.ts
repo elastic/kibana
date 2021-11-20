@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs/operators';
 import { createHashHistory } from 'history';
+import { BehaviorSubject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
 import {
   AppMountParameters,
   AppUpdater,
@@ -18,7 +19,8 @@ import {
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
-} from 'kibana/public';
+  DEFAULT_APP_CATEGORIES,
+} from '../../../core/public';
 
 import {
   Storage,
@@ -26,31 +28,27 @@ import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../kibana_utils/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { SharePluginStart, SharePluginSetup } from '../../share/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { VisualizationsStart } from '../../visualizations/public';
+
 import { VisualizeConstants } from './application/visualize_constants';
+import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { VisualizeServices } from './application/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { SavedObjectsStart } from '../../saved_objects/public';
-import { EmbeddableStart } from '../../embeddable/public';
-import { DashboardStart } from '../../dashboard/public';
-import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+
+import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
+import type { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import type { SharePluginStart, SharePluginSetup } from '../../share/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
+import type { VisualizationsStart } from '../../visualizations/public';
+import type { VisualizeServices } from './application/types';
+import type { SavedObjectsStart } from '../../saved_objects/public';
+import type { EmbeddableStart } from '../../embeddable/public';
+import type { DashboardStart } from '../../dashboard/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import {
-  setUISettings,
-  setApplication,
-  setIndexPatterns,
-  setQueryService,
-  setShareService,
-  setVisEditorsRegistry,
-} from './services';
-import { visualizeFieldAction } from './actions/visualize_field_action';
-import { createVisualizeUrlGenerator } from './url_generator';
+import type { UsageCollectionStart } from '../../usage_collection/public';
+import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
+
+import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
+import { VisualizeLocatorDefinition } from '../common/locator';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -62,6 +60,9 @@ export interface VisualizePluginStartDependencies {
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
+  usageCollection?: UsageCollectionStart;
+  spaces?: SpacesApi;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -69,7 +70,6 @@ export interface VisualizePluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
   data: DataPublicPluginSetup;
   share?: SharePluginSetup;
-  uiActions: UiActionsSetup;
 }
 
 export interface VisualizePluginSetup {
@@ -83,18 +83,20 @@ export class VisualizePlugin
       void,
       VisualizePluginSetupDependencies,
       VisualizePluginStartDependencies
-    > {
+    >
+{
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private isLinkedToOriginatingApp: (() => boolean) | undefined = undefined;
 
   private readonly visEditorsRegistry = createVisEditorsRegistry();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, urlForwarding, data, share, uiActions }: VisualizePluginSetupDependencies
+    { home, urlForwarding, data, share }: VisualizePluginSetupDependencies
   ) {
     const {
       appMounted,
@@ -103,7 +105,7 @@ export class VisualizePlugin
       setActiveUrl,
       restorePreviousUrl,
     } = createKbnUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/visualize'),
+      baseUrl: core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
       navLinkUpdater$: this.appStateUpdater,
@@ -123,27 +125,22 @@ export class VisualizePlugin
         },
       ],
       getHistory: () => this.currentHistory!,
+      onBeforeNavLinkSaved: (urlToSave: string) => {
+        if (this.isLinkedToOriginatingApp?.()) {
+          return core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH);
+        }
+        return urlToSave;
+      },
     });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
-    if (share) {
-      share.urlGenerators.registerUrlGenerator(
-        createVisualizeUrlGenerator(async () => {
-          const [coreStart] = await core.getStartServices();
-          return {
-            appBasePath: coreStart.application.getUrlForApp('visualize'),
-            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-          };
-        })
-      );
-    }
+
     setUISettings(core.uiSettings);
-    uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
 
     core.application.register({
-      id: 'visualize',
-      title: 'Visualize',
+      id: VisualizeConstants.APP_ID,
+      title: 'Visualize Library',
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -154,11 +151,20 @@ export class VisualizePlugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         this.currentHistory = params.history;
 
+        // allows the urlTracker to only save URLs that are not linked to an originatingApp
+        this.isLinkedToOriginatingApp = () => {
+          return Boolean(
+            pluginsStart.embeddable
+              .getStateTransfer()
+              .getIncomingEditorState(VisualizeConstants.APP_ID)?.originatingApp
+          );
+        };
+
         // make sure the index pattern list is up to date
         pluginsStart.data.indexPatterns.clearCache();
         // make sure a default index pattern exists
         // if not, the page will be redirected to management and visualize won't be rendered
-        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
+        await pluginsStart.data.indexPatterns.ensureDefaultDataView();
 
         appMounted();
 
@@ -188,10 +194,10 @@ export class VisualizePlugin
           data: pluginsStart.data,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
-          savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
+          dashboardCapabilities: coreStart.application.capabilities.dashboard,
           visualizations: pluginsStart.visualizations,
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
@@ -204,12 +210,17 @@ export class VisualizePlugin
           dashboard: pluginsStart.dashboard,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
+          presentationUtil: pluginsStart.presentationUtil,
+          usageCollection: pluginsStart.usageCollection,
+          getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
+          spaces: pluginsStart.spaces,
         };
 
         params.element.classList.add('visAppWrapper');
         const { renderApp } = await import('./application');
         const unmount = renderApp(params, services);
         return () => {
+          data.search.session.clear();
           params.element.classList.remove('visAppWrapper');
           unlistenParentHistory();
           unmount();
@@ -223,7 +234,7 @@ export class VisualizePlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'visualize',
-        title: 'Visualize',
+        title: 'Visualize Library',
         description: i18n.translate('visualize.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
@@ -235,18 +246,20 @@ export class VisualizePlugin
       });
     }
 
+    if (share) {
+      share.url.locators.create(new VisualizeLocatorDefinition());
+    }
+
     return {
       visEditorsRegistry: this.visEditorsRegistry,
     } as VisualizePluginSetup;
   }
 
-  public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
+  public start(core: CoreStart, { usageCollection }: VisualizePluginStartDependencies) {
     setVisEditorsRegistry(this.visEditorsRegistry);
-    setApplication(core.application);
-    setIndexPatterns(plugins.data.indexPatterns);
-    setQueryService(plugins.data.query);
-    if (plugins.share) {
-      setShareService(plugins.share);
+
+    if (usageCollection) {
+      setUsageCollector(usageCollection);
     }
   }
 

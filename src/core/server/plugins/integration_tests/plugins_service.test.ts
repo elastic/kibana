@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
@@ -20,12 +20,12 @@ import { config } from '../plugins_config';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
-import { Plugin } from '../types';
+import { AsyncPlugin, PluginType } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
   const logger = loggingSystemMock.create();
-  const environmentSetup = environmentServiceMock.createSetupContract();
+  const environmentPreboot = environmentServiceMock.createPrebootContract();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -38,9 +38,11 @@ describe('PluginsService', () => {
       requiredBundles = [],
       optionalPlugins = [],
       kibanaVersion = '7.0.0',
+      type = PluginType.standard,
       configPath = [path],
       server = true,
       ui = true,
+      owner = { name: 'foo' },
     }: {
       path?: string;
       disabled?: boolean;
@@ -49,9 +51,11 @@ describe('PluginsService', () => {
       requiredBundles?: string[];
       optionalPlugins?: string[];
       kibanaVersion?: string;
+      type?: PluginType;
       configPath?: ConfigPath;
       server?: boolean;
       ui?: boolean;
+      owner?: { name: string };
     }
   ): PluginWrapper => {
     return new PluginWrapper({
@@ -61,11 +65,13 @@ describe('PluginsService', () => {
         version,
         configPath: `${configPath}${disabled ? '-disabled' : ''}`,
         kibanaVersion,
+        type,
         requiredPlugins,
         requiredBundles,
         optionalPlugins,
         server,
         ui,
+        owner,
       },
       opaqueId: Symbol(id),
       initializerContext: { logger } as any,
@@ -138,7 +144,7 @@ describe('PluginsService', () => {
           expect(startDependenciesResolved).toBe(false);
           return pluginStartContract;
         },
-      } as Plugin<void, typeof pluginStartContract, {}, {}>);
+      } as AsyncPlugin<void, typeof pluginStartContract, {}, {}>);
 
     jest.doMock(
       join(pluginPath, 'server'),
@@ -150,7 +156,10 @@ describe('PluginsService', () => {
       }
     );
 
-    await pluginsService.discover({ environment: environmentSetup });
+    await pluginsService.discover({ environment: environmentPreboot });
+
+    const prebootDeps = coreMock.createInternalPreboot();
+    await pluginsService.preboot(prebootDeps);
 
     const setupDeps = coreMock.createInternalSetup();
     await pluginsService.setup(setupDeps);

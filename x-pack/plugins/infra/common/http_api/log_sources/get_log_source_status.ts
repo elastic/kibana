@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
 import { routeTimingMetadataRT } from '../shared';
-import {
-  getLogSourceConfigurationPath,
-  LOG_SOURCE_CONFIGURATION_PATH,
-} from './log_source_configuration';
+import { getLogSourceConfigurationPath, LOG_SOURCE_CONFIGURATION_PATH } from './common';
 
 export const LOG_SOURCE_STATUS_PATH_SUFFIX = 'status';
 export const LOG_SOURCE_STATUS_PATH = `${LOG_SOURCE_CONFIGURATION_PATH}/${LOG_SOURCE_STATUS_PATH_SUFFIX}`;
@@ -49,7 +47,6 @@ const logIndexStatusRT = rt.keyof({
 export type LogIndexStatus = rt.TypeOf<typeof logIndexStatusRT>;
 
 const logSourceStatusRT = rt.strict({
-  logIndexFields: rt.array(logIndexFieldRT),
   logIndexStatus: logIndexStatusRT,
 });
 

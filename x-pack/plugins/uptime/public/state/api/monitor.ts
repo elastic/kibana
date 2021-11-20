@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BaseParams } from './types';
@@ -26,7 +27,7 @@ export const fetchMonitorDetails = async ({
     dateStart,
     dateEnd,
   };
-  return await apiService.get(API_URLS.MONITOR_DETAILS, params, MonitorDetailsType);
+  return await apiService.get<any>(API_URLS.MONITOR_DETAILS, params, MonitorDetailsType);
 };
 
 type ApiParams = QueryParams & ApiRequest;
@@ -37,5 +38,5 @@ export const fetchMonitorLocations = async ({ monitorId, dateStart, dateEnd }: A
     dateEnd,
     monitorId,
   };
-  return await apiService.get(API_URLS.MONITOR_LOCATIONS, params, MonitorLocationsType);
+  return await apiService.get<any>(API_URLS.MONITOR_LOCATIONS, params, MonitorLocationsType);
 };

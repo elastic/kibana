@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -15,12 +15,13 @@ import {
 } from 'kibana/public';
 import {
   DataPublicPluginStart,
-  IIndexPattern,
+  IndexPattern,
   IndexPatternsContract,
   ISearchSource,
   SearchSourceFields,
 } from '../../data/public';
 
+/** @deprecated */
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;
@@ -33,7 +34,7 @@ export interface SavedObject {
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;
-  hydrateIndexPattern?: (id?: string) => Promise<null | IIndexPattern>;
+  hydrateIndexPattern?: (id?: string) => Promise<null | IndexPattern>;
   id?: string;
   init?: () => Promise<SavedObject>;
   isSaving: boolean;
@@ -81,7 +82,7 @@ export interface SavedObjectConfig {
   injectReferences?: <T extends SavedObject>(object: T, references: SavedObjectReference[]) => void;
   id?: string;
   init?: () => void;
-  indexPattern?: IIndexPattern;
+  indexPattern?: IndexPattern;
   mapping?: Record<string, any>;
   migrationVersion?: Record<string, any>;
   path?: string;

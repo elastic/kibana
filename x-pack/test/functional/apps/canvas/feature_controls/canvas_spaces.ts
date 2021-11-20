@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -11,18 +13,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
+  const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
+  const soInfo = getService('savedObjectInfo');
+  const log = getService('log');
 
   describe('spaces feature controls', function () {
     this.tags(['skipFirefox']);
+
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['canvas-workpad'] });
+      await soInfo.logSoTypes(log);
     });
 
     describe('space with no features disabled', () => {
+      const canvasDefaultArchive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('canvas/default');
+        await kibanaServer.importExport.load(canvasDefaultArchive);
 
         await spacesService.create({
           id: 'custom_space',
@@ -33,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('canvas/default');
+        await kibanaServer.importExport.unload(canvasDefaultArchive);
       });
 
       it('shows canvas navlink', async () => {
@@ -53,10 +67,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a workpad to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
+        await PageObjects.common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
+
+        await testSubjects.click('create-workpad-button');
 
         await PageObjects.canvas.expectAddElementButton();
       });
@@ -76,10 +92,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with Canvas disabled', () => {
+      const spaceWithCanvasDisabledArchive =
+        'x-pack/test/functional/fixtures/kbn_archiver/spaces/disabled_features';
+
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('spaces/disabled_features');
+        await kibanaServer.importExport.load(spaceWithCanvasDisabledArchive);
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -89,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('spaces/disabled_features');
+        await kibanaServer.importExport.unload(spaceWithCanvasDisabledArchive);
       });
 
       it(`doesn't show canvas navlink`, async () => {
@@ -101,7 +120,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new workpad returns a 404`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
+        await PageObjects.common.navigateToActualUrl('canvas', '', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,

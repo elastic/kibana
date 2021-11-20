@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { Logger } from 'src/core/server';
 import {
   exportRulesQuerySchema,
   ExportRulesQuerySchemaDecoded,
@@ -17,9 +20,14 @@ import { ConfigType } from '../../../../config';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 
-export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const exportRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
+) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
@@ -37,9 +45,11 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
+      const exceptionsClient = context.lists?.getExceptionListClient();
+      const savedObjectsClient = context.core.savedObjects.client;
 
-      if (!alertsClient) {
+      if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -51,7 +61,10 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             body: `Can't export more than ${exportSizeLimit} rules`,
           });
         } else {
-          const nonPackagedRulesCount = await getNonPackagedRulesCount({ alertsClient });
+          const nonPackagedRulesCount = await getNonPackagedRulesCount({
+            isRuleRegistryEnabled,
+            rulesClient,
+          });
           if (nonPackagedRulesCount > exportSizeLimit) {
             return siemResponse.error({
               statusCode: 400,
@@ -60,14 +73,27 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           }
         }
 
-        const exported =
+        const exportedRulesAndExceptions =
           request.body?.objects != null
-            ? await getExportByObjectIds(alertsClient, request.body.objects)
-            : await getExportAll(alertsClient);
+            ? await getExportByObjectIds(
+                rulesClient,
+                exceptionsClient,
+                savedObjectsClient,
+                request.body.objects,
+                logger,
+                isRuleRegistryEnabled
+              )
+            : await getExportAll(
+                rulesClient,
+                exceptionsClient,
+                savedObjectsClient,
+                logger,
+                isRuleRegistryEnabled
+              );
 
         const responseBody = request.query.exclude_export_details
-          ? exported.rulesNdjson
-          : `${exported.rulesNdjson}${exported.exportDetails}`;
+          ? exportedRulesAndExceptions.rulesNdjson
+          : `${exportedRulesAndExceptions.rulesNdjson}${exportedRulesAndExceptions.exceptionLists}${exportedRulesAndExceptions.exportDetails}`;
 
         return response.ok({
           headers: {

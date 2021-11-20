@@ -1,24 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { Root } from '../../root';
 
-const { startES } = kbnTestServer.createTestServers({
-  adjustTimeout: (t: number) => jest.setTimeout(t),
-});
-let esServer: kbnTestServer.TestElasticsearchUtils;
-
-// FLAKY: https://github.com/elastic/kibana/issues/81072
-describe.skip('default route provider', () => {
+describe('default route provider', () => {
+  let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
+    const { startES } = kbnTestServer.createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+    });
     esServer = await startES();
     root = kbnTestServer.createRootWithCorePlugins({
       server: {
@@ -26,6 +24,7 @@ describe.skip('default route provider', () => {
       },
     });
 
+    await root.preboot();
     await root.setup();
     await root.start();
   });

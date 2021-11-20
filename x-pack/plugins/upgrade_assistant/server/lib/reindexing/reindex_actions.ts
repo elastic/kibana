@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -12,7 +13,6 @@ import {
   ElasticsearchClient,
 } from 'src/core/server';
 import {
-  IndexGroup,
   REINDEX_OP_TYPE,
   ReindexOperation,
   ReindexOptions,
@@ -20,8 +20,9 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { versionService } from '../version';
 import { generateNewIndexName } from './index_settings';
-import { FlatSettings } from './types';
+import { FlatSettings, FlatSettingsWithTypeName } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -31,11 +32,6 @@ export const LOCK_WINDOW = moment.duration(90, 'seconds');
  * This is NOT intended to be used by any other code.
  */
 export interface ReindexActions {
-  /**
-   * Namespace for ML-specific actions.
-   */
-  // ml: MlActions;
-
   /**
    * Creates a new reindexOp, does not perform any pre-flight checks.
    * @param indexName
@@ -84,34 +80,10 @@ export interface ReindexActions {
    * Retrieve index settings (in flat, dot-notation style) and mappings.
    * @param indexName
    */
-  getFlatSettings(indexName: string): Promise<FlatSettings | null>;
-
-  // ----- Functions below are for enforcing locks around groups of indices like ML or Watcher
-
-  /**
-   * Atomically increments the number of reindex operations running for an index group.
-   */
-  incrementIndexGroupReindexes(group: IndexGroup): Promise<void>;
-
-  /**
-   * Atomically decrements the number of reindex operations running for an index group.
-   */
-  decrementIndexGroupReindexes(group: IndexGroup): Promise<void>;
-
-  /**
-   * Runs a callback function while locking an index group.
-   * @param func A function to run with the locked index group lock document. Must return a promise that resolves
-   * to the updated ReindexSavedObject.
-   */
-  runWhileIndexGroupLocked(
-    group: IndexGroup,
-    func: (lockDoc: ReindexSavedObject) => Promise<ReindexSavedObject>
-  ): Promise<void>;
-
-  /**
-   * Exposed only for testing, DO NOT USE.
-   */
-  _fetchAndLockIndexGroupDoc(group: IndexGroup): Promise<ReindexSavedObject>;
+  getFlatSettings(
+    indexName: string,
+    withTypeName?: boolean
+  ): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
 }
 
 export const reindexActionsFactory = (
@@ -236,89 +208,33 @@ export const reindexActionsFactory = (
     },
 
     async getFlatSettings(indexName: string) {
-      const { body: flatSettings } = await esClient.indices.getSettings<{
-        [indexName: string]: FlatSettings;
-      }>({
-        index: indexName,
-        flat_settings: true,
-      });
+      let flatSettings;
 
-      if (!flatSettings[indexName]) {
+      if (versionService.getMajorVersion() === 7) {
+        // On 7.x, we need to get index settings with mapping type
+        flatSettings = await esClient.indices.get<{
+          [indexName: string]: FlatSettingsWithTypeName;
+        }>({
+          index: indexName,
+          flat_settings: true,
+          // This @ts-ignore is needed on master since the flag is deprecated on >7.x
+          // @ts-ignore
+          include_type_name: true,
+        });
+      } else {
+        flatSettings = await esClient.indices.get<{
+          [indexName: string]: FlatSettings;
+        }>({
+          index: indexName,
+          flat_settings: true,
+        });
+      }
+
+      if (!flatSettings.body[indexName]) {
         return null;
       }
 
-      return flatSettings[indexName];
-    },
-
-    async _fetchAndLockIndexGroupDoc(indexGroup) {
-      const fetchDoc = async () => {
-        try {
-          // The IndexGroup enum value (a string) serves as the ID of the lock doc
-          return await client.get<ReindexOperation>(REINDEX_OP_TYPE, indexGroup);
-        } catch (e) {
-          if (client.errors.isNotFoundError(e)) {
-            return await client.create<ReindexOperation>(
-              REINDEX_OP_TYPE,
-              {
-                indexName: null,
-                newIndexName: null,
-                locked: null,
-                status: null,
-                lastCompletedStep: null,
-                reindexTaskId: null,
-                reindexTaskPercComplete: null,
-                errorMessage: null,
-                runningReindexCount: 0,
-              } as any,
-              { id: indexGroup }
-            );
-          } else {
-            throw e;
-          }
-        }
-      };
-
-      const lockDoc = async (attempt = 1): Promise<ReindexSavedObject> => {
-        try {
-          // Refetch the document each time to avoid version conflicts.
-          return await acquireLock(await fetchDoc());
-        } catch (e) {
-          if (attempt >= 10) {
-            throw new Error(`Could not acquire lock for ML jobs`);
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          return lockDoc(attempt + 1);
-        }
-      };
-
-      return lockDoc();
-    },
-
-    async incrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
-        this.updateReindexOp(lockDoc, {
-          runningReindexCount: lockDoc.attributes.runningReindexCount! + 1,
-        })
-      );
-    },
-
-    async decrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
-        this.updateReindexOp(lockDoc, {
-          runningReindexCount: lockDoc.attributes.runningReindexCount! - 1,
-        })
-      );
-    },
-
-    async runWhileIndexGroupLocked(indexGroup, func) {
-      let lockDoc = await this._fetchAndLockIndexGroupDoc(indexGroup);
-
-      try {
-        lockDoc = await func(lockDoc);
-      } finally {
-        await releaseLock(lockDoc);
-      }
+      return flatSettings.body[indexName];
     },
   };
 };

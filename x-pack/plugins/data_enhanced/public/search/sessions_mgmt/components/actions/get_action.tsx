@@ -1,56 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import { CoreStart } from 'kibana/public';
 import { IClickActionDescriptor } from '../';
-import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
-import { CancelButton } from './cancel_button';
-import { ExtendButton } from './extend_button';
-import { ReloadButton } from './reload_button';
-import { ACTION, OnActionComplete } from './types';
+import { createDeleteActionDescriptor } from './delete_button';
+import { createExtendActionDescriptor } from './extend_button';
+import { createInspectActionDescriptor } from './inspect_button';
+import { ACTION } from './types';
+import { createRenameActionDescriptor } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
-  { id, name, expires, reloadUrl }: UISession,
-  onActionComplete: OnActionComplete
+  uiSession: UISession,
+  core: CoreStart
 ): IClickActionDescriptor | null => {
   switch (actionType) {
-    case ACTION.CANCEL:
-      return {
-        iconType: 'crossInACircleFilled',
-        textColor: 'default',
-        label: <CancelButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
-      };
-
-    case ACTION.RELOAD:
-      return {
-        iconType: 'refresh',
-        textColor: 'default',
-        label: <ReloadButton api={api} reloadUrl={reloadUrl} />,
-      };
-
+    case ACTION.INSPECT:
+      return createInspectActionDescriptor(api, uiSession, core);
+    case ACTION.DELETE:
+      return createDeleteActionDescriptor(api, uiSession, core);
     case ACTION.EXTEND:
-      return {
-        iconType: extendSessionIcon,
-        textColor: 'default',
-        label: (
-          <ExtendButton
-            api={api}
-            id={id}
-            name={name}
-            expires={expires}
-            extendBy={api.getExtendByDuration()}
-            onActionComplete={onActionComplete}
-          />
-        ),
-      };
-
+      return createExtendActionDescriptor(api, uiSession, core);
+    case ACTION.RENAME:
+      return createRenameActionDescriptor(api, uiSession, core);
     default:
       // eslint-disable-next-line no-console
       console.error(`Unknown action: ${actionType}`);

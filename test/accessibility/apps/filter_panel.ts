@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -17,10 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Filter panel', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
     });
@@ -28,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test on add filter panel', async () => {
       await PageObjects.discover.openAddFilterPanel();
       await a11y.testAppSnapshot();
+      await PageObjects.discover.closeAddFilterPanel();
       await filterBar.addFilter('OriginCityName', 'is', 'Rome');
     });
 

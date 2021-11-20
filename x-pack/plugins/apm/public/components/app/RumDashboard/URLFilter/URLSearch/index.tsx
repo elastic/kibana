@@ -1,114 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import useDebounce from 'react-use/lib/useDebounce';
-import React, { useEffect, useState, FormEvent, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
-import { EuiTitle } from '@elastic/eui';
-import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
+import React, { useEffect, useState } from 'react';
+import { isEqual, map } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../../translations';
-import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
-import { SelectableUrlList } from './SelectableUrlList';
-import { UrlOption } from './RenderOption';
-import { useUxQuery } from '../../hooks/useUxQuery';
 import { getPercentileLabel } from '../../UXMetrics/translations';
+import { SelectableUrlList } from '../../../../../../../observability/public';
+import { selectableRenderOptions, UrlOption } from './render_option';
+import { useUrlSearch } from './use_url_search';
 
 interface Props {
-  onChange: (value: string[]) => void;
+  onChange: (value?: string[], excludedValue?: string[]) => void;
+  updateSearchTerm: (value: string) => void;
 }
 
-export function URLSearch({ onChange: onFilterChange }: Props) {
-  const history = useHistory();
+interface URLItem {
+  url: string;
+  count: number;
+  pld: number;
+}
 
-  const { uiFilters, urlParams } = useUrlParams();
-
-  const { searchTerm, percentile } = urlParams;
-
-  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
-
-  const [searchValue, setSearchValue] = useState(searchTerm ?? '');
-
-  const [debouncedValue, setDebouncedValue] = useState(searchTerm ?? '');
-
-  useDebounce(
-    () => {
-      setSearchValue(debouncedValue);
-    },
-    250,
-    [debouncedValue]
-  );
-
-  const updateSearchTerm = useCallback(
-    (searchTermN: string) => {
-      const newQuery = {
-        ...toQuery(history.location.search),
-        searchTerm: searchTermN || undefined,
-      };
-      if (!searchTermN) {
-        delete newQuery.searchTerm;
-      }
-      const newLocation = {
-        ...history.location,
-        search: fromQuery(newQuery),
-      };
-      history.push(newLocation);
-    },
-    [history]
-  );
-
-  const [checkedUrls, setCheckedUrls] = useState<string[]>([]);
-
-  const uxQuery = useUxQuery();
-
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (uxQuery && popoverIsOpen) {
-        const { transactionUrl, ...restFilters } = uiFilters;
-
-        return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/url-search',
-          params: {
-            query: {
-              ...uxQuery,
-              uiFilters: JSON.stringify(restFilters),
-              urlQuery: searchValue,
-            },
-          },
-        });
-      }
-      return Promise.resolve(null);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [uxQuery, searchValue, popoverIsOpen]
-  );
-
-  useEffect(() => {
-    setCheckedUrls(uiFilters.transactionUrl || []);
-  }, [uiFilters]);
-
-  useEffect(() => {
-    if (searchTerm && searchValue === '') {
-      updateSearchTerm('');
-    }
-  }, [searchValue, updateSearchTerm, searchTerm]);
-
-  const onChange = (updatedOptions: UrlOption[]) => {
-    const clickedItems = updatedOptions.filter(
-      (option) => option.checked === 'on'
-    );
-
-    setCheckedUrls(clickedItems.map((item) => item.url));
-  };
-
+const formatOptions = (
+  urlItems: URLItem[],
+  includedUrls?: string[],
+  excludedUrls?: string[],
+  percentile?: number
+): UrlOption[] => {
   const percTitle = getPercentileLabel(percentile!);
 
-  const items: UrlOption[] = (data?.items ?? []).map((item) => ({
+  return urlItems.map((item) => ({
     label: item.url,
+    title: item.url,
     key: item.url,
     meta: [
       I18LABELS.pageViews + ': ' + item.count,
@@ -118,42 +47,154 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
         ` (${percTitle})`,
     ],
     url: item.url,
-    checked: checkedUrls?.includes(item.url) ? 'on' : undefined,
+    checked: includedUrls?.includes(item.url)
+      ? 'on'
+      : excludedUrls?.includes(item.url)
+      ? 'off'
+      : undefined,
   }));
+};
 
-  const onInputChange = (e: FormEvent<HTMLInputElement>) => {
-    setDebouncedValue(e.currentTarget.value);
+const processItems = (items: UrlOption[]) => {
+  const includedItems = map(
+    items.filter(({ checked, isWildcard }) => checked === 'on' && !isWildcard),
+    'label'
+  );
+
+  const excludedItems = map(
+    items.filter(({ checked, isWildcard }) => checked === 'off' && !isWildcard),
+    'label'
+  );
+
+  const includedWildcards = map(
+    items.filter(({ checked, isWildcard }) => checked === 'on' && isWildcard),
+    'title'
+  );
+
+  const excludedWildcards = map(
+    items.filter(({ checked, isWildcard }) => checked === 'off' && isWildcard),
+    'title'
+  );
+
+  return { includedItems, excludedItems, includedWildcards, excludedWildcards };
+};
+
+const getWildcardLabel = (wildcard: string) => {
+  return i18n.translate('xpack.apm.urlFilter.wildcard', {
+    defaultMessage: 'Use wildcard *{wildcard}*',
+    values: { wildcard },
+  });
+};
+
+export function URLSearch({
+  onChange: onFilterChange,
+  updateSearchTerm,
+}: Props) {
+  const {
+    uxUiFilters: { transactionUrl, transactionUrlExcluded },
+    urlParams,
+  } = useLegacyUrlParams();
+
+  const { searchTerm, percentile } = urlParams;
+
+  const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false);
+
+  const [searchValue, setSearchValue] = useState('');
+
+  const [items, setItems] = useState<UrlOption[]>([]);
+
+  const { data, status } = useUrlSearch({ query: searchValue, popoverIsOpen });
+
+  useEffect(() => {
+    const newItems = formatOptions(
+      data?.items ?? [],
+      transactionUrl,
+      transactionUrlExcluded,
+      percentile
+    );
+    const wildCardLabel = searchValue || searchTerm;
+
+    if (wildCardLabel) {
+      newItems.unshift({
+        label: getWildcardLabel(wildCardLabel),
+        title: wildCardLabel,
+        isWildcard: true,
+        checked: searchTerm ? 'on' : undefined,
+      });
+    }
+    setItems(newItems);
+  }, [
+    data,
+    percentile,
+    searchTerm,
+    searchValue,
+    transactionUrl,
+    transactionUrlExcluded,
+  ]);
+
+  const onChange = (updatedOptions: UrlOption[]) => {
+    setItems(
+      updatedOptions.map((item) => {
+        const { isWildcard, checked } = item;
+        if (isWildcard && checked === 'off') {
+          return {
+            ...item,
+            checked: undefined,
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const onInputChange = (val: string) => {
+    setSearchValue(val);
   };
 
   const isLoading = status !== 'success';
 
-  const onTermChange = () => {
+  const onApply = () => {
+    const { includedItems, excludedItems } = processItems(items);
+
+    onFilterChange(includedItems, excludedItems);
+
     updateSearchTerm(searchValue);
+
+    setSearchValue('');
   };
 
-  const onClose = () => {
-    if (uiFilters.transactionUrl || checkedUrls.length > 0) {
-      onFilterChange(checkedUrls);
+  const hasChanged = () => {
+    const { includedItems, excludedItems, includedWildcards } =
+      processItems(items);
+
+    let isWildcardChanged =
+      (includedWildcards.length > 0 && !searchTerm) ||
+      (includedWildcards.length === 0 && searchTerm);
+
+    if (includedWildcards.length > 0) {
+      isWildcardChanged = includedWildcards[0] !== searchTerm;
     }
+
+    return (
+      isWildcardChanged ||
+      !isEqual(includedItems.sort(), (transactionUrl ?? []).sort()) ||
+      !isEqual(excludedItems.sort(), (transactionUrlExcluded ?? []).sort())
+    );
   };
 
   return (
-    <>
-      <EuiTitle size="xxxs" textTransform="uppercase">
-        <h4>{I18LABELS.url}</h4>
-      </EuiTitle>
-      <SelectableUrlList
-        initialValue={searchTerm}
-        loading={isLoading}
-        onInputChange={onInputChange}
-        onTermChange={onTermChange}
-        data={{ items, total: data?.total ?? 0 }}
-        onChange={onChange}
-        onClose={onClose}
-        searchValue={searchValue}
-        popoverIsOpen={popoverIsOpen}
-        setPopoverIsOpen={setPopoverIsOpen}
-      />
-    </>
+    <SelectableUrlList
+      loading={isLoading}
+      onInputChange={onInputChange}
+      data={{ items, total: data?.total ?? 0 }}
+      onSelectionChange={onChange}
+      searchValue={searchValue}
+      popoverIsOpen={Boolean(popoverIsOpen)}
+      setPopoverIsOpen={setPopoverIsOpen}
+      onSelectionApply={onApply}
+      renderOption={selectableRenderOptions}
+      rowHeight={64}
+      hasChanged={() => Boolean(hasChanged())}
+    />
   );
 }

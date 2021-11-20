@@ -1,45 +1,56 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getFindResultStatus, ruleStatusRequest, getResult } from '../__mocks__/request_responses';
+import {
+  ruleStatusRequest,
+  getAlertMock,
+  getFindBulkResultStatus,
+} from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
 import { RuleStatusResponse } from '../../rules/types';
-import { AlertExecutionStatusErrorReasons } from '../../../../../../alerts/common';
+import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
-jest.mock('../../signals/rule_status_service');
-
-describe('find_statuses', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('find_statuses - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful status search
-    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.ruleExecutionLogClient.getCurrentStatusBulk.mockResolvedValue(
+      getFindBulkResultStatus()
+    ); // successful status search
+    clients.rulesClient.get.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
     findRulesStatusesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when finding a single rule status with a valid alertsClient', async () => {
+    test('returns 200 when finding a single rule status with a valid rulesClient', async () => {
       const response = await server.inject(ruleStatusRequest(), context);
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(ruleStatusRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catch error when status search throws error', async () => {
-      clients.savedObjectsClient.find.mockImplementation(async () => {
+      clients.ruleExecutionLogClient.getCurrentStatusBulk.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(ruleStatusRequest(), context);
@@ -53,7 +64,7 @@ describe('find_statuses', () => {
     test('returns success if rule status client writes an error status', async () => {
       // 0. task manager tried to run the rule but couldn't, so the alerting framework
       // wrote an error to the executionStatus.
-      const failingExecutionRule = getResult();
+      const failingExecutionRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       failingExecutionRule.executionStatus = {
         status: 'error',
         lastExecutionDate: failingExecutionRule.executionStatus.lastExecutionDate,
@@ -64,7 +75,7 @@ describe('find_statuses', () => {
       };
 
       // 1. getFailingRules api found a rule where the executionStatus was 'error'
-      clients.alertsClient.get.mockResolvedValue({
+      clients.rulesClient.get.mockResolvedValue({
         ...failingExecutionRule,
       });
 

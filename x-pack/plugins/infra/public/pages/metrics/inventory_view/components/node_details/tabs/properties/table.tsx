@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -17,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Row {
   name: string;
@@ -64,7 +65,7 @@ export const Table = (props: Props) => {
                     )}
                   >
                     <EuiButtonIcon
-                      color="subdued"
+                      color="text"
                       size="s"
                       iconType="filter"
                       aria-label={i18n.translate(

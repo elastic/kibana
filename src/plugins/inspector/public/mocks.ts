@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Setup as PluginSetup, Start as PluginStart } from '.';
 import { InspectorViewRegistry } from './view_registry';
 import { plugin as pluginInitializer } from '.';
 import { coreMock } from '../../../core/public/mocks';
+import type { SharePluginStart } from '../../share/public';
 
 export type Setup = jest.Mocked<PluginSetup>;
 export type Start = jest.Mocked<PluginStart>;
@@ -48,6 +49,7 @@ const createPlugin = async () => {
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
   const setup = await plugin.setup(coreSetup);
+  const share = {} as SharePluginStart;
 
   return {
     pluginInitializerContext,
@@ -55,7 +57,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () => await plugin.start(coreStart),
+    doStart: async () => await plugin.start(coreStart, { share }),
   };
 };
 

@@ -1,43 +1,54 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { GraphQLSchema } from 'graphql';
-import { runHttpQuery } from 'apollo-server-core';
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  InfraRouteConfig,
-  InfraTSVBResponse,
-  InfraServerPluginSetupDeps,
-  CallWithRequestParams,
-  InfraDatabaseSearchResponse,
-  InfraDatabaseMultiResponse,
-  InfraDatabaseFieldCapsResponse,
-  InfraDatabaseGetIndicesResponse,
-  InfraDatabaseGetIndicesAliasResponse,
-} from './adapter_types';
-import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportRequestParams } from '@elastic/elasticsearch';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import {
   CoreSetup,
   IRouter,
   KibanaRequest,
-  KibanaResponseFactory,
+  RequestHandler,
   RouteMethod,
 } from '../../../../../../../src/core/server';
-import { RequestHandler } from '../../../../../../../src/core/server';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
+import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
+import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
+import {
+  CallWithRequestParams,
+  InfraDatabaseFieldCapsResponse,
+  InfraDatabaseGetIndicesAliasResponse,
+  InfraDatabaseGetIndicesResponse,
+  InfraDatabaseMultiResponse,
+  InfraDatabaseSearchResponse,
+  InfraRouteConfig,
+  InfraServerPluginSetupDeps,
+  InfraServerPluginStartDeps,
+} from './adapter_types';
+
+interface FrozenIndexParams {
+  ignore_throttled?: boolean;
+}
 
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;
   public plugins: InfraServerPluginSetupDeps;
+  private core: CoreSetup<InfraServerPluginStartDeps>;
 
-  constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginSetupDeps) {
+  constructor(
+    core: CoreSetup<InfraServerPluginStartDeps>,
+    config: InfraConfig,
+    plugins: InfraServerPluginSetupDeps
+  ) {
     this.router = core.http.createRouter();
     this.plugins = plugins;
+    this.core = core;
   }
 
   public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
@@ -71,79 +82,6 @@ export class KibanaFramework {
         this.router.patch(routeConfig, handler);
         break;
     }
-  }
-
-  public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema) {
-    // These endpoints are validated by GraphQL at runtime and with GraphQL generated types
-    const body = schema.object({}, { unknowns: 'allow' });
-    type Body = TypeOf<typeof body>;
-
-    const routeOptions = {
-      path: `/api/infra${routePath}`,
-      validate: {
-        body,
-      },
-      options: {
-        tags: ['access:infra'],
-      },
-    };
-    async function handler(
-      context: InfraPluginRequestHandlerContext,
-      request: KibanaRequest<unknown, unknown, Body>,
-      response: KibanaResponseFactory
-    ) {
-      try {
-        const query =
-          request.route.method === 'post'
-            ? (request.body as Record<string, any>)
-            : (request.query as Record<string, any>);
-
-        const gqlResponse = await runHttpQuery([context, request], {
-          method: request.route.method.toUpperCase(),
-          options: (req: InfraPluginRequestHandlerContext, rawReq: KibanaRequest) => ({
-            context: { req, rawReq },
-            schema: gqlSchema,
-          }),
-          query,
-        });
-
-        return response.ok({
-          body: gqlResponse,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-      } catch (error) {
-        const errorBody = {
-          message: error.message,
-        };
-
-        if ('HttpQueryError' !== error.name) {
-          return response.internalError({
-            body: errorBody,
-          });
-        }
-
-        if (error.isGraphQLError === true) {
-          return response.customError({
-            statusCode: error.statusCode,
-            body: errorBody,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-        }
-
-        const { headers = [], statusCode = 500 } = error;
-        return response.customError({
-          statusCode,
-          headers,
-          body: errorBody,
-        });
-      }
-    }
-    this.router.post(routeOptions, handler);
-    this.router.get(routeOptions, handler);
   }
 
   callWithRequest<Hit = {}, Aggregation = undefined>(
@@ -187,14 +125,14 @@ export class KibanaFramework {
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;
 
-  public async callWithRequest<Hit = {}, Aggregation = undefined>(
+  public async callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
     params: CallWithRequestParams
   ) {
     const { elasticsearch, uiSettings } = requestContext.core;
 
-    const includeFrozen = await uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+    const includeFrozen = await uiSettings.client.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
     if (endpoint === 'msearch') {
       const maxConcurrentShardRequests = await uiSettings.client.get(
         UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
@@ -204,22 +142,91 @@ export class KibanaFramework {
       }
     }
 
-    const frozenIndicesParams = ['search', 'msearch'].includes(endpoint)
-      ? {
-          ignore_throttled: !includeFrozen,
-        }
-      : {};
+    // Only set the "ignore_throttled" value (to false) if the Kibana setting
+    // for "search:includeFrozen" is true (i.e. don't ignore throttled indices, a triple negative!)
+    // More information:
+    // - https://github.com/elastic/kibana/issues/113197
+    // - https://github.com/elastic/elasticsearch/pull/77479
+    //
+    // NOTE: these params only need to be spread onto the search and msearch calls below
+    const frozenIndicesParams: FrozenIndexParams = {};
+    if (includeFrozen) {
+      frozenIndicesParams.ignore_throttled = false;
+    }
 
-    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, {
-      ...params,
-      ...frozenIndicesParams,
-    });
+    let apiResult;
+    switch (endpoint) {
+      case 'search':
+        apiResult = elasticsearch.client.asCurrentUser.search({
+          ...params,
+          ...frozenIndicesParams,
+        });
+        break;
+      case 'msearch':
+        apiResult = elasticsearch.client.asCurrentUser.msearch({
+          ...params,
+          ...frozenIndicesParams,
+        } as estypes.MsearchRequest);
+        break;
+      case 'fieldCaps':
+        apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
+          ...params,
+        });
+        break;
+      case 'indices.existsAlias':
+        apiResult = elasticsearch.client.asCurrentUser.indices.existsAlias({
+          ...params,
+        } as estypes.IndicesExistsAliasRequest);
+        break;
+      case 'indices.getAlias':
+        apiResult = elasticsearch.client.asCurrentUser.indices.getAlias({
+          ...params,
+        });
+        break;
+      case 'indices.get':
+        apiResult = elasticsearch.client.asCurrentUser.indices.get({
+          ...params,
+        } as estypes.IndicesGetRequest);
+        break;
+      case 'transport.request':
+        apiResult = elasticsearch.client.asCurrentUser.transport.request({
+          ...params,
+        } as TransportRequestParams);
+        break;
+      case 'ml.getBuckets':
+        apiResult = elasticsearch.client.asCurrentUser.ml.getBuckets({
+          ...params,
+        } as estypes.MlGetBucketsRequest);
+        break;
+    }
+    return apiResult ? (await apiResult).body : undefined;
   }
 
-  public getIndexPatternsService(
+  public async getIndexPatternsServiceWithRequestContext(
     requestContext: InfraPluginRequestHandlerContext
-  ): IndexPatternsFetcher {
-    return new IndexPatternsFetcher(requestContext.core.elasticsearch.client.asCurrentUser, true);
+  ) {
+    return await this.createIndexPatternsService(
+      requestContext.core.savedObjects.client,
+      requestContext.core.elasticsearch.client.asCurrentUser
+    );
+  }
+
+  public async getIndexPatternsService(
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient
+  ) {
+    return await this.createIndexPatternsService(savedObjectsClient, elasticsearchClient);
+  }
+
+  private async createIndexPatternsService(
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient
+  ) {
+    const [, startPlugins] = await this.core.getStartServices();
+    return startPlugins.data.indexPatterns.indexPatternsServiceFactory(
+      savedObjectsClient,
+      elasticsearchClient
+    );
   }
 
   public getSpaceId(request: KibanaRequest): string {
@@ -242,7 +249,7 @@ export class KibanaFramework {
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
-  ): Promise<InfraTSVBResponse> {
+  ): Promise<TimeseriesVisData> {
     const { getVisData } = this.plugins.visTypeTimeseries;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');

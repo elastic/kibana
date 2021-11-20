@@ -1,9 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { PackagePolicy, NewPackagePolicy, UpdatePackagePolicy } from '../models';
+
+import type {
+  PackagePolicy,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  DryRunPackagePolicy,
+  PackagePolicyPackage,
+} from '../models';
 
 export interface GetPackagePoliciesRequest {
   query: {
@@ -54,4 +62,29 @@ export type DeletePackagePoliciesResponse = Array<{
   id: string;
   name?: string;
   success: boolean;
+  package?: PackagePolicyPackage;
 }>;
+
+export interface UpgradePackagePolicyBaseResponse {
+  name?: string;
+
+  // Support generic errors
+  statusCode?: number;
+  body?: {
+    message: string;
+  };
+}
+
+export interface UpgradePackagePolicyDryRunResponseItem extends UpgradePackagePolicyBaseResponse {
+  hasErrors: boolean;
+  diff?: [PackagePolicy, DryRunPackagePolicy];
+}
+
+export type UpgradePackagePolicyDryRunResponse = UpgradePackagePolicyDryRunResponseItem[];
+
+export interface UpgradePackagePolicyResponseItem extends UpgradePackagePolicyBaseResponse {
+  id: string;
+  success: boolean;
+}
+
+export type UpgradePackagePolicyResponse = UpgradePackagePolicyResponseItem[];

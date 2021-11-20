@@ -1,22 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestParams } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { buildExceptionFilter } from '../../../common/detection_engine/build_exceptions_filter';
-import { ExceptionListItemSchema } from '../../../../lists/common';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
-import { SearchResponse } from '../types';
 
-export { Anomaly };
-export type AnomalyResults = SearchResponse<Anomaly>;
+export type { Anomaly };
+export type AnomalyResults = estypes.SearchResponse<Anomaly>;
 type MlAnomalySearch = <T>(
-  searchParams: RequestParams.Search,
+  searchParams: estypes.SearchRequest,
   jobIds: string[]
-) => Promise<SearchResponse<T>>;
+) => Promise<estypes.SearchResponse<T>>;
 
 export interface AnomaliesSearchParams {
   jobIds: string[];
@@ -46,6 +46,7 @@ export const getAnomalies = async (
                   analyze_wildcard: false,
                 },
               },
+              { term: { is_interim: false } },
               {
                 bool: {
                   must: boolCriteria,
@@ -59,7 +60,13 @@ export const getAnomalies = async (
             })?.query,
           },
         },
-        sort: [{ record_score: { order: 'desc' } }],
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
+        sort: [{ record_score: { order: 'desc' as const } }],
       },
     },
     params.jobIds

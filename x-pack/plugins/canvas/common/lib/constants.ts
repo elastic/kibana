@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants_static';
+import { FilterField } from '../../types';
 
 export const CANVAS_TYPE = 'canvas-workpad';
 export const CUSTOM_ELEMENT_TYPE = 'canvas-element';
@@ -24,6 +26,7 @@ export const SESSIONSTORAGE_LASTPATH = 'lastPath:canvas';
 export const FETCH_TIMEOUT = 30000; // 30 seconds
 export const DEFAULT_WORKPAD_CSS = '.canvasPage {\n\n}';
 export const DEFAULT_ELEMENT_CSS = '.canvasRenderEl{\n\n}';
+export const DEFAULT_GROUP_BY_FIELD: FilterField = 'filterGroup';
 export const VALID_IMAGE_TYPES = ['gif', 'jpeg', 'png', 'svg+xml'];
 export const ASSET_MAX_SIZE = 25000;
 export const ELEMENT_SHIFT_OFFSET = 10;
@@ -43,3 +46,5 @@ export const API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD = `/public/canvas/${SHAREABLE_
 export const CANVAS_EMBEDDABLE_CLASSNAME = `canvasEmbeddable`;
 export const CONTEXT_MENU_TOP_BORDER_CLASSNAME = 'canvasContextMenu--topBorder';
 export const API_ROUTE_FUNCTIONS = `${API_ROUTE}/fns`;
+export const ESSQL_SEARCH_STRATEGY = 'essql';
+export const HEADER_BANNER_HEIGHT = 32; // This value is also declared in `/src/core/public/_variables.scss`

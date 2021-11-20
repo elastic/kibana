@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -18,6 +19,14 @@ export const JOB_CREATED_SUCCESS_MESSAGE = i18n.translate(
   {
     defaultMessage:
       'The analysis is now running for response duration chart. It might take a while before results are added to the response times graph.',
+  }
+);
+
+export const JOB_CREATED_LAZY_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.jobCreatedLazyNotificationText',
+  {
+    defaultMessage:
+      'The analysis is waiting for an ML node to become available. It might take a while before results are added to the response times graph.',
   }
 );
 

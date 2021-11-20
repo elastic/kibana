@@ -1,49 +1,62 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable, Subject, Subscription, timer } from 'rxjs';
-import { take } from 'rxjs/operators';
 import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MaybePromise } from '@kbn/utility-types';
+import { isPromise } from '@kbn/std';
 import {
   CoreSetup,
   Logger,
   Plugin,
   PluginInitializerContext,
-  ILegacyClusterClient,
-  ILegacyScopedClusterClient,
-  ScopeableRequest,
+  IClusterClient,
 } from 'src/core/server';
 
-import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
+import {
+  ILicense,
+  PublicLicense,
+  PublicFeatures,
+  LicenseType,
+  LicenseStatus,
+} from '../common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
-import { ElasticsearchError, RawLicense, RawFeatures } from './types';
+import { ElasticsearchError } from './types';
 import { registerRoutes } from './routes';
 import { FeatureUsageService } from './services';
 
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
+import { getPluginStatus$ } from './plugin_status';
 
-function normalizeServerLicense(license: RawLicense): PublicLicense {
+function normalizeServerLicense(
+  license: estypes.XpackInfoMinimalLicenseInformation
+): PublicLicense {
   return {
     uid: license.uid,
-    type: license.type,
-    mode: license.mode,
-    expiryDateInMillis: license.expiry_date_in_millis,
-    status: license.status,
+    type: license.type as LicenseType,
+    mode: license.mode as LicenseType,
+    expiryDateInMillis:
+      typeof license.expiry_date_in_millis === 'string'
+        ? parseInt(license.expiry_date_in_millis, 10)
+        : license.expiry_date_in_millis,
+    status: license.status as LicenseStatus,
   };
 }
 
-function normalizeFeatures(rawFeatures: RawFeatures) {
+function normalizeFeatures(rawFeatures: estypes.XpackInfoFeatures) {
   const features: PublicFeatures = {};
   for (const [name, feature] of Object.entries(rawFeatures)) {
     features[name] = {
@@ -80,9 +93,9 @@ function sign({
  * current Kibana instance.
  */
 export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart, {}, {}> {
-  private stop$ = new Subject();
+  private stop$ = new Subject<void>();
   private readonly logger: Logger;
-  private readonly config$: Observable<LicenseConfigType>;
+  private readonly config: LicenseConfigType;
   private loggingSubscription?: Subscription;
   private featureUsage = new FeatureUsageService();
 
@@ -91,42 +104,23 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
-    this.config$ = this.context.config.create<LicenseConfigType>();
+    this.config = this.context.config.get<LicenseConfigType>();
   }
 
-  public async setup(core: CoreSetup<{}, LicensingPluginStart>) {
+  public setup(core: CoreSetup<{}, LicensingPluginStart>) {
     this.logger.debug('Setting up Licensing plugin');
-    const config = await this.config$.pipe(take(1)).toPromise();
-    const pollingFrequency = config.api_polling_frequency;
+    const pollingFrequency = this.config.api_polling_frequency;
 
-    async function callAsInternalUser(
-      ...args: Parameters<ILegacyScopedClusterClient['callAsInternalUser']>
-    ): ReturnType<ILegacyScopedClusterClient['callAsInternalUser']> {
-      const [coreStart] = await core.getStartServices();
-      const client = coreStart.elasticsearch.legacy.client;
-      return await client.callAsInternalUser(...args);
-    }
-
-    const client: ILegacyClusterClient = {
-      callAsInternalUser,
-      asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient {
-        return {
-          async callAsCurrentUser(
-            ...args: Parameters<ILegacyScopedClusterClient['callAsCurrentUser']>
-          ): ReturnType<ILegacyScopedClusterClient['callAsCurrentUser']> {
-            const [coreStart] = await core.getStartServices();
-            const _client = coreStart.elasticsearch.legacy.client;
-            return await _client.asScoped(request).callAsCurrentUser(...args);
-          },
-          callAsInternalUser,
-        };
-      },
-    };
+    const clientPromise = core.getStartServices().then(([{ elasticsearch }]) => {
+      return elasticsearch.client;
+    });
 
     const { refresh, license$ } = this.createLicensePoller(
-      client,
+      clientPromise,
       pollingFrequency.asMilliseconds()
     );
+
+    core.status.set(getPluginStatus$(license$, this.stop$.asObservable()));
 
     core.http.registerRouteHandlerContext(
       'licensing',
@@ -144,12 +138,14 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return {
       refresh,
       license$,
-      createLicensePoller: this.createLicensePoller.bind(this),
       featureUsage: featureUsageSetup,
     };
   }
 
-  private createLicensePoller(clusterClient: ILegacyClusterClient, pollingFrequency: number) {
+  private createLicensePoller(
+    clusterClient: MaybePromise<IClusterClient>,
+    pollingFrequency: number
+  ) {
     this.logger.debug(`Polling Elasticsearch License API with frequency ${pollingFrequency}ms.`);
 
     const intervalRefresh$ = timer(0, pollingFrequency);
@@ -178,16 +174,17 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     };
   }
 
-  private fetchLicense = async (clusterClient: ILegacyClusterClient): Promise<ILicense> => {
+  private fetchLicense = async (clusterClient: MaybePromise<IClusterClient>): Promise<ILicense> => {
+    const client = isPromise(clusterClient) ? await clusterClient : clusterClient;
     try {
-      const response = await clusterClient.callAsInternalUser('transport.request', {
-        method: 'GET',
-        path: '/_xpack?accept_enterprise=true',
+      const { body: response } = await client.asInternalUser.xpack.info({
+        // @ts-expect-error `accept_enterprise` is not present in the client definition
+        accept_enterprise: true,
       });
-
-      const normalizedLicense = response.license
-        ? normalizeServerLicense(response.license)
-        : undefined;
+      const normalizedLicense =
+        response.license && response.license.type !== 'missing'
+          ? normalizeServerLicense(response.license)
+          : undefined;
       const normalizedFeatures = response.features
         ? normalizeFeatures(response.features)
         : undefined;
@@ -224,7 +221,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return error.message;
   }
 
-  public async start() {
+  public start() {
     if (!this.refresh || !this.license$) {
       throw new Error('Setup has not been completed');
     }

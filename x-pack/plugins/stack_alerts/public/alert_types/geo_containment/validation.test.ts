@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { GeoContainmentAlertParams } from './types';
@@ -21,7 +22,7 @@ describe('expression params validation', () => {
       boundaryGeoField: 'testField',
     };
     expect(validateExpression(initialParams).errors.index.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.index[0]).toBe('Index pattern is required.');
+    expect(validateExpression(initialParams).errors.index[0]).toBe('Data view is required.');
   });
 
   test('if geoField property is invalid should return proper error message', () => {
@@ -104,7 +105,7 @@ describe('expression params validation', () => {
     };
     expect(validateExpression(initialParams).errors.boundaryIndexTitle.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.boundaryIndexTitle[0]).toBe(
-      'Boundary index pattern title is required.'
+      'Boundary data view title is required.'
     );
   });
 

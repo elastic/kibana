@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -541,4 +541,41 @@ test('Check when hide header option is true', async () => {
 
   const title = findTestSubject(component, `embeddablePanelHeading-HelloAryaStark`);
   expect(title.length).toBe(0);
+});
+
+test('Should work in minimal way rendering only the inspector action', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  inspector.isAvailable = jest.fn(() => true);
+
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Arya',
+    lastName: 'Stark',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        inspector={inspector}
+        hideHeader={false}
+      />
+    </I18nProvider>
+  );
+
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
+  await nextTick();
+  component.update();
+  expect(findTestSubject(component, `embeddablePanelAction-openInspector`).length).toBe(1);
+  const action = findTestSubject(component, `embeddablePanelAction-ACTION_CUSTOMIZE_PANEL`);
+  expect(action.length).toBe(0);
 });

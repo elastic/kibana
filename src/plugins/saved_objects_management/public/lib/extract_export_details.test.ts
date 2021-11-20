@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
@@ -14,14 +14,22 @@ describe('extractExportDetails', () => {
   };
   const detailsLine = (
     exported: number,
-    missingRefs: SavedObjectsExportResultDetails['missingReferences'] = []
+    {
+      missingRefs = [],
+      excludedObjects = [],
+    }: {
+      missingRefs?: SavedObjectsExportResultDetails['missingReferences'];
+      excludedObjects?: SavedObjectsExportResultDetails['excludedObjects'];
+    } = {}
   ) => {
     return (
       JSON.stringify({
         exportedCount: exported,
         missingRefCount: missingRefs.length,
         missingReferences: missingRefs,
-      }) + '\n'
+        excludedObjectsCount: excludedObjects.length,
+        excludedObjects,
+      } as SavedObjectsExportResultDetails) + '\n'
     );
   };
 
@@ -43,6 +51,8 @@ describe('extractExportDetails', () => {
       exportedCount: 3,
       missingRefCount: 0,
       missingReferences: [],
+      excludedObjectsCount: 0,
+      excludedObjects: [],
     });
   });
 
@@ -51,10 +61,12 @@ describe('extractExportDetails', () => {
       [
         [
           objLine('1', 'index-pattern'),
-          detailsLine(1, [
-            { id: '2', type: 'index-pattern' },
-            { id: '3', type: 'index-pattern' },
-          ]),
+          detailsLine(1, {
+            missingRefs: [
+              { id: '2', type: 'index-pattern' },
+              { id: '3', type: 'index-pattern' },
+            ],
+          }),
         ].join(''),
       ],
       {
@@ -69,6 +81,39 @@ describe('extractExportDetails', () => {
       missingRefCount: 2,
       missingReferences: [
         { id: '2', type: 'index-pattern' },
+        { id: '3', type: 'index-pattern' },
+      ],
+      excludedObjectsCount: 0,
+      excludedObjects: [],
+    });
+  });
+
+  it('should properly extract the excluded objects', async () => {
+    const exportData = new Blob(
+      [
+        [
+          objLine('1', 'index-pattern'),
+          detailsLine(1, {
+            excludedObjects: [
+              { id: '2', type: 'index-pattern', reason: 'foo' },
+              { id: '3', type: 'index-pattern' },
+            ],
+          }),
+        ].join(''),
+      ],
+      {
+        type: 'application/ndjson',
+        endings: 'transparent',
+      }
+    );
+    const result = await extractExportDetails(exportData);
+    expect(result).toEqual({
+      exportedCount: 1,
+      missingRefCount: 0,
+      missingReferences: [],
+      excludedObjectsCount: 2,
+      excludedObjects: [
+        { id: '2', type: 'index-pattern', reason: 'foo' },
         { id: '3', type: 'index-pattern' },
       ],
     });

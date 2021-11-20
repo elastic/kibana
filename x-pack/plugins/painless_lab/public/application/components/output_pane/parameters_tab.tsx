@@ -1,18 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FunctionComponent } from 'react';
-import {
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiIcon,
-  EuiToolTip,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiIcon, EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -56,31 +50,29 @@ export const ParametersTab: FunctionComponent = () => {
           </EuiText>
         }
       >
-        <EuiPanel paddingSize="s">
-          <CodeEditor
-            languageId="json"
-            height={600}
-            value={payload.parameters}
-            onChange={(nextParams) => updatePayload({ parameters: nextParams })}
-            options={{
-              fontSize: 12,
-              minimap: {
-                enabled: false,
-              },
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              wrappingIndent: 'indent',
-              automaticLayout: true,
-            }}
-            editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
-              // Updating tab size for the editor
-              const model = editor.getModel();
-              if (model) {
-                model.updateOptions({ tabSize: 2 });
-              }
-            }}
-          />
-        </EuiPanel>
+        <CodeEditor
+          languageId="json"
+          height={600}
+          value={payload.parameters}
+          onChange={(nextParams) => updatePayload({ parameters: nextParams })}
+          options={{
+            fontSize: 12,
+            minimap: {
+              enabled: false,
+            },
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            automaticLayout: true,
+          }}
+          editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
+            // Updating tab size for the editor
+            const model = editor.getModel();
+            if (model) {
+              model.updateOptions({ tabSize: 2 });
+            }
+          }}
+        />
       </EuiFormRow>
     </>
   );

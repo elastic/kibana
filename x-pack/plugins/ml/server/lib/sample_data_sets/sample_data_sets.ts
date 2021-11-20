@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -14,11 +15,16 @@ export function initSampleDataSets(mlLicense: MlLicense, plugins: PluginsSetup) 
       defaultMessage: 'ML jobs',
     });
     const { addAppLinksToSampleDataset } = plugins.home.sampleData;
+    const getCreateJobPath = (jobId: string, dataViewId: string) =>
+      `/app/ml/modules/check_view_or_create?id=${jobId}&index=${dataViewId}`;
 
     addAppLinksToSampleDataset('ecommerce', [
       {
-        path:
-          '/app/ml/modules/check_view_or_create?id=sample_data_ecommerce&index=ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        sampleObject: {
+          type: 'index-pattern',
+          id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        },
+        getPath: (objectId) => getCreateJobPath('sample_data_ecommerce', objectId),
         label: sampleDataLinkLabel,
         icon: 'machineLearningApp',
       },
@@ -26,8 +32,11 @@ export function initSampleDataSets(mlLicense: MlLicense, plugins: PluginsSetup) 
 
     addAppLinksToSampleDataset('logs', [
       {
-        path:
-          '/app/ml/modules/check_view_or_create?id=sample_data_weblogs&index=90943e30-9a47-11e8-b64d-95841ca0b247',
+        sampleObject: {
+          type: 'index-pattern',
+          id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        },
+        getPath: (objectId) => getCreateJobPath('sample_data_weblogs', objectId),
         label: sampleDataLinkLabel,
         icon: 'machineLearningApp',
       },

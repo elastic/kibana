@@ -1,36 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { AppMountParameters } from 'kibana/public';
-import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
+import { IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
-import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable/types';
-import { SourceRegistryEntry } from '../classes/sources/source_registry';
-import { LayerWizard } from '../classes/layers/layer_wizard_registry';
+import type {
+  MapEmbeddableConfig,
+  MapEmbeddableInput,
+  MapEmbeddableType,
+} from '../embeddable/types';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
+import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
+import type { CreateTileMapLayerDescriptorParams } from '../classes/layers/create_tile_map_layer_descriptor';
+import type { CreateRegionMapLayerDescriptorParams } from '../classes/layers/create_region_map_layer_descriptor';
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
-interface LazyLoadedMapModules {
+export interface LazyLoadedMapModules {
   MapEmbeddable: new (
     config: MapEmbeddableConfig,
     initialInput: MapEmbeddableInput,
     parent?: IContainer
-  ) => Embeddable<MapEmbeddableInput, MapEmbeddableOutput>;
+  ) => MapEmbeddableType;
   getIndexPatternService: () => IndexPatternsContract;
   getMapsCapabilities: () => any;
-  renderApp: (params: AppMountParameters) => Promise<() => void>;
+  renderApp: (params: AppMountParameters, AppUsageTracker: React.FC) => Promise<() => void>;
   createSecurityLayerDescriptors: (
     indexPatternId: string,
     indexPatternTitle: string
   ) => LayerDescriptor[];
-  registerLayerWizard: (layerWizard: LayerWizard) => void;
-  registerSource(entry: SourceRegistryEntry): void;
   createTileMapLayerDescriptor: ({
     label,
     mapType,
@@ -39,15 +42,7 @@ interface LazyLoadedMapModules {
     geoFieldName,
     metricAgg,
     metricFieldName,
-  }: {
-    label: string;
-    mapType: string;
-    colorSchema: string;
-    indexPatternId?: string;
-    geoFieldName?: string;
-    metricAgg: string;
-    metricFieldName?: string;
-  }) => LayerDescriptor | null;
+  }: CreateTileMapLayerDescriptorParams) => LayerDescriptor | null;
   createRegionMapLayerDescriptor: ({
     label,
     emsLayerId,
@@ -59,20 +54,10 @@ interface LazyLoadedMapModules {
     indexPatternTitle,
     metricAgg,
     metricFieldName,
-  }: {
-    label: string;
-    emsLayerId?: string;
-    leftFieldName?: string;
-    termsFieldName?: string;
-    termsSize?: number;
-    colorSchema: string;
-    indexPatternId?: string;
-    indexPatternTitle?: string;
-    metricAgg: string;
-    metricFieldName?: string;
-  }) => LayerDescriptor | null;
+  }: CreateRegionMapLayerDescriptorParams) => LayerDescriptor | null;
   createBasemapLayerDescriptor: () => LayerDescriptor | null;
   createESSearchSourceLayerDescriptor: (params: CreateLayerDescriptorParams) => LayerDescriptor;
+  suggestEMSTermJoinConfig: (config: SampleValuesConfig) => Promise<EMSTermJoinConfig | null>;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -80,34 +65,35 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
     return loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
-    const {
-      MapEmbeddable,
-      getIndexPatternService,
-      getMapsCapabilities,
-      renderApp,
-      createSecurityLayerDescriptors,
-      registerLayerWizard,
-      registerSource,
-      createTileMapLayerDescriptor,
-      createRegionMapLayerDescriptor,
-      createBasemapLayerDescriptor,
-      createESSearchSourceLayerDescriptor,
-    } = await import('./lazy');
-
-    resolve({
-      MapEmbeddable,
-      getIndexPatternService,
-      getMapsCapabilities,
-      renderApp,
-      createSecurityLayerDescriptors,
-      registerLayerWizard,
-      registerSource,
-      createTileMapLayerDescriptor,
-      createRegionMapLayerDescriptor,
-      createBasemapLayerDescriptor,
-      createESSearchSourceLayerDescriptor,
-    });
+  loadModulesPromise = new Promise(async (resolve, reject) => {
+    try {
+      const {
+        MapEmbeddable,
+        getIndexPatternService,
+        getMapsCapabilities,
+        renderApp,
+        createSecurityLayerDescriptors,
+        createTileMapLayerDescriptor,
+        createRegionMapLayerDescriptor,
+        createBasemapLayerDescriptor,
+        createESSearchSourceLayerDescriptor,
+        suggestEMSTermJoinConfig,
+      } = await import('./lazy');
+      resolve({
+        MapEmbeddable,
+        getIndexPatternService,
+        getMapsCapabilities,
+        renderApp,
+        createSecurityLayerDescriptors,
+        createTileMapLayerDescriptor,
+        createRegionMapLayerDescriptor,
+        createBasemapLayerDescriptor,
+        createESSearchSourceLayerDescriptor,
+        suggestEMSTermJoinConfig,
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
   return loadModulesPromise;
 }

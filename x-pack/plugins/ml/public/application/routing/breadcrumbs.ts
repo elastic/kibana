@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -40,6 +41,13 @@ export const DATA_FRAME_ANALYTICS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '/data_frame_analytics',
 });
 
+export const TRAINED_MODELS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.trainedModelsLabel', {
+    defaultMessage: 'Trained Models',
+  }),
+  href: '/trained_models',
+});
+
 export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
     defaultMessage: 'Data Visualizer',
@@ -73,6 +81,7 @@ const breadcrumbs = {
   SETTINGS_BREADCRUMB,
   ANOMALY_DETECTION_BREADCRUMB,
   DATA_FRAME_ANALYTICS_BREADCRUMB,
+  TRAINED_MODELS,
   DATA_VISUALIZER_BREADCRUMB,
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,

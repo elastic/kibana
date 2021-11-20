@@ -11,17 +11,18 @@ core: {
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
-            exporter: ISavedObjectsExporter;
-            importer: ISavedObjectsImporter;
+            getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+            getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+            getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
         };
         elasticsearch: {
             client: IScopedClusterClient;
-            legacy: {
-                client: ILegacyScopedClusterClient;
-            };
         };
         uiSettings: {
             client: IUiSettingsClient;
+        };
+        deprecations: {
+            client: DeprecationsClient;
         };
     };
 ```

@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-import { loadJobs as sendLoadJobsRequest, deserializeJobs, showApiError } from '../../services';
+import { loadJobs as sendLoadJobsRequest, deserializeJobs } from '../../services';
 import { LOAD_JOBS_START, LOAD_JOBS_SUCCESS, LOAD_JOBS_FAILURE } from '../action_types';
 
 export const loadJobs = () => async (dispatch) => {
@@ -18,17 +17,10 @@ export const loadJobs = () => async (dispatch) => {
   try {
     jobs = await sendLoadJobsRequest();
   } catch (error) {
-    dispatch({
+    return dispatch({
       type: LOAD_JOBS_FAILURE,
       payload: { error },
     });
-
-    return showApiError(
-      error,
-      i18n.translate('xpack.rollupJobs.loadAction.errorTitle', {
-        defaultMessage: 'Error loading rollup jobs',
-      })
-    );
   }
 
   dispatch({

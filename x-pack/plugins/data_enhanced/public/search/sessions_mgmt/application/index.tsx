@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'kibana/public';
@@ -21,6 +22,7 @@ export class SearchSessionsMgmtApp {
   constructor(
     private coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
     private config: SessionsConfigSchema,
+    private kibanaVersion: string,
     private params: ManagementAppMountParams,
     private pluginsSetup: IManagementSectionsPluginsSetup
   ) {}
@@ -47,8 +49,9 @@ export class SearchSessionsMgmtApp {
     const { sessionsClient } = data.search;
     const api = new SearchSessionsMgmtAPI(sessionsClient, this.config, {
       notifications,
-      urls: share.urlGenerators,
+      locators: share.url.locators,
       application,
+      usageCollector: pluginsSetup.data.search.usageCollector,
     });
 
     const documentation = new AsyncSearchIntroDocumentation(docLinks);
@@ -63,6 +66,7 @@ export class SearchSessionsMgmtApp {
       i18n,
       uiSettings,
       share,
+      kibanaVersion: this.kibanaVersion,
     };
 
     const { element } = params;

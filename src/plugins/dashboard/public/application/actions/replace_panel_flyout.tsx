@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -53,9 +53,8 @@ export class ReplacePanelFlyout extends React.Component<Props> {
 
   public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
     const { panelToRemove, container } = this.props;
-    const { w, h, x, y } = (container.getInput().panels[
-      panelToRemove.id
-    ] as DashboardPanelState).gridData;
+    const { w, h, x, y } = (container.getInput().panels[panelToRemove.id] as DashboardPanelState)
+      .gridData;
 
     const { id } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, {
       savedObjectId,

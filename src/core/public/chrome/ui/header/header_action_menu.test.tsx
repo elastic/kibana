@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -26,27 +26,32 @@ describe('HeaderActionMenu', () => {
   });
 
   const refresh = () => {
-    new Promise(async (resolve) => {
-      if (component) {
-        act(() => {
-          component.update();
-        });
+    new Promise(async (resolve, reject) => {
+      try {
+        if (component) {
+          act(() => {
+            component.update();
+          });
+        }
+
+        setImmediate(() => resolve(component)); // flushes any pending promises
+      } catch (error) {
+        reject(error);
       }
-      setImmediate(() => resolve(component)); // flushes any pending promises
     });
   };
 
-  const createMountPoint = (id: string, content: string = id): MountPoint => (
-    root
-  ): MockedUnmount => {
-    const container = document.createElement('DIV');
-    // eslint-disable-next-line no-unsanitized/property
-    container.innerHTML = content;
-    root.appendChild(container);
-    const unmount = jest.fn(() => container.remove());
-    unmounts[id] = unmount;
-    return unmount;
-  };
+  const createMountPoint =
+    (id: string, content: string = id): MountPoint =>
+    (root): MockedUnmount => {
+      const container = document.createElement('DIV');
+      // eslint-disable-next-line no-unsanitized/property
+      container.innerHTML = content;
+      root.appendChild(container);
+      const unmount = jest.fn(() => container.remove());
+      unmounts[id] = unmount;
+      return unmount;
+    };
 
   it('mounts the current value of the provided observable', async () => {
     component = mount(<HeaderActionMenu actionMenu$={menuMount$} />);

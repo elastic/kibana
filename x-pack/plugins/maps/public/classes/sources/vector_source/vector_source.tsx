@@ -1,31 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// @ts-expect-error
-import * as topojson from 'topojson-client';
-import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { FeatureCollection, GeoJsonProperties } from 'geojson';
+import type { Query } from 'src/plugins/data/common';
+import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
-import { FORMAT_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { TooltipProperty, ITooltipProperty } from '../../tooltips/tooltip_property';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
-  MapQuery,
+  Timeslice,
   VectorSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 
-export interface SourceTooltipConfig {
+export interface SourceStatus {
   tooltipContent: string | null;
   areResultsTrimmed: boolean;
+  isDeprecated?: boolean;
 }
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
@@ -35,19 +33,21 @@ export interface GeoJsonWithMeta {
   meta?: GeoJsonFetchMeta;
 }
 
-export interface BoundsFilters {
+export interface BoundsRequestMeta {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
   filters: Filter[];
-  query?: MapQuery;
-  sourceQuery?: MapQuery;
+  query?: Query;
+  sourceQuery?: Query;
   timeFilters: TimeRange;
+  timeslice?: Timeslice;
 }
 
 export interface IVectorSource extends ISource {
+  isMvt(): boolean;
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    layerDataFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null>;
   getGeoJsonWithMeta(
@@ -60,74 +60,38 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getLeftJoinFields(): Promise<IField[]>;
-  getSyncMeta(): VectorSourceSyncMeta | null;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
+
+  /*
+   * Vector layer avoids unnecessarily re-fetching source data.
+   * Use getSyncMeta to expose fields that require source data re-fetch when changed.
+   */
+  getSyncMeta(): object | null;
+
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
-  canFormatFeatureProperties(): boolean;
+  hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
-}
-
-export interface ITiledSingleLayerVectorSource extends IVectorSource {
-  getUrlTemplateWithMeta(
-    searchFilters: VectorSourceRequestMeta
-  ): Promise<{
-    layerName: string;
-    urlTemplate: string;
-    minSourceZoom: number;
-    maxSourceZoom: number;
-  }>;
-  getMinZoom(): number;
-  getMaxZoom(): number;
-  getLayerName(): string;
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus;
+  getTimesliceMaskFieldName(): Promise<string | null>;
+  supportsFeatureEditing(): Promise<boolean>;
+  getDefaultFields(): Promise<Record<string, Record<string, string>>>;
+  addFeature(
+    geometry: Geometry | Position[],
+    defaultFields: Record<string, Record<string, string>>
+  ): Promise<void>;
+  deleteFeature(featureId: string): Promise<void>;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  static async getGeoJson({
-    format,
-    featureCollectionPath,
-    fetchUrl,
-  }: {
-    format: FORMAT_TYPE;
-    featureCollectionPath: string;
-    fetchUrl: string;
-  }) {
-    let fetchedJson;
-    try {
-      const response = await fetch(fetchUrl);
-      if (!response.ok) {
-        throw new Error('Request failed');
-      }
-      fetchedJson = await response.json();
-    } catch (e) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.vetorSource.requestFailedErrorMessage', {
-          defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
-          values: { fetchUrl },
-        })
-      );
-    }
-
-    if (format === FORMAT_TYPE.GEOJSON) {
-      return fetchedJson;
-    }
-
-    if (format === FORMAT_TYPE.TOPOJSON) {
-      const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
-      return topojson.feature(fetchedJson, features);
-    }
-
-    throw new Error(
-      i18n.translate('xpack.maps.source.vetorSource.formatErrorMessage', {
-        defaultMessage: `Unable to fetch vector shapes from url: {format}`,
-        values: { format },
-      })
-    );
-  }
-
   getFieldNames(): string[] {
     return [];
+  }
+
+  isMvt() {
+    return false;
   }
 
   createField({ fieldName }: { fieldName: string }): IField {
@@ -146,8 +110,12 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return false;
   }
 
+  async supportsFitToBounds(): Promise<boolean> {
+    return true;
+  }
+
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;
@@ -161,6 +129,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [];
   }
 
+  getJoinsDisabledReason(): string | null {
+    return null;
+  }
+
   async getGeoJsonWithMeta(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
@@ -170,7 +142,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     throw new Error('Should implement VectorSource#getGeoJson');
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return false;
   }
 
@@ -199,11 +171,34 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): object | null {
     return null;
+  }
+
+  async getTimesliceMaskFieldName(): Promise<string | null> {
+    return null;
+  }
+
+  async addFeature(
+    geometry: Geometry | Position[],
+    defaultFields: Record<string, Record<string, string>>
+  ) {
+    throw new Error('Should implement VectorSource#addFeature');
+  }
+
+  async deleteFeature(featureId: string): Promise<void> {
+    throw new Error('Should implement VectorSource#deleteFeature');
+  }
+
+  async supportsFeatureEditing(): Promise<boolean> {
+    return false;
+  }
+
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    return {};
   }
 }

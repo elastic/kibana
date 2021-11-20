@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPanel, EuiProgress } from '@elastic/eui';
@@ -23,7 +24,7 @@ const MyPanel = styled(EuiPanel)`
 MyPanel.displayName = 'MyPanel';
 
 const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title }) => (
-  <MyPanel>
+  <MyPanel hasBorder>
     {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
     <HeaderSection title={title} />
     {children}

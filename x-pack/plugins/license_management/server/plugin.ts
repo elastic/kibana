@@ -1,19 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
 
 import { ApiRoutes } from './routes';
-import { isEsError } from './shared_imports';
-import { Dependencies } from './types';
+import { handleEsError } from './shared_imports';
+import { SetupDependencies, StartDependencies } from './types';
 
-export class LicenseManagementServerPlugin implements Plugin<void, void, any, any> {
+export class LicenseManagementServerPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   private readonly apiRoutes = new ApiRoutes();
 
-  setup({ http }: CoreSetup, { licensing, features, security }: Dependencies) {
+  setup(
+    { http, getStartServices }: CoreSetup<StartDependencies>,
+    { features, security }: SetupDependencies
+  ) {
     const router = http.createRouter();
 
     features.registerElasticsearchFeature({
@@ -29,17 +35,19 @@ export class LicenseManagementServerPlugin implements Plugin<void, void, any, an
       ],
     });
 
-    this.apiRoutes.setup({
-      router,
-      plugins: {
-        licensing,
-      },
-      lib: {
-        isEsError,
-      },
-      config: {
-        isSecurityEnabled: security !== undefined,
-      },
+    getStartServices().then(([, { licensing }]) => {
+      this.apiRoutes.setup({
+        router,
+        plugins: {
+          licensing,
+        },
+        lib: {
+          handleEsError,
+        },
+        config: {
+          isSecurityEnabled: security !== undefined,
+        },
+      });
     });
   }
 

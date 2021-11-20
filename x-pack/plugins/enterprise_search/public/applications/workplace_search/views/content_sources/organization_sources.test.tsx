@@ -1,25 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { contentSources } from '../../__mocks__/content_sources.mock';
 
-import { setMockValues, setMockActions } from '../../../__mocks__';
+import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import React from 'react';
-import { Redirect } from 'react-router-dom';
-
-import { contentSources } from '../../__mocks__/content_sources.mock';
-
-import { Loading } from '../../../shared/loading';
 import { SourcesTable } from '../../components/shared/sources_table';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-
-import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import { OrganizationSources } from './organization_sources';
 
@@ -44,20 +38,12 @@ describe('OrganizationSources', () => {
     const wrapper = shallow(<OrganizationSources />);
 
     expect(wrapper.find(SourcesTable)).toHaveLength(1);
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
   });
 
-  it('returns loading when loading', () => {
+  it('does not render a page header when data is loading (to prevent a jump after redirect)', () => {
     setMockValues({ ...mockValues, dataLoading: true });
     const wrapper = shallow(<OrganizationSources />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('returns redirect when no sources', () => {
-    setMockValues({ ...mockValues, contentSources: [] });
-    const wrapper = shallow(<OrganizationSources />);
-
-    expect(wrapper.find(Redirect).prop('to')).toEqual(getSourcesPath(ADD_SOURCE_PATH, true));
+    expect(wrapper.prop('pageHeader')).toBeUndefined();
   });
 });

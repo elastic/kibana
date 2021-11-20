@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -11,7 +12,7 @@ import { handleError } from '../../../../lib/errors';
 // @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 // @ts-ignore
 import { metricSet } from './metric_set_instance';
 import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';

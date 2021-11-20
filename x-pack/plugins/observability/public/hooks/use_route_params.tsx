@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as t from 'io-ts';
 import { useLocation, useParams } from 'react-router-dom';
 import { isLeft } from 'fp-ts/lib/Either';
@@ -44,8 +46,8 @@ export function useRouteParams<T extends keyof typeof routes>(pathName: T): Rout
     console.error(PathReporter.report(pathResult)[0]);
   }
 
-  return ({
+  return {
     query: isLeft(queryResult) ? {} : queryResult.right,
     path: isLeft(pathResult) ? {} : pathResult.right,
-  } as unknown) as RouteParams<T>;
+  } as unknown as RouteParams<T>;
 }

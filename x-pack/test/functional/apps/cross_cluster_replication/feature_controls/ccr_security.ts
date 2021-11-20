@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -13,15 +15,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/89180
-  describe.skip('security', () => {
+  describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('global all privileges (aka kibana_admin)', () => {
@@ -44,9 +45,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard all with ccr_user', () => {
+    describe('global dashboard read with ccr_user', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'ccr_user'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'ccr_user'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

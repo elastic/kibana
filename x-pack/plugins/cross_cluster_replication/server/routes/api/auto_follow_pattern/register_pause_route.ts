@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -14,7 +15,7 @@ import { RouteDependencies } from '../../../types';
 export const registerPauseRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
     id: schema.string(),
@@ -28,29 +29,22 @@ export const registerPauseRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
       const { id } = request.params;
       const ids = id.split(',');
 
       const itemsPaused: string[] = [];
       const errors: Array<{ id: string; error: any }> = [];
 
-      const formatError = (err: any) => {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        return response.internalError({ body: err });
-      };
-
       await Promise.all(
         ids.map((_id) =>
-          context
-            .crossClusterReplication!.client.callAsCurrentUser('ccr.pauseAutoFollowPattern', {
-              id: _id,
+          client.asCurrentUser.ccr
+            .pauseAutoFollowPattern({
+              name: _id,
             })
             .then(() => itemsPaused.push(_id))
-            .catch((err) => {
-              errors.push({ id: _id, error: formatError(err) });
+            .catch((error) => {
+              errors.push({ id: _id, error: handleEsError({ error, response }) });
             })
         )
       );

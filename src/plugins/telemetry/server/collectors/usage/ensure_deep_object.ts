@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 //
 // THIS IS A DIRECT COPY OF
-// '../../../../../../../../src/core/server/config/ensure_deep_object'
+// 'packages/kbn-config/src/raw/ensure_deep_object.ts'
 // BECAUSE THAT IS BLOCKED FOR IMPORTING BY OUR LINTER.
 //
 // IF THAT IS EXPOSED, WE SHOULD USE IT RATHER THAN CLONE IT.
 //
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// ^ Disabling the rule for the entire file because of the complexity to type this
 
 const separator = '.';
 

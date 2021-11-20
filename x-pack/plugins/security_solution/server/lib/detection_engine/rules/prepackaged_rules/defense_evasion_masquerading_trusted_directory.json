@@ -6,13 +6,14 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Program Files Directory Masquerading",
-  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n /* capture both fake program files directory in process executable as well as if passed in process args as a dll*/\n  process.args : (\"C:\\\\*Program*Files*\\\\*\", \"C:\\\\*Program*Files*\\\\*\") and\n  not process.args : (\"C:\\\\Program Files\\\\*\", \"C:\\\\Program Files (x86)\\\\*\")\n",
-  "risk_score": 43,
+  "query": "process where event.type == \"start\" and\n process.executable : \"C:\\\\*Program*Files*\\\\*.exe\" and\n not process.executable : (\"C:\\\\Program Files\\\\*.exe\", \"C:\\\\Program Files (x86)\\\\*.exe\", \"C:\\\\Users\\\\*.exe\", \"C:\\\\ProgramData\\\\*.exe\")\n",
+  "risk_score": 47,
   "rule_id": "32c5cf9c-2ef8-4e87-819e-5ccb7cd18b14",
   "severity": "medium",
   "tags": [
@@ -34,11 +35,19 @@
         {
           "id": "T1036",
           "name": "Masquerading",
-          "reference": "https://attack.mitre.org/techniques/T1036/"
+          "reference": "https://attack.mitre.org/techniques/T1036/",
+          "subtechnique": [
+            {
+              "id": "T1036.005",
+              "name": "Match Legitimate Name or Location",
+              "reference": "https://attack.mitre.org/techniques/T1036/005/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 5
 }

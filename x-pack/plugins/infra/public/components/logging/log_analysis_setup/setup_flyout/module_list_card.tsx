@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiCard, EuiIcon, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
@@ -38,7 +39,7 @@ export const LogAnalysisModuleListCard: React.FC<{
   const [viewInMlLink, setViewInMlLink] = useState<string>('');
 
   const getMlUrl = async () => {
-    if (!ml.urlGenerator) {
+    if (!ml.locator) {
       toasts.addWarning({
         title: mountReactNode(
           <FormattedMessage
@@ -49,7 +50,7 @@ export const LogAnalysisModuleListCard: React.FC<{
       });
       return;
     }
-    setViewInMlLink(await ml.urlGenerator.createUrl({ page: 'jobs', pageState: { jobId } }));
+    setViewInMlLink(await ml.locator.getUrl({ page: 'jobs', pageState: { jobId } }));
   };
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export const LogAnalysisModuleListCard: React.FC<{
     moduleStatus.type === 'required' ? (
       <EuiIcon size="xxl" type="machineLearningApp" />
     ) : (
-      <EuiIcon color="secondary" size="xxl" type="check" />
+      <EuiIcon color="success" size="xxl" type="check" />
     );
 
   const moduleSetupButton =

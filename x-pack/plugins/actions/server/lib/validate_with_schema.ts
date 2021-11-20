@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -34,6 +35,22 @@ export function validateSecrets<
   return validateWithSchema(actionType, 'secrets', value);
 }
 
+export function validateConnector<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
+  if (actionType.validate && actionType.validate.connector) {
+    const connectorValue = value as { config: Config; secrets: Secrets };
+    const result = actionType.validate.connector(connectorValue.config, connectorValue.secrets);
+    if (result !== null) {
+      throw Boom.badRequest(`error validating action type connector: ${result}`);
+    }
+  }
+  return null;
+}
+
 type ValidKeys = 'params' | 'config' | 'secrets';
 
 function validateWithSchema<
@@ -44,7 +61,7 @@ function validateWithSchema<
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,
-  value: unknown
+  value: unknown | { config: unknown; secrets: unknown }
 ): Record<string, unknown> {
   if (actionType.validate) {
     let name;

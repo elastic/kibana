@@ -1,5 +1,9 @@
 {
-  "id": "ui_settings_plugin",
+  "id": "uiSettingsPlugin",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["ui_settings_plugin"],

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -124,7 +124,7 @@ function getOrCreateContainerElement() {
 class ContextMenuSession extends EventEmitter {
   /**
    * Closes the opened flyout as long as it's still the open one.
-   * If this is not the active session anymore, this method won't do anything.
+   * If this is not the active session, this method will do nothing.
    * If this session was still active and a flyout was closed, the 'closed'
    * event will be emitted on this FlyoutSession instance.
    */

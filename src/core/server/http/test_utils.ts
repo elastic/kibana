@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject } from 'rxjs';
+import moment from 'moment';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '../config';
@@ -38,11 +39,13 @@ configService.atPath.mockImplementation((path) => {
         disableProtection: true,
         allowlist: [],
       },
+      securityResponseHeaders: {},
       customResponseHeaders: {},
       requestId: {
         allowFromAnyIp: true,
         ipAllowlist: [],
       },
+      shutdownTimeout: moment.duration(30, 'seconds'),
       keepaliveTimeout: 120_000,
       socketTimeout: 120_000,
     } as any);
@@ -53,7 +56,11 @@ configService.atPath.mockImplementation((path) => {
     } as any);
   }
   if (path === 'csp') {
-    return new BehaviorSubject({} as any);
+    return new BehaviorSubject({
+      strict: false,
+      disableEmbedding: false,
+      warnLegacyBrowsers: true,
+    });
   }
   throw new Error(`Unexpected config path: ${path}`);
 });

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
@@ -20,10 +22,8 @@ const { useGlobalFlyout } = GlobalFlyout;
 export const DocumentFields = React.memo(() => {
   const { fields, search, documentFields } = useMappingsState();
   const dispatch = useDispatch();
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const { editor: editorType } = documentFields;
   const isEditing = documentFields.status === 'editingField';

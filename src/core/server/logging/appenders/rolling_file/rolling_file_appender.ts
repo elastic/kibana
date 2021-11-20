@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -26,7 +26,7 @@ import { RollingFileManager } from './rolling_file_manager';
 import { RollingFileContext } from './rolling_file_context';
 
 export interface RollingFileAppenderConfig {
-  kind: 'rolling-file';
+  type: 'rolling-file';
   /**
    * The layout to use when writing log entries
    */
@@ -34,7 +34,7 @@ export interface RollingFileAppenderConfig {
   /**
    * The absolute path of the file to write to.
    */
-  path: string;
+  fileName: string;
   /**
    * The {@link TriggeringPolicy | policy} to use to determine if a rollover should occur.
    */
@@ -51,9 +51,9 @@ export interface RollingFileAppenderConfig {
  */
 export class RollingFileAppender implements DisposableAppender {
   public static configSchema = schema.object({
-    kind: schema.literal('rolling-file'),
+    type: schema.literal('rolling-file'),
     layout: Layouts.configSchema,
-    path: schema.string(),
+    fileName: schema.string(),
     policy: triggeringPolicyConfigSchema,
     strategy: rollingStrategyConfigSchema,
   });
@@ -70,7 +70,7 @@ export class RollingFileAppender implements DisposableAppender {
   private readonly buffer: BufferAppender;
 
   constructor(config: RollingFileAppenderConfig) {
-    this.context = new RollingFileContext(config.path);
+    this.context = new RollingFileContext(config.fileName);
     this.context.refreshFileInfo();
     this.fileManager = new RollingFileManager(this.context);
     this.layout = Layouts.create(config.layout);
@@ -144,7 +144,7 @@ export class RollingFileAppender implements DisposableAppender {
     // this would cause a second rollover that would not be awaited
     // and could result in a race with the newly created appender
     // that would also be performing a rollover.
-    // so if we are disposed, we just flush the buffer directly to the file instead to avoid loosing the entries.
+    // so if we are disposed, we just flush the buffer directly to the file instead to avoid losing the entries.
     for (const log of pendingLogs) {
       if (this.disposed) {
         this._writeToFile(log);

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { RequestHandlerContext } from 'src/core/server';
@@ -15,10 +15,11 @@ import {
   InternalHttpServiceSetup,
   KibanaRequest,
   KibanaResponseFactory,
+  InternalHttpServicePreboot,
 } from '../http';
 
 import { Logger } from '../logging';
-import { InternalRenderingServiceSetup } from '../rendering';
+import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
 import { CoreService } from '../../types';
 
 import {
@@ -29,6 +30,12 @@ import {
   HttpResourcesRequestHandler,
   HttpResourcesServiceToolkit,
 } from './types';
+import { getApmConfig } from './get_apm_config';
+
+export interface PrebootDeps {
+  http: InternalHttpServicePreboot;
+  rendering: InternalRenderingServicePreboot;
+}
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -37,8 +44,16 @@ export interface SetupDeps {
 
 export class HttpResourcesService implements CoreService<InternalHttpResourcesSetup> {
   private readonly logger: Logger;
+
   constructor(core: CoreContext) {
     this.logger = core.logger.get('http-resources');
+  }
+
+  preboot(deps: PrebootDeps) {
+    this.logger.debug('prebooting HttpResourcesService');
+    return {
+      createRegistrar: this.createRegistrar.bind(this, deps),
+    };
   }
 
   setup(deps: SetupDeps) {
@@ -49,9 +64,10 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
   }
 
   start() {}
+
   stop() {}
 
-  private createRegistrar(deps: SetupDeps, router: IRouter): HttpResources {
+  private createRegistrar(deps: SetupDeps | PrebootDeps, router: IRouter): HttpResources {
     return {
       register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(
         route: RouteConfig<P, Q, B, 'get'>,
@@ -68,7 +84,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
   }
 
   private createResponseToolkit(
-    deps: SetupDeps,
+    deps: SetupDeps | PrebootDeps,
     context: RequestHandlerContext,
     request: KibanaRequest,
     response: KibanaResponseFactory
@@ -76,8 +92,12 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     const cspHeader = deps.http.csp.header;
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
+        const apmConfig = getApmConfig(request.url.pathname);
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
           includeUserSettings: true,
+          vars: {
+            apmConfig,
+          },
         });
 
         return response.ok({
@@ -86,8 +106,12 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
+        const apmConfig = getApmConfig(request.url.pathname);
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
           includeUserSettings: false,
+          vars: {
+            apmConfig,
+          },
         });
 
         return response.ok({

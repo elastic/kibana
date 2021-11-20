@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ThreatMapEntries } from './types';
 import { getDefaultEmptyEntry } from './helpers';
 
@@ -25,27 +27,29 @@ export type Action =
       lastEntry: ThreatMapEntries;
     };
 
-export const reducer = () => (state: State, action: Action): State => {
-  switch (action.type) {
-    case 'setEntries': {
-      const isAndLogicIncluded =
-        action.entries.filter(({ entries }) => entries.length > 1).length > 0;
+export const reducer =
+  () =>
+  (state: State, action: Action): State => {
+    switch (action.type) {
+      case 'setEntries': {
+        const isAndLogicIncluded =
+          action.entries.filter(({ entries }) => entries.length > 1).length > 0;
 
-      const returnState = {
-        ...state,
-        andLogicIncluded: isAndLogicIncluded,
-        entries: action.entries,
-      };
-      return returnState;
+        const returnState = {
+          ...state,
+          andLogicIncluded: isAndLogicIncluded,
+          entries: action.entries,
+        };
+        return returnState;
+      }
+      case 'setDefault': {
+        return {
+          ...state,
+          ...action.initialState,
+          entries: [{ ...action.lastEntry, entries: [getDefaultEmptyEntry()] }],
+        };
+      }
+      default:
+        return state;
     }
-    case 'setDefault': {
-      return {
-        ...state,
-        ...action.initialState,
-        entries: [{ ...action.lastEntry, entries: [getDefaultEmptyEntry()] }],
-      };
-    }
-    default:
-      return state;
-  }
-};
+  };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -14,15 +15,8 @@ import { createQuery } from '../create_query';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 
-export function handleResponse(response: ElasticsearchResponse) {
-  const isEnabled = response.hits?.hits[0]?._source.stack_stats?.xpack?.ccr?.enabled ?? undefined;
-  const isAvailable =
-    response.hits?.hits[0]?._source.stack_stats?.xpack?.ccr?.available ?? undefined;
-  return isEnabled && isAvailable;
-}
-
 export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string) {
-  checkParam(esIndexPattern, 'esIndexPattern in getNodes');
+  checkParam(esIndexPattern, 'esIndexPattern in checkCcrEnabled');
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
@@ -33,7 +27,7 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
   const params = {
     index: esIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         type: 'cluster_stats',
@@ -44,10 +38,17 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
       }),
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
-    filterPath: ['hits.hits._source.stack_stats.xpack.ccr'],
+    filter_path: [
+      'hits.hits._source.stack_stats.xpack.ccr',
+      'hits.hits._source.elasticsearch.cluster.stats.stack.xpack.ccr',
+    ],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const response = await callWithRequest(req, 'search', params);
-  return handleResponse(response);
+  const response: ElasticsearchResponse = await callWithRequest(req, 'search', params);
+  const legacyCcr = response.hits?.hits[0]?._source.stack_stats?.xpack?.ccr;
+  const mbCcr = response.hits?.hits[0]?._source?.elasticsearch?.cluster?.stats?.stack?.xpack?.ccr;
+  const isEnabled = legacyCcr?.enabled ?? mbCcr?.enabled;
+  const isAvailable = legacyCcr?.available ?? mbCcr?.available;
+  return Boolean(isEnabled && isAvailable);
 }

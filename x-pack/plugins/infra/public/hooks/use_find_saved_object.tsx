@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useCallback } from 'react';
 import { SavedObjectAttributes, SavedObjectsBatchResponse } from 'src/core/public';
+import { useUiTracker } from '../../../observability/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
+  const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const kibana = useKibana();
   const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectType> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,10 +29,17 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
             type,
             search: query,
             searchFields,
+            page: 1,
+            perPage: 1000,
           });
           setError(null);
           setLoading(false);
           setData(d);
+          if (d.total > 1000) {
+            trackMetric({ metric: `over_1000_saved_objects_for_${type}` });
+          } else {
+            trackMetric({ metric: `under_1000_saved_objects_for_${type}` });
+          }
         } catch (e) {
           setLoading(false);
           setError(e);
@@ -37,7 +47,7 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
       };
       fetchData();
     },
-    [type, kibana.services.savedObjects]
+    [type, kibana.services.savedObjects, trackMetric]
   );
 
   const hasView = async (name: string) => {

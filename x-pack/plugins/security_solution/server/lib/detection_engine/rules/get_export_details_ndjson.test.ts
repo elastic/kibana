@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
@@ -20,6 +21,7 @@ describe('getExportDetailsNdjson', () => {
     const reParsed = JSON.parse(details);
     expect(reParsed).toEqual({
       exported_count: 1,
+      exported_rules_count: 1,
       missing_rules: [],
       missing_rules_count: 0,
     });
@@ -31,6 +33,7 @@ describe('getExportDetailsNdjson', () => {
     const reParsed = JSON.parse(details);
     expect(reParsed).toEqual({
       exported_count: 0,
+      exported_rules_count: 0,
       missing_rules: [{ rule_id: 'rule-1' }],
       missing_rules_count: 1,
     });
@@ -49,6 +52,7 @@ describe('getExportDetailsNdjson', () => {
     const reParsed = JSON.parse(details);
     expect(reParsed).toEqual({
       exported_count: 2,
+      exported_rules_count: 2,
       missing_rules: [missingRule1, missingRule2],
       missing_rules_count: 2,
     });

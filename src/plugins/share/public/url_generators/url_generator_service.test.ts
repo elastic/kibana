@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UrlGeneratorsService } from './url_generator_service';
@@ -29,12 +29,8 @@ test('Registering and retrieving a generator', async () => {
       "createUrl": [Function],
       "id": "TEST_GENERATOR",
       "isDeprecated": false,
-      "migrate": [Function],
     }
   `);
-  await expect(generator.migrate({})).rejects.toEqual(
-    new Error('You cannot call migrate on a non-deprecated generator.')
-  );
   expect(await generator.createUrl({})).toBe('myurl');
 
   const retrievedGenerator = start.getUrlGenerator('TEST_GENERATOR');
@@ -43,12 +39,8 @@ test('Registering and retrieving a generator', async () => {
       "createUrl": [Function],
       "id": "TEST_GENERATOR",
       "isDeprecated": false,
-      "migrate": [Function],
     }
   `);
-  await expect(generator.migrate({})).rejects.toEqual(
-    new Error('You cannot call migrate on a non-deprecated generator.')
-  );
   expect(await generator.createUrl({})).toBe('myurl');
 });
 
@@ -124,6 +116,5 @@ test('Generator returns migrated url', async () => {
 
   const generator = start.getUrlGenerator('v1');
   expect(generator.isDeprecated).toBe(true);
-  expect(await generator.migrate({ bar: 'hi' })).toEqual({ id: 'v2', state: { foo: 'hi' } });
   expect(await generator.createUrl({ bar: 'hi' })).toEqual('www.hi.com');
 });

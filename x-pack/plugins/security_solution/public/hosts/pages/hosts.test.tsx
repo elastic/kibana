@@ -1,29 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
 
-import { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import type { Filter } from '@kbn/es-query';
 import '../../common/mock/match_media';
 import {
-  apolloClientObservable,
   TestProviders,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
-import { SiemNavigation } from '../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { inputsActions } from '../../common/store/inputs';
 import { State, createStore } from '../../common/store';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -57,10 +57,10 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-const mockUseSourcererScope = useSourcererScope as jest.Mock;
+const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Hosts - rendering', () => {
   test('it renders the Setup Instructions text when no index is available', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
     });
 
@@ -75,7 +75,7 @@ describe('Hosts - rendering', () => {
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
@@ -90,7 +90,7 @@ describe('Hosts - rendering', () => {
   });
 
   test('it should render tab navigation', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
@@ -102,7 +102,7 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(SiemNavigation).exists()).toBe(true);
+    expect(wrapper.find(SecuritySolutionTabNavigation).exists()).toBe(true);
   });
 
   test('it should add the new filters after init', async () => {
@@ -137,19 +137,13 @@ describe('Hosts - rendering', () => {
         },
       },
     ];
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },
     });
     const myState: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
@@ -161,7 +155,7 @@ describe('Hosts - rendering', () => {
     myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
     wrapper.update();
     expect(wrapper.find(HostsTabs).props().filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
     );
   });
 });

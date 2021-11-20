@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -47,23 +47,21 @@ function RoutingExplorer({
               listItems={[
                 {
                   label: 'IRouter API docs',
-                  href:
-                    'https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.irouter.md',
+                  href: 'https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.irouter.md',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',
                 },
                 {
                   label: 'HttpHandler (core.http.fetch) API docs',
-                  href:
-                    'https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.httphandler.md',
+                  href: 'https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.httphandler.md',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',
                 },
                 {
                   label: 'Conventions',
-                  href: 'https://github.com/elastic/kibana/tree/master/STYLEGUIDE.md#api-endpoints',
+                  href: 'https://github.com/elastic/kibana/tree/main/STYLEGUIDE.mdx#api-endpoints',
                   iconType: 'logoGithub',
                   target: '_blank',
                   size: 's',

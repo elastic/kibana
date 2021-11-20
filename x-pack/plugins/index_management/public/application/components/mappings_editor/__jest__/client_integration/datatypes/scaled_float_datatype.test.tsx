@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed } from '../helpers';
+import { componentHelpers, MappingsEditorTestBed, kibanaVersion } from '../helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
@@ -89,6 +91,13 @@ describe('Mappings editor: scaled float datatype', () => {
     });
     await updateFieldAndCloseFlyout();
     expect(exists('mappingsEditorFieldEdit')).toBe(false);
+
+    if (kibanaVersion.major < 7) {
+      expect(exists('boostParameterToggle')).toBe(true);
+    } else {
+      // Since 8.x the boost parameter is deprecated
+      expect(exists('boostParameterToggle')).toBe(false);
+    }
 
     // It should have the default parameters values added, plus the scaling factor
     updatedMappings.properties.myField = {

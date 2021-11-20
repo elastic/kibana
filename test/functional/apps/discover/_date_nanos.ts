@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('date_nanos', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('date_nanos');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await PageObjects.common.navigateToApp('discover');
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function unloadMakelogs() {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('date_nanos');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos');
     });
 
     it('should show a timestamp with nanoseconds in the first result row', async function () {

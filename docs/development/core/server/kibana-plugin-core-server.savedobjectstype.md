@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsType 
+export interface SavedObjectsType<Attributes = any> 
 ```
 
 ## Remarks
@@ -18,8 +18,8 @@ This is only internal for now, and will only be public when we expose the regist
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [convertToAliasScript](./kibana-plugin-core-server.savedobjectstype.converttoaliasscript.md) | <code>string</code> | If defined, will be used to convert the type to an alias. |
-|  [convertToMultiNamespaceTypeVersion](./kibana-plugin-core-server.savedobjectstype.converttomultinamespacetypeversion.md) | <code>string</code> | If defined, objects of this type will be converted to multi-namespace objects when migrating to this version.<!-- -->Requirements:<!-- -->1. This string value must be a valid semver version 2. This type must have previously specified [\`namespaceType: 'single'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md) 3. This type must also specify [\`namespaceType: 'multiple'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md)<!-- -->Example of a single-namespace type in 7.10:
+|  [convertToAliasScript?](./kibana-plugin-core-server.savedobjectstype.converttoaliasscript.md) | string | <i>(Optional)</i> If defined, will be used to convert the type to an alias. |
+|  [convertToMultiNamespaceTypeVersion?](./kibana-plugin-core-server.savedobjectstype.converttomultinamespacetypeversion.md) | string | <i>(Optional)</i> If defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this version.<!-- -->Requirements:<!-- -->1. This string value must be a valid semver version 2. This type must have previously specified [\`namespaceType: 'single'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md) 3. This type must also specify [\`namespaceType: 'multiple'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md) \*or\* [\`namespaceType: 'multiple-isolated'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md)<!-- -->Example of a single-namespace type in 7.12:
 ```ts
 {
   name: 'foo',
@@ -27,25 +27,34 @@ This is only internal for now, and will only be public when we expose the regist
   namespaceType: 'single',
   mappings: {...}
 }
-
 ```
-Example after converting to a multi-namespace type in 7.11:
+Example after converting to a multi-namespace (isolated) type in 8.0:
+```ts
+{
+  name: 'foo',
+  hidden: false,
+  namespaceType: 'multiple-isolated',
+  mappings: {...},
+  convertToMultiNamespaceTypeVersion: '8.0.0'
+}
+```
+Example after converting to a multi-namespace (shareable) type in 8.1:
 ```ts
 {
   name: 'foo',
   hidden: false,
   namespaceType: 'multiple',
   mappings: {...},
-  convertToMultiNamespaceTypeVersion: '7.11.0'
+  convertToMultiNamespaceTypeVersion: '8.0.0'
 }
-
 ```
-Note: a migration function can be optionally specified for the same version. |
-|  [hidden](./kibana-plugin-core-server.savedobjectstype.hidden.md) | <code>boolean</code> | Is the type hidden by default. If true, repositories will not have access to this type unless explicitly declared as an <code>extraType</code> when creating the repository.<!-- -->See [createInternalRepository](./kibana-plugin-core-server.savedobjectsservicestart.createinternalrepository.md)<!-- -->. |
-|  [indexPattern](./kibana-plugin-core-server.savedobjectstype.indexpattern.md) | <code>string</code> | If defined, the type instances will be stored in the given index instead of the default one. |
-|  [management](./kibana-plugin-core-server.savedobjectstype.management.md) | <code>SavedObjectsTypeManagementDefinition</code> | An optional [saved objects management section](./kibana-plugin-core-server.savedobjectstypemanagementdefinition.md) definition for the type. |
-|  [mappings](./kibana-plugin-core-server.savedobjectstype.mappings.md) | <code>SavedObjectsTypeMappingDefinition</code> | The [mapping definition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) for the type. |
-|  [migrations](./kibana-plugin-core-server.savedobjectstype.migrations.md) | <code>SavedObjectMigrationMap &#124; (() =&gt; SavedObjectMigrationMap)</code> | An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) or a function returning a map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type. |
-|  [name](./kibana-plugin-core-server.savedobjectstype.name.md) | <code>string</code> | The name of the type, which is also used as the internal id. |
-|  [namespaceType](./kibana-plugin-core-server.savedobjectstype.namespacetype.md) | <code>SavedObjectsNamespaceType</code> | The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) for the type. |
+Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process. |
+|  [excludeOnUpgrade?](./kibana-plugin-core-server.savedobjectstype.excludeonupgrade.md) | SavedObjectTypeExcludeFromUpgradeFilterHook | <i>(Optional)</i> If defined, allows a type to exclude unneeded documents from the migration process and effectively be deleted. See [SavedObjectTypeExcludeFromUpgradeFilterHook](./kibana-plugin-core-server.savedobjecttypeexcludefromupgradefilterhook.md) for more details. |
+|  [hidden](./kibana-plugin-core-server.savedobjectstype.hidden.md) | boolean | Is the type hidden by default. If true, repositories will not have access to this type unless explicitly declared as an <code>extraType</code> when creating the repository.<!-- -->See [createInternalRepository](./kibana-plugin-core-server.savedobjectsservicestart.createinternalrepository.md)<!-- -->. |
+|  [indexPattern?](./kibana-plugin-core-server.savedobjectstype.indexpattern.md) | string | <i>(Optional)</i> If defined, the type instances will be stored in the given index instead of the default one. |
+|  [management?](./kibana-plugin-core-server.savedobjectstype.management.md) | SavedObjectsTypeManagementDefinition&lt;Attributes&gt; | <i>(Optional)</i> An optional [saved objects management section](./kibana-plugin-core-server.savedobjectstypemanagementdefinition.md) definition for the type. |
+|  [mappings](./kibana-plugin-core-server.savedobjectstype.mappings.md) | SavedObjectsTypeMappingDefinition | The [mapping definition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) for the type. |
+|  [migrations?](./kibana-plugin-core-server.savedobjectstype.migrations.md) | SavedObjectMigrationMap \| (() =&gt; SavedObjectMigrationMap) | <i>(Optional)</i> An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) or a function returning a map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type. |
+|  [name](./kibana-plugin-core-server.savedobjectstype.name.md) | string | The name of the type, which is also used as the internal id. |
+|  [namespaceType](./kibana-plugin-core-server.savedobjectstype.namespacetype.md) | SavedObjectsNamespaceType | The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) for the type. |
 

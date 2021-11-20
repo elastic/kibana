@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subscription } from 'rxjs';
@@ -74,7 +74,7 @@ describe('connect_to_global_state', () => {
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
-      savedObjectsClient: startMock.savedObjects.client,
+      http: startMock.http,
     });
     filterManager = queryServiceStart.filterManager;
     timeFilter = queryServiceStart.timefilter.timefilter;
@@ -308,7 +308,7 @@ describe('connect_to_app_state', () => {
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
-      savedObjectsClient: startMock.savedObjects.client,
+      http: startMock.http,
     });
     filterManager = queryServiceStart.filterManager;
 
@@ -487,7 +487,7 @@ describe('filters with different state', () => {
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
-      savedObjectsClient: startMock.savedObjects.client,
+      http: startMock.http,
     });
     filterManager = queryServiceStart.filterManager;
 

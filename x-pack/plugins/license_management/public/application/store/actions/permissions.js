@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createAction } from 'redux-actions';
@@ -13,14 +14,16 @@ export const permissionsSuccess = createAction('LICENSE_MANAGEMENT_PERMISSIONS_S
 
 export const permissionsError = createAction('LICENSE_MANAGEMENT_PERMISSIONS_ERROR');
 
-export const loadPermissions = () => async (dispatch, getState, { http }) => {
-  dispatch(permissionsLoading(true));
-  try {
-    const permissions = await getPermissions(http);
-    dispatch(permissionsLoading(false));
-    dispatch(permissionsSuccess(permissions.hasPermission));
-  } catch (e) {
-    dispatch(permissionsLoading(false));
-    dispatch(permissionsError(e));
-  }
-};
+export const loadPermissions =
+  () =>
+  async (dispatch, getState, { http }) => {
+    dispatch(permissionsLoading(true));
+    try {
+      const permissions = await getPermissions(http);
+      dispatch(permissionsLoading(false));
+      dispatch(permissionsSuccess(permissions.hasPermission));
+    } catch (e) {
+      dispatch(permissionsLoading(false));
+      dispatch(permissionsError(e));
+    }
+  };

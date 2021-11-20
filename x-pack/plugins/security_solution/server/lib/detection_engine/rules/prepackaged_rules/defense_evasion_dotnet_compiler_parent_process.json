@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious .NET Code Compilation",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"csc.exe\", \"vbc.exe\") and\n  process.parent.name : (\"wscript.exe\", \"mshta.exe\", \"cscript.exe\", \"wmic.exe\", \"svchost.exe\", \"rundll32.exe\", \"cmstp.exe\", \"regsvr32.exe\")\n",
   "risk_score": 47,
@@ -32,13 +33,21 @@
       },
       "technique": [
         {
-          "id": "T1055",
-          "name": "Process Injection",
-          "reference": "https://attack.mitre.org/techniques/T1055/"
+          "id": "T1027",
+          "name": "Obfuscated Files or Information",
+          "reference": "https://attack.mitre.org/techniques/T1027/",
+          "subtechnique": [
+            {
+              "id": "T1027.004",
+              "name": "Compile After Delivery",
+              "reference": "https://attack.mitre.org/techniques/T1027/004/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 5
 }

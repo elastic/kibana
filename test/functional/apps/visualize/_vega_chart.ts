@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { unzip } from 'lodash';
@@ -43,6 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('vega chart in visualize app', () => {
     before(async () => {
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVega');
@@ -117,12 +118,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await inspector.openInspectorRequestsView();
 
           for (const getFn of [
-            inspector.getOpenRequestDetailRequestButton,
-            inspector.getOpenRequestDetailResponseButton,
-            inspector.getOpenRequestStatisticButton,
-          ]) {
+            'getOpenRequestDetailRequestButton',
+            'getOpenRequestDetailResponseButton',
+            'getOpenRequestStatisticButton',
+          ] as const) {
             await retry.try(async () => {
-              const requestStatisticTab = await getFn();
+              const requestStatisticTab = await inspector[getFn]();
 
               expect(await requestStatisticTab.isEnabled()).to.be(true);
             });
@@ -130,9 +131,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should set the default query name if not given in the schema', async () => {
-          const requests = await inspector.getRequestNames();
+          const singleExampleRequest = await inspector.hasSingleRequest();
+          const selectedExampleRequest = await inspector.getSelectedOption();
 
-          expect(requests).to.be('Unnamed request #0');
+          expect(singleExampleRequest).to.be(true);
+          expect(selectedExampleRequest).to.equal('Unnamed request #0');
         });
 
         it('should log the request statistic', async () => {
@@ -158,12 +161,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await vegaDebugInspectorView.openVegaDebugInspectorView();
 
           for (const getFn of [
-            vegaDebugInspectorView.getOpenDataViewerButton,
-            vegaDebugInspectorView.getOpenSignalViewerButton,
-            vegaDebugInspectorView.getOpenSpecViewerButton,
-          ]) {
+            'getOpenDataViewerButton',
+            'getOpenSignalViewerButton',
+            'getOpenSpecViewerButton',
+          ] as const) {
             await retry.try(async () => {
-              const requestStatisticTab = await getFn();
+              const requestStatisticTab = await vegaDebugInspectorView[getFn]();
 
               expect(await requestStatisticTab.isEnabled()).to.be(true);
             });

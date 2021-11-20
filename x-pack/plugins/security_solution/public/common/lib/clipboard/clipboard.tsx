@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
+import classNames from 'classnames';
 import copy from 'copy-to-clipboard';
 import React from 'react';
 
@@ -24,12 +26,20 @@ export type OnCopy = ({
 interface Props {
   children?: JSX.Element;
   content: string | number;
+  isHoverAction?: boolean;
   onCopy?: OnCopy;
   titleSummary?: string;
   toastLifeTimeMs?: number;
 }
 
-export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTimeMs }: Props) => {
+export const Clipboard = ({
+  children,
+  content,
+  isHoverAction,
+  onCopy,
+  titleSummary,
+  toastLifeTimeMs,
+}: Props) => {
   const { addSuccess } = useAppToasts();
   const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -46,11 +56,15 @@ export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTi
     }
   };
 
+  const className = classNames(COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME, {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    securitySolution__hoverActionButton: isHoverAction,
+  });
+
   return (
     <EuiButtonIcon
       aria-label={i18n.COPY_TO_THE_CLIPBOARD}
-      className={COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME}
-      color="text"
+      className={className}
       data-test-subj="clipboard"
       iconType="copyClipboard"
       onClick={onClick}

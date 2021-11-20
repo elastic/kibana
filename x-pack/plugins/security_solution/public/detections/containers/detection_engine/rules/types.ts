@@ -1,32 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
 
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  risk_score_mapping,
+  threat_query,
+  threat_index,
+  threat_indicator_path,
+  threat_mapping,
+  threat_language,
+  threat_filters,
+  threats,
+  type,
+  severity_mapping,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   SortOrder,
   author,
   building_block_type,
   license,
-  risk_score_mapping,
   rule_name_override,
-  severity_mapping,
   timestamp_override,
   threshold,
-  type,
-  threats,
+  BulkAction,
+  ruleExecutionStatus,
+  RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  listArray,
-  threat_query,
-  threat_index,
-  threat_mapping,
-  threat_language,
-  threat_filters,
-} from '../../../../../common/detection_engine/schemas/types';
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -35,7 +40,8 @@ import {
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerts/common/alert.ts
+ * @see x-pack/plugins/alerting/common/alert.ts
+ * @deprecated Use the one from @kbn/security-io-ts-alerting-types
  */
 export const action = t.exact(
   t.type({
@@ -48,6 +54,11 @@ export const action = t.exact(
 
 export interface CreateRulesProps {
   rule: CreateRulesSchema;
+  signal: AbortSignal;
+}
+
+export interface PreviewRulesProps {
+  rule: CreateRulesSchema & { invocationCount: number };
   signal: AbortSignal;
 }
 
@@ -69,13 +80,6 @@ const MetaRule = t.intersection([
     throttle: t.string,
     kibana_siem_app_url: t.string,
   }),
-]);
-
-const StatusTypes = t.union([
-  t.literal('succeeded'),
-  t.literal('failed'),
-  t.literal('going to run'),
-  t.literal('partial failure'),
 ]);
 
 // TODO: make a ticket
@@ -109,6 +113,8 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
+    outcome: t.union([t.literal('exactMatch'), t.literal('aliasMatch'), t.literal('conflict')]),
+    alias_target_id: t.string,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
@@ -120,17 +126,18 @@ export const RuleSchema = t.intersection([
     last_success_message: t.string,
     last_success_at: t.string,
     meta: MetaRule,
-    machine_learning_job_id: t.string,
+    machine_learning_job_id: t.array(t.string),
     output_index: t.string,
     query: t.string,
     rule_name_override,
     saved_id: t.string,
-    status: StatusTypes,
+    status: ruleExecutionStatus,
     status_date: t.string,
     threshold,
     threat_query,
     threat_filters,
     threat_index,
+    threat_indicator_path,
     threat_mapping,
     threat_language,
     timeline_id: t.string,
@@ -138,6 +145,7 @@ export const RuleSchema = t.intersection([
     timestamp_override,
     note: t.string,
     exceptions_list: listArray,
+    uuid: t.string,
     version: t.number,
   }),
 ]);
@@ -207,6 +215,24 @@ export interface DuplicateRulesProps {
   rules: Rule[];
 }
 
+export interface BulkActionProps<Action extends BulkAction> {
+  action: Action;
+  query: string;
+}
+
+export interface BulkActionResult {
+  success: boolean;
+  rules_count: number;
+}
+
+export type BulkActionResponse<Action extends BulkAction> = {
+  [BulkAction.delete]: BulkActionResult;
+  [BulkAction.disable]: BulkActionResult;
+  [BulkAction.enable]: BulkActionResult;
+  [BulkAction.duplicate]: BulkActionResult;
+  [BulkAction.export]: Blob;
+}[Action];
+
 export interface BasicFetchProps {
   signal: AbortSignal;
 }
@@ -243,24 +269,22 @@ export interface ExportDocumentsProps {
   ids: string[];
   filename?: string;
   excludeExportDetails?: boolean;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface RuleStatus {
   current_status: RuleInfoStatus;
   failures: RuleInfoStatus[];
 }
-
-export type RuleStatusType = 'executing' | 'failed' | 'going to run' | 'succeeded';
 export interface RuleInfoStatus {
   alert_id: string;
   status_date: string;
-  status: RuleStatusType | null;
+  status: RuleExecutionStatus | null;
   last_failure_at: string | null;
   last_success_at: string | null;
   last_failure_message: string | null;
   last_success_message: string | null;
-  last_look_back_date: string | null | undefined;
+  last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
   gap: string | null | undefined;
   bulk_create_time_durations: string[] | null | undefined;
   search_after_time_durations: string[] | null | undefined;

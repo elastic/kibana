@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const defaultRequestParameters = {
-  allowNoIndices: true,
-  ignoreUnavailable: true,
-  trackScores: false,
-  trackTotalHits: false,
+  allow_no_indices: true,
+  ignore_unavailable: true,
+  track_scores: false,
+  track_total_hits: false,
 };
 
 export const createJobIdFilters = (jobId: string) => [
@@ -35,6 +36,7 @@ export const createTimeRangeFilters = (startTime: number, endTime: number) => [
       timestamp: {
         gte: startTime,
         lte: endTime,
+        format: 'epoch_millis',
       },
     },
   },

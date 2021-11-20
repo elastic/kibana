@@ -1,35 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
-import { RequestEvent, errors } from '@elastic/elasticsearch';
-import { TransportRequestParams, RequestBody } from '@elastic/elasticsearch/lib/Transport';
+import { errors } from '@elastic/elasticsearch';
+import type {
+  TransportRequestOptions,
+  TransportRequestParams,
+  DiagnosticResult,
+  RequestBody,
+} from '@elastic/elasticsearch';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { EventEmitter } from 'events';
 import type { ElasticsearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';
 
 const createFakeConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
 ): ElasticsearchClientConfig => {
-  return ({
+  return {
     type: 'fake-config',
     ...parts,
-  } as unknown) as ElasticsearchClientConfig;
+  } as unknown as ElasticsearchClientConfig;
 };
 
 const createFakeClient = () => {
-  const client = new EventEmitter();
-  jest.spyOn(client, 'on');
+  const actualEs = jest.requireActual('@elastic/elasticsearch');
+  const client = new actualEs.Client({
+    nodes: ['http://localhost'], // Enforcing `nodes` because it's mandatory
+  });
+  jest.spyOn(client.diagnostic, 'on');
   return client;
 };
 
@@ -39,21 +46,25 @@ const createApiResponse = <T>({
   headers = {},
   warnings = [],
   params,
+  requestOptions = {},
 }: {
   body: T;
   statusCode?: number;
   headers?: Record<string, string>;
   warnings?: string[];
   params?: TransportRequestParams;
-}): RequestEvent<T> => {
+  requestOptions?: TransportRequestOptions;
+}): DiagnosticResult<T> => {
   return {
     body,
     statusCode,
     headers,
     warnings,
     meta: {
+      body,
       request: {
         params: params!,
+        options: requestOptions,
       } as any,
     } as any,
   };
@@ -76,14 +87,14 @@ describe('configureClient', () => {
   });
 
   it('calls `parseClientOptions` with the correct parameters', () => {
-    configureClient(config, { logger, scoped: false });
+    configureClient(config, { logger, type: 'test', scoped: false });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
     expect(parseClientOptionsMock).toHaveBeenCalledWith(config, false);
 
     parseClientOptionsMock.mockClear();
 
-    configureClient(config, { logger, scoped: true });
+    configureClient(config, { logger, type: 'test', scoped: true });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
     expect(parseClientOptionsMock).toHaveBeenCalledWith(config, true);
@@ -95,18 +106,18 @@ describe('configureClient', () => {
     };
     parseClientOptionsMock.mockReturnValue(parsedOptions);
 
-    const client = configureClient(config, { logger, scoped: false });
+    const client = configureClient(config, { logger, type: 'test', scoped: false });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
-    expect(ClientMock).toHaveBeenCalledWith(parsedOptions);
+    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining(parsedOptions));
     expect(client).toBe(ClientMock.mock.results[0].value);
   });
 
   it('listens to client on `response` events', () => {
-    const client = configureClient(config, { logger, scoped: false });
+    const client = configureClient(config, { logger, type: 'test', scoped: false });
 
-    expect(client.on).toHaveBeenCalledTimes(1);
-    expect(client.on).toHaveBeenCalledWith('response', expect.any(Function));
+    expect(client.diagnostic.on).toHaveBeenCalledTimes(1);
+    expect(client.diagnostic.on).toHaveBeenCalledWith('response', expect.any(Function));
   });
 
   describe('Client logging', () => {
@@ -122,38 +133,15 @@ describe('configureClient', () => {
         },
       });
     }
-    describe('does not log whrn "logQueries: false"', () => {
-      it('response', () => {
-        const client = configureClient(config, { logger, scoped: false });
-        const response = createResponseWithBody({
-          seq_no_primary_term: true,
-          query: {
-            term: { user: 'kimchy' },
-          },
-        });
 
-        client.emit('response', null, response);
-        expect(loggingSystemMock.collect(logger).debug).toHaveLength(0);
+    describe('logs each query', () => {
+      it('creates a query logger context based on the `type` parameter', () => {
+        configureClient(createFakeConfig(), { logger, type: 'test123' });
+        expect(logger.get).toHaveBeenCalledWith('query', 'test123');
       });
 
-      it('error', () => {
-        const client = configureClient(config, { logger, scoped: false });
-
-        const response = createApiResponse({ body: {} });
-        client.emit('response', new errors.TimeoutError('message', response), response);
-
-        expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
-      });
-    });
-
-    describe('logs each queries if `logQueries` is true', () => {
       it('when request body is an object', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody({
           seq_no_primary_term: true,
@@ -162,30 +150,21 @@ describe('configureClient', () => {
           },
         });
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
                   Array [
                     Array [
                       "200
                   GET /foo?hello=dolly
                   {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
-                      Object {
-                        "tags": Array [
-                          "query",
-                        ],
-                      },
+                      undefined,
                     ],
                   ]
               `);
       });
 
       it('when request body is a string', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody(
           JSON.stringify({
@@ -196,30 +175,21 @@ describe('configureClient', () => {
           })
         );
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
                   Array [
                     Array [
                       "200
                   GET /foo?hello=dolly
                   {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
-                      Object {
-                        "tags": Array [
-                          "query",
-                        ],
-                      },
+                      undefined,
                     ],
                   ]
               `);
       });
 
       it('when request body is a buffer', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody(
           Buffer.from(
@@ -232,30 +202,21 @@ describe('configureClient', () => {
           )
         );
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
               "200
           GET /foo?hello=dolly
           [buffer]",
-              Object {
-                "tags": Array [
-                  "query",
-                ],
-              },
+              undefined,
             ],
           ]
         `);
       });
 
       it('when request body is a readable stream', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody(
           Readable.from(
@@ -268,56 +229,38 @@ describe('configureClient', () => {
           )
         );
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
               "200
           GET /foo?hello=dolly
           [stream]",
-              Object {
-                "tags": Array [
-                  "query",
-                ],
-              },
+              undefined,
             ],
           ]
         `);
       });
 
       it('when request body is not defined', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createResponseWithBody();
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
               "200
           GET /foo?hello=dolly",
-              Object {
-                "tags": Array [
-                  "query",
-                ],
-              },
+              undefined,
             ],
           ]
         `);
       });
 
       it('properly encode queries', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
           body: {},
@@ -329,30 +272,21 @@ describe('configureClient', () => {
           },
         });
 
-        client.emit('response', null, response);
+        client.diagnostic.emit('response', null, response);
 
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
                   Array [
                     Array [
                       "200
                   GET /foo?city=M%C3%BCnich",
-                      Object {
-                        "tags": Array [
-                          "query",
-                        ],
-                      },
+                      undefined,
                     ],
                   ]
               `);
       });
 
-      it('logs queries even in case of errors if `logQueries` is true', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+      it('logs queries even in case of errors', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
           statusCode: 500,
@@ -373,68 +307,38 @@ describe('configureClient', () => {
             },
           },
         });
-        client.emit('response', new errors.ResponseError(response), response);
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-        expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
               "500
           GET /foo?hello=dolly
           {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}} [internal server error]: internal server error",
+              undefined,
             ],
           ]
         `);
       });
 
-      it('does not log queries if `logQueries` is false', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: false,
-          }),
-          { logger, scoped: false }
-        );
-
-        const response = createApiResponse({
-          body: {},
-          statusCode: 200,
-          params: {
-            method: 'GET',
-            path: '/foo',
-          },
-        });
-
-        client.emit('response', null, response);
-
-        expect(logger.debug).not.toHaveBeenCalled();
-      });
-
-      it('logs error when the client emits an @elastic/elasticsearch error', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+      it('logs debug when the client emits an @elastic/elasticsearch error', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({ body: {} });
-        client.emit('response', new errors.TimeoutError('message', response), response);
+        client.diagnostic.emit('response', new errors.TimeoutError('message', response), response);
 
-        expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
                   Array [
                     Array [
                       "[TimeoutError]: message",
+                      undefined,
                     ],
                   ]
               `);
       });
 
-      it('logs error when the client emits an ResponseError returned by elasticsearch', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+      it('logs debug when the client emits an ResponseError returned by elasticsearch', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
           statusCode: 400,
@@ -451,27 +355,23 @@ describe('configureClient', () => {
             },
           },
         });
-        client.emit('response', new errors.ResponseError(response), response);
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-        expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
               "400
           GET /_path?hello=dolly [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
+              undefined,
             ],
           ]
         `);
       });
 
       it('logs default error info when the error response body is empty', () => {
-        const client = configureClient(
-          createFakeConfig({
-            logQueries: true,
-          }),
-          { logger, scoped: false }
-        );
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
-        let response = createApiResponse({
+        let response: DiagnosticResult<any, any> = createApiResponse({
           statusCode: 400,
           headers: {},
           params: {
@@ -482,18 +382,19 @@ describe('configureClient', () => {
             error: {},
           },
         });
-        client.emit('response', new errors.ResponseError(response), response);
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-        expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
               "400
-          GET /_path [undefined]: Response Error",
+          GET /_path [undefined]: {\\"error\\":{}}",
+              undefined,
             ],
           ]
         `);
 
-        logger.error.mockClear();
+        logger.debug.mockClear();
 
         response = createApiResponse({
           statusCode: 400,
@@ -502,17 +403,74 @@ describe('configureClient', () => {
             method: 'GET',
             path: '/_path',
           },
-          body: {} as any,
+          body: undefined,
         });
-        client.emit('response', new errors.ResponseError(response), response);
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-        expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
           Array [
             Array [
               "400
           GET /_path [undefined]: Response Error",
+              undefined,
             ],
           ]
+        `);
+      });
+
+      it('adds meta information to logs', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
+
+        let response = createApiResponse({
+          statusCode: 400,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/_path',
+          },
+          requestOptions: {
+            opaqueId: 'opaque-id',
+          },
+          body: {
+            error: {},
+          },
+        });
+        client.diagnostic.emit('response', null, response);
+
+        expect(loggingSystemMock.collect(logger).debug[0][1]).toMatchInlineSnapshot(`
+          Object {
+            "http": Object {
+              "request": Object {
+                "id": "opaque-id",
+              },
+            },
+          }
+        `);
+
+        logger.debug.mockClear();
+
+        response = createApiResponse({
+          statusCode: 400,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/_path',
+          },
+          requestOptions: {
+            opaqueId: 'opaque-id',
+          },
+          body: {} as any,
+        });
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
+
+        expect(loggingSystemMock.collect(logger).debug[0][1]).toMatchInlineSnapshot(`
+          Object {
+            "http": Object {
+              "request": Object {
+                "id": "opaque-id",
+              },
+            },
+          }
         `);
       });
     });

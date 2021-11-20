@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ElasticsearchClient, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
 import {
-  IndexGroup,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
@@ -29,10 +30,6 @@ import { ReindexActions } from './reindex_actions';
 
 import { error } from './error';
 
-const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
-const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
-const WATCHER_INDICES = ['.watches', '.triggered-watches'];
-
 export interface ReindexService {
   /**
    * Checks whether or not the user has proper privileges required to reindex this index.
@@ -46,12 +43,6 @@ export interface ReindexService {
    * @param indexName
    */
   detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | null>;
-
-  /**
-   * Returns an IndexGroup if the index belongs to one, otherwise undefined.
-   * @param indexName
-   */
-  getIndexGroup(indexName: string): IndexGroup | undefined;
 
   /**
    * Creates a new reindex operation for a given index.
@@ -133,83 +124,6 @@ export const reindexServiceFactory = (
   licensing: LicensingPluginSetup
 ): ReindexService => {
   // ------ Utility functions
-
-  /**
-   * If the index is a ML index that will cause jobs to fail when set to readonly,
-   * turn on 'upgrade mode' to pause all ML jobs.
-   * @param reindexOp
-   */
-  const stopMlJobs = async () => {
-    await actions.incrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
-      await validateNodesMinimumVersion(6, 7);
-
-      const { body } = await esClient.ml.setUpgradeMode({
-        enabled: true,
-      });
-
-      if (!body.acknowledged) {
-        throw new Error(`Could not stop ML jobs`);
-      }
-
-      return mlDoc;
-    });
-  };
-
-  /**
-   * Resumes ML jobs if there are no more remaining reindex operations.
-   */
-  const resumeMlJobs = async () => {
-    await actions.decrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
-      if (mlDoc.attributes.runningReindexCount === 0) {
-        const { body } = await esClient.ml.setUpgradeMode({
-          enabled: false,
-        });
-
-        if (!body.acknowledged) {
-          throw new Error(`Could not resume ML jobs`);
-        }
-      }
-
-      return mlDoc;
-    });
-  };
-
-  /**
-   * Stops Watcher in Elasticsearch.
-   */
-  const stopWatcher = async () => {
-    await actions.incrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
-      const { body } = await esClient.watcher.stop();
-
-      if (!body.acknowledged) {
-        throw new Error('Could not stop Watcher');
-      }
-
-      return watcherDoc;
-    });
-  };
-
-  /**
-   * Starts Watcher in Elasticsearch.
-   */
-  const startWatcher = async () => {
-    await actions.decrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
-      if (watcherDoc.attributes.runningReindexCount === 0) {
-        const { body } = await esClient.watcher.start();
-
-        if (!body.acknowledged) {
-          throw new Error('Could not start Watcher');
-        }
-      }
-
-      return watcherDoc;
-    });
-  };
-
   const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
     // Cancel reindex task if it was started but not completed
     if (reindexOp.attributes.lastCompletedStep === ReindexStep.reindexStarted) {
@@ -217,14 +131,14 @@ export const reindexServiceFactory = (
         .cancel({
           task_id: reindexOp.attributes.reindexTaskId ?? undefined,
         })
-        .catch((e) => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
+        .catch(() => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
     }
 
     // Set index back to writable if we ever got past this point.
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
       await esClient.indices.putSettings({
         index: reindexOp.attributes.indexName,
-        body: { 'index.blocks.write': false },
+        body: { blocks: { write: false } },
       });
     }
 
@@ -237,47 +151,10 @@ export const reindexServiceFactory = (
       });
     }
 
-    // Resume consumers if we ever got past this point.
-    if (reindexOp.attributes.lastCompletedStep >= ReindexStep.indexGroupServicesStopped) {
-      await resumeIndexGroupServices(reindexOp);
-    }
-
     return reindexOp;
   };
 
   // ------ Functions used to process the state machine
-
-  const validateNodesMinimumVersion = async (minMajor: number, minMinor: number) => {
-    const { body: nodesResponse } = await esClient.nodes.info();
-
-    const outDatedNodes = Object.values(nodesResponse.nodes).filter((node: any) => {
-      const matches = node.version.match(VERSION_REGEX);
-      const major = parseInt(matches[1], 10);
-      const minor = parseInt(matches[2], 10);
-
-      // All ES nodes must be >= 6.7.0 to pause ML jobs
-      return !(major > minMajor || (major === minMajor && minor >= minMinor));
-    });
-
-    if (outDatedNodes.length > 0) {
-      const nodeList = JSON.stringify(outDatedNodes.map((n: any) => n.name));
-      throw new Error(
-        `Some nodes are not on minimum version (${minMajor}.${minMinor}.0)  required: ${nodeList}`
-      );
-    }
-  };
-
-  const stopIndexGroupServices = async (reindexOp: ReindexSavedObject) => {
-    if (isMlIndex(reindexOp.attributes.indexName)) {
-      await stopMlJobs();
-    } else if (isWatcherIndex(reindexOp.attributes.indexName)) {
-      await stopWatcher();
-    }
-
-    return actions.updateReindexOp(reindexOp, {
-      lastCompletedStep: ReindexStep.indexGroupServicesStopped,
-    });
-  };
 
   /**
    * Sets the original index as readonly so new data can be indexed until the reindex
@@ -288,7 +165,7 @@ export const reindexServiceFactory = (
     const { indexName } = reindexOp.attributes;
     const { body: putReadonly } = await esClient.indices.putSettings({
       index: indexName,
-      body: { 'index.blocks.write': true },
+      body: { blocks: { write: true } },
     });
 
     if (!putReadonly.acknowledged) {
@@ -345,6 +222,11 @@ export const reindexServiceFactory = (
       await esClient.indices.open({ index: indexName });
     }
 
+    const flatSettings = await actions.getFlatSettings(indexName);
+    if (!flatSettings) {
+      throw error.indexNotFound(`Index ${indexName} does not exist.`);
+    }
+
     const { body: startReindexResponse } = await esClient.reindex({
       refresh: true,
       wait_for_completion: false,
@@ -356,7 +238,10 @@ export const reindexServiceFactory = (
 
     return actions.updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.reindexStarted,
-      reindexTaskId: startReindexResponse.task,
+      reindexTaskId:
+        startReindexResponse.task === undefined
+          ? startReindexResponse.task
+          : String(startReindexResponse.task),
       reindexTaskPercComplete: 0,
       reindexOptions: {
         ...(reindexOptions ?? {}),
@@ -382,11 +267,11 @@ export const reindexServiceFactory = (
 
     if (!taskResponse.completed) {
       // Updated the percent complete
-      const perc = taskResponse.task.status.created / taskResponse.task.status.total;
+      const perc = taskResponse.task.status!.created / taskResponse.task.status!.total;
       return actions.updateReindexOp(reindexOp, {
         reindexTaskPercComplete: perc,
       });
-    } else if (taskResponse.task.status.canceled === 'by user request') {
+    } else if (taskResponse.task.status?.canceled === 'by user request') {
       // Set the status to cancelled
       reindexOp = await actions.updateReindexOp(reindexOp, {
         status: ReindexStatus.cancelled,
@@ -396,9 +281,11 @@ export const reindexServiceFactory = (
       reindexOp = await cleanupChanges(reindexOp);
     } else {
       // Check that it reindexed all documents
-      const { body: count } = await esClient.count({ index: reindexOp.attributes.indexName });
+      const {
+        body: { count },
+      } = await esClient.count({ index: reindexOp.attributes.indexName });
 
-      if (taskResponse.task.status.created < count) {
+      if (taskResponse.task.status!.created < count) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
         throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
@@ -464,23 +351,6 @@ export const reindexServiceFactory = (
     });
   };
 
-  const resumeIndexGroupServices = async (reindexOp: ReindexSavedObject) => {
-    if (isMlIndex(reindexOp.attributes.indexName)) {
-      await resumeMlJobs();
-    } else if (isWatcherIndex(reindexOp.attributes.indexName)) {
-      await startWatcher();
-    }
-
-    // Only change the status if we're still in-progress (this function is also called when the reindex fails or is cancelled)
-    if (reindexOp.attributes.status === ReindexStatus.inProgress) {
-      return actions.updateReindexOp(reindexOp, {
-        lastCompletedStep: ReindexStep.indexGroupServicesStarted,
-      });
-    } else {
-      return reindexOp;
-    }
-  };
-
   // ------ The service itself
 
   return {
@@ -525,14 +395,6 @@ export const reindexServiceFactory = (
         ],
       } as any;
 
-      if (isMlIndex(indexName)) {
-        body.cluster = [...body.cluster, 'manage_ml'];
-      }
-
-      if (isWatcherIndex(indexName)) {
-        body.cluster = [...body.cluster, 'manage_watcher'];
-      }
-
       const { body: resp } = await esClient.security.hasPrivileges({
         body,
       });
@@ -546,14 +408,6 @@ export const reindexServiceFactory = (
         return null;
       } else {
         return getReindexWarnings(flatSettings);
-      }
-    },
-
-    getIndexGroup(indexName: string) {
-      if (isMlIndex(indexName)) {
-        return IndexGroup.ml;
-      } else if (isWatcherIndex(indexName)) {
-        return IndexGroup.watcher;
       }
     },
 
@@ -624,9 +478,6 @@ export const reindexServiceFactory = (
         try {
           switch (lockedReindexOp.attributes.lastCompletedStep) {
             case ReindexStep.created:
-              lockedReindexOp = await stopIndexGroupServices(lockedReindexOp);
-              break;
-            case ReindexStep.indexGroupServicesStopped:
               lockedReindexOp = await setReadonly(lockedReindexOp);
               break;
             case ReindexStep.readonly:
@@ -642,12 +493,10 @@ export const reindexServiceFactory = (
               lockedReindexOp = await switchAlias(lockedReindexOp);
               break;
             case ReindexStep.aliasCreated:
-              lockedReindexOp = await resumeIndexGroupServices(lockedReindexOp);
-              break;
-            case ReindexStep.indexGroupServicesStarted:
               lockedReindexOp = await actions.updateReindexOp(lockedReindexOp, {
                 status: ReindexStatus.completed,
               });
+              break;
             default:
               break;
           }
@@ -754,14 +603,4 @@ export const reindexServiceFactory = (
       return reindexOp;
     },
   };
-};
-
-export const isMlIndex = (indexName: string) => {
-  const sourceName = sourceNameForIndex(indexName);
-  return ML_INDICES.indexOf(sourceName) >= 0;
-};
-
-export const isWatcherIndex = (indexName: string) => {
-  const sourceName = sourceNameForIndex(indexName);
-  return WATCHER_INDICES.indexOf(sourceName) >= 0;
 };

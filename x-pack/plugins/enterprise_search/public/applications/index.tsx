@@ -1,26 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { Store } from 'redux';
+import { Router } from 'react-router-dom';
+
 import { getContext, resetContext } from 'kea';
+import { Store } from 'redux';
+
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { AppMountParameters, CoreStart } from 'src/core/public';
-import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
+import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { InitialAppData } from '../../common/types';
+import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
+import { externalUrl } from './shared/enterprise_search_url';
+import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
+import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
-import { mountHttpLogic } from './shared/http';
-import { mountFlashMessagesLogic } from './shared/flash_messages';
-import { externalUrl } from './shared/enterprise_search_url';
 
 /**
  * This file serves as a reusable wrapper to share Kibana-level context and other helpers
@@ -42,16 +47,19 @@ export const renderApp = (
   const unmountKibanaLogic = mountKibanaLogic({
     config,
     charts: plugins.charts,
-    cloud: plugins.cloud || {},
+    cloud: plugins.cloud,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
+    security: plugins.security,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
+    setChromeIsVisible: core.chrome.setIsVisible,
     setDocTitle: core.chrome.docTitle.change,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu((el) => renderHeaderActions(HeaderActions, store, el)),
   });
   const unmountLicensingLogic = mountLicensingLogic({
     license$: plugins.licensing.license$,
+    canManageLicense: core.application.capabilities.management?.stack?.license_management,
   });
   const unmountHttpLogic = mountHttpLogic({
     http: core.http,
@@ -62,11 +70,16 @@ export const renderApp = (
 
   ReactDOM.render(
     <I18nProvider>
-      <Provider store={store}>
-        <Router history={params.history}>
-          <App {...initialData} />
-        </Router>
-      </Provider>
+      <EuiThemeProvider>
+        <KibanaContextProvider services={{ ...core, ...plugins }}>
+          <Provider store={store}>
+            <Router history={params.history}>
+              <App {...initialData} />
+              <Toasts />
+            </Router>
+          </Provider>
+        </KibanaContextProvider>
+      </EuiThemeProvider>
     </I18nProvider>,
     params.element
   );
@@ -83,7 +96,7 @@ export const renderApp = (
  * Render function for Kibana's header action menu chrome -
  * reusable by any Enterprise Search plugin simply by passing in
  * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
- * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
+ * @see https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
 
 export const renderHeaderActions = (

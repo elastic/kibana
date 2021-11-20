@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mapMatchAll } from './map_match_all';
-import { MatchAllFilter } from '../../../../../common';
+import { MatchAllFilter } from '@kbn/es-query';
 
 describe('filter_manager/lib', () => {
   describe('mapMatchAll()', () => {
@@ -15,7 +15,7 @@ describe('filter_manager/lib', () => {
 
     beforeEach(() => {
       filter = {
-        match_all: {},
+        query: { match_all: {} },
         meta: {
           alias: null,
           negate: true,
@@ -24,19 +24,6 @@ describe('filter_manager/lib', () => {
           formattedValue: 'bar',
         },
       };
-    });
-
-    describe('when given a filter that is not match_all', () => {
-      test('filter is rejected', async (done) => {
-        delete filter.match_all;
-
-        try {
-          mapMatchAll(filter);
-        } catch (e) {
-          expect(e).toBe(filter);
-          done();
-        }
-      });
     });
 
     describe('when given a match_all filter', () => {

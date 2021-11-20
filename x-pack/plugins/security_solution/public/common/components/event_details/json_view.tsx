@@ -1,19 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiCodeEditor } from '@elastic/eui';
-import { set } from '@elastic/safer-lodash-set/fp';
+import { EuiCodeBlock } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { omitTypenameAndEmpty } from '../../../timelines/components/timeline/body/helpers';
 
 interface Props {
-  data: TimelineEventsDetailsItem[];
+  rawEventData: object | undefined;
 }
 
 const EuiCodeEditorContainer = styled.div`
@@ -22,43 +21,30 @@ const EuiCodeEditorContainer = styled.div`
   }
 `;
 
-const EDITOR_SET_OPTIONS = { fontSize: '12px' };
-
-export const JsonView = React.memo<Props>(({ data }) => {
+export const JsonView = React.memo<Props>(({ rawEventData }) => {
   const value = useMemo(
     () =>
       JSON.stringify(
-        buildJsonView(data),
+        rawEventData,
         omitTypenameAndEmpty,
         2 // indent level
       ),
-    [data]
+    [rawEventData]
   );
 
   return (
     <EuiCodeEditorContainer>
-      <EuiCodeEditor
+      <EuiCodeBlock
+        language="json"
+        fontSize="m"
+        paddingSize="m"
+        isCopyable
         data-test-subj="jsonView"
-        isReadOnly
-        mode="javascript"
-        setOptions={EDITOR_SET_OPTIONS}
-        value={value}
-        width="100%"
-        height="100%"
-      />
+      >
+        {value}
+      </EuiCodeBlock>
     </EuiCodeEditorContainer>
   );
 });
 
 JsonView.displayName = 'JsonView';
-
-export const buildJsonView = (data: TimelineEventsDetailsItem[]) =>
-  data.reduce(
-    (accumulator, item) =>
-      set(
-        item.field,
-        Array.isArray(item.originalValue) ? item.originalValue.join() : item.originalValue,
-        accumulator
-      ),
-    {}
-  );

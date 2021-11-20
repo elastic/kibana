@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
@@ -27,7 +29,11 @@ export class GroupName extends React.PureComponent<Props, {}> {
         <Inner isChild={isChild}>
           <Name>
             <EuiToolTip position="top" content={group.name}>
-              <EuiLink style={linkStyle} onClickCapture={this.handleClick}>
+              <EuiLink
+                style={linkStyle}
+                onClickCapture={this.handleClick}
+                data-test-subj="groupNameLink"
+              >
                 {group.name}
               </EuiLink>
             </EuiToolTip>

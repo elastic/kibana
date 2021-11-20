@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { AggConfigs } from '../agg_configs';
@@ -12,6 +12,7 @@ import { AggTypesDependencies } from '../agg_types';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
 import { BucketAggType } from './bucket_agg_type';
+import { SerializableRecord } from '@kbn/utility-types';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;
@@ -77,7 +78,23 @@ describe('Histogram Agg', () => {
                 true,
               ],
               "extended_bounds": Array [
-                "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "max": Array [
+                          "",
+                        ],
+                        "min": Array [
+                          "",
+                        ],
+                      },
+                      "function": "extendedBounds",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
               ],
               "field": Array [
                 "field",
@@ -228,6 +245,27 @@ describe('Histogram Agg', () => {
         });
 
         expect(params.interval).toBeNaN();
+      });
+
+      test('will serialize the auto interval along with the actually chosen interval and deserialize correctly', () => {
+        const aggConfigs = getAggConfigs({
+          interval: 'auto',
+          field: {
+            name: 'field',
+          },
+        });
+        (aggConfigs.aggs[0] as IBucketHistogramAggConfig).setAutoBounds({ min: 0, max: 1000 });
+        const serializedAgg = aggConfigs.aggs[0].serialize();
+        const serializedIntervalParam = (serializedAgg.params as SerializableRecord).used_interval;
+        expect(serializedIntervalParam).toBe(500);
+        const freshHistogramAggConfig = getAggConfigs({
+          interval: 100,
+          field: {
+            name: 'field',
+          },
+        }).aggs[0];
+        freshHistogramAggConfig.setParams(serializedAgg.params);
+        expect(freshHistogramAggConfig.getParam('interval')).toEqual('auto');
       });
 
       describe('interval scaling', () => {

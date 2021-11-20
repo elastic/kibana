@@ -5,6 +5,7 @@
       {
         "names": [
           "apm-*-transaction*",
+          "traces-apm*",
           "auditbeat-*",
           "endgame-*",
           "filebeat-*",
@@ -19,6 +20,14 @@
       {
         "names": [".siem-signals-*"],
         "privileges": ["read", "write", "manage"]
+      },
+      {
+        "names": [
+          "metrics-endpoint.metadata_current_*",
+          ".fleet-agents*",
+          ".fleet-actions*"
+        ],
+        "privileges": ["read"]
       }
     ]
   },
@@ -26,10 +35,12 @@
     {
       "feature": {
         "ml": ["read"],
-        "siem": ["all"],
+        "siem": ["all", "read_alerts", "crud_alerts"],
+        "securitySolutionCases": ["all"],
+        "indexPatterns": ["all"],
+        "savedObjectsManagement": ["all"],
         "actions": ["all"],
-        "builtInAlerts": ["all"],
-        "savedObjectsManagement": ["all"]
+        "builtInAlerts": ["all"]
       },
       "spaces": ["*"]
     }

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 
 import {
   NetworkDetailsRequestOptions,
@@ -14,6 +15,7 @@ import {
 export const mockOptions: NetworkDetailsRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -142,12 +144,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
         results: {
           hits: {
             total: { value: 1, relation: 'eq' },
-            max_score: null,
+            max_score: undefined,
             hits: [
               {
                 _index: 'auditbeat-7.8.0-2020.11.23-000004',
                 _id: 'wRCuOnYB7WTwW_GluxL8',
-                _score: null,
+                _score: undefined,
                 _source: {
                   host: {
                     hostname: 'internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773',
@@ -187,12 +189,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           results: {
             hits: {
               total: { value: 5, relation: 'eq' },
-              max_score: null,
+              max_score: undefined,
               hits: [
                 {
                   _index: 'filebeat-8.0.0-2020.09.02-000001',
                   _id: 'dd4fa2d4bd-1523631609876537',
-                  _score: null,
+                  _score: undefined,
                   _source: {
                     destination: {
                       geo: {
@@ -216,12 +218,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           results: {
             hits: {
               total: { value: 5, relation: 'eq' },
-              max_score: null,
+              max_score: undefined,
               hits: [
                 {
                   _index: 'filebeat-8.0.0-2020.09.02-000001',
                   _id: 'dd4fa2d4bd-1523631609876537',
-                  _score: null,
+                  _score: undefined,
                   _source: {
                     destination: { as: { number: 15169, organization: { name: 'Google LLC' } } },
                   },
@@ -243,12 +245,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           results: {
             hits: {
               total: { value: 5, relation: 'eq' },
-              max_score: null,
+              max_score: undefined,
               hits: [
                 {
                   _index: 'filebeat-8.0.0-2020.09.02-000001',
                   _id: 'dd4fa2d4bd-1523631486500511',
-                  _score: null,
+                  _score: undefined,
                   _source: {
                     source: {
                       geo: {
@@ -272,12 +274,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           results: {
             hits: {
               total: { value: 5, relation: 'eq' },
-              max_score: null,
+              max_score: undefined,
               hits: [
                 {
                   _index: 'filebeat-8.0.0-2020.09.02-000001',
                   _id: 'dd4fa2d4bd-1523631486500511',
-                  _score: null,
+                  _score: undefined,
                   _source: {
                     source: { as: { number: 15169, organization: { name: 'Google LLC' } } },
                   },
@@ -302,9 +304,10 @@ export const formattedSearchStrategyResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -312,7 +315,8 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
+          track_total_hits: false,
           body: {
             docvalue_fields: mockOptions.docValueFields,
             aggs: {
@@ -389,7 +393,6 @@ export const formattedSearchStrategyResponse = {
             },
             query: { bool: { should: [] } },
             size: 0,
-            track_total_hits: false,
           },
         },
         null,
@@ -443,9 +446,10 @@ export const formattedSearchStrategyResponse = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -453,7 +457,8 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
+  track_total_hits: false,
   body: {
     aggs: {
       source: {
@@ -520,6 +525,5 @@ export const expectedDsl = {
     docvalue_fields: mockOptions.docValueFields,
     query: { bool: { should: [] } },
     size: 0,
-    track_total_hits: false,
   },
 };

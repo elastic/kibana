@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
+import type { SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
 
 /**
  * Used for accumulating the totals of all the stats older than 90d
@@ -17,6 +17,7 @@ export interface ApplicationUsageTotal extends SavedObjectAttributes {
   minutesOnScreen: number;
   numberOfClicks: number;
 }
+
 export const SAVED_OBJECTS_TOTAL_TYPE = 'application_usage_totals';
 
 /**
@@ -25,6 +26,8 @@ export const SAVED_OBJECTS_TOTAL_TYPE = 'application_usage_totals';
 export interface ApplicationUsageTransactional extends ApplicationUsageTotal {
   timestamp: string;
 }
+
+/** @deprecated transactional type is no longer used, and only preserved for backward compatibility */
 export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
 
 /**
@@ -62,6 +65,7 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
   });
 
   // Type for storing ApplicationUsageTransactional (declaring empty mappings because we don't use the internal fields for query/aggregations)
+  // Remark: this type is deprecated and only here for BWC reasons.
   registerType({
     name: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
     hidden: false,

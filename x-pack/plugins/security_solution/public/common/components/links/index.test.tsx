@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mount, shallow, ShallowWrapper } from 'enzyme';
+import { mount, shallow, ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { removeExternalLinkText } from '../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { encodeIpv6 } from '../../lib/helpers';
@@ -45,6 +46,7 @@ jest.mock('../../lib/kibana', () => {
 describe('Custom Links', () => {
   const hostName = 'Host Name';
   const ipv4 = '192.0.2.255';
+  const ipv4a = '192.0.2.266';
   const ipv6 = '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff';
   const ipv6Encoded = encodeIpv6(ipv6);
 
@@ -63,6 +65,16 @@ describe('Custom Links', () => {
   });
 
   describe('NetworkDetailsLink', () => {
+    test('can handle array of ips', () => {
+      const wrapper = mount(<NetworkDetailsLink ip={[ipv4, ipv4a]} />);
+      expect(wrapper.find('EuiLink').first().prop('href')).toEqual(
+        `/ip/${encodeURIComponent(ipv4)}/source`
+      );
+      expect(wrapper.text()).toEqual(`${ipv4}${ipv4a}`);
+      expect(wrapper.find('EuiLink').last().prop('href')).toEqual(
+        `/ip/${encodeURIComponent(ipv4a)}/source`
+      );
+    });
     test('should render valid link to IP Details with ipv4 as the display text', () => {
       const wrapper = mount(<NetworkDetailsLink ip={ipv4} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
@@ -120,11 +132,11 @@ describe('Custom Links', () => {
   describe('External Link', () => {
     const mockLink = 'https://www.virustotal.com/gui/search/';
     const mockLinkName = 'Link';
-    let wrapper: ShallowWrapper;
+    let wrapper: ReactWrapper | ShallowWrapper;
 
     describe('render', () => {
       beforeAll(() => {
-        wrapper = shallow(
+        wrapper = mount(
           <ExternalLink url={mockLink} idx={0} allItemsLimit={5} overflowIndexStart={5}>
             {mockLinkName}
           </ExternalLink>
@@ -136,11 +148,13 @@ describe('Custom Links', () => {
       });
 
       test('it renders ExternalLinkIcon', () => {
-        expect(wrapper.find('[data-test-subj="externalLinkIcon"]').exists()).toBeTruthy();
+        expect(wrapper.find('span [data-euiicon-type="popout"]').length).toBe(1);
       });
 
       test('it renders correct url', () => {
-        expect(wrapper.find('[data-test-subj="externalLink"]').prop('href')).toEqual(mockLink);
+        expect(wrapper.find('[data-test-subj="externalLink"]').first().prop('href')).toEqual(
+          mockLink
+        );
       });
 
       test('it renders comma if id is given', () => {
@@ -434,14 +448,14 @@ describe('Custom Links', () => {
 
       test('it renders correct number of external icons by default', () => {
         const wrapper = mountWithIntl(<ReputationLink domain={'192.0.2.0'} />);
-        expect(wrapper.find('[data-test-subj="externalLinkIcon"]')).toHaveLength(5);
+        expect(wrapper.find('span [data-euiicon-type="popout"]')).toHaveLength(5);
       });
 
       test('it renders correct number of external icons', () => {
         const wrapper = mountWithIntl(
           <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
         );
-        expect(wrapper.find('[data-test-subj="externalLinkIcon"]')).toHaveLength(1);
+        expect(wrapper.find('span [data-euiicon-type="popout"]')).toHaveLength(1);
       });
     });
   });

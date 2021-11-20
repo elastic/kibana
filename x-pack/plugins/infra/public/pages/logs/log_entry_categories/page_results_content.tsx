@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import datemath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiSuperDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTrackPageview } from '../../../../../observability/public';
@@ -16,7 +18,6 @@ import { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
-import { useInterval } from '../../../hooks/use_interval';
 import { PageViewLogInContext } from '../stream/page_view_log_in_context';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
@@ -25,219 +26,260 @@ import {
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogsPageTemplate } from '../page_template';
+import { RecreateJobButton } from '../../../components/logging/log_analysis_setup/create_job_button';
+import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
+import { useMlHref, ML_PAGES } from '../../../../../ml/public';
+import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 interface LogEntryCategoriesResultsContentProps {
   onOpenSetup: () => void;
+  pageTitle: string;
 }
 
-export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryCategoriesResultsContentProps> = ({
-  onOpenSetup,
-}) => {
-  useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
-  useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
+export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryCategoriesResultsContentProps> =
+  ({ onOpenSetup, pageTitle }) => {
+    useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
+    useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 
-  const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
+    const {
+      services: { ml, http },
+    } = useKibanaContextForPlugin();
 
-  const {
-    fetchJobStatus,
-    fetchModuleDefinition,
-    moduleDescriptor,
-    setupStatus,
-    hasOutdatedJobConfigurations,
-    hasOutdatedJobDefinitions,
-    hasStoppedJobs,
-    jobIds,
-    categoryQualityWarnings,
-    sourceConfiguration: { sourceId },
-  } = useLogEntryCategoriesModuleContext();
+    const { sourceStatus } = useLogSourceContext();
+    const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
-  const {
-    timeRange: selectedTimeRange,
-    setTimeRange: setSelectedTimeRange,
-    autoRefresh,
-    setAutoRefresh,
-  } = useLogEntryCategoriesResultsUrlState();
+    const {
+      fetchJobStatus,
+      fetchModuleDefinition,
+      moduleDescriptor,
+      setupStatus,
+      hasOutdatedJobConfigurations,
+      hasOutdatedJobDefinitions,
+      hasStoppedJobs,
+      jobIds,
+      categoryQualityWarnings,
+      sourceConfiguration: { sourceId },
+    } = useLogEntryCategoriesModuleContext();
 
-  const [categoryQueryTimeRange, setCategoryQueryTimeRange] = useState<{
-    lastChangedTime: number;
-    timeRange: TimeRange;
-  }>(() => ({
-    lastChangedTime: Date.now(),
-    timeRange: stringToNumericTimeRange(selectedTimeRange),
-  }));
+    const {
+      timeRange: selectedTimeRange,
+      setTimeRange: setSelectedTimeRange,
+      autoRefresh,
+      setAutoRefresh,
+    } = useLogEntryCategoriesResultsUrlState();
 
-  const [categoryQueryDatasets, setCategoryQueryDatasets] = useState<string[]>([]);
+    const [categoryQueryTimeRange, setCategoryQueryTimeRange] = useState<{
+      lastChangedTime: number;
+      timeRange: TimeRange;
+    }>(() => ({
+      lastChangedTime: Date.now(),
+      timeRange: stringToNumericTimeRange(selectedTimeRange),
+    }));
 
-  const { services } = useKibana<{}>();
+    const [categoryQueryDatasets, setCategoryQueryDatasets] = useState<string[]>([]);
 
-  const showLoadDataErrorNotification = useCallback(
-    (error: Error) => {
-      services.notifications?.toasts.addError(error, {
-        title: loadDataErrorTitle,
-      });
-    },
-    [services.notifications]
-  );
+    const { services } = useKibana<{}>();
 
-  const {
-    getLogEntryCategoryDatasets,
-    getTopLogEntryCategories,
-    isLoadingLogEntryCategoryDatasets,
-    isLoadingTopLogEntryCategories,
-    logEntryCategoryDatasets,
-    topLogEntryCategories,
-    sortOptions,
-    changeSortOptions,
-  } = useLogEntryCategoriesResults({
-    categoriesCount: 25,
-    endTime: categoryQueryTimeRange.timeRange.endTime,
-    filteredDatasets: categoryQueryDatasets,
-    onGetTopLogEntryCategoriesError: showLoadDataErrorNotification,
-    sourceId,
-    startTime: categoryQueryTimeRange.timeRange.startTime,
-  });
+    const showLoadDataErrorNotification = useCallback(
+      (error: Error) => {
+        services.notifications?.toasts.addError(error, {
+          title: loadDataErrorTitle,
+        });
+      },
+      [services.notifications]
+    );
 
-  const handleQueryTimeRangeChange = useCallback(
-    ({ start: startTime, end: endTime }: { start: string; end: string }) => {
-      setCategoryQueryTimeRange((previousQueryParameters) => ({
-        ...previousQueryParameters,
-        timeRange: stringToNumericTimeRange({ startTime, endTime }),
-        lastChangedTime: Date.now(),
-      }));
-    },
-    [setCategoryQueryTimeRange]
-  );
+    const {
+      getLogEntryCategoryDatasets,
+      getTopLogEntryCategories,
+      isLoadingLogEntryCategoryDatasets,
+      isLoadingTopLogEntryCategories,
+      logEntryCategoryDatasets,
+      topLogEntryCategories,
+      sortOptions,
+      changeSortOptions,
+    } = useLogEntryCategoriesResults({
+      categoriesCount: 25,
+      endTime: categoryQueryTimeRange.timeRange.endTime,
+      filteredDatasets: categoryQueryDatasets,
+      onGetTopLogEntryCategoriesError: showLoadDataErrorNotification,
+      sourceId,
+      startTime: categoryQueryTimeRange.timeRange.startTime,
+    });
 
-  const handleSelectedTimeRangeChange = useCallback(
-    (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
-      if (selectedTime.isInvalid) {
-        return;
-      }
-      setSelectedTimeRange({
-        startTime: selectedTime.start,
-        endTime: selectedTime.end,
-      });
-      handleQueryTimeRangeChange(selectedTime);
-    },
-    [setSelectedTimeRange, handleQueryTimeRangeChange]
-  );
+    const handleQueryTimeRangeChange = useCallback(
+      ({ start: startTime, end: endTime }: { start: string; end: string }) => {
+        setCategoryQueryTimeRange((previousQueryParameters) => ({
+          ...previousQueryParameters,
+          timeRange: stringToNumericTimeRange({ startTime, endTime }),
+          lastChangedTime: Date.now(),
+        }));
+      },
+      [setCategoryQueryTimeRange]
+    );
 
-  const handleAutoRefreshChange = useCallback(
-    ({ isPaused, refreshInterval: interval }: { isPaused: boolean; refreshInterval: number }) => {
-      setAutoRefresh({
-        isPaused,
-        interval,
-      });
-    },
-    [setAutoRefresh]
-  );
+    const handleSelectedTimeRangeChange = useCallback(
+      (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
+        if (selectedTime.isInvalid) {
+          return;
+        }
+        setSelectedTimeRange({
+          startTime: selectedTime.start,
+          endTime: selectedTime.end,
+        });
+        handleQueryTimeRangeChange(selectedTime);
+      },
+      [setSelectedTimeRange, handleQueryTimeRangeChange]
+    );
 
-  const hasResults = useMemo(() => topLogEntryCategories.length > 0, [
-    topLogEntryCategories.length,
-  ]);
+    const handleAutoRefreshChange = useCallback(
+      ({ isPaused, refreshInterval: interval }: { isPaused: boolean; refreshInterval: number }) => {
+        setAutoRefresh({
+          isPaused,
+          interval,
+        });
+      },
+      [setAutoRefresh]
+    );
 
-  const isFirstUse = useMemo(
-    () =>
-      ((setupStatus.type === 'skipped' && !!setupStatus.newlyCreated) ||
-        setupStatus.type === 'succeeded') &&
-      !hasResults,
-    [hasResults, setupStatus]
-  );
+    const hasResults = useMemo(
+      () => topLogEntryCategories.length > 0,
+      [topLogEntryCategories.length]
+    );
 
-  useEffect(() => {
-    getTopLogEntryCategories();
-  }, [
-    getTopLogEntryCategories,
-    categoryQueryDatasets,
-    categoryQueryTimeRange.lastChangedTime,
-    sortOptions,
-  ]);
+    const isFirstUse = useMemo(
+      () =>
+        ((setupStatus.type === 'skipped' && !!setupStatus.newlyCreated) ||
+          setupStatus.type === 'succeeded') &&
+        !hasResults,
+      [hasResults, setupStatus]
+    );
 
-  useEffect(() => {
-    getLogEntryCategoryDatasets();
-  }, [getLogEntryCategoryDatasets, categoryQueryTimeRange.lastChangedTime]);
+    useEffect(() => {
+      getTopLogEntryCategories();
+    }, [
+      getTopLogEntryCategories,
+      categoryQueryDatasets,
+      categoryQueryTimeRange.lastChangedTime,
+      sortOptions,
+    ]);
 
-  useEffect(() => {
-    fetchModuleDefinition();
-  }, [fetchModuleDefinition]);
+    useEffect(() => {
+      getLogEntryCategoryDatasets();
+    }, [getLogEntryCategoryDatasets, categoryQueryTimeRange.lastChangedTime]);
 
-  useInterval(() => {
-    fetchJobStatus();
-  }, JOB_STATUS_POLLING_INTERVAL);
+    useEffect(() => {
+      fetchModuleDefinition();
+    }, [fetchModuleDefinition]);
 
-  useInterval(
-    () => {
-      handleQueryTimeRangeChange({
-        start: selectedTimeRange.startTime,
-        end: selectedTimeRange.endTime,
-      });
-    },
-    autoRefresh.isPaused ? null : autoRefresh.interval
-  );
+    useInterval(() => {
+      fetchJobStatus();
+    }, JOB_STATUS_POLLING_INTERVAL);
 
-  return (
-    <ViewLogInContext.Provider
-      sourceId={sourceId}
-      startTimestamp={categoryQueryTimeRange.timeRange.startTime}
-      endTimestamp={categoryQueryTimeRange.timeRange.endTime}
-    >
-      <ResultsContentPage>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem />
-              <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
-                  start={selectedTimeRange.startTime}
-                  end={selectedTimeRange.endTime}
-                  onTimeChange={handleSelectedTimeRangeChange}
-                  isPaused={autoRefresh.isPaused}
-                  refreshInterval={autoRefresh.interval}
-                  onRefreshChange={handleAutoRefreshChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CategoryJobNoticesSection
-              hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
-              hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
-              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-              hasStoppedJobs={hasStoppedJobs}
-              isFirstUse={isFirstUse}
-              moduleName={moduleDescriptor.moduleName}
-              onRecreateMlJobForReconfiguration={onOpenSetup}
-              onRecreateMlJobForUpdate={onOpenSetup}
-              qualityWarnings={categoryQualityWarnings}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="m">
-              <TopCategoriesSection
-                availableDatasets={logEntryCategoryDatasets}
+    useInterval(
+      () => {
+        handleQueryTimeRangeChange({
+          start: selectedTimeRange.startTime,
+          end: selectedTimeRange.endTime,
+        });
+      },
+      autoRefresh.isPaused ? null : autoRefresh.interval
+    );
+
+    const analyzeInMlLink = useMlHref(ml, http.basePath.get(), {
+      page: ML_PAGES.ANOMALY_EXPLORER,
+      pageState: {
+        jobIds: [jobIds['log-entry-categories-count']],
+        timeRange: {
+          from: moment(categoryQueryTimeRange.timeRange.startTime).format(
+            'YYYY-MM-DDTHH:mm:ss.SSSZ'
+          ),
+          to: moment(categoryQueryTimeRange.timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          mode: 'absolute',
+        },
+      },
+    });
+
+    return (
+      <ViewLogInContext.Provider
+        sourceId={sourceId}
+        startTimestamp={categoryQueryTimeRange.timeRange.startTime}
+        endTimestamp={categoryQueryTimeRange.timeRange.endTime}
+      >
+        <LogsPageTemplate
+          hasData={sourceStatus?.logIndexStatus !== 'missing'}
+          pageHeader={{
+            pageTitle,
+            rightSideItems: [
+              <RecreateJobButton
                 hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-                isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
+                onClick={onOpenSetup}
+                size="s"
+              />,
+              <AnalyzeInMlButton href={analyzeInMlLink} />,
+            ],
+          }}
+        >
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem>
+                  <DatasetsSelector
+                    availableDatasets={logEntryCategoryDatasets}
+                    isLoading={isLoadingLogEntryCategoryDatasets}
+                    onChangeDatasetSelection={setCategoryQueryDatasets}
+                    selectedDatasets={categoryQueryDatasets}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSuperDatePicker
+                    start={selectedTimeRange.startTime}
+                    end={selectedTimeRange.endTime}
+                    onTimeChange={handleSelectedTimeRangeChange}
+                    isPaused={autoRefresh.isPaused}
+                    refreshInterval={autoRefresh.interval}
+                    onRefreshChange={handleAutoRefreshChange}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MLJobsAwaitingNodeWarning jobIds={Object.values(jobIds)} />
+              <CategoryJobNoticesSection
+                hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
+                hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
+                hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+                hasStoppedJobs={hasStoppedJobs}
+                isFirstUse={isFirstUse}
+                moduleName={moduleDescriptor.moduleName}
+                onRecreateMlJobForReconfiguration={onOpenSetup}
+                onRecreateMlJobForUpdate={onOpenSetup}
+                qualityWarnings={categoryQualityWarnings}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TopCategoriesSection
                 isLoadingTopCategories={isLoadingTopLogEntryCategories}
                 jobId={jobIds['log-entry-categories-count']}
-                onChangeDatasetSelection={setCategoryQueryDatasets}
-                onRequestRecreateMlJob={onOpenSetup}
-                selectedDatasets={categoryQueryDatasets}
                 sourceId={sourceId}
                 timeRange={categoryQueryTimeRange.timeRange}
                 topCategories={topLogEntryCategories}
                 sortOptions={sortOptions}
                 changeSortOptions={changeSortOptions}
               />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ResultsContentPage>
-      <PageViewLogInContext />
-    </ViewLogInContext.Provider>
-  );
-};
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </LogsPageTemplate>
+        <PageViewLogInContext />
+      </ViewLogInContext.Provider>
+    );
+  };
 
 const stringToNumericTimeRange = (timeRange: StringTimeRange): TimeRange => ({
   startTime: moment(

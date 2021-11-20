@@ -1,44 +1,56 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import { useValues } from 'kea';
+import React, { useEffect } from 'react';
 
+import { useActions, useValues } from 'kea';
+
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
+
+import { getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
+
+import { TotalStats, TotalCharts, RecentApiLogs } from './components';
+
+import { SuggestedCurationsCallout } from './components/suggested_curations_callout';
 
 import { EngineOverviewLogic } from './';
 
-import { UnavailablePrompt, TotalStats, TotalCharts, RecentApiLogs } from './components';
-
 export const EngineOverviewMetrics: React.FC = () => {
-  const { apiLogsUnavailable } = useValues(EngineOverviewLogic);
+  const { loadOverviewMetrics } = useActions(EngineOverviewLogic);
+  const { dataLoading } = useValues(EngineOverviewLogic);
+
+  useEffect(() => {
+    loadOverviewMetrics();
+  }, []);
 
   return (
-    <>
-      <EuiPageHeader>
-        <EuiTitle size="l">
-          <h1>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
-              defaultMessage: 'Engine overview',
-            })}
-          </h1>
-        </EuiTitle>
-      </EuiPageHeader>
-      {apiLogsUnavailable ? (
-        <UnavailablePrompt />
-      ) : (
-        <>
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs()}
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
+          defaultMessage: 'Engine overview',
+        }),
+      }}
+      isLoading={dataLoading}
+      data-test-subj="EngineOverview"
+    >
+      <SuggestedCurationsCallout />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
           <TotalStats />
-          <EuiSpacer size="xl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={3}>
           <TotalCharts />
-          <EuiSpacer size="xl" />
-          <RecentApiLogs />
-        </>
-      )}
-    </>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+      <RecentApiLogs />
+    </AppSearchPageTemplate>
   );
 };

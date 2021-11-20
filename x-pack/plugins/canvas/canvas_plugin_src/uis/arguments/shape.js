@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,18 +14,20 @@ import { ArgumentStrings } from '../../../i18n';
 
 const { Shape: strings } = ArgumentStrings;
 
-const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => (
-  <EuiFlexGroup gutterSize="s">
-    <EuiFlexItem grow={false}>
-      <ShapePickerPopover
-        value={argValue}
-        onChange={onValueChange}
-        shapes={typeInstance.options.shapes}
-        ariaLabel={typeInstance.displayName}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => {
+  return (
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <ShapePickerPopover
+          value={argValue}
+          onChange={onValueChange}
+          shapes={typeInstance.options.shapes}
+          ariaLabel={typeInstance.displayName}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 ShapeArgInput.propTypes = {
   argValue: PropTypes.any.isRequired,

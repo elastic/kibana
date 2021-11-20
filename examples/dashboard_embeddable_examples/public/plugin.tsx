@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '../../../src/core/public';
@@ -27,14 +27,15 @@ export class DashboardEmbeddableExamples implements Plugin<void, void, {}, Start
       title: 'Dashboard embeddable examples',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const [, depsStart] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
         await depsStart.embeddableExamples.createSampleData();
         return renderApp(
           {
             basename: params.appBasePath,
             DashboardContainerByValueRenderer:
-              depsStart.dashboard.DashboardContainerByValueRenderer,
+              depsStart.dashboard.getDashboardContainerByValueRenderer(),
+            uiSettings: coreStart.uiSettings,
           },
           params.element
         );

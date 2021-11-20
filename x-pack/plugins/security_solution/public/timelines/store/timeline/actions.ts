@@ -1,31 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+import type { Filter } from '@kbn/es-query';
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
-import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
   DataProvider,
   DataProviderType,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { SerializedFilterQuery } from '../../../common/store/types';
 
-import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
-import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import {
-  TimelineEventsType,
-  TimelineExpandedEventType,
-  TimelineTypeLiteral,
-  RowRendererId,
-  TimelineExpandedEvent,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+import { KqlMode, TimelineModel } from './model';
 import { InsertTimeline } from './types';
+import { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
+import type {
+  TimelineEventsType,
+  RowRendererId,
+  TimelineTabs,
+  TimelinePersistInput,
+  SerializedFilterQuery,
+} from '../../../../common/types/timeline';
+import { tGridActions } from '../../../../../timelines/public';
+import { ResolveTimelineConfig } from '../../components/open_timeline/types';
+export const {
+  applyDeltaToColumnWidth,
+  clearEventsDeleted,
+  clearEventsLoading,
+  clearSelected,
+  initializeTGridSettings,
+  removeColumn,
+  setEventsDeleted,
+  setEventsLoading,
+  setSelected,
+  setTGridSelectAll,
+  toggleDetailPanel,
+  updateColumnOrder,
+  updateColumns,
+  updateColumnWidth,
+  updateIsLoading,
+  updateItemsPerPage,
+  updateItemsPerPageOptions,
+  updateSort,
+  upsertColumn,
+} = tGridActions;
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -33,73 +54,29 @@ export const addHistory = actionCreator<{ id: string; historyId: string }>('ADD_
 
 export const addNote = actionCreator<{ id: string; noteId: string }>('ADD_NOTE');
 
-export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
-  'ADD_NOTE_TO_EVENT'
-);
+export const addNoteToEvent =
+  actionCreator<{ id: string; noteId: string; eventId: string }>('ADD_NOTE_TO_EVENT');
 
-export interface ToggleExpandedEvent {
-  event?: TimelineExpandedEventType;
-  tabType?: TimelineTabs;
-  timelineId: string;
-}
-export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
+export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
 
-export const upsertColumn = actionCreator<{
-  column: ColumnHeaderOptions;
-  id: string;
-  index: number;
-}>('UPSERT_COLUMN');
+export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
-export const applyDeltaToColumnWidth = actionCreator<{
-  id: string;
-  columnId: string;
-  delta: number;
-}>('APPLY_DELTA_TO_COLUMN_WIDTH');
+export const saveTimeline = actionCreator<TimelinePersistInput>('SAVE_TIMELINE');
 
-export interface TimelineInput {
-  id: string;
-  dataProviders?: DataProvider[];
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-  excludedRowRendererIds?: RowRendererId[];
-  expandedEvent?: TimelineExpandedEvent;
-  filters?: Filter[];
-  columns: ColumnHeaderOptions[];
-  itemsPerPage?: number;
-  indexNames: string[];
-  kqlQuery?: {
-    filterQuery: SerializedFilterQuery | null;
-  };
-  show?: boolean;
-  sort?: Sort[];
-  showCheckboxes?: boolean;
-  timelineType?: TimelineTypeLiteral;
-  templateTimelineId?: string | null;
-  templateTimelineVersion?: number | null;
-}
-
-export const saveTimeline = actionCreator<TimelineInput>('SAVE_TIMELINE');
-
-export const createTimeline = actionCreator<TimelineInput>('CREATE_TIMELINE');
+export const createTimeline = actionCreator<TimelinePersistInput>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 
-export const removeColumn = actionCreator<{
-  id: string;
-  columnId: string;
-}>('REMOVE_COLUMN');
+export const setTimelineUpdatedAt =
+  actionCreator<{ id: string; updated: number }>('SET_TIMELINE_UPDATED_AT');
 
 export const removeProvider = actionCreator<{
   id: string;
   providerId: string;
   andProviderId?: string;
 }>('REMOVE_PROVIDER');
-
-export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
 
 export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
   'UPDATE_TIMELINE_GRAPH_EVENT_ID'
@@ -115,10 +92,9 @@ export const updateTimeline = actionCreator<{
 export const addTimeline = actionCreator<{
   id: string;
   timeline: TimelineModel;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   savedTimeline?: boolean;
 }>('ADD_TIMELINE');
-
-export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{
   id: string;
@@ -127,16 +103,6 @@ export const startTimelineSaving = actionCreator<{
 export const endTimelineSaving = actionCreator<{
   id: string;
 }>('END_TIMELINE_SAVING');
-
-export const updateIsLoading = actionCreator<{
-  id: string;
-  isLoading: boolean;
-}>('UPDATE_LOADING');
-
-export const updateColumns = actionCreator<{
-  id: string;
-  columns: ColumnHeaderOptions[];
-}>('UPDATE_COLUMNS');
 
 export const updateDataProviderEnabled = actionCreator<{
   id: string;
@@ -182,20 +148,10 @@ export const applyKqlFilterQuery = actionCreator<{
   filterQuery: SerializedFilterQuery;
 }>('APPLY_KQL_FILTER_QUERY');
 
-export const updateIsFavorite = actionCreator<{ id: string; isFavorite: boolean }>(
-  'UPDATE_IS_FAVORITE'
-);
+export const updateIsFavorite =
+  actionCreator<{ id: string; isFavorite: boolean }>('UPDATE_IS_FAVORITE');
 
 export const updateIsLive = actionCreator<{ id: string; isLive: boolean }>('UPDATE_IS_LIVE');
-
-export const updateItemsPerPage = actionCreator<{ id: string; itemsPerPage: number }>(
-  'UPDATE_ITEMS_PER_PAGE'
-);
-
-export const updateItemsPerPageOptions = actionCreator<{
-  id: string;
-  itemsPerPageOptions: number[];
-}>('UPDATE_ITEMS_PER_PAGE_OPTIONS');
 
 export const updateTitleAndDescription = actionCreator<{
   description: string;
@@ -203,19 +159,14 @@ export const updateTitleAndDescription = actionCreator<{
   title: string;
 }>('UPDATE_TITLE_AND_DESCRIPTION');
 
-export const updatePageIndex = actionCreator<{ id: string; activePage: number }>(
-  'UPDATE_PAGE_INDEX'
-);
+export const updatePageIndex =
+  actionCreator<{ id: string; activePage: number }>('UPDATE_PAGE_INDEX');
 
-export const updateProviders = actionCreator<{ id: string; providers: DataProvider[] }>(
-  'UPDATE_PROVIDERS'
-);
+export const updateProviders =
+  actionCreator<{ id: string; providers: DataProvider[] }>('UPDATE_PROVIDERS');
 
-export const updateRange = actionCreator<{ id: string; start: string; end: string }>(
-  'UPDATE_RANGE'
-);
-
-export const updateSort = actionCreator<{ id: string; sort: Sort[] }>('UPDATE_SORT');
+export const updateRange =
+  actionCreator<{ id: string; start: string; end: string }>('UPDATE_RANGE');
 
 export const updateAutoSaveMsg = actionCreator<{
   timelineId: string | null;
@@ -234,57 +185,33 @@ export const setFilters = actionCreator<{
   filters: Filter[];
 }>('SET_TIMELINE_FILTERS');
 
-export const setSelected = actionCreator<{
-  id: string;
-  eventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
-  isSelected: boolean;
-  isSelectAllChecked: boolean;
-}>('SET_TIMELINE_SELECTED');
-
-export const clearSelected = actionCreator<{
-  id: string;
-}>('CLEAR_TIMELINE_SELECTED');
-
-export const setEventsLoading = actionCreator<{
-  id: string;
-  eventIds: string[];
-  isLoading: boolean;
-}>('SET_TIMELINE_EVENTS_LOADING');
-
-export const clearEventsLoading = actionCreator<{
-  id: string;
-}>('CLEAR_TIMELINE_EVENTS_LOADING');
-
-export const setEventsDeleted = actionCreator<{
-  id: string;
-  eventIds: string[];
-  isDeleted: boolean;
-}>('SET_TIMELINE_EVENTS_DELETED');
-
-export const clearEventsDeleted = actionCreator<{
-  id: string;
-}>('CLEAR_TIMELINE_EVENTS_DELETED');
-
-export const updateEventType = actionCreator<{ id: string; eventType: TimelineEventsType }>(
-  'UPDATE_EVENT_TYPE'
-);
+export const updateEventType =
+  actionCreator<{ id: string; eventType: TimelineEventsType }>('UPDATE_EVENT_TYPE');
 
 export const setExcludedRowRendererIds = actionCreator<{
   id: string;
   excludedRowRendererIds: RowRendererId[];
 }>('SET_TIMELINE_EXCLUDED_ROW_RENDERER_IDS');
 
-export const updateIndexNames = actionCreator<{
+export const updateDataView = actionCreator<{
   id: string;
+  dataViewId: string;
   indexNames: string[];
-}>('UPDATE_INDEXES_NAME');
+}>('UPDATE_DATA_VIEW');
 
 export const setActiveTabTimeline = actionCreator<{
   id: string;
   activeTab: TimelineTabs;
+  scrollToTop?: boolean;
 }>('SET_ACTIVE_TAB_TIMELINE');
 
 export const toggleModalSaveTimeline = actionCreator<{
   id: string;
   showModalSaveTimeline: boolean;
 }>('TOGGLE_MODAL_SAVE_TIMELINE');
+
+export const updateEqlOptions = actionCreator<{
+  id: string;
+  field: FieldsEqlOptions;
+  value: string | null;
+}>('UPDATE_EQL_OPTIONS_TIMELINE');

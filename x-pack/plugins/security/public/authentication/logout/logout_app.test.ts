@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AppMount } from 'src/core/public';
-import { logoutApp } from './logout_app';
+import type { AppMount } from 'src/core/public';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { logoutApp } from './logout_app';
 
 describe('logoutApp', () => {
   beforeAll(() => {
@@ -54,6 +55,7 @@ describe('logoutApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
+      theme$: themeServiceMock.createTheme$(),
     });
 
     expect(window.sessionStorage.clear).toHaveBeenCalledTimes(1);

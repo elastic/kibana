@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { take } from 'rxjs/operators';
@@ -15,6 +15,7 @@ import { ApplicationService } from '../application_service';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
+import { themeServiceMock } from '../../theme/theme_service.mock';
 import { AppMountParameters } from '../types';
 import { Observable } from 'rxjs';
 import { MountPoint } from 'kibana/public';
@@ -43,7 +44,11 @@ describe('ApplicationService', () => {
       http,
       history: history as any,
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 

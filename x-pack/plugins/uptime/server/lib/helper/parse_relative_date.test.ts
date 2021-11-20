@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { parseRelativeDate } from './get_histogram_interval';
 import { Moment } from 'moment';
+import { parseRelativeDate } from '../../../common/lib/get_histogram_interval';
 
 describe('Parsing a relative end date properly', () => {
   it('converts the upper range of relative end dates to now', async () => {

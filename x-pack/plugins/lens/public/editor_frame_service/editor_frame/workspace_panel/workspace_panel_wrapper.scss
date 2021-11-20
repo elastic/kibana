@@ -1,23 +1,24 @@
 @import '../../../mixins';
 
 .lnsWorkspacePanelWrapper {
-  @include euiScrollBar;
-  overflow: hidden;
-  // Override panel size padding
-  padding: 0 !important; // sass-lint:disable-line no-important
   margin-bottom: $euiSize;
   display: flex;
   flex-direction: column;
   position: relative; // For positioning the dnd overlay
   min-height: $euiSizeXXL * 10;
+  overflow: visible;
+  height: 100%;
 
   .lnsWorkspacePanelWrapper__pageContentBody {
+    @include euiBottomShadowMedium;
     @include euiScrollBar;
     flex-grow: 1;
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-    overflow: auto;
+    border-radius: $euiBorderRadius;
+    background: $euiColorEmptyShade;
+    height: 100%;
 
     > * {
       flex: 1 1 100%;
@@ -27,20 +28,41 @@
       overflow: hidden;
     }
   }
+
+  &.lnsWorkspacePanelWrapper--fullscreen {
+    margin-bottom: 0;
+  }
 }
 
 .lnsWorkspacePanel__dragDrop {
-  // Disable the coloring of the DnD for this element as we'll
-  // Color the whole panel instead
-  background-color: transparent !important; // sass-lint:disable-line no-important
-  border: none !important; // sass-lint:disable-line no-important
-}
+  border: $euiBorderWidthThin solid transparent;
 
-.lnsExpressionRenderer {
-  .lnsDragDrop-isDropTarget & {
-    transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
-    filter: blur($euiSizeXS);
-    opacity: .25;
+  &.lnsDragDrop-isDropTarget {
+    @include lnsDroppable;
+    @include lnsDroppableActive;
+
+    p {
+      transition: filter $euiAnimSpeedFast ease-in-out;
+      filter: blur(5px);
+    }
+
+    .lnsExpressionRenderer {
+      transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
+      filter: blur($euiSizeXS);
+      opacity: .25;
+    }
+  }
+
+  &.lnsDragDrop-isActiveDropTarget {
+    @include lnsDroppableActiveHover;
+
+    .lnsDropIllustration__hand {
+      animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
+    }
+  }
+
+  &.lnsWorkspacePanel__dragDrop--fullscreen {
+    border: none;
   }
 }
 
@@ -54,24 +76,6 @@
   justify-content: center;
   align-items: center;
   transition: background-color $euiAnimSpeedFast ease-in-out;
-
-  .lnsDragDrop-isDropTarget & {
-    @include lnsDroppable;
-    @include lnsDroppableActive;
-
-    p {
-      transition: filter $euiAnimSpeedFast ease-in-out;
-      filter: blur(5px);
-    }
-  }
-
-  .lnsDragDrop-isActiveDropTarget & {
-    @include lnsDroppableActiveHover;
-
-    .lnsDropIllustration__hand {
-      animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
-    }
-  }
 }
 
 .lnsWorkspacePanelWrapper__toolbar {

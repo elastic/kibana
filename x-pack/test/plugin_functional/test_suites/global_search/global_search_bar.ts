@@ -1,25 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  describe('TOTO GlobalSearchBar', function () {
+  describe('GlobalSearchBar', function () {
     const { common, navigationalSearch } = getPageObjects(['common', 'navigationalSearch']);
     const esArchiver = getService('esArchiver');
     const browser = getService('browser');
 
     before(async () => {
-      await esArchiver.load('global_search/search_syntax');
+      await esArchiver.load(
+        'x-pack/test/plugin_functional/es_archives/global_search/search_syntax'
+      );
       await common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('global_search/search_syntax');
+      await esArchiver.unload(
+        'x-pack/test/plugin_functional/es_archives/global_search/search_syntax'
+      );
     });
 
     afterEach(async () => {

@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { KibanaFeature } from '../../../../../features/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { featuresPluginMock } from '../../../../../features/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { LicenseType } from '../../../../../licensing/server';
+import type { SecurityLicenseFeatures } from '../../../../common/licensing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Actions } from '../../../../server/authorization';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { privilegesFactory } from '../../../../server/authorization/privileges';
-import { KibanaFeature } from '../../../../../features/public';
 import { KibanaPrivileges } from '../model';
-import { SecurityLicenseFeatures } from '../../..';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { featuresPluginMock } from '../../../../../features/server/mocks';
 
 export const createRawKibanaPrivileges = (
   features: KibanaFeature[],
@@ -24,6 +27,7 @@ export const createRawKibanaPrivileges = (
   const licensingService = {
     getFeatures: () => ({ allowSubFeaturePrivileges } as SecurityLicenseFeatures),
     getType: () => 'basic' as const,
+    hasAtLeast: (licenseType: LicenseType) => licenseType === 'basic',
   };
 
   return privilegesFactory(

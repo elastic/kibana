@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,11 +13,16 @@ export const BACK_TO_DETECTIONS = i18n.translate(
     defaultMessage: 'Back to detections',
   }
 );
+export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
+    defaultMessage: 'Tooltip for column: {columnName}',
+    values: { columnName },
+  });
 
 export const IMPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.importRuleTitle',
   {
-    defaultMessage: 'Import rule',
+    defaultMessage: 'Import rules',
   }
 );
 
@@ -43,7 +49,7 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Detection rules',
+  defaultMessage: 'Rules',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate(
@@ -164,13 +170,13 @@ export const EXPORT_FILENAME = i18n.translate(
   }
 );
 
-export const SUCCESSFULLY_EXPORTED_RULES = (totalRules: number) =>
+export const SUCCESSFULLY_EXPORTED_RULES = (exportedRules: number, totalRules: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.successfullyExportedRulesTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.successfullyExportedXofYRulesTitle',
     {
-      values: { totalRules },
+      values: { totalRules, exportedRules },
       defaultMessage:
-        'Successfully exported {totalRules, plural, =0 {all rules} =1 {{totalRules} rule} other {{totalRules} rules}}',
+        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}. Prebuilt rules were excluded from the resulting file.',
     }
   );
 
@@ -200,6 +206,19 @@ export const SHOWING_RULES = (totalRules: number) =>
     values: { totalRules },
     defaultMessage: 'Showing {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
   });
+
+export const SELECT_ALL_RULES = (totalRules: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectAllRulesTitle', {
+    values: { totalRules },
+    defaultMessage: 'Select all {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+  });
+
+export const CLEAR_SELECTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.clearSelectionTitle',
+  {
+    defaultMessage: 'Clear selection',
+  }
+);
 
 export const SELECTED_RULES = (selectedRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectedRulesTitle', {
@@ -249,6 +268,13 @@ export const DUPLICATE_RULE_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleErrorDescription',
   {
     defaultMessage: 'Error duplicating rule',
+  }
+);
+
+export const BULK_ACTION_FAILED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.bulkActionFailedDescription',
+  {
+    defaultMessage: 'Failed to execte bulk action',
   }
 );
 
@@ -343,6 +369,13 @@ export const COLUMN_INDEXING_TIMES = i18n.translate(
   }
 );
 
+export const COLUMN_INDEXING_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.indexingTimesTooltip',
+  {
+    defaultMessage: 'Total time spent indexing alerts during last Rule execution',
+  }
+);
+
 export const COLUMN_QUERY_TIMES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimes',
   {
@@ -350,17 +383,17 @@ export const COLUMN_QUERY_TIMES = i18n.translate(
   }
 );
 
-export const COLUMN_GAP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
+export const COLUMN_QUERY_TIMES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimesTooltip',
   {
-    defaultMessage: 'Gap (if any)',
+    defaultMessage: 'Total time spent querying source indices during last Rule execution',
   }
 );
 
-export const COLUMN_LAST_LOOKBACK_DATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.lastLookBackDate',
+export const COLUMN_GAP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
-    defaultMessage: 'Last Look-Back Date',
+    defaultMessage: 'Last Gap (if any)',
   }
 );
 
@@ -518,7 +551,8 @@ export const IMPORT_RULE_BTN_TITLE = i18n.translate(
 export const SELECT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription',
   {
-    defaultMessage: 'Select a Security rule (as exported from the Detection Engine view) to import',
+    defaultMessage:
+      'Select rules and actions (as exported from the Security > Rules page) to import',
   }
 );
 
@@ -532,7 +566,7 @@ export const INITIAL_PROMPT_TEXT = i18n.translate(
 export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteDescription',
   {
-    defaultMessage: 'Automatically overwrite saved objects with the same rule ID',
+    defaultMessage: 'Overwrite existing detection rules with conflicting Rule ID',
   }
 );
 
@@ -546,19 +580,21 @@ export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
     }
   );
 
-export const IMPORT_FAILED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
-  {
-    defaultMessage: 'Failed to import rules',
-  }
-);
+export const IMPORT_FAILED = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
+    {
+      values: { totalRules },
+      defaultMessage: 'Failed to import {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    }
+  );
 
-export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, message: string) =>
+export const IMPORT_FAILED_DETAILED = (message: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedDetailedTitle',
     {
-      values: { ruleId, statusCode, message },
-      defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
+      values: { message },
+      defaultMessage: '{message}',
     }
   );
 
@@ -580,6 +616,35 @@ export const REFRESH_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
   {
     defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
+  }
+);
+
+export const DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
+  {
+    defaultMessage: 'Confirm bulk deletion',
+  }
+);
+
+export const DELETE_CONFIRMATION_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationConfirm',
+  {
+    defaultMessage: 'Confirm',
+  }
+);
+
+export const DELETE_CONFIRMATION_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationCancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const DELETE_CONFIRMATION_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationBody',
+  {
+    defaultMessage:
+      'This action will delete all rules that match current filter query. Click "Confirm" to continue.',
   }
 );
 

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
+import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 
 import {
   MonitoringNoDataProvider,
@@ -25,6 +27,9 @@ import {
   MonitoringBeatsListingProvider,
   MonitoringBeatDetailProvider,
   MonitoringBeatsSummaryStatusProvider,
+  MonitoringLogstashOverviewProvider,
+  MonitoringLogstashNodesProvider,
+  MonitoringLogstashNodeDetailProvider,
   MonitoringLogstashPipelinesProvider,
   MonitoringLogstashSummaryStatusProvider,
   MonitoringKibanaOverviewProvider,
@@ -57,6 +62,9 @@ import {
   DashboardDrilldownsManageProvider,
   DashboardPanelTimeRangeProvider,
 } from './dashboard';
+import { SearchSessionsService } from './search_sessions';
+import { ObservabilityProvider } from './observability';
+import { CompareImagesProvider } from './compare_images';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -83,6 +91,9 @@ export const services = {
   monitoringBeatsListing: MonitoringBeatsListingProvider,
   monitoringBeatDetail: MonitoringBeatDetailProvider,
   monitoringBeatsSummaryStatus: MonitoringBeatsSummaryStatusProvider,
+  monitoringLogstashOverview: MonitoringLogstashOverviewProvider,
+  monitoringLogstashNodes: MonitoringLogstashNodesProvider,
+  monitoringLogstashNodeDetail: MonitoringLogstashNodeDetailProvider,
   monitoringLogstashPipelines: MonitoringLogstashPipelinesProvider,
   monitoringLogstashSummaryStatus: MonitoringLogstashSummaryStatusProvider,
   monitoringKibanaOverview: MonitoringKibanaOverviewProvider,
@@ -105,4 +116,8 @@ export const services = {
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
+  reporting: ReportingFunctionalProvider,
+  searchSessions: SearchSessionsService,
+  observability: ObservabilityProvider,
+  compareImages: CompareImagesProvider,
 };

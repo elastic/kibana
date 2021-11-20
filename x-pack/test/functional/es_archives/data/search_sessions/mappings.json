@@ -2,95 +2,10 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".kibana": {
-      }
+      ".kibana": {}
     },
     "index": ".kibana_1",
     "mappings": {
-      "_meta": {
-        "migrationMappingPropertyHashes": {
-          "action": "6e96ac5e648f57523879661ea72525b7",
-          "action_task_params": "a9d49f184ee89641044be0ca2950fa3a",
-          "alert": "49eb3350984bd2a162914d3776e70cfb",
-          "api_key_pending_invalidation": "16f515278a295f6245149ad7c5ddedb7",
-          "apm-indices": "9bb9b2bf1fa636ed8619cbab5ce6a1dd",
-          "apm-telemetry": "3d1b76c39bfb2cc8296b024d73854724",
-          "app_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724",
-          "application_usage_daily": "43b8830d5d0df85a6823d290885fc9fd",
-          "application_usage_totals": "3d1b76c39bfb2cc8296b024d73854724",
-          "application_usage_transactional": "3d1b76c39bfb2cc8296b024d73854724",
-          "background-session": "dfd06597e582fdbbbc09f1a3615e6ce0",
-          "canvas-element": "7390014e1091044523666d97247392fc",
-          "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
-          "canvas-workpad-template": "ae2673f678281e2c055d764b153e9715",
-          "cases": "477f214ff61acc3af26a7b7818e380c1",
-          "cases-comments": "8a50736330e953bca91747723a319593",
-          "cases-configure": "387c5f3a3bda7e0ae0dd4e106f914a69",
-          "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
-          "config": "c63748b75f39d0c54de12d12c1ccbc20",
-          "core-usage-stats": "3d1b76c39bfb2cc8296b024d73854724",
-          "dashboard": "40554caf09725935e2c02e02563a2d07",
-          "endpoint:user-artifact": "4a11183eee21e6fbad864f7a30b39ad0",
-          "endpoint:user-artifact-manifest": "4b9c0e7cfaf86d82a7ee9ed68065e50d",
-          "enterprise_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724",
-          "epm-packages": "0cbbb16506734d341a96aaed65ec6413",
-          "epm-packages-assets": "44621b2f6052ef966da47b7c3a00f33b",
-          "exception-list": "67f055ab8c10abd7b2ebfd969b836788",
-          "exception-list-agnostic": "67f055ab8c10abd7b2ebfd969b836788",
-          "file-upload-telemetry": "0ed4d3e1983d1217a30982630897092e",
-          "fleet-agent-actions": "9511b565b1cc6441a42033db3d5de8e9",
-          "fleet-agent-events": "e20a508b6e805189356be381dbfac8db",
-          "fleet-agents": "cb661e8ede2b640c42c8e5ef99db0683",
-          "fleet-enrollment-api-keys": "a69ef7ae661dab31561d6c6f052ef2a7",
-          "graph-workspace": "27a94b2edcb0610c6aea54a7c56d7752",
-          "index-pattern": "45915a1ad866812242df474eb0479052",
-          "infrastructure-ui-source": "3d1b76c39bfb2cc8296b024d73854724",
-          "ingest-agent-policies": "8b0733cce189659593659dad8db426f0",
-          "ingest-outputs": "8854f34453a47e26f86a29f8f3b80b4e",
-          "ingest-package-policies": "c91ca97b1ff700f0fc64dc6b13d65a85",
-          "ingest_manager_settings": "02a03095f0e05b7a538fa801b88a217f",
-          "inventory-view": "3d1b76c39bfb2cc8296b024d73854724",
-          "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
-          "lens": "52346cfec69ff7b47d5f0c12361a2797",
-          "lens-ui-telemetry": "509bfa5978586998e05f9e303c07a327",
-          "map": "4a05b35c3a3a58fbc72dd0202dc3487f",
-          "maps-telemetry": "5ef305b18111b77789afefbd36b66171",
-          "metrics-explorer-view": "3d1b76c39bfb2cc8296b024d73854724",
-          "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
-          "ml-job": "3bb64c31915acf93fc724af137a0891b",
-          "ml-telemetry": "257fd1d4b4fdbb9cb4b8a3b27da201e9",
-          "monitoring-telemetry": "2669d5ec15e82391cf58df4294ee9c68",
-          "namespace": "2f4316de49999235636386fe51dc06c1",
-          "namespaces": "2f4316de49999235636386fe51dc06c1",
-          "originId": "2f4316de49999235636386fe51dc06c1",
-          "query": "11aaeb7f5f7fa5bb43f25e18ce26e7d9",
-          "references": "7997cf5a56cc02bdc9c93361bde732b0",
-          "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
-          "search": "43012c7ebc4cb57054e0a490e4b43023",
-          "search-telemetry": "3d1b76c39bfb2cc8296b024d73854724",
-          "siem-detection-engine-rule-actions": "6569b288c169539db10cb262bf79de18",
-          "siem-detection-engine-rule-status": "ae783f41c6937db6b7a2ef5c93a9e9b0",
-          "siem-ui-timeline": "d12c5474364d737d17252acf1dc4585c",
-          "siem-ui-timeline-note": "8874706eedc49059d4cf0f5094559084",
-          "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
-          "space": "c5ca8acafa0beaa4d08d014a97b6bc6b",
-          "spaces-usage-stats": "3d1b76c39bfb2cc8296b024d73854724",
-          "tag": "83d55da58f6530f7055415717ec06474",
-          "telemetry": "36a616f7026dfa617d6655df850fe16d",
-          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
-          "tsvb-validation-telemetry": "3a37ef6c8700ae6fc97d5c7da00e9215",
-          "type": "2f4316de49999235636386fe51dc06c1",
-          "ui-counter": "0d409297dc5ebe1e3a1da691c6ee32e3",
-          "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
-          "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
-          "upgrade-assistant-reindex-operation": "215107c281839ea9b3ad5f6419819763",
-          "upgrade-assistant-telemetry": "56702cec857e0a9dacfb696655b4ff7b",
-          "uptime-dynamic-settings": "3d1b76c39bfb2cc8296b024d73854724",
-          "url": "c7f66a0df8b1b52f17c28c4adb111105",
-          "visualization": "f819cf6636b75c9e76ba733a0c6ef355",
-          "workplace_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724"
-        }
-      },
       "dynamic": "strict",
       "properties": {
         "action": {
@@ -254,27 +169,23 @@
         },
         "apm-indices": {
           "properties": {
-            "apm_oss": {
-              "properties": {
-                "errorIndices": {
-                  "type": "keyword"
-                },
-                "metricsIndices": {
-                  "type": "keyword"
-                },
-                "onboardingIndices": {
-                  "type": "keyword"
-                },
-                "sourcemapIndices": {
-                  "type": "keyword"
-                },
-                "spanIndices": {
-                  "type": "keyword"
-                },
-                "transactionIndices": {
-                  "type": "keyword"
-                }
-              }
+            "error": {
+              "type": "keyword"
+            },
+            "metric": {
+              "type": "keyword"
+            },
+            "onboarding": {
+              "type": "keyword"
+            },
+            "sourcemap": {
+              "type": "keyword"
+            },
+            "span": {
+              "type": "keyword"
+            },
+            "transaction": {
+              "type": "keyword"
             }
           }
         },
@@ -301,43 +212,6 @@
         "application_usage_transactional": {
           "dynamic": "false",
           "type": "object"
-        },
-        "search-session": {
-          "properties": {
-            "appId": {
-              "type": "keyword"
-            },
-            "created": {
-              "type": "date"
-            },
-            "expires": {
-              "type": "date"
-            },
-            "idMapping": {
-              "enabled": false,
-              "type": "object"
-            },
-            "initialState": {
-              "enabled": false,
-              "type": "object"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "restoreState": {
-              "enabled": false,
-              "type": "object"
-            },
-            "sessionId": {
-              "type": "keyword"
-            },
-            "status": {
-              "type": "keyword"
-            },
-            "urlGeneratorId": {
-              "type": "keyword"
-            }
-          }
         },
         "canvas-element": {
           "dynamic": "false",
@@ -513,6 +387,13 @@
                 }
               }
             },
+            "settings": {
+              "properties": {
+                "syncAlerts": {
+                  "type": "boolean"
+                }
+              }
+            },
             "status": {
               "type": "keyword"
             },
@@ -520,6 +401,9 @@
               "type": "keyword"
             },
             "title": {
+              "type": "keyword"
+            },
+            "type": {
               "type": "keyword"
             },
             "updated_at": {
@@ -543,6 +427,9 @@
         "cases-comments": {
           "properties": {
             "alertId": {
+              "type": "keyword"
+            },
+            "associationType": {
               "type": "keyword"
             },
             "comment": {
@@ -647,6 +534,78 @@
                   "type": "keyword"
                 }
               }
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-connector-mappings": {
+          "properties": {
+            "mappings": {
+              "properties": {
+                "action_type": {
+                  "type": "keyword"
+                },
+                "source": {
+                  "type": "keyword"
+                },
+                "target": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-sub-case": {
+          "properties": {
+            "closed_at": {
+              "type": "date"
+            },
+            "closed_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "status": {
+              "type": "keyword"
             },
             "updated_at": {
               "type": "date"
@@ -822,13 +781,22 @@
         },
         "endpoint:user-artifact-manifest": {
           "properties": {
+            "artifacts": {
+              "properties": {
+                "artifactId": {
+                  "index": false,
+                  "type": "keyword"
+                },
+                "policyId": {
+                  "index": false,
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
             "created": {
               "index": false,
               "type": "date"
-            },
-            "ids": {
-              "index": false,
-              "type": "keyword"
             },
             "schemaVersion": {
               "type": "keyword"
@@ -1038,12 +1006,22 @@
               "type": "keyword"
             },
             "name": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
               "type": "keyword"
             },
             "os_types": {
               "type": "keyword"
             },
             "tags": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
               "type": "keyword"
             },
             "tie_breaker_id": {
@@ -1164,12 +1142,22 @@
               "type": "keyword"
             },
             "name": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
               "type": "keyword"
             },
             "os_types": {
               "type": "keyword"
             },
             "tags": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
               "type": "keyword"
             },
             "tie_breaker_id": {
@@ -1186,10 +1174,14 @@
             }
           }
         },
-        "file-upload-telemetry": {
+        "file-upload-usage-collection-telemetry": {
           "properties": {
-            "filesUploadedTotalCount": {
-              "type": "long"
+            "file_upload": {
+              "properties": {
+                "index_creation_count": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -1296,9 +1288,6 @@
             },
             "policy_revision": {
               "type": "integer"
-            },
-            "shared_id": {
-              "type": "keyword"
             },
             "type": {
               "type": "keyword"
@@ -1411,6 +1400,12 @@
               "type": "text"
             },
             "is_default": {
+              "type": "boolean"
+            },
+            "is_default_fleet_server": {
+              "type": "boolean"
+            },
+            "is_managed": {
               "type": "boolean"
             },
             "monitoring_enabled": {
@@ -1607,6 +1602,10 @@
             }
           }
         },
+        "legacy-url-alias": {
+          "dynamic": "false",
+          "type": "object"
+        },
         "lens": {
           "properties": {
             "description": {
@@ -1646,6 +1645,10 @@
         },
         "map": {
           "properties": {
+            "bounds": {
+              "dynamic": "false",
+              "type": "object"
+            },
             "description": {
               "type": "text"
             },
@@ -1674,47 +1677,6 @@
           "dynamic": "false",
           "type": "object"
         },
-        "migrationVersion": {
-          "dynamic": "true",
-          "properties": {
-            "config": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "index-pattern": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "search": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "space": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
-        },
         "ml-job": {
           "properties": {
             "datafeed_id": {
@@ -1735,17 +1697,6 @@
             },
             "type": {
               "type": "keyword"
-            }
-          }
-        },
-        "ml-telemetry": {
-          "properties": {
-            "file_data_visualizer": {
-              "properties": {
-                "index_creation_count": {
-                  "type": "long"
-                }
-              }
             }
           }
         },
@@ -1828,6 +1779,15 @@
             "description": {
               "type": "text"
             },
+            "grid": {
+              "enabled": false,
+              "type": "object"
+            },
+            "hideChart": {
+              "doc_values": false,
+              "index": false,
+              "type": "boolean"
+            },
             "hits": {
               "doc_values": false,
               "index": false,
@@ -1841,6 +1801,9 @@
                 }
               }
             },
+            "pre712": {
+              "type": "boolean"
+            },
             "sort": {
               "doc_values": false,
               "index": false,
@@ -1851,6 +1814,58 @@
             },
             "version": {
               "type": "integer"
+            }
+          }
+        },
+        "search-session": {
+          "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "created": {
+              "type": "date"
+            },
+            "expires": {
+              "type": "date"
+            },
+            "idMapping": {
+              "enabled": false,
+              "type": "object"
+            },
+            "initialState": {
+              "enabled": false,
+              "type": "object"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "persisted": {
+              "type": "boolean"
+            },
+            "realmName": {
+              "type": "keyword"
+            },
+            "realmType": {
+              "type": "keyword"
+            },
+            "restoreState": {
+              "enabled": false,
+              "type": "object"
+            },
+            "sessionId": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "touched": {
+              "type": "date"
+            },
+            "urlGeneratorId": {
+              "type": "keyword"
+            },
+            "username": {
+              "type": "keyword"
             }
           }
         },
@@ -2177,8 +2192,12 @@
               "type": "keyword"
             },
             "sort": {
+              "dynamic": "false",
               "properties": {
                 "columnId": {
+                  "type": "keyword"
+                },
+                "columnType": {
                   "type": "keyword"
                 },
                 "sortDirection": {
@@ -2330,54 +2349,6 @@
             },
             "userHasSeenNotice": {
               "type": "boolean"
-            }
-          }
-        },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "tsvb-validation-telemetry": {
-          "properties": {
-            "failedRequests": {
-              "type": "long"
             }
           }
         },
@@ -2589,7 +2560,9 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "number_of_replicas": "0",
-        "number_of_shards": "1"
+        "number_of_shards": "1",
+        "priority": "10",
+        "refresh_interval": "1s"
       }
     }
   }

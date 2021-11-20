@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { DataPublicPluginSetup } from 'src/plugins/data/public';
@@ -18,15 +19,17 @@ import type {
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
-import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
 import type { MapsStartApi } from '../../../../maps/public';
+import type { DataVisualizerPluginStart } from '../../../../data_visualizer/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
-  indexPatterns: IndexPatternsContract | null;
+  indexPatterns: DataViewsContract | null;
   chrome: ChromeStart | null;
   docLinks: DocLinksStart | null;
   toastNotifications: ToastsStart | null;
@@ -42,6 +45,8 @@ export interface DependencyCache {
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;
   maps: MapsStartApi | null;
+  dataVisualizer: DataVisualizerPluginStart | null;
+  dataViews: DataViewsContract | null;
 }
 
 const cache: DependencyCache = {
@@ -63,6 +68,8 @@ const cache: DependencyCache = {
   i18n: null,
   urlGenerators: null,
   maps: null,
+  dataVisualizer: null,
+  dataViews: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -83,6 +90,8 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
   cache.urlGenerators = deps.urlGenerators || null;
+  cache.dataVisualizer = deps.dataVisualizer || null;
+  cache.dataViews = deps.dataViews || null;
 }
 
 export function getTimefilter() {
@@ -203,8 +212,22 @@ export function getGetUrlGenerator() {
   return cache.urlGenerators.getUrlGenerator;
 }
 
+export function getDataViews() {
+  if (cache.dataViews === null) {
+    throw new Error("dataViews hasn't been initialized");
+  }
+  return cache.dataViews;
+}
+
 export function clearCache() {
   Object.keys(cache).forEach((k) => {
     cache[k as keyof DependencyCache] = null;
   });
+}
+
+export function getFileDataVisualizer() {
+  if (cache.dataVisualizer === null) {
+    throw new Error("dataVisualizer hasn't been initialized");
+  }
+  return cache.dataVisualizer;
 }

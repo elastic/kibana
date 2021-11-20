@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-import { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
+import type { Query } from '@kbn/es-query';
 import { navTabs } from '../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../app/types';
 import { inputsActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
-import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { UrlStateContainerPropTypes, LocationTypes } from './types';
-import { Query } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../../network/store';
 import { hostsModel } from '../../../hosts/store';
 import { HostsTableType } from '../../../hosts/store/model';
@@ -27,13 +25,18 @@ export const getFilterQuery = (): Query => ({
   language: 'kuery',
 });
 
-export const mockSetFilterQuery: jest.Mock = (inputsActions.setFilterQuery as unknown) as jest.Mock;
-export const mockAddGlobalLinkTo: jest.Mock = (inputsActions.addGlobalLinkTo as unknown) as jest.Mock;
-export const mockAddTimelineLinkTo: jest.Mock = (inputsActions.addTimelineLinkTo as unknown) as jest.Mock;
-export const mockRemoveGlobalLinkTo: jest.Mock = (inputsActions.removeGlobalLinkTo as unknown) as jest.Mock;
-export const mockRemoveTimelineLinkTo: jest.Mock = (inputsActions.removeTimelineLinkTo as unknown) as jest.Mock;
-export const mockSetAbsoluteRangeDatePicker: jest.Mock = (inputsActions.setAbsoluteRangeDatePicker as unknown) as jest.Mock;
-export const mockSetRelativeRangeDatePicker: jest.Mock = (inputsActions.setRelativeRangeDatePicker as unknown) as jest.Mock;
+export const mockSetFilterQuery: jest.Mock = inputsActions.setFilterQuery as unknown as jest.Mock;
+export const mockAddGlobalLinkTo: jest.Mock = inputsActions.addGlobalLinkTo as unknown as jest.Mock;
+export const mockAddTimelineLinkTo: jest.Mock =
+  inputsActions.addTimelineLinkTo as unknown as jest.Mock;
+export const mockRemoveGlobalLinkTo: jest.Mock =
+  inputsActions.removeGlobalLinkTo as unknown as jest.Mock;
+export const mockRemoveTimelineLinkTo: jest.Mock =
+  inputsActions.removeTimelineLinkTo as unknown as jest.Mock;
+export const mockSetAbsoluteRangeDatePicker: jest.Mock =
+  inputsActions.setAbsoluteRangeDatePicker as unknown as jest.Mock;
+export const mockSetRelativeRangeDatePicker: jest.Mock =
+  inputsActions.setRelativeRangeDatePicker as unknown as jest.Mock;
 
 jest.mock('../../store/actions', () => ({
   inputsActions: {
@@ -81,9 +84,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
   indexPattern: {
     fields: [
       {
-        aggregatable: true,
         name: '@timestamp',
-        searchable: true,
         type: 'date',
       },
     ],
@@ -121,12 +122,6 @@ export const defaultProps: UrlStateContainerPropTypes = {
     },
     [CONSTANTS.sourcerer]: {},
   },
-  setInitialStateFromUrl: dispatchSetInitialStateFromUrl(mockDispatch),
-  updateTimeline: (jest.fn() as unknown) as DispatchUpdateTimeline,
-  updateTimelineIsLoading: (jest.fn() as unknown) as ActionCreator<{
-    id: string;
-    isLoading: boolean;
-  }>,
   history: {
     ...mockHistory,
     location: defaultLocation,
@@ -163,13 +158,7 @@ interface GetMockPropsObj {
   detailName: string | undefined;
 }
 
-export const getMockPropsObj = ({
-  page,
-  examplePath,
-  namespaceLower,
-  pageName,
-  detailName,
-}: GetMockPropsObj) => ({
+export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: GetMockPropsObj) => ({
   noSearch: {
     undefinedQuery: getMockProps(
       {

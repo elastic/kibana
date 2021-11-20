@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
 import { WithAppDependencies } from './setup_environment';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: ['/add_policy'],
     componentRoutePath: '/add_policy',
@@ -22,10 +24,56 @@ const initTestBed = registerTestBed<RestoreSnapshotFormTestSubject>(
 );
 
 const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
-  const { find } = testBed;
+  const { find, component, form, exists } = testBed;
+
   return {
     findDataStreamCallout() {
       return find('dataStreamWarningCallOut');
+    },
+
+    canGoToADifferentStep() {
+      const canGoNext = find('restoreSnapshotsForm.nextButton').props().disabled !== true;
+      const canGoPrevious = exists('restoreSnapshotsForm.backButton')
+        ? find('restoreSnapshotsForm.nextButton').props().disabled !== true
+        : true;
+      return canGoNext && canGoPrevious;
+    },
+
+    toggleModifyIndexSettings() {
+      act(() => {
+        form.toggleEuiSwitch('modifyIndexSettingsSwitch');
+      });
+      component.update();
+    },
+
+    toggleGlobalState() {
+      act(() => {
+        form.toggleEuiSwitch('includeGlobalStateSwitch');
+      });
+
+      component.update();
+    },
+
+    toggleIncludeAliases() {
+      act(() => {
+        form.toggleEuiSwitch('includeAliasesSwitch');
+      });
+
+      component.update();
+    },
+
+    goToStep(step: number) {
+      while (--step > 0) {
+        find('nextButton').simulate('click');
+      }
+      component.update();
+    },
+
+    async clickRestore() {
+      await act(async () => {
+        find('restoreButton').simulate('click');
+      });
+      component.update();
     },
   };
 };
@@ -47,4 +95,12 @@ export const setup = async (): Promise<RestoreSnapshotTestBed> => {
 
 export type RestoreSnapshotFormTestSubject =
   | 'snapshotRestoreStepLogistics'
-  | 'dataStreamWarningCallOut';
+  | 'includeGlobalStateSwitch'
+  | 'includeAliasesSwitch'
+  | 'nextButton'
+  | 'restoreButton'
+  | 'systemIndicesInfoCallOut'
+  | 'dataStreamWarningCallOut'
+  | 'restoreSnapshotsForm.backButton'
+  | 'restoreSnapshotsForm.nextButton'
+  | 'modifyIndexSettingsSwitch';

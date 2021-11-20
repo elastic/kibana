@@ -1,4 +1,23 @@
+@import '../mixins';
+
 .lnsFieldItem {
+  width: 100%;
+
+  &.kbnFieldButton {
+    &:focus-within,
+    &-isActive {
+      @include removeEuiFocusRing;
+    }
+  }
+
+  .kbnFieldButton__button:focus {
+    @include passDownFocusRing('.kbnFieldButton__name > span');
+
+    .kbnFieldButton__name > span {
+      text-decoration: underline;
+    }
+  }
+
   .lnsFieldItem__infoIcon {
     visibility: hidden;
     opacity: 0;
@@ -13,6 +32,17 @@
       transition: opacity $euiAnimSpeedFast ease-in-out 1s;
     }
   }
+}
+
+.kbnFieldButton.lnsDragDrop_ghost {
+  .lnsFieldItem__infoIcon {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+.kbnFieldButton__name {
+  transition: background-color $euiAnimSpeedFast ease-in-out;
 }
 
 .lnsFieldItem--missing {

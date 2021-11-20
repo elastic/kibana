@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import uuid from 'uuid';
+import deepEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
 import { createStateContainer, StateContainer } from '../../../../kibana_utils/public';
+import { SearchSessionSavedObject } from './sessions_client';
 
 /**
  * Possible state that current session can be in
@@ -69,9 +71,19 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
   sessionId?: string;
 
   /**
+   * App that created this session
+   */
+  appName?: string;
+
+  /**
    * Has the session already been stored (i.e. "sent to background")?
    */
   isStored: boolean;
+
+  /**
+   * Saved object of a current search session
+   */
+  searchSessionSavedObject?: SearchSessionSavedObject;
 
   /**
    * Is this session a restored session (have these requests already been made, and we're just
@@ -96,15 +108,26 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
   isCanceled: boolean;
 
   /**
-   * Start time of current session
+   * Start time of the current session (from browser perspective)
    */
   startTime?: Date;
+
+  /**
+   * Time when all the searches from the current session are completed (from browser perspective)
+   */
+  completedTime?: Date;
+
+  /**
+   * Time when the session was canceled by user, by hitting "stop"
+   */
+  canceledTime?: Date;
 }
 
 const createSessionDefaultState: <
   SearchDescriptor = unknown
 >() => SessionStateInternal<SearchDescriptor> = () => ({
   sessionId: undefined,
+  appName: undefined,
   isStored: false,
   isRestore: false,
   isCanceled: false,
@@ -116,21 +139,27 @@ export interface SessionPureTransitions<
   SearchDescriptor = unknown,
   S = SessionStateInternal<SearchDescriptor>
 > {
-  start: (state: S) => () => S;
+  start: (state: S) => ({ appName }: { appName: string }) => S;
   restore: (state: S) => (sessionId: string) => S;
   clear: (state: S) => () => S;
-  store: (state: S) => () => S;
+  store: (state: S) => (searchSessionSavedObject: SearchSessionSavedObject) => S;
   trackSearch: (state: S) => (search: SearchDescriptor) => S;
   unTrackSearch: (state: S) => (search: SearchDescriptor) => S;
   cancel: (state: S) => () => S;
+  setSearchSessionSavedObject: (
+    state: S
+  ) => (searchSessionSavedObject: SearchSessionSavedObject) => S;
 }
 
 export const sessionPureTransitions: SessionPureTransitions = {
-  start: (state) => () => ({
-    ...createSessionDefaultState(),
-    sessionId: uuid.v4(),
-    startTime: new Date(),
-  }),
+  start:
+    (state) =>
+    ({ appName }) => ({
+      ...createSessionDefaultState(),
+      sessionId: uuid.v4(),
+      startTime: new Date(),
+      appName,
+    }),
   restore: (state) => (sessionId: string) => ({
     ...createSessionDefaultState(),
     sessionId,
@@ -138,13 +167,14 @@ export const sessionPureTransitions: SessionPureTransitions = {
     isStored: true,
   }),
   clear: (state) => () => createSessionDefaultState(),
-  store: (state) => () => {
+  store: (state) => (searchSessionSavedObject: SearchSessionSavedObject) => {
     if (!state.sessionId) throw new Error("Can't store session. Missing sessionId");
     if (state.isStored || state.isRestore)
       throw new Error('Can\'t store because current session is already stored"');
     return {
       ...state,
       isStored: true,
+      searchSessionSavedObject,
     };
   },
   trackSearch: (state) => (search) => {
@@ -153,12 +183,15 @@ export const sessionPureTransitions: SessionPureTransitions = {
       ...state,
       isStarted: true,
       pendingSearches: state.pendingSearches.concat(search),
+      completedTime: undefined,
     };
   },
   unTrackSearch: (state) => (search) => {
+    const pendingSearches = state.pendingSearches.filter((s) => s !== search);
     return {
       ...state,
-      pendingSearches: state.pendingSearches.filter((s) => s !== search),
+      pendingSearches,
+      completedTime: pendingSearches.length === 0 ? new Date() : state.completedTime,
     };
   },
   cancel: (state) => () => {
@@ -168,16 +201,45 @@ export const sessionPureTransitions: SessionPureTransitions = {
       ...state,
       pendingSearches: [],
       isCanceled: true,
+      canceledTime: new Date(),
       isStored: false,
+      searchSessionSavedObject: undefined,
+    };
+  },
+  setSearchSessionSavedObject: (state) => (searchSessionSavedObject: SearchSessionSavedObject) => {
+    if (!state.sessionId)
+      throw new Error(
+        "Can't add search session saved object session into the state. Missing sessionId"
+      );
+    if (state.sessionId !== searchSessionSavedObject.attributes.sessionId)
+      throw new Error(
+        "Can't add search session saved object session into the state. SessionIds don't match."
+      );
+    return {
+      ...state,
+      searchSessionSavedObject,
     };
   },
 };
+
+/**
+ * Consolidate meta info about current seach session
+ * Contains both deferred properties and plain properties from state
+ */
+export interface SessionMeta {
+  state: SearchSessionState;
+  name?: string;
+  startTime?: Date;
+  canceledTime?: Date;
+  completedTime?: Date;
+}
 
 export interface SessionPureSelectors<
   SearchDescriptor = unknown,
   S = SessionStateInternal<SearchDescriptor>
 > {
   getState: (state: S) => () => SearchSessionState;
+  getMeta: (state: S) => () => SessionMeta;
 }
 
 export const sessionPureSelectors: SessionPureSelectors = {
@@ -201,6 +263,21 @@ export const sessionPureSelectors: SessionPureSelectors = {
     }
     return SearchSessionState.None;
   },
+  getMeta(state) {
+    const sessionState = this.getState(state)();
+
+    return () => ({
+      state: sessionState,
+      name: state.searchSessionSavedObject?.attributes.name,
+      startTime: state.searchSessionSavedObject?.attributes.created
+        ? new Date(state.searchSessionSavedObject?.attributes.created)
+        : state.startTime,
+      completedTime: state.searchSessionSavedObject?.attributes.completed
+        ? new Date(state.searchSessionSavedObject?.attributes.completed)
+        : state.completedTime,
+      canceledTime: state.canceledTime,
+    });
+  },
 };
 
 export type SessionStateContainer<SearchDescriptor = unknown> = StateContainer<
@@ -214,7 +291,7 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
 ): {
   stateContainer: SessionStateContainer<SearchDescriptor>;
   sessionState$: Observable<SearchSessionState>;
-  sessionStartTime$: Observable<Date | undefined>;
+  sessionMeta$: Observable<SessionMeta>;
 } => {
   const stateContainer = createStateContainer(
     createSessionDefaultState(),
@@ -223,21 +300,20 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
     freeze ? undefined : { freeze: (s) => s }
   ) as SessionStateContainer<SearchDescriptor>;
 
-  const sessionState$: Observable<SearchSessionState> = stateContainer.state$.pipe(
-    map(() => stateContainer.selectors.getState()),
-    distinctUntilChanged(),
+  const sessionMeta$: Observable<SessionMeta> = stateContainer.state$.pipe(
+    map(() => stateContainer.selectors.getMeta()),
+    distinctUntilChanged(deepEqual),
     shareReplay(1)
   );
 
-  const sessionStartTime$: Observable<Date | undefined> = stateContainer.state$.pipe(
-    map(() => stateContainer.get().startTime),
-    distinctUntilChanged(),
-    shareReplay(1)
+  const sessionState$: Observable<SearchSessionState> = sessionMeta$.pipe(
+    map((meta) => meta.state),
+    distinctUntilChanged()
   );
 
   return {
     stateContainer,
     sessionState$,
-    sessionStartTime$,
+    sessionMeta$,
   };
 };

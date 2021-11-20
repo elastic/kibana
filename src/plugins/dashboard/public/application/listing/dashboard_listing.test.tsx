@@ -1,74 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import React from 'react';
 import { mount } from 'enzyme';
-import {
-  IUiSettingsClient,
-  PluginInitializerContext,
-  ScopedHistory,
-  SimpleSavedObject,
-} from '../../../../../core/public';
+import { I18nProvider } from '@kbn/i18n/react';
 
-import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
-import { IndexPatternsContract, SavedQueryService } from '../../services/data';
-import { NavigationPublicPluginStart } from '../../services/navigation';
+import { DashboardAppServices } from '../../types';
+import { SimpleSavedObject } from '../../../../../core/public';
 import { KibanaContextProvider } from '../../services/kibana_react';
 import { createKbnUrlStateStorage } from '../../services/kibana_utils';
-
-import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
-import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
-import { DashboardAppServices, DashboardCapabilities } from '../types';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
-import { I18nProvider } from '@kbn/i18n/react';
-import React from 'react';
-import { UrlForwardingStart } from '../../../../url_forwarding/public';
-
-function makeDefaultServices(): DashboardAppServices {
-  const core = coreMock.createStart();
-  const savedDashboards = {} as SavedObjectLoader;
-  savedDashboards.find = (search: string, sizeOrOptions: number | SavedObjectLoaderFindOptions) => {
-    const size = typeof sizeOrOptions === 'number' ? sizeOrOptions : sizeOrOptions.size ?? 10;
-    const hits = [];
-    for (let i = 0; i < size; i++) {
-      hits.push({
-        id: `dashboard${i}`,
-        title: `dashboard${i} - ${search} - title`,
-        description: `dashboard${i} desc`,
-      });
-    }
-    return Promise.resolve({
-      total: size,
-      hits,
-    });
-  };
-  return {
-    savedObjects: savedObjectsPluginMock.createStartContract(),
-    embeddable: embeddablePluginMock.createInstance().doStart(),
-    dashboardCapabilities: {} as DashboardCapabilities,
-    initializerContext: {} as PluginInitializerContext,
-    chrome: chromeServiceMock.createStartContract(),
-    navigation: {} as NavigationPublicPluginStart,
-    savedObjectsClient: core.savedObjects.client,
-    data: dataPluginMock.createStartContract(),
-    indexPatterns: {} as IndexPatternsContract,
-    scopedHistory: () => ({} as ScopedHistory),
-    savedQueryService: {} as SavedQueryService,
-    setHeaderActionMenu: (mountPoint) => {},
-    urlForwarding: {} as UrlForwardingStart,
-    uiSettings: {} as IUiSettingsClient,
-    restorePreviousUrl: () => {},
-    onAppLeave: (handler) => {},
-    savedDashboards,
-    core,
-  };
-}
+import { makeDefaultServices } from '../test_helpers';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 
 function makeDefaultProps(): DashboardListingProps {
   return {
@@ -117,6 +65,25 @@ describe('after fetch', () => {
         hits: [],
       });
     };
+    const { component } = mountWith({ services });
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  test('renders call to action with continue when no dashboards exist but one is in progress', async () => {
+    const services = makeDefaultServices();
+    services.savedDashboards.find = () => {
+      return Promise.resolve({
+        total: 0,
+        hits: [],
+      });
+    };
+    services.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = () => [
+      DASHBOARD_PANELS_UNSAVED_ID,
+    ];
     const { component } = mountWith({ services });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -186,9 +153,9 @@ describe('after fetch', () => {
     });
   });
 
-  test('hideWriteControls', async () => {
+  test('showWriteControls', async () => {
     const services = makeDefaultServices();
-    services.dashboardCapabilities.hideWriteControls = true;
+    services.dashboardCapabilities.showWriteControls = false;
     const { component } = mountWith({ services });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

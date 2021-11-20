@@ -6,7 +6,10 @@
         "names" : [
           ".siem-signals*",
           ".lists*",
-          ".items*"
+          ".items*",
+          "metrics-endpoint.metadata_current_*",
+          ".fleet-agents*",
+          ".fleet-actions*"
         ],
         "privileges" : ["read"]
       },
@@ -22,10 +25,12 @@
     {
       "feature": {
         "ml": ["read"],
-        "siem": ["read"],
+        "siem": ["read", "read_alerts"],
+        "securitySolutionCases": ["read"],
+        "indexPatterns": ["read"],
+        "savedObjectsManagement": ["read"],
         "actions": ["read"],
-        "builtInAlerts": ["read"],
-        "savedObjectsManagement": ["read"]
+        "builtInAlerts": ["read"]
       },
       "spaces": ["*"]
     }

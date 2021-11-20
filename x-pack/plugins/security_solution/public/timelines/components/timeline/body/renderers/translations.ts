@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,6 +14,13 @@ export const TCP = i18n.translate('xpack.securitySolution.timeline.tcp', {
 export const DESTINATION = i18n.translate('xpack.securitySolution.timeline.destination', {
   defaultMessage: 'Destination',
 });
+
+export const FROM_ITS_ORIGINAL_PATH = i18n.translate(
+  'xpack.securitySolution.timeline.file.fromOriginalPathDescription',
+  {
+    defaultMessage: 'from its original path',
+  }
+);
 
 export const PROTOCOL = i18n.translate('xpack.securitySolution.timeline.protocol', {
   defaultMessage: 'Protocol',
@@ -36,3 +44,16 @@ export const LINK_ELASTIC_ENDPOINT_SECURITY = i18n.translate(
     defaultMessage: 'Open in Endpoint Security',
   }
 );
+
+export const EMPTY_STATUS = i18n.translate(
+  'xpack.securitySolution.hostIsolation.agentStatuses.empty',
+  {
+    defaultMessage: '-',
+  }
+);
+
+export const REASON_RENDERER_TITLE = (eventRendererName: string) =>
+  i18n.translate('xpack.securitySolution.event.reason.reasonRendererTitle', {
+    values: { eventRendererName },
+    defaultMessage: 'Event renderer: {eventRendererName} ',
+  });

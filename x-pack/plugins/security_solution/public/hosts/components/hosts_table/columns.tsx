@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
@@ -23,13 +24,14 @@ import {
 import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
+import { Maybe } from '../../../../common/search_strategy';
 
 export const getHostsColumns = (): HostsTableColumns => [
   {
     field: 'node.host.name',
     name: i18n.NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
@@ -73,11 +75,15 @@ export const getHostsColumns = (): HostsTableColumns => [
       </EuiToolTip>
     ),
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
-    render: (lastSeen) => {
-      if (lastSeen != null) {
-        return <FormattedRelativePreferenceDate value={lastSeen} />;
+    render: (lastSeen: Maybe<string | string[]> | undefined) => {
+      if (lastSeen != null && lastSeen.length > 0) {
+        return (
+          <FormattedRelativePreferenceDate
+            value={Array.isArray(lastSeen) ? lastSeen[0] : lastSeen}
+          />
+        );
       }
       return getEmptyTagValue();
     },
@@ -86,7 +92,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     field: 'node.host.os.name',
     name: i18n.OS,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (hostOsName) => {
       if (hostOsName != null) {
@@ -103,7 +109,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     field: 'node.host.os.version',
     name: i18n.VERSION,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (hostOsVersion) => {
       if (hostOsVersion != null) {

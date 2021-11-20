@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,6 +13,7 @@ import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 import { ViewMode } from '../../../../types';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 import { IContainer } from '../../../../containers';
+import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
 
 export const ACTION_ADD_PANEL = 'ACTION_ADD_PANEL';
 
@@ -29,7 +30,8 @@ export class AddPanelAction implements Action<ActionContext> {
     private readonly getAllFactories: EmbeddableStart['getEmbeddableFactories'],
     private readonly overlays: OverlayStart,
     private readonly notifications: NotificationsStart,
-    private readonly SavedObjectFinder: React.ComponentType<any>
+    private readonly SavedObjectFinder: React.ComponentType<any>,
+    private readonly reportUiCounter?: UsageCollectionStart['reportUiCounter']
   ) {}
 
   public getDisplayName() {
@@ -60,6 +62,7 @@ export class AddPanelAction implements Action<ActionContext> {
       overlays: this.overlays,
       notifications: this.notifications,
       SavedObjectFinder: this.SavedObjectFinder,
+      reportUiCounter: this.reportUiCounter,
     });
   }
 }

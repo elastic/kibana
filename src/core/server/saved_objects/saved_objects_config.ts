@@ -1,35 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { ServiceConfigDescriptor } from '../internal_types';
 
-export type SavedObjectsMigrationConfigType = TypeOf<typeof savedObjectsMigrationConfig.schema>;
+const migrationSchema = schema.object({
+  batchSize: schema.number({ defaultValue: 1_000 }),
+  maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
+  scrollDuration: schema.string({ defaultValue: '15m' }),
+  pollInterval: schema.number({ defaultValue: 1_500 }),
+  skip: schema.boolean({ defaultValue: false }),
+  retryAttempts: schema.number({ defaultValue: 15 }),
+});
 
-export const savedObjectsMigrationConfig = {
-  path: 'migrations',
-  schema: schema.object({
-    batchSize: schema.number({ defaultValue: 100 }),
-    scrollDuration: schema.string({ defaultValue: '15m' }),
-    pollInterval: schema.number({ defaultValue: 1500 }),
-    skip: schema.boolean({ defaultValue: false }),
-    // TODO migrationsV2: remove/deprecate once we release migrations v2
-    enableV2: schema.boolean({ defaultValue: true }),
-  }),
-};
+export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
 
-export type SavedObjectsConfigType = TypeOf<typeof savedObjectsConfig.schema>;
+export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> =
+  {
+    path: 'migrations',
+    schema: migrationSchema,
+  };
 
-export const savedObjectsConfig = {
+const soSchema = schema.object({
+  maxImportPayloadBytes: schema.byteSize({ defaultValue: 26_214_400 }),
+  maxImportExportSize: schema.number({ defaultValue: 10_000 }),
+});
+
+export type SavedObjectsConfigType = TypeOf<typeof soSchema>;
+
+export const savedObjectsConfig: ServiceConfigDescriptor<SavedObjectsConfigType> = {
   path: 'savedObjects',
-  schema: schema.object({
-    maxImportPayloadBytes: schema.byteSize({ defaultValue: 26214400 }),
-    maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
-  }),
+  schema: soSchema,
 };
 
 export class SavedObjectConfig {
@@ -43,7 +49,7 @@ export class SavedObjectConfig {
     rawMigrationConfig: SavedObjectsMigrationConfigType
   ) {
     this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
-    this.maxImportExportSize = rawConfig.maxImportExportSize.getValueInBytes();
+    this.maxImportExportSize = rawConfig.maxImportExportSize;
     this.migration = rawMigrationConfig;
   }
 }

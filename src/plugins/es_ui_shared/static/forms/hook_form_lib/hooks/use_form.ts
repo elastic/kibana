@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
@@ -18,15 +18,22 @@ const DEFAULT_OPTIONS = {
   stripEmptyFields: true,
 };
 
-interface UseFormReturn<T extends FormData, I extends FormData> {
+export interface UseFormReturn<T extends FormData, I extends FormData> {
   form: FormHook<T, I>;
 }
 
 export function useForm<T extends FormData = FormData, I extends FormData = T>(
   formConfig?: FormConfig<T, I>
 ): UseFormReturn<T, I> {
-  const { onSubmit, schema, serializer, deserializer, options, id = 'default', defaultValue } =
-    formConfig ?? {};
+  const {
+    onSubmit,
+    schema,
+    serializer,
+    deserializer,
+    options,
+    id = 'default',
+    defaultValue,
+  } = formConfig ?? {};
 
   const initDefaultValue = useCallback(
     (_defaultValue?: Partial<T>): { [key: string]: any } => {
@@ -59,11 +66,26 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
+  const [errorMessages, setErrorMessages] = useState<{ [fieldName: string]: string }>({});
 
   const fieldsRefs = useRef<FieldsMap>({});
+  const fieldsRemovedRefs = useRef<FieldsMap>({});
   const formUpdateSubscribers = useRef<Subscription[]>([]);
   const isMounted = useRef<boolean>(false);
   const defaultValueDeserialized = useRef(defaultValueMemoized);
+
+  /**
+   * We have both a state and a ref for the error messages so the consumer can, in the same callback,
+   * validate the form **and** have the errors returned immediately.
+   *
+   * ```
+   * const myHandler = useCallback(async () => {
+   *   const isFormValid = await validate();
+   *   const errors = getErrors(); // errors from the validate() call are there
+   * }, [validate, getErrors]);
+   * ```
+   */
+  const errorMessagesRef = useRef<{ [fieldName: string]: string }>({});
 
   // formData$ is an observable we can subscribe to in order to receive live
   // update of the raw form data. As an observable it does not trigger any React
@@ -88,6 +110,34 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     },
     [getFormData$]
   );
+
+  const updateFieldErrorMessage = useCallback((path: string, errorMessage: string | null) => {
+    setErrorMessages((prev) => {
+      const previousMessageValue = prev[path];
+
+      if (
+        errorMessage === previousMessageValue ||
+        (previousMessageValue === undefined && errorMessage === null)
+      ) {
+        // Don't update the state, the error message has not changed.
+        return prev;
+      }
+
+      if (errorMessage === null) {
+        // We strip out previous error message
+        const { [path]: discard, ...next } = prev;
+        errorMessagesRef.current = next;
+        return next;
+      }
+
+      const next = {
+        ...prev,
+        [path]: errorMessage,
+      };
+      errorMessagesRef.current = next;
+      return next;
+    });
+  }, []);
 
   const fieldsToArray = useCallback<() => FieldHook[]>(() => Object.values(fieldsRefs.current), []);
 
@@ -150,22 +200,22 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     });
   }, [fieldsToArray]);
 
-  const validateFields: FormHook<T, I>['__validateFields'] = useCallback(
-    async (fieldNames) => {
+  const validateFields: FormHook<T, I>['validateFields'] = useCallback(
+    async (fieldNames, onlyBlocking = false) => {
       const fieldsToValidate = fieldNames
         .map((name) => fieldsRefs.current[name])
         .filter((field) => field !== undefined);
 
       const formData = getFormData$().value;
       const validationResult = await Promise.all(
-        fieldsToValidate.map((field) => field.validate({ formData }))
+        fieldsToValidate.map((field) => field.validate({ formData, onlyBlocking }))
       );
 
       if (isMounted.current === false) {
         return { areFieldsValid: true, isFormValid: true };
       }
 
-      const areFieldsValid = validationResult.every(Boolean);
+      const areFieldsValid = validationResult.every((res) => res.isValid);
 
       const validationResultByPath = fieldsToValidate.reduce((acc, field, i) => {
         acc[field.path] = validationResult[i].isValid;
@@ -211,11 +261,14 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   // ----------------------------------
   const addField: FormHook<T, I>['__addField'] = useCallback(
     (field) => {
+      const fieldExists = fieldsRefs.current[field.path] !== undefined;
       fieldsRefs.current[field.path] = field;
+      delete fieldsRemovedRefs.current[field.path];
 
       updateFormDataAt(field.path, field.value);
+      updateFieldErrorMessage(field.path, field.getErrorsMessages());
 
-      if (!field.isValidated) {
+      if (!fieldExists && !field.isValidated) {
         setIsValid(undefined);
 
         // When we submit the form (and set "isSubmitted" to "true"), we validate **all fields**.
@@ -225,7 +278,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         setIsSubmitted(false);
       }
     },
-    [updateFormDataAt]
+    [updateFormDataAt, updateFieldErrorMessage]
   );
 
   const removeField: FormHook<T, I>['__removeField'] = useCallback(
@@ -234,6 +287,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       const currentFormData = { ...getFormData$().value };
 
       fieldNames.forEach((name) => {
+        // Keep a track of the fields that have been removed from the form
+        // This will allow us to know if the form has been modified
+        fieldsRemovedRefs.current[name] = fieldsRefs.current[name];
+        updateFieldErrorMessage(name, null);
         delete fieldsRefs.current[name];
         delete currentFormData[name];
       });
@@ -253,11 +310,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         return prev;
       });
     },
-    [getFormData$, updateFormData$, fieldsToArray]
+    [getFormData$, updateFormData$, fieldsToArray, updateFieldErrorMessage]
   );
 
-  const getFieldDefaultValue: FormHook<T, I>['__getFieldDefaultValue'] = useCallback(
-    (fieldName) => get(defaultValueDeserialized.current, fieldName),
+  const getFormDefaultValue: FormHook<T, I>['__getFormDefaultValue'] = useCallback(
+    () => defaultValueDeserialized.current,
     []
   );
 
@@ -268,6 +325,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       return config;
     },
     [schema]
+  );
+
+  const getFieldsRemoved: FormHook<T, I>['getFields'] = useCallback(
+    () => fieldsRemovedRefs.current,
+    []
   );
 
   // ----------------------------------
@@ -287,15 +349,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     if (isValid === true) {
       return [];
     }
-
-    return fieldsToArray().reduce((acc, field) => {
-      const fieldError = field.getErrorsMessages();
-      if (fieldError === null) {
-        return acc;
-      }
-      return [...acc, fieldError];
-    }, [] as string[]);
-  }, [isValid, fieldsToArray]);
+    return Object.values({ ...errorMessages, ...errorMessagesRef.current });
+  }, [isValid, errorMessages]);
 
   const validate: FormHook<T, I>['validate'] = useCallback(async (): Promise<boolean> => {
     // Maybe some field are being validated because of their async validation(s).
@@ -314,7 +369,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     if (fieldsToValidate.length === 0) {
       isFormValid = fieldsArray.every(isFieldValid);
     } else {
-      ({ isFormValid } = await validateFields(fieldsToValidate.map((field) => field.path)));
+      const fieldPathsToValidate = fieldsToValidate.map((field) => field.path);
+      ({ isFormValid } = await validateFields(fieldPathsToValidate, true));
     }
 
     setIsValid(isFormValid);
@@ -336,6 +392,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   }, []);
 
   const getFields: FormHook<T, I>['getFields'] = useCallback(() => fieldsRefs.current, []);
+
+  const getFieldDefaultValue: FormHook<T, I>['getFieldDefaultValue'] = useCallback(
+    (fieldName) => get(defaultValueDeserialized.current, fieldName),
+    []
+  );
 
   const submit: FormHook<T, I>['submit'] = useCallback(
     async (e) => {
@@ -429,18 +490,20 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       setFieldValue,
       setFieldErrors,
       getFields,
+      getFieldDefaultValue,
       getFormData,
       getErrors,
       reset,
+      validateFields,
       __options: formOptions,
       __getFormData$: getFormData$,
       __updateFormDataAt: updateFormDataAt,
       __updateDefaultValueAt: updateDefaultValueAt,
       __readFieldConfigFromSchema: readFieldConfigFromSchema,
-      __getFieldDefaultValue: getFieldDefaultValue,
+      __getFormDefaultValue: getFormDefaultValue,
       __addField: addField,
       __removeField: removeField,
-      __validateFields: validateFields,
+      __getFieldsRemoved: getFieldsRemoved,
     };
   }, [
     isSubmitted,
@@ -452,8 +515,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     setFieldValue,
     setFieldErrors,
     getFields,
+    getFieldsRemoved,
     getFormData,
     getErrors,
+    getFormDefaultValue,
     getFieldDefaultValue,
     reset,
     formOptions,

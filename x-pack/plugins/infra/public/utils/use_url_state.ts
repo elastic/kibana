@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { parse, stringify } from 'query-string';
@@ -37,15 +38,13 @@ export const useUrlState = <State>({
     return getParamFromQueryString(queryString, urlStateKey);
   }, [queryString, urlStateKey]);
 
-  const decodedState = useMemo(() => decodeUrlState(decodeRisonUrlState(urlStateString)), [
-    decodeUrlState,
-    urlStateString,
-  ]);
+  const decodedState = useMemo(() => {
+    return decodeUrlState(decodeRisonUrlState(urlStateString));
+  }, [decodeUrlState, urlStateString]);
 
-  const state = useMemo(() => (typeof decodedState !== 'undefined' ? decodedState : defaultState), [
-    defaultState,
-    decodedState,
-  ]);
+  const state = useMemo(() => {
+    return typeof decodedState !== 'undefined' ? decodedState : defaultState;
+  }, [defaultState, decodedState]);
 
   const setState = useCallback(
     (newState: State | undefined) => {
@@ -106,21 +105,20 @@ const getParamFromQueryString = (queryString: string, key: string) => {
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
-export const replaceStateKeyInQueryString = <UrlState extends any>(
-  stateKey: string,
-  urlState: UrlState | undefined
-) => (queryString: string) => {
-  const previousQueryValues = parse(queryString, { sort: false });
-  const newValue =
-    typeof urlState === 'undefined'
-      ? previousQueryValues
-      : {
-          ...previousQueryValues,
-          [stateKey]: encodeRisonUrlState(urlState),
-        };
+export const replaceStateKeyInQueryString =
+  <UrlState extends any>(stateKey: string, urlState: UrlState | undefined) =>
+  (queryString: string) => {
+    const previousQueryValues = parse(queryString, { sort: false });
+    const newValue =
+      typeof urlState === 'undefined'
+        ? previousQueryValues
+        : {
+            ...previousQueryValues,
+            [stateKey]: encodeRisonUrlState(urlState),
+          };
 
-  return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
-};
+    return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
+  };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {
   if (queryString === getQueryStringFromLocation(location)) {

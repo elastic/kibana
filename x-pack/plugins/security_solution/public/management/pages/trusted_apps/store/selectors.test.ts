@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -92,6 +93,9 @@ describe('selectors', () => {
         page_index: 0,
         page_size: 10,
         view_type: 'grid',
+        filter: '',
+        included_policies: '',
+        excluded_policies: '',
       };
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true, location })).toBe(
@@ -173,6 +177,9 @@ describe('selectors', () => {
         page_index: 3,
         page_size: 10,
         view_type: 'grid',
+        filter: '',
+        included_policies: '',
+        excluded_policies: '',
       };
 
       expect(getCurrentLocationPageIndex({ ...initialState, location })).toBe(3);
@@ -185,6 +192,9 @@ describe('selectors', () => {
         page_index: 0,
         page_size: 20,
         view_type: 'grid',
+        filter: '',
+        included_policies: '',
+        excluded_policies: '',
       };
 
       expect(getCurrentLocationPageSize({ ...initialState, location })).toBe(20);

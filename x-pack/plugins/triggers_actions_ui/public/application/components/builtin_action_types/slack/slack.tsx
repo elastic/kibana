@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -29,61 +31,35 @@ export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackAct
         defaultMessage: 'Send to Slack',
       }
     ),
-    validateConnector: (
+    validateConnector: async (
       action: SlackActionConnector
-    ): ConnectorValidationResult<unknown, SlackSecrets> => {
+    ): Promise<ConnectorValidationResult<unknown, SlackSecrets>> => {
+      const translations = await import('./translations');
       const secretsErrors = {
         webhookUrl: new Array<string>(),
       };
       const validationResult = { config: { errors: {} }, secrets: { errors: secretsErrors } };
       if (!action.secrets.webhookUrl) {
-        secretsErrors.webhookUrl.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.requiredWebhookUrlText',
-            {
-              defaultMessage: 'Webhook URL is required.',
-            }
-          )
-        );
+        secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_REQUIRED);
       } else if (action.secrets.webhookUrl) {
         if (!isValidUrl(action.secrets.webhookUrl)) {
-          secretsErrors.webhookUrl.push(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.invalidWebhookUrlText',
-              {
-                defaultMessage: 'Webhook URL is invalid.',
-              }
-            )
-          );
+          secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_INVALID);
         } else if (!isValidUrl(action.secrets.webhookUrl, 'https:')) {
-          secretsErrors.webhookUrl.push(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.requireHttpsWebhookUrlText',
-              {
-                defaultMessage: 'Webhook URL must start with https://.',
-              }
-            )
-          );
+          secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_HTTP_INVALID);
         }
       }
       return validationResult;
     },
-    validateParams: (
+    validateParams: async (
       actionParams: SlackActionParams
-    ): GenericValidationResult<SlackActionParams> => {
+    ): Promise<GenericValidationResult<SlackActionParams>> => {
+      const translations = await import('./translations');
       const errors = {
         message: new Array<string>(),
       };
       const validationResult = { errors };
       if (!actionParams.message?.length) {
-        errors.message.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSlackMessageText',
-            {
-              defaultMessage: 'Message is required.',
-            }
-          )
-        );
+        errors.message.push(translations.MESSAGE_REQUIRED);
       }
       return validationResult;
     },

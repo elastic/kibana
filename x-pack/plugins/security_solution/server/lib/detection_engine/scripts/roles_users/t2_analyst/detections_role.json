@@ -8,12 +8,16 @@
           ".lists*",
           ".items*",
           "apm-*-transaction*",
+          "traces-apm*",
           "auditbeat-*",
           "endgame-*",
           "filebeat-*",
           "logs-*",
           "packetbeat-*",
-          "winlogbeat-*"
+          "winlogbeat-*",
+          "metrics-endpoint.metadata_current_*",
+          ".fleet-agents*",
+          ".fleet-actions*"
         ],
         "privileges": ["read"]
       }
@@ -23,10 +27,12 @@
     {
       "feature": {
         "ml": ["read"],
-        "siem": ["all"],
+        "siem": ["read", "read_alerts"],
+        "securitySolutionCases": ["read"],
+        "indexPatterns": ["read"],
+        "savedObjectsManagement": ["read"],
         "actions": ["read"],
-        "builtInAlerts": ["read"],
-        "savedObjectsManagement": ["read"]
+        "builtInAlerts": ["read"]
       },
       "spaces": ["*"]
     }

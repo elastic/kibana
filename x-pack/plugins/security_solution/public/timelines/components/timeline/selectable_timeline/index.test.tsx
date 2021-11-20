@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSelectableProps } from '@elastic/eui';
 import React from 'react';
 import { shallow, ShallowWrapper, mount } from 'enzyme';
 
-import { TimelineType } from '../../../../../common/types/timeline';
-import { SortFieldTimeline, Direction } from '../../../../graphql/types';
+import { SortFieldTimeline, TimelineType } from '../../../../../common/types/timeline';
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from './';
+import { Direction } from '../../../../../common/search_strategy';
 
 const mockFetchAllTimeline = jest.fn();
 jest.mock('../../../containers/all', () => {
@@ -46,7 +47,7 @@ describe('SelectableTimeline', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps!.placeholder).toEqual('e.g. Timeline name or description');
+        expect(searchProps?.placeholder).toEqual('e.g. Timeline name or description');
       });
     });
 
@@ -64,7 +65,7 @@ describe('SelectableTimeline', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps!.placeholder).toEqual('e.g. Timeline template name or description');
+        expect(searchProps?.placeholder).toEqual('e.g. Timeline template name or description');
       });
     });
   });

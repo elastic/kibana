@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import minimatch from 'minimatch';
@@ -45,7 +45,7 @@ export const CleanTypescript: Task = {
       'Deleted %d files',
       await scanDelete({
         directory: build.resolvePath(),
-        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.json$/],
+        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.(json|tsbuildinfo)$/],
       })
     );
   },
@@ -62,8 +62,8 @@ export const CleanExtraFilesFromModules: Task = {
       // tests
       '**/test',
       '**/tests',
+      '**/jest.config.js',
       '**/__tests__',
-      '**/mocha.opts',
       '**/*.test.js',
       '**/*.snap',
       '**/coverage',
@@ -151,6 +151,9 @@ export const CleanExtraFilesFromModules: Task = {
       '**/.DS_Store',
       '**/Dockerfile',
       '**/docker-compose.yml',
+
+      // https://github.com/elastic/kibana/issues/107617
+      '**/png-js/images/*.png',
     ]);
 
     log.info(
@@ -193,6 +196,7 @@ export const CleanEmptyFolders: Task = {
     await deleteEmptyFolders(log, build.resolvePath('.'), [
       build.resolvePath('plugins'),
       build.resolvePath('data'),
+      build.resolvePath('logs'),
     ]);
   },
 };

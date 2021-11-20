@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,70 +16,71 @@ import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header', 'alertDetailsUI']);
+  const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header', 'ruleDetailsUI']);
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
   const supertest = getService('supertest');
+  const comboBox = getService('comboBox');
   const objectRemover = new ObjectRemover(supertest);
 
-  async function createActionManualCleanup(overwrites: Record<string, any> = {}) {
-    const { body: createdAction } = await supertest
-      .post(`/api/actions/action`)
+  async function createConnectorManualCleanup(overwrites: Record<string, any> = {}) {
+    const { body: createdConnector } = await supertest
+      .post(`/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
       .send(getTestActionData(overwrites))
       .expect(200);
-    return createdAction;
+    return createdConnector;
   }
 
-  async function createAction(overwrites: Record<string, any> = {}) {
-    const createdAction = await createActionManualCleanup(overwrites);
-    objectRemover.add(createdAction.id, 'action', 'actions');
-    return createdAction;
+  async function createConnector(overwrites: Record<string, any> = {}) {
+    const createdConnector = await createConnectorManualCleanup(overwrites);
+    objectRemover.add(createdConnector.id, 'action', 'actions');
+    return createdConnector;
   }
 
-  async function createAlert(overwrites: Record<string, any> = {}) {
-    const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+  async function createRule(overwrites: Record<string, any> = {}) {
+    const { body: createdRule } = await supertest
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(getTestAlertData(overwrites))
       .expect(200);
-    objectRemover.add(createdAlert.id, 'alert', 'alerts');
-    return createdAlert;
+    objectRemover.add(createdRule.id, 'alert', 'alerts');
+    return createdRule;
   }
 
-  async function createAlwaysFiringAlert(overwrites: Record<string, any> = {}) {
-    const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+  async function createAlwaysFiringRule(overwrites: Record<string, any> = {}) {
+    const { body: createdRule } = await supertest
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(
         getTestAlertData({
-          alertTypeId: 'test.always-firing',
+          rule_type_id: 'test.always-firing',
           ...overwrites,
         })
       )
       .expect(200);
-    objectRemover.add(createdAlert.id, 'alert', 'alerts');
-    return createdAlert;
+    objectRemover.add(createdRule.id, 'alert', 'alerts');
+    return createdRule;
   }
 
-  async function createActions(testRunUuid: string) {
+  async function createConnectors(testRunUuid: string) {
     return await Promise.all([
-      createAction({ name: `slack-${testRunUuid}-${0}` }),
-      createAction({ name: `slack-${testRunUuid}-${1}` }),
+      createConnector({ name: `slack-${testRunUuid}-${0}` }),
+      createConnector({ name: `slack-${testRunUuid}-${1}` }),
     ]);
   }
 
-  async function createAlertWithActionsAndParams(
+  async function createRuleWithActionsAndParams(
     testRunUuid: string,
     params: Record<string, any> = {}
   ) {
-    const actions = await createActions(testRunUuid);
-    return await createAlwaysFiringAlert({
-      name: `test-alert-${testRunUuid}`,
-      actions: actions.map((action) => ({
-        id: action.id,
+    const connectors = await createConnectors(testRunUuid);
+    return await createAlwaysFiringRule({
+      name: `test-rule-${testRunUuid}`,
+      actions: connectors.map((connector) => ({
+        id: connector.id,
         group: 'default',
         params: {
           message: 'from alert 1s',
@@ -89,30 +91,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
-  async function getAlertInstanceSummary(alertId: string) {
+  async function getAlertSummary(ruleId: string) {
     const { body: summary } = await supertest
-      .get(`/api/alerts/alert/${alertId}/_instance_summary`)
+      .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
       .expect(200);
     return summary;
   }
 
-  async function muteAlertInstance(alertId: string, alertInstanceId: string) {
+  async function muteAlert(ruleId: string, alertId: string) {
     const { body: response } = await supertest
-      .post(`/api/alerts/alert/${alertId}/alert_instance/${alertInstanceId}/_mute`)
+      .post(
+        `/api/alerting/rule/${encodeURIComponent(ruleId)}/alert/${encodeURIComponent(
+          alertId
+        )}/_mute`
+      )
       .set('kbn-xsrf', 'foo')
       .expect(204);
 
     return response;
   }
 
-  describe('Alert Details', function () {
+  describe('Rule Details', function () {
     describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
-        const alert = await createAlertWithActionsAndParams(testRunUuid);
+        const rule = await createRuleWithActionsAndParams(testRunUuid);
 
-        // refresh to see alert
+        // refresh to see rule
         await browser.refresh();
 
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -121,42 +127,42 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('alertsList');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
       });
 
       after(async () => {
         await objectRemover.removeAll();
       });
 
-      it('renders the alert details', async () => {
-        const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(`test-alert-${testRunUuid}`);
+      it('renders the rule details', async () => {
+        const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
+        expect(headingText.includes(`test-rule-${testRunUuid}`)).to.be(true);
 
-        const alertType = await pageObjects.alertDetailsUI.getAlertType();
-        expect(alertType).to.be(`Always Firing`);
+        const ruleType = await pageObjects.ruleDetailsUI.getRuleType();
+        expect(ruleType).to.be(`Always Firing`);
 
-        const { actionType } = await pageObjects.alertDetailsUI.getActionsLabels();
-        expect(actionType).to.be(`Slack`);
+        const { connectorType } = await pageObjects.ruleDetailsUI.getActionsLabels();
+        expect(connectorType).to.be(`Slack`);
       });
 
-      it('should disable the alert', async () => {
-        const disableSwitch = await testSubjects.find('disableSwitch');
+      it('should disable the rule', async () => {
+        const enableSwitch = await testSubjects.find('enableSwitch');
 
-        const isChecked = await disableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('false');
+        const isChecked = await enableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('true');
 
-        await disableSwitch.click();
+        await enableSwitch.click();
 
-        const disableSwitchAfterDisabling = await testSubjects.find('disableSwitch');
+        const disableSwitchAfterDisabling = await testSubjects.find('enableSwitch');
         const isCheckedAfterDisabling = await disableSwitchAfterDisabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('true');
+        expect(isCheckedAfterDisabling).to.eql('false');
       });
 
-      it('shouldnt allow you to mute a disabled alert', async () => {
-        const disabledDisableSwitch = await testSubjects.find('disableSwitch');
-        expect(await disabledDisableSwitch.getAttribute('aria-checked')).to.eql('true');
+      it('shouldnt allow you to mute a disabled rule', async () => {
+        const disabledEnableSwitch = await testSubjects.find('enableSwitch');
+        expect(await disabledEnableSwitch.getAttribute('aria-checked')).to.eql('false');
 
         const muteSwitch = await testSubjects.find('muteSwitch');
         expect(await muteSwitch.getAttribute('aria-checked')).to.eql('false');
@@ -170,22 +176,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(isDisabledMuteAfterDisabling).to.eql('false');
       });
 
-      it('should reenable a disabled the alert', async () => {
-        const disableSwitch = await testSubjects.find('disableSwitch');
+      it('should reenable a disabled the rule', async () => {
+        const enableSwitch = await testSubjects.find('enableSwitch');
 
-        const isChecked = await disableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('true');
+        const isChecked = await enableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('false');
 
-        await disableSwitch.click();
+        await enableSwitch.click();
 
-        const disableSwitchAfterReenabling = await testSubjects.find('disableSwitch');
+        const disableSwitchAfterReenabling = await testSubjects.find('enableSwitch');
         const isCheckedAfterDisabling = await disableSwitchAfterReenabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('false');
+        expect(isCheckedAfterDisabling).to.eql('true');
       });
 
-      it('should mute the alert', async () => {
+      it('should mute the rule', async () => {
         const muteSwitch = await testSubjects.find('muteSwitch');
 
         const isChecked = await muteSwitch.getAttribute('aria-checked');
@@ -198,7 +204,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(isCheckedAfterDisabling).to.eql('true');
       });
 
-      it('should unmute the alert', async () => {
+      it('should unmute the rule', async () => {
         const muteSwitch = await testSubjects.find('muteSwitch');
 
         const isChecked = await muteSwitch.getAttribute('aria-checked');
@@ -212,14 +218,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Edit alert button', function () {
-      const alertName = uuid.v4();
-      const updatedAlertName = `Changed Alert Name ${alertName}`;
+    describe('Edit rule button', function () {
+      const ruleName = uuid.v4();
+      const updatedRuleName = `Changed Rule Name ${ruleName}`;
 
       before(async () => {
-        await createAlwaysFiringAlert({
-          name: alertName,
-          alertTypeId: '.index-threshold',
+        await createAlwaysFiringRule({
+          name: ruleName,
+          rule_type_id: '.index-threshold',
           params: {
             aggType: 'count',
             termSize: 5,
@@ -245,10 +251,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await objectRemover.removeAll();
       });
 
-      it('should open edit alert flyout', async () => {
+      it('should open edit rule flyout', async () => {
         await pageObjects.common.navigateToApp('triggersActions');
 
-        // refresh to see alert
+        // refresh to see rule
         await browser.refresh();
 
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -256,30 +262,30 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
-        // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alertName);
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
-        await testSubjects.setValue('alertNameInput', updatedAlertName, {
+        await testSubjects.setValue('alertNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
         await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
 
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
+        expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
 
-        const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(updatedAlertName);
+        const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
+        expect(headingText.includes(updatedRuleName)).to.be(true);
       });
 
-      it('should reset alert when canceling an edit', async () => {
+      it('should reset rule when canceling an edit', async () => {
         await pageObjects.common.navigateToApp('triggersActions');
 
-        // refresh to see alert
+        // refresh to see rule
         await browser.refresh();
 
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -287,8 +293,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
-        // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedAlertName);
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedRuleName);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
@@ -306,34 +312,89 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const nameInputAfterCancel = await testSubjects.find('alertNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
-        expect(textAfterCancel).to.eql(updatedAlertName);
+        expect(textAfterCancel).to.eql(updatedRuleName);
       });
     });
 
-    describe('Edit alert with deleted connector', function () {
+    describe('Edit rule with deleted connector', function () {
       const testRunUuid = uuid.v4();
 
-      after(async () => {
+      afterEach(async () => {
         await objectRemover.removeAll();
       });
 
-      it('should show and update deleted connectors', async () => {
-        const action = await createActionManualCleanup({
+      it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
+        const connector = await createConnectorManualCleanup({
           name: `slack-${testRunUuid}-${0}`,
         });
 
         await pageObjects.common.navigateToApp('triggersActions');
-        const alert = await createAlwaysFiringAlert({
+        const rule = await createAlwaysFiringRule({
           name: testRunUuid,
           actions: [
             {
               group: 'default',
-              id: action.id,
+              id: connector.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+          ],
+        });
+
+        // refresh to see rule
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // delete connector
+        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.triggersActionsUI.searchConnectors(connector.name);
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Deleted 1 connector');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(false);
+        expect(await testSubjects.exists('alertActionAccordion-0')).to.eql(true);
+
+        await comboBox.set('selectActionConnector-.slack-0', 'Slack#xyztest (preconfigured)');
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
+      });
+
+      it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
+        const connector = await createConnectorManualCleanup({
+          name: `index-${testRunUuid}-${0}`,
+          connector_type_id: '.index',
+          config: {
+            index: `index-${testRunUuid}-${0}`,
+          },
+          secrets: {},
+        });
+
+        await pageObjects.common.navigateToApp('triggersActions');
+        const alert = await createAlwaysFiringRule({
+          name: testRunUuid,
+          actions: [
+            {
+              group: 'default',
+              id: connector.id,
               params: { level: 'info', message: ' {{context.message}}' },
             },
             {
               group: 'other',
-              id: action.id,
+              id: connector.id,
               params: { level: 'info', message: ' {{context.message}}' },
             },
           ],
@@ -348,7 +409,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // delete connector
         await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
-        await pageObjects.triggersActionsUI.searchConnectors(action.name);
+        await pageObjects.triggersActionsUI.searchConnectors(connector.name);
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
@@ -357,8 +418,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
-        // click on first alert
-        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        // click on first rule
+        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
@@ -373,7 +434,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('createActionConnectorButton-0');
         await testSubjects.existOrFail('connectorAddModal');
         await testSubjects.setValue('nameInput', 'new connector');
-        await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+        await retry.try(async () => {
+          // At times we find the driver controlling the ComboBox in tests
+          // can select the wrong item, this ensures we always select the correct index
+          await comboBox.set('connectorIndexesComboBox', 'test-index');
+          expect(
+            await comboBox.isOptionSelected(
+              await testSubjects.find('connectorIndexesComboBox'),
+              'test-index'
+            )
+          ).to.be(true);
+        });
         await testSubjects.click('connectorAddModal > saveActionButtonModal');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
@@ -383,7 +454,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('View In App', function () {
-      const alertName = uuid.v4();
+      const ruleName = uuid.v4();
 
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
@@ -393,74 +464,74 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await objectRemover.removeAll();
       });
 
-      it('renders the alert details view in app button', async () => {
-        const alert = await createAlert({
-          name: alertName,
+      it('renders the rule details view in app button', async () => {
+        const rule = await createRule({
+          name: ruleName,
           consumer: 'alerting_fixture',
         });
 
-        // refresh to see alert
+        // refresh to see rule
         await browser.refresh();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
-        // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
-        expect(await pageObjects.alertDetailsUI.isViewInAppEnabled()).to.be(true);
+        expect(await pageObjects.ruleDetailsUI.isViewInAppEnabled()).to.be(true);
 
-        await pageObjects.alertDetailsUI.clickViewInApp();
+        await pageObjects.ruleDetailsUI.clickViewInApp();
 
-        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
+        expect(await pageObjects.ruleDetailsUI.getNoOpAppTitle()).to.be(`View Rule ${rule.id}`);
       });
 
-      it('renders a disabled alert details view in app button', async () => {
-        const alert = await createAlwaysFiringAlert({
-          name: `test-alert-disabled-nav`,
+      it('renders a disabled rule details view in app button', async () => {
+        const rule = await createAlwaysFiringRule({
+          name: `test-rule-disabled-nav`,
         });
 
-        // refresh to see alert
+        // refresh to see rule
         await browser.refresh();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
-        // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
-        expect(await pageObjects.alertDetailsUI.isViewInAppDisabled()).to.be(true);
+        expect(await pageObjects.ruleDetailsUI.isViewInAppDisabled()).to.be(true);
       });
     });
 
-    describe('Alert Instances', function () {
+    describe('Alerts', function () {
       const testRunUuid = uuid.v4();
-      let alert: any;
+      let rule: any;
 
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
 
-        const instances = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
-        alert = await createAlertWithActionsAndParams(testRunUuid, {
-          instances,
+        const alerts = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
+        rule = await createRuleWithActionsAndParams(testRunUuid, {
+          instances: alerts,
         });
 
-        // refresh to see alert
+        // refresh to see rule
         await browser.refresh();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
-        // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
-          expect(Object.keys(alertInstances).length).to.eql(instances.length);
+          const { alerts: alertInstances } = await getAlertSummary(rule.id);
+          expect(Object.keys(alertInstances).length).to.eql(alerts.length);
         });
       });
 
@@ -468,7 +539,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await objectRemover.removeAll();
       });
 
-      it('renders the active alert instances', async () => {
+      it('renders the active alerts', async () => {
         // refresh to ensure Api call and UI are looking at freshest output
         await browser.refresh();
 
@@ -476,66 +547,61 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const { actionGroups } = alwaysFiringAlertType;
 
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
         const actionGroupNameFromId = (actionGroupId: string) =>
           actionGroups.find(
             (actionGroup: { id: string; name: string }) => actionGroup.id === actionGroupId
           )?.name;
 
-        const summary = await getAlertInstanceSummary(alert.id);
-        const dateOnAllInstancesFromApiResponse: Record<string, string> = mapValues(
-          summary.instances,
-          (instance) => instance.activeStartDate
+        const summary = await getAlertSummary(rule.id);
+        const dateOnAllAlertsFromApiResponse: Record<string, string> = mapValues(
+          summary.alerts,
+          (a) => a.activeStartDate
         );
 
-        const actionGroupNameOnAllInstancesFromApiResponse = mapValues(
-          summary.instances,
-          (instance) => {
-            const name = actionGroupNameFromId(instance.actionGroupId);
-            return name ? ` (${name})` : '';
-          }
-        );
+        const actionGroupNameOnAllInstancesFromApiResponse = mapValues(summary.alerts, (a) => {
+          const name = actionGroupNameFromId(a.actionGroupId);
+          return name ? ` (${name})` : '';
+        });
 
         log.debug(
-          `API RESULT: ${Object.entries(dateOnAllInstancesFromApiResponse)
+          `API RESULT: ${Object.entries(dateOnAllAlertsFromApiResponse)
             .map(([id, date]) => `${id}: ${moment(date).utc()}`)
             .join(', ')}`
         );
 
-        const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
-        expect(instancesList.map((instance) => omit(instance, 'duration'))).to.eql([
+        const alertsList: any[] = await pageObjects.ruleDetailsUI.getAlertsList();
+        expect(alertsList.map((a) => omit(a, 'duration'))).to.eql([
           {
-            instance: 'us-central',
+            alert: 'us-central',
             status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-central']}`,
-            start: moment(dateOnAllInstancesFromApiResponse['us-central'])
+            start: moment(dateOnAllAlertsFromApiResponse['us-central'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
-            instance: 'us-east',
+            alert: 'us-east',
             status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-east']}`,
-            start: moment(dateOnAllInstancesFromApiResponse['us-east'])
+            start: moment(dateOnAllAlertsFromApiResponse['us-east'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
-            instance: 'us-west',
+            alert: 'us-west',
             status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-west']}`,
-            start: moment(dateOnAllInstancesFromApiResponse['us-west'])
+            start: moment(dateOnAllAlertsFromApiResponse['us-west'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
         ]);
 
-        const durationEpoch = moment(
-          await pageObjects.alertDetailsUI.getAlertInstanceDurationEpoch()
-        ).utc();
+        const durationEpoch = moment(await pageObjects.ruleDetailsUI.getAlertDurationEpoch()).utc();
 
         log.debug(`DURATION EPOCH is: ${durationEpoch}]`);
 
         const durationFromInstanceInApiUntilPageLoad = mapValues(
-          dateOnAllInstancesFromApiResponse,
+          dateOnAllAlertsFromApiResponse,
           // time from Alert Instance until pageload (AKA durationEpoch)
           (date) => {
             const durationFromApiResuiltToEpoch = moment.duration(
@@ -550,11 +616,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         );
 
-        instancesList
-          .map((alertInstance) => ({
-            id: alertInstance.instance,
+        alertsList
+          .map((a) => ({
+            id: a.alert,
             // time from Alert Instance used to render the list until pageload (AKA durationEpoch)
-            duration: moment.duration(alertInstance.duration),
+            duration: moment.duration(a.duration),
           }))
           .forEach(({ id, duration: durationAsItAppearsOnList }) => {
             log.debug(
@@ -571,97 +637,95 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
       });
 
-      it('renders the muted inactive alert instances', async () => {
-        // mute an alert instance that doesn't exist
-        await muteAlertInstance(alert.id, 'eu-east');
+      it('renders the muted inactive alerts', async () => {
+        // mute an alert that doesn't exist
+        await muteAlert(rule.id, 'eu/east');
 
-        // refresh to see alert
+        // refresh to see rule
         await browser.refresh();
 
-        const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
-        expect(
-          instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
-        ).to.eql([
+        const alertsList: any[] = await pageObjects.ruleDetailsUI.getAlertsList();
+        expect(alertsList.filter((a) => a.alert === 'eu/east')).to.eql([
           {
-            instance: 'eu-east',
-            status: 'OK',
+            alert: 'eu/east',
+            status: 'Recovered',
             start: '',
             duration: '',
           },
         ]);
       });
 
-      it('allows the user to mute a specific instance', async () => {
+      it('allows the user to mute a specific alert', async () => {
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
         log.debug(`Ensuring us-central is not muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-central', false);
+        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-central', false);
 
         log.debug(`Muting us-central`);
-        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('us-central');
+        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-central');
 
         log.debug(`Ensuring us-central is muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-central', true);
+        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-central', true);
       });
 
-      it('allows the user to unmute a specific instance', async () => {
+      it('allows the user to unmute a specific alert', async () => {
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
         log.debug(`Ensuring us-east is not muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-east', false);
+        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', false);
 
         log.debug(`Muting us-east`);
-        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('us-east');
+        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-east');
 
         log.debug(`Ensuring us-east is muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-east', true);
+        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', true);
 
         log.debug(`Unmuting us-east`);
-        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('us-east');
+        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-east');
 
         log.debug(`Ensuring us-east is not muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-east', false);
+        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', false);
       });
 
-      it('allows the user unmute an inactive instance', async () => {
-        log.debug(`Ensuring eu-east is muted`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu-east', true);
+      it('allows the user unmute an inactive alert', async () => {
+        log.debug(`Ensuring eu/east is muted`);
+        await pageObjects.ruleDetailsUI.ensureAlertMuteState('eu/east', true);
 
-        log.debug(`Unmuting eu-east`);
-        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu-east');
+        log.debug(`Unmuting eu/east`);
+        await pageObjects.ruleDetailsUI.clickAlertMuteButton('eu/east');
 
-        log.debug(`Ensuring eu-east is removed from list`);
-        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu-east', false);
+        log.debug(`Ensuring eu/east is removed from list`);
+        await pageObjects.ruleDetailsUI.ensureAlertExistence('eu/east', false);
       });
     });
 
-    describe('Alert Instance Pagination', function () {
+    describe('Alert Pagination', function () {
       const testRunUuid = uuid.v4();
-      let alert: any;
+      let rule: any;
 
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
 
-        const instances = flatten(
+        const alerts = flatten(
           range(10).map((index) => [
             { id: `us-central-${index}` },
             { id: `us-east-${index}` },
             { id: `us-west-${index}` },
           ])
         );
-        alert = await createAlertWithActionsAndParams(testRunUuid, {
-          instances,
+        rule = await createRuleWithActionsAndParams(testRunUuid, {
+          instances: alerts,
         });
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
-          expect(Object.keys(alertInstances).length).to.eql(instances.length);
+          const { alerts: alertInstances } = await getAlertSummary(rule.id);
+          expect(Object.keys(alertInstances).length).to.eql(alerts.length);
         });
 
-        // refresh to see alert
+        // refresh to see rule
         await browser.refresh();
 
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -669,8 +733,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
-        // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
       });
 
       after(async () => {
@@ -680,28 +744,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const PAGE_SIZE = 10;
       it('renders the first page', async () => {
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
-        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+        const { alerts: alertInstances } = await getAlertSummary(rule.id);
 
-        const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
+        const items = await pageObjects.ruleDetailsUI.getAlertsList();
         expect(items.length).to.eql(PAGE_SIZE);
 
         const [firstItem] = items;
-        expect(firstItem.instance).to.eql(Object.keys(alertInstances)[0]);
+        expect(firstItem.alert).to.eql(Object.keys(alertInstances)[0]);
       });
 
       it('navigates to the next page', async () => {
         // Verify content
-        await testSubjects.existOrFail('alertInstancesList');
+        await testSubjects.existOrFail('alertsList');
 
-        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+        const { alerts: alertInstances } = await getAlertSummary(rule.id);
 
-        await pageObjects.alertDetailsUI.clickPaginationNextPage();
+        await pageObjects.ruleDetailsUI.clickPaginationNextPage();
 
         await retry.try(async () => {
-          const [firstItem] = await pageObjects.alertDetailsUI.getAlertInstancesList();
-          expect(firstItem.instance).to.eql(Object.keys(alertInstances)[PAGE_SIZE]);
+          const [firstItem] = await pageObjects.ruleDetailsUI.getAlertsList();
+          expect(firstItem.alert).to.eql(Object.keys(alertInstances)[PAGE_SIZE]);
         });
       });
     });

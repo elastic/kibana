@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -66,18 +67,13 @@ export const EventRateChart: FC<Props> = ({
         <Chart>
           {showAxis === true && <Axes />}
 
-          {onBrushEnd === undefined ? (
-            <Settings tooltip={TooltipType.None} theme={theme} />
-          ) : (
-            <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} theme={theme} />
-          )}
+          <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} theme={theme} />
 
           {overlayRanges &&
             overlayRanges.map((range, i) => (
               <OverlayRange
                 key={i}
                 overlayKey={i}
-                eventRateChartData={eventRateChartData}
                 start={range.start}
                 end={range.end}
                 color={range.color}

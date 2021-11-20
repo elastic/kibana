@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
-import { RequestParams } from '@elastic/elasticsearch';
 import { MlLicense } from '../../../common/license';
 import { CloudSetup } from '../../../../cloud/server';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
@@ -23,10 +24,7 @@ export interface MlSystemProvider {
   ): {
     mlCapabilities(): Promise<MlCapabilitiesResponse>;
     mlInfo(): Promise<MlInfoResponse>;
-    mlAnomalySearch<T>(
-      searchParams: RequestParams.Search<any>,
-      jobIds: string[]
-    ): Promise<SearchResponse<T>>;
+    mlAnomalySearch<T>(searchParams: any, jobIds: string[]): Promise<estypes.SearchResponse<T>>;
   };
 }
 
@@ -73,9 +71,9 @@ export function getMlSystemProvider(
             });
         },
         async mlAnomalySearch<T>(
-          searchParams: RequestParams.Search<any>,
+          searchParams: any,
           jobIds: string[]
-        ): Promise<SearchResponse<T>> {
+        ): Promise<estypes.SearchResponse<T>> {
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canAccessML'])

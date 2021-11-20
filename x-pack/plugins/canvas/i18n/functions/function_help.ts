@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
@@ -26,6 +27,7 @@ import { help as demodata } from './dict/demodata';
 import { help as doFn } from './dict/do';
 import { help as dropdownControl } from './dict/dropdown_control';
 import { help as eq } from './dict/eq';
+import { help as embeddable } from './dict/embeddable';
 import { help as escount } from './dict/escount';
 import { help as esdocs } from './dict/esdocs';
 import { help as essql } from './dict/essql';
@@ -39,26 +41,19 @@ import { help as gt } from './dict/gt';
 import { help as gte } from './dict/gte';
 import { help as head } from './dict/head';
 import { help as ifFn } from './dict/if';
-import { help as image } from './dict/image';
 import { help as joinRows } from './dict/join_rows';
 import { help as location } from './dict/location';
 import { help as lt } from './dict/lt';
 import { help as lte } from './dict/lte';
 import { help as mapCenter } from './dict/map_center';
-import { help as mapColumn } from './dict/map_column';
 import { help as markdown } from './dict/markdown';
-import { help as math } from './dict/math';
-import { help as metric } from './dict/metric';
 import { help as neq } from './dict/neq';
 import { help as pie } from './dict/pie';
 import { help as plot } from './dict/plot';
 import { help as ply } from './dict/ply';
 import { help as pointseries } from './dict/pointseries';
-import { help as progress } from './dict/progress';
 import { help as render } from './dict/render';
-import { help as repeatImage } from './dict/repeat_image';
 import { help as replace } from './dict/replace';
-import { help as revealImage } from './dict/reveal_image';
 import { help as rounddate } from './dict/rounddate';
 import { help as rowCount } from './dict/row_count';
 import { help as savedLens } from './dict/saved_lens';
@@ -66,7 +61,6 @@ import { help as savedMap } from './dict/saved_map';
 import { help as savedSearch } from './dict/saved_search';
 import { help as savedVisualization } from './dict/saved_visualization';
 import { help as seriesStyle } from './dict/series_style';
-import { help as shape } from './dict/shape';
 import { help as sort } from './dict/sort';
 import { help as staticColumn } from './dict/static_column';
 import { help as string } from './dict/string';
@@ -189,6 +183,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   do: doFn,
   dropdownControl,
   eq,
+  embeddable,
   escount,
   esdocs,
   essql,
@@ -203,25 +198,18 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   head,
   if: ifFn,
   joinRows,
-  image,
   location,
   lt,
   lte,
   mapCenter,
-  mapColumn,
   markdown,
-  math,
-  metric,
   neq,
   pie,
   plot,
   ply,
   pointseries,
-  progress,
   render,
-  repeatImage,
   replace,
-  revealImage,
   rounddate,
   rowCount,
   savedLens,
@@ -229,7 +217,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   savedSearch,
   savedVisualization,
   seriesStyle,
-  shape,
   sort,
   staticColumn,
   string,

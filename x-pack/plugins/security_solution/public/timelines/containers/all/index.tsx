@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -11,22 +12,19 @@ import { useDispatch } from 'react-redux';
 
 import { OpenTimelineResult } from '../../components/open_timeline/types';
 import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
-import {
-  GetAllTimeline,
-  PageInfoTimeline,
-  SortTimeline,
-  TimelineResult,
-} from '../../../graphql/types';
 import { inputsActions } from '../../../common/store/inputs';
-import { useApolloClient } from '../../../common/utils/apollo_context';
 
-import { allTimelinesQuery } from './index.gql_query';
 import * as i18n from '../../pages/translations';
 import {
   TimelineType,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
+  PageInfoTimeline,
+  TimelineResult,
+  SortTimeline,
+  GetAllTimelineVariables,
 } from '../../../../common/types/timeline';
+import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {
   fetchAllTimeline: ({
@@ -37,7 +35,7 @@ export interface AllTimelinesArgs {
     status,
     timelineType,
   }: AllTimelinesVariables) => void;
-  timelines: OpenTimelineResult[];
+  timelines: OpenTimelineResult[] | null;
   loading: boolean;
   totalCount: number;
   customTemplateTimelineCount: number;
@@ -99,12 +97,11 @@ export const getAllTimeline = memoizeOne(
 
 export const useGetAllTimeline = (): AllTimelinesArgs => {
   const dispatch = useDispatch();
-  const apolloClient = useApolloClient();
   const [, dispatchToaster] = useStateToaster();
   const [allTimelines, setAllTimelines] = useState<Omit<AllTimelinesArgs, 'fetchAllTimeline'>>({
     loading: false,
     totalCount: 0,
-    timelines: [],
+    timelines: null, // use null as initial state to distinguish between empty result and haven't started loading.
     customTemplateTimelineCount: 0,
     defaultTimelineCount: 0,
     elasticTemplateTimelineCount: 0,
@@ -126,61 +123,49 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
 
       const fetchData = async () => {
         try {
-          if (apolloClient != null) {
-            setAllTimelines((prevState) => ({ ...prevState, loading: true }));
+          setAllTimelines((prevState) => ({
+            ...prevState,
+            loading: true,
+          }));
 
-            const variables: GetAllTimeline.Variables = {
-              onlyUserFavorite,
-              pageInfo,
-              search,
-              sort,
-              status,
-              timelineType,
-            };
-            const response = await apolloClient.query<
-              GetAllTimeline.Query,
-              GetAllTimeline.Variables
-            >({
-              query: allTimelinesQuery,
-              fetchPolicy: 'network-only',
-              variables,
-              context: {
-                fetchOptions: {
-                  abortSignal: abortCtrl.signal,
-                },
-              },
-            });
-            const getAllTimelineResponse = response?.data?.getAllTimeline;
-            const totalCount = getAllTimelineResponse?.totalCount ?? 0;
-            const timelines = getAllTimelineResponse?.timeline ?? [];
-            const customTemplateTimelineCount =
-              getAllTimelineResponse?.customTemplateTimelineCount ?? 0;
-            const defaultTimelineCount = getAllTimelineResponse?.defaultTimelineCount ?? 0;
-            const elasticTemplateTimelineCount =
-              getAllTimelineResponse?.elasticTemplateTimelineCount ?? 0;
-            const templateTimelineCount = getAllTimelineResponse?.templateTimelineCount ?? 0;
-            const favoriteCount = getAllTimelineResponse?.favoriteCount ?? 0;
-            if (!didCancel) {
-              dispatch(
-                inputsActions.setQuery({
-                  inputId: 'global',
-                  id: ALL_TIMELINE_QUERY_ID,
-                  loading: false,
-                  refetch: fetchData,
-                  inspect: null,
-                })
-              );
-              setAllTimelines({
+          const variables: GetAllTimelineVariables = {
+            onlyUserFavorite,
+            pageInfo,
+            search,
+            sort,
+            status,
+            timelineType,
+          };
+          const getAllTimelineResponse = await getAllTimelines(variables, abortCtrl.signal);
+          const totalCount = getAllTimelineResponse?.totalCount ?? 0;
+          const timelines = getAllTimelineResponse?.timeline ?? [];
+          const customTemplateTimelineCount =
+            getAllTimelineResponse?.customTemplateTimelineCount ?? 0;
+          const defaultTimelineCount = getAllTimelineResponse?.defaultTimelineCount ?? 0;
+          const elasticTemplateTimelineCount =
+            getAllTimelineResponse?.elasticTemplateTimelineCount ?? 0;
+          const templateTimelineCount = getAllTimelineResponse?.templateTimelineCount ?? 0;
+          const favoriteCount = getAllTimelineResponse?.favoriteCount ?? 0;
+          if (!didCancel) {
+            dispatch(
+              inputsActions.setQuery({
+                inputId: 'global',
+                id: ALL_TIMELINE_QUERY_ID,
                 loading: false,
-                totalCount,
-                timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
-                customTemplateTimelineCount,
-                defaultTimelineCount,
-                elasticTemplateTimelineCount,
-                templateTimelineCount,
-                favoriteCount,
-              });
-            }
+                refetch: fetchData,
+                inspect: null,
+              })
+            );
+            setAllTimelines({
+              loading: false,
+              totalCount,
+              timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
+              customTemplateTimelineCount,
+              defaultTimelineCount,
+              elasticTemplateTimelineCount,
+              templateTimelineCount,
+              favoriteCount,
+            });
           }
         } catch (error) {
           if (!didCancel) {
@@ -208,14 +193,15 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
         abortCtrl.abort();
       };
     },
-    [apolloClient, dispatch, dispatchToaster]
+    [dispatch, dispatchToaster]
   );
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: ALL_TIMELINE_QUERY_ID }));
-    };
-  }, [dispatch]);
+    },
+    [dispatch]
+  );
 
   return {
     ...allTimelines,

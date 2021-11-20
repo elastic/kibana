@@ -1,0 +1,512 @@
+{
+  "type":"doc",
+  "value":{
+    "id":"_aZE5nwBOpWiDweSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "event":{
+        "module":"auditd"
+      },
+      "host":{
+        "name":"Glo"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_aZE2nwBOpWiDweSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "event":{
+        "module": "file_integrity"
+      },
+      "host": {
+        "name": "Glo"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_aZE2nwBasWiDweSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "event":{
+        "module": "system",
+        "dataset": "login"
+      },
+      "host": {
+        "name": "Glo"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_aZEsdfgasWiDweSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "event":{
+        "module": "system",
+        "dataset": "package"
+      },
+      "host": {
+        "name": "Glo"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_aZEsdfAsrWiDweSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "event":{
+        "module": "system",
+        "dataset": "process"
+      },
+      "host": {
+        "name": "Glo"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_aZEasdfsAsrWiDweSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "event":{
+        "module": "system",
+        "dataset": "user"
+      },
+      "host": {
+        "name": "Glo"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_aZEasdfPwsrWiDweSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "destination": {
+        "ip": "1.1.1.1"
+      },
+      "source": {
+        "ip": "1.1.1.1"
+      },
+      "event": {
+        "dataset": "socket"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_pwEasdfPwsrWiDweSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "destination": {
+        "ip": "1.1.1.1"
+      },
+      "source": {
+        "ip": "1.1.1.1"
+      },
+      "agent": {
+        "type": "filebeat"
+      },
+      "event": {
+        "module": "cisco"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_pwEasdLxwsrWiDweSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "destination": {
+        "ip": "1.1.1.1"
+      },
+      "source": {
+        "ip": "1.1.1.1"
+      },
+      "agent": {
+        "type": "filebeat"
+      },
+      "input": {
+        "type": "netflow"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_pwEasdLxwsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "destination": {
+        "ip": "1.1.1.1"
+      },
+      "source": {
+        "ip": "1.1.1.1"
+      },
+      "agent": {
+        "type": "filebeat"
+      },
+      "event": {
+        "module": "panw"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_pwELpdLxwsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "destination": {
+        "ip": "1.1.1.1"
+      },
+      "source": {
+        "ip": "1.1.1.1"
+      },
+      "agent": {
+        "type": "filebeat"
+      },
+      "service": {
+        "type": "suricata"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_QaELpdLxwsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "destination": {
+        "ip": "1.1.1.1"
+      },
+      "source": {
+        "ip": "1.1.1.1"
+      },
+      "agent": {
+        "type": "filebeat"
+      },
+      "service": {
+        "type": "zeek"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_LmELpdLxwsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "destination": {
+        "ip": "1.1.1.1"
+      },
+      "source": {
+        "ip": "1.1.1.1"
+      },
+      "agent": {
+        "type": "packetbeat"
+      },
+      "type": "dns"
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_LmELpgbxwsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "destination": {
+        "ip": "1.1.1.1"
+      },
+      "source": {
+        "ip": "1.1.1.1"
+      },
+      "agent": {
+        "type": "packetbeat"
+      },
+      "type": "flow"
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_LmELpgpqwsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "destination": {
+        "ip": "1.1.1.1"
+      },
+      "source": {
+        "ip": "1.1.1.1"
+      },
+      "agent": {
+        "type": "packetbeat"
+      },
+      "network": {
+        "protocol": "tls"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_LmELpgpPXZsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "endgame": {
+        "event_type_full": "dns_event"
+      },
+      "network": {
+        "protocol": "dns"
+      },
+      "event": {
+        "module": "endpoint",
+        "category": "network"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_LmELmqpPXZsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "endgame": {
+        "event_type_full": "file_event"
+      },
+      "event": {
+        "module": "endpoint",
+        "category": "file"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_PmELmqpPXZsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "endgame": {
+        "event_type_full": "image_load_event"
+      },
+      "event": {
+        "module": "endpoint",
+        "category": "library"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_PmELmqpPgxsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "event": {
+        "module": "endpoint",
+        "category": "network"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_PMsbmqpPgxsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "endgame": {
+        "event_type_full": "process_event"
+      },
+      "event": {
+        "module": "endpoint",
+        "category": "process"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_PLNbmqpPgxsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "endgame": {
+        "event_type_full": "registry_event"
+      },
+      "event": {
+        "module": "endpoint",
+        "category": "registry"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_AoNbmqpPgxsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "endgame": {
+        "event_type_full": "security_event"
+      },
+      "event": {
+        "module": "endpoint",
+        "category": "authentication"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_AbNbmqpPgxsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "event":{
+        "module": "system"
+      },
+      "agent": {
+        "type": "filebeat"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_VqbNbmqpPgxsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "agent": {
+        "type": "winlogbeat"
+      },
+      "winlog": {
+        "channel": "Security"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"_AgbNbmqpPgxsrpoeSth_D",
+    "index":"auditbeat-8.0.0-2019.08.30-000021",
+    "source":{
+      "@timestamp":"2021-09-23T10:41:06.527Z",
+      "host": {
+        "name": "Glo"
+      },
+      "agent": {
+        "type": "winlogbeat"
+      },
+      "winlog": {
+        "channel": "Microsoft-Windows-Sysmon/Operational"
+      }
+    }
+  }
+}

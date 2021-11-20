@@ -1,26 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { reduceRight } from 'lodash';
 
+import { Filter } from '@kbn/es-query';
 import { mapSpatialFilter } from './mappers/map_spatial_filter';
 import { mapMatchAll } from './mappers/map_match_all';
 import { mapPhrase } from './mappers/map_phrase';
 import { mapPhrases } from './mappers/map_phrases';
 import { mapRange } from './mappers/map_range';
 import { mapExists } from './mappers/map_exists';
-import { mapMissing } from './mappers/map_missing';
 import { mapQueryString } from './mappers/map_query_string';
-import { mapGeoBoundingBox } from './mappers/map_geo_bounding_box';
-import { mapGeoPolygon } from './mappers/map_geo_polygon';
 import { mapDefault } from './mappers/map_default';
 import { generateMappingChain } from './generate_mapping_chain';
-import { Filter } from '../../../../common';
 
 export function mapFilter(filter: Filter) {
   /** Mappers **/
@@ -46,10 +43,7 @@ export function mapFilter(filter: Filter) {
     mapPhrase,
     mapPhrases,
     mapExists,
-    mapMissing,
     mapQueryString,
-    mapGeoBoundingBox,
-    mapGeoPolygon,
     mapDefault,
   ];
 

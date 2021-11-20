@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -34,44 +36,62 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`).expect(200, [
+      const { body: connectors } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connectors`)
+        .expect(200);
+
+      // the custom ssl connectors have dynamic ports, so remove them before
+      // comparing to what we expect
+      const nonCustomSslConnectors = connectors.filter(
+        (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
+      );
+
+      expect(nonCustomSslConnectors).to.eql([
+        {
+          id: 'preconfigured-alert-history-es-index',
+          name: 'Alert history Elasticsearch index',
+          connector_type_id: '.index',
+          is_preconfigured: true,
+          referenced_by_count: 0,
+        },
         {
           id: createdAction.id,
-          isPreconfigured: false,
+          is_preconfigured: false,
           name: 'My action',
-          actionTypeId: 'test.index-record',
+          connector_type_id: 'test.index-record',
+          is_missing_secrets: false,
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
-          referencedByCount: 0,
+          referenced_by_count: 0,
         },
         {
           id: 'preconfigured-es-index-action',
-          isPreconfigured: true,
-          actionTypeId: '.index',
+          is_preconfigured: true,
+          connector_type_id: '.index',
           name: 'preconfigured_es_index_action',
-          referencedByCount: 0,
+          referenced_by_count: 0,
         },
         {
           id: 'my-slack1',
-          isPreconfigured: true,
-          actionTypeId: '.slack',
+          is_preconfigured: true,
+          connector_type_id: '.slack',
           name: 'Slack#xyz',
-          referencedByCount: 0,
+          referenced_by_count: 0,
         },
         {
           id: 'custom-system-abc-connector',
-          isPreconfigured: true,
-          actionTypeId: 'system-abc-action-type',
+          is_preconfigured: true,
+          connector_type_id: 'system-abc-action-type',
           name: 'SystemABC',
-          referencedByCount: 0,
+          referenced_by_count: 0,
         },
         {
           id: 'preconfigured.test.index-record',
-          isPreconfigured: true,
-          actionTypeId: 'test.index-record',
+          is_preconfigured: true,
+          connector_type_id: 'test.index-record',
           name: 'Test:_Preconfigured_Index_Record',
-          referencedByCount: 0,
+          referenced_by_count: 0,
         },
       ]);
     });
@@ -93,36 +113,132 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/actions`).expect(200, [
+      const { body: connectors } = await supertest
+        .get(`${getUrlPrefix(Spaces.other.id)}/api/actions/connectors`)
+        .expect(200);
+
+      // the custom ssl connectors have dynamic ports, so remove them before
+      // comparing to what we expect
+      const nonCustomSslConnectors = connectors.filter(
+        (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
+      );
+
+      expect(nonCustomSslConnectors).to.eql([
+        {
+          id: 'preconfigured-alert-history-es-index',
+          name: 'Alert history Elasticsearch index',
+          connector_type_id: '.index',
+          is_preconfigured: true,
+          referenced_by_count: 0,
+        },
         {
           id: 'preconfigured-es-index-action',
-          isPreconfigured: true,
-          actionTypeId: '.index',
+          is_preconfigured: true,
+          connector_type_id: '.index',
           name: 'preconfigured_es_index_action',
-          referencedByCount: 0,
+          referenced_by_count: 0,
         },
         {
           id: 'my-slack1',
-          isPreconfigured: true,
-          actionTypeId: '.slack',
+          is_preconfigured: true,
+          connector_type_id: '.slack',
           name: 'Slack#xyz',
-          referencedByCount: 0,
+          referenced_by_count: 0,
         },
         {
           id: 'custom-system-abc-connector',
-          isPreconfigured: true,
-          actionTypeId: 'system-abc-action-type',
+          is_preconfigured: true,
+          connector_type_id: 'system-abc-action-type',
           name: 'SystemABC',
-          referencedByCount: 0,
+          referenced_by_count: 0,
         },
         {
           id: 'preconfigured.test.index-record',
-          isPreconfigured: true,
-          actionTypeId: 'test.index-record',
+          is_preconfigured: true,
+          connector_type_id: 'test.index-record',
           name: 'Test:_Preconfigured_Index_Record',
-          referencedByCount: 0,
+          referenced_by_count: 0,
         },
       ]);
+    });
+
+    describe('legacy', () => {
+      it('should handle get all action request appropriately', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'My action',
+            actionTypeId: 'test.index-record',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
+            secrets: {
+              encrypted: 'This value should be encrypted',
+            },
+          })
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+        const { body: connectors } = await supertest
+          .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`)
+          .expect(200);
+
+        // the custom ssl connectors have dynamic ports, so remove them before
+        // comparing to what we expect
+        const nonCustomSslConnectors = connectors.filter(
+          (conn: { id: string }) => !conn.id.startsWith('custom.ssl.')
+        );
+
+        expect(nonCustomSslConnectors).to.eql([
+          {
+            id: 'preconfigured-alert-history-es-index',
+            name: 'Alert history Elasticsearch index',
+            actionTypeId: '.index',
+            isPreconfigured: true,
+            referencedByCount: 0,
+          },
+          {
+            id: createdAction.id,
+            isPreconfigured: false,
+            name: 'My action',
+            actionTypeId: 'test.index-record',
+            isMissingSecrets: false,
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
+            referencedByCount: 0,
+          },
+          {
+            id: 'preconfigured-es-index-action',
+            isPreconfigured: true,
+            actionTypeId: '.index',
+            name: 'preconfigured_es_index_action',
+            referencedByCount: 0,
+          },
+          {
+            id: 'my-slack1',
+            isPreconfigured: true,
+            actionTypeId: '.slack',
+            name: 'Slack#xyz',
+            referencedByCount: 0,
+          },
+          {
+            id: 'custom-system-abc-connector',
+            isPreconfigured: true,
+            actionTypeId: 'system-abc-action-type',
+            name: 'SystemABC',
+            referencedByCount: 0,
+          },
+          {
+            id: 'preconfigured.test.index-record',
+            isPreconfigured: true,
+            actionTypeId: 'test.index-record',
+            name: 'Test:_Preconfigured_Index_Record',
+            referencedByCount: 0,
+          },
+        ]);
+      });
     });
   });
 }

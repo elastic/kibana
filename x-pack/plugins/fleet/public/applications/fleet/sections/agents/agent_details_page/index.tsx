@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useMemo, useCallback } from 'react';
 import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
 import {
@@ -15,12 +17,13 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
-import { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
-import { PAGE_ROUTING_PATHS } from '../../../constants';
+
+import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
+import { FLEET_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
 import {
   useGetOneAgent,
@@ -29,13 +32,14 @@ import {
   useBreadcrumbs,
   useStartServices,
   useKibanaVersion,
+  useIntraAppState,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
+import { isAgentUpgradeable } from '../../../services';
+
 import { AgentRefreshContext } from './hooks';
 import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
-import { useIntraAppState } from '../../../hooks/use_intra_app_state';
-import { isAgentUpgradeable } from '../../../services';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
@@ -77,12 +81,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="arrowLeft"
-            href={getHref('fleet_agent_list')}
-            flush="left"
-            size="xs"
-          >
+          <EuiButtonEmpty iconType="arrowLeft" href={getHref('agent_list')} flush="left" size="xs">
             <FormattedMessage
               id="xpack.fleet.agentDetails.viewAgentListTitle"
               defaultMessage="View all agents"
@@ -190,17 +189,19 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 ),
             },
             {
-              content: (
-                <AgentDetailsActionMenu
-                  agent={agentData.item}
-                  assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
-                  onCancelReassign={
-                    routeState && routeState.onDoneNavigateTo
-                      ? reassignCancelClickHandler
-                      : undefined
-                  }
-                />
-              ),
+              content:
+                isAgentPolicyLoading || agentPolicyData?.item?.is_managed ? undefined : (
+                  <AgentDetailsActionMenu
+                    agent={agentData.item}
+                    agentPolicy={agentPolicyData?.item}
+                    assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
+                    onCancelReassign={
+                      routeState && routeState.onDoneNavigateTo
+                        ? reassignCancelClickHandler
+                        : undefined
+                    }
+                  />
+                ),
             },
           ].map((item, index) => (
             <EuiFlexItem grow={false} key={index}>
@@ -227,7 +228,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
           defaultMessage: 'Agent details',
         }),
-        href: getHref('fleet_agent_details', { agentId, tabId: 'details' }),
+        href: getHref('agent_details', { agentId, tabId: 'details' }),
         isSelected: !tabId || tabId === 'details',
       },
       {
@@ -235,7 +236,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.logsTab', {
           defaultMessage: 'Logs',
         }),
-        href: getHref('fleet_agent_details', { agentId, tabId: 'logs' }),
+        href: getHref('agent_details_logs', { agentId, tabId: 'logs' }),
         isSelected: tabId === 'logs',
       },
     ];
@@ -253,7 +254,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       <WithHeaderLayout
         leftColumn={headerLeftContent}
         rightColumn={headerRightContent}
-        tabs={(headerTabs as unknown) as EuiTabProps[]}
+        tabs={headerTabs as unknown as EuiTabProps[]}
       >
         {isLoading && isInitialRequest ? (
           <Loading />
@@ -294,7 +295,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = ({ agent, agentPolicy }) => {
-  useBreadcrumbs('fleet_agent_details', {
+  useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
       typeof agent.local_metadata.host.hostname === 'string'
@@ -304,13 +305,13 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   return (
     <Switch>
       <Route
-        path={PAGE_ROUTING_PATHS.fleet_agent_details_logs}
+        path={FLEET_ROUTING_PATHS.agent_details_logs}
         render={() => {
-          return <AgentLogs agent={agent} />;
+          return <AgentLogs agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
       <Route
-        path={PAGE_ROUTING_PATHS.fleet_agent_details}
+        path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {
           return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
         }}

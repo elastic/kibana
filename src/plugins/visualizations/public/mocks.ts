@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PluginInitializerContext } from '../../../core/public';
 import { Schema, VisualizationsSetup, VisualizationsStart } from './';
 import { Schemas } from './vis_types';
 import { VisualizationsPlugin } from './plugin';
+import { spacesPluginMock } from '../../../../x-pack/plugins/spaces/public/mocks';
 import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
@@ -17,8 +18,8 @@ import { dataPluginMock } from '../../../plugins/data/public/mocks';
 import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
-import { dashboardPluginMock } from '../../../plugins/dashboard/public/mocks';
 import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mocks';
+import { savedObjectTaggingOssPluginMock } from '../../saved_objects_tagging_oss/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -32,9 +33,9 @@ const createStartContract = (): VisualizationsStart => ({
   getAliases: jest.fn(),
   getByGroup: jest.fn(),
   unRegisterAlias: jest.fn(),
-  savedVisualizationsLoader: {
-    get: jest.fn(),
-  } as any,
+  getSavedVisualization: jest.fn(),
+  saveVisualization: jest.fn(),
+  findListItems: jest.fn(),
   showNewVisModal: jest.fn(),
   createVis: jest.fn(),
   convertFromSerializedVis: jest.fn(),
@@ -62,10 +63,11 @@ const createInstance = async () => {
       uiActions: uiActionsPluginMock.createStartContract(),
       application: applicationServiceMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
-      dashboard: dashboardPluginMock.createStartContract(),
+      spaces: spacesPluginMock.createStartContract(),
       getAttributeService: jest.fn(),
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),
+      savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
     });
 
   return {

@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
 import moment from 'moment';
+import { SecurityPluginStart } from '../../../../security/server';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
@@ -44,15 +47,19 @@ export class ReindexWorker {
   private inProgressOps: ReindexSavedObject[] = [];
   private readonly reindexService: ReindexService;
   private readonly log: Logger;
+  private readonly security: SecurityPluginStart;
 
   constructor(
     private client: SavedObjectsClientContract,
     private credentialStore: CredentialStore,
     private clusterClient: IClusterClient,
     log: Logger,
-    private licensing: LicensingPluginSetup
+    private licensing: LicensingPluginSetup,
+    security: SecurityPluginStart
   ) {
     this.log = log.get('reindex_worker');
+    this.security = security;
+
     if (ReindexWorker.workerSingleton) {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
@@ -169,7 +176,11 @@ export class ReindexWorker {
             firstOpInQueue.attributes.indexName
           );
           // Re-associate the credentials
-          this.credentialStore.set(firstOpInQueue, credential);
+          this.credentialStore.update({
+            reindexOp: firstOpInQueue,
+            security: this.security,
+            credential,
+          });
         }
       }
 
@@ -221,7 +232,7 @@ export class ReindexWorker {
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.
-    this.credentialStore.set(reindexOp, credential);
+    this.credentialStore.update({ reindexOp, security: this.security, credential });
   };
 }
 
@@ -229,19 +240,18 @@ export class ReindexWorker {
  * Swallows any exceptions that may occur during the reindex process. This prevents any errors from
  * stopping the worker from continuing to process more jobs.
  */
-const swallowExceptions = (
-  func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>,
-  log: Logger
-) => async (reindexOp: ReindexSavedObject) => {
-  try {
-    return await func(reindexOp);
-  } catch (e) {
-    if (reindexOp.attributes.locked) {
-      log.debug(`Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
-    } else {
-      log.warn(`Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`);
-    }
+const swallowExceptions =
+  (func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>, log: Logger) =>
+  async (reindexOp: ReindexSavedObject) => {
+    try {
+      return await func(reindexOp);
+    } catch (e) {
+      if (reindexOp.attributes.locked) {
+        log.debug(`Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
+      } else {
+        log.warn(`Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`);
+      }
 
-    return reindexOp;
-  }
-};
+      return reindexOp;
+    }
+  };

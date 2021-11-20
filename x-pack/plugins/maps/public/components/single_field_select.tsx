@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -16,20 +17,20 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { IFieldType } from 'src/plugins/data/public';
-import { FieldIcon } from '../../../../../src/plugins/kibana_react/public';
+import { FieldIcon } from '@kbn/react-field/field_icon';
+import { IndexPatternField } from 'src/plugins/data/public';
 
 function fieldsToOptions(
-  fields?: IFieldType[],
-  isFieldDisabled?: (field: IFieldType) => boolean
-): Array<EuiComboBoxOptionOption<IFieldType>> {
+  fields?: IndexPatternField[],
+  isFieldDisabled?: (field: IndexPatternField) => boolean
+): Array<EuiComboBoxOptionOption<IndexPatternField>> {
   if (!fields) {
     return [];
   }
 
   return fields
     .map((field) => {
-      const option: EuiComboBoxOptionOption<IFieldType> = {
+      const option: EuiComboBoxOptionOption<IndexPatternField> = {
         value: field,
         label: field.displayName ? field.displayName : field.name,
       };
@@ -44,14 +45,14 @@ function fieldsToOptions(
 }
 
 type Props = Omit<
-  EuiComboBoxProps<IFieldType>,
+  EuiComboBoxProps<IndexPatternField>,
   'isDisabled' | 'onChange' | 'options' | 'renderOption' | 'selectedOptions' | 'singleSelection'
 > & {
-  fields?: IFieldType[];
+  fields?: IndexPatternField[];
   onChange: (fieldName?: string) => void;
   value: string | null; // index pattern field name
-  isFieldDisabled?: (field: IFieldType) => boolean;
-  getFieldDisabledReason?: (field: IFieldType) => string | null;
+  isFieldDisabled?: (field: IndexPatternField) => boolean;
+  getFieldDisabledReason?: (field: IndexPatternField) => string | null;
 };
 
 export function SingleFieldSelect({
@@ -63,7 +64,7 @@ export function SingleFieldSelect({
   ...rest
 }: Props) {
   function renderOption(
-    option: EuiComboBoxOptionOption<IFieldType>,
+    option: EuiComboBoxOptionOption<IndexPatternField>,
     searchValue: string,
     contentClassName: string
   ) {
@@ -90,13 +91,13 @@ export function SingleFieldSelect({
     );
   }
 
-  const onSelection = (selectedOptions: Array<EuiComboBoxOptionOption<IFieldType>>) => {
+  const onSelection = (selectedOptions: Array<EuiComboBoxOptionOption<IndexPatternField>>) => {
     onChange(_.get(selectedOptions, '0.value.name'));
   };
 
-  const selectedOptions: Array<EuiComboBoxOptionOption<IFieldType>> = [];
+  const selectedOptions: Array<EuiComboBoxOptionOption<IndexPatternField>> = [];
   if (value && fields) {
-    const selectedField = fields.find((field: IFieldType) => {
+    const selectedField = fields.find((field: IndexPatternField) => {
       return field.name === value;
     });
     if (selectedField) {
@@ -113,7 +114,7 @@ export function SingleFieldSelect({
       options={fieldsToOptions(fields, isFieldDisabled)}
       selectedOptions={selectedOptions}
       onChange={onSelection}
-      isDisabled={!fields}
+      isDisabled={!fields || fields.length === 0}
       renderOption={renderOption}
       {...rest}
     />

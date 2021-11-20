@@ -1,25 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getBasePath, isIntegrationsPopupOpen } from './index';
 import { AppState } from '../../state';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants/settings_defaults';
 
 describe('state selectors', () => {
   const state: AppState = {
-    overviewFilters: {
-      filters: {
-        locations: [],
-        ports: [],
-        schemes: [],
-        tags: [],
-      },
-      errors: [],
-      loading: false,
-    },
     dynamicSettings: {
       settings: DYNAMIC_SETTINGS_DEFAULTS,
       loading: false,
@@ -29,15 +20,6 @@ describe('state selectors', () => {
       monitorLocationsList: new Map(),
       loading: false,
       errors: [],
-    },
-    snapshot: {
-      count: {
-        up: 2,
-        down: 0,
-        total: 2,
-      },
-      errors: [],
-      loading: false,
     },
     ui: {
       alertFlyoutVisible: false,
@@ -50,11 +32,6 @@ describe('state selectors', () => {
     monitorStatus: {
       status: null,
       loading: false,
-    },
-    indexPattern: {
-      index_pattern: null,
-      loading: false,
-      errors: [],
     },
     ping: {
       pingHistogram: null,
@@ -101,10 +78,7 @@ describe('state selectors', () => {
       },
     },
     certificates: {
-      certs: {
-        data: null,
-        loading: false,
-      },
+      total: 0,
     },
     selectedFilters: null,
     alerts: {
@@ -117,6 +91,11 @@ describe('state selectors', () => {
     },
     journeys: {},
     networkEvents: {},
+    synthetics: {
+      blocks: {},
+      cacheSize: 0,
+      hitCount: [],
+    },
   };
 
   it('selects base path from state', () => {

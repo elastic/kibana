@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
   HostsRequestOptions,
@@ -39,9 +40,10 @@ export const buildHostsQuery = ({
   const agg = { host_count: { cardinality: { field: 'host.name' } } };
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
+    track_total_hits: false,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
@@ -56,7 +58,7 @@ export const buildHostsQuery = ({
                 sort: [
                   {
                     '@timestamp': {
-                      order: 'desc',
+                      order: 'desc' as const,
                     },
                   },
                 ],
@@ -70,7 +72,6 @@ export const buildHostsQuery = ({
       },
       query: { bool: { filter } },
       size: 0,
-      track_total_hits: false,
     },
   };
 
@@ -86,6 +87,6 @@ const getQueryOrder = (sort: SortField<HostsFields>): QueryOrder => {
     case HostsFields.hostName:
       return { _key: sort.direction };
     default:
-      return assertUnreachable(sort.field as never);
+      return assertUnreachable(sort.field);
   }
 };

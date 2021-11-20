@@ -1,182 +1,255 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
-import { DataStream } from '../../types';
-import { GetDataStreamsResponse, KibanaAssetType, KibanaSavedObjectType } from '../../../common';
-import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { keyBy, keys, merge } from 'lodash';
+import type { RequestHandler } from 'src/core/server';
+
+import type { DataStream } from '../../types';
+import { KibanaSavedObjectType } from '../../../common';
+import type { GetDataStreamsResponse } from '../../../common';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
-const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*';
+const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
+interface ESDataStreamInfo {
+  name: string;
+  timestamp_field: {
+    name: string;
+  };
+  indices: Array<{ index_name: string; index_uuid: string }>;
+  generation: number;
+  _meta?: {
+    package?: {
+      name: string;
+    };
+    managed_by?: string;
+    managed?: boolean;
+    [key: string]: any;
+  };
+  status: string;
+  template: string;
+  ilm_policy?: string;
+  hidden: boolean;
+}
+
+interface ESDataStreamStats {
+  data_stream: string;
+  backing_indices: number;
+  store_size_bytes: number;
+  maximum_timestamp: number;
+}
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
+  const body: GetDataStreamsResponse = {
+    data_streams: [],
+  };
 
   try {
-    // Get stats (size on disk) of all potentially matching indices
-    const { indices: indexStats } = await callCluster('indices.stats', {
-      index: DATA_STREAM_INDEX_PATTERN,
-      metric: ['store'],
-    });
-
-    // Get all matching indices and info about each
-    // This returns the top 100,000 indices (as buckets) by last activity
-    const { aggregations } = await callCluster('search', {
-      index: DATA_STREAM_INDEX_PATTERN,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            must: [
-              {
-                exists: {
-                  field: 'data_stream.namespace',
-                },
-              },
-              {
-                exists: {
-                  field: 'data_stream.dataset',
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          index: {
-            terms: {
-              field: '_index',
-              size: 100000,
-              order: {
-                last_activity: 'desc',
-              },
-            },
-            aggs: {
-              dataset: {
-                terms: {
-                  field: 'data_stream.dataset',
-                  size: 1,
-                },
-              },
-              namespace: {
-                terms: {
-                  field: 'data_stream.namespace',
-                  size: 1,
-                },
-              },
-              type: {
-                terms: {
-                  field: 'data_stream.type',
-                  size: 1,
-                },
-              },
-              last_activity: {
-                max: {
-                  field: '@timestamp',
-                },
-              },
-            },
-          },
-        },
+    // Get matching data streams, their stats, and package SOs
+    const [
+      {
+        body: { data_streams: dataStreamsInfo },
       },
-    });
+      {
+        body: { data_streams: dataStreamStats },
+      },
+      packageSavedObjects,
+    ] = await Promise.all([
+      esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
+      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN }),
+      getPackageSavedObjects(context.core.savedObjects.client),
+    ]);
 
-    const body: GetDataStreamsResponse = {
-      data_streams: [],
-    };
+    const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
+    const dataStreamsStatsByName = keyBy<ESDataStreamStats>(dataStreamStats, 'data_stream');
 
-    if (!(aggregations && aggregations.index && aggregations.index.buckets)) {
-      return response.ok({
-        body,
-      });
-    }
+    // Combine data stream info
+    const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
+    const dataStreamNames = keys(dataStreams);
 
-    const {
-      index: { buckets: indexResults },
-    } = aggregations;
-
-    const packageSavedObjects = await getPackageSavedObjects(context.core.savedObjects.client);
+    // Map package SOs
+    const packageSavedObjectsByName = keyBy(packageSavedObjects.saved_objects, 'id');
     const packageMetadata: any = {};
 
-    const dataStreamsPromises = (indexResults as any[]).map(async (result) => {
-      const {
-        key: indexName,
-        dataset: { buckets: datasetBuckets },
-        namespace: { buckets: namespaceBuckets },
-        type: { buckets: typeBuckets },
-        last_activity: { value_as_string: lastActivity },
-      } = result;
-
-      // We don't have a reliable way to associate index with package ID, so
-      // this is a hack to extract the package ID from the first part of the dataset name
-      // with fallback to extraction from index name
-      const pkg = datasetBuckets.length
-        ? datasetBuckets[0].key.split('.')[0]
-        : indexName.split('-')[1].split('.')[0];
-      const pkgSavedObject = packageSavedObjects.saved_objects.filter((p) => p.id === pkg);
-
-      // if
-      // - the datastream is associated with a package
-      // - and the package has been installed through EPM
-      // - and we didn't pick the metadata in an earlier iteration of this map()
-      if (pkg !== '' && pkgSavedObject.length > 0 && !packageMetadata[pkg]) {
-        // then pick the dashboards from the package saved object
-        const dashboards =
-          pkgSavedObject[0].attributes?.installed_kibana?.filter(
-            (o) => o.type === KibanaSavedObjectType.dashboard
-          ) || [];
-        // and then pick the human-readable titles from the dashboard saved objects
-        const enhancedDashboards = await getEnhancedDashboards(
-          context.core.savedObjects.client,
-          dashboards
-        );
-
-        packageMetadata[pkg] = {
-          version: pkgSavedObject[0].attributes?.version || '',
-          dashboards: enhancedDashboards,
-        };
+    // Get dashboard information for all packages
+    const dashboardIdsByPackageName = packageSavedObjects.saved_objects.reduce<
+      Record<string, string[]>
+    >((allDashboards, pkgSavedObject) => {
+      const dashboards: string[] = [];
+      (pkgSavedObject.attributes?.installed_kibana || []).forEach((o) => {
+        if (o.type === KibanaSavedObjectType.dashboard) {
+          dashboards.push(o.id);
+        }
+      });
+      allDashboards[pkgSavedObject.id] = dashboards;
+      return allDashboards;
+    }, {});
+    const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
+      title?: string;
+    }>(
+      Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>
+        dashboardIds.map((id) => ({
+          id,
+          type: KibanaSavedObjectType.dashboard,
+          fields: ['title'],
+        }))
+      )
+    );
+    // Ignore dashboards not found
+    const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter((so) => {
+      if (so.error) {
+        if (so.error.statusCode === 404) {
+          return false;
+        }
+        throw so.error;
       }
-
-      return {
-        index: indexName,
-        dataset: datasetBuckets.length ? datasetBuckets[0].key : '',
-        namespace: namespaceBuckets.length ? namespaceBuckets[0].key : '',
-        type: typeBuckets.length ? typeBuckets[0].key : '',
-        package: pkgSavedObject.length ? pkg : '',
-        package_version: packageMetadata[pkg] ? packageMetadata[pkg].version : '',
-        last_activity: lastActivity,
-        size_in_bytes: indexStats[indexName] ? indexStats[indexName].total.store.size_in_bytes : 0,
-        dashboards: packageMetadata[pkg] ? packageMetadata[pkg].dashboards : [],
-      };
+      return true;
     });
 
-    const dataStreams: DataStream[] = await Promise.all(dataStreamsPromises);
+    const allDashboardSavedObjectsById = keyBy(
+      allDashboardSavedObjects,
+      (dashboardSavedObject) => dashboardSavedObject.id
+    );
 
-    body.data_streams = dataStreams;
+    // Query additional information for each data stream
+    const dataStreamPromises = dataStreamNames.map(async (dataStreamName) => {
+      const dataStream = dataStreams[dataStreamName];
+      const dataStreamResponse: DataStream = {
+        index: dataStreamName,
+        dataset: '',
+        namespace: '',
+        type: '',
+        package: dataStream._meta?.package?.name || '',
+        package_version: '',
+        last_activity_ms: dataStream.maximum_timestamp, // overridden below if maxIngestedTimestamp agg returns a result
+        size_in_bytes: dataStream.store_size_bytes,
+        dashboards: [],
+      };
 
+      // Query backing indices to extract data stream dataset, namespace, and type values
+      const {
+        body: { aggregations: dataStreamAggs },
+      } = await esClient.search({
+        index: dataStream.name,
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                {
+                  exists: {
+                    field: 'data_stream.namespace',
+                  },
+                },
+                {
+                  exists: {
+                    field: 'data_stream.dataset',
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            maxIngestedTimestamp: {
+              max: {
+                field: 'event.ingested',
+              },
+            },
+            dataset: {
+              terms: {
+                field: 'data_stream.dataset',
+                size: 1,
+              },
+            },
+            namespace: {
+              terms: {
+                field: 'data_stream.namespace',
+                size: 1,
+              },
+            },
+            type: {
+              terms: {
+                field: 'data_stream.type',
+                size: 1,
+              },
+            },
+          },
+        },
+      });
+
+      const { maxIngestedTimestamp } = dataStreamAggs as Record<
+        string,
+        estypes.AggregationsValueAggregate
+      >;
+      const { dataset, namespace, type } = dataStreamAggs as Record<
+        string,
+        estypes.AggregationsMultiBucketAggregate<{ key?: string; value?: number }>
+      >;
+
+      // some integrations e.g custom logs don't have event.ingested
+      if (maxIngestedTimestamp?.value) {
+        dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
+      }
+
+      dataStreamResponse.dataset = dataset.buckets[0]?.key || '';
+      dataStreamResponse.namespace = namespace.buckets[0]?.key || '';
+      dataStreamResponse.type = type.buckets[0]?.key || '';
+
+      // Find package saved object
+      const pkgName = dataStreamResponse.package;
+      const pkgSavedObject = pkgName ? packageSavedObjectsByName[pkgName] : null;
+
+      if (pkgSavedObject) {
+        // if
+        // - the data stream is associated with a package
+        // - and the package has been installed through EPM
+        // - and we didn't pick the metadata in an earlier iteration of this map()
+        if (!packageMetadata[pkgName]) {
+          // then pick the dashboards from the package saved object
+          const packageDashboardIds = dashboardIdsByPackageName[pkgName] || [];
+          const packageDashboards = packageDashboardIds.reduce<
+            Array<{ id: string; title: string }>
+          >((dashboards, dashboardId) => {
+            const dashboard = allDashboardSavedObjectsById[dashboardId];
+            if (dashboard) {
+              dashboards.push({
+                id: dashboard.id,
+                title: dashboard.attributes.title || dashboard.id,
+              });
+            }
+            return dashboards;
+          }, []);
+
+          packageMetadata[pkgName] = {
+            version: pkgSavedObject.attributes?.version || '',
+            dashboards: packageDashboards,
+          };
+        }
+
+        // Set values from package information
+        dataStreamResponse.package = pkgName;
+        dataStreamResponse.package_version = packageMetadata[pkgName].version;
+        dataStreamResponse.dashboards = packageMetadata[pkgName].dashboards;
+      }
+
+      return dataStreamResponse;
+    });
+
+    // Return final data streams objects sorted by last activity, descending
+    // After filtering out data streams that are missing dataset/namespace/type fields
+    body.data_streams = (await Promise.all(dataStreamPromises))
+      .filter(({ dataset, namespace, type }) => dataset && namespace && type)
+      .sort((a, b) => b.last_activity_ms - a.last_activity_ms);
     return response.ok({
       body,
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
-};
-
-const getEnhancedDashboards = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  dashboards: any[]
-) => {
-  const dashboardsPromises = dashboards.map(async (db) => {
-    const dbSavedObject: any = await getKibanaSavedObject(
-      savedObjectsClient,
-      KibanaAssetType.dashboard,
-      db.id
-    );
-    return {
-      id: db.id,
-      title: dbSavedObject.attributes?.title || db.id,
-    };
-  });
-  return await Promise.all(dashboardsPromises);
 };

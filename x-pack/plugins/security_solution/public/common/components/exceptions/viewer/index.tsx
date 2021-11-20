@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
+import type {
+  ExceptionListTypeEnum,
+  ExceptionListItemSchema,
+  ExceptionListIdentifiers,
+  UseExceptionListItemsSuccess,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -16,14 +24,7 @@ import { Loader } from '../../../../common/components/loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import { ExceptionListItemIdentifiers, Filter } from '../types';
 import { allExceptionItemsReducer, State, ViewerModalName } from './reducer';
-import {
-  useExceptionListItems,
-  ExceptionListIdentifiers,
-  ExceptionListTypeEnum,
-  ExceptionListItemSchema,
-  UseExceptionListItemsSuccess,
-  useApi,
-} from '../../../../../public/lists_plugin_deps';
+
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
@@ -72,17 +73,18 @@ const ExceptionsViewerComponent = ({
   const { services } = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const onDispatchToaster = useCallback(
-    ({ title, color, iconType }) => (): void => {
-      dispatchToaster({
-        type: 'addToaster',
-        toast: {
-          id: uuid.v4(),
-          title,
-          color,
-          iconType,
-        },
-      });
-    },
+    ({ title, color, iconType }) =>
+      (): void => {
+        dispatchToaster({
+          type: 'addToaster',
+          toast: {
+            id: uuid.v4(),
+            title,
+            color,
+            iconType,
+          },
+        });
+      },
     [dispatchToaster]
   );
   const [

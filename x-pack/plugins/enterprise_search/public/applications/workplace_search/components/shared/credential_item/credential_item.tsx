@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -18,6 +19,21 @@ import {
   EuiFieldPassword,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+export const COPY_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.credentialItem.copy.tooltip',
+  {
+    defaultMessage: 'Copy to clipboard',
+  }
+);
+
+export const COPIED_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.credentialItem.copied.tooltip',
+  {
+    defaultMessage: 'Copied!',
+  }
+);
 
 interface CredentialItemProps {
   label: string;
@@ -36,6 +52,14 @@ export const CredentialItem: React.FC<CredentialItemProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
+  const SHOW_CREDENTIAL_TOOLTIP = i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.credentialItem.show.tooltip',
+    {
+      defaultMessage: 'Show {credential}.',
+      values: { credential: label },
+    }
+  );
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -52,10 +76,14 @@ export const CredentialItem: React.FC<CredentialItemProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {!hideCopy && (
             <EuiFlexItem grow={false}>
-              <EuiCopy beforeMessage="Copy to clipboard" afterMessage="Copied!" textToCopy={value}>
+              <EuiCopy
+                beforeMessage={COPY_TOOLTIP}
+                afterMessage={COPIED_TOOLTIP}
+                textToCopy={value}
+              >
                 {(copy) => (
                   <EuiButtonIcon
-                    aria-label="Copy to Clipboard"
+                    aria-label={COPY_TOOLTIP}
                     onClick={copy}
                     iconType="copy"
                     color="primary"
@@ -65,9 +93,9 @@ export const CredentialItem: React.FC<CredentialItemProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" content={`Show ${label}`}>
+            <EuiToolTip position="top" content={SHOW_CREDENTIAL_TOOLTIP}>
               <EuiButtonIcon
-                aria-label="Show credential"
+                aria-label={SHOW_CREDENTIAL_TOOLTIP}
                 data-test-subj={`Show${upperFirst(testSubj)}`}
                 onClick={() => setIsVisible(!isVisible)}
                 iconType={isVisible ? 'eyeClosed' : 'eye'}
@@ -77,20 +105,14 @@ export const CredentialItem: React.FC<CredentialItemProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             {!isVisible ? (
-              <EuiFieldPassword
-                placeholder={label}
-                value={value}
-                readOnly
-                compressed={true}
-                disabled
-              />
+              <EuiFieldPassword placeholder={label} value={value} readOnly compressed disabled />
             ) : (
               <EuiFieldText
-                readOnly={true}
+                readOnly
                 placeholder="Compressed"
                 data-test-subj={`${testSubj}Input`}
                 value={value}
-                compressed={true}
+                compressed
                 onClick={inputSelectAll}
               />
             )}

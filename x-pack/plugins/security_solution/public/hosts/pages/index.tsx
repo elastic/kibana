@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
-
+import { Route, Switch, Redirect } from 'react-router-dom';
+import { HOSTS_PATH } from '../../../common/constants';
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
 
 import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { Hosts } from './hosts';
-import { hostsPagePath, hostDetailsPagePath } from './types';
+import { hostDetailsPagePath } from './types';
 
 const getHostsTabPath = () =>
-  `/:tabName(` +
+  `${HOSTS_PATH}/:tabName(` +
   `${HostsTableType.hosts}|` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
@@ -23,7 +24,7 @@ const getHostsTabPath = () =>
   `${HostsTableType.events}|` +
   `${HostsTableType.alerts})`;
 
-const getHostDetailsTabPath = (pagePath: string) =>
+const getHostDetailsTabPath = () =>
   `${hostDetailsPagePath}/:tabName(` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
@@ -31,24 +32,26 @@ const getHostDetailsTabPath = (pagePath: string) =>
   `${HostsTableType.events}|` +
   `${HostsTableType.alerts})`;
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
-
-export const HostsContainer = React.memo<Props>(({ url }) => {
-  const history = useHistory();
-
+export const HostsContainer = React.memo(() => {
   return (
     <Switch>
       <Route
-        path="/ml-hosts"
-        render={({ location, match }) => (
-          <MlHostConditionalContainer location={location} url={match.url} />
+        exact
+        strict
+        path={HOSTS_PATH}
+        render={({ location: { search = '' } }) => (
+          <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
         )}
       />
+
+      <Route path={`${HOSTS_PATH}/ml-hosts`}>
+        <MlHostConditionalContainer />
+      </Route>
       <Route path={getHostsTabPath()}>
         <Hosts />
       </Route>
       <Route
-        path={getHostDetailsTabPath(hostsPagePath)}
+        path={getHostDetailsTabPath()}
         render={({
           match: {
             params: { detailName },
@@ -62,20 +65,14 @@ export const HostsContainer = React.memo<Props>(({ url }) => {
             params: { detailName },
           },
           location: { search = '' },
-        }) => {
-          history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
-          return null;
-        }}
-      />
-
-      <Route
-        exact
-        strict
-        path=""
-        render={({ location: { search = '' } }) => {
-          history.replace(`${HostsTableType.hosts}${search}`);
-          return null;
-        }}
+        }) => (
+          <Redirect
+            to={{
+              pathname: `${HOSTS_PATH}/${detailName}/${HostsTableType.authentications}`,
+              search,
+            }}
+          />
+        )}
       />
     </Switch>
   );

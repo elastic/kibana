@@ -1,46 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
+import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
-import { ruleStatusServiceFactory } from './rule_status_service';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import {
-  getGapBetweenRuns,
-  getGapMaxCatchupRatio,
   getListsClient,
   getExceptions,
-  sortExceptionItems,
   checkPrivileges,
+  createSearchAfterReturnType,
 } from './utils';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
-import { searchAfterAndBulkCreate } from './search_after_bulk_create';
-import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { RuleAlertType } from '../rules/types';
-import { findMlSignals } from './find_ml_signals';
-import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportResult } from '@elastic/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { queryExecutor } from './executors/query';
+import { mlExecutor } from './executors/ml';
+import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { errors } from '@elastic/elasticsearch';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
+import { eventLogServiceMock } from '../../../../../event_log/server/mocks';
+import { createMockConfig } from '../routes/__mocks__';
 
-jest.mock('./rule_status_saved_objects_client');
-jest.mock('./rule_status_service');
-jest.mock('./search_after_bulk_create');
-jest.mock('./get_filter');
 jest.mock('./utils', () => {
   const original = jest.requireActual('./utils');
   return {
     ...original,
-    getGapBetweenRuns: jest.fn(),
-    getGapMaxCatchupRatio: jest.fn(),
     getListsClient: jest.fn(),
     getExceptions: jest.fn(),
     sortExceptionItems: jest.fn(),
@@ -48,9 +50,21 @@ jest.mock('./utils', () => {
   };
 });
 jest.mock('../notifications/schedule_notification_actions');
-jest.mock('./find_ml_signals');
-jest.mock('./bulk_create_ml_signals');
-jest.mock('../../../../common/detection_engine/parse_schedule_dates');
+jest.mock('./executors/query');
+jest.mock('./executors/ml');
+jest.mock('@kbn/securitysolution-io-ts-utils', () => {
+  const original = jest.requireActual('@kbn/securitysolution-io-ts-utils');
+  return {
+    ...original,
+    parseScheduleDates: jest.fn(),
+  };
+});
+jest.mock('../notifications/schedule_throttle_notification_actions');
+const mockRuleExecutionLogClient = ruleExecutionLogClientMock.create();
+
+jest.mock('../rule_execution_log/rule_execution_log_client', () => ({
+  RuleExecutionLogClient: jest.fn().mockImplementation(() => mockRuleExecutionLogClient),
+}));
 
 const getPayload = (
   ruleAlert: RuleAlertType,
@@ -58,26 +72,40 @@ const getPayload = (
 ): RuleExecutorOptions => ({
   alertId: ruleAlert.id,
   services,
+  name: ruleAlert.name,
+  tags: ruleAlert.tags,
   params: {
     ...ruleAlert.params,
-    actions: [],
-    enabled: ruleAlert.enabled,
-    interval: ruleAlert.schedule.interval,
-    name: ruleAlert.name,
-    tags: ruleAlert.tags,
-    throttle: ruleAlert.throttle,
   },
   state: {},
   spaceId: '',
-  name: 'name',
-  tags: [],
   startedAt: new Date('2019-12-13T16:50:33.400Z'),
   previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
   createdBy: 'elastic',
   updatedBy: 'elastic',
+  rule: {
+    name: ruleAlert.name,
+    tags: ruleAlert.tags,
+    consumer: 'foo',
+    producer: 'foo',
+    ruleTypeId: 'ruleType',
+    ruleTypeName: 'Name of rule',
+    enabled: true,
+    schedule: {
+      interval: '5m',
+    },
+    actions: ruleAlert.actions,
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    createdAt: new Date('2019-12-13T16:50:33.400Z'),
+    updatedAt: new Date('2019-12-13T16:50:33.400Z'),
+    throttle: null,
+    notifyWhen: null,
+  },
 });
 
-describe('rules_notification_alert_type', () => {
+// Deprecated
+describe.skip('signal_rule_alert_type', () => {
   const version = '8.0.0';
   const jobsSummaryMock = jest.fn();
   const mlMock = {
@@ -93,41 +121,23 @@ describe('rules_notification_alert_type', () => {
     mlSystemProvider: jest.fn(),
     modulesProvider: jest.fn(),
     resultsServiceProvider: jest.fn(),
+    alertingServiceProvider: jest.fn(),
   };
   let payload: jest.Mocked<RuleExecutorOptions>;
   let alert: ReturnType<typeof signalRulesAlertType>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
-  let ruleStatusService: Record<string, jest.Mock>;
+  let eventLogService: ReturnType<typeof eventLogServiceMock.create>;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
     logger = loggingSystemMock.createLogger();
-    ruleStatusService = {
-      success: jest.fn(),
-      find: jest.fn(),
-      goingToRun: jest.fn(),
-      error: jest.fn(),
-      partialFailure: jest.fn(),
-    };
-    (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
-    (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(0));
+    eventLogService = eventLogServiceMock.create();
     (getListsClient as jest.Mock).mockReturnValue({
       listClient: getListClientMock(),
       exceptionsClient: getExceptionListClientMock(),
     });
     (getExceptions as jest.Mock).mockReturnValue([getExceptionListItemSchemaMock()]);
-    (sortExceptionItems as jest.Mock).mockReturnValue({
-      exceptionsWithoutValueLists: [getExceptionListItemSchemaMock()],
-      exceptionsWithValueLists: [],
-    });
-    (searchAfterAndBulkCreate as jest.Mock).mockClear();
-    (getGapMaxCatchupRatio as jest.Mock).mockClear();
-    (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
-      success: true,
-      searchAfterTimes: [],
-      createdSignalsCount: 10,
-    });
     (checkPrivileges as jest.Mock).mockImplementation(async (_, indices) => {
       return {
         index: indices.reduce(
@@ -143,16 +153,21 @@ describe('rules_notification_alert_type', () => {
         ),
       };
     });
-    alertServices.callCluster.mockResolvedValue({
-      hits: {
-        total: { value: 10 },
-      },
+    const executorReturnValue = createSearchAfterReturnType({
+      createdSignalsCount: 10,
     });
-    const value: Partial<ApiResponse> = {
+    (queryExecutor as jest.Mock).mockClear();
+    (queryExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
+    (mlExecutor as jest.Mock).mockClear();
+    (mlExecutor as jest.Mock).mockResolvedValue(executorReturnValue);
+    (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+    const value: Partial<TransportResult<estypes.FieldCapsResponse>> = {
       statusCode: 200,
       body: {
+        indices: ['index1', 'index2', 'index3', 'index4'],
         fields: {
           '@timestamp': {
+            // @ts-expect-error not full interface
             date: {
               indices: ['index1', 'index2', 'index3', 'index4'],
               searchable: true,
@@ -162,8 +177,10 @@ describe('rules_notification_alert_type', () => {
         },
       },
     };
-    alertServices.scopedClusterClient.fieldCaps.mockResolvedValue(value as ApiResponse);
-    const ruleAlert = getResult();
+    alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
+      value as TransportResult<estypes.FieldCapsResponse>
+    );
+    const ruleAlert = getAlertMock(false, getQueryRuleParams());
     alertServices.savedObjectsClient.get.mockResolvedValue({
       id: 'id',
       type: 'type',
@@ -174,37 +191,53 @@ describe('rules_notification_alert_type', () => {
     payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
 
     alert = signalRulesAlertType({
+      experimentalFeatures: allowedExperimentalValues,
       logger,
       eventsTelemetry: undefined,
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
+      config: createMockConfig(),
+      eventLogService,
     });
+
+    mockRuleExecutionLogClient.logStatusChange.mockClear();
+    (scheduleThrottledNotificationActions as jest.Mock).mockClear();
   });
 
   describe('executor', () => {
-    it('should warn about the gap between runs if gap is very large', async () => {
-      (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(100, 'm'));
-      (getGapMaxCatchupRatio as jest.Mock).mockReturnValue({
-        maxCatchup: 4,
-        ratio: 20,
-        gapDiffInUnits: 95,
-      });
+    it('should log success status if signals were created', async () => {
+      payload.previousStartedAt = null;
       await alert.executor(payload);
-      expect(logger.warn).toHaveBeenCalled();
-      expect(logger.warn.mock.calls[0][0]).toContain(
-        '2 hours (6000000ms) has passed since last rule execution, and signals may have been missed.'
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.succeeded,
+        })
       );
-      expect(ruleStatusService.error).toHaveBeenCalled();
-      expect(ruleStatusService.error.mock.calls[0][0]).toContain(
-        '2 hours (6000000ms) has passed since last rule execution, and signals may have been missed.'
-      );
-      expect(ruleStatusService.error.mock.calls[0][1]).toEqual({
-        gap: '2 hours',
-      });
     });
 
-    it('should set a partial failure for when rules cannot read ALL provided indices', async () => {
+    it('should warn about the gap between runs if gap is very large', async () => {
+      payload.previousStartedAt = moment(payload.startedAt).subtract(100, 'm').toDate();
+      await alert.executor(payload);
+      expect(logger.warn).toHaveBeenCalled();
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus['going to run'],
+        })
+      );
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.failed,
+          metrics: {
+            executionGap: expect.any(Object),
+          },
+        })
+      );
+    });
+
+    it('should set a warning for when rules cannot read ALL provided indices', async () => {
       (checkPrivileges as jest.Mock).mockResolvedValueOnce({
         username: 'elastic',
         has_all_requested: false,
@@ -222,11 +255,18 @@ describe('rules_notification_alert_type', () => {
         },
         application: {},
       });
-      payload.params.index = ['some*', 'myfa*', 'anotherindex*'];
+      const newRuleAlert = getAlertMock(false, getQueryRuleParams());
+      newRuleAlert.params.index = ['some*', 'myfa*', 'anotherindex*'];
+      payload = getPayload(newRuleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
+
       await alert.executor(payload);
-      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
-      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
-        'Missing required read privileges on the following indices: ["some*"]'
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus['partial failure'],
+          message:
+            'This rule may not have the required read privileges to the following indices/index patterns: ["some*"]',
+        })
       );
     });
 
@@ -245,89 +285,66 @@ describe('rules_notification_alert_type', () => {
         },
         application: {},
       });
-      payload.params.index = ['some*', 'myfa*'];
-      await alert.executor(payload);
-      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
-      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
-        'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]'
-      );
-    });
-
-    it('should NOT warn about the gap between runs if gap small', async () => {
-      (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(1, 'm'));
-      (getGapMaxCatchupRatio as jest.Mock).mockReturnValue({
-        maxCatchup: 1,
-        ratio: 1,
-        gapDiffInUnits: 1,
-      });
-      await alert.executor(payload);
-      expect(logger.warn).toHaveBeenCalledTimes(0);
-      expect(ruleStatusService.error).toHaveBeenCalledTimes(0);
-    });
-
-    it("should set refresh to 'wait_for' when actions are present", async () => {
-      const ruleAlert = getResult();
-      ruleAlert.actions = [
-        {
-          actionTypeId: '.slack',
-          params: {
-            message:
-              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
-          },
-          group: 'default',
-          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-        },
-      ];
-
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      await alert.executor(payload);
-      expect((searchAfterAndBulkCreate as jest.Mock).mock.calls[0][0].refresh).toEqual('wait_for');
-      (searchAfterAndBulkCreate as jest.Mock).mockClear();
-    });
-
-    it('should set refresh to false when actions are not present', async () => {
-      await alert.executor(payload);
-      expect((searchAfterAndBulkCreate as jest.Mock).mock.calls[0][0].refresh).toEqual(false);
-      (searchAfterAndBulkCreate as jest.Mock).mockClear();
-    });
-
-    it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
-      const ruleAlert = getResult();
-      ruleAlert.actions = [
-        {
-          actionTypeId: '.slack',
-          params: {
-            message:
-              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
-          },
-          group: 'default',
-          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-        },
-      ];
-
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
+      const newRuleAlert = getAlertMock(false, getQueryRuleParams());
+      newRuleAlert.params.index = ['some*', 'myfa*', 'anotherindex*'];
+      payload = getPayload(newRuleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
 
       await alert.executor(payload);
-
-      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
-          signalsCount: 10,
+          newStatus: RuleExecutionStatus['partial failure'],
+          message:
+            'This rule may not have the required read privileges to the following indices/index patterns: ["myfa*","some*"]',
         })
       );
     });
 
+    it('should NOT warn about the gap between runs if gap small', async () => {
+      payload.previousStartedAt = moment().subtract(10, 'm').toDate();
+      await alert.executor(payload);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenCalledTimes(2);
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus['going to run'],
+        })
+      );
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.succeeded,
+        })
+      );
+    });
+
+    it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+
+      await alert.executor(payload);
+    });
+
     it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
       ruleAlert.params.meta = {};
       ruleAlert.actions = [
         {
@@ -341,26 +358,22 @@ describe('rules_notification_alert_type', () => {
         },
       ];
 
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'rule-id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
-      payload.params.meta = {};
-      await alert.executor(payload);
+      const modifiedPayload = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
+
+      await alert.executor(modifiedPayload);
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          resultsLink:
-            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+          resultsLink: `/app/security/detections/rules/id/${ruleAlert.id}?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))`,
         })
       );
     });
 
     it('should resolve results_link when meta is undefined use "/app/security"', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
       delete ruleAlert.params.meta;
       ruleAlert.actions = [
         {
@@ -374,26 +387,22 @@ describe('rules_notification_alert_type', () => {
         },
       ];
 
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'rule-id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
-      delete payload.params.meta;
-      await alert.executor(payload);
+      const modifiedPayload = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
+
+      await alert.executor(modifiedPayload);
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          resultsLink:
-            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+          resultsLink: `/app/security/detections/rules/id/${ruleAlert.id}?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))`,
         })
       );
     });
 
     it('should resolve results_link with a custom link', async () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
       ruleAlert.params.meta = { kibana_siem_app_url: 'http://localhost' };
       ruleAlert.actions = [
         {
@@ -407,219 +416,39 @@ describe('rules_notification_alert_type', () => {
         },
       ];
 
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'rule-id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
-      payload.params.meta = { kibana_siem_app_url: 'http://localhost' };
-      await alert.executor(payload);
+      const modifiedPayload = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
+
+      await alert.executor(modifiedPayload);
 
       expect(scheduleNotificationActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          resultsLink:
-            'http://localhost/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+          resultsLink: `http://localhost/detections/rules/id/${ruleAlert.id}?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))`,
         })
       );
     });
 
     describe('ML rule', () => {
-      it('should throw an error if ML plugin was not available', async () => {
-        const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
-        alert = signalRulesAlertType({
-          logger,
-          eventsTelemetry: undefined,
-          version,
-          ml: undefined,
-          lists: undefined,
-        });
-        await alert.executor(payload);
-        expect(logger.error).toHaveBeenCalled();
-        expect(logger.error.mock.calls[0][0]).toContain(
-          'ML plugin unavailable during rule execution'
-        );
-      });
-
-      it('should throw an error if machineLearningJobId or anomalyThreshold was not null', async () => {
-        const ruleAlert = getMlResult();
-        ruleAlert.params.anomalyThreshold = undefined;
-        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
-        await alert.executor(payload);
-        expect(logger.error).toHaveBeenCalled();
-        expect(logger.error.mock.calls[0][0]).toContain(
-          'Machine learning rule is missing job id and/or anomaly threshold'
-        );
-      });
-
-      it('should throw an error if Machine learning job summary was null', async () => {
-        const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
-        jobsSummaryMock.mockResolvedValue([]);
-        await alert.executor(payload);
-        expect(logger.warn).toHaveBeenCalled();
-        expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job is not started');
-        expect(ruleStatusService.error).toHaveBeenCalled();
-        expect(ruleStatusService.error.mock.calls[0][0]).toContain(
-          'Machine learning job is not started'
-        );
-      });
-
-      it('should log an error if Machine learning job was not started', async () => {
-        const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
-        jobsSummaryMock.mockResolvedValue([
-          {
-            id: 'some_job_id',
-            jobState: 'starting',
-            datafeedState: 'started',
-          },
-        ]);
-        (findMlSignals as jest.Mock).mockResolvedValue({
-          _shards: {},
-          hits: {
-            hits: [],
-          },
-        });
-        await alert.executor(payload);
-        expect(logger.warn).toHaveBeenCalled();
-        expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job is not started');
-        expect(ruleStatusService.error).toHaveBeenCalled();
-        expect(ruleStatusService.error.mock.calls[0][0]).toContain(
-          'Machine learning job is not started'
-        );
-      });
-
-      it('should not call ruleStatusService.success if no anomalies were found', async () => {
-        const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
-        jobsSummaryMock.mockResolvedValue([]);
-        (findMlSignals as jest.Mock).mockResolvedValue({
-          _shards: {},
-          hits: {
-            hits: [],
-          },
-        });
-        (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
-          success: true,
-          bulkCreateDuration: 0,
-          createdItemsCount: 0,
-          errors: [],
-        });
-        await alert.executor(payload);
-        expect(ruleStatusService.success).not.toHaveBeenCalled();
-      });
-
-      it('should call ruleStatusService.success if signals were created', async () => {
-        const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
-        jobsSummaryMock.mockResolvedValue([
-          {
-            id: 'some_job_id',
-            jobState: 'started',
-            datafeedState: 'started',
-          },
-        ]);
-        (findMlSignals as jest.Mock).mockResolvedValue({
-          _shards: { failed: 0 },
-          hits: {
-            hits: [{}],
-          },
-        });
-        (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
-          success: true,
-          bulkCreateDuration: 1,
-          createdItemsCount: 1,
-          errors: [],
-        });
-        await alert.executor(payload);
-        expect(ruleStatusService.success).toHaveBeenCalled();
-      });
-
       it('should not call checkPrivileges if ML rule', async () => {
-        const ruleAlert = getMlResult();
-        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
-        jobsSummaryMock.mockResolvedValue([
-          {
-            id: 'some_job_id',
-            jobState: 'started',
-            datafeedState: 'started',
-          },
-        ]);
-        (findMlSignals as jest.Mock).mockResolvedValue({
-          _shards: { failed: 0 },
-          hits: {
-            hits: [{}],
-          },
-        });
-        (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
-          success: true,
-          bulkCreateDuration: 1,
-          createdItemsCount: 1,
-          errors: [],
-        });
-        (checkPrivileges as jest.Mock).mockClear();
-
-        await alert.executor(payload);
-        expect(checkPrivileges).toHaveBeenCalledTimes(0);
-        expect(ruleStatusService.success).toHaveBeenCalled();
-      });
-
-      it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
-        const ruleAlert = getMlResult();
-        ruleAlert.actions = [
-          {
-            actionTypeId: '.slack',
-            params: {
-              message:
-                'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
-            },
-            group: 'default',
-            id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-          },
-        ];
-        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
+        const ruleAlert = getAlertMock(false, getMlRuleParams());
         alertServices.savedObjectsClient.get.mockResolvedValue({
           id: 'id',
           type: 'type',
           references: [],
           attributes: ruleAlert,
         });
-        jobsSummaryMock.mockResolvedValue([]);
-        (findMlSignals as jest.Mock).mockResolvedValue({
-          _shards: { failed: 0 },
-          hits: {
-            hits: [{}],
-          },
-        });
-        (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
-          success: true,
-          bulkCreateDuration: 1,
-          createdItemsCount: 1,
-          errors: [],
-        });
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
+        payload.previousStartedAt = null;
+        (checkPrivileges as jest.Mock).mockClear();
 
         await alert.executor(payload);
-
-        expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect(checkPrivileges).toHaveBeenCalledTimes(0);
+        expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
           expect.objectContaining({
-            signalsCount: 1,
+            newStatus: RuleExecutionStatus.succeeded,
           })
-        );
-      });
-    });
-
-    describe('threat match', () => {
-      it('should throw an error if threatQuery or threatIndex or threatMapping was not null', async () => {
-        const result = getResult();
-        result.params.type = 'threat_match';
-        payload = getPayload(result, alertServices) as jest.Mocked<RuleExecutorOptions>;
-        await alert.executor(payload);
-        expect(logger.error).toHaveBeenCalled();
-        expect(logger.error.mock.calls[0][0]).toContain(
-          'An error occurred during rule execution: message: "Indicator match is missing threatQuery and/or threatIndex and/or threatMapping: threatQuery: "undefined" threatIndex: "undefined" threatMapping: "undefined"" name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
         );
       });
     });
@@ -629,36 +458,142 @@ describe('rules_notification_alert_type', () => {
     it('when bulk indexing failed', async () => {
       const result: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: [],
         bulkCreateTimes: [],
         lastLookBackDate: null,
         createdSignalsCount: 0,
         createdSignals: [],
+        warningMessages: [],
         errors: ['Error that bubbled up.'],
       };
-      (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue(result);
+      (queryExecutor as jest.Mock).mockResolvedValue(result);
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain(
         'Bulk Indexing of signals failed: Error that bubbled up. name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
       );
-      expect(ruleStatusService.error).toHaveBeenCalled();
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.failed,
+        })
+      );
     });
 
     it('when error was thrown', async () => {
-      (searchAfterAndBulkCreate as jest.Mock).mockRejectedValue({});
+      (queryExecutor as jest.Mock).mockRejectedValue({});
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain('An error occurred during rule execution');
-      expect(ruleStatusService.error).toHaveBeenCalled();
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.failed,
+        })
+      );
     });
 
-    it('and call ruleStatusService with the default message', async () => {
-      (searchAfterAndBulkCreate as jest.Mock).mockRejectedValue({});
+    it('and log failure with the default message', async () => {
+      (queryExecutor as jest.Mock).mockReturnValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(
+          new errors.ResponseError(
+            elasticsearchClientMock.createApiResponse({
+              statusCode: 400,
+              body: { error: { type: 'some_error_type' } },
+            })
+          )
+        )
+      );
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain('An error occurred during rule execution');
-      expect(ruleStatusService.error).toHaveBeenCalled();
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.failed,
+        })
+      );
+    });
+
+    it('should call scheduleThrottledNotificationActions if result is false to prevent the throttle from being reset', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        warningMessages: [],
+        errors: ['Error that bubbled up.'],
+      };
+      (queryExecutor as jest.Mock).mockResolvedValue(result);
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
+      ruleAlert.throttle = '1h';
+      const payLoadWithThrottle = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
+      payLoadWithThrottle.rule.throttle = '1h';
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      await alert.executor(payLoadWithThrottle);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should NOT call scheduleThrottledNotificationActions if result is false and the throttle is not set', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        warningMessages: [],
+        errors: ['Error that bubbled up.'],
+      };
+      (queryExecutor as jest.Mock).mockResolvedValue(result);
+      await alert.executor(payload);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(0);
+    });
+
+    it('should call scheduleThrottledNotificationActions if an error was thrown to prevent the throttle from being reset', async () => {
+      (queryExecutor as jest.Mock).mockRejectedValue({});
+      const ruleAlert = getAlertMock(false, getQueryRuleParams());
+      ruleAlert.throttle = '1h';
+      const payLoadWithThrottle = getPayload(
+        ruleAlert,
+        alertServices
+      ) as jest.Mocked<RuleExecutorOptions>;
+      payLoadWithThrottle.rule.throttle = '1h';
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      await alert.executor(payLoadWithThrottle);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should NOT call scheduleThrottledNotificationActions if an error was thrown to prevent the throttle from being reset if throttle is not defined', async () => {
+      const result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        warning: false,
+        searchAfterTimes: [],
+        bulkCreateTimes: [],
+        lastLookBackDate: null,
+        createdSignalsCount: 0,
+        createdSignals: [],
+        warningMessages: [],
+        errors: ['Error that bubbled up.'],
+      };
+      (queryExecutor as jest.Mock).mockRejectedValue(result);
+      await alert.executor(payload);
+      expect(scheduleThrottledNotificationActions).toHaveBeenCalledTimes(0);
     });
   });
 });

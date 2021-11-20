@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "UAC Bypass Attempt via Privileged IFileOperation COM Interface",
   "query": "file where event.type : \"change\" and process.name : \"dllhost.exe\" and\n  /* Known modules names side loaded into process running with high or system integrity level for UAC Bypass, update here for new modules */\n  file.name : (\"wow64log.dll\", \"comctl32.dll\", \"DismCore.dll\", \"OskSupport.dll\", \"duser.dll\", \"Accessibility.ni.dll\") and\n  /* has no impact on rule logic just to avoid OS install related FPs */\n  not file.path : (\"C:\\\\Windows\\\\SoftwareDistribution\\\\*\", \"C:\\\\Windows\\\\WinSxS\\\\*\")\n",
   "references": [
@@ -41,7 +42,7 @@
           "subtechnique": [
             {
               "id": "T1548.002",
-              "name": "Bypass User Access Control",
+              "name": "Bypass User Account Control",
               "reference": "https://attack.mitre.org/techniques/T1548/002/"
             }
           ]
@@ -49,6 +50,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 4
 }

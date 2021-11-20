@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { isPromise } from '@kbn/std';
 import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { read } from './plugin_reader';
@@ -19,6 +20,23 @@ import { CoreStart, CoreSetup } from '..';
  * @public
  */
 export interface Plugin<
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
+> {
+  setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
+  start(core: CoreStart, plugins: TPluginsStart): TStart;
+  stop?(): void;
+}
+
+/**
+ * A plugin with asynchronous lifecycle methods.
+ *
+ * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
+ * @public
+ */
+export interface AsyncPlugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
@@ -40,7 +58,11 @@ export type PluginInitializer<
   TStart,
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
-> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+> = (
+  core: PluginInitializerContext
+) =>
+  | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -58,7 +80,9 @@ export class PluginWrapper<
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
-  private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private instance?:
+    | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
@@ -81,10 +105,12 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup) {
-    this.instance = await this.createPluginInstance();
-
-    return await this.instance.setup(setupContext, plugins);
+  public setup(
+    setupContext: CoreSetup<TPluginsStart, TStart>,
+    plugins: TPluginsSetup
+  ): TSetup | Promise<TSetup> {
+    this.instance = this.createPluginInstance();
+    return this.instance.setup(setupContext, plugins);
   }
 
   /**
@@ -94,16 +120,21 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public async start(startContext: CoreStart, plugins: TPluginsStart) {
+  public start(startContext: CoreStart, plugins: TPluginsStart) {
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    const startContract = await this.instance.start(startContext, plugins);
-
-    this.startDependencies$.next([startContext, plugins, startContract]);
-
-    return startContract;
+    const startContract = this.instance.start(startContext, plugins);
+    if (isPromise(startContract)) {
+      return startContract.then((resolvedContract) => {
+        this.startDependencies$.next([startContext, plugins, resolvedContract]);
+        return resolvedContract;
+      });
+    } else {
+      this.startDependencies$.next([startContext, plugins, startContract]);
+      return startContract;
+    }
   }
 
   /**
@@ -121,7 +152,7 @@ export class PluginWrapper<
     this.instance = undefined;
   }
 
-  private async createPluginInstance() {
+  private createPluginInstance() {
     const initializer = read(this.name) as PluginInitializer<
       TSetup,
       TStart,

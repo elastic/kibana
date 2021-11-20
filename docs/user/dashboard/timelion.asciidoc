@@ -1,19 +1,19 @@
-[[create-panels-with-timelion]]
+[[timelion]]
 === Timelion
 
-Instead of using a visual editor to create charts, you define a graph by chaining functions together, using a timelion specific syntax. This syntax enables some features that classical point series charts don't offer - like drawing data from different indices or data sources into one graph.
+To use *Timelion*, you define a graph by chaining functions together, using the *Timelion*-specific syntax. 
+The syntax enables some features that classical point series charts don't offer, such as pulling data from different indices or data sources into one graph.
 
-[NOTE]
-====
-Timelion app deprecation
+*Timelion* is driven by a simple expression language that you use to:
 
-*Timelion* is still supported, the *Timelion app* is deprecated in 7.0, replaced by
-dashboard features. In 8.0 and later, the *Timelion app* is removed from {kib}. 
-To prepare for the removal of *Timelion app*, you must migrate *Timelion app* worksheets to a dashboard.
+* Retrieve time series data from one or more indices
+* Perform math across two or more time series
+* Visualize the results
 
-For information on how to migrate *Timelion app* worksheets, refer to the 
-link:https://www.elastic.co/guide/en/kibana/current/release-notes-7.10.0.html#deprecation-v7.10.0[7.10.0 Release Notes].
-====
+[role="screenshot"]
+image:dashboard/images/timelion.png[Timelion]
+
+deprecated::[7.0.0,"*Timelion* is still supported. The *Timelion app* is deprecated in 7.0, replaced by dashboard features. In 7.16 and later, the *Timelion app* is removed from {kib}. To prepare for the removal of *Timelion app*, you must migrate *Timelion app* worksheets to a dashboard. For information on how to migrate *Timelion app* worksheets, refer to <<migrate-timelion-app-worksheets,Migrate Timelion app worksheets>>."]
 
 [float]
 ==== Timelion expressions
@@ -42,15 +42,49 @@ If the value of your parameter contains spaces or commas you have to put the val
 
 .es(q='some query', index=logstash-*)
 
+[float]
+[[customize-data-series-y-axis]]
+===== .yaxis() function
+
+{kib} supports many y-axis scales and ranges for your data series.
+
+The `.yaxis()` function supports the following parameters:
+
+* *yaxis* &mdash; The numbered y-axis to plot the series on. For example, use `.yaxis(2)` to display a second y-axis.
+* *min* &mdash; The minimum value for the y-axis range.
+* *max* &mdash; The maximum value for the y-axis range.
+* *position* &mdash; The location of the units. Values include `left` or `right`.  
+* *label* &mdash; The label for the axis.  
+* *color* &mdash; The color of the axis label.
+* *units* &mdash; The function to use for formatting the y-axis labels. Values include `bits`, `bits/s`, `bytes`, `bytes/s`, `currency(:ISO 4217 currency code)`, `percent`, and `custom(:prefix:suffix)`.
+* *tickDecimals* &mdash; The tick decimal precision.
+
+Example:
+
+[source,text]
+----------------------------------
+.es(index= kibana_sample_data_logs,
+    timefield='@timestamp',
+    metric='avg:bytes')
+  .label('Average Bytes for request')
+  .title('Memory consumption over time in bytes').yaxis(1,units=bytes,position=left), <1>
+.es(index= kibana_sample_data_logs,
+    timefield='@timestamp',
+    metric=avg:machine.ram)
+  .label('Average Machine RAM amount').yaxis(2,units=bytes,position=right) <2>
+----------------------------------
+
+<1> `.yaxis(1,units=bytes,position=left)` &mdash; Specifies the first y-axis for the first data series, and changes the units on the left.
+<2> `.yaxis(2,units=bytes,position=left)` &mdash; Specifies the second y-axis for the second data series, and changes the units on the right.
 
 [float]
-==== Tutorial: Create visualizations with Timelion 
+=== Tutorial: Create visualizations with Timelion 
 
 You collected data from your operating system using Metricbeat, and you want to visualize and analyze the data on a dashboard. To create panels of the data, use *Timelion* to 
 create a time series visualization, 
 
 [float]
-===== Add the data and create the dashboard
+==== Add the data and create the dashboard
 
 Set up Metricbeat, then create the dashboard.
 
@@ -61,15 +95,13 @@ Set up Metricbeat, then create the dashboard.
 . On the *Dashboards* page, click *Create dashboard*.
 
 [float]
-===== Open and set up Timelion
+==== Open and set up Timelion
 
 Open *Timelion* and change the time range. 
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *All types > Aggregation based*, then select *Timelion*.
 
-. On the *New visualization* window, click *Aggregation based > Timelion*.
-
-. Change the <<set-time-filter,time range>> to *Last 7 days*.
+. Make sure the <<set-time-filter,time filter>> is *Last 7 days*.
 
 [float]
 [[timelion-tutorial-create-time-series-visualizations]]
@@ -79,7 +111,7 @@ To compare the real-time percentage of CPU time spent in user space to the resul
 
 [float]
 [[define-the-functions]]
-==== Define the functions
+===== Define the functions
 
 To track the real-time percentage of CPU, enter the following in the *Timelion Expression* field, then click *Update*:
 
@@ -92,7 +124,7 @@ To track the real-time percentage of CPU, enter the following in the *Timelion E
 
 [float]
 [[compare-the-data]]
-==== Compare the data
+===== Compare the data
 
 To compare two data sets, add another series, and offset the data back by one hour, then click *Update*:
 
@@ -109,7 +141,7 @@ To compare two data sets, add another series, and offset the data back by one ho
 
 [float]
 [[add-label-names]]
-==== Add label names
+===== Add label names
 
 To easily distinguish between the two data sets, add label names, then click *Update*:
 
@@ -125,7 +157,7 @@ To easily distinguish between the two data sets, add label names, then click *Up
 
 [float]
 [[add-a-title]]
-==== Add a title
+===== Add a title
 
 To make is easier for unfamiliar users to understand the purpose of the visualization, add a title, then click *Update*:
 
@@ -145,7 +177,7 @@ To make is easier for unfamiliar users to understand the purpose of the visualiz
 
 [float]
 [[change-the-chart-type]]
-==== Change the appearance of the chart lines
+===== Change the appearance of the chart lines
 
 To differentiate between the current hour and the last hour, change the appearance of the chart lines, then click *Update*:
 
@@ -166,7 +198,7 @@ To differentiate between the current hour and the last hour, change the appearan
 
 [float]
 [[change-the-line-colors]]
-==== Change the line colors
+===== Change the line colors
 
 *Timelion* supports standard color names, hexadecimal values, or a color schema for grouped data.
 
@@ -191,7 +223,7 @@ To make the first data series stand out, change the line colors, then click *Upd
 
 [float]
 [[make-adjustments-to-the-legend]]
-==== Adjust the legend
+===== Adjust the legend
 
 Move the legend to the north west position  with two columns, then click *Update*:
 
@@ -218,19 +250,32 @@ image::images/timelion-customize04.png[Final time series visualization]
 {nbsp}
 
 [float]
-==== Save the panel
+[[save-the-timelion-panel]]
+===== Save and add the panel
 
-Save and add the panel to the dashboard.
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
 
-. From the toolbar, click *Save*.
+To save the panel to the *Visualize Library*:
 
-. Enter the *Title* and optional *Description*. 
+. Click *Save to library*.
 
-. From the *Tags* drop down, select any applicable tags. 
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
 
-. Select *Add to Dashboard after saving*.
+. Make sure that *Add to Dashboard after saving* is selected.
 
 . Click *Save and return*.
+
+To save the panel to the dashboard:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
 
 [float]
 [[timelion-tutorial-create-visualizations-with-mathematical-functions]]
@@ -340,27 +385,40 @@ image::images/timelion-math05.png[Final visualization that displays inbound and 
 {nbsp}
 
 [float]
-==== Save the panel
+[[save-the-network-timelion-panel]]
+===== Save and add the panel
 
-Save and add the panel to the dashboard.
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
 
-. From the toolbar, click *Save*.
+To save the panel to the *Visualize Library*:
 
-. Enter the *Title* and optional *Description*. 
+. Click *Save to library*.
 
-. From the *Tags* drop down, select any applicable tags. 
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
 
-. Select *Add to Dashboard after saving*.
+. Make sure that *Add to Dashboard after saving* is selected.
 
 . Click *Save and return*.
 
+To save the panel to the dashboard:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
+
 [float]
 [[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
-=== Detect outliers and discover patterns over time
+==== Detect outliers and discover patterns over time
 
 To easily detect outliers and discover patterns over time, modify the time series data with conditional logic and create a trend with a moving average.
 
-With Timelion conditional logic, you can use the following operator values to compare your data:
+With *Timelion* conditional logic, you can use the following operator values to compare your data:
 
 [horizontal]
 `eq`:: equal
@@ -372,7 +430,7 @@ With Timelion conditional logic, you can use the following operator values to co
 
 [float]
 [[conditional-define-functions]]
-==== Define the functions
+===== Define the functions
 
 To chart the maximum value of `system.memory.actual.used.bytes`, enter the following in the *Timelion Expression* field, then click *Update*:
 
@@ -385,7 +443,7 @@ To chart the maximum value of `system.memory.actual.used.bytes`, enter the follo
 
 [float]
 [[conditional-track-memory]]
-==== Track used memory
+===== Track used memory
 
 To track the amount of memory used, create two thresholds, then click *Update*:
 
@@ -425,7 +483,7 @@ and the severe threshold is 11.375GB (`11375000000`). If the threshold values ar
 
 [float]
 [[conditional-determine-trend]]
-==== Determine the trend
+===== Determine the trend
 
 To determine the trend, create a new data series, then click *Update*:
 
@@ -465,7 +523,7 @@ In this example, `.mvavg(10)` creates a moving average with a window of 10 data 
 
 [float]
 [[conditional-format-visualization]]
-==== Customize and format the visualization
+===== Customize and format the visualization
 
 Customize and format the visualization using the following functions, then click *Update*:
 
@@ -515,18 +573,31 @@ image::images/timelion-conditional04.png[Final visualization that displays outli
 {nbsp}
 
 [float]
-==== Save the panel
+[[save-the-outlier-timelion-panel]]
+===== Save and add the panel
 
-Save and add the panel to the dashboard.
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
 
-. From the toolbar, click *Save*.
+To save the panel to the *Visualize Library*:
 
-. Enter the *Title* and optional *Description*. 
+. Click *Save to library*.
 
-. From the *Tags* drop down, select any applicable tags. 
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
 
-. Select *Add to Dashboard after saving*.
+. Make sure that *Add to Dashboard after saving* is selected.
 
 . Click *Save and return*.
+
+To save the panel to the dashboard:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
 
 For more information about *Timelion* conditions, refer to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].

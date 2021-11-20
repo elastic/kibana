@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PanelState, EmbeddableInput } from '../../../services/embeddable';
@@ -26,7 +26,10 @@ export function createPanelState<
   currentPanels: { [key: string]: DashboardPanelState },
   placementMethod?: PanelPlacementMethod<TPlacementMethodArgs>,
   placementArgs?: TPlacementMethodArgs
-): DashboardPanelState<TEmbeddableInput> {
+): {
+  newPanel: DashboardPanelState<TEmbeddableInput>;
+  otherPanels: { [key: string]: DashboardPanelState };
+} {
   const defaultPlacementArgs = {
     width: DEFAULT_PANEL_WIDTH,
     height: DEFAULT_PANEL_HEIGHT,
@@ -39,15 +42,18 @@ export function createPanelState<
       }
     : defaultPlacementArgs;
 
-  const gridDataLocation = placementMethod
+  const { newPanelPlacement, otherPanels } = placementMethod
     ? placementMethod(finalPlacementArgs as TPlacementMethodArgs)
     : findTopLeftMostOpenSpace(defaultPlacementArgs);
 
   return {
-    gridData: {
-      ...gridDataLocation,
-      i: panelState.explicitInput.id,
+    newPanel: {
+      gridData: {
+        ...newPanelPlacement,
+        i: panelState.explicitInput.id,
+      },
+      ...panelState,
     },
-    ...panelState,
+    otherPanels,
   };
 }

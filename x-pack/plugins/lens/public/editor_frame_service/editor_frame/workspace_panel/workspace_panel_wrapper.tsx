@@ -1,73 +1,79 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
-import { Datasource, FramePublicAPI, Visualization } from '../../../types';
+import { EuiPageContent, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import classNames from 'classnames';
+import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
-import { Action } from '../state_management';
 import { ChartSwitch } from './chart_switch';
 import { WarningsPopover } from './warnings_popover';
+import {
+  useLensDispatch,
+  updateVisualizationState,
+  DatasourceStates,
+  VisualizationState,
+} from '../../../state_management';
+import { WorkspaceTitle } from './title';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
-  visualizationState: unknown;
-  dispatch: (action: Action) => void;
-  title?: string;
-  visualizationMap: Record<string, Visualization>;
+  visualizationState: VisualizationState['state'];
+  visualizationMap: VisualizationMap;
   visualizationId: string | null;
-  datasourceMap: Record<string, Datasource>;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
+  datasourceMap: DatasourceMap;
+  datasourceStates: DatasourceStates;
+  isFullscreen: boolean;
 }
 
 export function WorkspacePanelWrapper({
   children,
   framePublicAPI,
   visualizationState,
-  dispatch,
-  title,
   visualizationId,
   visualizationMap,
   datasourceMap,
   datasourceStates,
+  isFullscreen,
 }: WorkspacePanelWrapperProps) {
+  const dispatchLens = useLensDispatch();
+
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
         return;
       }
-      dispatch({
-        type: 'UPDATE_VISUALIZATION_STATE',
-        visualizationId: activeVisualization.id,
-        updater: newState,
-        clearStagedPreview: false,
-      });
+      dispatchLens(
+        updateVisualizationState({
+          visualizationId: activeVisualization.id,
+          newState,
+        })
+      );
     },
-    [dispatch, activeVisualization]
+    [dispatchLens, activeVisualization]
   );
-  const warningMessages =
-    activeVisualization?.getWarningMessages &&
-    activeVisualization.getWarningMessages(visualizationState, framePublicAPI);
+  const warningMessages: React.ReactNode[] = [];
+  if (activeVisualization?.getWarningMessages) {
+    warningMessages.push(
+      ...(activeVisualization.getWarningMessages(visualizationState, framePublicAPI) || [])
+    );
+  }
+  Object.entries(datasourceStates).forEach(([datasourceId, datasourceState]) => {
+    const datasource = datasourceMap[datasourceId];
+    if (!datasourceState.isLoading && datasource.getWarningMessages) {
+      warningMessages.push(
+        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI) || [])
+      );
+    }
+  });
   return (
     <>
       <div>
@@ -79,40 +85,38 @@ export function WorkspacePanelWrapper({
           wrap={true}
           justifyContent="spaceBetween"
         >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              gutterSize="m"
-              direction="row"
-              responsive={false}
-              wrap={true}
-              className="lnsWorkspacePanelWrapper__toolbar"
-            >
-              <EuiFlexItem grow={false}>
-                <ChartSwitch
-                  data-test-subj="lnsChartSwitcher"
-                  visualizationMap={visualizationMap}
-                  visualizationId={visualizationId}
-                  visualizationState={visualizationState}
-                  datasourceMap={datasourceMap}
-                  datasourceStates={datasourceStates}
-                  dispatch={dispatch}
-                  framePublicAPI={framePublicAPI}
-                />
-              </EuiFlexItem>
-              {activeVisualization && activeVisualization.renderToolbar && (
+          {!isFullscreen ? (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                gutterSize="m"
+                direction="row"
+                responsive={false}
+                wrap={true}
+                className="lnsWorkspacePanelWrapper__toolbar"
+              >
                 <EuiFlexItem grow={false}>
-                  <NativeRenderer
-                    render={activeVisualization.renderToolbar}
-                    nativeProps={{
-                      frame: framePublicAPI,
-                      state: visualizationState,
-                      setState: setVisualizationState,
-                    }}
+                  <ChartSwitch
+                    data-test-subj="lnsChartSwitcher"
+                    visualizationMap={visualizationMap}
+                    datasourceMap={datasourceMap}
+                    framePublicAPI={framePublicAPI}
                   />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                {activeVisualization && activeVisualization.renderToolbar && (
+                  <EuiFlexItem grow={false}>
+                    <NativeRenderer
+                      render={activeVisualization.renderToolbar}
+                      nativeProps={{
+                        frame: framePublicAPI,
+                        state: visualizationState,
+                        setState: setVisualizationState,
+                      }}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             {warningMessages && warningMessages.length ? (
               <WarningsPopover>{warningMessages}</WarningsPopover>
@@ -120,18 +124,18 @@ export function WorkspacePanelWrapper({
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-      <EuiPageContent className="lnsWorkspacePanelWrapper">
-        <EuiScreenReaderOnly>
-          <h1 id="lns_ChartTitle" data-test-subj="lns_ChartTitle">
-            {title ||
-              i18n.translate('xpack.lens.chartTitle.unsaved', {
-                defaultMessage: 'Unsaved visualization',
-              })}
-          </h1>
-        </EuiScreenReaderOnly>
-        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {children}
-        </EuiPageContentBody>
+
+      <EuiPageContent
+        className={classNames('lnsWorkspacePanelWrapper', {
+          'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
+        })}
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <WorkspaceTitle />
+        {children}
       </EuiPageContent>
     </>
   );

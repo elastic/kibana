@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Type } from '@kbn/config-schema';
@@ -22,7 +22,8 @@ export type UiSettingsType =
   | 'boolean'
   | 'string'
   | 'array'
-  | 'image';
+  | 'image'
+  | 'color';
 
 /**
  * UiSettings deprecation field options.
@@ -65,12 +66,13 @@ export interface UiSettingsParams<T = unknown> {
   type?: UiSettingsType;
   /** optional deprecation information. Used to generate a deprecation warning. */
   deprecation?: DeprecationSettings;
-  /*
-   * Allows defining a custom validation applicable to value change on the client.
-   * @deprecated
-   * Use schema instead.
+  /**
+   * index of the settings within its category (ascending order, smallest will be displayed first).
+   * Used for ordering in the UI.
+   *
+   * @remark settings without order defined will be displayed last and ordered by name
    */
-  validation?: ImageValidation | StringValidation;
+  order?: number;
   /*
    * Value validation schema
    * Used to validate value on write and read.
@@ -92,40 +94,6 @@ export interface UiSettingsParams<T = unknown> {
  * @public
  * */
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
-
-/**
- * Allows regex objects or a regex string
- * @public
- * */
-export type StringValidation = StringValidationRegex | StringValidationRegexString;
-
-/**
- * StringValidation with regex object
- * @public
- * */
-export interface StringValidationRegex {
-  regex: RegExp;
-  message: string;
-}
-
-/**
- * StringValidation as regex string
- * @public
- * */
-export interface StringValidationRegexString {
-  regexString: string;
-  message: string;
-}
-
-/**
- * @public
- * */
-export interface ImageValidation {
-  maxSize: {
-    length: number;
-    description: string;
-  };
-}
 
 /**
  * Describes the values explicitly set by user.

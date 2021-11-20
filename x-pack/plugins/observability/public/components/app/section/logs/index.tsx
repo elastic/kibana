@@ -1,10 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  XYBrushEvent,
+} from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -23,9 +32,10 @@ import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
+import { BucketSize } from '../../../../pages/overview';
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: BucketSize;
 }
 
 function getColorPerItem(series?: LogsFetchDataResponse['series']) {
@@ -46,7 +56,7 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
 export function LogsSection({ bucketSize }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
@@ -55,7 +65,7 @@ export function LogsSection({ bucketSize }: Props) {
         return getDataHandler('infra_logs')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
-          bucketSize,
+          ...bucketSize,
         });
       }
     },
@@ -64,7 +74,7 @@ export function LogsSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
-  if (!hasData.infra_logs?.hasData) {
+  if (!hasDataMap.infra_logs?.hasData) {
     return null;
   }
 
@@ -123,7 +133,7 @@ export function LogsSection({ bucketSize }: Props) {
       </EuiFlexGroup>
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           theme={chartTheme}
           showLegend
           legendPosition={Position.Right}

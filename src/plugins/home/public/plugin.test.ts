@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
+import { SharePluginSetup } from '../../share/public';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
+const mockShare = {} as SharePluginSetup;
 
 describe('HomePublicPlugin', () => {
   beforeEach(() => {
@@ -26,6 +28,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
+          share: mockShare,
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );
@@ -45,6 +48,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
+          share: mockShare,
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );
@@ -56,6 +60,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
+          share: {} as SharePluginSetup,
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );
@@ -67,6 +72,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
+          share: mockShare,
           urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );

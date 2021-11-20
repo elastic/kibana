@@ -1,42 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { KibanaIndexPatterns, ManageScopeInit, SourcererScopeName } from './model';
+import { SourcererDataView, SourcererScopeName } from './model';
+import { SecurityDataView } from '../../containers/sourcerer/api';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
-export const setSource = actionCreator<{
+export const setDataView = actionCreator<{
+  browserFields: SourcererDataView['browserFields'];
+  docValueFields: SourcererDataView['docValueFields'];
+  id: SourcererDataView['id'];
+  indexFields: SourcererDataView['indexFields'];
+  loading: SourcererDataView['loading'];
+  runtimeMappings: SourcererDataView['runtimeMappings'];
+}>('SET_DATA_VIEW');
+
+export const setDataViewLoading = actionCreator<{
+  id: string;
+  loading: boolean;
+}>('SET_DATA_VIEW_LOADING');
+
+export const setSignalIndexName =
+  actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
+
+export const setSourcererDataViews = actionCreator<SecurityDataView>('SET_SOURCERER_DATA_VIEWS');
+
+export const setSourcererScopeLoading = actionCreator<{
+  id?: SourcererScopeName;
+  loading: boolean;
+}>('SET_SOURCERER_SCOPE_LOADING');
+
+export interface SelectedDataViewPayload {
   id: SourcererScopeName;
-  payload: ManageScopeInit;
-}>('SET_SOURCE');
-
-export const setIndexPatternsList = actionCreator<{
-  kibanaIndexPatterns: KibanaIndexPatterns;
-  configIndexPatterns: string[];
-}>('SET_INDEX_PATTERNS_LIST');
-
-export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
-  'SET_SIGNAL_INDEX_NAME'
-);
-
-export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; loading: boolean }>(
-  'SET_SOURCERER_SCOPE_LOADING'
-);
-
-export const setSelectedIndexPatterns = actionCreator<{
-  id: SourcererScopeName;
+  selectedDataViewId: string;
   selectedPatterns: string[];
   eventType?: TimelineEventsType;
-}>('SET_SELECTED_INDEX_PATTERNS');
-
-export const initTimelineIndexPatterns = actionCreator<{
-  id: SourcererScopeName;
-  selectedPatterns: string[];
-  eventType?: TimelineEventsType;
-}>('INIT_TIMELINE_INDEX_PATTERNS');
+}
+export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');

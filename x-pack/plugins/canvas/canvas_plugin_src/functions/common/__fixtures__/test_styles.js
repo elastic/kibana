@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { elasticLogo } from '../../../lib/elastic_logo';
+import { getElasticLogo } from '../../../../../../../src/plugins/presentation_util/common/lib';
 
 export const fontStyle = {
   type: 'style',
@@ -18,20 +19,22 @@ export const fontStyle = {
     fontSize: '14px',
     lineHeight: '21px',
   },
-  css:
-    'font-family:Chalkboard, serif;font-weight:bolder;font-style:normal;text-decoration:underline;color:pink;text-align:center;font-size:14px;line-height:21px',
+  css: 'font-family:Chalkboard, serif;font-weight:bolder;font-style:normal;text-decoration:underline;color:pink;text-align:center;font-size:14px;line-height:21px',
 };
 
-export const containerStyle = {
-  type: 'containerStyle',
-  border: '3px dotted blue',
-  borderRadius: '5px',
-  padding: '10px',
-  backgroundColor: 'red',
-  backgroundImage: `url(${elasticLogo})`,
-  opacity: 0.5,
-  backgroundSize: 'contain',
-  backgroundRepeat: 'no-repeat',
+export const getContainerStyle = async () => {
+  const { elasticLogo } = await getElasticLogo();
+  return {
+    type: 'containerStyle',
+    border: '3px dotted blue',
+    borderRadius: '5px',
+    padding: '10px',
+    backgroundColor: 'red',
+    backgroundImage: `url(${elasticLogo})`,
+    opacity: 0.5,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+  };
 };
 
 export const defaultStyle = {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
-import { IndexPatternColumn } from '../operations';
+import { GenericIndexPatternColumn } from '../operations';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter((c) => c !== inner);
@@ -21,7 +22,7 @@ function nestColumn(columnOrder: string[], outer: string, inner: string) {
 }
 
 function getFieldName(
-  column: IndexPatternColumn,
+  column: GenericIndexPatternColumn,
   getFieldByName: (name: string) => IndexPatternField | undefined
 ) {
   return hasField(column)

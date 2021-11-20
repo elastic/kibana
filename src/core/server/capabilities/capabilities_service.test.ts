@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { httpServiceMock, InternalHttpServiceSetupMock } from '../http/http_service.mock';
+import {
+  httpServiceMock,
+  InternalHttpServicePrebootMock,
+  InternalHttpServiceSetupMock,
+} from '../http/http_service.mock';
 import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
 import { mockCoreContext } from '../core_context.mock';
@@ -22,6 +26,31 @@ describe('CapabilitiesService', () => {
     router = mockRouter.create();
     http.createRouter.mockReturnValue(router);
     service = new CapabilitiesService(mockCoreContext.create());
+  });
+
+  describe('#preboot()', () => {
+    let httpPreboot: InternalHttpServicePrebootMock;
+    beforeEach(() => {
+      httpPreboot = httpServiceMock.createInternalPrebootContract();
+      service.preboot({ http: httpPreboot });
+    });
+
+    it('registers the capabilities routes', async () => {
+      expect(httpPreboot.registerRoutes).toHaveBeenCalledWith('', expect.any(Function));
+      expect(httpPreboot.registerRoutes).toHaveBeenCalledTimes(1);
+
+      const [[, callback]] = httpPreboot.registerRoutes.mock.calls;
+      callback(router);
+
+      expect(router.post).toHaveBeenCalledTimes(1);
+      expect(router.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/api/core/capabilities',
+          options: { authRequired: 'optional' },
+        }),
+        expect.any(Function)
+      );
+    });
   });
 
   describe('#setup()', () => {

@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { ScaleControl } from './scale_control';
-import { LngLat, LngLatBounds, Map as MapboxMap, PointLike } from 'mapbox-gl';
+import type { LngLat, LngLatBounds, Map as MapboxMap, PointLike } from '@kbn/mapbox-gl';
 
 const CLIENT_HEIGHT_PIXELS = 1200;
 const DISTANCE_METERS = 87653;
 
 const mockMbMapHandlers: { [key: string]: () => void } = {};
-const mockMBMap = ({
+const mockMBMap = {
   on: (eventName: string, callback: () => void) => {
     mockMbMapHandlers[eventName] = callback;
   },
@@ -29,23 +30,23 @@ const mockMBMap = ({
     return 4;
   },
   getBounds: () => {
-    return ({
+    return {
       getNorth: () => {
         return 75;
       },
       getSouth: () => {
         return -60;
       },
-    } as unknown) as LngLatBounds;
+    } as unknown as LngLatBounds;
   },
   unproject: (point: PointLike) => {
-    return ({
+    return {
       distanceTo: (lngLat: LngLat) => {
         return DISTANCE_METERS;
       },
-    } as unknown) as LngLat;
+    } as unknown as LngLat;
   },
-} as unknown) as MapboxMap;
+} as unknown as MapboxMap;
 
 test('render', () => {
   const component = shallow(<ScaleControl mbMap={mockMBMap} isFullScreen={false} />);

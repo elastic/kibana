@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { startTracingSpan } from '../../../common/performance_tracing';
@@ -33,16 +34,17 @@ export async function getLatestLogEntriesCategoriesDatasetsStats(
   let afterLatestBatchKey: CompositeDatasetKey | undefined;
 
   while (true) {
-    const latestLogEntryCategoriesDatasetsStatsResponse = await context.infra.mlSystem.mlAnomalySearch(
-      createLatestLogEntryCategoriesDatasetsStatsQuery(
-        jobIds,
-        startTime,
-        endTime,
-        COMPOSITE_AGGREGATION_BATCH_SIZE,
-        afterLatestBatchKey
-      ),
-      jobIds
-    );
+    const latestLogEntryCategoriesDatasetsStatsResponse =
+      await context.infra.mlSystem.mlAnomalySearch(
+        createLatestLogEntryCategoriesDatasetsStatsQuery(
+          jobIds,
+          startTime,
+          endTime,
+          COMPOSITE_AGGREGATION_BATCH_SIZE,
+          afterLatestBatchKey
+        ),
+        jobIds
+      );
 
     const { after_key: afterKey, buckets: latestBatchBuckets = [] } =
       decodeOrThrow(latestLogEntryCategoriesDatasetsStatsResponseRT)(
@@ -78,7 +80,7 @@ export async function getLatestLogEntriesCategoriesDatasetsStats(
       return {
         categorization_status: latestHitSource.categorization_status,
         categorized_doc_count: latestHitSource.categorized_doc_count,
-        dataset: bucket.key.dataset ?? '',
+        dataset: bucket.key?.dataset ?? '',
         dead_category_count: latestHitSource.dead_category_count,
         failed_category_count: latestHitSource.failed_category_count,
         frequent_category_count: latestHitSource.frequent_category_count,

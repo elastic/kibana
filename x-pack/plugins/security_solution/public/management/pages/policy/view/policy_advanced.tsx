@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback } from 'react';
@@ -148,7 +149,7 @@ const PolicyAdvanced = React.memo(
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
           setValue(
-            (newPayload as unknown) as Record<string, unknown>,
+            newPayload as unknown as Record<string, unknown>,
             event.target.value,
             configPath
           );
@@ -163,17 +164,17 @@ const PolicyAdvanced = React.memo(
 
     const value =
       policyDetailsConfig &&
-      getValue((policyDetailsConfig as unknown) as Record<string, unknown>, configPath);
+      getValue(policyDetailsConfig as unknown as Record<string, unknown>, configPath);
 
     return (
       <>
         <EuiFormRow
           fullWidth
           label={
-            <EuiFlexGroup>
-              <EuiFlexItem>{configPath.join('.')}</EuiFlexItem>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={true}>{configPath.join('.')}</EuiFlexItem>
               {documentation && (
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiIconTip content={documentation} position="right" />
                 </EuiFlexItem>
               )}

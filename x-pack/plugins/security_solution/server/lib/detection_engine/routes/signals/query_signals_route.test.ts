@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
@@ -15,18 +16,21 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
+import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let { context } = requestContextMock.createTools();
+  const ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
   beforeEach(() => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    ({ context } = requestContextMock.createTools());
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptySignalsResponse());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ruleDataClient.getReader().search.mockResolvedValue(getEmptySignalsResponse() as any);
 
-    querySignalsRoute(server.router);
+    querySignalsRoute(server.router, ruleDataClient);
   });
 
   describe('query and agg on signals index', () => {
@@ -34,9 +38,10 @@ describe('query for signal', () => {
       const response = await server.inject(getSignalsQueryRequest(), context);
 
       expect(response.status).toEqual(200);
-      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'search',
-        expect.objectContaining({ body: typicalSignalsQuery() })
+      expect(ruleDataClient.getReader().search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: typicalSignalsQuery(),
+        })
       );
     });
 
@@ -44,9 +49,8 @@ describe('query for signal', () => {
       const response = await server.inject(getSignalsAggsQueryRequest(), context);
 
       expect(response.status).toEqual(200);
-      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'search',
-        expect.objectContaining({ body: typicalSignalsQueryAggs() })
+      expect(ruleDataClient.getReader().search).toHaveBeenCalledWith(
+        expect.objectContaining({ body: typicalSignalsQueryAggs(), ignore_unavailable: true })
       );
     });
 
@@ -54,8 +58,7 @@ describe('query for signal', () => {
       const response = await server.inject(getSignalsAggsAndQueryRequest(), context);
 
       expect(response.status).toEqual(200);
-      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'search',
+      expect(ruleDataClient.getReader().search).toHaveBeenCalledWith(
         expect.objectContaining({
           body: {
             ...typicalSignalsQuery(),
@@ -66,9 +69,7 @@ describe('query for signal', () => {
     });
 
     test('catches error if query throws error', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
+      ruleDataClient.getReader().search.mockRejectedValue(new Error('Test error'));
       const response = await server.inject(getSignalsAggsQueryRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({

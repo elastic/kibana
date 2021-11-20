@@ -1,21 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import dateMath from '@elastic/datemath';
+import { Filter, FieldFilter } from '@kbn/es-query';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
-import {
-  isFilterable,
-  IIndexPattern,
-  IFieldType,
-  Ipv4Address,
-  Filter,
-  FieldFilter,
-} from '../../../../../common';
+import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find((field) => field.name === filter.meta.key);
@@ -44,7 +38,7 @@ export function validateParams(params: any, type: string) {
       return Boolean(typeof params === 'string' && moment && moment.isValid());
     case 'ip':
       try {
-        return Boolean(new Ipv4Address(params));
+        return Boolean(new IpAddress(params));
       } catch (e) {
         return false;
       }

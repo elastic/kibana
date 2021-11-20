@@ -1,123 +1,82 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { SavedObjectNotFound } from '../../../../../../../src/plugins/kibana_utils/common';
+import { useUiTracker } from '../../../../../observability/public';
 import {
-  createInputFieldProps,
-  validateInputFieldNotEmpty,
-} from '../../../components/source_configuration/input_fields';
+  LogIndexNameReference,
+  logIndexNameReferenceRT,
+  LogIndexPatternReference,
+} from '../../../../common/log_sources';
+import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
+import { useFormElement } from './form_elements';
+import {
+  FormValidationError,
+  validateIndexPattern,
+  validateStringNotEmpty,
+} from './validation_errors';
 
-interface FormState {
-  name: string;
-  description: string;
-  logAlias: string;
-  tiebreakerField: string;
-  timestampField: string;
-}
+export type LogIndicesFormState = LogIndexNameReference | LogIndexPatternReference | undefined;
 
-type FormStateChanges = Partial<FormState>;
+export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
+  const indexPatternService = useKibanaIndexPatternService();
 
-export const useLogIndicesConfigurationFormState = ({
-  initialFormState = defaultFormState,
-}: {
-  initialFormState?: FormState;
-}) => {
-  const [formStateChanges, setFormStateChanges] = useState<FormStateChanges>({});
+  const trackIndexPatternValidationError = useUiTracker({ app: 'infra_logs' });
 
-  const resetForm = useCallback(() => setFormStateChanges({}), []);
+  const logIndicesFormElement = useFormElement<LogIndicesFormState, FormValidationError>({
+    initialValue,
+    validate: useMemo(
+      () => async (logIndices) => {
+        if (logIndices == null) {
+          return validateStringNotEmpty('log data view', '');
+        } else if (logIndexNameReferenceRT.is(logIndices)) {
+          return validateStringNotEmpty('log indices', logIndices.indexName);
+        } else {
+          const emptyStringErrors = validateStringNotEmpty(
+            'log data view',
+            logIndices.indexPatternId
+          );
 
-  const formState = useMemo(
-    () => ({
-      ...initialFormState,
-      ...formStateChanges,
-    }),
-    [initialFormState, formStateChanges]
-  );
+          if (emptyStringErrors.length > 0) {
+            return emptyStringErrors;
+          }
 
-  const nameFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.name),
-        name: 'name',
-        onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
-        value: formState.name,
-      }),
-    [formState.name]
-  );
-  const logAliasFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.logAlias),
-        name: 'logAlias',
-        onChange: (logAlias) => setFormStateChanges((changes) => ({ ...changes, logAlias })),
-        value: formState.logAlias,
-      }),
-    [formState.logAlias]
-  );
-  const tiebreakerFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.tiebreakerField),
-        name: `tiebreakerField`,
-        onChange: (tiebreakerField) =>
-          setFormStateChanges((changes) => ({ ...changes, tiebreakerField })),
-        value: formState.tiebreakerField,
-      }),
-    [formState.tiebreakerField]
-  );
-  const timestampFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.timestampField),
-        name: `timestampField`,
-        onChange: (timestampField) =>
-          setFormStateChanges((changes) => ({ ...changes, timestampField })),
-        value: formState.timestampField,
-      }),
-    [formState.timestampField]
-  );
+          const indexPatternErrors = await indexPatternService
+            .get(logIndices.indexPatternId)
+            .then(validateIndexPattern, (error): FormValidationError[] => {
+              if (error instanceof SavedObjectNotFound) {
+                return [
+                  {
+                    type: 'missing_index_pattern' as const,
+                    indexPatternId: logIndices.indexPatternId,
+                  },
+                ];
+              } else {
+                throw error;
+              }
+            });
 
-  const fieldProps = useMemo(
-    () => ({
-      name: nameFieldProps,
-      logAlias: logAliasFieldProps,
-      tiebreakerField: tiebreakerFieldFieldProps,
-      timestampField: timestampFieldFieldProps,
-    }),
-    [nameFieldProps, logAliasFieldProps, tiebreakerFieldFieldProps, timestampFieldFieldProps]
-  );
+          if (indexPatternErrors.length > 0) {
+            trackIndexPatternValidationError({
+              metric: 'configuration_index_pattern_validation_failed',
+            });
+          } else {
+            trackIndexPatternValidationError({
+              metric: 'configuration_index_pattern_validation_succeeded',
+            });
+          }
 
-  const errors = useMemo(
-    () =>
-      Object.values(fieldProps).reduce<ReactNode[]>(
-        (accumulatedErrors, { error }) => [...accumulatedErrors, ...error],
-        []
-      ),
-    [fieldProps]
-  );
+          return indexPatternErrors;
+        }
+      },
+      [indexPatternService, trackIndexPatternValidationError]
+    ),
+  });
 
-  const isFormValid = useMemo(() => errors.length <= 0, [errors]);
-
-  const isFormDirty = useMemo(() => Object.keys(formStateChanges).length > 0, [formStateChanges]);
-
-  return {
-    errors,
-    fieldProps,
-    formState,
-    formStateChanges,
-    isFormDirty,
-    isFormValid,
-    resetForm,
-  };
-};
-
-const defaultFormState: FormState = {
-  name: '',
-  description: '',
-  logAlias: '',
-  tiebreakerField: '',
-  timestampField: '',
+  return logIndicesFormElement;
 };

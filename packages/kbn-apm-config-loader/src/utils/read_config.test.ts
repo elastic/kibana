@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { relative, resolve } from 'path';
 import { getConfigFromFiles } from './read_config';
 
-const fixtureFile = (name: string) => resolve(__dirname, '..', '..', '__fixtures__', name);
+const fixtureFile = (name: string) => resolve(__dirname, '..', '__fixtures__', name);
 
 test('reads single yaml from file system and parses to json', () => {
   const config = getConfigFromFiles([fixtureFile('config.yml')]);

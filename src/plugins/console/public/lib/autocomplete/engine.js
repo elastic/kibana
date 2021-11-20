@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -146,7 +146,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
 
     if (!wsToUse && walkStates.length > 1 && !includeAutoComplete) {
       console.info(
-        "more then one context active for current path, but autocomplete isn't requested",
+        "more than one context active for current path, but autocomplete isn't requested",
         walkStates
       );
     }

@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
-  expectedAsyncError,
-} from '../../../../../__mocks__';
+} from '../../../../../__mocks__/kea_logic';
+import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
+
+import { nextTick } from '@kbn/test/jest';
 
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
   SourceLogic: { values: { contentSource } },
 }));
 
-import { AppLogic } from '../../../../app_logic';
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
@@ -24,21 +26,22 @@ jest.mock('../../../../app_logic', () => ({
 const spyScrollTo = jest.fn();
 Object.defineProperty(global.window, 'scrollTo', { value: spyScrollTo });
 
-import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
-import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
+import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
+import { SchemaType } from '../../../../../shared/schema/types';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
+import { AppLogic } from '../../../../app_logic';
 
 import {
   SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
   SCHEMA_FIELD_ADDED_MESSAGE,
   SCHEMA_UPDATED_MESSAGE,
 } from './constants';
-
 import { SchemaLogic, dataTypeOptions } from './schema_logic';
 
 describe('SchemaLogic', () => {
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, setErrorMessage } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
 
   const defaultValues = {
@@ -52,7 +55,7 @@ describe('SchemaLogic', () => {
     addFieldFormErrors: null,
     mostRecentIndexJob: {},
     fieldCoercionErrors: {},
-    newFieldType: TEXT,
+    newFieldType: SchemaType.Text,
     rawFieldName: '',
     formUnchanged: true,
     dataLoading: true,
@@ -111,7 +114,7 @@ describe('SchemaLogic', () => {
       expect(SchemaLogic.values.activeSchema).toEqual(schema);
       expect(SchemaLogic.values.serverSchema).toEqual(schema);
       expect(SchemaLogic.values.mostRecentIndexJob).toEqual(mostRecentIndexJob);
-      expect(SchemaLogic.values.newFieldType).toEqual(TEXT);
+      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Text);
       expect(SchemaLogic.values.addFieldFormErrors).toEqual(null);
       expect(SchemaLogic.values.formUnchanged).toEqual(true);
       expect(SchemaLogic.values.showAddFieldModal).toEqual(false);
@@ -126,10 +129,9 @@ describe('SchemaLogic', () => {
     });
 
     it('updateNewFieldType', () => {
-      const NUMBER = 'number';
-      SchemaLogic.actions.updateNewFieldType(NUMBER);
+      SchemaLogic.actions.updateNewFieldType(SchemaType.Number);
 
-      expect(SchemaLogic.values.newFieldType).toEqual(NUMBER);
+      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Number);
     });
 
     it('onFieldUpdate', () => {
@@ -198,14 +200,13 @@ describe('SchemaLogic', () => {
     describe('initializeSchema', () => {
       it('calls API and sets values (org)', async () => {
         const onInitializeSchemaSpy = jest.spyOn(SchemaLogic.actions, 'onInitializeSchema');
-        const promise = Promise.resolve(serverResponse);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(serverResponse));
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/schemas'
+          '/internal/workplace_search/org/sources/source123/schemas'
         );
-        await promise;
+        await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
       });
 
@@ -213,24 +214,18 @@ describe('SchemaLogic', () => {
         AppLogic.values.isOrganization = false;
 
         const onInitializeSchemaSpy = jest.spyOn(SchemaLogic.actions, 'onInitializeSchema');
-        const promise = Promise.resolve(serverResponse);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(serverResponse));
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/schemas'
+          '/internal/workplace_search/account/sources/source123/schemas'
         );
-        await promise;
+        await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
       });
 
-      it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.get.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SchemaLogic.actions.initializeSchema();
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -251,12 +246,12 @@ describe('SchemaLogic', () => {
         );
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/schemas'
+          '/internal/workplace_search/org/sources/source123/schemas'
         );
 
         await initPromise;
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/reindex_job/123'
+          '/internal/workplace_search/org/sources/source123/reindex_job/123'
         );
 
         await promise;
@@ -282,12 +277,12 @@ describe('SchemaLogic', () => {
         );
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/schemas'
+          '/internal/workplace_search/account/sources/source123/schemas'
         );
 
         await initPromise;
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/reindex_job/123'
+          '/internal/workplace_search/account/sources/source123/reindex_job/123'
         );
 
         await promise;
@@ -297,40 +292,46 @@ describe('SchemaLogic', () => {
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject({ error: 'this is an error' });
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject({ error: 'this is an error' }));
         SchemaLogic.actions.initializeSchemaFieldErrors(
           mostRecentIndexJob.activeReindexJobId,
           contentSource.id
         );
-        await expectedAsyncError(promise);
+        await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith({
-          error: 'this is an error',
-          message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
-        });
+        expect(setErrorMessage).toHaveBeenCalledWith(SCHEMA_FIELD_ERRORS_ERROR_MESSAGE);
       });
     });
 
-    it('addNewField', () => {
-      const setServerFieldSpy = jest.spyOn(SchemaLogic.actions, 'setServerField');
-      SchemaLogic.actions.onInitializeSchema(serverResponse);
-      const newSchema = {
-        ...schema,
-        bar: 'number',
-      };
-      SchemaLogic.actions.addNewField('bar', 'number');
+    describe('addNewField', () => {
+      it('handles happy path', () => {
+        const setServerFieldSpy = jest.spyOn(SchemaLogic.actions, 'setServerField');
+        SchemaLogic.actions.onInitializeSchema(serverResponse);
+        const newSchema = {
+          ...schema,
+          bar: SchemaType.Number,
+        };
+        SchemaLogic.actions.addNewField('bar', SchemaType.Number);
 
-      expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
+        expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
+      });
+
+      it('handles duplicate', () => {
+        const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
+        SchemaLogic.actions.onInitializeSchema(serverResponse);
+        SchemaLogic.actions.addNewField('foo', SchemaType.Number);
+
+        expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith(['New field already exists: foo.']);
+      });
     });
 
     it('updateExistingFieldType', () => {
       const onFieldUpdateSpy = jest.spyOn(SchemaLogic.actions, 'onFieldUpdate');
       SchemaLogic.actions.onInitializeSchema(serverResponse);
       const newSchema = {
-        foo: 'number',
+        foo: SchemaType.Number,
       };
-      SchemaLogic.actions.updateExistingFieldType('foo', 'number');
+      SchemaLogic.actions.updateExistingFieldType('foo', SchemaType.Number);
 
       expect(onFieldUpdateSpy).toHaveBeenCalledWith({ schema: newSchema, formUnchanged: false });
     });
@@ -352,18 +353,17 @@ describe('SchemaLogic', () => {
         it('calls API and sets values (org)', async () => {
           AppLogic.values.isOrganization = true;
           const onSchemaSetSuccessSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetSuccess');
-          const promise = Promise.resolve(serverResponse);
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve(serverResponse));
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/source123/schemas',
+            '/internal/workplace_search/org/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
           );
-          await promise;
-          expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_FIELD_ADDED_MESSAGE);
+          await nextTick();
+          expect(flashSuccessToast).toHaveBeenCalledWith(SCHEMA_FIELD_ADDED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
@@ -371,28 +371,40 @@ describe('SchemaLogic', () => {
           AppLogic.values.isOrganization = false;
 
           const onSchemaSetSuccessSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetSuccess');
-          const promise = Promise.resolve(serverResponse);
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve(serverResponse));
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/account/sources/source123/schemas',
+            '/internal/workplace_search/account/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
           );
-          await promise;
+          await nextTick();
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
-        it('handles error', async () => {
+        it('handles error with message', async () => {
           const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
-          const promise = Promise.reject({ message: 'this is an error' });
-          http.post.mockReturnValue(promise);
+          // We expect body.attributes.errors to be a string[] when it is present
+          http.post.mockReturnValue(
+            Promise.reject({ body: { attributes: { errors: ['this is an error'] } } })
+          );
           SchemaLogic.actions.setServerField(schema, ADD);
-          await expectedAsyncError(promise);
+          await nextTick();
 
-          expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith('this is an error');
+          expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith(['this is an error']);
+          expect(spyScrollTo).toHaveBeenCalledWith(0, 0);
+        });
+
+        it('handles error with no message', async () => {
+          const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
+          http.post.mockReturnValue(Promise.reject());
+          SchemaLogic.actions.setServerField(schema, ADD);
+          await nextTick();
+
+          expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith([defaultErrorMessage]);
+          expect(spyScrollTo).toHaveBeenCalledWith(0, 0);
         });
       });
 
@@ -400,18 +412,17 @@ describe('SchemaLogic', () => {
         it('calls API and sets values (org)', async () => {
           AppLogic.values.isOrganization = true;
           const onSchemaSetSuccessSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetSuccess');
-          const promise = Promise.resolve(serverResponse);
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve(serverResponse));
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/source123/schemas',
+            '/internal/workplace_search/org/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
           );
-          await promise;
-          expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_UPDATED_MESSAGE);
+          await nextTick();
+          expect(flashSuccessToast).toHaveBeenCalledWith(SCHEMA_UPDATED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
@@ -419,27 +430,21 @@ describe('SchemaLogic', () => {
           AppLogic.values.isOrganization = false;
 
           const onSchemaSetSuccessSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetSuccess');
-          const promise = Promise.resolve(serverResponse);
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve(serverResponse));
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/account/sources/source123/schemas',
+            '/internal/workplace_search/account/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
           );
-          await promise;
+          await nextTick();
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
-        it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.post.mockReturnValue(promise);
+        itShowsServerErrorAsFlashMessage(http.post, () => {
           SchemaLogic.actions.setServerField(schema, UPDATE);
-          await expectedAsyncError(promise);
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
     });
@@ -457,7 +462,7 @@ describe('SchemaLogic', () => {
       it('handles filtered response', () => {
         const newSchema = {
           ...schema,
-          bar: 'number',
+          bar: SchemaType.Number,
         };
         SchemaLogic.actions.onInitializeSchema(serverResponse);
         SchemaLogic.actions.onFieldUpdate({ schema: newSchema, formUnchanged: false });

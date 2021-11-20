@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid';
 import { range } from 'lodash';
-import { AlertType } from '../../../../plugins/alerts/server';
+import { AlertType } from '../../../../plugins/alerting/server';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
@@ -38,6 +39,7 @@ function getTShirtSizeByIdAndThreshold(
 
 export const alertType: AlertType<
   AlwaysFiringParams,
+  never,
   { count?: number },
   { triggerdOnCycle: number },
   never,
@@ -52,6 +54,7 @@ export const alertType: AlertType<
   ],
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },

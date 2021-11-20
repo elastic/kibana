@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
 import fs from 'fs';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -29,9 +30,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers: integrationConfig.get('servers'),
     esTestCluster: integrationConfig.get('esTestCluster'),
     apps: integrationConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../functional/es_archives'),
-    },
     screenshots: integrationConfig.get('screenshots'),
     junit: {
       reportName: 'Plugin Functional Tests',
@@ -40,10 +38,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...integrationConfig.get('kbnTestServer'),
       serverArgs: [
         ...integrationConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.eventLog.enabled=true',
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
+        '--xpack.task_manager.ephemeral_tasks.enabled=false',
+        '--xpack.task_manager.ephemeral_tasks.request_capacity=100',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

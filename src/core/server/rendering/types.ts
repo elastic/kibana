@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
-import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
+import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
@@ -24,36 +25,51 @@ export interface RenderingMetadata {
   i18n: typeof i18n.translate;
   locale: string;
   darkMode: boolean;
-  injectedMetadata: {
-    version: string;
-    buildNumber: number;
-    branch: string;
-    basePath: string;
-    serverBasePath: string;
-    publicBaseUrl?: string;
-    env: {
-      mode: EnvironmentMode;
-      packageInfo: PackageInfo;
-    };
-    anonymousStatusPage: boolean;
-    i18n: {
-      translationsUrl: string;
-    };
-    csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
-    externalUrl: { policy: IExternalUrlPolicy[] };
-    vars: Record<string, any>;
-    uiPlugins: Array<{
-      id: string;
-      plugin: DiscoveredPlugin;
-      config?: Record<string, unknown>;
-    }>;
-    legacyMetadata: {
-      uiSettings: {
-        defaults: Record<string, any>;
-        user: Record<string, UserProvidedValues<any>>;
-      };
+  themeVersion: ThemeVersion;
+  stylesheetPaths: string[];
+  injectedMetadata: InjectedMetadata;
+}
+
+/** @internal */
+export interface InjectedMetadata {
+  version: string;
+  buildNumber: number;
+  branch: string;
+  basePath: string;
+  serverBasePath: string;
+  publicBaseUrl?: string;
+  env: {
+    mode: EnvironmentMode;
+    packageInfo: PackageInfo;
+  };
+  anonymousStatusPage: boolean;
+  i18n: {
+    translationsUrl: string;
+  };
+  theme: {
+    darkMode: boolean;
+    version: ThemeVersion;
+  };
+  csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
+  externalUrl: { policy: IExternalUrlPolicy[] };
+  vars: Record<string, any>;
+  uiPlugins: Array<{
+    id: string;
+    plugin: DiscoveredPlugin;
+    config?: Record<string, unknown>;
+  }>;
+  legacyMetadata: {
+    uiSettings: {
+      defaults: Record<string, any>;
+      user: Record<string, UserProvidedValues<any>>;
     };
   };
+}
+
+/** @internal */
+export interface RenderingPrebootDeps {
+  http: InternalHttpServicePreboot;
+  uiPlugins: UiPlugins;
 }
 
 /** @internal */
@@ -90,9 +106,12 @@ export interface InternalRenderingServiceSetup {
    * const html = await rendering.render(request, uiSettings);
    * ```
    */
-  render<R extends KibanaRequest | LegacyRequest>(
-    request: R,
+  render(
+    request: KibanaRequest,
     uiSettings: IUiSettingsClient,
     options?: IRenderOptions
   ): Promise<string>;
 }
+
+/** @internal */
+export type InternalRenderingServicePreboot = InternalRenderingServiceSetup;

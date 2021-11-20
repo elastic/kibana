@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { Request } from '@hapi/hapi';
-import {
+
+import type {
+  Capabilities,
   CapabilitiesStart,
   IBasePath,
-  KibanaRequest,
-  Logger,
-  Capabilities,
   IClusterClient,
-} from '../../../../../src/core/server';
+  Logger,
+} from 'src/core/server';
+
+import { KibanaRequest } from '../../../../../src/core/server';
 import { addSpaceIdToPath } from '../../../spaces/common';
 import type { SpacesServiceStart } from '../../../spaces/server';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
-import { AnonymousAuthenticationProvider, HTTPAuthorizationHeader } from '../authentication';
+import type { HTTPAuthorizationHeader } from '../authentication';
+import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
@@ -161,7 +165,7 @@ export class AnonymousAccessService {
    * anonymous service account credentials.
    */
   private createFakeAnonymousRequest({ authenticateRequest }: { authenticateRequest: boolean }) {
-    return KibanaRequest.from(({
+    return KibanaRequest.from({
       headers:
         authenticateRequest && this.httpAuthorizationHeader
           ? { authorization: this.httpAuthorizationHeader.toString() }
@@ -173,6 +177,6 @@ export class AnonymousAccessService {
       route: { settings: {} },
       url: { href: '/' },
       raw: { req: { url: '/' } },
-    } as unknown) as Request);
+    } as unknown as Request);
   }
 }

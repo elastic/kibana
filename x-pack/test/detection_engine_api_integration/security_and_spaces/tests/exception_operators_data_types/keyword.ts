@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -29,37 +30,43 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const log = getService('log');
 
   describe('Rule exception operators for data type keyword', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/keyword');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/keyword');
+    });
+
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
-      await createListsIndex(supertest);
-      await esArchiver.load('rule_exceptions/keyword');
+      await createSignalsIndex(supertest, log);
+      await createListsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
-      await deleteAllExceptions(es);
-      await deleteListsIndex(supertest);
-      await esArchiver.unload('rule_exceptions/keyword');
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
+      await deleteAllExceptions(supertest, log);
+      await deleteListsIndex(supertest, log);
     });
 
     describe('"is" operator', () => {
       it('should find all the keyword from the data set when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word one', 'word three', 'word two']);
       });
 
       it('should filter 1 single keyword if it is set as an exception', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -69,16 +76,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word three', 'word two']);
       });
 
       it('should filter 2 keyword if both are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -96,16 +103,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word three']);
       });
 
       it('should filter 3 keyword if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -131,16 +138,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four']);
       });
 
       it('should filter 4 keyword if all are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -174,9 +181,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
     });
@@ -184,7 +191,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is not" operator', () => {
       it('will return 0 results if it cannot find what it is excluding', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -194,15 +201,15 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
 
       it('will return just 1 result we excluded', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -212,16 +219,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word one']);
       });
 
       it('will return 0 results if we exclude two keyword', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -239,9 +246,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
     });
@@ -249,7 +256,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is one of" operator', () => {
       it('should filter 1 single keyword if it is set as an exception', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -259,16 +266,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word three', 'word two']);
       });
 
       it('should filter 2 keyword if both are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -278,16 +285,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word three']);
       });
 
       it('should filter 3 keyword if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -297,16 +304,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four']);
       });
 
       it('should filter 4 keyword if all are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -316,9 +323,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
     });
@@ -326,7 +333,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is not one of" operator', () => {
       it('will return 0 results if it cannot find what it is excluding', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -336,15 +343,15 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
 
       it('will return just the result we excluded', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -354,10 +361,10 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word one']);
       });
     });
@@ -365,7 +372,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"exists" operator', () => {
       it('will return 0 results if matching against keyword', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -374,9 +381,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
     });
@@ -384,7 +391,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"does not exist" operator', () => {
       it('will return 4 results if matching against keyword', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -393,20 +400,20 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word one', 'word three', 'word two']);
       });
     });
 
     describe('"is in list" operator', () => {
       it('will return 4 results if we have two lists with an AND contradiction keyword === "word one" AND keyword === "word two"', async () => {
-        await importFile(supertest, 'keyword', ['word one'], 'list_items_1.txt');
-        await importFile(supertest, 'keyword', ['word two'], 'list_items_2.txt');
+        await importFile(supertest, log, 'keyword', ['word one'], 'list_items_1.txt');
+        await importFile(supertest, log, 'keyword', ['word two'], 'list_items_2.txt');
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -428,17 +435,17 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word one', 'word three', 'word two']);
       });
 
       it('will return 3 results if we have a list that includes 1 keyword', async () => {
-        await importFile(supertest, 'keyword', ['word one'], 'list_items.txt');
+        await importFile(supertest, log, 'keyword', ['word one'], 'list_items.txt');
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -451,17 +458,17 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word three', 'word two']);
       });
 
       it('will return 2 results if we have a list that includes 2 keyword', async () => {
-        await importFile(supertest, 'keyword', ['word one', 'word three'], 'list_items.txt');
+        await importFile(supertest, log, 'keyword', ['word one', 'word three'], 'list_items.txt');
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -474,22 +481,23 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word two']);
       });
 
       it('will return 0 results if we have a list that includes all keyword', async () => {
         await importFile(
           supertest,
+          log,
           'keyword',
           ['word one', 'word two', 'word three', 'word four'],
           'list_items.txt'
         );
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -502,18 +510,18 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
     });
 
     describe('"is not in list" operator', () => {
       it('will return 1 result if we have a list that excludes 1 keyword', async () => {
-        await importFile(supertest, 'keyword', ['word one'], 'list_items.txt');
+        await importFile(supertest, log, 'keyword', ['word one'], 'list_items.txt');
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -526,17 +534,17 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word one']);
       });
 
       it('will return 2 results if we have a list that excludes 2 keyword', async () => {
-        await importFile(supertest, 'keyword', ['word one', 'word three'], 'list_items.txt');
+        await importFile(supertest, log, 'keyword', ['word one', 'word three'], 'list_items.txt');
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -549,22 +557,23 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word one', 'word three']);
       });
 
       it('will return 4 results if we have a list that excludes all keyword', async () => {
         await importFile(
           supertest,
+          log,
           'keyword',
           ['word one', 'word two', 'word three', 'word four'],
           'list_items.txt'
         );
         const rule = getRuleForSignalTesting(['keyword']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'keyword',
@@ -577,10 +586,10 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql(['word four', 'word one', 'word three', 'word two']);
       });
     });

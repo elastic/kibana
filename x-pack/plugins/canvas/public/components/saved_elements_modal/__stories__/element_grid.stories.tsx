@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { waitFor } from '../../../../../../../src/plugins/presentation_util/public/__stories__';
 import { ElementGrid } from '../element_grid';
-import { testCustomElements } from './fixtures/test_elements';
+import { getTestCustomElements } from './fixtures/test_elements';
 
 storiesOf('components/SavedElementsModal/ElementGrid', module)
   .addDecorator((story) => (
@@ -20,20 +22,28 @@ storiesOf('components/SavedElementsModal/ElementGrid', module)
       {story()}
     </div>
   ))
-  .add('default', () => (
-    <ElementGrid
-      elements={testCustomElements}
-      onClick={action('addCustomElement')}
-      onDelete={action('onDelete')}
-      onEdit={action('onEdit')}
-    />
-  ))
-  .add('with text filter', () => (
-    <ElementGrid
-      elements={testCustomElements}
-      onClick={action('addCustomElement')}
-      filterText="table"
-      onDelete={action('onDelete')}
-      onEdit={action('onEdit')}
-    />
-  ));
+  .add(
+    'default',
+    (_, props) => (
+      <ElementGrid
+        elements={props?.testCustomElements}
+        onClick={action('addCustomElement')}
+        onDelete={action('onDelete')}
+        onEdit={action('onEdit')}
+      />
+    ),
+    { decorators: [waitFor(getTestCustomElements())] }
+  )
+  .add(
+    'with text filter',
+    (_, props) => (
+      <ElementGrid
+        elements={props?.testCustomElements}
+        onClick={action('addCustomElement')}
+        filterText="table"
+        onDelete={action('onDelete')}
+        onEdit={action('onEdit')}
+      />
+    ),
+    { decorators: [waitFor(getTestCustomElements())] }
+  );

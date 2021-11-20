@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import sinon from 'sinon';
+import { fakeServer } from 'sinon';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server) => {
@@ -123,7 +124,7 @@ const registerHttpRequestMockHelpers = (server) => {
 };
 
 export const init = () => {
-  const server = sinon.fakeServer.create();
+  const server = fakeServer.create();
   server.respondImmediately = true;
 
   // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,

@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
 import React, { memo, FC } from 'react';
 
-import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 import { StepDefineFormHook } from '../step_define';
 
@@ -24,14 +27,11 @@ export const AdvancedPivotEditor: FC<StepDefineFormHook['advancedPivotEditor']> 
         label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorLabel', {
           defaultMessage: 'Pivot configuration object',
         })}
+        data-test-subj="transformAdvancedPivotEditor"
       >
-        <EuiCodeEditor
-          data-test-subj="transformAdvancedPivotEditor"
-          style={{ border: '1px solid #e3e6ef' }}
-          height="250px"
-          width="100%"
-          mode={xJsonMode}
-          value={advancedEditorConfig}
+        <CodeEditor
+          height={250}
+          languageId={'json'}
           onChange={(d: string) => {
             setAdvancedEditorConfig(d);
 
@@ -50,13 +50,21 @@ export const AdvancedPivotEditor: FC<StepDefineFormHook['advancedPivotEditor']> 
               setAdvancedPivotEditorApplyButtonEnabled(false);
             }
           }}
-          setOptions={{
-            fontSize: '12px',
+          options={{
+            ariaLabel: i18n.translate('xpack.transform.stepDefineForm.advancedEditorAriaLabel', {
+              defaultMessage: 'Advanced pivot editor',
+            }),
+            automaticLayout: true,
+            fontSize: 12,
+            scrollBeyondLastLine: false,
+            quickSuggestions: true,
+            minimap: {
+              enabled: false,
+            },
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
           }}
-          theme="textmate"
-          aria-label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorAriaLabel', {
-            defaultMessage: 'Advanced pivot editor',
-          })}
+          value={advancedEditorConfig}
         />
       </EuiFormRow>
     );

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set';
@@ -21,7 +22,7 @@ export const findPotentialMatches = async (
   const { body: queryResult } = await query(queryContext, searchAfter, size);
   const monitorIds: string[] = [];
 
-  (queryResult.aggregations?.monitors.buckets ?? []).forEach((b) => {
+  (queryResult.aggregations?.monitors.buckets ?? []).forEach((b: any) => {
     const monitorId = b.key.monitor_id;
     monitorIds.push(monitorId as string);
   });
@@ -39,7 +40,8 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
     body,
   };
 
-  return await queryContext.search(params);
+  const response = await queryContext.search(params, 'getMonitorList-potentialMatches');
+  return response;
 };
 
 const queryBody = async (queryContext: QueryContext, searchAfter: any, size: number) => {
@@ -51,14 +53,34 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
 
   const body = {
     size: 0,
-    query: { bool: { filter: filters } },
+    query: {
+      bool: {
+        filter: filters,
+        ...(queryContext.query
+          ? {
+              minimum_should_match: 1,
+              should: [
+                {
+                  multi_match: {
+                    query: escape(queryContext.query),
+                    type: 'phrase_prefix',
+                    fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
+                  },
+                },
+              ],
+            }
+          : {}),
+      },
+    },
     aggs: {
       monitors: {
         composite: {
           size,
           sources: [
             {
-              monitor_id: { terms: { field: 'monitor.id', order: queryContext.cursorOrder() } },
+              monitor_id: {
+                terms: { field: 'monitor.id' as const, order: queryContext.cursorOrder() },
+              },
             },
           ],
         },

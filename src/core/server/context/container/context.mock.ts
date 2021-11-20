@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IContextContainer } from './context';
 
-export type ContextContainerMock = jest.Mocked<IContextContainer<any>>;
+export type ContextContainerMock = jest.Mocked<IContextContainer>;
 
-const createContextMock = (mockContext = {}) => {
+const createContextMock = (mockContext: any = {}) => {
   const contextMock: ContextContainerMock = {
-    // @ts-expect-error tsc cannot infer ContextName and uses never
+    // @ts-expect-error since ContextContainerMock cannot infer ContextName and fallsback to never
     registerContext: jest.fn(),
     createHandler: jest.fn(),
   };
-  contextMock.createHandler.mockImplementation((pluginId, handler) => (...args) =>
-    handler(mockContext, ...args)
+  contextMock.createHandler.mockImplementation(
+    (pluginId, handler) =>
+      (...args) =>
+        Promise.resolve(handler(mockContext, ...args))
   );
   return contextMock;
 };

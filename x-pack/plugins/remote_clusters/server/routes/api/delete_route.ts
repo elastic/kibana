@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -14,7 +15,6 @@ import { serializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../shared_imports';
 
 const paramsValidation = schema.object({
   nameOrNames: schema.string(),
@@ -23,13 +23,18 @@ const paramsValidation = schema.object({
 type RouteParams = TypeOf<typeof paramsValidation>;
 
 export const register = (deps: RouteDependencies): void => {
+  const {
+    router,
+    lib: { handleEsError },
+  } = deps;
+
   const deleteHandler: RequestHandler<RouteParams, unknown, unknown> = async (
     ctx,
     request,
     response
   ) => {
     try {
-      const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
+      const { client: clusterClient } = ctx.core.elasticsearch;
 
       const { nameOrNames } = request.params;
       const names = nameOrNames.split(',');
@@ -37,12 +42,12 @@ export const register = (deps: RouteDependencies): void => {
       const itemsDeleted: any[] = [];
       const errors: any[] = [];
 
-      const clusterSettings = await callAsCurrentUser('cluster.getSettings');
+      const { body: clusterSettings } = await clusterClient.asCurrentUser.cluster.getSettings();
 
       // Validator that returns an error if the remote cluster does not exist.
       const validateClusterDoesExist = async (name: string) => {
         try {
-          const existingCluster = await doesClusterExist(callAsCurrentUser, name);
+          const existingCluster = await doesClusterExist(clusterClient, name);
           if (!existingCluster) {
             return response.customError({
               statusCode: 404,
@@ -68,7 +73,11 @@ export const register = (deps: RouteDependencies): void => {
       ) => {
         try {
           const body = serializeCluster({ name, hasDeprecatedProxySetting });
-          const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', { body });
+
+          const { body: updateClusterResponse } =
+            await clusterClient.asCurrentUser.cluster.putSettings({
+              body,
+            });
           const acknowledged = get(updateClusterResponse, 'acknowledged');
           const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
 
@@ -91,10 +100,7 @@ export const register = (deps: RouteDependencies): void => {
             },
           });
         } catch (error) {
-          if (isEsError(error)) {
-            return response.customError({ statusCode: error.statusCode, body: error });
-          }
-          return response.internalError({ body: error });
+          return handleEsError({ error, response });
         }
       };
 
@@ -128,14 +134,11 @@ export const register = (deps: RouteDependencies): void => {
         },
       });
     } catch (error) {
-      if (isEsError(error)) {
-        return response.customError({ statusCode: error.statusCode, body: error });
-      }
-      return response.internalError({ body: error });
+      return handleEsError({ error, response });
     }
   };
 
-  deps.router.delete(
+  router.delete(
     {
       path: `${API_BASE_PATH}/{nameOrNames}`,
       validate: {

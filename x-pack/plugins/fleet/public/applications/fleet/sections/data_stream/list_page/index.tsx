@@ -1,58 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useMemo } from 'react';
+import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiEmptyPrompt,
   EuiInMemoryTable,
-  EuiTableActionsColumnType,
-  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
-import { DataStream } from '../../../types';
-import { WithHeaderLayout } from '../../../layouts';
-import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
-import { PackageIcon } from '../../../components/package_icon';
-import { DataStreamRowActions } from './components/data_stream_row_actions';
 
-const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
-  <WithHeaderLayout
-    leftColumn={
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.fleet.dataStreamList.pageTitle"
-                defaultMessage="Data streams"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.dataStreamList.pageSubtitle"
-                defaultMessage="Manage the data created by your agents."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
-  >
-    {children}
-  </WithHeaderLayout>
-);
+import type { DataStream } from '../../../types';
+import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
+import { PackageIcon } from '../../../components';
+
+import { DataStreamRowActions } from './components/data_stream_row_actions';
 
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('data_streams');
@@ -121,16 +91,18 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         },
       },
       {
-        field: 'last_activity',
+        field: 'last_activity_ms',
         sortable: true,
         width: '25%',
         dataType: 'date',
         name: i18n.translate('xpack.fleet.dataStreamList.lastActivityColumnTitle', {
           defaultMessage: 'Last activity',
         }),
-        render: (date: DataStream['last_activity']) => {
+        render: (date: DataStream['last_activity_ms']) => {
           try {
-            const formatter = fieldFormats.getInstance('date');
+            const formatter = fieldFormats.getInstance('date', {
+              pattern: 'MMM D, YYYY @ HH:mm:ss',
+            });
             return formatter.convert(date);
           } catch (e) {
             return <FormattedDate value={date} year="numeric" month="short" day="2-digit" />;
@@ -229,97 +201,96 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   }
 
   return (
-    <DataStreamListPageLayout>
-      <EuiInMemoryTable
-        loading={isLoading}
-        hasActions={true}
-        message={
-          isLoading ? (
+    <EuiInMemoryTable
+      loading={isLoading}
+      hasActions={true}
+      tableLayout="auto"
+      message={
+        isLoading ? (
+          <FormattedMessage
+            id="xpack.fleet.dataStreamList.loadingDataStreamsMessage"
+            defaultMessage="Loading data streams…"
+          />
+        ) : dataStreamsData && !dataStreamsData.data_streams.length ? (
+          emptyPrompt
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.dataStreamList.noFilteredDataStreamsMessage"
+            defaultMessage="No matching data streams found"
+          />
+        )
+      }
+      items={dataStreamsData ? dataStreamsData.data_streams : []}
+      itemId="index"
+      columns={columns}
+      pagination={{
+        initialPageSize: pagination.pageSize,
+        pageSizeOptions,
+      }}
+      sorting={true}
+      search={{
+        toolsRight: [
+          <EuiButton
+            key="reloadButton"
+            color="primary"
+            iconType="refresh"
+            onClick={() => resendRequest()}
+          >
             <FormattedMessage
-              id="xpack.fleet.dataStreamList.loadingDataStreamsMessage"
-              defaultMessage="Loading data streams…"
+              id="xpack.fleet.dataStreamList.reloadDataStreamsButtonText"
+              defaultMessage="Reload"
             />
-          ) : dataStreamsData && !dataStreamsData.data_streams.length ? (
-            emptyPrompt
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.dataStreamList.noFilteredDataStreamsMessage"
-              defaultMessage="No matching data streams found"
-            />
-          )
-        }
-        items={dataStreamsData ? dataStreamsData.data_streams : []}
-        itemId="index"
-        columns={columns}
-        pagination={{
-          initialPageSize: pagination.pageSize,
-          pageSizeOptions,
-        }}
-        sorting={true}
-        search={{
-          toolsRight: [
-            <EuiButton
-              key="reloadButton"
-              color="primary"
-              iconType="refresh"
-              onClick={() => resendRequest()}
-            >
-              <FormattedMessage
-                id="xpack.fleet.dataStreamList.reloadDataStreamsButtonText"
-                defaultMessage="Reload"
-              />
-            </EuiButton>,
-          ],
-          box: {
-            placeholder: i18n.translate('xpack.fleet.dataStreamList.searchPlaceholderTitle', {
-              defaultMessage: 'Filter data streams',
+          </EuiButton>,
+        ],
+        box: {
+          placeholder: i18n.translate('xpack.fleet.dataStreamList.searchPlaceholderTitle', {
+            defaultMessage: 'Filter data streams',
+          }),
+          incremental: true,
+        },
+        filters: [
+          {
+            type: 'field_value_selection',
+            field: 'dataset',
+            name: i18n.translate('xpack.fleet.dataStreamList.datasetColumnTitle', {
+              defaultMessage: 'Dataset',
             }),
-            incremental: true,
+            multiSelect: 'or',
+            operator: 'exact',
+            options: filterOptions.dataset,
           },
-          filters: [
-            {
-              type: 'field_value_selection',
-              field: 'dataset',
-              name: i18n.translate('xpack.fleet.dataStreamList.datasetColumnTitle', {
-                defaultMessage: 'Dataset',
-              }),
-              multiSelect: 'or',
-              operator: 'exact',
-              options: filterOptions.dataset,
-            },
-            {
-              type: 'field_value_selection',
-              field: 'type',
-              name: i18n.translate('xpack.fleet.dataStreamList.typeColumnTitle', {
-                defaultMessage: 'Type',
-              }),
-              multiSelect: 'or',
-              operator: 'exact',
-              options: filterOptions.type,
-            },
-            {
-              type: 'field_value_selection',
-              field: 'namespace',
-              name: i18n.translate('xpack.fleet.dataStreamList.namespaceColumnTitle', {
-                defaultMessage: 'Namespace',
-              }),
-              multiSelect: 'or',
-              operator: 'exact',
-              options: filterOptions.namespace,
-            },
-            {
-              type: 'field_value_selection',
-              field: 'package',
-              name: i18n.translate('xpack.fleet.dataStreamList.integrationColumnTitle', {
-                defaultMessage: 'Integration',
-              }),
-              multiSelect: 'or',
-              operator: 'exact',
-              options: filterOptions.package,
-            },
-          ],
-        }}
-      />
-    </DataStreamListPageLayout>
+          {
+            type: 'field_value_selection',
+            field: 'type',
+            name: i18n.translate('xpack.fleet.dataStreamList.typeColumnTitle', {
+              defaultMessage: 'Type',
+            }),
+            multiSelect: 'or',
+            operator: 'exact',
+            options: filterOptions.type,
+          },
+          {
+            type: 'field_value_selection',
+            field: 'namespace',
+            name: i18n.translate('xpack.fleet.dataStreamList.namespaceColumnTitle', {
+              defaultMessage: 'Namespace',
+            }),
+            multiSelect: 'or',
+            operator: 'exact',
+            options: filterOptions.namespace,
+          },
+          {
+            type: 'field_value_selection',
+            field: 'package',
+            name: i18n.translate('xpack.fleet.dataStreamList.integrationColumnTitle', {
+              defaultMessage: 'Integration',
+            }),
+            multiSelect: 'or',
+            operator: 'exact',
+            options: filterOptions.package,
+          },
+        ],
+      }}
+    />
   );
 };

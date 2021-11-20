@@ -16,20 +16,19 @@ WARNING: The following instructions assumes {kib} is using the default index nam
 
 Saved objects are stored in two indices: 
 
-* `.kibana_{kibana_version}_001`, or if the `kibana.index` configuration setting is set `.{kibana.index}_{kibana_version}_001`. E.g. for Kibana v7.12.0 `.kibana_7.12.0_001`.
-* `.kibana_task_manager_{kibana_version}_001`, or if the `xpack.tasks.index` configuration setting is set `.{xpack.tasks.index}_{kibana_version}_001` E.g. for Kibana v7.12.0 `.kibana_task_manager_7.12.0_001`.
+* `.kibana_{kibana_version}_001`, e.g. for Kibana v7.12.0 `.kibana_7.12.0_001`.
+* `.kibana_task_manager_{kibana_version}_001`, e.g. for Kibana v7.12.0 `.kibana_task_manager_7.12.0_001`.
  
-The index aliases `.kibana` and `.kibana_task_manager` will always point to the most up-to-date version indices.
+The index aliases `.kibana` and `.kibana_task_manager` will always point to
+the most up-to-date saved object indices.
 
 The first time a newer {kib} starts, it will first perform an upgrade migration before starting plugins or serving HTTP traffic. To prevent losing acknowledged writes old nodes should be shutdown before starting the upgrade. To reduce the likelihood of old nodes losing acknowledged writes, {kib} 7.12.0 and later will add a write block to the outdated index. Table 1 lists the saved objects indices used by previous versions of {kib}.
 
 .Saved object indices and aliases per {kib} version
 [options="header"]
-[cols="a,a,a"]
 |=======================
-|Upgrading from version | Outdated index (alias) | Upgraded index (alias)
-| 6.0.0 through 6.4.x    | `.kibana`     1.3+^.^| `.kibana_7.12.0_001`
-(`.kibana` alias)
+|Upgrading from version | Outdated index (alias)
+| 6.0.0 through 6.4.x    | `.kibana`     
 
 `.kibana_task_manager_7.12.0_001` (`.kibana_task_manager` alias)
 | 6.5.0 through 7.3.x    | `.kibana_N` (`.kibana` alias)
@@ -52,8 +51,59 @@ For large deployments with more than 10 {kib} instances and more than 10 000 sav
 This section highlights common causes of {kib} upgrade failures and how to prevent them.
 
 [float]
+===== timeout_exception or receive_timeout_transport_exception
+There is a known issue in v7.12.0 for users who tried the fleet beta. Upgrade migrations fail because of a large number of documents in the `.kibana` index.
+
+This can cause Kibana to log errors like:
+
+[source,sh]
+--------------------------------------------
+Error: Unable to complete saved object migrations for the [.kibana] index. Please check the health of your Elasticsearch cluster and try again. Error: [receive_timeout_transport_exception]: [instance-0000000002][10.32.1.112:19541][cluster:monitor/task/get] request_id [2648] timed out after [59940ms]
+
+Error: Unable to complete saved object migrations for the [.kibana] index. Please check the health of your Elasticsearch cluster and try again. Error: [timeout_exception]: Timed out waiting for completion of [org.elasticsearch.index.reindex.BulkByScrollTask@6a74c54]
+--------------------------------------------
+
+See https://github.com/elastic/kibana/issues/95321 for instructions to work around this issue.
+ 
+[float]
 ===== Corrupt saved objects
-We highly recommend testing your {kib} upgrade in a development cluster to discover and remedy problems caused by corrupt documents, especially when there are custom integrations creating saved objects in your environment. Saved objects that were corrupted through manual editing or integrations will cause migration failures with a log message like `Failed to transform document. Transform: index-pattern:7.0.0\n Doc: {...}` or `Unable to migrate the corrupt Saved Object document ...`. Corrupt documents will have to be fixed or deleted before an upgrade migration can succeed.
+We highly recommend testing your {kib} upgrade in a development cluster to discover and remedy problems caused by corrupt documents, especially when there are custom integrations creating saved objects in your environment.
+
+Saved objects that were corrupted through manual editing or integrations will cause migration failures with a log message like `Failed to transform document. Transform: index-pattern:7.0.0\n Doc: {...}` or `Unable to migrate the corrupt Saved Object document ...`. Corrupt documents will have to be fixed or deleted before an upgrade migration can succeed.
+
+For example, given the following error message:
+
+[source,sh]
+--------------------------------------------
+Unable to migrate the corrupt saved object document with _id: 'marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275'. To allow migrations to proceed, please delete this document from the [.kibana_7.12.0_001] index.
+--------------------------------------------
+
+The following steps must be followed to delete the document that is causing the migration to fail:
+
+. Remove the write block which the migration system has placed on the previous index:
++
+[source,sh]
+--------------------------------------------
+PUT .kibana_7.12.1_001/_settings
+{
+  "index": {
+    "blocks.write": false
+  }
+}
+--------------------------------------------
+
+. Delete the corrupt document:
++
+[source,sh]
+--------------------------------------------
+DELETE .kibana_7.12.0_001/_doc/marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275
+--------------------------------------------
+
+. Restart {kib}.
+
+In this example, the Dashboard with ID `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` that belongs to the space `marketing_space` **will no longer be available**.
+
+Be sure you have a snapshot before you delete the corrupt document. If restoring from a snapshot is not an option, it is recommended to also delete the `temp` and `target` indices the migration created before restarting {kib} and retrying.
 
 [float]
 ===== User defined index templates that causes new `.kibana*` indices to have incompatible settings or mappings
@@ -101,17 +151,17 @@ In order to rollback after a failed upgrade migration, the saved object indices 
 [float]
 ===== Rollback by restoring a backup snapshot:
 
-1. Before proceeding ensure that you have a recent and successful backup snapshot of all `.kibana*` indices.
+1. Before proceeding, {ref}/snapshots-take-snapshot.html[take a snapshot] that contains the `kibana` feature state or all `.kibana*` indices.
 2. Shutdown all {kib} instances to be 100% sure that there are no instances currently performing a migration.
 3. Delete all saved object indices with `DELETE /.kibana*`
-4. Restore the `.kibana* indices and their aliases from the backup snapshot. See {es} {ref}/modules-snapshots.html[snapshots]
+4. {ref}/snapshots-restore-snapshot.html[Restore] the `kibana` feature state or all `.kibana* indices and their aliases from the snapshot.
 5. Start up all {kib} instances on the older version you wish to rollback to.
 
 [float]
 ===== (Not recommended) Rollback without a backup snapshot:
 
 1. Shutdown all {kib} instances to be 100% sure that there are no {kib} instances currently performing a migration.
-2. Create a backup snapshot of the `.kibana*` indices.
+2. {ref}/snapshots-take-snapshot.html[Take a snapshot] that includes the `kibana` feature state or all `.kibana*` indices.
 3. Delete the version specific indices created by the failed upgrade migration. E.g. if you wish to rollback from a failed upgrade to v7.12.0 `DELETE /.kibana_7.12.0_*,.kibana_task_manager_7.12.0_*`
 4. Inspect the output of `GET /_cat/aliases`. If either the `.kibana` and/or `.kibana_task_manager` alias is missing, these will have to be created manually. Find the latest index from the output of `GET /_cat/indices` and create the missing alias to point to the latest index. E.g. if the `.kibana` alias was missing and the latest index is `.kibana_3` create a new alias with `POST /.kibana_3/_aliases/.kibana`.
 5. Remove the write block from the rollback indices. `PUT /.kibana,.kibana_task_manager/_settings {"index.blocks.write": false}`

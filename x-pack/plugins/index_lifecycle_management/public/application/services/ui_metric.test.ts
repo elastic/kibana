@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   UIM_CONFIG_COLD_PHASE,
   UIM_CONFIG_WARM_PHASE,
   UIM_CONFIG_SET_PRIORITY,
-  UIM_CONFIG_FREEZE_INDEX,
   defaultIndexPriority,
 } from '../constants/';
 
@@ -58,21 +58,5 @@ describe('getUiMetricsForPhases', () => {
         },
       })
     ).toEqual([UIM_CONFIG_WARM_PHASE, UIM_CONFIG_SET_PRIORITY]);
-  });
-
-  test('gets freeze index', () => {
-    expect(
-      getUiMetricsForPhases({
-        cold: {
-          min_age: '0ms',
-          actions: {
-            freeze: {},
-            set_priority: {
-              priority: parseInt(defaultIndexPriority.cold, 10),
-            },
-          },
-        },
-      })
-    ).toEqual([UIM_CONFIG_COLD_PHASE, UIM_CONFIG_FREEZE_INDEX]);
   });
 });

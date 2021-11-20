@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React from 'react';
-import { useParams } from 'react-router-dom';
+
+import { defaults, omit } from 'lodash';
+import React, { useEffect } from 'react';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
 import {
   EnvironmentField,
@@ -20,90 +21,89 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 interface AlertParams {
-  windowSize: number;
-  windowUnit: string;
-  threshold: number;
-  serviceName: string;
-  transactionType: string;
-  environment: string;
+  windowSize?: number;
+  windowUnit?: string;
+  threshold?: number;
+  serviceName?: string;
+  transactionType?: string;
+  environment?: string;
 }
 
 interface Props {
   alertParams: AlertParams;
+  metadata?: AlertMetadata;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
 export function TransactionErrorRateAlertTrigger(props: Props) {
-  const { setAlertParams, alertParams, setAlertProperty } = props;
-  const { urlParams } = useUrlParams();
-  const { transactionTypes } = useApmServiceContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end, transactionType } = urlParams;
-  const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName,
-    start,
-    end,
-  });
+  const { services } = useKibana();
+  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
-  const { threshold, windowSize, windowUnit, environment } = alertParams;
+  useEffect(() => {
+    createCallApmApi(services as CoreStart);
+  }, [services]);
 
-  const thresholdAsPercent = (threshold ?? 0) / 100;
-
-  const { data } = useFetcher(() => {
-    if (windowSize && windowUnit) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
-        params: {
-          query: {
-            ...getAbsoluteTimeRange(windowSize, windowUnit),
-            environment,
-            serviceName,
-            transactionType: alertParams.transactionType,
-          },
-        },
-      });
+  const params = defaults(
+    { ...omit(metadata, ['start', 'end']), ...alertParams },
+    {
+      threshold: 30,
+      windowSize: 5,
+      windowUnit: 'm',
+      environment: ENVIRONMENT_ALL.value,
     }
-  }, [
-    alertParams.transactionType,
-    environment,
-    serviceName,
-    windowSize,
-    windowUnit,
-  ]);
+  );
 
-  if (serviceName && !transactionTypes.length) {
-    return null;
-  }
+  const thresholdAsPercent = (params.threshold ?? 0) / 100;
 
-  const defaultParams = {
-    threshold: 30,
-    windowSize: 5,
-    windowUnit: 'm',
-    transactionType: transactionType || transactionTypes[0],
-    environment: urlParams.environment || ENVIRONMENT_ALL.value,
-  };
-
-  const params = {
-    ...defaultParams,
-    ...alertParams,
-  };
+  const { data } = useFetcher(
+    (callApmApi) => {
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit as TimeUnit,
+      });
+      if (interval && start && end) {
+        return callApmApi({
+          endpoint:
+            'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
+          params: {
+            query: {
+              environment: params.environment,
+              serviceName: params.serviceName,
+              transactionType: params.transactionType,
+              interval,
+              start,
+              end,
+            },
+          },
+        });
+      }
+    },
+    [
+      params.transactionType,
+      params.environment,
+      params.serviceName,
+      params.windowSize,
+      params.windowUnit,
+    ]
+  );
 
   const fields = [
-    <ServiceField value={serviceName} />,
+    <ServiceField
+      currentValue={params.serviceName}
+      onChange={(value) => setAlertParams('serviceName', value)}
+    />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      options={transactionTypes.map((key) => ({ text: key, value: key }))}
-      onChange={(e) => setAlertParams('transactionType', e.target.value)}
+      onChange={(value) => setAlertParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
+      onChange={(value) => setAlertParams('environment', value)}
     />,
     <IsAboveField
       value={params.threshold}
@@ -128,16 +128,17 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
 
   const chartPreview = (
     <ChartPreview
-      data={data}
+      data={data?.errorRateChartPreview}
       yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
+      uiSettings={services.uiSettings}
     />
   );
 
   return (
     <ServiceAlertTrigger
       fields={fields}
-      defaults={defaultParams}
+      defaults={params}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
       chartPreview={chartPreview}

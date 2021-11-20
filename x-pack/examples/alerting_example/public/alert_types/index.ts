@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { registerNavigation as registerPeopleInSpaceNavigation } from './astros';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
-import { SanitizedAlert } from '../../../../plugins/alerts/common';
-import { PluginSetupContract as AlertingSetup } from '../../../../plugins/alerts/public';
+import { SanitizedAlert } from '../../../../plugins/alerting/common';
+import { PluginSetupContract as AlertingSetup } from '../../../../plugins/alerting/public';
 
-export function registerNavigation(alerts: AlertingSetup) {
+export function registerNavigation(alerting: AlertingSetup) {
   // register default navigation
-  alerts.registerDefaultNavigation(
+  alerting.registerDefaultNavigation(
     ALERTING_EXAMPLE_APP_ID,
     (alert: SanitizedAlert) => `/alert/${alert.id}`
   );
 
-  registerPeopleInSpaceNavigation(alerts);
+  registerPeopleInSpaceNavigation(alerting);
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* global jest */
@@ -16,14 +17,13 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
-  ESFilter,
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../typings/elasticsearch';
+} from '../../../../../src/core/types/elasticsearch';
 import { PromiseReturnType } from '../../../observability/typings/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
-import { UIFilters } from '../../typings/ui_filters';
+import { UxUIFilters } from '../../typings/ui_filters';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 
@@ -67,13 +67,13 @@ export function mockMoment() {
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <MockApmPluginContextWrapper>
-      <MemoryRouter initialEntries={[location]}>
+    <MemoryRouter initialEntries={[location]}>
+      <MockApmPluginContextWrapper>
         <UrlParamsProvider>
           <Component />
         </UrlParamsProvider>
-      </MemoryRouter>
-    </MockApmPluginContextWrapper>
+      </MockApmPluginContextWrapper>
+    </MemoryRouter>
   );
   const a = el.container.querySelector('a');
 
@@ -114,22 +114,17 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
-  start: number;
-  end: number;
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFilters: UIFilters;
-  esFilter: ESFilter[];
+  uiFilters: UxUIFilters;
   indices: {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.sourcemapIndices': string;
-    'apm_oss.errorIndices': string;
-    'apm_oss.onboardingIndices': string;
-    'apm_oss.spanIndices': string;
-    'apm_oss.transactionIndices': string;
-    'apm_oss.metricsIndices': string;
-    /* eslint-enable @typescript-eslint/naming-convention */
+    sourcemap: string;
+    error: string;
+    onboarding: string;
+    span: string;
+    transaction: string;
+    metric: string;
     apmAgentConfigurationIndex: string;
     apmCustomLinkIndex: string;
   };
@@ -163,8 +158,6 @@ export async function inspectSearchParams(
   let error;
 
   const mockSetup = {
-    start: 1528113600000,
-    end: 1528977600000,
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
     config: new Proxy(
@@ -181,21 +174,17 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: { environment: 'test' },
-    esFilter: [{ term: { 'service.environment': 'test' } }],
+    uiFilters: {},
     indices: {
-      /* eslint-disable @typescript-eslint/naming-convention */
-      'apm_oss.sourcemapIndices': 'myIndex',
-      'apm_oss.errorIndices': 'myIndex',
-      'apm_oss.onboardingIndices': 'myIndex',
-      'apm_oss.spanIndices': 'myIndex',
-      'apm_oss.transactionIndices': 'myIndex',
-      'apm_oss.metricsIndices': 'myIndex',
-      /* eslint-enable @typescript-eslint/naming-convention */
+      sourcemap: 'myIndex',
+      error: 'myIndex',
+      onboarding: 'myIndex',
+      span: 'myIndex',
+      transaction: 'myIndex',
+      metric: 'myIndex',
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },
-    dynamicIndexPattern: null as any,
   };
   try {
     response = await fn(mockSetup);

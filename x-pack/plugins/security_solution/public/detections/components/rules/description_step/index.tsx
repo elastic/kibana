@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -9,13 +10,9 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
-import {
-  IIndexPattern,
-  Filter,
-  esFilters,
-  FilterManager,
-} from '../../../../../../../../src/plugins/data/public';
+import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
@@ -35,10 +32,9 @@ import {
   buildThresholdDescription,
   buildThreatMappingDescription,
 } from './helpers';
-import { buildMlJobDescription } from './ml_job_description';
+import { buildMlJobsDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
-import { Threats, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../../pages/detection_engine/rules/create/helpers';
 
@@ -48,13 +44,14 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
   }
   &.euiDescriptionList--column .euiDescriptionList__description {
     width: 70%;
+    overflow-wrap: anywhere;
   }
 `;
 
 interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
-  indexPatterns?: IIndexPattern;
+  indexPatterns?: DataViewBase;
   schema: FormSchema<T>;
 }
 
@@ -72,8 +69,8 @@ export const StepRuleDescriptionComponent = <T,>({
     if (key === 'machineLearningJobId') {
       return [
         ...acc,
-        buildMlJobDescription(
-          get(key, data) as string,
+        buildMlJobsDescription(
+          get(key, data) as string[],
           (get(key, schema) as { label: string }).label
         ),
       ];
@@ -128,7 +125,7 @@ export const buildListItems = <T,>(
   data: unknown,
   schema: FormSchema<T>,
   filterManager: FilterManager,
-  indexPatterns?: IIndexPattern
+  indexPatterns?: DataViewBase
 ): ListItems[] =>
   Object.keys(schema).reduce<ListItems[]>(
     (acc, field) => [
@@ -147,7 +144,7 @@ export const buildListItems = <T,>(
 export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   return filters.map((filter) => {
     if (filter.$state == null) {
-      return { $state: { store: esFilters.FilterStateStore.APP_STATE }, ...filter };
+      return { $state: { store: FilterStateStore.APP_STATE }, ...filter };
     } else {
       return filter;
     }
@@ -160,7 +157,7 @@ export const getDescriptionItem = (
   label: string,
   data: unknown,
   filterManager: FilterManager,
-  indexPatterns?: IIndexPattern
+  indexPatterns?: DataViewBase
 ): ListItems[] => {
   if (field === 'queryBar') {
     const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);

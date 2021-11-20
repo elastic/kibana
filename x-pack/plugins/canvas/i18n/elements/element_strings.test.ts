@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { getElementStrings } from './element_strings';
-import { initializeElements } from '../../canvas_plugin_src/elements';
+import { initializeElementsSpec } from '../../canvas_plugin_src/elements';
 import { coreMock } from '../../../../../src/core/public/mocks';
 
-const elementSpecs = initializeElements(coreMock.createSetup() as any, {} as any);
+const elementSpecs = initializeElementsSpec(coreMock.createSetup() as any, {} as any);
 
 describe('ElementStrings', () => {
   const elementStrings = getElementStrings();

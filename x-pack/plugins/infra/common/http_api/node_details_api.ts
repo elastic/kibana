@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -17,18 +18,20 @@ const NodeDetailsDataPointRT = rt.intersection([
   }),
 ]);
 
-const NodeDetailsDataSeries = rt.type({
+const NodeDetailsDataSeriesRT = rt.type({
   id: rt.string,
   label: rt.string,
   data: rt.array(NodeDetailsDataPointRT),
 });
+
+export type NodeDetailsDataSeries = rt.TypeOf<typeof NodeDetailsDataSeriesRT>;
 
 export const NodeDetailsMetricDataRT = rt.intersection([
   rt.partial({
     id: rt.union([InventoryMetricRT, rt.null]),
   }),
   rt.type({
-    series: rt.array(NodeDetailsDataSeries),
+    series: rt.array(NodeDetailsDataSeriesRT),
   }),
 ]);
 

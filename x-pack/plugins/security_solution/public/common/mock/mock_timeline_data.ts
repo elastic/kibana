@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Ecs } from '../../../common/ecs';
@@ -1087,6 +1088,29 @@ export const mockTimelineData: TimelineItem[] = [
       geo: { region_name: ['xx'], country_iso_code: ['xx'] },
     },
   },
+  {
+    _id: '32',
+    data: [],
+    ecs: {
+      _id: 'BuBP4W0BOpWiDweSoYSg',
+      timestamp: '2019-10-18T23:59:15.091Z',
+      threat: {
+        enrichments: [
+          {
+            indicator: {
+              provider: ['indicator_provider'],
+              reference: ['https://example.com'],
+            },
+            matched: {
+              atomic: ['192.168.1.1'],
+              field: ['source.ip'],
+              type: ['ip'],
+            },
+          },
+        ],
+      },
+    },
+  },
 ];
 
 export const mockFimFileCreatedEvent: Ecs = {
@@ -1300,4 +1324,187 @@ export const mockDnsEvent: Ecs = {
     bytes: [40],
     ip: ['10.9.9.9'],
   },
+};
+
+export const mockEndpointProcessExecutionMalwarePreventionAlert: Ecs = {
+  process: {
+    hash: {
+      md5: ['177afc1eb0be88eb9983fb74111260c4'],
+      sha256: ['3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb'],
+      sha1: ['f573b85e9beb32121f1949217947b2adc6749e3d'],
+    },
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTY5MjAtMTMyNDg5OTk2OTAuNDgzMzA3NzAw',
+    ],
+    executable: [
+      'C:\\Users\\sean\\Downloads\\3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb.exe',
+    ],
+    name: [
+      'C:\\Users\\sean\\Downloads\\3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb.exe',
+    ],
+    pid: [6920],
+    args: [
+      'C:\\Users\\sean\\Downloads\\3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb.exe',
+    ],
+  },
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1518)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1518)'],
+      platform: ['windows'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1518)'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+    name: ['win2019-endpoint-1'],
+  },
+  file: {
+    mtime: ['2020-11-04T21:40:51.494Z'],
+    path: [
+      'C:\\Users\\sean\\Downloads\\3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb.exe',
+    ],
+    owner: ['sean'],
+    hash: {
+      md5: ['177afc1eb0be88eb9983fb74111260c4'],
+      sha256: ['3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb'],
+      sha1: ['f573b85e9beb32121f1949217947b2adc6749e3d'],
+    },
+    name: ['3be13acde2f4dcded4fd8d518a513bfc9882407a6e384ffb17d12710db7d76fb.exe'],
+    extension: ['exe'],
+    size: [1604112],
+  },
+  event: {
+    category: ['malware', 'intrusion_detection', 'process'],
+    outcome: ['success'],
+    severity: [73],
+    code: ['malicious_file'],
+    action: ['execution'],
+    id: ['LsuMZVr+sdhvehVM++++Gp2Y'],
+    kind: ['alert'],
+    created: ['2020-11-04T21:41:30.533Z'],
+    module: ['endpoint'],
+    type: ['info', 'start', 'denied'],
+    dataset: ['endpoint.alerts'],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  timestamp: '2020-11-04T21:41:30.533Z',
+  message: ['Malware Prevention Alert'],
+  _id: '0dA2lXUBn9bLIbfPkY7d',
+};
+
+export const mockEndpointLibraryLoadEvent: Ecs = {
+  file: {
+    path: ['C:\\Windows\\System32\\bcrypt.dll'],
+    hash: {
+      md5: ['00439016776de367bad087d739a03797'],
+      sha1: ['2c4ba5c1482987d50a182bad915f52cd6611ee63'],
+      sha256: ['e70f5d8f87aab14e3160227d38387889befbe37fa4f8f5adc59eff52804b35fd'],
+    },
+    name: ['bcrypt.dll'],
+  },
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['win2019-endpoint-1'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+  },
+  event: {
+    category: ['library'],
+    kind: ['event'],
+    created: ['2021-02-05T21:27:23.921Z'],
+    module: ['endpoint'],
+    action: ['load'],
+    type: ['start'],
+    id: ['LzzWB9jjGmCwGMvk++++Da5H'],
+    dataset: ['endpoint.events.library'],
+  },
+  process: {
+    name: ['sshd.exe'],
+    pid: [9644],
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTk2NDQtMTMyNTcwMzQwNDEuNzgyMTczODAw',
+    ],
+    executable: ['C:\\Program Files\\OpenSSH-Win64\\sshd.exe'],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  user: {
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  message: ['Endpoint DLL load event'],
+  timestamp: '2021-02-05T21:27:23.921Z',
+  _id: 'IAUYdHcBGrBB52F2zo8Q',
+};
+
+export const mockEndpointRegistryModificationEvent: Ecs = {
+  host: {
+    os: {
+      full: ['Windows Server 2019 Datacenter 1809 (10.0.17763.1697)'],
+      name: ['Windows'],
+      version: ['1809 (10.0.17763.1697)'],
+      family: ['windows'],
+      kernel: ['1809 (10.0.17763.1697)'],
+      platform: ['windows'],
+    },
+    mac: ['aa:bb:cc:dd:ee:ff'],
+    name: ['win2019-endpoint-1'],
+    architecture: ['x86_64'],
+    ip: ['10.1.2.3'],
+    id: ['d8ad572e-d224-4044-a57d-f5a84c0dfe5d'],
+  },
+  event: {
+    category: ['registry'],
+    kind: ['event'],
+    created: ['2021-02-04T13:44:31.559Z'],
+    module: ['endpoint'],
+    action: ['modification'],
+    type: ['change'],
+    id: ['LzzWB9jjGmCwGMvk++++CbOn'],
+    dataset: ['endpoint.events.registry'],
+  },
+  process: {
+    name: ['GoogleUpdate.exe'],
+    pid: [7408],
+    entity_id: [
+      'MWQxNWNmOWUtM2RjNy01Yjk3LWY1ODYtNzQzZjdjMjUxOGIyLTc0MDgtMTMyNTY5MTk4NDguODY4NTI0ODAw',
+    ],
+    executable: ['C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe'],
+  },
+  registry: {
+    hive: ['HKLM'],
+    key: [
+      'SOFTWARE\\WOW6432Node\\Google\\Update\\ClientState\\{430FD4D0-B729-4F61-AA34-91526481799D}\\CurrentState',
+    ],
+    path: [
+      'HKLM\\SOFTWARE\\WOW6432Node\\Google\\Update\\ClientState\\{430FD4D0-B729-4F61-AA34-91526481799D}\\CurrentState\\StateValue',
+    ],
+    value: ['StateValue'],
+  },
+  agent: {
+    type: ['endpoint'],
+  },
+  user: {
+    name: ['SYSTEM'],
+    domain: ['NT AUTHORITY'],
+  },
+  message: ['Endpoint registry event'],
+  timestamp: '2021-02-04T13:44:31.559Z',
+  _id: '4cxLbXcBGrBB52F2uOfF',
 };

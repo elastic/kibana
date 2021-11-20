@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { fetchUrl } from './requests';
+
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+
+import { fetchUrl } from './requests';
 jest.mock('node-fetch');
 
 const { Response, FetchError } = jest.requireActual('node-fetch');
@@ -12,7 +15,7 @@ const { Response, FetchError } = jest.requireActual('node-fetch');
 const fetchMock = require('node-fetch') as jest.Mock;
 
 jest.setTimeout(120 * 1000);
-describe('setupIngestManager', () => {
+describe('Registry request', () => {
   beforeEach(async () => {});
 
   afterEach(async () => {
@@ -106,6 +109,7 @@ describe('setupIngestManager', () => {
         await expect(promise).rejects.toThrow(
           `'404 Not Found' error response from package registry at https://example.com`
         );
+        await expect(promise).rejects.toMatchObject({ status: 404 });
         expect(fetchMock).toHaveBeenCalledTimes(1);
       });
 
@@ -121,6 +125,7 @@ describe('setupIngestManager', () => {
         await expect(promise).rejects.toThrow(
           `'429 Too Many Requests' error response from package registry at https://example.com`
         );
+        await expect(promise).rejects.toMatchObject({ status: 429 });
         expect(fetchMock).toHaveBeenCalledTimes(1);
       });
 
@@ -136,6 +141,7 @@ describe('setupIngestManager', () => {
         await expect(promise).rejects.toThrow(
           `'500 Internal Server Error' error response from package registry at https://example.com`
         );
+        await expect(promise).rejects.toMatchObject({ status: 500 });
         expect(fetchMock).toHaveBeenCalledTimes(1);
       });
     });

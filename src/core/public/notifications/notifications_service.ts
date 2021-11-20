@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { Subscription } from 'rxjs';
 import { I18nStart } from '../i18n';
+import { ThemeServiceStart } from '../theme';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
 import { IUiSettingsClient } from '../ui_settings';
 import { OverlayStart } from '../overlays';
@@ -21,6 +22,7 @@ interface SetupDeps {
 interface StartDeps {
   i18n: I18nStart;
   overlays: OverlayStart;
+  theme: ThemeServiceStart;
   targetDomElement: HTMLElement;
 }
 
@@ -49,13 +51,23 @@ export class NotificationsService {
     return notificationSetup;
   }
 
-  public start({ i18n: i18nDep, overlays, targetDomElement }: StartDeps): NotificationsStart {
+  public start({
+    i18n: i18nDep,
+    overlays,
+    theme,
+    targetDomElement,
+  }: StartDeps): NotificationsStart {
     this.targetDomElement = targetDomElement;
     const toastsContainer = document.createElement('div');
     targetDomElement.appendChild(toastsContainer);
 
     return {
-      toasts: this.toasts.start({ i18n: i18nDep, overlays, targetDomElement: toastsContainer }),
+      toasts: this.toasts.start({
+        i18n: i18nDep,
+        overlays,
+        theme,
+        targetDomElement: toastsContainer,
+      }),
     };
   }
 

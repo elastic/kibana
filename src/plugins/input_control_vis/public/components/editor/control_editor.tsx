@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent, ChangeEvent } from 'react';
@@ -22,7 +22,7 @@ import {
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
-import { IIndexPattern } from '../../../../data/public';
+import { IndexPattern } from '../../../../data/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 import './control_editor.scss';
@@ -35,7 +35,7 @@ interface ControlEditorUiProps {
   handleRemoveControl: (controlIndex: number) => void;
   handleIndexPatternChange: (controlIndex: number, indexPatternId: string) => void;
   handleFieldNameChange: (controlIndex: number, fieldName: string) => void;
-  getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
   handleOptionsChange: <T extends keyof ControlParamsOptions>(
     controlIndex: number,
     optionName: T,

@@ -7,6 +7,30 @@
 The following pages have moved or been deleted.
 
 --
+[role="exclude",id="snapshot-repositories"]
+== Snapshot and Restore
+Refer to {ref}/snapshot-restore.html[Snapshot and Restore].
+
+[role="exclude",id="snapshot-restore-tutorial"]
+== Tutorial: Snapshot and Restore
+Refer to {ref}/snapshot-restore.html[Snapshot and Restore].
+
+[role="exclude",id="configuring-tls"]
+== Encrypt TLS communications in {kib}
+Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-http[Encrypt HTTP client communications for {kib}].
+
+[float]
+[role="exclude",id="configuring-tls-browser-kib"]
+=== Encrypt traffic between the browser and {kib}
+
+Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-browser[Encrypt traffic between your browser and {kib}].
+
+[float]
+[role="exclude",id="configuring-tls-kib-es"]
+=== Encrypt traffic between {kib} and {es}
+
+Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-elasticsearch[Encrypt traffic between {kib} and {es}].
+
 [role="exclude",id="monitoring-xpack-kibana"]
 == Configuring monitoring in {kib}
 
@@ -163,11 +187,6 @@ This content has moved. See <<discover, **Discover**>>.
 
 This content has moved. See <<discover, **Discover**>>.
 
-[role="exclude",id="lens"]
-== Lens
-
-This content has moved. See <<create-panels-with-lens>>.
-
 [role="exclude",id="known-plugins"]
 == Known plugins
 
@@ -194,10 +213,166 @@ This page has moved. Refer to <<url_templating-language>>.
 
 This page has moved. Refer to <<url-template-variables>>.
 
+[float]
+[[time-series-visual-builder]]
+=== Time Series Visual Builder
+
+This page was deleted. Refer to <<dashboard>>.
+
+[float]
+[[kibana-keystore-has-moved-from-the-data-folder-to-the-config-folder]]
+=== Kibana Keystore has moved from the Data Folder to the Config Folder
+
+This page has been deleted. Refer to link:https://www.elastic.co/guide/en/kibana/7.9/breaking-changes-7.9.html#user-facing-changes-79[Breaking changes in 7.9].
+
+[float]
+[[createvis]]
+=== Create Visualization
+
+This page has been deleted. Refer to <<dashboard>>.
+
+[float]
+[[data-table]]
+=== Data Table
+
+This page has been deleted. Refer to <<dashboard>>.
+
+
+[float]
+[[xy-chart]]
+=== Line, Area, and Bar Chart
+
+This page has been deleted. Refer to <<dashboard>>.
+
+[float]
+[[add-canvas-events]]
+=== Add Canvas Elements
+
+This page has been moved. Refer to <<canvas>>.
+
+[float]
+[[vega-lite-tutorial]]
+=== Vega-Lite Tutorial
+
+This page has been moved. Refer to <<vega-tutorial-create-a-stacked-area-chart>>.
+
+[float]
+[[heatmap-chart]]
+=== Heatmap Chart
+
+This page has been moved. Refer to <<types-of-visualizations>>.
+
+[float]
+[[interface-overview]]
+=== Interface Overview
+
+This page has been moved. Refer to <<dashboard>>.
+
+[float]
+[[time-series-visualizations]]
+=== Featured Visualizations
+
+This page has been moved. Refer to <<dashboard>>.
+
+[float]
+[[timelion-customize]]
+=== Customize and format visualizations
+
+This page has been moved. Refer to <<dashboard>>.
+
+[float]
+[[dashboard-drilldown]]
+=== Dashboard Drilldowns
+
+This page has been moved. Refer to <<dashboard-drilldowns>>.
+
+[float]
+[[development-plugin-localization]]
+=== Localization for plugins
+
+This page has been moved. PRefer to <<external-plugin-localization>>.
+
 [role="exclude",id="visualize"]
 == Visualize
 
-This content has moved. See <<dashboard, **Dashboard**>>.
+This content has moved. Refer to <<dashboard, **Dashboard**>>.
 
 [role="exclude",id="explore-dashboard-data"]
-This content has moved. See <<dashboard, **Dashboard**>>.
+This content has moved. Refer to <<dashboard, **Dashboard**>>.
+
+[role="exclude",id="ingest-node-pipelines"]
+== Ingest Pipelines
+
+This content has moved. Refer to {ref}/ingest.html[Ingest pipelines].
+
+
+[role="exclude",id="create-panels-with-timelion"]
+== Timelion
+
+This content has moved. Refer to <<timelion>>.
+
+
+[role="exclude",id="space-rbac-tutorial"]
+== Tutorial: Use role-based access control to customize Kibana spaces
+
+This content has moved. Refer to <<tutorial-secure-access-to-kibana>>.
+
+[role="exclude",id="search"]
+== Search your data
+
+This content has moved. Refer to <<kuery-query>>.
+
+[role="exclude",id="discover-document-context"]
+== View surrounding documents
+
+This content has moved. Refer to <<discover-view-surrounding-documents>>.
+
+[role="exclude",id="field-formatters-string"]
+== String field formatters
+
+This content has moved. Refer to <<string-field-formatters>>.
+
+[role="exclude",id="embedding"]
+== Embed {kib} content in a web page
+
+This content has moved. Refer to <<embedded-content-authentication>> and <<embed-code>>.
+
+[role="exclude",id="reporting-troubleshooting-system-dependencies"]
+== System dependencies
+
+This content has moved. Refer to <<install-reporting-packages>>.
+
+[role="exclude",id="graph-getting-started"]
+== Create a graph
+
+This content has moved. Refer to <<xpack-graph>>.
+
+[role="exclude",id="graph-limitations"]
+== Graph limitations
+
+This content has moved. Refer to <<graph-troubleshooting>>.
+
+[role="exclude",id="profiler-getting-started"]
+== Getting start with Search Profiler
+
+This content has moved. Refer to <<xpack-profiler>>.
+
+[role="exclude",id="profiler-complicated"]
+== Profiling a more complicated querying
+
+This content has moved. Refer to <<xpack-profiler>>.
+
+[role="exclude",id="profiler-render"]
+== Rendering pre-captured profiler JSON
+
+This content has moved. Refer to <<xpack-profiler>>.
+
+[role="exclude",id="index-patterns"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views>>.
+
+[role="exclude",id="managing-index-patterns"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<managing-data-views>>.

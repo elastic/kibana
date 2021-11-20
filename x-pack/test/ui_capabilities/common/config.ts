@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
 
@@ -29,7 +30,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack UI Capabilities Functional Tests',
       },
-      esArchiver: {},
       esTestCluster: {
         ...xPackFunctionalTestsConfig.get('esTestCluster'),
         license,
@@ -42,7 +42,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackFunctionalTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'foo_plugin')}`,
         ],
       },

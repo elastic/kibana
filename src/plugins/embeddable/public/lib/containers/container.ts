@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import uuid from 'uuid';
@@ -30,9 +30,10 @@ export abstract class Container<
     TContainerOutput extends ContainerOutput = ContainerOutput
   >
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput>
+{
   public readonly isContainer: boolean = true;
-  protected readonly children: {
+  public readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
 
@@ -45,12 +46,29 @@ export abstract class Container<
     parent?: Container
   ) {
     super(input, output, parent);
+    this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
     this.subscription = this.getInput$()
       // At each update event, get both the previous and current state
       .pipe(startWith(input), pairwise())
       .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
+  }
+
+  public setChildLoaded(embeddable: IEmbeddable) {
+    // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
+    if (!this.input.panels[embeddable.id]) {
+      embeddable.destroy();
+      return;
+    }
+
+    this.children[embeddable.id] = embeddable;
+    this.updateOutput({
+      embeddableLoaded: {
+        ...this.output.embeddableLoaded,
+        [embeddable.id]: true,
+      },
+    } as Partial<TContainerOutput>);
   }
 
   public updateInputForChild<EEI extends EmbeddableInput = EmbeddableInput>(
@@ -134,13 +152,13 @@ export abstract class Container<
       explicitFiltered[key] = explicitInput[key];
     });
 
-    return ({
+    return {
       ...containerInput,
       ...explicitFiltered,
       // Typescript has difficulties with inferring this type but it is accurate with all
       // tests I tried. Could probably be revisted with future releases of TS to see if
       // it can accurately infer the type.
-    } as unknown) as TEmbeddableInput;
+    } as unknown as TEmbeddableInput;
   }
 
   public destroy() {
@@ -213,7 +231,7 @@ export abstract class Container<
 
   /**
    * Return state that comes from the container and is passed down to the child. For instance, time range and
-   * filters are common inherited input state. Note that any state stored in `this.input.panels[embeddableId].explicitInput`
+   * filters are common inherited input state. Note that state stored in `this.input.panels[embeddableId].explicitInput`
    * will override inherited input.
    */
   protected abstract getInheritedInput(id: string): TChildInput;
@@ -292,8 +310,7 @@ export abstract class Container<
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
 
-      // TODO: lets get rid of this distinction with factories, I don't think it will be needed
-      // anymore after this change.
+      // TODO: lets get rid of this distinction with factories, I don't think it will be needed after this change.
       embeddable = isSavedObjectEmbeddableInput(inputForChild)
         ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
@@ -307,19 +324,9 @@ export abstract class Container<
     // switch over to inline creation we can probably clean this up, and force EmbeddableFactory.create to always
     // return an embeddable, or throw an error.
     if (embeddable) {
-      // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
-      if (!this.input.panels[panel.explicitInput.id]) {
-        embeddable.destroy();
-        return;
+      if (!embeddable.deferEmbeddableLoad) {
+        this.setChildLoaded(embeddable);
       }
-
-      this.children[embeddable.id] = embeddable;
-      this.updateOutput({
-        embeddableLoaded: {
-          ...this.output.embeddableLoaded,
-          [panel.explicitInput.id]: true,
-        },
-      } as Partial<TContainerOutput>);
     } else if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
     }

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiFilterButton } from '@elastic/eui';
 
@@ -34,14 +36,15 @@ export const useTimelineStatus = ({
   installPrepackagedTimelines: () => void;
 } => {
   const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(null);
-  const isTemplateFilterEnabled = useMemo(() => timelineType === TimelineType.template, [
-    timelineType,
-  ]);
+  const isTemplateFilterEnabled = useMemo(
+    () => timelineType === TimelineType.template,
+    [timelineType]
+  );
 
-  const templateTimelineType = useMemo(() => (!isTemplateFilterEnabled ? null : selectedTab), [
-    selectedTab,
-    isTemplateFilterEnabled,
-  ]);
+  const templateTimelineType = useMemo(
+    () => (!isTemplateFilterEnabled ? null : selectedTab),
+    [selectedTab, isTemplateFilterEnabled]
+  );
 
   const timelineStatus = useMemo(
     () =>
@@ -94,6 +97,7 @@ export const useTimelineStatus = ({
             onClick={onFilterClicked.bind(null, tab.id)}
             withNext={tab.withNext}
             isDisabled={tab.disabled}
+            data-test-subj={tab.name}
           >
             {tab.name}
           </EuiFilterButton>

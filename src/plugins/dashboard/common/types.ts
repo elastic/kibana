@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { EmbeddableInput, PanelState } from '../../../../src/plugins/embeddable/common/types';
+import {
+  EmbeddableInput,
+  EmbeddableStateWithType,
+  PanelState,
+} from '../../../../src/plugins/embeddable/common/types';
 import { SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/common/lib/saved_object_embeddable';
 import {
   RawSavedDashboardPanelTo60,
@@ -18,6 +22,7 @@ import {
 } from './bwc/types';
 
 import { GridData } from './embeddable/types';
+import { ControlGroupInput } from '../../presentation_util/common/controls/control_group/types';
 export type PanelId = string;
 export type SavedObjectId = string;
 
@@ -25,6 +30,15 @@ export interface DashboardPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > extends PanelState<TEmbeddableInput> {
   readonly gridData: GridData;
+  panelRefName?: string;
+}
+
+export interface DashboardCapabilities {
+  showWriteControls: boolean;
+  saveQuery: boolean;
+  createNew: boolean;
+  show: boolean;
+  [key: string]: boolean;
 }
 
 /**
@@ -80,3 +94,25 @@ export type SavedDashboardPanel730ToLatest = Pick<
   readonly id?: string;
   readonly type: string;
 };
+
+// Making this interface because so much of the Container type from embeddable is tied up in public
+// Once that is all available from common, we should be able to move the dashboard_container type to our common as well
+
+export interface DashboardContainerControlGroupInput extends EmbeddableStateWithType {
+  panels: ControlGroupInput['panels'];
+  controlStyle: ControlGroupInput['controlStyle'];
+  id: string;
+}
+
+export interface RawControlGroupAttributes {
+  controlStyle: ControlGroupInput['controlStyle'];
+  panelsJSON: string;
+  id: string;
+}
+
+export interface DashboardContainerStateWithType extends EmbeddableStateWithType {
+  panels: {
+    [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
+  };
+  controlGroupInput?: DashboardContainerControlGroupInput;
+}

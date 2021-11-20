@@ -1,24 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { kea, MakeLogicType, isBreakpoint } from 'kea';
+import type { BreakPointFunction } from 'kea';
 import { cloneDeep, findIndex } from 'lodash';
-
-import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
-
+import { AppLogic } from '../../app_logic';
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
 
 import { staticSourceData } from './source_data';
-
-import { AppLogic } from '../../app_logic';
 
 interface ServerStatuses {
   [key: string]: string;
@@ -158,34 +156,39 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeSources: async () => {
+    initializeSources: async (_, breakpoint) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? '/api/workplace_search/org/sources'
-        : '/api/workplace_search/account/sources';
+        ? '/internal/workplace_search/org/sources'
+        : '/internal/workplace_search/account/sources';
 
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get<ISourcesServerResponse>(route);
+        breakpoint(); // Prevents errors if logic unmounts while fetching
         actions.pollForSourceStatusChanges();
         actions.onInitializeSources(response);
       } catch (e) {
-        flashAPIErrors(e);
+        if (isBreakpoint(e)) {
+          return; // do not continue if logic is unmounted
+        } else {
+          flashAPIErrors(e);
+        }
       }
 
       if (isOrganization && !values.serverStatuses) {
         // We want to get the initial statuses from the server to compare our polling results to.
-        const sourceStatuses = await fetchSourceStatuses(isOrganization);
+        const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
         actions.setServerSourceStatuses(sourceStatuses);
       }
     },
     // We poll the server and if the status update, we trigger a new fetch of the sources.
-    pollForSourceStatusChanges: () => {
+    pollForSourceStatusChanges: (_, breakpoint) => {
       const { isOrganization } = AppLogic.values;
       if (!isOrganization) return;
       const serverStatuses = values.serverStatuses;
 
       pollingInterval = window.setInterval(async () => {
-        const sourceStatuses = await fetchSourceStatuses(isOrganization);
+        const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
 
         sourceStatuses.some((source: ContentSourceStatus) => {
           if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
@@ -197,8 +200,8 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     setSourceSearchability: async ({ sourceId, searchable }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/searchable`
-        : `/api/workplace_search/account/sources/${sourceId}/searchable`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/searchable`
+        : `/internal/workplace_search/account/sources/${sourceId}/searchable`;
 
       try {
         await HttpLogic.values.http.put(route, {
@@ -225,7 +228,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         }
       );
 
-      setQueuedSuccessMessage(
+      flashSuccessToast(
         [
           successfullyConnectedMessage,
           additionalConfiguration ? additionalConfigurationMessage : '',
@@ -243,20 +246,29 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   }),
 });
 
-export const fetchSourceStatuses = async (isOrganization: boolean) => {
+export const fetchSourceStatuses = async (
+  isOrganization: boolean,
+  breakpoint: BreakPointFunction
+) => {
   const route = isOrganization
-    ? '/api/workplace_search/org/sources/status'
-    : '/api/workplace_search/account/sources/status';
+    ? '/internal/workplace_search/org/sources/status'
+    : '/internal/workplace_search/account/sources/status';
   let response;
 
   try {
-    response = await HttpLogic.values.http.get(route);
+    response = await HttpLogic.values.http.get<ContentSourceStatus[]>(route);
+    breakpoint();
     SourcesLogic.actions.setServerSourceStatuses(response);
   } catch (e) {
-    flashAPIErrors(e);
+    if (isBreakpoint(e)) {
+      // Do nothing, silence the error
+    } else {
+      flashAPIErrors(e);
+    }
   }
 
-  return response;
+  // TODO: remove casting. return type should be ContentSourceStatus[] | undefined
+  return response as ContentSourceStatus[];
 };
 
 const updateSourcesOnToggle = (

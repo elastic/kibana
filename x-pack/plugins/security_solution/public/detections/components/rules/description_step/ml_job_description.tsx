@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -50,7 +51,7 @@ export const AuditIcon = React.memo(AuditIconComponent);
 
 const JobStatusBadgeComponent: React.FC<{ job: MlSummaryJob }> = ({ job }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
-  const color = isStarted ? 'secondary' : 'danger';
+  const color = isStarted ? 'success' : 'danger';
   const text = isStarted ? ML_JOB_STARTED : ML_JOB_STOPPED;
 
   return (
@@ -103,7 +104,15 @@ const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
 
 export const MlJobDescription = React.memo(MlJobDescriptionComponent);
 
-export const buildMlJobDescription = (jobId: string, label: string): ListItems => ({
+const MlJobsDescription: React.FC<{ jobIds: string[] }> = ({ jobIds }) => (
+  <>
+    {jobIds.map((jobId) => (
+      <MlJobDescription key={jobId} jobId={jobId} />
+    ))}
+  </>
+);
+
+export const buildMlJobsDescription = (jobIds: string[], label: string): ListItems => ({
   title: label,
-  description: <MlJobDescription jobId={jobId} />,
+  description: <MlJobsDescription jobIds={jobIds} />,
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useRef } from 'react';
@@ -14,13 +15,13 @@ import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
 describe('AllRulesTables', () => {
   it('renders correctly', () => {
     const Component = () => {
-      const ref = useRef();
+      const ref = useRef(null);
 
       return (
         <AllRulesTables
           selectedTab={AllRulesTabs.rules}
           euiBasicTableSelectionProps={{}}
-          hasNoPermissions={false}
+          hasPermissions
           monitoringColumns={[]}
           rules={[]}
           rulesColumns={[]}
@@ -49,13 +50,13 @@ describe('AllRulesTables', () => {
 
   it('renders rules tab when "selectedTab" is "rules"', () => {
     const Component = () => {
-      const ref = useRef();
+      const ref = useRef(null);
 
       return (
         <AllRulesTables
           selectedTab={AllRulesTabs.rules}
           euiBasicTableSelectionProps={{}}
-          hasNoPermissions={false}
+          hasPermissions
           monitoringColumns={[]}
           rules={[]}
           rulesColumns={[]}
@@ -85,13 +86,13 @@ describe('AllRulesTables', () => {
 
   it('renders monitoring tab when "selectedTab" is "monitoring"', () => {
     const Component = () => {
-      const ref = useRef();
+      const ref = useRef(null);
 
       return (
         <AllRulesTables
           selectedTab={AllRulesTabs.monitoring}
           euiBasicTableSelectionProps={{}}
-          hasNoPermissions={false}
+          hasPermissions
           monitoringColumns={[]}
           rules={[]}
           rulesColumns={[]}

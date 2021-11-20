@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export * from './query/types';
 export * from './kbn_field_types/types';
-export * from './index_patterns/types';
 
 /**
  * If a service is being shared on both the client and the server, and
@@ -21,3 +20,9 @@ export * from './index_patterns/types';
  * not possible.
  */
 export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+
+type FilterFormatterFunction = (value: any) => string;
+export interface FilterValueFormatter {
+  convert: FilterFormatterFunction;
+  getConverterFor: (type: string) => FilterFormatterFunction;
+}

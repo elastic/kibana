@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { SearchResponse7 } from '../../../../common/types/es_client';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { extractErrorMessage } from '../../../../common/util/errors';
 
 import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
@@ -27,6 +28,7 @@ export const getIndexData = async (
       pagination,
       setErrorMessage,
       setRowCount,
+      setRowCountRelation,
       setStatus,
       setTableItems,
       sortingColumns,
@@ -49,7 +51,7 @@ export const getIndexData = async (
 
       const { pageIndex, pageSize } = pagination;
       // TODO: remove results_field from `fields` when possible
-      const resp: SearchResponse7 = await ml.esSearch({
+      const resp: estypes.SearchResponse = await ml.esSearch({
         index: jobConfig.dest.index,
         body: {
           fields: ['*'],
@@ -62,10 +64,15 @@ export const getIndexData = async (
       });
 
       if (!options.didCancel) {
-        setRowCount(resp.hits.total.value);
+        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+        setRowCountRelation(
+          typeof resp.hits.total === 'number'
+            ? ('eq' as estypes.SearchTotalHitsRelation)
+            : resp.hits.total.relation
+        );
         setTableItems(
           resp.hits.hits.map((d) =>
-            getProcessedFields(d.fields, (key: string) =>
+            getProcessedFields(d.fields ?? {}, (key: string) =>
               key.startsWith(`${jobConfig.dest.results_field}.feature_importance`)
             )
           )

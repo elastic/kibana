@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
@@ -29,10 +30,10 @@ describe('getUrlTemplateWithMeta', () => {
   });
 });
 
-describe('canFormatFeatureProperties', () => {
+describe('hasTooltipProperties', () => {
   it('false if no tooltips', async () => {
     const source = new MVTSingleLayerVectorSource(descriptor);
-    expect(source.canFormatFeatureProperties()).toEqual(false);
+    expect(source.hasTooltipProperties()).toEqual(false);
   });
   it('true if tooltip', async () => {
     const descriptorWithTooltips = {
@@ -41,7 +42,7 @@ describe('canFormatFeatureProperties', () => {
       tooltipProperties: ['foobar'],
     };
     const source = new MVTSingleLayerVectorSource(descriptorWithTooltips);
-    expect(source.canFormatFeatureProperties()).toEqual(true);
+    expect(source.hasTooltipProperties()).toEqual(true);
   });
 });
 

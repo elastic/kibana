@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { DocEntry, extractDocumentation } from './schema_extractor';
-import { ApiParameter, Block } from './types';
+import type { ApiParameter, Block } from './types';
 
 export function postProcess(parsedFiles: any[]): void {
   const schemasDirPath = path.resolve(__dirname, '..', '..', 'schemas');
@@ -18,6 +19,7 @@ export function postProcess(parsedFiles: any[]): void {
   const schemaDocs = extractDocumentation(schemaFiles);
 
   parsedFiles.forEach((parsedFile) => {
+    // @ts-ignore
     parsedFile.forEach((block: Block) => {
       const {
         local: { schemas },

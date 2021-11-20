@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,12 +30,12 @@ export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActi
         defaultMessage: 'Send to Server log',
       }
     ),
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return { config: { errors: {} }, secrets: { errors: {} } };
+    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
+      return Promise.resolve({ config: { errors: {} }, secrets: { errors: {} } });
     },
     validateParams: (
       actionParams: ServerLogActionParams
-    ): GenericValidationResult<Pick<ServerLogActionParams, 'message'>> => {
+    ): Promise<GenericValidationResult<Pick<ServerLogActionParams, 'message'>>> => {
       const errors = {
         message: new Array<string>(),
       };
@@ -48,7 +50,7 @@ export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActi
           )
         );
       }
-      return validationResult;
+      return Promise.resolve(validationResult);
     },
     actionConnectorFields: null,
     actionParamsFields: lazy(() => import('./server_log_params')),

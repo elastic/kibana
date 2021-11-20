@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const breakdown = {
@@ -41,16 +42,14 @@ export const normalized = [
     time: 6273,
     relative: '0.1',
     color: '#f5f5f5',
-    tip:
-      'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+    tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
   },
   {
     key: 'create_weight',
     time: 1852,
     relative: '0.0',
     color: '#f5f5f5',
-    tip:
-      'The time taken to create the Weight object, which holds temporary information during scoring.',
+    tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
   },
   { key: 'build_scorer_count', time: 2, relative: 0, color: '#f5f5f5', tip: '' },
   { key: 'create_weight_count', time: 1, relative: 0, color: '#f5f5f5', tip: '' },
@@ -67,8 +66,7 @@ export const normalized = [
     time: 0,
     relative: '0.0',
     color: '#f5f5f5',
-    tip:
-      'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+    tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
   },
   { key: 'match_count', time: 0, relative: 0, color: '#f5f5f5', tip: '' },
 ];

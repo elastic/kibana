@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import styled from 'styled-components';
@@ -12,16 +13,23 @@ import {
   LinkToAppProps,
 } from '../../../../../../../common/components/endpoint/link_to_app';
 
-const LinkLabel = styled.span`
+const LinkLabel = styled.span<{
+  size?: 'm' | 'l';
+}>`
   display: inline-block;
   padding-right: ${(props) => props.theme.eui.paddingSizes.s};
+  font-size: ${({ size, theme }) => (size === 'm' ? theme.eui.euiFontSizeXS : 'innherit')};
 `;
 
-export const LinkWithIcon: FC<LinkToAppProps> = memo(({ children, ...props }) => {
+type ComponentProps = LinkToAppProps & {
+  size?: 'm' | 'l';
+};
+
+export const LinkWithIcon: FC<ComponentProps> = memo(({ children, size = 'l', ...props }) => {
   return (
     <LinkToApp {...props}>
-      <LinkLabel>{children}</LinkLabel>
-      <EuiIcon type="popout" />
+      <LinkLabel size={size}>{children}</LinkLabel>
+      <EuiIcon type={size === 'm' ? 'arrowRight' : 'popout'} />
     </LinkToApp>
   );
 });

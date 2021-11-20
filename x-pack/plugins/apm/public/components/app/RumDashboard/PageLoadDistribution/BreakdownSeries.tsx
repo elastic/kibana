@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CurveType, Fit, LineSeries, ScaleType } from '@elastic/charts';
@@ -34,7 +35,7 @@ export function BreakdownSeries({
     ? EUI_CHARTS_THEME_DARK
     : EUI_CHARTS_THEME_LIGHT;
 
-  const { data, status } = useBreakdowns({
+  const { breakdowns, status } = useBreakdowns({
     field,
     value,
     percentileRange,
@@ -48,7 +49,7 @@ export function BreakdownSeries({
   // so don't user that here
   return (
     <>
-      {data?.map(({ data: seriesData, name }, sortIndex) => (
+      {breakdowns.map(({ data: seriesData, name }, sortIndex) => (
         <LineSeries
           id={`${field}-${value}-${name}`}
           key={`${field}-${value}-${name}`}

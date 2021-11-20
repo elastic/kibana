@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState, useCallback, useContext } from 'react';
@@ -14,7 +15,6 @@ import { extractErrorMessage } from '../../../../../common/util/errors';
 import { Annotation } from '../../../../../common/types/annotations';
 import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
-import { ANNOTATION_EVENT_USER } from '../../../../../common/constants/annotations';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
@@ -87,12 +87,6 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
           earliestMs: searchBounds.min.valueOf(),
           latestMs: searchBounds.max.valueOf(),
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-          fields: [
-            {
-              field: 'event',
-              missing: ANNOTATION_EVENT_USER,
-            },
-          ],
           detectorIndex,
           entities: nonBlankEntities,
         });

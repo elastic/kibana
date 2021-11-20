@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { compose } from 'recompose';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
+import React, { useMemo, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { encode } from '../../../common/lib/embeddable_dataurl';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
+import { State } from '../../../types';
+import { useLabsService } from '../../services';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
@@ -31,80 +33,81 @@ const allowedEmbeddables = {
   },*/
 };
 
-interface StateProps {
-  pageId: string;
-}
+type AddEmbeddable = (pageId: string, partialElement: { expression: string }) => void;
 
-interface DispatchProps {
-  addEmbeddable: (pageId: string, partialElement: { expression: string }) => void;
-}
+type FlyoutProps = Pick<ComponentProps, 'onClose'> & Partial<Omit<ComponentProps, 'onClose'>>;
 
-// FIX: Missing state type
-const mapStateToProps = (state: any) => ({ pageId: getSelectedPage(state) });
+export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (props) => {
+  const el: HTMLElement = useMemo(() => document.createElement('div'), []);
 
-const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
-  addEmbeddable: (pageId, partialElement): DispatchProps['addEmbeddable'] =>
-    dispatch(addElement(pageId, partialElement)),
-});
+  useEffect(() => {
+    let body = document.querySelector('body');
+    if (body && el) {
+      body.appendChild(el);
+    }
+    return () => {
+      body = document.querySelector('body');
+      if (body && el) {
+        body.removeChild(el);
+      }
+    };
+  }, [el]);
 
-const mergeProps = (
-  stateProps: StateProps,
-  dispatchProps: DispatchProps,
-  ownProps: ComponentProps
-): ComponentProps => {
-  const { pageId, ...remainingStateProps } = stateProps;
-  const { addEmbeddable } = dispatchProps;
+  if (!el) {
+    return null;
+  }
 
-  return {
-    ...remainingStateProps,
-    ...ownProps,
-    onSelect: (id: string, type: string): void => {
+  return createPortal(
+    <Component {...props} availableEmbeddables={Object.keys(allowedEmbeddables)} />,
+    el
+  );
+};
+
+export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
+  availableEmbeddables,
+  ...restProps
+}) => {
+  const labsService = useLabsService();
+  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
+
+  const dispatch = useDispatch();
+  const pageId = useSelector<State, string>((state) => getSelectedPage(state));
+
+  const addEmbeddable: AddEmbeddable = useCallback(
+    (selectedPageId, partialElement) => dispatch(addElement(selectedPageId, partialElement)),
+    [dispatch]
+  );
+
+  const onSelect = useCallback(
+    (id: string, type: string): void => {
       const partialElement = {
         expression: `markdown "Could not find embeddable for type ${type}" | render`,
       };
-      if (allowedEmbeddables[type]) {
+
+      // If by-value is enabled, we'll handle both by-reference and by-value embeddables
+      // with the new generic `embeddable` function.
+      // Otherwise we fallback to the embeddable type specific expressions.
+      if (isByValueEnabled) {
+        const config = encode({ savedObjectId: id });
+        partialElement.expression = `embeddable config="${config}" 
+  type="${type}" 
+| render`;
+      } else if (allowedEmbeddables[type]) {
         partialElement.expression = allowedEmbeddables[type](id);
       }
 
       addEmbeddable(pageId, partialElement);
-      ownProps.onClose();
+      restProps.onClose();
     },
-  };
+    [addEmbeddable, pageId, restProps, isByValueEnabled]
+  );
+
+  return (
+    <EmbeddableFlyoutPortal
+      {...restProps}
+      availableEmbeddables={availableEmbeddables || []}
+      onSelect={onSelect}
+      isByValueEnabled={isByValueEnabled}
+    />
+  );
 };
-
-export class EmbeddableFlyoutPortal extends React.Component<ComponentProps> {
-  el?: HTMLElement;
-
-  constructor(props: ComponentProps) {
-    super(props);
-
-    this.el = document.createElement('div');
-  }
-  componentDidMount() {
-    const body = document.querySelector('body');
-    if (body && this.el) {
-      body.appendChild(this.el);
-    }
-  }
-
-  componentWillUnmount() {
-    const body = document.querySelector('body');
-
-    if (body && this.el) {
-      body.removeChild(this.el);
-    }
-  }
-
-  render() {
-    if (this.el) {
-      return ReactDOM.createPortal(
-        <Component {...this.props} availableEmbeddables={Object.keys(allowedEmbeddables)} />,
-        this.el
-      );
-    }
-  }
-}
-
-export const AddEmbeddablePanel = compose<ComponentProps, { onClose: () => void }>(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps)
-)(EmbeddableFlyoutPortal);

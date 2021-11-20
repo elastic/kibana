@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
@@ -15,8 +16,8 @@ import { ES_GEO_SHAPE_TYPES, GeoContainmentAlertParams } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IFieldType } from '../../../../../../../../src/plugins/data/common';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   alertParams: GeoContainmentAlertParams;
@@ -161,7 +162,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
 
   return (
     <ExpressionWithPopover
-      defaultValue={'Select an index pattern and geo shape field'}
+      defaultValue={'Select a data view and geo shape field'}
       value={boundaryIndexPattern.title}
       popoverContent={indexPopover}
       expressionDescription={i18n.translate('xpack.stackAlerts.geoContainment.indexLabel', {

@@ -1,17 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { CanvasVariable } from '../../../types';
 
-import { ComponentStrings } from '../../../i18n';
-const { VarConfigVarValueField: strings } = ComponentStrings;
+const strings = {
+  getBooleanOptionsLegend: () =>
+    i18n.translate('xpack.canvas.varConfigVarValueField.booleanOptionsLegend', {
+      defaultMessage: 'Boolean value',
+    }),
+  getFalseOption: () =>
+    i18n.translate('xpack.canvas.varConfigVarValueField.falseOption', {
+      defaultMessage: 'False',
+    }),
+  getTrueOption: () =>
+    i18n.translate('xpack.canvas.varConfigVarValueField.trueOption', {
+      defaultMessage: 'True',
+    }),
+};
 
 interface Props {
   type: CanvasVariable['type'];
@@ -33,16 +47,22 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
     },
   ];
 
+  const onNumberChange = useCallback(
+    (e) => {
+      const floatVal = parseFloat(e.target.value);
+      const varValue = isNaN(floatVal) ? '' : floatVal;
+      onChange(varValue);
+    },
+    [onChange]
+  );
+
   if (type === 'number') {
     return (
-      <EuiFieldNumber
-        compressed
-        name="value"
-        value={value as number}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <EuiFieldNumber compressed name="value" value={value as number} onChange={onNumberChange} />
     );
-  } else if (type === 'boolean') {
+  }
+
+  if (type === 'boolean') {
     return (
       <EuiButtonGroup
         name="value"

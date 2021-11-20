@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useMemo } from 'react';
@@ -11,27 +12,29 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { IndexPatternColumn } from '../indexpattern';
+import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
-import { DateRange } from '../../../common';
+import { DateRange, layerTypes } from '../../../common';
 import { getOperationSupportMatrix } from './operation_support';
 
-export type IndexPatternDimensionTriggerProps = DatasourceDimensionTriggerProps<IndexPatternPrivateState> & {
-  uniqueLabel: string;
-};
+export type IndexPatternDimensionTriggerProps =
+  DatasourceDimensionTriggerProps<IndexPatternPrivateState> & {
+    uniqueLabel: string;
+  };
 
-export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<IndexPatternPrivateState> & {
-  uiSettings: IUiSettingsClient;
-  storage: IStorageWrapper;
-  savedObjectsClient: SavedObjectsClientContract;
-  layerId: string;
-  http: HttpSetup;
-  data: DataPublicPluginStart;
-  uniqueLabel: string;
-  dateRange: DateRange;
-};
+export type IndexPatternDimensionEditorProps =
+  DatasourceDimensionEditorProps<IndexPatternPrivateState> & {
+    uiSettings: IUiSettingsClient;
+    storage: IStorageWrapper;
+    savedObjectsClient: SavedObjectsClientContract;
+    layerId: string;
+    http: HttpSetup;
+    data: DataPublicPluginStart;
+    uniqueLabel: string;
+    dateRange: DateRange;
+  };
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -46,14 +49,14 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
-  const { columnId, uniqueLabel } = props;
+  const { columnId, uniqueLabel, invalid, invalidMessage } = props;
 
   const currentColumnHasErrors = useMemo(
-    () => isColumnInvalid(layer, columnId, currentIndexPattern),
-    [layer, columnId, currentIndexPattern]
+    () => invalid || isColumnInvalid(layer, columnId, currentIndexPattern),
+    [layer, columnId, currentIndexPattern, invalid]
   );
 
-  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] ?? null;
+  const selectedColumn: GenericIndexPatternColumn | null = layer.columns[props.columnId] ?? null;
 
   if (!selectedColumn) {
     return null;
@@ -64,15 +67,17 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     return (
       <EuiToolTip
         content={
-          <p>
-            {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
-              defaultMessage: 'Invalid configuration.',
-            })}
-            <br />
-            {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
-              defaultMessage: 'Click for more details.',
-            })}
-          </p>
+          invalidMessage ?? (
+            <p>
+              {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+                defaultMessage: 'Invalid configuration.',
+              })}
+              <br />
+              {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+                defaultMessage: 'Click for more details.',
+              })}
+            </p>
+          )
         }
         anchorClassName="eui-displayBlock"
       >
@@ -116,14 +121,17 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   const layerId = props.layerId;
   const currentIndexPattern =
     props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
+  if (!currentIndexPattern) {
+    return null;
+  }
   const operationSupportMatrix = getOperationSupportMatrix(props);
 
-  const selectedColumn: IndexPatternColumn | null =
+  const selectedColumn: GenericIndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
-
   return (
     <DimensionEditor
       {...props}
+      layerType={props.layerType || layerTypes.DATA}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}
       operationSupportMatrix={operationSupportMatrix}

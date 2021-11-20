@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -28,7 +29,7 @@ import { CronEditor } from '../../../../../../../../src/plugins/es_ui_shared/pub
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import { indices } from '../../../../shared_imports';
-import { getLogisticalDetailsUrl, getCronUrl } from '../../../services';
+import { documentationLinks } from '../../../services/documentation_links';
 import { StepError } from './components';
 
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -73,7 +74,7 @@ export class StepLogistics extends Component {
 
     if (!isValidatingIndexPattern && hasMatchingIndices) {
       return (
-        <EuiTextColor color="secondary" data-test-subj="fieldIndexPatternSuccessMessage">
+        <EuiTextColor color="success" data-test-subj="fieldIndexPatternSuccessMessage">
           <p>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpHasMatchesLabel"
@@ -148,7 +149,7 @@ export class StepLogistics extends Component {
             isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
             helpText={
               <p>
-                <EuiLink href={getCronUrl()} target="_blank">
+                <EuiLink href={documentationLinks.apis.cronExpressions} target="_blank">
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLinkLabel"
                     defaultMessage="Learn more about cron expressions"
@@ -262,7 +263,7 @@ export class StepLogistics extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={getLogisticalDetailsUrl()}
+              href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateLogisticsDocsButton"

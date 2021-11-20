@@ -1,38 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component } from 'react';
+import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
-  EuiLink,
-  EuiFlexGroup,
-  EuiInMemoryTable,
-  EuiPageContent,
-  EuiTitle,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiPageContentBody,
   EuiEmptyPrompt,
-  EuiBasicTableColumn,
-  EuiSwitchEvent,
-  EuiSwitch,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiPageContent,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
-import { User, Role } from '../../../../common/model';
-import { ConfirmDeleteUsers } from '../components';
-import { isUserReserved, getExtendedUserDeprecationNotice, isUserDeprecated } from '../user_utils';
-import { DisabledBadge, ReservedBadge, DeprecatedBadge } from '../../badges';
-import { RoleTableDisplay } from '../../role_table_display';
-import { RolesAPIClient } from '../../roles';
+import type { ApplicationStart, NotificationsStart, ScopedHistory } from 'src/core/public';
+
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { UserAPIClient } from '..';
+import type { Role, User } from '../../../../common/model';
+import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
+import { RoleTableDisplay } from '../../role_table_display';
+import type { RolesAPIClient } from '../../roles';
+import { ConfirmDeleteUsers } from '../components';
+import type { UserAPIClient } from '../user_api_client';
+import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from '../user_utils';
 
 interface Props {
   userAPIClient: PublicMethodsOf<UserAPIClient>;
@@ -51,6 +51,7 @@ interface State {
   permissionDenied: boolean;
   filter: string;
   includeReservedUsers: boolean;
+  isTableLoading: boolean;
 }
 
 export class UsersGridPage extends Component<Props, State> {
@@ -65,6 +66,7 @@ export class UsersGridPage extends Component<Props, State> {
       permissionDenied: false,
       filter: '',
       includeReservedUsers: true,
+      isTableLoading: false,
     };
   }
 
@@ -73,12 +75,12 @@ export class UsersGridPage extends Component<Props, State> {
   }
 
   public render() {
-    const { users, roles, permissionDenied, showDeleteConfirmation, selection } = this.state;
+    const { roles, permissionDenied, showDeleteConfirmation, selection } = this.state;
 
     if (permissionDenied) {
       return (
         <EuiFlexGroup gutterSize="none">
-          <EuiPageContent horizontalPosition="center">
+          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
             <EuiEmptyPrompt
               iconType="securityApp"
               title={
@@ -221,63 +223,61 @@ export class UsersGridPage extends Component<Props, State> {
     };
 
     return (
-      <div className="secUsersListingPage">
-        <EuiPageContent className="secUsersListingPage__content">
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.security.management.users.usersTitle"
-                    defaultMessage="Users"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiPageContentHeaderSection>
-            <EuiPageContentHeaderSection>
-              <EuiButton
-                data-test-subj="createUserButton"
-                {...reactRouterNavigate(this.props.history, `/create`)}
-              >
-                <FormattedMessage
-                  id="xpack.security.management.users.createNewUserButtonLabel"
-                  defaultMessage="Create user"
-                />
-              </EuiButton>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            {showDeleteConfirmation ? (
-              <ConfirmDeleteUsers
-                onCancel={this.onCancelDelete}
-                usersToDelete={selection.map((user) => user.username)}
-                callback={this.handleDelete}
-                userAPIClient={this.props.userAPIClient}
-                notifications={this.props.notifications}
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.security.management.users.usersTitle"
+              defaultMessage="Users"
+            />
+          }
+          rightSideItems={[
+            <EuiButton
+              data-test-subj="createUserButton"
+              {...reactRouterNavigate(this.props.history, `/create`)}
+              fill
+              iconType="plusInCircleFilled"
+            >
+              <FormattedMessage
+                id="xpack.security.management.users.createNewUserButtonLabel"
+                defaultMessage="Create user"
               />
-            ) : null}
+            </EuiButton>,
+          ]}
+        />
 
-            {
-              <EuiInMemoryTable
-                itemId="username"
-                tableCaption={i18n.translate('xpack.security.management.users.tableCaption', {
-                  defaultMessage: 'Users',
-                })}
-                rowHeader="username"
-                columns={columns}
-                selection={selectionConfig}
-                pagination={pagination}
-                items={this.state.visibleUsers}
-                loading={users.length === 0}
-                search={search}
-                sorting={sorting}
-                rowProps={rowProps}
-                isSelectable
-              />
-            }
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </div>
+        <EuiSpacer size="l" />
+
+        {showDeleteConfirmation ? (
+          <ConfirmDeleteUsers
+            onCancel={this.onCancelDelete}
+            usersToDelete={selection.map((user) => user.username)}
+            callback={this.handleDelete}
+            userAPIClient={this.props.userAPIClient}
+            notifications={this.props.notifications}
+          />
+        ) : null}
+
+        {
+          <EuiInMemoryTable
+            itemId="username"
+            tableCaption={i18n.translate('xpack.security.management.users.tableCaption', {
+              defaultMessage: 'Users',
+            })}
+            rowHeader="username"
+            columns={columns}
+            selection={selectionConfig}
+            pagination={pagination}
+            items={this.state.visibleUsers}
+            loading={this.state.isTableLoading}
+            search={search}
+            sorting={sorting}
+            rowProps={rowProps}
+            isSelectable
+          />
+        }
+      </>
     );
   }
 
@@ -313,11 +313,15 @@ export class UsersGridPage extends Component<Props, State> {
 
   private async loadUsersAndRoles() {
     try {
+      this.setState({
+        isTableLoading: true,
+      });
       const [users, roles] = await Promise.all([
         this.props.userAPIClient.getUsers(),
         this.props.rolesAPIClient.getRoles(),
       ]);
       this.setState({
+        isTableLoading: false,
         users,
         roles,
         visibleUsers: this.getVisibleUsers(
@@ -327,9 +331,8 @@ export class UsersGridPage extends Component<Props, State> {
         ),
       });
     } catch (e) {
-      if (e.body.statusCode === 403) {
-        this.setState({ permissionDenied: true });
-      } else {
+      this.setState({ permissionDenied: e.body.statusCode === 403, isTableLoading: false });
+      if (e.body.statusCode !== 403) {
         this.props.notifications.toasts.addDanger(
           i18n.translate('xpack.security.management.users.fetchingUsersErrorMessage', {
             defaultMessage: 'Error fetching users: {message}',

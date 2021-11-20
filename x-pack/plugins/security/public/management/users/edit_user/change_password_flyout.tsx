@@ -1,29 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import {
   EuiCallOut,
   EuiFieldPassword,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiIcon,
   EuiLoadingContent,
   EuiSpacer,
   EuiText,
-  EuiFlexItem,
 } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { useForm, ValidationErrors } from '../../../components/use_form';
-import { useCurrentUser } from '../../../components/use_current_user';
 import { FormFlyout } from '../../../components/form_flyout';
-import { UserAPIClient } from '..';
+import { useCurrentUser } from '../../../components/use_current_user';
+import type { ValidationErrors } from '../../../components/use_form';
+import { useForm } from '../../../components/use_form';
+import { useInitialFocus } from '../../../components/use_initial_focus';
+import { UserAPIClient } from '../user_api_client';
 
 export interface ChangePasswordFormValues {
   current_password?: string;
@@ -37,6 +43,49 @@ export interface ChangePasswordFlyoutProps {
   onCancel(): void;
   onSuccess?(): void;
 }
+
+export const validateChangePasswordForm = (
+  values: ChangePasswordFormValues,
+  isCurrentUser: boolean
+) => {
+  const errors: ValidationErrors<typeof values> = {};
+
+  if (isCurrentUser) {
+    if (!values.current_password) {
+      errors.current_password = i18n.translate(
+        'xpack.security.management.users.changePasswordFlyout.currentPasswordRequiredError',
+        {
+          defaultMessage: 'Enter your current password.',
+        }
+      );
+    }
+  }
+
+  if (!values.password) {
+    errors.password = i18n.translate(
+      'xpack.security.management.users.changePasswordFlyout.passwordRequiredError',
+      {
+        defaultMessage: 'Enter a new password.',
+      }
+    );
+  } else if (values.password.length < 6) {
+    errors.password = i18n.translate(
+      'xpack.security.management.users.changePasswordFlyout.passwordInvalidError',
+      {
+        defaultMessage: 'Password must be at least 6 characters.',
+      }
+    );
+  } else if (values.password !== values.confirm_password) {
+    errors.confirm_password = i18n.translate(
+      'xpack.security.management.users.changePasswordFlyout.confirmPasswordInvalidError',
+      {
+        defaultMessage: 'Passwords do not match.',
+      }
+    );
+  }
+
+  return errors;
+};
 
 export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> = ({
   username,
@@ -93,54 +142,11 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
         }
       }
     },
-    validate: async (values) => {
-      const errors: ValidationErrors<typeof values> = {};
-
-      if (isCurrentUser) {
-        if (!values.current_password) {
-          errors.current_password = i18n.translate(
-            'xpack.security.management.users.changePasswordFlyout.currentPasswordRequiredError',
-            {
-              defaultMessage: 'Enter your current password.',
-            }
-          );
-        }
-      }
-
-      if (!values.password) {
-        errors.password = i18n.translate(
-          'xpack.security.management.users.changePasswordFlyout.passwordRequiredError',
-          {
-            defaultMessage: 'Enter a new password.',
-          }
-        );
-      } else if (values.password.length < 6) {
-        errors.password = i18n.translate(
-          'xpack.security.management.users.changePasswordFlyout.passwordInvalidError',
-          {
-            defaultMessage: 'Password must be at least 6 characters.',
-          }
-        );
-      } else if (!values.confirm_password) {
-        errors.confirm_password = i18n.translate(
-          'xpack.security.management.users.changePasswordFlyout.confirmPasswordRequiredError',
-          {
-            defaultMessage: 'Passwords do not match.',
-          }
-        );
-      } else if (values.password !== values.confirm_password) {
-        errors.confirm_password = i18n.translate(
-          'xpack.security.management.users.changePasswordFlyout.confirmPasswordInvalidError',
-          {
-            defaultMessage: 'Passwords do not match.',
-          }
-        );
-      }
-
-      return errors;
-    },
+    validate: async (values) => validateChangePasswordForm(values, isCurrentUser),
     defaultValues,
   });
+
+  const firstFieldRef = useInitialFocus<HTMLInputElement>([isLoading]);
 
   return (
     <FormFlyout
@@ -237,6 +243,8 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
                 defaultValue={form.values.current_password}
                 isInvalid={form.touched.current_password && !!form.errors.current_password}
                 autoComplete="current-password"
+                inputRef={firstFieldRef}
+                data-test-subj="editUserChangePasswordCurrentPasswordInput"
               />
             </EuiFormRow>
           ) : null}
@@ -258,6 +266,8 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
               defaultValue={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
               autoComplete="new-password"
+              inputRef={isCurrentUser ? undefined : firstFieldRef}
+              data-test-subj="editUserChangePasswordNewPasswordInput"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -274,6 +284,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
               defaultValue={form.values.confirm_password}
               isInvalid={form.touched.confirm_password && !!form.errors.confirm_password}
               autoComplete="new-password"
+              data-test-subj="editUserChangePasswordConfirmPasswordInput"
             />
           </EuiFormRow>
 

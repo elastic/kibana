@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IIndexPattern } from 'src/plugins/data/common';
+import { DataViewListItem } from '../../../../../../../../src/plugins/data_views/common';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
 import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 import { TimeRangeType } from './constants';
@@ -33,7 +34,7 @@ export function isValidCustomUrlSettingsTimeRange(timeRangeSettings: any): boole
 export function getNewCustomUrlDefaults(
   job: Job,
   dashboards: any[],
-  indexPatterns: IIndexPattern[]
+  dataViews: DataViewListItem[]
 ): CustomUrlSettings;
 export function getQueryEntityFieldNames(job: Job): string[];
 export function isValidCustomUrlSettings(

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -311,6 +312,30 @@ export const ArgumentStrings = {
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.arguments.toggleLabel', {
         defaultMessage: 'A true/false toggle switch',
+      }),
+  },
+  VisDimension: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.visDimensionTitle', {
+        defaultMessage: 'Column',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.visDimensionLabel', {
+        defaultMessage: 'Generates visConfig dimension object',
+      }),
+    getDefaultOptionName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.visDimensionDefaultOptionName', {
+        defaultMessage: 'Select column',
+      }),
+  },
+  StopsPalette: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.stopsPaletteTitle', {
+        defaultMessage: 'Palette picker with bounds',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.stopsPaletteLabel', {
+        defaultMessage: 'Provides colors for the values, based on the bounds',
       }),
   },
 };
@@ -1170,6 +1195,158 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.timefilter.args.filterGroupLabel', {
         defaultMessage:
           "Apply the selected group name to an element's filters function to target this filter",
+      }),
+  },
+  Tagcloud: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloudTitle', {
+        defaultMessage: 'Tag Cloud',
+      }),
+    getScaleColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.scaleDisplayName', {
+        defaultMessage: 'Scale',
+      }),
+    getScaleColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.scaleHelp', {
+        defaultMessage: 'Scale to determine font size of a word',
+      }),
+    getScaleLinear: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.scaleLinearLabel', {
+        defaultMessage: 'Linear',
+      }),
+    getScaleLog: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.scaleLogLabel', {
+        defaultMessage: 'Log',
+      }),
+    getScaleSquareRoot: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.scaleSquareRootLabel', {
+        defaultMessage: 'Square root',
+      }),
+    getOrientationColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.orientationDisplayName', {
+        defaultMessage: 'Orientation',
+      }),
+    getOrientationColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.orientationHelp', {
+        defaultMessage: 'Orientation of words inside tagcloud',
+      }),
+    getOrientationSingle: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.orientationSingleLabel', {
+        defaultMessage: 'Single',
+      }),
+    getOrientationRightAngled: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.orientationRightAngledLabel', {
+        defaultMessage: 'Right angled',
+      }),
+    getOrientationMultiple: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.orientationMultipleLabel', {
+        defaultMessage: 'Multiple',
+      }),
+    getMinFontHeightColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.minFontHeightDisplayName', {
+        defaultMessage: 'Minimum font height',
+      }),
+    getMinFontHeightColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.minFontHeightHelp', {
+        defaultMessage: 'Minimum height of the element font',
+      }),
+    getMaxFontHeightColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.maxFontHeightDisplayName', {
+        defaultMessage: 'Maximum font height',
+      }),
+    getMaxFontHeightColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.maxFontHeightHelp', {
+        defaultMessage: 'Maximum height of the element font',
+      }),
+    getShowLabelColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.showLabelDisplayName', {
+        defaultMessage: 'Show label',
+      }),
+    getShowLabelColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.showLabelHelp', {
+        defaultMessage: 'Show label of the chart',
+      }),
+    getMetricColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.metricDisplayName', {
+        defaultMessage: 'Metric',
+      }),
+    getMetricColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.metricHelp', {
+        defaultMessage: 'Metric dimension configuration',
+      }),
+    getBucketColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.bucketDisplayName', {
+        defaultMessage: 'Bucket',
+      }),
+    getBucketColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.tagcloud.args.bucketHelp', {
+        defaultMessage: 'Bucket dimension configuration',
+      }),
+  },
+  MetricVis: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVisTitle', {
+        defaultMessage: 'Metric Vis',
+      }),
+    getMetricColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.metricDisplayName', {
+        defaultMessage: 'Metric',
+      }),
+    getMetricColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.metricHelp', {
+        defaultMessage: 'Metric dimension configuration',
+      }),
+    getBucketColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.bucketDisplayName', {
+        defaultMessage: 'Bucket',
+      }),
+    getBucketColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.bucketHelp', {
+        defaultMessage: 'Bucket dimension configuration',
+      }),
+    getFontColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.fontDisplayName', {
+        defaultMessage: 'Font',
+      }),
+    getFontColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.fontHelp', {
+        defaultMessage: 'Metric font configuration',
+      }),
+    getPercentageModeColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.percentageModeDisplayName', {
+        defaultMessage: 'Enable percentage mode',
+      }),
+    getPercentageModeColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.percentageModeHelp', {
+        defaultMessage: 'Shows metric in percentage mode.',
+      }),
+    getShowLabelsColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.showLabelsDisplayName', {
+        defaultMessage: 'Show metric labels',
+      }),
+    getShowLabelsColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.showLabelsHelp', {
+        defaultMessage: 'Shows labels under the metric values.',
+      }),
+    getColorModeColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorModeDisplayName', {
+        defaultMessage: 'Metric color mode',
+      }),
+    getColorModeColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorModeHelp', {
+        defaultMessage: 'Which part of metric to fill with color.',
+      }),
+    getColorModeNoneOption: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.noneOption', {
+        defaultMessage: 'None',
+      }),
+    getColorModeLabelOption: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.labelsOption', {
+        defaultMessage: 'Labels',
+      }),
+    getColorModeBackgroundOption: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.backgroundOption', {
+        defaultMessage: 'Background',
       }),
   },
 };

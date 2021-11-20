@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PassThrough } from 'stream';
 
-import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient } from 'kibana/server';
 
-import { SearchEsListItemSchema } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { findSourceValue } from '../utils/find_source_value';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 /**
  * How many results to page through from the network at a time
@@ -21,7 +22,7 @@ export const SIZE = 100;
 
 export interface ExportListItemsToStreamOptions {
   listId: string;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
@@ -29,7 +30,7 @@ export interface ExportListItemsToStreamOptions {
 
 export const exportListItemsToStream = ({
   listId,
-  callCluster,
+  esClient,
   stream,
   listItemIndex,
   stringToAppend,
@@ -38,7 +39,7 @@ export const exportListItemsToStream = ({
   // and prevent the async await from bubbling up to the caller
   setTimeout(async () => {
     let searchAfter = await writeNextResponse({
-      callCluster,
+      esClient,
       listId,
       listItemIndex,
       searchAfter: undefined,
@@ -47,7 +48,7 @@ export const exportListItemsToStream = ({
     });
     while (searchAfter != null) {
       searchAfter = await writeNextResponse({
-        callCluster,
+        esClient,
         listId,
         listItemIndex,
         searchAfter,
@@ -61,7 +62,7 @@ export const exportListItemsToStream = ({
 
 export interface WriteNextResponseOptions {
   listId: string;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   stream: PassThrough;
   searchAfter: string[] | undefined;
@@ -70,14 +71,14 @@ export interface WriteNextResponseOptions {
 
 export const writeNextResponse = async ({
   listId,
-  callCluster,
+  esClient,
   stream,
   listItemIndex,
   searchAfter,
   stringToAppend,
 }: WriteNextResponseOptions): Promise<string[] | undefined> => {
   const response = await getResponse({
-    callCluster,
+    esClient,
     listId,
     listItemIndex,
     searchAfter,
@@ -94,14 +95,15 @@ export const writeNextResponse = async ({
 export const getSearchAfterFromResponse = <T>({
   response,
 }: {
-  response: SearchResponse<T>;
+  response: estypes.SearchResponse<T>;
 }): string[] | undefined =>
+  // @ts-expect-error @elastic/elasticsearch SortResults contains null
   response.hits.hits.length > 0
     ? response.hits.hits[response.hits.hits.length - 1].sort
     : undefined;
 
 export interface GetResponseOptions {
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listId: string;
   searchAfter: undefined | string[];
   listItemIndex: string;
@@ -109,30 +111,32 @@ export interface GetResponseOptions {
 }
 
 export const getResponse = async ({
-  callCluster,
+  esClient,
   searchAfter,
   listId,
   listItemIndex,
   size = SIZE,
-}: GetResponseOptions): Promise<SearchResponse<SearchEsListItemSchema>> => {
-  return callCluster<SearchEsListItemSchema>('search', {
-    body: {
-      query: {
-        term: {
-          list_id: listId,
+}: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
+  return (
+    await esClient.search<SearchEsListItemSchema>({
+      body: {
+        query: {
+          term: {
+            list_id: listId,
+          },
         },
+        search_after: searchAfter,
+        sort: [{ tie_breaker_id: 'asc' }],
       },
-      search_after: searchAfter,
-      sort: [{ tie_breaker_id: 'asc' }],
-    },
-    ignoreUnavailable: true,
-    index: listItemIndex,
-    size,
-  });
+      ignore_unavailable: true,
+      index: listItemIndex,
+      size,
+    })
+  ).body as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {
-  response: SearchResponse<SearchEsListItemSchema>;
+  response: estypes.SearchResponse<SearchEsListItemSchema>;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
 }
@@ -145,6 +149,7 @@ export const writeResponseHitsToStream = ({
   const stringToAppendOrEmpty = stringToAppend ?? '';
 
   response.hits.hits.forEach((hit) => {
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     const value = findSourceValue(hit._source);
     if (value != null) {
       stream.push(`${value}${stringToAppendOrEmpty}`);

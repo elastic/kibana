@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HostAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
 import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/ecs_fields';
 
@@ -32,7 +33,10 @@ export const buildQuery = ({
   defaultIndex,
   docValueFields,
 }: HostAuthenticationsRequestOptions) => {
-  const esFields = reduceFields(authenticationsFields, { ...hostFieldsMap, ...sourceFieldsMap });
+  const esFields = reduceFields(authenticationsFields, {
+    ...hostFieldsMap,
+    ...sourceFieldsMap,
+  }) as string[];
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -57,9 +61,9 @@ export const buildQuery = ({
   };
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
@@ -68,7 +72,10 @@ export const buildQuery = ({
           terms: {
             size: querySize,
             field: 'user.name',
-            order: [{ 'successes.doc_count': 'desc' }, { 'failures.doc_count': 'desc' }],
+            order: [
+              { 'successes.doc_count': 'desc' as const },
+              { 'failures.doc_count': 'desc' as const },
+            ] as estypes.AggregationsTermsAggregationOrder,
           },
           aggs: {
             failures: {
@@ -82,7 +89,7 @@ export const buildQuery = ({
                   top_hits: {
                     size: 1,
                     _source: esFields,
-                    sort: [{ '@timestamp': { order: 'desc' } }],
+                    sort: [{ '@timestamp': { order: 'desc' as const } }],
                   },
                 },
               },
@@ -98,7 +105,7 @@ export const buildQuery = ({
                   top_hits: {
                     size: 1,
                     _source: esFields,
-                    sort: [{ '@timestamp': { order: 'desc' } }],
+                    sort: [{ '@timestamp': { order: 'desc' as const } }],
                   },
                 },
               },

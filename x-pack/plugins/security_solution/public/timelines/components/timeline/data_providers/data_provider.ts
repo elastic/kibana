@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /** Represents the Timeline data providers */
@@ -59,6 +60,10 @@ export interface DataProvider {
    * Returns a DataProviderType
    */
   type?: DataProviderType.default | DataProviderType.template;
+  /**
+   * Array of multiple values for a field
+   */
+  valueArray?: string[] | null;
 }
 
 export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;

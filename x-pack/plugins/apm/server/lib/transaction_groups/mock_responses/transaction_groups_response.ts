@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ESResponse } from '../fetcher';
 
-export const transactionGroupsResponse = ({
+export const transactionGroupsResponse = {
   took: 139,
   timed_out: false,
   _shards: { total: 44, successful: 44, skipped: 0, failed: 0 },
@@ -1153,8 +1154,7 @@ export const transactionGroupsResponse = ({
                         url: {
                           port: '3000',
                           pathname: '/api/products/2/customers',
-                          full:
-                            'http://opbeans-node:3000/api/products/2/customers',
+                          full: 'http://opbeans-node:3000/api/products/2/customers',
                           raw: '/api/products/2/customers',
                           protocol: 'http:',
                           hostname: 'opbeans-node',
@@ -2720,4 +2720,4 @@ export const transactionGroupsResponse = ({
       ],
     },
   },
-} as unknown) as ESResponse;
+} as unknown as ESResponse;

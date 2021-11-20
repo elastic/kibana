@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import { IUrlParams } from './types';
-import { UrlParamsContext, useUiFilters } from './url_params_context';
+import { UrlParams } from './types';
+import { UrlParamsContext } from './url_params_context';
 
 const defaultUrlParams = {
   page: 0,
@@ -16,7 +18,7 @@ const defaultUrlParams = {
 };
 
 interface Props {
-  params?: IUrlParams;
+  params?: UrlParams;
   children: React.ReactNode;
   refreshTimeRange?: (time: any) => void;
 }
@@ -30,9 +32,10 @@ export function MockUrlParamsContextProvider({
   return (
     <UrlParamsContext.Provider
       value={{
-        urlParams,
+        rangeId: 0,
         refreshTimeRange,
-        uiFilters: useUiFilters(urlParams),
+        urlParams,
+        uxUiFilters: {},
       }}
       children={children}
     />

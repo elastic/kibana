@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 import {
   MonitorSummariesResult,
   CursorDirection,
@@ -14,18 +16,12 @@ import {
   MonitorSummary,
 } from '../../../../common/runtime_types';
 import { MonitorListComponent, noItemsMessage } from './monitor_list';
-import { renderWithRouter, shallowWithRouter } from '../../../lib';
 import * as redux from 'react-redux';
 import moment from 'moment';
-import { IHttpFetchError } from '../../../../../../../src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '../../../../../../../src/core/public';
 import { mockMoment } from '../../../lib/helper/test_helpers';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
+import { render } from '../../../lib/helper/rtl_helpers';
+import { NO_DATA_MESSAGE } from './translations';
 
 const testFooPings: Ping[] = [
   makePing({
@@ -111,6 +107,10 @@ describe('MonitorList component', () => {
 
   beforeAll(() => {
     mockMoment();
+    global.innerWidth = 1200;
+
+    // Trigger the window resize event.
+    global.dispatchEvent(new Event('resize'));
   });
 
   const getMonitorList = (timestamp?: string): MonitorSummariesResult => {
@@ -143,20 +143,8 @@ describe('MonitorList component', () => {
     global.localStorage = localStorageMock;
   });
 
-  it('shallow renders the monitor list', () => {
-    const component = shallowWithRouter(
-      <MonitorListComponent
-        monitorList={{ list: getMonitorList(), loading: false }}
-        pageSize={10}
-        setPageSize={jest.fn()}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('renders a no items message when no data is provided', () => {
-    const component = shallowWithRouter(
+  it('renders a no items message when no data is provided', async () => {
+    const { findByText } = render(
       <MonitorListComponent
         monitorList={{
           list: {
@@ -164,38 +152,20 @@ describe('MonitorList component', () => {
             nextPagePagination: null,
             prevPagePagination: null,
           },
-          loading: true,
+          loading: false,
         }}
         pageSize={10}
         setPageSize={jest.fn()}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(await findByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
-  it('renders the monitor list', () => {
-    const component = renderWithRouter(
-      <EuiThemeProvider darkMode={false}>
-        <MonitorListComponent
-          monitorList={{
-            list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
-            loading: false,
-          }}
-          pageSize={10}
-          setPageSize={jest.fn()}
-        />
-      </EuiThemeProvider>
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('renders error list', () => {
-    const component = shallowWithRouter(
+  it('renders the monitor list', async () => {
+    const { findByLabelText } = render(
       <MonitorListComponent
         monitorList={{
-          list: getMonitorList(),
-          error: new Error('foo message') as IHttpFetchError,
+          list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
           loading: false,
         }}
         pageSize={10}
@@ -203,19 +173,27 @@ describe('MonitorList component', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(
+      await findByLabelText(
+        'Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 2 items.'
+      )
+    ).toBeInTheDocument();
   });
 
-  it('renders loading state', () => {
-    const component = shallowWithRouter(
+  it('renders error list', async () => {
+    const { findByText } = render(
       <MonitorListComponent
-        monitorList={{ list: getMonitorList(), loading: true }}
+        monitorList={{
+          list: getMonitorList(),
+          error: new Error('foo message') as IHttpFetchError<ResponseErrorBody>,
+          loading: false,
+        }}
         pageSize={10}
         setPageSize={jest.fn()}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(await findByText('foo message')).toBeInTheDocument();
   });
 
   describe('MonitorListPagination component', () => {
@@ -237,8 +215,8 @@ describe('MonitorList component', () => {
       };
     });
 
-    it('renders the pagination', () => {
-      const component = shallowWithRouter(
+    it('renders the pagination', async () => {
+      const { findByText, findByLabelText } = render(
         <MonitorListComponent
           monitorList={{
             list: {
@@ -251,26 +229,70 @@ describe('MonitorList component', () => {
         />
       );
 
-      expect(component).toMatchSnapshot();
+      expect(await findByText('Rows per page: 10')).toBeInTheDocument();
+      expect(await findByLabelText('Prev page of results')).toBeInTheDocument();
+      expect(await findByLabelText('Next page of results')).toBeInTheDocument();
+    });
+  });
+
+  describe('responsive behavior', () => {
+    describe('xl screens', () => {
+      beforeAll(() => {
+        global.innerWidth = 1200;
+
+        // Trigger the window resize event.
+        global.dispatchEvent(new Event('resize'));
+      });
+
+      it('shows ping histogram and expand button on xl and xxl screens', async () => {
+        const list = getMonitorList(moment().subtract(5, 'minute').toISOString());
+        const { getByTestId, getByText } = render(
+          <MonitorListComponent
+            monitorList={{
+              list,
+              loading: false,
+            }}
+            pageSize={10}
+            setPageSize={jest.fn()}
+          />
+        );
+
+        await waitFor(() => {
+          expect(
+            getByTestId(
+              `xpack.uptime.monitorList.${list.summaries[0].monitor_id}.expandMonitorDetail`
+            )
+          ).toBeInTheDocument();
+          expect(getByText('Downtime history')).toBeInTheDocument();
+        });
+      });
     });
 
-    it('renders a no items message when no data is provided', () => {
-      const component = shallowWithRouter(
-        <MonitorListComponent
-          monitorList={{
-            list: {
-              summaries: [],
-              nextPagePagination: null,
-              prevPagePagination: null,
-            },
-            loading: false,
-          }}
-          pageSize={10}
-          setPageSize={jest.fn()}
-        />
-      );
+    describe('large and medium screens', () => {
+      it('hides ping histogram and expand button on extra large screens', async () => {
+        global.innerWidth = 1199;
 
-      expect(component).toMatchSnapshot();
+        // Trigger the window resize event.
+        global.dispatchEvent(new Event('resize'));
+
+        const { queryByTestId, queryByText } = render(
+          <MonitorListComponent
+            monitorList={{
+              list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
+              loading: false,
+            }}
+            pageSize={10}
+            setPageSize={jest.fn()}
+          />
+        );
+
+        await waitFor(() => {
+          expect(
+            queryByTestId('xpack.uptime.monitorList.always-down.expandMonitorDetail')
+          ).not.toBeInTheDocument();
+          expect(queryByText('Downtime history')).not.toBeInTheDocument();
+        });
+      });
     });
   });
 

@@ -1,32 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { useValues } from 'kea';
-import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet;
 import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
 // @ts-expect-error types are not available for this package yet
 import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
+import { i18n } from '@kbn/i18n';
 
 import './search_experience.scss';
 
-import { externalUrl } from '../../../../shared/enterprise_search_url';
+import { HttpLogic } from '../../../../shared/http';
 import { useLocalStorage } from '../../../../shared/use_local_storage';
 import { EngineLogic } from '../../engine';
 
-import { Fields, SortOption } from './types';
-import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
-import { SearchExperienceContent } from './search_experience_content';
 import { buildSearchUIConfig } from './build_search_ui_config';
-import { CustomizationCallout } from './customization_callout';
-import { CustomizationModal } from './customization_modal';
 import { buildSortOptions } from './build_sort_options';
 import { ASCENDING, DESCENDING } from './constants';
+import { CustomizationCallout } from './customization_callout';
+import { CustomizationModal } from './customization_modal';
+import { SearchExperienceContent } from './search_experience_content';
+import { Fields, SortOption } from './types';
+import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
 
 const RECENTLY_UPLOADED = i18n.translate(
   'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.recentlyUploaded',
@@ -49,7 +52,8 @@ const DEFAULT_SORT_OPTIONS: SortOption[] = [
 
 export const SearchExperience: React.FC = () => {
   const { engine } = useValues(EngineLogic);
-  const endpointBase = externalUrl.enterpriseSearchUrl;
+  const { http } = useValues(HttpLogic);
+  const endpointBase = http.basePath.prepend('/internal/app_search/search-ui');
 
   const [showCustomizationModal, setShowCustomizationModal] = useState(false);
   const openCustomizationModal = () => setShowCustomizationModal(true);
@@ -69,7 +73,9 @@ export const SearchExperience: React.FC = () => {
     cacheResponses: false,
     endpointBase,
     engineName: engine.name,
-    searchKey: engine.apiKey,
+    additionalHeaders: {
+      'kbn-xsrf': true,
+    },
   });
 
   const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {}, fields);
@@ -78,7 +84,7 @@ export const SearchExperience: React.FC = () => {
     <div className="documentsSearchExperience">
       <SearchProvider config={searchProviderConfig}>
         <SearchBox
-          searchAsYouType={true}
+          searchAsYouType
           inputProps={{
             placeholder: i18n.translate(
               'xpack.enterpriseSearch.appSearch.documents.search.placeholder',

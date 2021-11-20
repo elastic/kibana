@@ -1,23 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
-import { FieldFormat } from 'src/plugins/data/common';
-import { FieldFormatConfig, IFieldFormatsRegistry } from 'src/plugins/data/server';
-import { IndexPatternSavedObject } from '../types';
-
+import type { DataView, KBN_FIELD_TYPES } from 'src/plugins/data/common';
+import {
+  FieldFormat,
+  IFieldFormatsRegistry,
+  FieldFormatConfig,
+} from 'src/plugins/field_formats/common';
 /**
  *  Create a map of FieldFormat instances for index pattern fields
  *
- *  @param {Object} indexPatternSavedObject
+ *  @param {DataView} dataView
  *  @param {FieldFormatsService} fieldFormats
  *  @return {Map} key: field name, value: FieldFormat instance
  */
 export function fieldFormatMapFactory(
-  indexPatternSavedObject: IndexPatternSavedObject,
+  dataView: DataView | undefined,
   fieldFormatsRegistry: IFieldFormatsRegistry,
   timezone: string | undefined
 ) {
@@ -28,10 +31,9 @@ export function fieldFormatMapFactory(
   const serverDateParams = { timezone };
 
   // Add FieldFormat instances for fields with custom formatters
-  if (_.has(indexPatternSavedObject, 'attributes.fieldFormatMap')) {
-    const fieldFormatMap = JSON.parse(indexPatternSavedObject.attributes.fieldFormatMap);
-    Object.keys(fieldFormatMap).forEach((fieldName) => {
-      const formatConfig: FieldFormatConfig = fieldFormatMap[fieldName];
+  if (dataView) {
+    Object.keys(dataView.fieldFormatMap).forEach((fieldName) => {
+      const formatConfig: FieldFormatConfig = dataView.fieldFormatMap[fieldName];
       const formatParams = {
         ...formatConfig.params,
         ...serverDateParams,
@@ -44,12 +46,11 @@ export function fieldFormatMapFactory(
   }
 
   // Add default FieldFormat instances for non-custom formatted fields
-  const indexFields = JSON.parse(_.get(indexPatternSavedObject, 'attributes.fields', '[]'));
-  indexFields.forEach((field: any) => {
+  dataView?.fields.forEach((field) => {
     if (!formatsMap.has(field.name)) {
       formatsMap.set(
         field.name,
-        fieldFormatsRegistry.getDefaultInstance(field.type, [], serverDateParams)
+        fieldFormatsRegistry.getDefaultInstance(field.type as KBN_FIELD_TYPES, [], serverDateParams)
       );
     }
   });

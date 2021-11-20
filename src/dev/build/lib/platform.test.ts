@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Platform } from './platform';
@@ -31,6 +31,7 @@ describe('isWindows()', () => {
     expect(new Platform('win32', 'x64', 'foo').isWindows()).toBe(true);
     expect(new Platform('linux', 'x64', 'foo').isWindows()).toBe(false);
     expect(new Platform('darwin', 'x64', 'foo').isWindows()).toBe(false);
+    expect(new Platform('darwin', 'arm64', 'foo').isWindows()).toBe(false);
   });
 });
 
@@ -39,6 +40,7 @@ describe('isLinux()', () => {
     expect(new Platform('win32', 'x64', 'foo').isLinux()).toBe(false);
     expect(new Platform('linux', 'x64', 'foo').isLinux()).toBe(true);
     expect(new Platform('darwin', 'x64', 'foo').isLinux()).toBe(false);
+    expect(new Platform('darwin', 'arm64', 'foo').isLinux()).toBe(false);
   });
 });
 
@@ -47,5 +49,6 @@ describe('isMac()', () => {
     expect(new Platform('win32', 'x64', 'foo').isMac()).toBe(false);
     expect(new Platform('linux', 'x64', 'foo').isMac()).toBe(false);
     expect(new Platform('darwin', 'x64', 'foo').isMac()).toBe(true);
+    expect(new Platform('darwin', 'arm64', 'foo').isMac()).toBe(true);
   });
 });

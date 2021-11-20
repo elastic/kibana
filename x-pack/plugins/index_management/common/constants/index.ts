@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export { BASE_PATH } from './base_path';
@@ -23,8 +24,6 @@ export {
   UIM_INDEX_FLUSH_MANY,
   UIM_INDEX_FORCE_MERGE,
   UIM_INDEX_FORCE_MERGE_MANY,
-  UIM_INDEX_FREEZE,
-  UIM_INDEX_FREEZE_MANY,
   UIM_INDEX_OPEN,
   UIM_INDEX_OPEN_MANY,
   UIM_INDEX_REFRESH,
@@ -52,3 +51,5 @@ export {
   UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
 } from './ui_metric';
+
+export { MAJOR_VERSION } from './plugin';

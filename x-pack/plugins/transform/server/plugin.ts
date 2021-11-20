@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
 
@@ -11,6 +13,7 @@ import { LicenseType } from '../../licensing/common/types';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License } from './services';
+import { registerTransformHealthRuleType } from './lib/alerting';
 
 const basicLicense: LicenseType = 'basic';
 
@@ -36,7 +39,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
 
   setup(
     { http, getStartServices, elasticsearch }: CoreSetup,
-    { licensing, features }: Dependencies
+    { licensing, features, alerting }: Dependencies
   ): {} {
     const router = http.createRouter();
 
@@ -72,6 +75,10 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
       router,
       license: this.license,
     });
+
+    if (alerting) {
+      registerTransformHealthRuleType({ alerting, logger: this.logger });
+    }
 
     return {};
   }

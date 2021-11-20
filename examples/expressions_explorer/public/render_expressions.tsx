@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -20,11 +20,7 @@ import {
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
-import {
-  ExpressionsStart,
-  ReactExpressionRenderer,
-  ExpressionsInspectorAdapter,
-} from '../../../src/plugins/expressions/public';
+import { ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { ExpressionEditor } from './editor/expression_editor';
 import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
 
@@ -34,15 +30,15 @@ interface Props {
 }
 
 export function RenderExpressionsExample({ expressions, inspector }: Props) {
-  const [expression, updateExpression] = useState('markdown "## expressions explorer rendering"');
+  const [expression, updateExpression] = useState(
+    'markdownVis "## expressions explorer rendering"'
+  );
 
   const expressionChanged = (value: string) => {
     updateExpression(value);
   };
 
-  const inspectorAdapters = {
-    expression: new ExpressionsInspectorAdapter(),
-  };
+  const inspectorAdapters = {};
 
   return (
     <EuiPageBody>
@@ -81,10 +77,12 @@ export function RenderExpressionsExample({ expressions, inspector }: Props) {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel data-test-subj="expressionRender" paddingSize="none" role="figure">
-                <ReactExpressionRenderer
+                <expressions.ReactExpressionRenderer
                   expression={expression}
                   debug={true}
-                  inspectorAdapters={inspectorAdapters}
+                  onData$={(result, panels) => {
+                    Object.assign(inspectorAdapters, panels);
+                  }}
                   renderError={(message: any) => {
                     return <div>{message}</div>;
                   }}

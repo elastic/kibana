@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, FC } from 'react';
@@ -19,15 +20,61 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { CanvasVariable } from '../../../types';
+import { i18n } from '@kbn/i18n';
 
+import { CanvasVariable } from '../../../types';
 import { VarValueField } from './var_value_field';
 
-import { ComponentStrings } from '../../../i18n';
-const { VarConfigEditVar: strings } = ComponentStrings;
-
-import './edit_var.scss';
-import './var_panel.scss';
+const strings = {
+  getAddTitle: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.addTitleLabel', {
+      defaultMessage: 'Add variable',
+    }),
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getDuplicateNameError: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.duplicateNameError', {
+      defaultMessage: 'Variable name already in use',
+    }),
+  getEditTitle: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.editTitleLabel', {
+      defaultMessage: 'Edit variable',
+    }),
+  getEditWarning: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.editWarning', {
+      defaultMessage: 'Editing a variable in use may adversely affect your workpad',
+    }),
+  getNameFieldLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.nameFieldLabel', {
+      defaultMessage: 'Name',
+    }),
+  getSaveButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.saveButtonLabel', {
+      defaultMessage: 'Save changes',
+    }),
+  getTypeBooleanLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.typeBooleanLabel', {
+      defaultMessage: 'Boolean',
+    }),
+  getTypeFieldLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.typeFieldLabel', {
+      defaultMessage: 'Type',
+    }),
+  getTypeNumberLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.typeNumberLabel', {
+      defaultMessage: 'Number',
+    }),
+  getTypeStringLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.typeStringLabel', {
+      defaultMessage: 'String',
+    }),
+  getValueFieldLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.valueFieldLabel', {
+      defaultMessage: 'Value',
+    }),
+};
 
 interface Props {
   selectedVar: CanvasVariable | null;
@@ -56,6 +103,8 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
   const [value, setValue] = useState(isNew ? '' : selectedVar!.value);
 
   const hasDupeName = checkDupeName(name, selectedVar && selectedVar.name, variables);
+  const hasEmptyValue = value.toString().trim() === '';
+  const hasEmptyName = !name;
 
   const typeOptions = [
     {
@@ -160,7 +209,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
-                color="secondary"
+                color="success"
                 size="s"
                 fill
                 onClick={() =>
@@ -170,7 +219,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
                     type,
                   })
                 }
-                disabled={hasDupeName || !name}
+                disabled={hasDupeName || hasEmptyValue || hasEmptyName}
                 iconType="save"
               >
                 {strings.getSaveButtonLabel()}

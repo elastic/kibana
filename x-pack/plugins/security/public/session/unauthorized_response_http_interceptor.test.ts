@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
+
+import { setup } from 'src/core/test_helpers/http_test_setup';
+
 import { SessionExpired } from './session_expired';
-import { setup } from '../../../../../src/core/test_helpers/http_test_setup';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
+
 jest.mock('./session_expired');
 
 const drainPromiseQueue = () => {
@@ -52,6 +56,7 @@ it(`logs out 401 responses`, async () => {
   await drainPromiseQueue();
   expect(fetchResolved).toBe(false);
   expect(fetchRejected).toBe(false);
+  expect(sessionExpired.logout).toHaveBeenCalledWith('AUTHENTICATION_ERROR');
 });
 
 it(`ignores anonymous paths`, async () => {

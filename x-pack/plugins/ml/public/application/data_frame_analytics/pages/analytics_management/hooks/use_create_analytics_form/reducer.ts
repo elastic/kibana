@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
+import { memoize, isEqual } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
@@ -107,6 +108,28 @@ const getSourceIndexString = (state: State) => {
   return '';
 };
 
+const isSourceIndexNameValid = (
+  sourceIndexName: string,
+  sourceIndex: string | Array<string | undefined> | undefined
+) => {
+  // general check against Kibana data view names, but since this is about the advanced editor
+  // with support for arrays in the job config, we also need to check that each individual name
+  // doesn't include a comma if index names are supplied as an array.
+  // `indexPatterns.validate()` returns a map of messages, we're only interested here if it's valid or not.
+  // If there are no messages, it means the source index name is valid.
+  let sourceIndexNameValid = Object.keys(indexPatterns.validate(sourceIndexName)).length === 0;
+  if (sourceIndexNameValid) {
+    if (typeof sourceIndex === 'string') {
+      sourceIndexNameValid = !sourceIndex.includes(',');
+    }
+    if (Array.isArray(sourceIndex)) {
+      sourceIndexNameValid = !sourceIndex.some((d) => d?.includes(','));
+    }
+  }
+
+  return sourceIndexNameValid;
+};
+
 /**
  * Validates num_top_feature_importance_values. Must be an integer >= 0.
  */
@@ -121,34 +144,23 @@ export const validateNumTopFeatureImportanceValues = (
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern, includes } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
 
   const sourceIndexName = getSourceIndexString(state);
   const sourceIndexNameEmpty = sourceIndexName === '';
-  // general check against Kibana index pattern names, but since this is about the advanced editor
-  // with support for arrays in the job config, we also need to check that each individual name
-  // doesn't include a comma if index names are supplied as an array.
-  // `indexPatterns.validate()` returns a map of messages, we're only interested here if it's valid or not.
-  // If there are no messages, it means the index pattern is valid.
-  let sourceIndexNameValid = Object.keys(indexPatterns.validate(sourceIndexName)).length === 0;
   const sourceIndex = jobConfig?.source?.index;
-  if (sourceIndexNameValid) {
-    if (typeof sourceIndex === 'string') {
-      sourceIndexNameValid = !sourceIndex.includes(',');
-    }
-    if (Array.isArray(sourceIndex)) {
-      sourceIndexNameValid = !sourceIndex.some((d) => d?.includes(','));
-    }
-  }
+  const sourceIndexNameValid = isSourceIndexNameValid(sourceIndexName, sourceIndex);
 
   const destinationIndexName = jobConfig?.dest?.index ?? '';
   const destinationIndexNameEmpty = destinationIndexName === '';
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
+
+  const analyzedFields = jobConfig?.analyzed_fields?.includes || [];
 
   const resultsFieldEmptyString =
     typeof jobConfig?.dest?.results_field === 'string' &&
@@ -179,12 +191,10 @@ export const validateAdvancedEditor = (state: State): State => {
   ) {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
     dependentVariableEmpty = dependentVariableName === '';
-
     if (
       !dependentVariableEmpty &&
-      includes !== undefined &&
-      includes.length > 0 &&
-      !includes.includes(dependentVariableName)
+      analyzedFields.length > 0 &&
+      !analyzedFields.includes(dependentVariableName)
     ) {
       includesValid = false;
 
@@ -469,7 +479,11 @@ export function reducer(state: State, action: Action): State {
       let disableSwitchToForm = false;
       try {
         resultJobConfig = JSON.parse(collapseLiteralStrings(action.advancedEditorRawString));
-        disableSwitchToForm = isAdvancedConfig(resultJobConfig);
+        const runtimeMappingsChanged =
+          state.form.runtimeMappings &&
+          resultJobConfig.source.runtime_mappings &&
+          !isEqual(state.form.runtimeMappings, resultJobConfig.source.runtime_mappings);
+        disableSwitchToForm = isAdvancedConfig(resultJobConfig) || runtimeMappingsChanged;
       } catch (e) {
         return {
           ...state,
@@ -499,7 +513,6 @@ export function reducer(state: State, action: Action): State {
       }
 
       if (action.payload.jobId !== undefined) {
-        newFormState.jobIdExists = state.jobIds.some((id) => newFormState.jobId === id);
         newFormState.jobIdEmpty = newFormState.jobId === '';
         newFormState.jobIdValid = isJobIdValid(newFormState.jobId);
         newFormState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(
@@ -542,12 +555,6 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SET_JOB_CONFIG:
       return validateAdvancedEditor({ ...state, jobConfig: action.payload });
 
-    case ACTION.SET_JOB_IDS: {
-      const newState = { ...state, jobIds: action.jobIds };
-      newState.form.jobIdExists = newState.jobIds.some((id) => newState.form.jobId === id);
-      return newState;
-    }
-
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
       const jobConfig = getJobConfigFromFormState(state.form);
       const shouldDisableSwitchToForm = isAdvancedConfig(jobConfig);
@@ -562,7 +569,7 @@ export function reducer(state: State, action: Action): State {
       });
 
     case ACTION.SWITCH_TO_FORM:
-      const { jobConfig: config, jobIds } = state;
+      const { jobConfig: config } = state;
       const { jobId } = state.form;
       // @ts-ignore
       const formState = getFormStateFromJobConfig(config, false);
@@ -571,7 +578,6 @@ export function reducer(state: State, action: Action): State {
         formState.jobId = jobId;
       }
 
-      formState.jobIdExists = jobIds.some((id) => formState.jobId === id);
       formState.jobIdEmpty = jobId === '';
       formState.jobIdValid = isJobIdValid(jobId);
       formState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(jobId);
@@ -586,6 +592,11 @@ export function reducer(state: State, action: Action): State {
           formState.numTopFeatureImportanceValues
         );
       }
+
+      const sourceIndexName = getSourceIndexString(state);
+      const sourceIndex = config?.source?.index;
+      const sourceIndexNameValid = isSourceIndexNameValid(sourceIndexName, sourceIndex);
+      formState.sourceIndexNameValid = sourceIndexNameValid;
 
       return validateForm({
         ...state,

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { handleActions, Action } from 'redux-actions';
-import { Ping, SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
+import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 import { pruneJourneyState } from '../actions/journey';
 import {
   FetchJourneyStepsParams,
@@ -17,13 +18,13 @@ import {
 
 export interface JourneyState {
   checkGroup: string;
-  steps: Ping[];
+  steps: JourneyStep[];
   details?: SyntheticsJourneyApiResponse['details'];
   loading: boolean;
   error?: Error;
 }
 
-interface JourneyKVP {
+export interface JourneyKVP {
   [checkGroup: string]: JourneyState;
 }
 

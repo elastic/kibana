@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
@@ -16,20 +17,16 @@ import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 
 export class PopulationJobCreator extends JobCreator {
   // a population job has one overall over (split) field, which is the same for all detectors
   // each detector has an optional by field
-  private _splitField: SplitField = null;
+  private _populatonField: SplitField = null;
   private _byFields: SplitField[] = [];
   protected _type: JOB_TYPE = JOB_TYPE.POPULATION;
 
-  constructor(
-    indexPattern: IndexPattern,
-    savedSearch: SavedSearchSavedObject | null,
-    query: object
-  ) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
     this._wizardInitialized$.next(true);
@@ -64,27 +61,27 @@ export class PopulationJobCreator extends JobCreator {
   }
 
   // add an over field to all detectors
-  public setSplitField(field: SplitField) {
-    this._splitField = field;
+  public setPopulationField(field: SplitField) {
+    this._populatonField = field;
 
-    if (this._splitField === null) {
-      this.removeSplitField();
+    if (this._populatonField === null) {
+      this.removePopulationField();
     } else {
       for (let i = 0; i < this._detectors.length; i++) {
-        this._detectors[i].over_field_name = this._splitField.id;
+        this._detectors[i].over_field_name = this._populatonField.id;
       }
     }
   }
 
   // remove over field from all detectors
-  public removeSplitField() {
+  public removePopulationField() {
     this._detectors.forEach((d) => {
       delete d.over_field_name;
     });
   }
 
-  public get splitField(): SplitField {
-    return this._splitField;
+  public get populationField(): SplitField {
+    return this._populatonField;
   }
 
   public addDetector(agg: Aggregation, field: Field) {
@@ -111,8 +108,8 @@ export class PopulationJobCreator extends JobCreator {
   private _createDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
 
-    if (this._splitField !== null) {
-      dtr.over_field_name = this._splitField.id;
+    if (this._populatonField !== null) {
+      dtr.over_field_name = this._populatonField.id;
     }
     return dtr;
   }
@@ -142,7 +139,7 @@ export class PopulationJobCreator extends JobCreator {
 
     if (detectors.length) {
       if (detectors[0].overField !== null) {
-        this.setSplitField(detectors[0].overField);
+        this.setPopulationField(detectors[0].overField);
       }
     }
     detectors.forEach((d, i) => {

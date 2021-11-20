@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -35,7 +36,7 @@ export function formatToSec(
   }
   return (valueInMs / 1000).toFixed(2) + ' s';
 }
-const STAT_STYLE = { width: '240px' };
+const STAT_STYLE = { width: '200px' };
 
 interface Props {
   data?: UXMetrics | null;
@@ -55,7 +56,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/long-task-metrics',
+          endpoint: 'GET /internal/apm/ux/long-task-metrics',
           params: {
             query: {
               ...uxQuery,
@@ -70,7 +71,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
 
   // Note: FCP value is in ms unit
   return (
-    <EuiFlexGroup wrap>
+    <EuiFlexGroup wrap responsive={false}>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"

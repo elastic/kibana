@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -42,13 +43,13 @@ export const StepDetailsTimeField: FC<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.transform.stepDetailsForm.indexPatternTimeFieldLabel"
-          defaultMessage="Time field for Kibana index pattern"
+          id="xpack.transform.stepDetailsForm.dataViewTimeFieldLabel"
+          defaultMessage="Time field for Kibana data view"
         />
       }
       helpText={
         <FormattedMessage
-          id="xpack.transform.stepDetailsForm.indexPatternTimeFieldHelpText"
+          id="xpack.transform.stepDetailsForm.dataViewTimeFieldHelpText"
           defaultMessage="Select a primary time field for use with the global time filter."
         />
       }

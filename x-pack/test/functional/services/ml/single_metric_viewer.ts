@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -18,24 +20,6 @@ export function MachineLearningSingleMetricViewerProvider(
   return {
     async assertSingleMetricViewerEmptyListMessageExsist() {
       await testSubjects.existOrFail('mlNoSingleMetricJobsFound');
-    },
-
-    async assertForecastButtonExists() {
-      await testSubjects.existOrFail(
-        'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
-      );
-    },
-
-    async assertForecastButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled(
-        'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
-      );
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected "forecast" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
     },
 
     async assertDetectorInputExist() {
@@ -93,28 +77,6 @@ export function MachineLearningSingleMetricViewerProvider(
       await testSubjects.existOrFail(`mlAnomalyExplorerAnnotations ${state}`, {
         timeout: 30 * 1000,
       });
-    },
-
-    async openForecastModal() {
-      await testSubjects.click(
-        'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
-      );
-      await testSubjects.existOrFail('mlModalForecast');
-    },
-
-    async closeForecastModal() {
-      await testSubjects.click('mlModalForecast > mlModalForecastButtonClose');
-      await testSubjects.missingOrFail('mlModalForecast');
-    },
-
-    async assertForecastModalRunButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlModalForecast > mlModalForecastButtonRun');
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected forecast "run" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
     },
 
     async openAnomalyExplorer() {

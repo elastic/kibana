@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
   Logger,
   Plugin as CorePlugin,
   PluginInitializerContext,
-  LegacyClusterClient,
-  SharedGlobalConfig,
+  IClusterClient,
   IContextProvider,
 } from 'src/core/server';
 import { SpacesPluginStart } from '../../spaces/server';
@@ -23,7 +21,6 @@ import type {
   IEventLogConfig,
   IEventLogService,
   IEventLogger,
-  IEventLogConfig$,
   IEventLogClientService,
 } from './types';
 import { findRoute } from './routes';
@@ -33,7 +30,7 @@ import { EventLogClientService } from './event_log_start_service';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 import { findByIdsRoute } from './routes/find_by_ids';
 
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 
 const PROVIDER = 'eventLog';
 
@@ -47,48 +44,44 @@ interface PluginStartDeps {
 }
 
 export class Plugin implements CorePlugin<IEventLogService, IEventLogClientService> {
-  private readonly config$: IEventLogConfig$;
+  private readonly config: IEventLogConfig;
   private systemLogger: Logger;
   private eventLogService?: EventLogService;
   private esContext?: EsContext;
   private eventLogger?: IEventLogger;
-  private globalConfig$: Observable<SharedGlobalConfig>;
   private eventLogClientService?: EventLogClientService;
   private savedObjectProviderRegistry: SavedObjectProviderRegistry;
   private kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
-    this.config$ = this.context.config.create<IEventLogConfig>();
-    this.globalConfig$ = this.context.config.legacy.globalConfig$;
+    this.config = this.context.config.get<IEventLogConfig>();
     this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
     this.kibanaVersion = this.context.env.packageInfo.version;
   }
 
-  async setup(core: CoreSetup): Promise<IEventLogService> {
-    const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
-    const kibanaIndex = globalConfig.kibana.index;
+  setup(core: CoreSetup): IEventLogService {
+    const kibanaIndex = core.savedObjects.getKibanaIndex();
 
     this.systemLogger.debug('setting up plugin');
-
-    const config = await this.config$.pipe(first()).toPromise();
 
     this.esContext = createEsContext({
       logger: this.systemLogger,
       // TODO: get index prefix from config.get(kibana.index)
       indexNameRoot: kibanaIndex,
-      clusterClientPromise: core
+      elasticsearchClientPromise: core
         .getStartServices()
-        .then(([{ elasticsearch }]) => elasticsearch.legacy.client),
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       kibanaVersion: this.kibanaVersion,
     });
 
     this.eventLogService = new EventLogService({
-      config,
+      config: this.config,
       esContext: this.esContext,
       systemLogger: this.systemLogger,
       kibanaUUID: this.context.env.instanceUuid,
       savedObjectProviderRegistry: this.savedObjectProviderRegistry,
+      kibanaVersion: this.kibanaVersion,
     });
 
     this.eventLogService.registerProviderActions(PROVIDER, Object.values(ACTIONS));
@@ -111,7 +104,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     return this.eventLogService;
   }
 
-  async start(core: CoreStart, { spaces }: PluginStartDeps): Promise<IEventLogClientService> {
+  start(core: CoreStart, { spaces }: PluginStartDeps): IEventLogClientService {
     this.systemLogger.debug('starting plugin');
 
     if (!this.esContext) throw new Error('esContext not initialized');

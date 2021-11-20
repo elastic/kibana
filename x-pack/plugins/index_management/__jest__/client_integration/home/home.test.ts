@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -53,15 +54,18 @@ describe('<IndexManagementHome />', () => {
     });
 
     describe('tabs', () => {
-      test('should have 2 tabs', () => {
+      test('should have 4 tabs', () => {
         const { find } = testBed;
-        const templatesTab = find('templatesTab');
-        const indicesTab = find('indicesTab');
 
-        expect(indicesTab.length).toBe(1);
-        expect(indicesTab.text()).toEqual('Indices');
-        expect(templatesTab.length).toBe(1);
-        expect(templatesTab.text()).toEqual('Index Templates');
+        const indexManagementContainer = find('indexManagementHeaderContent');
+        const tabListContainer = indexManagementContainer.find('.euiTabs');
+        const allTabs = tabListContainer.children();
+        const allTabsLabels = ['Indices', 'Data Streams', 'Index Templates', 'Component Templates'];
+
+        expect(allTabs.length).toBe(4);
+        for (let i = 0; i < allTabs.length; i++) {
+          expect(tabListContainer.childAt(i).text()).toEqual(allTabsLabels[i]);
+        }
       });
 
       test('should navigate to Index Templates tab', async () => {

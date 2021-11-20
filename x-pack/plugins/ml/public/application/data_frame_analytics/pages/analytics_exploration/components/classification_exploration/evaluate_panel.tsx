@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './_classification_exploration.scss';
@@ -12,40 +13,47 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiDataGrid,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridPopoverContents,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
+
+// Separate imports for lazy loadable VegaChart and related code
+import { VegaChart } from '../../../../../components/vega_chart';
+import { VegaChartLoading } from '../../../../../components/vega_chart/vega_chart_loading';
+import { useCurrentEuiTheme } from '../../../../../components/color_range_legend';
+
 import { ErrorCallout } from '../error_callout';
-import {
-  getDependentVar,
-  getPredictionFieldName,
-  loadEvalData,
-  loadDocsCount,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
-import { isKeywordAndTextType } from '../../../../common/fields';
+import { getDependentVar, DataFrameAnalyticsConfig } from '../../../../common';
 import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
-import {
-  isResultsSearchBoolQuery,
-  isClassificationEvaluateResponse,
-  ConfusionMatrix,
-  ResultsSearchQuery,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common/analytics';
+import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
 
+import { EvaluateStat } from './evaluate_stat';
+import { EvaluationQualityMetricsTable } from './evaluation_quality_metrics_table';
+
+import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_spec';
+
 import {
   getColumnData,
+  getTrailingControlColumns,
+  ConfusionMatrixColumn,
+  ConfusionMatrixColumnData,
   ACTUAL_CLASS_ID,
   MAX_COLUMNS,
-  getTrailingControlColumns,
 } from './column_data';
+
+import { isTrainingFilter } from './is_training_filter';
+import { useRocCurve } from './use_roc_curve';
+import { useConfusionMatrix } from './use_confusion_matrix';
+import { MulticlassConfusionMatrixHelpPopover } from './confusion_matrix_help_popover';
+import { RocCurveHelpPopover } from './roc_curve_help_popover';
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
@@ -80,7 +88,14 @@ const trainingDatasetHelpText = i18n.translate(
   }
 );
 
-function getHelpText(dataSubsetTitle: string) {
+const evaluationQualityMetricsHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.evaluationQualityMetricsHelpText',
+  {
+    defaultMessage: 'Evaluation quality metrics',
+  }
+);
+
+function getHelpText(dataSubsetTitle: string): string {
   let helpText = entireDatasetHelpText;
   if (dataSubsetTitle === SUBSET_TITLE.TESTING) {
     helpText = testingDatasetHelpText;
@@ -94,77 +109,40 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const {
     services: { docLinks },
   } = useMlKibana();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
-  const [columns, setColumns] = useState<any>([]);
-  const [columnsData, setColumnsData] = useState<any>([]);
+  const { euiTheme } = useCurrentEuiTheme();
+
+  const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
+  const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);
   const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
-  const [popoverContents, setPopoverContents] = useState<any>([]);
-  const [docsCount, setDocsCount] = useState<null | number>(null);
-  const [error, setError] = useState<null | string>(null);
+  const [popoverContents, setPopoverContents] = useState<EuiDataGridPopoverContents>({});
   const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState(() =>
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
     columns.map(({ id }: { id: string }) => id)
   );
 
-  const index = jobConfig.dest.index;
-  const dependentVariable = getDependentVar(jobConfig.analysis);
-  const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
-  // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
-  let requiresKeyword = false;
+  const isTraining = isTrainingFilter(searchQuery, resultsField);
 
-  const loadData = async ({ isTraining }: { isTraining: boolean | undefined }) => {
-    setIsLoading(true);
+  const {
+    avgRecall,
+    confusionMatrixData,
+    docsCount,
+    error: errorConfusionMatrix,
+    isLoading: isLoadingConfusionMatrix,
+    overallAccuracy,
+    evaluationMetricsItems,
+  } = useConfusionMatrix(jobConfig, searchQuery);
 
-    try {
-      requiresKeyword = isKeywordAndTextType(dependentVariable);
-    } catch (e) {
-      // Additional error handling due to missing field type is handled by loadEvalData
-      console.error('Unable to load new field types', error); // eslint-disable-line no-console
-    }
-
-    const evalData = await loadEvalData({
-      isTraining,
-      index,
-      dependentVariable,
-      resultsField,
-      predictionFieldName,
-      searchQuery,
-      jobType: ANALYSIS_CONFIG_TYPE.CLASSIFICATION,
-      requiresKeyword,
-    });
-
-    const docsCountResp = await loadDocsCount({
-      isTraining,
-      searchQuery,
-      resultsField,
-      destIndex: jobConfig.dest.index,
-    });
-
-    if (
-      evalData.success === true &&
-      evalData.eval &&
-      isClassificationEvaluateResponse(evalData.eval)
-    ) {
-      const confusionMatrix =
-        evalData.eval?.classification?.multiclass_confusion_matrix?.confusion_matrix;
-      setError(null);
-      setConfusionMatrixData(confusionMatrix || []);
-      setIsLoading(false);
+  useEffect(() => {
+    if (isTraining === undefined) {
+      setDataSubsetTitle(SUBSET_TITLE.ENTIRE);
     } else {
-      setIsLoading(false);
-      setConfusionMatrixData([]);
-      setError(evalData.error);
+      setDataSubsetTitle(
+        isTraining && isTraining === true ? SUBSET_TITLE.TRAINING : SUBSET_TITLE.TESTING
+      );
     }
-
-    if (docsCountResp.success === true) {
-      setDocsCount(docsCountResp.docsCount);
-    } else {
-      setDocsCount(null);
-    }
-  };
+  }, [isTraining]);
 
   useEffect(() => {
     if (confusionMatrixData.length > 0) {
@@ -186,8 +164,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
           const gridItem = columnData[rowIndex];
 
           if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
-            // @ts-ignore
-            const count = gridItem[colId];
+            const count = gridItem.predicted_classes_count[colId];
             return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
           }
 
@@ -197,48 +174,16 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     }
   }, [confusionMatrixData]);
 
-  useEffect(() => {
-    let isTraining: boolean | undefined;
-    const query =
-      isResultsSearchBoolQuery(searchQuery) && (searchQuery.bool.should || searchQuery.bool.filter);
-
-    if (query !== undefined && query !== false) {
-      for (let i = 0; i < query.length; i++) {
-        const clause = query[i];
-
-        if (clause.match && clause.match[`${resultsField}.is_training`] !== undefined) {
-          isTraining = clause.match[`${resultsField}.is_training`];
-          break;
-        } else if (
-          clause.bool &&
-          (clause.bool.should !== undefined || clause.bool.filter !== undefined)
-        ) {
-          const innerQuery = clause.bool.should || clause.bool.filter;
-          if (innerQuery !== undefined) {
-            for (let j = 0; j < innerQuery.length; j++) {
-              const innerClause = innerQuery[j];
-              if (
-                innerClause.match &&
-                innerClause.match[`${resultsField}.is_training`] !== undefined
-              ) {
-                isTraining = innerClause.match[`${resultsField}.is_training`];
-                break;
-              }
-            }
-          }
-        }
-      }
-    }
-    if (isTraining === undefined) {
-      setDataSubsetTitle(SUBSET_TITLE.ENTIRE);
-    } else {
-      setDataSubsetTitle(
-        isTraining && isTraining === true ? SUBSET_TITLE.TRAINING : SUBSET_TITLE.TESTING
-      );
-    }
-
-    loadData({ isTraining });
-  }, [JSON.stringify(searchQuery)]);
+  const {
+    rocCurveData,
+    classificationClasses,
+    error: errorRocCurve,
+    isLoading: isLoadingRocCurve,
+  } = useRocCurve(
+    jobConfig,
+    searchQuery,
+    columns.map((d) => d.id)
+  );
 
   const renderCellValue = ({
     rowIndex,
@@ -247,17 +192,20 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   }: {
     rowIndex: number;
     columnId: string;
-    setCellProps: any;
+    setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
   }) => {
-    const cellValue = columnsData[rowIndex][columnId];
+    const cellValue =
+      columnId === ACTUAL_CLASS_ID
+        ? columnsData[rowIndex][columnId]
+        : columnsData[rowIndex].predicted_classes_count[columnId];
     const actualCount = columnsData[rowIndex] && columnsData[rowIndex].actual_class_doc_count;
-    let accuracy: number | string = '0%';
+    let accuracy: string = '0%';
 
-    if (columnId !== ACTUAL_CLASS_ID && actualCount) {
-      accuracy = cellValue / actualCount;
+    if (columnId !== ACTUAL_CLASS_ID && actualCount && typeof cellValue === 'number') {
+      let accuracyNumber: number = cellValue / actualCount;
       // round to 2 decimal places without converting to string;
-      accuracy = Math.round(accuracy * 100) / 100;
-      accuracy = `${Math.round(accuracy * 100)}%`;
+      accuracyNumber = Math.round(accuracyNumber * 100) / 100;
+      accuracy = `${Math.round(accuracyNumber * 100)}%`;
     }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
@@ -311,7 +259,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
           </EuiButtonEmpty>
         }
         headerItems={
-          !isLoading
+          !isLoadingConfusionMatrix
             ? [
                 ...(jobStatus !== undefined
                   ? [
@@ -347,94 +295,191 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
         }
         contentPadding={true}
         content={
-          !isLoading ? (
-            <>
-              {error !== null && <ErrorCallout error={error} />}
-              {error === null && (
-                <>
-                  <EuiFlexGroup gutterSize="none">
-                    <EuiTitle size="xxs">
-                      <span>{getHelpText(dataSubsetTitle)}</span>
-                    </EuiTitle>
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                        content={i18n.translate(
-                          'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip',
-                          {
-                            defaultMessage:
-                              'The multi-class confusion matrix contains the number of occurrences where the analysis classified data points correctly with their actual class as well as the number of occurrences where it misclassified them with another class',
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  {/* BEGIN TABLE ELEMENTS */}
-                  <EuiSpacer size="m" />
-                  <div className="mlDataFrameAnalyticsClassification__confusionMatrix">
-                    <div className="mlDataFrameAnalyticsClassification__actualLabel">
-                      <EuiText size="xs" color="subdued">
-                        <FormattedMessage
-                          id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel"
-                          defaultMessage="Actual label"
-                        />
-                      </EuiText>
-                    </div>
-                    <div className="mlDataFrameAnalyticsClassification__dataGridMinWidth">
-                      {columns.length > 0 && columnsData.length > 0 && (
-                        <>
-                          <div>
-                            <EuiText size="xs" color="subdued">
-                              <FormattedMessage
-                                id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel"
-                                defaultMessage="Predicted label"
-                              />
-                            </EuiText>
-                          </div>
-                          <EuiSpacer size="s" />
-                          <EuiDataGrid
-                            data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
-                            aria-label={i18n.translate(
-                              'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixLabel',
-                              {
-                                defaultMessage: 'Classification confusion matrix',
-                              }
-                            )}
-                            columns={shownColumns}
-                            columnVisibility={{ visibleColumns, setVisibleColumns }}
-                            rowCount={rowCount}
-                            renderCellValue={renderCellValue}
-                            inMemory={{ level: 'sorting' }}
-                            toolbarVisibility={{
-                              showColumnSelector: true,
-                              showStyleSelector: false,
-                              showFullScreenSelector: false,
-                              showSortSelector: false,
-                            }}
-                            popoverContents={popoverContents}
-                            gridStyle={{
-                              border: 'all',
-                              fontSize: 's',
-                              cellPadding: 's',
-                              stripes: false,
-                              rowHover: 'none',
-                              header: 'shade',
-                            }}
-                            trailingControlColumns={
-                              showTrailingColumns === true && showFullColumns === false
-                                ? getTrailingControlColumns(extraColumns, setShowFullColumns)
-                                : undefined
-                            }
+          <>
+            {!isLoadingConfusionMatrix ? (
+              <>
+                {errorConfusionMatrix !== null && <ErrorCallout error={errorConfusionMatrix} />}
+                {errorConfusionMatrix === null && (
+                  <>
+                    <EuiFlexGroup gutterSize="none" alignItems="center">
+                      <EuiTitle size="xxs">
+                        <span>{getHelpText(dataSubsetTitle)}</span>
+                      </EuiTitle>
+                      <EuiFlexItem grow={false}>
+                        <MulticlassConfusionMatrixHelpPopover />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    {/* BEGIN TABLE ELEMENTS */}
+                    <EuiSpacer size="m" />
+                    <div className="mlDataFrameAnalyticsClassification__evaluateSectionContent">
+                      <div className="mlDataFrameAnalyticsClassification__actualLabel">
+                        <EuiText size="xs" color="subdued">
+                          <FormattedMessage
+                            id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel"
+                            defaultMessage="Actual class"
                           />
-                        </>
-                      )}
+                        </EuiText>
+                      </div>
+                      <div className="mlDataFrameAnalyticsClassification__dataGridMinWidth">
+                        {columns.length > 0 && columnsData.length > 0 && (
+                          <>
+                            <div>
+                              <EuiText size="xs" color="subdued">
+                                <FormattedMessage
+                                  id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel"
+                                  defaultMessage="Predicted class"
+                                />
+                              </EuiText>
+                            </div>
+                            <EuiSpacer size="s" />
+                            <EuiDataGrid
+                              data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
+                              aria-label={i18n.translate(
+                                'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixLabel',
+                                {
+                                  defaultMessage: 'Classification confusion matrix',
+                                }
+                              )}
+                              columns={shownColumns}
+                              columnVisibility={{ visibleColumns, setVisibleColumns }}
+                              rowCount={rowCount}
+                              renderCellValue={renderCellValue}
+                              inMemory={{ level: 'sorting' }}
+                              toolbarVisibility={{
+                                showColumnSelector: true,
+                                showStyleSelector: false,
+                                showFullScreenSelector: false,
+                                showSortSelector: false,
+                              }}
+                              popoverContents={popoverContents}
+                              gridStyle={{
+                                border: 'all',
+                                fontSize: 's',
+                                cellPadding: 's',
+                                stripes: false,
+                                rowHover: 'none',
+                                header: 'shade',
+                              }}
+                              trailingControlColumns={
+                                showTrailingColumns === true && showFullColumns === false
+                                  ? getTrailingControlColumns(extraColumns, setShowFullColumns)
+                                  : undefined
+                              }
+                            />
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
-              {/* END TABLE ELEMENTS */}
-            </>
-          ) : null
+                    {/* END TABLE ELEMENTS */}
+                  </>
+                )}
+              </>
+            ) : null}
+            {/* Accuracy and Recall */}
+            <EuiSpacer size="xl" />
+            <EuiTitle size="xxs">
+              <span>{evaluationQualityMetricsHelpText}</span>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup
+              direction="column"
+              justifyContent="center"
+              className="mlDataFrameAnalyticsClassification__evaluationMetrics"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="l">
+                  <EuiFlexItem grow={false}>
+                    <EvaluateStat
+                      dataTestSubj={'mlDFAEvaluateSectionOverallAccuracyStat'}
+                      title={overallAccuracy}
+                      isLoading={isLoadingConfusionMatrix}
+                      description={i18n.translate(
+                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyStat',
+                        {
+                          defaultMessage: 'Overall accuracy',
+                        }
+                      )}
+                      tooltipContent={i18n.translate(
+                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyTooltip',
+                        {
+                          defaultMessage:
+                            'The ratio of the number of correct class predictions to the total number of predictions.',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EvaluateStat
+                      dataTestSubj={'mlDFAEvaluateSectionAvgRecallStat'}
+                      title={avgRecall}
+                      isLoading={isLoadingConfusionMatrix}
+                      description={i18n.translate(
+                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionMeanRecallStat',
+                        {
+                          defaultMessage: 'Mean recall',
+                        }
+                      )}
+                      tooltipContent={i18n.translate(
+                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionAvgRecallTooltip',
+                        {
+                          defaultMessage:
+                            'Mean recall shows how many of the data points that are actual class members were identified correctly as class members.',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EvaluationQualityMetricsTable evaluationMetricsItems={evaluationMetricsItems} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {/* AUC ROC Chart */}
+            <EuiSpacer size="l" />
+            <EuiFlexGroup gutterSize="none" alignItems="center">
+              <EuiTitle size="xxs">
+                <span>
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocTitle"
+                    defaultMessage="Receiver operating characteristic (ROC) curve"
+                  />
+                </span>
+              </EuiTitle>
+              <EuiFlexItem grow={false}>
+                <RocCurveHelpPopover />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {Array.isArray(errorRocCurve) && (
+              <ErrorCallout
+                error={
+                  <>
+                    {errorRocCurve.map((e) => (
+                      <>
+                        {e}
+                        <br />
+                      </>
+                    ))}
+                  </>
+                }
+              />
+            )}
+            {!isLoadingRocCurve && errorRocCurve === null && rocCurveData.length > 0 && (
+              <div
+                className="mlDataFrameAnalyticsClassification__evaluateSectionContent"
+                data-test-subj="mlDFAnalyticsClassificationExplorationRocCurveChart"
+              >
+                <VegaChart
+                  vegaSpec={getRocCurveChartVegaLiteSpec(
+                    classificationClasses,
+                    rocCurveData,
+                    getDependentVar(jobConfig.analysis),
+                    euiTheme
+                  )}
+                />
+              </div>
+            )}
+            {isLoadingRocCurve && <VegaChartLoading />}
+          </>
         }
       />
       <EuiSpacer size="m" />

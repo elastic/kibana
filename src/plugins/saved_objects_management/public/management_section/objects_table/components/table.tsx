@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ApplicationStart, IBasePath } from 'src/core/public';
@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -39,6 +40,7 @@ import {
 export interface TableProps {
   taggingApi?: SavedObjectsTaggingApi;
   basePath: IBasePath;
+  allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
@@ -48,7 +50,7 @@ export interface TableProps {
   filterOptions: any[];
   capabilities: ApplicationStart['capabilities'];
   onDelete: () => void;
-  onActionRefresh: (object: SavedObjectWithMetadata) => void;
+  onActionRefresh: (objects: Array<{ type: string; id: string }>) => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
@@ -70,8 +72,9 @@ interface TableState {
   isExportPopoverOpen: boolean;
   isIncludeReferencesDeepChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
-  isColumnDataLoaded: boolean;
 }
+
+const MAX_PAGINATED_ITEM = 10000;
 
 export class Table extends PureComponent<TableProps, TableState> {
   state: TableState = {
@@ -80,21 +83,11 @@ export class Table extends PureComponent<TableProps, TableState> {
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
     activeAction: undefined,
-    isColumnDataLoaded: false,
   };
 
   constructor(props: TableProps) {
     super(props);
   }
-
-  componentDidMount() {
-    this.loadColumnData();
-  }
-
-  loadColumnData = async () => {
-    await Promise.all(this.props.columnRegistry.getAll().map((column) => column.loadData()));
-    this.setState({ isColumnDataLoaded: true });
-  };
 
   onChange = ({ query, error }: any) => {
     if (error) {
@@ -156,12 +149,15 @@ export class Table extends PureComponent<TableProps, TableState> {
       actionRegistry,
       columnRegistry,
       taggingApi,
+      allowedTypes,
     } = this.props;
+
+    const cappedTotalItemCount = Math.min(totalItemCount, MAX_PAGINATED_ITEM);
 
     const pagination = {
       pageIndex,
       pageSize,
-      totalItemCount,
+      totalItemCount: cappedTotalItemCount,
       pageSizeOptions: [5, 10, 20, 50],
     };
 
@@ -193,10 +189,11 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
+          const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+            <EuiToolTip position="top" content={typeLabel}>
               <EuiIcon
-                aria-label={getSavedObjectLabel(type)}
+                aria-label={typeLabel}
                 type={object.meta.icon || 'apps'}
                 size="s"
                 data-test-subj="objectType"
@@ -254,7 +251,6 @@ export class Table extends PureComponent<TableProps, TableState> {
             type: 'icon',
             icon: 'inspect',
             onClick: (object) => goInspectObject(object),
-            available: (object) => !!object.meta.editUrl,
             'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
@@ -288,10 +284,9 @@ export class Table extends PureComponent<TableProps, TableState> {
                   this.setState({
                     activeAction: undefined,
                   });
-                  const { refreshOnFinish = () => false } = action;
-                  if (refreshOnFinish()) {
-                    onActionRefresh(object);
-                  }
+                  const { refreshOnFinish = () => [] } = action;
+                  const objectsToRefresh = refreshOnFinish();
+                  onActionRefresh(objectsToRefresh);
                 });
 
                 if (action.euiAction.onClick) {
@@ -330,6 +325,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     );
 
     const activeActionContents = this.state.activeAction?.render() ?? null;
+    const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
     return (
       <Fragment>
@@ -401,6 +397,18 @@ export class Table extends PureComponent<TableProps, TableState> {
         />
         {queryParseError}
         <EuiSpacer size="s" />
+        {exceededResultCount && (
+          <>
+            <EuiText color="subdued" size="s" data-test-subj="savedObjectsTableTooManyResultsLabel">
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.table.tooManyResultsLabel"
+                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# object} other {# objects}}"
+                values={{ totalItemCount, limit: MAX_PAGINATED_ITEM }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}

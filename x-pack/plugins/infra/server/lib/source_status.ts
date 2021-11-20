@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { InfraPluginRequestHandlerContext } from '../types';
 import { InfraSources } from './sources';
+import { ResolvedLogSourceConfiguration } from '../../common/log_sources';
 
 export class InfraSourceStatus {
   constructor(
@@ -13,20 +15,6 @@ export class InfraSourceStatus {
     private readonly libs: { sources: InfraSources }
   ) {}
 
-  public async getLogIndexNames(
-    requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string
-  ): Promise<string[]> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
-    const indexNames = await this.adapter.getIndexNames(
-      requestContext,
-      sourceConfiguration.configuration.logAlias
-    );
-    return indexNames;
-  }
   public async getMetricIndexNames(
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
@@ -40,20 +28,6 @@ export class InfraSourceStatus {
       sourceConfiguration.configuration.metricAlias
     );
     return indexNames;
-  }
-  public async hasLogAlias(
-    requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string
-  ): Promise<boolean> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
-    const hasAlias = await this.adapter.hasAlias(
-      requestContext,
-      sourceConfiguration.configuration.logAlias
-    );
-    return hasAlias;
   }
   public async hasMetricAlias(
     requestContext: InfraPluginRequestHandlerContext,
@@ -71,15 +45,11 @@ export class InfraSourceStatus {
   }
   public async getLogIndexStatus(
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string
+    resolvedLogSourceConfiguration: ResolvedLogSourceConfiguration
   ): Promise<SourceIndexStatus> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
     const indexStatus = await this.adapter.getIndexStatus(
       requestContext,
-      sourceConfiguration.configuration.logAlias
+      resolvedLogSourceConfiguration.indices
     );
     return indexStatus;
   }

@@ -1,19 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiInMemoryTable,
+  EuiButton,
   EuiLink,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
   EuiHealth,
 } from '@elastic/eui';
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import {
   AutoFollowPatternDeleteProvider,
@@ -54,11 +59,12 @@ const getFilteredPatterns = (autoFollowPatterns, queryText) => {
     const normalizedSearchText = queryText.toLowerCase();
 
     return autoFollowPatterns.filter((autoFollowPattern) => {
+      // default values to avoid undefined errors
       const {
-        name,
-        remoteCluster,
-        followIndexPatternPrefix,
-        followIndexPatternSuffix,
+        name = '',
+        remoteCluster = '',
+        followIndexPatternPrefix = '',
+        followIndexPatternSuffix = '',
       } = autoFollowPattern;
 
       const inName = name.toLowerCase().includes(normalizedSearchText);
@@ -267,7 +273,7 @@ export class AutoFollowPatternTable extends PureComponent {
     if (apiStatusDelete === API_STATUS.DELETING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }
@@ -303,6 +309,19 @@ export class AutoFollowPatternTable extends PureComponent {
           )}
         />
       ) : undefined,
+      toolsRight: (
+        <EuiButton
+          {...reactRouterNavigate(routing._reactRouter.history, `/auto_follow_patterns/add`)}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="createAutoFollowPatternButton"
+        >
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
+            defaultMessage="Create an auto-follow pattern"
+          />
+        </EuiButton>
+      ),
       onChange: this.onSearch,
       box: {
         incremental: true,

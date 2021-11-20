@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -21,13 +22,16 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import { Threshold, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  getDisplayValueFromFilter,
+  FilterLabel,
+} from '../../../../../../../../src/plugins/data/public';
 
 import {
   subtechniquesOptions,
@@ -49,11 +53,11 @@ const NoteDescriptionContainer = styled(EuiFlexItem)`
 
 export const isNotEmptyArray = (values: string[]) => !isEmpty(values.join(''));
 
-const EuiBadgeWrap = (styled(EuiBadge)`
+const EuiBadgeWrap = styled(EuiBadge)`
   .euiBadge__text {
     white-space: pre-wrap !important;
   }
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 const Query = styled.div`
   white-space: pre-wrap;
@@ -81,9 +85,9 @@ export const buildQueryBarDescription = ({
               <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
-                    <esFilters.FilterLabel
+                    <FilterLabel
                       filter={filter}
-                      valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
+                      valueLabel={getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
                   ) : (
                     <EuiLoadingSpinner size="m" />
@@ -156,49 +160,54 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                       : `${singleThreat.tactic.name} (${singleThreat.tactic.id})`}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {singleThreat.technique.map((technique, techniqueIndex) => {
-                      const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
-                      return (
-                        <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
-                          <TechniqueLinkItem
-                            data-test-subj="threatTechniqueLink"
-                            href={technique.reference}
-                            target="_blank"
-                            iconType={ListTreeIcon}
-                            size="xs"
-                          >
-                            {myTechnique != null
-                              ? myTechnique.label
-                              : `${technique.name} (${technique.id})`}
-                          </TechniqueLinkItem>
-                          <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                            {technique.subtechnique != null &&
-                              technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
-                                const mySubtechnique = subtechniquesOptions.find(
-                                  (t) => t.id === subtechnique.id
-                                );
-                                return (
-                                  <SubtechniqueFlexItem
-                                    key={mySubtechnique?.id ?? subtechniqueIndex}
-                                  >
-                                    <TechniqueLinkItem
-                                      data-test-subj="threatSubtechniqueLink"
-                                      href={subtechnique.reference}
-                                      target="_blank"
-                                      iconType={ListTreeIcon}
-                                      size="xs"
+                    {singleThreat.technique &&
+                      singleThreat.technique.map((technique, techniqueIndex) => {
+                        const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
+                        return (
+                          <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
+                            <TechniqueLinkItem
+                              data-test-subj="threatTechniqueLink"
+                              href={technique.reference}
+                              target="_blank"
+                              iconType={ListTreeIcon}
+                              size="xs"
+                            >
+                              {myTechnique != null
+                                ? myTechnique.label
+                                : `${technique.name} (${technique.id})`}
+                            </TechniqueLinkItem>
+                            <EuiFlexGroup
+                              gutterSize="none"
+                              alignItems="flexStart"
+                              direction="column"
+                            >
+                              {technique.subtechnique != null &&
+                                technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
+                                  const mySubtechnique = subtechniquesOptions.find(
+                                    (t) => t.id === subtechnique.id
+                                  );
+                                  return (
+                                    <SubtechniqueFlexItem
+                                      key={mySubtechnique?.id ?? subtechniqueIndex}
                                     >
-                                      {mySubtechnique != null
-                                        ? mySubtechnique.label
-                                        : `${subtechnique.name} (${subtechnique.id})`}
-                                    </TechniqueLinkItem>
-                                  </SubtechniqueFlexItem>
-                                );
-                              })}
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                      );
-                    })}
+                                      <TechniqueLinkItem
+                                        data-test-subj="threatSubtechniqueLink"
+                                        href={subtechnique.reference}
+                                        target="_blank"
+                                        iconType={ListTreeIcon}
+                                        size="xs"
+                                      >
+                                        {mySubtechnique != null
+                                          ? mySubtechnique.label
+                                          : `${subtechnique.name} (${subtechnique.id})`}
+                                      </TechniqueLinkItem>
+                                    </SubtechniqueFlexItem>
+                                  );
+                                })}
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                        );
+                      })}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               );
@@ -455,7 +464,9 @@ export const buildThresholdDescription = (label: string, threshold: Threshold): 
       <>
         {isEmpty(threshold.field[0])
           ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field[0]} >= ${threshold.value}`}
+          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
+              Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
+            } >= ${threshold.value}`}
       </>
     ),
   },

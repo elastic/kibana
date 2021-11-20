@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import { useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import type { Filter, Query } from '@kbn/es-query';
 import { inputsActions, sourcererActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -18,97 +21,111 @@ import {
 } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
-import { decodeRisonUrlState } from './helpers';
+import { decodeRisonUrlState, isDetectionsPages } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
-import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl } from './types';
-import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
-import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
-import { SecurityPageName } from '../../../../common/constants';
+import { SetInitialStateFromUrl } from './types';
+import {
+  queryTimelineById,
+  dispatchUpdateTimeline,
+} from '../../../timelines/components/open_timeline/helpers';
+import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
+import { timelineActions } from '../../../timelines/store/timeline';
 
-export const dispatchSetInitialStateFromUrl = (
-  dispatch: Dispatch
-): DispatchSetInitialStateFromUrl => ({
-  apolloClient,
-  detailName,
-  filterManager,
-  indexPattern,
-  pageName,
-  savedQueries,
-  updateTimeline,
-  updateTimelineIsLoading,
-  urlStateToUpdate,
-}: SetInitialStateFromUrl<unknown>): (() => void) => () => {
-  urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
-    if (urlKey === CONSTANTS.timerange) {
-      updateTimerange(newUrlStateString, dispatch);
-    }
-    if (urlKey === CONSTANTS.sourcerer) {
-      const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
-      if (sourcererState != null) {
-        const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
-          (key) => !(key === SourcererScopeName.default && pageName === SecurityPageName.detections)
-        ) as SourcererScopeName[];
-        activeScopes.forEach((scope) =>
-          dispatch(
-            sourcererActions.setSelectedIndexPatterns({
-              id: scope,
-              selectedPatterns: sourcererState[scope] ?? [],
-            })
-          )
-        );
-      }
-    }
+export const useSetInitialStateFromUrl = () => {
+  const dispatch = useDispatch();
 
-    if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
-      const appQuery = decodeRisonUrlState<Query>(newUrlStateString);
-      if (appQuery != null) {
-        dispatch(
-          inputsActions.setFilterQuery({
-            id: 'global',
-            query: appQuery.query,
-            language: appQuery.language,
-          })
-        );
-      }
-    }
+  const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
 
-    if (urlKey === CONSTANTS.filters) {
-      const filters = decodeRisonUrlState<Filter[]>(newUrlStateString);
-      filterManager.setFilters(filters || []);
-    }
+  const updateTimelineIsLoading = useMemo(
+    () => (status: { id: string; isLoading: boolean }) =>
+      dispatch(timelineActions.updateIsLoading(status)),
+    [dispatch]
+  );
 
-    if (urlKey === CONSTANTS.savedQuery) {
-      const savedQueryId = decodeRisonUrlState<string>(newUrlStateString);
-      if (savedQueryId != null && savedQueryId !== '') {
-        savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
-          filterManager.setFilters(savedQueryData.attributes.filters || []);
-          dispatch(
-            inputsActions.setFilterQuery({
-              id: 'global',
-              ...savedQueryData.attributes.query,
-            })
-          );
-          dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
-        });
-      }
-    }
+  const setInitialStateFromUrl = useCallback(
+    ({
+      filterManager,
+      indexPattern,
+      pageName,
+      savedQueries,
+      urlStateToUpdate,
+    }: SetInitialStateFromUrl) => {
+      urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
+        if (urlKey === CONSTANTS.timerange) {
+          updateTimerange(newUrlStateString, dispatch);
+        }
+        if (urlKey === CONSTANTS.sourcerer) {
+          const sourcererState = decodeRisonUrlState<SourcererUrlState>(newUrlStateString);
+          if (sourcererState != null) {
+            const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
+              (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
+            ) as SourcererScopeName[];
+            activeScopes.forEach((scope) =>
+              dispatch(
+                sourcererActions.setSelectedDataView({
+                  id: scope,
+                  selectedDataViewId: sourcererState[scope]?.id ?? '',
+                  selectedPatterns: sourcererState[scope]?.selectedPatterns ?? [],
+                })
+              )
+            );
+          }
+        }
 
-    if (urlKey === CONSTANTS.timeline) {
-      const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
-      if (timeline != null && timeline.id !== '') {
-        queryTimelineById({
-          activeTimelineTab: timeline.activeTab,
-          apolloClient,
-          duplicate: false,
-          graphEventId: timeline.graphEventId,
-          timelineId: timeline.id,
-          openTimeline: timeline.isOpen,
-          updateIsLoading: updateTimelineIsLoading,
-          updateTimeline,
-        });
-      }
-    }
-  });
+        if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
+          const appQuery = decodeRisonUrlState<Query>(newUrlStateString);
+          if (appQuery != null) {
+            dispatch(
+              inputsActions.setFilterQuery({
+                id: 'global',
+                query: appQuery.query,
+                language: appQuery.language,
+              })
+            );
+          }
+        }
+
+        if (urlKey === CONSTANTS.filters) {
+          const filters = decodeRisonUrlState<Filter[]>(newUrlStateString);
+          filterManager.setFilters(filters || []);
+        }
+
+        if (urlKey === CONSTANTS.savedQuery) {
+          const savedQueryId = decodeRisonUrlState<string>(newUrlStateString);
+          if (savedQueryId != null && savedQueryId !== '') {
+            savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
+              filterManager.setFilters(savedQueryData.attributes.filters || []);
+              dispatch(
+                inputsActions.setFilterQuery({
+                  id: 'global',
+                  ...savedQueryData.attributes.query,
+                })
+              );
+              dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
+            });
+          }
+        }
+
+        if (urlKey === CONSTANTS.timeline) {
+          const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
+          if (timeline != null && timeline.id !== '') {
+            queryTimelineById({
+              activeTimelineTab: timeline.activeTab,
+              duplicate: false,
+              graphEventId: timeline.graphEventId,
+              timelineId: timeline.id,
+              openTimeline: timeline.isOpen,
+              updateIsLoading: updateTimelineIsLoading,
+              updateTimeline,
+            });
+          }
+        }
+      });
+    },
+    [dispatch, updateTimeline, updateTimelineIsLoading]
+  );
+
+  return Object.freeze({ setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading });
 };
 
 const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {

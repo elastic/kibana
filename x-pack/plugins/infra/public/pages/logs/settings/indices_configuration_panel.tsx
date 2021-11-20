@@ -1,88 +1,64 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import React, { useCallback } from 'react';
+import { useUiTracker } from '../../../../../observability/public';
 import {
-  EuiCode,
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import { InputFieldProps } from '../../../components/source_configuration';
+  logIndexNameReferenceRT,
+  LogIndexPatternReference,
+  logIndexPatternReferenceRT,
+  LogIndexReference,
+} from '../../../../common/log_sources';
+import { FormElement, isFormElementForType } from './form_elements';
+import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
+import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
+import { FormValidationError } from './validation_errors';
 
-interface IndicesConfigurationPanelProps {
+export const IndicesConfigurationPanel = React.memo<{
   isLoading: boolean;
-  readOnly: boolean;
-  logAliasFieldProps: InputFieldProps;
-}
+  isReadOnly: boolean;
+  indicesFormElement: FormElement<LogIndexReference | undefined, FormValidationError>;
+}>(({ isLoading, isReadOnly, indicesFormElement }) => {
+  const trackSwitchToIndexPatternReference = useUiTracker({ app: 'infra_logs' });
 
-export const IndicesConfigurationPanel = ({
-  isLoading,
-  readOnly,
-  logAliasFieldProps,
-}: IndicesConfigurationPanelProps) => (
-  <EuiForm>
-    <EuiTitle size="s">
-      <h3>
-        <FormattedMessage
-          id="xpack.infra.sourceConfiguration.indicesSectionTitle"
-          defaultMessage="Indices"
-        />
-      </h3>
-    </EuiTitle>
-    <EuiSpacer size="m" />
-    <EuiDescribedFormGroup
-      title={
-        <h4>
-          <FormattedMessage
-            id="xpack.infra.sourceConfiguration.logIndicesTitle"
-            defaultMessage="Log indices"
-          />
-        </h4>
-      }
-      description={
-        <FormattedMessage
-          id="xpack.infra.sourceConfiguration.logIndicesDescription"
-          defaultMessage="Index pattern for matching indices that contain log data"
-        />
-      }
-    >
-      <EuiFormRow
-        error={logAliasFieldProps.error}
-        fullWidth
-        helpText={
-          <FormattedMessage
-            id="xpack.infra.sourceConfiguration.logIndicesRecommendedValue"
-            defaultMessage="The recommended value is {defaultValue}"
-            values={{
-              defaultValue: <EuiCode>logs-*,filebeat-*</EuiCode>,
-            }}
-          />
-        }
-        isInvalid={logAliasFieldProps.isInvalid}
-        label={
-          <FormattedMessage
-            id="xpack.infra.sourceConfiguration.logIndicesLabel"
-            defaultMessage="Log indices"
-          />
-        }
-      >
-        <EuiFieldText
-          data-test-subj="logIndicesInput"
-          fullWidth
-          disabled={isLoading}
+  const switchToIndexPatternReference = useCallback(() => {
+    indicesFormElement.updateValue(() => undefined);
+    trackSwitchToIndexPatternReference({
+      metric: 'configuration_switch_to_index_pattern_reference',
+    });
+  }, [indicesFormElement, trackSwitchToIndexPatternReference]);
+
+  if (isIndexPatternFormElement(indicesFormElement)) {
+    return (
+      <IndexPatternConfigurationPanel
+        isLoading={isLoading}
+        isReadOnly={isReadOnly}
+        indexPatternFormElement={indicesFormElement}
+      />
+    );
+  } else if (isIndexNamesFormElement(indicesFormElement)) {
+    return (
+      <>
+        <IndexNamesConfigurationPanel
           isLoading={isLoading}
-          readOnly={readOnly}
-          {...logAliasFieldProps}
+          isReadOnly={isReadOnly}
+          indexNamesFormElement={indicesFormElement}
+          onSwitchToIndexPatternReference={switchToIndexPatternReference}
         />
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  </EuiForm>
+      </>
+    );
+  } else {
+    return null;
+  }
+});
+
+const isIndexPatternFormElement = isFormElementForType(
+  (value): value is LogIndexPatternReference | undefined =>
+    value == null || logIndexPatternReferenceRT.is(value)
 );
+
+const isIndexNamesFormElement = isFormElementForType(logIndexNameReferenceRT.is);

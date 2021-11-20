@@ -1,9 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+
+import { camelCase } from 'lodash';
+import {
+  FullResponseSchema,
+  PreviewResponse,
+} from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -11,6 +17,9 @@ import {
   DETECTION_ENGINE_RULES_STATUS_URL,
   DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
   DETECTION_ENGINE_TAGS_URL,
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_PREVIEW,
+  INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
 import {
   UpdateRulesProps,
@@ -30,10 +39,15 @@ import {
   PrePackagedRulesStatusResponse,
   BulkRuleResponse,
   PatchRuleProps,
+  BulkActionProps,
+  BulkActionResponse,
+  PreviewRulesProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import { convertRulesFilterToKQL } from './utils';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 /**
  * Create provided Rule
@@ -84,6 +98,21 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
   });
 
 /**
+ * Preview provided Rule
+ *
+ * @param rule CreateRulesSchema to add
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
+  KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
+    method: 'POST',
+    body: JSON.stringify(rule),
+    signal,
+  });
+
+/**
  * Fetches all rules from the Detection Engine API
  *
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
@@ -108,29 +137,11 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const showCustomRuleFilter = filterOptions.showCustomRules
-    ? [`alert.attributes.tags: "__internal_immutable:false"`]
-    : [];
-  const showElasticRuleFilter = filterOptions.showElasticRules
-    ? [`alert.attributes.tags: "__internal_immutable:true"`]
-    : [];
-  const filtersWithoutTags = [
-    ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
-    ...showCustomRuleFilter,
-    ...showElasticRuleFilter,
-  ].join(' AND ');
+  const filterString = convertRulesFilterToKQL(filterOptions);
 
-  const tags = filterOptions.tags
-    .map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`)
-    .join(' AND ');
-
-  const filterString =
-    filtersWithoutTags !== '' && tags !== ''
-      ? `${filtersWithoutTags} AND (${tags})`
-      : filtersWithoutTags + tags;
-
+  // Sort field is camel cased because we use that in our mapping, but display snake case on the front end
   const getFieldNameForSortField = (field: string) => {
-    return field === 'name' ? `${field}.keyword` : field;
+    return field === 'name' ? `${field}.keyword` : camelCase(field);
   };
 
   const query = {
@@ -229,7 +240,7 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
         rule_id: undefined,
         updated_at: undefined,
         updated_by: undefined,
-        enabled: rule.enabled,
+        enabled: false,
         immutable: undefined,
         last_success_at: undefined,
         last_success_message: undefined,
@@ -239,6 +250,23 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
         status_date: undefined,
       }))
     ),
+  });
+
+/**
+ * Perform bulk action with rules selected by a filter query
+ *
+ * @param query filter query to select rules to perform bulk action with
+ * @param action bulk action to perform
+ *
+ * @throws An error if response is not OK
+ */
+export const performBulkAction = async <Action extends BulkAction>({
+  action,
+  query,
+}: BulkActionProps<Action>): Promise<BulkActionResponse<Action>> =>
+  KibanaServices.get().http.fetch<BulkActionResponse<Action>>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+    method: 'POST',
+    body: JSON.stringify({ action, query }),
   });
 
 /**
@@ -345,9 +373,9 @@ export const getRuleStatusById = async ({
   id: string;
   signal: AbortSignal;
 }): Promise<RuleStatusResponse> =>
-  KibanaServices.get().http.fetch<RuleStatusResponse>(DETECTION_ENGINE_RULES_STATUS_URL, {
+  KibanaServices.get().http.fetch<RuleStatusResponse>(INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL, {
     method: 'POST',
-    body: JSON.stringify({ ids: [id] }),
+    body: JSON.stringify({ ruleId: id }),
     signal,
   });
 

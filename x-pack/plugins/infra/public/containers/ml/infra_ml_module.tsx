@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useMemo } from 'react';
-import { DatasetFilter } from '../../../common/infra_ml';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { useModuleStatus } from './infra_ml_module_status';
@@ -19,7 +19,7 @@ export const useInfraMLModule = <JobType extends string>({
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { spaceId, sourceId, timestampField } = sourceConfiguration;
+  const { spaceId, sourceId } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
   const [, fetchJobStatus] = useTrackedPromise(
@@ -51,7 +51,7 @@ export const useInfraMLModule = <JobType extends string>({
         selectedIndices: string[],
         start: number | undefined,
         end: number | undefined,
-        datasetFilter: DatasetFilter,
+        filter: string,
         partitionField?: string
       ) => {
         dispatchModuleStatus({ type: 'startedSetup' });
@@ -59,12 +59,11 @@ export const useInfraMLModule = <JobType extends string>({
           {
             start,
             end,
-            datasetFilter,
+            filter,
             moduleSourceConfiguration: {
               indices: selectedIndices,
               sourceId,
               spaceId,
-              timestampField,
             },
             partitionField,
           },
@@ -91,7 +90,7 @@ export const useInfraMLModule = <JobType extends string>({
         dispatchModuleStatus({ type: 'failedSetup' });
       },
     },
-    [moduleDescriptor.setUpModule, spaceId, sourceId, timestampField]
+    [moduleDescriptor.setUpModule, spaceId, sourceId]
   );
 
   const [cleanUpModuleRequest, cleanUpModule] = useTrackedPromise(
@@ -104,22 +103,23 @@ export const useInfraMLModule = <JobType extends string>({
     [spaceId, sourceId]
   );
 
-  const isCleaningUp = useMemo(() => cleanUpModuleRequest.state === 'pending', [
-    cleanUpModuleRequest.state,
-  ]);
+  const isCleaningUp = useMemo(
+    () => cleanUpModuleRequest.state === 'pending',
+    [cleanUpModuleRequest.state]
+  );
 
   const cleanUpAndSetUpModule = useCallback(
     (
       selectedIndices: string[],
       start: number | undefined,
       end: number | undefined,
-      datasetFilter: DatasetFilter,
+      filter: string,
       partitionField?: string
     ) => {
       dispatchModuleStatus({ type: 'startedSetup' });
       cleanUpModule()
         .then(() => {
-          setUpModule(selectedIndices, start, end, datasetFilter, partitionField);
+          setUpModule(selectedIndices, start, end, filter, partitionField);
         })
         .catch(() => {
           dispatchModuleStatus({ type: 'failedSetup' });
@@ -132,11 +132,10 @@ export const useInfraMLModule = <JobType extends string>({
     dispatchModuleStatus({ type: 'viewedResults' });
   }, [dispatchModuleStatus]);
 
-  const jobIds = useMemo(() => moduleDescriptor.getJobIds(spaceId, sourceId), [
-    moduleDescriptor,
-    spaceId,
-    sourceId,
-  ]);
+  const jobIds = useMemo(
+    () => moduleDescriptor.getJobIds(spaceId, sourceId),
+    [moduleDescriptor, spaceId, sourceId]
+  );
 
   return {
     cleanUpAndSetUpModule,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import httpProxy from 'http-proxy';
@@ -44,11 +45,11 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should return 200 when creating a slack action successfully', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
-          actionTypeId: '.slack',
+          connector_type_id: '.slack',
           secrets: {
             webhookUrl: slackSimulatorURL,
           },
@@ -57,34 +58,36 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
+        is_missing_secrets: false,
         name: 'A slack action',
-        actionTypeId: '.slack',
+        connector_type_id: '.slack',
         config: {},
       });
 
       expect(typeof createdAction.id).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/actions/action/${createdAction.id}`)
+        .get(`/api/actions/connector/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        isPreconfigured: false,
+        is_preconfigured: false,
+        is_missing_secrets: false,
         name: 'A slack action',
-        actionTypeId: '.slack',
+        connector_type_id: '.slack',
         config: {},
       });
     });
 
     it('should respond with a 400 Bad Request when creating a slack action with no webhookUrl', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
-          actionTypeId: '.slack',
+          connector_type_id: '.slack',
           secrets: {},
         })
         .expect(400)
@@ -100,11 +103,11 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating a slack action with not present in allowedHosts webhookUrl', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
-          actionTypeId: '.slack',
+          connector_type_id: '.slack',
           secrets: {
             webhookUrl: 'http://slack.mynonexistent.com/other/stuff/in/the/path',
           },
@@ -121,11 +124,11 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating a slack action with a webhookUrl with no hostname', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
-          actionTypeId: '.slack',
+          connector_type_id: '.slack',
           secrets: {
             webhookUrl: 'fee-fi-fo-fum',
           },
@@ -143,11 +146,11 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should create our slack simulator action successfully', async () => {
       const { body: createdSimulatedAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack simulator',
-          actionTypeId: '.slack',
+          connector_type_id: '.slack',
           secrets: {
             webhookUrl: slackSimulatorURL,
           },
@@ -159,7 +162,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle firing with a simulated success', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -173,7 +176,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle an empty message error', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -187,7 +190,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle a 40x slack error', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -202,7 +205,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
     it('should handle a 429 slack error', async () => {
       const dateStart = new Date().getTime();
       const { body: result } = await supertest
-        .post(`/api/actions/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -220,7 +223,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle a 500 slack error', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

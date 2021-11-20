@@ -3,8 +3,8 @@
 }
 
 .spcMenu__spacesList {
+  @include euiYScrollWithShadows;
   max-height: $euiSizeXL * 10;
-  overflow-y: auto;
 }
 
 .spcMenu__searchFieldWrapper {
@@ -14,4 +14,8 @@
 .spcMenu__manageButton {
   margin: $euiSizeM;
   width: calc(100% - #{$euiSizeM*2});
+}
+
+.spcMenu__item {
+  margin-left: $euiSizeM;
 }

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -18,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('empty_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
 
         await spacesService.create({
           id: 'custom_space',
@@ -29,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('empty_kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
       it('shows Logs navlink', async () => {
@@ -41,15 +43,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('logs landing page without data', () => {
-        it(`shows 'Change source configuration' button`, async () => {
+        it(`shows 'No data' page`, async () => {
           await PageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '', undefined, {
             basePath: '/s/custom_space',
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
           await testSubjects.existOrFail('~infraLogsPage');
-          await testSubjects.existOrFail('~logsViewSetupInstructionsButton');
-          await testSubjects.existOrFail('~configureSourceButton');
+          await testSubjects.existOrFail('~noDataPage');
         });
       });
     });
@@ -58,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('empty_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -68,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('empty_kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
       it(`doesn't show Logs navlink`, async () => {

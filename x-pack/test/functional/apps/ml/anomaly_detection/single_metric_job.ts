@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -9,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const browser = getService('browser');
 
   const jobId = `fq_single_1_${Date.now()}`;
   const jobIdClone = `${jobId}_clone`;
@@ -72,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('single metric', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -200,7 +202,26 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.assertDetectorResultsExist(jobId, 0);
     });
 
+    it('job cloning fails in the single metric wizard if a matching data view does not exist', async () => {
+      await ml.testExecution.logTestStep('delete data view used by job');
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+
+      // Refresh page to ensure page has correct cache of data views
+      await browser.refresh();
+
+      await ml.testExecution.logTestStep(
+        'job cloning clicks the clone action and displays an error toast'
+      );
+      await ml.jobTable.clickCloneJobActionWhenNoDataViewExists(jobId);
+    });
+
     it('job cloning opens the existing job in the single metric wizard', async () => {
+      await ml.testExecution.logTestStep('recreate data view used by job');
+      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+
+      // Refresh page to ensure page has correct cache of data views
+      await browser.refresh();
+
       await ml.testExecution.logTestStep(
         'job cloning clicks the clone action and loads the single metric wizard'
       );
@@ -261,7 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
 
       await ml.testExecution.logTestStep('job cloning persists custom urls');
-      await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
+      await ml.customUrls.assertCustomUrlLabel(0, 'check-kibana-dashboard');
 
       await ml.testExecution.logTestStep('job cloning persists assigned calendars');
       await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);

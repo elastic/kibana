@@ -1,23 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 jest.mock('./patch_rules');
 
-describe('updatePrepackagedRules', () => {
-  let alertsClient: ReturnType<typeof alertsClientMock.create>;
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
+  let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    alertsClient = alertsClientMock.create();
+    rulesClient = rulesClientMock.create();
+    ruleStatusClient = ruleExecutionLogClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
   });
 
@@ -32,13 +39,16 @@ describe('updatePrepackagedRules', () => {
     ];
     const outputIndex = 'outputIndex';
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
     await updatePrepackagedRules(
-      alertsClient,
+      rulesClient,
       savedObjectsClient,
+      'default',
+      ruleStatusClient,
       [{ ...prepackagedRule, actions }],
-      outputIndex
+      outputIndex,
+      isRuleRegistryEnabled
     );
 
     expect(patchRules).toHaveBeenCalledWith(

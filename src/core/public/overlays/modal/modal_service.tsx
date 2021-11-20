@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint-disable max-classes-per-file */
 
 import { i18n as t } from '@kbn/i18n';
-import { EuiModal, EuiConfirmModal, EuiOverlayMask, EuiConfirmModalProps } from '@elastic/eui';
+import { EuiModal, EuiConfirmModal, EuiConfirmModalProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
+import { ThemeServiceStart } from '../../theme';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
-import { MountWrapper } from '../../utils';
+import { MountWrapper, CoreContextProvider } from '../../utils';
 
 /**
  * A ModalRef is a reference to an opened modal. It offers methods to
@@ -84,6 +85,7 @@ export interface OverlayModalStart {
    * @return {@link OverlayRef} A reference to the opened modal.
    */
   open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
+
   /**
    * Opens a confirmation modal with the given text or mountpoint as a message.
    * Returns a Promise resolving to `true` if user confirmed or `false` otherwise.
@@ -101,10 +103,12 @@ export interface OverlayModalOpenOptions {
   className?: string;
   closeButtonAriaLabel?: string;
   'data-test-subj'?: string;
+  maxWidth?: boolean | number | string;
 }
 
 interface StartDeps {
   i18n: I18nStart;
+  theme: ThemeServiceStart;
   targetDomElement: Element;
 }
 
@@ -113,7 +117,7 @@ export class ModalService {
   private activeModal: ModalRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({ i18n, targetDomElement }: StartDeps): OverlayModalStart {
+  public start({ i18n, theme, targetDomElement }: StartDeps): OverlayModalStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -136,13 +140,11 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <EuiOverlayMask>
-            <i18n.Context>
-              <EuiModal {...options} onClose={() => modal.close()}>
-                <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
-              </EuiModal>
-            </i18n.Context>
-          </EuiOverlayMask>,
+          <CoreContextProvider i18n={i18n} theme={theme}>
+            <EuiModal {...options} onClose={() => modal.close()}>
+              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+            </EuiModal>
+          </CoreContextProvider>,
           targetDomElement
         );
 
@@ -198,11 +200,9 @@ export class ModalService {
           };
 
           render(
-            <EuiOverlayMask>
-              <i18n.Context>
-                <EuiConfirmModal {...props} />
-              </i18n.Context>
-            </EuiOverlayMask>,
+            <CoreContextProvider i18n={i18n} theme={theme}>
+              <EuiConfirmModal {...props} />
+            </CoreContextProvider>,
             targetDomElement
           );
         });

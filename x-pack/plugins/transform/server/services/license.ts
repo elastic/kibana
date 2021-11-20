@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Logger } from 'src/core/server';
 import {
   IKibanaResponse,
@@ -13,6 +15,7 @@ import {
 } from 'kibana/server';
 
 import { LicensingPluginSetup, LicenseType } from '../../../licensing/server';
+import type { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -25,6 +28,10 @@ interface SetupSettings {
   minimumLicenseType: LicenseType;
   defaultErrorMessage: string;
 }
+
+type TransformRequestHandlerContext = RequestHandlerContext & {
+  alerting?: AlertingApiRequestHandlerContext;
+};
 
 export class License {
   private licenseStatus: LicenseStatus = {
@@ -62,7 +69,9 @@ export class License {
     });
   }
 
-  guardApiRoute<Params, Query, Body>(handler: RequestHandler<Params, Query, Body>) {
+  guardApiRoute<Params, Query, Body>(
+    handler: RequestHandler<Params, Query, Body, TransformRequestHandlerContext>
+  ) {
     const license = this;
 
     return function licenseCheck(

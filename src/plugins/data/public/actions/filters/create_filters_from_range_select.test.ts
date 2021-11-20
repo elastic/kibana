@@ -1,23 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
 
 import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
 
-import {
-  fieldFormats,
-  FieldFormatsGetConfigFn,
-  IndexPatternsContract,
-  RangeFilter,
-} from '../../../public';
+import { IndexPatternsContract } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
+import { FieldFormatsGetConfigFn } from '../../../../field_formats/common';
+import { DateFormat } from '../../../../field_formats/public/';
+import { RangeFilter } from '@kbn/es-query';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -35,7 +33,7 @@ describe('brushEvent', () => {
       id: 'logstash-*',
     },
     filterable: true,
-    format: new fieldFormats.DateFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+    format: new DateFormat({}, (() => {}) as FieldFormatsGetConfigFn),
   };
 
   const indexPattern = {
@@ -57,10 +55,10 @@ describe('brushEvent', () => {
   beforeEach(() => {
     const dataStart = dataPluginMock.createStartContract();
     setSearchService(dataStart.search);
-    setIndexPatterns(({
+    setIndexPatterns({
       ...dataStart.indexPatterns,
       get: async () => indexPattern,
-    } as unknown) as IndexPatternsContract);
+    } as unknown as IndexPatternsContract);
 
     baseEvent = {
       column: 0,
@@ -122,9 +120,11 @@ describe('brushEvent', () => {
 
         if (filter.length) {
           const rangeFilter = filter[0] as RangeFilter;
-          expect(rangeFilter.range.time.gte).toBe(new Date(JAN_01_2014).toISOString());
+          expect(rangeFilter.query.range.time.gte).toBe(new Date(JAN_01_2014).toISOString());
           // Set to a baseline timezone for comparison.
-          expect(rangeFilter.range.time.lt).toBe(new Date(JAN_01_2014 + DAY_IN_MS).toISOString());
+          expect(rangeFilter.query.range.time.lt).toBe(
+            new Date(JAN_01_2014 + DAY_IN_MS).toISOString()
+          );
         }
       });
     });
@@ -152,9 +152,11 @@ describe('brushEvent', () => {
 
         if (filter.length) {
           const rangeFilter = filter[0] as RangeFilter;
-          expect(rangeFilter.range.anotherTimeField.gte).toBe(moment(rangeBegin).toISOString());
-          expect(rangeFilter.range.anotherTimeField.lt).toBe(moment(rangeEnd).toISOString());
-          expect(rangeFilter.range.anotherTimeField).toHaveProperty(
+          expect(rangeFilter.query.range.anotherTimeField.gte).toBe(
+            moment(rangeBegin).toISOString()
+          );
+          expect(rangeFilter.query.range.anotherTimeField.lt).toBe(moment(rangeEnd).toISOString());
+          expect(rangeFilter.query.range.anotherTimeField).toHaveProperty(
             'format',
             'strict_date_optional_time'
           );
@@ -189,9 +191,9 @@ describe('brushEvent', () => {
 
       if (filter.length) {
         const rangeFilter = filter[0] as RangeFilter;
-        expect(rangeFilter.range.numberField.gte).toBe(1);
-        expect(rangeFilter.range.numberField.lt).toBe(4);
-        expect(rangeFilter.range.numberField).not.toHaveProperty('format');
+        expect(rangeFilter.query.range.numberField.gte).toBe(1);
+        expect(rangeFilter.query.range.numberField.lt).toBe(4);
+        expect(rangeFilter.query.range.numberField).not.toHaveProperty('format');
       }
     });
   });

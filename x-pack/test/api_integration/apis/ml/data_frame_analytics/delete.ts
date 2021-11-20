@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -64,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('DELETE data_frame/analytics', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/bm_classification');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await createJobs(testJobConfigs);
     });
@@ -129,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
         const destinationIndex = generateDestinationIndex(analyticsId);
 
         before(async () => {
-          await ml.api.createIndices(destinationIndex);
+          await ml.api.createIndex(destinationIndex);
           await ml.api.assertIndicesExist(destinationIndex);
         });
 
@@ -188,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         before(async () => {
           // Mimic real job by creating target index & index pattern after DFA job is created
-          await ml.api.createIndices(destinationIndex);
+          await ml.api.createIndex(destinationIndex);
           await ml.api.assertIndicesExist(destinationIndex);
           await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
         });

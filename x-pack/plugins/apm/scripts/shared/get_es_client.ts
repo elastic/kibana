@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ApiKeyAuth, BasicAuth } from '@elastic/elasticsearch/lib/pool';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../typings/elasticsearch';
+} from '../../../../../src/core/types/elasticsearch';
 
 export type ESClient = ReturnType<typeof getEsClient>;
 
@@ -18,28 +19,37 @@ export function getEsClient({
   auth,
 }: {
   node: string;
-  auth?: BasicAuth | ApiKeyAuth;
-}) {
+  auth?: ClientOptions['auth'];
+  // Should be refactored
+  // The inferred type of 'getEsClient' references an inaccessible 'unique symbol' type. A type annotation is necessary.
+}): any {
   const client = new Client({
     node,
-    ssl: {
+    tls: {
       rejectUnauthorized: false,
     },
     requestTimeout: 120000,
     auth,
   });
 
-  return {
-    ...client,
-    async search<TDocument, TSearchRequest extends ESSearchRequest>(
-      request: TSearchRequest
-    ) {
-      const response = await client.search(request as any);
+  const originalSearch = client.search.bind(client);
 
-      return {
-        ...response,
-        body: response.body as ESSearchResponse<TDocument, TSearchRequest>,
-      };
-    },
+  async function search<
+    TDocument = unknown,
+    TSearchRequest extends ESSearchRequest = ESSearchRequest
+  >(request: TSearchRequest) {
+    const response = await originalSearch(request);
+
+    return {
+      ...response,
+      body: response as unknown as ESSearchResponse<TDocument, TSearchRequest>,
+    };
+  }
+
+  // @ts-expect-error
+  client.search = search;
+
+  return client as unknown as Omit<Client, 'search'> & {
+    search: typeof search;
   };
 }

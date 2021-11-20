@@ -1,65 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
-
+import { DEFAULT_META } from '../../../shared/constants';
 import {
   flashAPIErrors,
-  setSuccessMessage,
-  setQueuedSuccessMessage,
+  flashSuccessToast,
+  setErrorMessage,
   clearFlashMessages,
 } from '../../../shared/flash_messages';
-
-import { DEFAULT_META } from '../../../shared/constants';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
-import { NOT_FOUND_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
+import { PRIVATE_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
-  onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
+  setContentSource(contentSource: ContentSourceFullData): ContentSourceFullData;
   onUpdateSourceName(name: string): string;
-  setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
+  initializeSourceSynchronization(sourceId: string): { sourceId: string };
   onUpdateSummary(summary: DocumentSummaryItem[]): DocumentSummaryItem[];
   setContentFilterValue(contentFilterValue: string): string;
   setActivePage(activePage: number): number;
   searchContentSourceDocuments(sourceId: string): { sourceId: string };
   updateContentSource(
     sourceId: string,
-    source: { name: string }
-  ): { sourceId: string; source: { name: string } };
+    source: SourceUpdatePayload
+  ): {
+    sourceId: string;
+    source: ContentSourceFullData;
+  };
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
-  getSourceConfigData(serviceType: string): { serviceType: string };
   setButtonNotLoading(): void;
-}
-
-interface SourceConfigData {
-  serviceType: string;
-  name: string;
-  configured: boolean;
-  categories: string[];
-  needsPermissions?: boolean;
-  privateSourcesEnabled: boolean;
-  configuredFields: {
-    publicKey: string;
-    privateKey: string;
-    consumerKey: string;
-    baseUrl?: string;
-    clientId?: string;
-    clientSecret?: string;
-  };
-  accountContextOnly?: boolean;
 }
 
 interface SourceValues {
@@ -70,7 +53,6 @@ interface SourceValues {
   contentItems: SourceContentItem[];
   contentMeta: Meta;
   contentFilterValue: string;
-  sourceConfigData: SourceConfigData;
 }
 
 interface SearchResultsResponse {
@@ -78,24 +60,34 @@ interface SearchResultsResponse {
   meta: Meta;
 }
 
+interface SourceUpdatePayload {
+  name?: string;
+  indexing?: {
+    enabled?: boolean;
+    features?: {
+      thumbnails?: { enabled: boolean };
+      content_extraction?: { enabled: boolean };
+    };
+  };
+}
+
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'source_logic'],
   actions: {
-    onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
+    setContentSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
-    setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
     onUpdateSummary: (summary: object[]) => summary,
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
     setContentFilterValue: (contentFilterValue: string) => contentFilterValue,
     setActivePage: (activePage: number) => activePage,
     initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
+    initializeSourceSynchronization: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
-    updateContentSource: (sourceId: string, source: { name: string }) => ({ sourceId, source }),
+    updateContentSource: (sourceId: string, source: SourceUpdatePayload) => ({ sourceId, source }),
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),
-    getSourceConfigData: (serviceType: string) => ({ serviceType }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
   },
@@ -103,7 +95,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     contentSource: [
       {} as ContentSourceFullData,
       {
-        onInitializeSource: (_, contentSource) => contentSource,
+        setContentSource: (_, contentSource) => contentSource,
         onUpdateSourceName: (contentSource, name) => ({
           ...contentSource,
           name,
@@ -112,29 +104,22 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           ...contentSource,
           summary,
         }),
-      },
-    ],
-    sourceConfigData: [
-      {} as SourceConfigData,
-      {
-        setSourceConfigData: (_, sourceConfigData) => sourceConfigData,
+        resetSourceState: () => ({} as ContentSourceFullData),
       },
     ],
     dataLoading: [
       true,
       {
-        onInitializeSource: () => false,
-        setSourceConfigData: () => false,
-        resetSourceState: () => false,
+        setContentSource: () => false,
+        resetSourceState: () => true,
+        removeContentSource: () => true,
       },
     ],
     buttonLoading: [
       false,
       {
         setButtonNotLoading: () => false,
-        setSourceConfigData: () => false,
         resetSourceState: () => false,
-        removeContentSource: () => true,
       },
     ],
     sectionLoading: [
@@ -170,28 +155,40 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSource: async ({ sourceId }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}`
-        : `/api/workplace_search/account/sources/${sourceId}`;
+        ? `/internal/workplace_search/org/sources/${sourceId}`
+        : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
-        const response = await HttpLogic.values.http.get(route);
-        actions.onInitializeSource(response);
+        const response = await HttpLogic.values.http.get<
+          ContentSourceFullData & { errors?: string }
+        >(route);
+        actions.setContentSource(response);
         if (response.isFederatedSource) {
           actions.initializeFederatedSummary(sourceId);
         }
+        if (response.errors) {
+          setErrorMessage(response.errors);
+        } else {
+          clearFlashMessages();
+        }
       } catch (e) {
-        // TODO: Verify this works once components are there. Not sure if the catch gives a status code.
-        if (e.response.status === 404) {
-          KibanaLogic.values.navigateToUrl(NOT_FOUND_PATH);
+        if (e?.response?.status === 404) {
+          const redirect = isOrganization ? SOURCES_PATH : PRIVATE_SOURCES_PATH;
+          KibanaLogic.values.navigateToUrl(redirect);
+          setErrorMessage(
+            i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.notFoundErrorMessage', {
+              defaultMessage: 'Source not found.',
+            })
+          );
         } else {
           flashAPIErrors(e);
         }
       }
     },
     initializeFederatedSummary: async ({ sourceId }) => {
-      const route = `/api/workplace_search/org/sources/${sourceId}/federated_summary`;
+      const route = `/internal/workplace_search/account/sources/${sourceId}/federated_summary`;
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get<{ summary: DocumentSummaryItem[] }>(route);
         actions.onUpdateSummary(response.summary);
       } catch (e) {
         flashAPIErrors(e);
@@ -202,8 +199,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/documents`
-        : `/api/workplace_search/account/sources/${sourceId}/documents`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/documents`
+        : `/internal/workplace_search/account/sources/${sourceId}/documents`;
 
       const {
         contentFilterValue: query,
@@ -211,7 +208,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       } = values;
 
       try {
-        const response = await HttpLogic.values.http.post(route, {
+        const response = await HttpLogic.values.http.post<SearchResultsResponse>(route, {
           body: JSON.stringify({ query, page }),
         });
         actions.setSearchResults(response);
@@ -222,14 +219,16 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     updateContentSource: async ({ sourceId, source }) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/settings`
-        : `/api/workplace_search/account/sources/${sourceId}/settings`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/settings`
+        : `/internal/workplace_search/account/sources/${sourceId}/settings`;
 
       try {
-        const response = await HttpLogic.values.http.patch(route, {
+        const response = await HttpLogic.values.http.patch<{ name: string }>(route, {
           body: JSON.stringify({ content_source: source }),
         });
-        actions.onUpdateSourceName(response.name);
+        if (source.name) {
+          actions.onUpdateSourceName(response.name);
+        }
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -238,12 +237,13 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}`
-        : `/api/workplace_search/account/sources/${sourceId}`;
+        ? `/internal/workplace_search/org/sources/${sourceId}`
+        : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
-        const response = await HttpLogic.values.http.delete(route);
-        setQueuedSuccessMessage(
+        const response = await HttpLogic.values.http.delete<{ name: string }>(route);
+        KibanaLogic.values.navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
+        flashSuccessToast(
           i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceRemoved',
             {
@@ -252,25 +252,23 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
             }
           )
         );
-        KibanaLogic.values.navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
       } catch (e) {
         flashAPIErrors(e);
       } finally {
         actions.setButtonNotLoading();
       }
     },
-    getSourceConfigData: async ({ serviceType }) => {
-      const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
-
+    initializeSourceSynchronization: async ({ sourceId }) => {
+      const route = `/internal/workplace_search/org/sources/${sourceId}/sync`;
       try {
-        const response = await HttpLogic.values.http.get(route);
-        actions.setSourceConfigData(response);
+        await HttpLogic.values.http.post(route);
+        actions.initializeSource(sourceId);
       } catch (e) {
         flashAPIErrors(e);
       }
     },
     onUpdateSourceName: (name: string) => {
-      setSuccessMessage(
+      flashSuccessToast(
         i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceNameChanged',
           {

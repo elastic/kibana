@@ -1,45 +1,59 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export * from './expressions';
 
-export { ISearchSetup, ISearchStart, ISearchStartSearchSource, SearchEnhancements } from './types';
+export type {
+  ISearchSetup,
+  ISearchStart,
+  ISearchStartSearchSource,
+  SearchUsageCollector,
+} from './types';
 
-export {
-  ES_SEARCH_STRATEGY,
+export type {
   EsQuerySortValue,
-  extractReferences as extractSearchSourceReferences,
-  getSearchParamsFromRequest,
   IEsSearchRequest,
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  injectReferences as injectSearchSourceReferences,
   ISearchGeneric,
   ISearchSource,
-  parseSearchSourceJSON,
   SearchError,
   SearchRequest,
-  SearchSource,
   SearchSourceDependencies,
   SearchSourceFields,
-  SortDirection,
 } from '../../common/search';
 export {
-  SessionService,
+  ES_SEARCH_STRATEGY,
+  extractReferences as extractSearchSourceReferences,
+  getSearchParamsFromRequest,
+  injectReferences as injectSearchSourceReferences,
+  parseSearchSourceJSON,
+  SearchSource,
+  SortDirection,
+  checkColumnForPrecisionError,
+} from '../../common/search';
+export type {
   ISessionService,
   SearchSessionInfoProvider,
+  ISessionsClient,
+  WaitUntilNextSessionCompletesOptions,
+} from './session';
+export {
+  SessionService,
   SearchSessionState,
   SessionsClient,
-  ISessionsClient,
   noSearchSessionStorageCapabilityMessage,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
 } from './session';
 export { getEsPreference } from './es_search';
 
-export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
+export type { SearchInterceptorDeps } from './search_interceptor';
+export { SearchInterceptor } from './search_interceptor';
 export * from './errors';

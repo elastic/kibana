@@ -1,18 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { connect } from 'react-redux';
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { getSelectedPageIndex, getPages } from '../../state/selectors/workpad';
 import { stylePage, setPageTransition } from '../../state/actions/pages';
-import { ComponentStrings } from '../../../i18n';
 import { PageConfig as Component } from './page_config';
 
-const { PageConfig: strings } = ComponentStrings;
+const strings = {
+  getNoTransitionDropDownOptionLabel: () =>
+    i18n.translate('xpack.canvas.pageConfig.transitions.noneDropDownOptionLabel', {
+      defaultMessage: 'None',
+      description:
+        'This is the option the user should choose if they do not want any page transition (i.e. fade in, fade out, etc) to ' +
+        'be applied to the current page.',
+    }),
+};
 
 const mapStateToProps = (state) => {
   const pageIndex = getSelectedPageIndex(state);

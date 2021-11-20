@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, Fragment } from 'react';
 
 import {
   EuiText,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiCallOut,
   EuiTextColor,
   EuiDescriptionList,
@@ -22,8 +23,12 @@ import {
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';
 import { isEmpty } from 'lodash';
-import { Alert, AlertTaskState, BASE_ALERT_API_PATH } from '../../../../plugins/alerts/common';
 import { ALERTING_EXAMPLE_APP_ID, AlwaysFiringParams } from '../../common/constants';
+import {
+  Alert,
+  AlertTaskState,
+  LEGACY_BASE_ALERT_API_PATH,
+} from '../../../../plugins/alerting/common';
 
 type Props = RouteComponentProps & {
   http: CoreStart['http'];
@@ -39,30 +44,33 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
 
   useEffect(() => {
     if (!alert) {
-      http.get(`${BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
+      http
+        .get<Alert<AlwaysFiringParams> | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`)
+        .then(setAlert);
     }
     if (!alertState) {
-      http.get(`${BASE_ALERT_API_PATH}/alert/${id}/state`).then(setAlertState);
+      http
+        .get<AlertTaskState | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`)
+        .then(setAlertState);
     }
   }, [alert, alertState, http, id]);
 
   return alert && alertState ? (
     <Fragment>
-      <EuiCallOut title={`Alert "${alert.name}"`} iconType="search">
+      <EuiCallOut title={`Rule "${alert.name}"`} iconType="search">
         <p>
           This is a specific view for all
-          <EuiTextColor color="accent"> example.people-in-space </EuiTextColor> Alerts created by
-          the
+          <EuiTextColor color="accent"> example.people-in-space </EuiTextColor> Rules created by the
           <EuiTextColor color="accent"> {ALERTING_EXAMPLE_APP_ID} </EuiTextColor>
           plugin.
         </p>
       </EuiCallOut>
       <EuiSpacer size="l" />
       <EuiText>
-        <h2>Alert Instances</h2>
+        <h2>Alerts</h2>
       </EuiText>
       {isEmpty(alertState.alertInstances) ? (
-        <EuiCallOut title="No Alert Instances!" color="warning" iconType="help">
+        <EuiCallOut title="No Alerts!" color="warning" iconType="help">
           <p>
             The people in {alert.params.craft} at the moment <b>are not</b> {alert.params.op}{' '}
             {alert.params.outerSpaceCapacity}
@@ -72,7 +80,7 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
         <Fragment>
           <EuiCallOut title="Active State" color="success" iconType="user">
             <p>
-              The alert has been triggered because the people in {alert.params.craft} at the moment{' '}
+              The rule has been triggered because the people in {alert.params.craft} at the moment{' '}
               {alert.params.op} {alert.params.outerSpaceCapacity}
             </p>
           </EuiCallOut>
@@ -106,6 +114,6 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
       )}
     </Fragment>
   ) : (
-    <EuiLoadingKibana size="xl" />
+    <EuiLoadingLogo logo="logoKibana" size="xl" />
   );
 });

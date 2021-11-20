@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState, useMemo } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { MultiMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../../common/types/fields';
+import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
@@ -32,7 +34,10 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
 
   const jobCreator = jc as MultiMetricJobCreator;
 
-  const { fields } = newJobCapsService;
+  const fields = useMemo(
+    () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    []
+  );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs
@@ -106,7 +111,11 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   useEffect(() => {
     if (splitField !== null) {
       chartLoader
-        .loadFieldExampleValues(splitField)
+        .loadFieldExampleValues(
+          splitField,
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
+        )
         .then(setFieldValues)
         .catch((error) => {
           getToastNotificationService().displayErrorToast(error);
@@ -134,7 +143,9 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
           aggFieldPairList,
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
-          cs.intervalMs
+          cs.intervalMs,
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
         );
         setLineChartsData(resp);
       } catch (error) {

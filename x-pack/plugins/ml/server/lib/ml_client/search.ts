@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
-import { RequestParams, ApiResponse } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { JobSavedObjectService } from '../../saved_objects';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import type { SearchResponse7 } from '../../../common/types/es_client';
 import type { JobType } from '../../../common/types/saved_objects';
 
 export function searchProvider(
@@ -28,12 +29,12 @@ export function searchProvider(
   }
 
   async function anomalySearch<T>(
-    searchParams: RequestParams.Search<any>,
+    searchParams: estypes.SearchRequest,
     jobIds: string[]
-  ): Promise<ApiResponse<SearchResponse7<T>>> {
+  ): Promise<TransportResult<estypes.SearchResponse<T>, unknown>> {
     await jobIdsCheck('anomaly-detector', jobIds);
     const { asInternalUser } = client;
-    const resp = await asInternalUser.search<SearchResponse7<T>>({
+    const resp = await asInternalUser.search<T>({
       ...searchParams,
       index: ML_RESULTS_INDEX_PATTERN,
     });

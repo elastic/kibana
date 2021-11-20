@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -19,15 +20,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
     describe('Login Page', () => {
       before(async () => {
-        await esArchiver.load('empty_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
         await PageObjects.security.forceLogout();
       });
 
       after(async () => {
-        await esArchiver.unload('empty_kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
       afterEach(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 
@@ -40,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expectSuccess: false,
         });
         const errorMessage = await PageObjects.security.loginPage.getErrorMessage();
-        expect(errorMessage).to.be('Invalid username or password. Please try again.');
+        expect(errorMessage).to.be('Username or password is incorrect. Please try again.');
       });
 
       it('displays message acknowledging logout', async () => {

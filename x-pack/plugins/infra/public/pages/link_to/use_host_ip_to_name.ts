@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useEffect } from 'react';
@@ -23,7 +24,7 @@ export const useHostIpToName = (ipAddress: string | null, indexPattern: string |
           throw new Error('HTTP service is unavailable');
         }
         if (ipAddress && indexPattern) {
-          const response = await fetch('/api/infra/ip_to_host', {
+          const response = await fetch<IpToHostResponse>('/api/infra/ip_to_host', {
             method: 'POST',
             body: JSON.stringify({
               ip: ipAddress,

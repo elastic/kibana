@@ -1,3 +1,11 @@
+@mixin gphSvgText() {
+  font-family: $euiFontFamily;
+  font-size: $euiSizeS;
+  line-height: $euiSizeM;
+  fill: $euiColorDarkShade;
+  color: $euiColorDarkShade;
+}
+
 .gphVisualization {
   flex: 1;
   display: flex;

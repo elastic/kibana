@@ -1,53 +1,62 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { useKibana as _useKibana, CodeEditor } from '../../../../src/plugins/kibana_react/public';
 import { AppServices } from './application';
 
 export { CodeEditor };
 
+export type {
+  Error,
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestConfig,
+  OnJsonEditorUpdateHandler,
+} from '../../../../src/plugins/es_ui_shared/public/';
 export {
   AuthorizationProvider,
-  Error,
   NotAuthorizedSection,
   SectionError,
   SectionLoading,
   sendRequest,
-  SendRequestConfig,
-  SendRequestResponse,
   useAuthorizationContext,
   useRequest,
-  UseRequestConfig,
   WithPrivileges,
   XJson,
   JsonEditor,
-  OnJsonEditorUpdateHandler,
   attemptToURIDecode,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
-export {
+export type {
   FormSchema,
-  FIELD_TYPES,
   FormConfig,
-  useForm,
-  Form,
-  getUseField,
   ValidationFuncArg,
   FormData,
-  UseField,
-  UseArray,
   ArrayItem,
   FormHook,
-  useFormContext,
-  FormDataProvider,
   OnFormUpdateArg,
   FieldConfig,
   FieldHook,
-  getFieldValidityAndErrorMessage,
   ValidationFunc,
   ValidationConfig,
+  FormOptions,
+  SerializerFunc,
+} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+export {
+  FIELD_TYPES,
+  useForm,
+  Form,
+  getUseField,
+  UseField,
+  UseArray,
+  useFormContext,
+  UseMultiFields,
+  FormDataProvider,
+  getFieldValidityAndErrorMessage,
   useFormData,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 

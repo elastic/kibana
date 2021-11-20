@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
 import {
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -32,14 +31,14 @@ import { NodeAvailableWarning } from '../../../components/node_available_warning
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
-import { ModelsList } from './components/models_management';
 import { JobMap } from '../job_map';
 import { usePageUrlState } from '../../../util/url_state';
 import { ListingPageUrlState } from '../../../../../common/types/common';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
+import { useRefreshAnalyticsList } from '../../common';
 
 export const getDefaultDFAListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -58,6 +57,8 @@ export const Page: FC = () => {
   );
 
   useRefreshInterval(setBlockRefresh);
+  const [isLoading, setIsLoading] = useState(false);
+  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
 
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
@@ -80,18 +81,6 @@ export const Page: FC = () => {
                     id="xpack.ml.dataframe.analyticsList.title"
                     defaultMessage="Data frame analytics"
                   />
-                  <span>&nbsp;</span>
-                  <EuiBetaBadge
-                    label={i18n.translate('xpack.ml.dataframe.analyticsList.betaBadgeLabel', {
-                      defaultMessage: 'Beta',
-                    })}
-                    tooltipContent={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.betaBadgeTooltipContent',
-                      {
-                        defaultMessage: `Data frame analytics are a beta feature. We'd love to hear your feedback.`,
-                      }
-                    )}
-                  />
                 </h1>
               </EuiTitle>
             </EuiPageHeaderSection>
@@ -112,7 +101,11 @@ export const Page: FC = () => {
           </EuiPageHeader>
 
           <NodeAvailableWarning />
-          <SavedObjectsWarning jobType="data-frame-analytics" />
+          <SavedObjectsWarning
+            jobType="data-frame-analytics"
+            onCloseFlyout={refresh}
+            forceRefresh={isLoading}
+          />
           <UpgradeWarning />
 
           <EuiPageContent>
@@ -131,7 +124,6 @@ export const Page: FC = () => {
                 updatePageState={setDfaPageState}
               />
             )}
-            {selectedTabId === 'models' && <ModelsList />}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

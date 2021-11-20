@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { History } from 'history';
@@ -11,12 +11,15 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { MountPoint } from '../types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+import { themeServiceMock } from '../theme/theme_service.mock';
+import { scopedHistoryMock } from './scoped_history.mock';
 import {
   ApplicationSetup,
   InternalApplicationStart,
   ApplicationStart,
   InternalApplicationSetup,
   PublicAppInfo,
+  AppMountParameters,
 } from './types';
 import { ApplicationServiceContract } from './test_types';
 
@@ -81,6 +84,19 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   };
 };
 
+const createAppMountParametersMock = (parts: Partial<AppMountParameters>) => {
+  const mock: AppMountParameters = {
+    element: document.createElement('div'),
+    history: scopedHistoryMock.create(),
+    appBasePath: '/app',
+    onAppLeave: jest.fn(),
+    setHeaderActionMenu: jest.fn(),
+    theme$: themeServiceMock.createTheme$(),
+    ...parts,
+  };
+  return mock;
+};
+
 const createMock = (): jest.Mocked<ApplicationServiceContract> => ({
   setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
   start: jest.fn().mockReturnValue(createInternalStartContractMock()),
@@ -93,4 +109,5 @@ export const applicationServiceMock = {
   createStartContract: createStartContractMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,
+  createAppMountParameters: createAppMountParametersMock,
 };

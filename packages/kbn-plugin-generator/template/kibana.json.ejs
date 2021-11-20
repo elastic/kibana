@@ -2,6 +2,11 @@
   "id": "<%= camelCase(name) %>",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
+  "owner": {
+    "name": "<%= ownerName %>",
+    "githubTeam": "<%= githubTeam %>"
+  },
+  "description": "<%= description %>",
   "server": <%= hasServer %>,
   "ui": <%= hasUi %>,
   "requiredPlugins": ["navigation"],

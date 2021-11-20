@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -10,7 +11,7 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
 } from '../../../../src/core/public';
-import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerts/public';
+import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerting/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -26,13 +27,13 @@ export type Setup = void;
 export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   developerExamples: DeveloperExamplesSetup;
 }
 
 export interface AlertingExamplePublicStartDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
@@ -41,7 +42,7 @@ export interface AlertingExamplePublicStartDeps {
 export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
   public setup(
     core: CoreSetup<AlertingExamplePublicStartDeps, Start>,
-    { alerts, triggersActionsUi, developerExamples }: AlertingExamplePublicSetupDeps
+    { alerting, triggersActionsUi, developerExamples }: AlertingExamplePublicSetupDeps
   ) {
     core.application.register({
       id: 'AlertingExample',
@@ -54,19 +55,19 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
       },
     });
 
-    triggersActionsUi.alertTypeRegistry.register(getAlwaysFiringAlertType());
-    triggersActionsUi.alertTypeRegistry.register(getPeopleInSpaceAlertType());
+    triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
+    triggersActionsUi.ruleTypeRegistry.register(getPeopleInSpaceAlertType());
 
-    registerNavigation(alerts);
+    registerNavigation(alerting);
 
     developerExamples.register({
       appId: 'AlertingExample',
       title: 'Alerting',
-      description: `This alerting example walks you through how to set up a new alert.`,
+      description: 'This alerting example walks you through how to set up a new rule.',
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerting',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

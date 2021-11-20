@@ -1,30 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiRange, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
+import type {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  HttpSetup,
+  CoreStart,
+} from 'kibana/public';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
-import { ValuesRangeInput } from './values_range_input';
+import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
-import { termsOperation } from '../index';
+import { termsOperation, LastValueIndexPatternColumn } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
+import { FrameDatasourceAPI } from '../../../../types';
+import { DateHistogramIndexPatternColumn } from '../date_histogram';
+
+const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('terms', () => {
@@ -46,8 +61,8 @@ describe('terms', () => {
             size: 3,
             orderDirection: 'asc',
           },
-          sourceField: 'category',
-        },
+          sourceField: 'source',
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'Count',
           dataType: 'number',
@@ -66,13 +81,15 @@ describe('terms', () => {
         { ...termsColumn, params: { ...termsColumn.params, otherBucket: true } },
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
             orderBy: ['_key'],
-            field: ['category'],
+            field: ['source'],
             size: [3],
             otherBucket: [true],
           }),
@@ -89,52 +106,15 @@ describe('terms', () => {
         },
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
             otherBucket: [false],
             missingBucket: [false],
-          }),
-        })
-      );
-    });
-
-    it('should include esaggs suffix from other columns in orderby argument', () => {
-      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
-      const esAggsFn = termsOperation.toEsAggsFn(
-        {
-          ...termsColumn,
-          params: {
-            ...termsColumn.params,
-            otherBucket: true,
-            orderBy: { type: 'column', columnId: 'abcde' },
-          },
-        },
-        'col1',
-        {} as IndexPattern,
-        {
-          ...layer,
-          columns: {
-            ...layer.columns,
-            abcde: {
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'percentile',
-              sourceField: 'abc',
-              label: '',
-              params: {
-                percentile: 12,
-              },
-            },
-          },
-        }
-      );
-      expect(esAggsFn).toEqual(
-        expect.objectContaining({
-          arguments: expect.objectContaining({
-            orderBy: ['abcde.12'],
           }),
         })
       );
@@ -378,7 +358,7 @@ describe('terms', () => {
               params: {
                 sortField: 'datefield',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -392,7 +372,7 @@ describe('terms', () => {
         },
       });
       expect(termsColumn.params).toEqual(
-        expect.objectContaining({ orderBy: { type: 'alphabetical' } })
+        expect.objectContaining({ orderBy: { type: 'alphabetical', fallback: true } })
       );
     });
 
@@ -493,7 +473,7 @@ describe('terms', () => {
               params: {
                 sortField: 'time',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -503,7 +483,7 @@ describe('terms', () => {
       );
       expect(updatedColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
         })
       );
     });
@@ -550,7 +530,7 @@ describe('terms', () => {
       );
       expect(updatedColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
         })
       );
     });
@@ -572,7 +552,7 @@ describe('terms', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -582,7 +562,7 @@ describe('terms', () => {
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
         })
       );
     });
@@ -604,7 +584,7 @@ describe('terms', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
             col1: {
               label: 'Value of timestamp',
               dataType: 'date',
@@ -616,7 +596,7 @@ describe('terms', () => {
                 interval: 'w',
               },
               sourceField: 'timestamp',
-            },
+            } as DateHistogramIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -626,7 +606,81 @@ describe('terms', () => {
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
+        })
+      );
+    });
+
+    it('should set order to ascending if falling back to alphabetical', () => {
+      const termsColumn = termsOperation.onOtherColumnChanged!(
+        {
+          columns: {
+            col2: {
+              label: 'Top value of category',
+              dataType: 'string',
+              isBucketed: true,
+
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'column', columnId: 'col1' },
+                size: 3,
+                orderDirection: 'desc',
+              },
+              sourceField: 'category',
+            } as TermsIndexPatternColumn,
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+        'col2',
+        'col1'
+      );
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({
+          orderDirection: 'asc',
+        })
+      );
+    });
+
+    it('should switch back to descending metric sorting if alphabetical sorting was applied as fallback', () => {
+      const initialColumn: TermsIndexPatternColumn = {
+        label: 'Top value of category',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical', fallback: true },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'category',
+      };
+      const updatedColumn = termsOperation.onOtherColumnChanged!(
+        {
+          indexPatternId: '',
+          columnOrder: [],
+          columns: {
+            col2: initialColumn,
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+        },
+        'col2',
+        'col1'
+      );
+
+      expect(updatedColumn.params).toEqual(
+        expect.objectContaining({
+          orderBy: { type: 'column', columnId: 'col1' },
+          orderDirection: 'desc',
         })
       );
     });
@@ -702,7 +756,7 @@ describe('terms', () => {
             {
               ...layer.columns.col1,
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as TermsIndexPatternColumn).params,
                 otherBucket: true,
               },
             } as TermsIndexPatternColumn
@@ -715,6 +769,34 @@ describe('terms', () => {
         .find(EuiSwitch);
 
       expect(select.prop('disabled')).toEqual(false);
+    });
+
+    it('should disable missing bucket setting if field is not a string', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={
+            {
+              ...layer.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+                otherBucket: true,
+              },
+            } as TermsIndexPatternColumn
+          }
+        />
+      );
+
+      const select = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select.prop('disabled')).toEqual(true);
     });
 
     it('should update state when clicking other bucket toggle', () => {
@@ -732,11 +814,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-other-bucket"]')
         .find(EuiSwitch)
-        .prop('onChange')!({
-        target: {
-          checked: true,
-        },
-      } as EuiSwitchEvent);
+        .simulate('change', {
+          target: {
+            checked: true,
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -790,11 +872,11 @@ describe('terms', () => {
       instance
         .find(EuiSelect)
         .find('[data-test-subj="indexPattern-terms-orderBy"]')
-        .prop('onChange')!({
-        target: {
-          value: 'column$$$col2',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'column$$$col2',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -808,6 +890,7 @@ describe('terms', () => {
                 type: 'column',
                 columnId: 'col2',
               },
+              orderDirection: 'desc',
             },
           },
         },
@@ -849,11 +932,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-orderDirection"]')
         .find(EuiSelect)
-        .prop('onChange')!({
-        target: {
-          value: 'desc',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'desc',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -882,7 +965,7 @@ describe('terms', () => {
         />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual('3');
+      expect(instance.find(EuiFieldNumber).prop('value')).toEqual('3');
     });
 
     it('should update state with the size value', () => {
@@ -898,7 +981,7 @@ describe('terms', () => {
       );
 
       act(() => {
-        instance.find(ValuesRangeInput).prop('onChange')!(7);
+        instance.find(ValuesInput).prop('onChange')!(7);
       });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -936,13 +1019,13 @@ describe('terms', () => {
             },
             scale: 'ordinal',
             sourceField: 'bytes',
-          },
+          } as TermsIndexPatternColumn,
         },
         columnOrder: [],
         indexPatternId: '',
       };
     });
-    it('returns undefined if sourceField exists in index pattern', () => {
+    it('returns undefined for no errors found', () => {
       expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual(undefined);
     });
     it('returns error message if the sourceField does not exist in index pattern', () => {
@@ -958,6 +1041,103 @@ describe('terms', () => {
       expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
         'Field notExisting was not found',
       ]);
+    });
+
+    describe('time shift error', () => {
+      beforeEach(() => {
+        layer = {
+          ...layer,
+          columnOrder: ['col1', 'col2', 'col3'],
+          columns: {
+            ...layer.columns,
+            col2: {
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'count',
+              label: 'Count',
+              sourceField: 'document',
+            },
+            col3: {
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'count',
+              label: 'Count',
+              sourceField: 'document',
+              timeShift: '1d',
+            },
+          },
+        };
+      });
+      it('returns error message if two time shifts are used together with terms', () => {
+        expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+          expect.objectContaining({
+            message:
+              'In a single layer, you are unable to combine metrics with different time shifts and dynamic top values. Use the same time shift value for all metrics, or use filters instead of top values.',
+          }),
+        ]);
+      });
+      it('returns fix action which calls field information endpoint and creates a pinned top values', async () => {
+        const errorMessage = termsOperation.getErrorMessage!(layer, 'col1', indexPattern)![0];
+        const fixAction = (
+          typeof errorMessage === 'object' ? errorMessage.fixAction!.newState : undefined
+        )!;
+        const coreMock = {
+          uiSettings: {
+            get: () => undefined,
+          },
+          http: {
+            post: jest.fn(() =>
+              Promise.resolve({
+                topValues: {
+                  buckets: [
+                    {
+                      key: 'A',
+                    },
+                    {
+                      key: 'B',
+                    },
+                  ],
+                },
+              })
+            ),
+          },
+        } as unknown as CoreStart;
+        const newLayer = await fixAction(
+          coreMock,
+          {
+            query: { language: 'kuery', query: 'a: b' },
+            filters: [],
+            dateRange: {
+              fromDate: '2020',
+              toDate: '2021',
+            },
+          } as unknown as FrameDatasourceAPI,
+          'first'
+        );
+        expect(newLayer.columns.col1).toEqual(
+          expect.objectContaining({
+            operationType: 'filters',
+            params: {
+              filters: [
+                {
+                  input: {
+                    language: 'kuery',
+                    query: 'bytes: "A"',
+                  },
+                  label: 'A',
+                },
+                {
+                  input: {
+                    language: 'kuery',
+                    query: 'bytes: "B"',
+                  },
+                  label: 'B',
+                },
+              ],
+            },
+          })
+        );
+      });
     });
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -49,7 +50,7 @@ export class AnomalyDetectorService {
     }
     const influencers = new Set<string>();
     for (const job of jobs) {
-      for (const influencer of job.analysis_config.influencers) {
+      for (const influencer of job.analysis_config.influencers || []) {
         influencers.add(influencer);
       }
     }

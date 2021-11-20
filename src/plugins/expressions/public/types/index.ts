@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { Adapters } from '../../../inspector/public';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
   ExpressionsService,
-  SerializableState,
   RenderMode,
+  IInterpreterRenderEvent,
 } from '../../common';
 import { ExpressionRenderHandlerParams } from '../render';
 
@@ -33,9 +35,9 @@ export interface ExpressionInterpreter {
 }
 
 export interface IExpressionLoaderParams {
-  searchContext?: SerializableState;
+  searchContext?: SerializableRecord;
   context?: ExpressionValue;
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
   // Enables debug tracking on each expression in the AST
   debug?: boolean;
   disableCaching?: boolean;
@@ -43,11 +45,25 @@ export interface IExpressionLoaderParams {
   customRenderers?: [];
   uiState?: unknown;
   inspectorAdapters?: Adapters;
+  interactive?: boolean;
   onRenderError?: RenderErrorHandlerFnType;
   searchSessionId?: string;
   renderMode?: RenderMode;
   syncColors?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
+  executionContext?: KibanaExecutionContext;
+
+  /**
+   * The flag to toggle on emitting partial results.
+   * By default, the partial results are disabled.
+   */
+  partial?: boolean;
+
+  /**
+   * Throttling of partial results in milliseconds. 0 is disabling the throttling.
+   * By default, it equals 1000.
+   */
+  throttle?: number;
 }
 
 export interface ExpressionRenderError extends Error {
@@ -60,3 +76,6 @@ export type RenderErrorHandlerFnType = (
   error: ExpressionRenderError,
   handlers: IInterpreterRenderHandlers
 ) => void;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ExpressionRendererEvent = IInterpreterRenderEvent<any>;

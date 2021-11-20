@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { compose, mapProps } from 'recompose';
@@ -24,15 +25,13 @@ interface Props {
 }
 
 export const ToolTipShortcut = compose<ComponentProps, Props>(
-  mapProps(
-    ({ namespace, action }: Props): ComponentProps => {
-      const shortcutMap = keymap[namespace][action];
-      if (typeof shortcutMap === 'string') {
-        return { shortcut: '' };
-      }
-
-      const shortcuts = shortcutMap[os] || [];
-      return { shortcut: getPrettyShortcut(shortcuts[0]) };
+  mapProps(({ namespace, action }: Props): ComponentProps => {
+    const shortcutMap = keymap[namespace][action];
+    if (typeof shortcutMap === 'string') {
+      return { shortcut: '' };
     }
-  )
+
+    const shortcuts = shortcutMap[os] || [];
+    return { shortcut: getPrettyShortcut(shortcuts[0]) };
+  })
 )(Component);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,6 +15,13 @@ import { SpaceScenarios } from '../scenarios';
 export default function navLinksTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
   const featuresService: FeaturesService = getService('features');
+
+  const uiCapabilitiesExceptions = [
+    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following 3 capabilities are disabled
+    'enterpriseSearch',
+    'appSearch',
+    'workplaceSearch',
+  ];
 
   describe('navLinks', () => {
     let navLinksBuilder: NavLinksBuilder;
@@ -29,7 +37,9 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except(...uiCapabilitiesExceptions)
+            );
             break;
           case 'nothing_space':
             expect(uiCapabilities.success).to.be(true);
@@ -39,7 +49,9 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'foo_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('foo'));
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except('foo', ...uiCapabilitiesExceptions)
+            );
             break;
           default:
             throw new UnreachableError(scenario);

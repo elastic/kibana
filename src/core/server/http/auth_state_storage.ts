@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
@@ -33,7 +33,7 @@ export enum AuthStatus {
  * @public
  */
 export type GetAuthState = <T = unknown>(
-  request: KibanaRequest | LegacyRequest
+  request: KibanaRequest
 ) => { status: AuthStatus; state: T };
 
 /**
@@ -41,7 +41,7 @@ export type GetAuthState = <T = unknown>(
  * @param request {@link KibanaRequest} - an incoming request.
  * @public
  */
-export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+export type IsAuthenticated = (request: KibanaRequest) => boolean;
 
 /** @internal */
 export class AuthStateStorage {

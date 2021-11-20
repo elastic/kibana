@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,16 +23,16 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
   return {
     id: 'envoyproxyMetrics',
     name: i18n.translate('home.tutorials.envoyproxyMetrics.nameTitle', {
-      defaultMessage: 'Envoy Proxy metrics',
+      defaultMessage: 'Envoy Proxy Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.envoyproxyMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from Envoy Proxy.',
+      defaultMessage: 'Collect metrics from Envoy Proxy with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.envoyproxyMetrics.longDescription', {
       defaultMessage:
-        'The `envoyproxy` Metricbeat module fetches monitoring metrics from Envoy Proxy. \
+        'The `envoyproxy` Metricbeat module fetches metrics from Envoy Proxy. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-envoyproxy.html',
@@ -49,5 +49,6 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['elastic_stack', 'datastore'],
   };
 }

@@ -1,18 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
 
-import {
-  // @ts-ignore
-  EuiCodeEditor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   json: object;
@@ -24,13 +21,21 @@ export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSpacer size="s" />
-          <EuiCodeEditor
-            value={JSON.stringify(json, null, 2)}
-            readOnly={true}
-            mode="json"
+          <EuiCodeBlock
+            aria-label={i18n.translate(
+              'xpack.transform.transformList.transformDetails.expandedRowJsonPane',
+              {
+                defaultMessage: 'JSON of transform configuration',
+              }
+            )}
+            fontSize="s"
+            language="json"
+            paddingSize="s"
             style={{ width: '100%' }}
-            theme="textmate"
-          />
+            isCopyable
+          >
+            value={JSON.stringify(json, null, 2)}
+          </EuiCodeBlock>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>
       </EuiFlexGroup>

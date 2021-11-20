@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import { i18n } from '@kbn/i18n';
 
 export const INSTRUCTION_VARIANT = {
   ESC: 'esc',
@@ -23,13 +25,15 @@ export const INSTRUCTION_VARIANT = {
   JAVA: 'java',
   DOTNET: 'dotnet',
   LINUX: 'linux',
+  PHP: 'php',
+  FLEET: 'fleet',
 };
 
 const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.ESC]: 'Elastic Cloud',
   [INSTRUCTION_VARIANT.OSX]: 'macOS',
-  [INSTRUCTION_VARIANT.DEB]: 'DEB',
-  [INSTRUCTION_VARIANT.RPM]: 'RPM',
+  [INSTRUCTION_VARIANT.DEB]: 'Linux DEB',
+  [INSTRUCTION_VARIANT.RPM]: 'Linux RPM',
   [INSTRUCTION_VARIANT.DOCKER]: 'Docker',
   [INSTRUCTION_VARIANT.WINDOWS]: 'Windows',
   [INSTRUCTION_VARIANT.NODE]: 'Node.js',
@@ -42,6 +46,10 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.JAVA]: 'Java',
   [INSTRUCTION_VARIANT.DOTNET]: '.NET',
   [INSTRUCTION_VARIANT.LINUX]: 'Linux',
+  [INSTRUCTION_VARIANT.PHP]: 'PHP',
+  [INSTRUCTION_VARIANT.FLEET]: i18n.translate('home.tutorial.instruction_variant.fleet', {
+    defaultMessage: 'Elastic APM in Fleet',
+  }),
 };
 
 /**

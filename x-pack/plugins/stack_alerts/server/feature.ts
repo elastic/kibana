@@ -1,27 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { KibanaFeatureConfig } from '../../../plugins/features/common';
 import { ID as IndexThreshold } from './alert_types/index_threshold/alert_type';
-import { GEO_THRESHOLD_ID as GeoThreshold } from './alert_types/geo_threshold/alert_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './alert_types/geo_containment/alert_type';
+import { ES_QUERY_ID as ElasticsearchQuery } from './alert_types/es_query/alert_type';
 import { STACK_ALERTS_FEATURE_ID } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { TRANSFORM_RULE_TYPE } from '../../transform/common';
 
-export const BUILT_IN_ALERTS_FEATURE = {
+const TransformHealth = TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH;
+
+export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   id: STACK_ALERTS_FEATURE_ID,
   name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
-    defaultMessage: 'Stack Alerts',
+    defaultMessage: 'Stack Rules',
   }),
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [IndexThreshold, GeoThreshold, GeoContainment],
+  alerting: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
   privileges: {
     all: {
       app: [],
@@ -30,8 +35,12 @@ export const BUILT_IN_ALERTS_FEATURE = {
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: {
-        all: [IndexThreshold, GeoThreshold, GeoContainment],
-        read: [],
+        rule: {
+          all: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+        },
+        alert: {
+          all: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+        },
       },
       savedObject: {
         all: [],
@@ -47,8 +56,12 @@ export const BUILT_IN_ALERTS_FEATURE = {
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: {
-        all: [],
-        read: [IndexThreshold, GeoThreshold, GeoContainment],
+        rule: {
+          read: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+        },
+        alert: {
+          read: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+        },
       },
       savedObject: {
         all: [],

@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 
 import {
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiFieldPassword,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -21,6 +21,7 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
 import { JiraActionConnector } from './types';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnector>> = ({
   action,
@@ -31,13 +32,17 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
 }) => {
   const { apiUrl, projectKey } = action.config;
 
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
+  const isApiUrlInvalid: boolean =
+    apiUrl !== undefined && errors.apiUrl !== undefined && errors.apiUrl.length > 0;
 
   const { email, apiToken } = action.secrets;
 
-  const isProjectKeyInvalid: boolean = errors.projectKey.length > 0 && projectKey !== undefined;
-  const isEmailInvalid: boolean = errors.email.length > 0 && email !== undefined;
-  const isApiTokenInvalid: boolean = errors.apiToken.length > 0 && apiToken !== undefined;
+  const isProjectKeyInvalid: boolean =
+    projectKey !== undefined && errors.projectKey !== undefined && errors.projectKey.length > 0;
+  const isEmailInvalid: boolean =
+    email !== undefined && errors.email !== undefined && errors.email.length > 0;
+  const isApiTokenInvalid: boolean =
+    apiToken !== undefined && errors.apiToken !== undefined && errors.apiToken.length > 0;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
@@ -119,7 +124,14 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
+          <EuiFormRow fullWidth>
+            {getEncryptedFieldNotifyLabel(
+              !action.id,
+              2,
+              action.isMissingSecrets ?? false,
+              i18n.JIRA_REENTER_VALUES_LABEL
+            )}
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -171,24 +183,6 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
     </>
   );
 };
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <EuiText size="s" data-test-subj="rememberValuesMessage">
-        {i18n.JIRA_REMEMBER_VALUES_LABEL}
-      </EuiText>
-    );
-  }
-  return (
-    <EuiCallOut
-      size="s"
-      iconType="iInCircle"
-      title={i18n.JIRA_REENTER_VALUES_LABEL}
-      data-test-subj="reenterValuesMessage"
-    />
-  );
-}
 
 // eslint-disable-next-line import/no-default-export
 export { JiraConnectorFields as default };

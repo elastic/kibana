@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -20,10 +21,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
    */
   const selectTagsInFilter = async (...tagNames: string[]) => {
     // open the filter dropdown
-    // the first class selector before the id is of course useless. Only here to help cleaning that once we got
-    // testSubjects in EUI filters.
+    // This CSS selector should be cleaned up once we have testSubjects in EUI filters.
     const filterButton = await find.byCssSelector(
-      '.euiFilterGroup #field_value_selection_1 .euiFilterButton'
+      '.euiFilterGroup > *:last-child .euiFilterButton'
     );
     await filterButton.click();
     // select the tags
@@ -36,12 +36,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await testSubjects.click('savedObjectSearchBar');
   };
 
-  describe('saved objects management integration', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/115320
+  describe.skip('saved objects management integration', () => {
     before(async () => {
-      await esArchiver.load('so_management');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management'
+      );
     });
     after(async () => {
-      await esArchiver.unload('so_management');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management'
+      );
     });
 
     describe('navigating from the tag section', () => {

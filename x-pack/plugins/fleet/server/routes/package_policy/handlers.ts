@@ -1,20 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { TypeOf } from '@kbn/config-schema';
+
+import type { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
-import { RequestHandler, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import type { RequestHandler } from '../../../../../../src/core/server';
 import { appContextService, packagePolicyService } from '../../services';
-import {
+import type {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
+  UpgradePackagePoliciesRequestSchema,
+  DryRunPackagePoliciesRequestSchema,
 } from '../../types';
-import { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
+import type {
+  CreatePackagePolicyResponse,
+  DeletePackagePoliciesResponse,
+  UpgradePackagePolicyDryRunResponse,
+  UpgradePackagePolicyResponse,
+} from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const getPackagePoliciesHandler: RequestHandler<
@@ -75,27 +86,21 @@ export const createPackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-  let newData = { ...request.body };
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const { force, ...newPolicy } = request.body;
   try {
-    newData = await packagePolicyService.runExternalCallbacks(
+    const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
-      newData,
+      newPolicy,
       context,
       request
     );
 
     // Create package policy
-    const packagePolicy = await packagePolicyService.create(
-      soClient,
-      esClient,
-      callCluster,
-      newData,
-      {
-        user,
-      }
-    );
+    const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
+      user,
+      force,
+    });
     const body: CreatePackagePolicyResponse = { item: packagePolicy };
     return response.ok({
       body,
@@ -118,7 +123,7 @@ export const updatePackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
@@ -142,7 +147,8 @@ export const updatePackagePolicyHandler: RequestHandler<
       esClient,
       request.params.packagePolicyId,
       { ...newData, package: pkg, inputs },
-      { user }
+      { user },
+      packagePolicy.package?.version
     );
     return response.ok({
       body: { item: updatedPackagePolicy },
@@ -159,14 +165,90 @@ export const deletePackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
     const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
       soClient,
       esClient,
       request.body.packagePolicyIds,
+      { user, force: request.body.force }
+    );
+    try {
+      await packagePolicyService.runExternalCallbacks(
+        'postPackagePolicyDelete',
+        body,
+        context,
+        request
+      );
+    } catch (error) {
+      const logger = appContextService.getLogger();
+      logger.error(`An error occurred executing external callback: ${error}`);
+      logger.error(error);
+    }
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const upgradePackagePolicyHandler: RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  try {
+    const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
+      soClient,
+      esClient,
+      request.body.packagePolicyIds,
       { user }
     );
+
+    const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+
+    if (firstFatalError) {
+      return response.customError({
+        statusCode: firstFatalError.statusCode!,
+        body: { message: firstFatalError.body!.message },
+      });
+    }
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const dryRunUpgradePackagePolicyHandler: RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof DryRunPackagePoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const body: UpgradePackagePolicyDryRunResponse = [];
+    const { packagePolicyIds, packageVersion } = request.body;
+
+    for (const id of packagePolicyIds) {
+      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id, packageVersion);
+      body.push(result);
+    }
+
+    const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+
+    if (firstFatalError) {
+      return response.customError({
+        statusCode: firstFatalError.statusCode!,
+        body: { message: firstFatalError.body!.message },
+      });
+    }
+
     return response.ok({
       body,
     });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CiStatsReporter } from '@kbn/dev-utils';
@@ -36,9 +37,7 @@ export async function testRunner({ getService }: FtrProviderContext) {
 
   log.debug('Saved Objects field count metrics starting');
 
-  const {
-    body: { fields },
-  } = await es.fieldCaps({
+  const { fields } = await es.fieldCaps({
     index: '.kibana',
     fields: '*',
   });

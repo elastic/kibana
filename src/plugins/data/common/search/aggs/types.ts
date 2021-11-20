@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Assign } from '@kbn/utility-types';
 import { DatatableColumn } from 'src/plugins/expressions';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { TimeRange } from '../../query';
+import { IndexPattern } from '../..';
 import {
   aggAvg,
   aggBucketAvg,
@@ -41,6 +40,7 @@ import {
   AggParamsBucketMax,
   AggParamsBucketMin,
   AggParamsBucketSum,
+  AggParamsFilteredMetric,
   AggParamsCardinality,
   AggParamsCumulativeSum,
   AggParamsDateHistogram,
@@ -56,6 +56,7 @@ import {
   AggParamsIpRange,
   AggParamsMax,
   AggParamsMedian,
+  AggParamsSinglePercentile,
   AggParamsMin,
   AggParamsMovingAvg,
   AggParamsPercentileRanks,
@@ -84,17 +85,18 @@ import {
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
   AggConfig,
+  aggFilteredMetric,
+  aggSinglePercentile,
 } from './';
 
-export { IAggConfig, AggConfigSerialized } from './agg_config';
-export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
-export { IAggType } from './agg_type';
-export { AggParam, AggParamOption } from './agg_params';
-export { IFieldParamType } from './param_types';
-export { IMetricAggType } from './metrics/metric_agg_type';
-export { DateRangeKey } from './buckets/lib/date_range';
-export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp } from './param_types/optioned';
+export type { IAggConfig, AggConfigSerialized } from './agg_config';
+export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
+export type { IAggType } from './agg_type';
+export type { AggParam, AggParamOption } from './agg_params';
+export type { IFieldParamType } from './param_types';
+export type { IMetricAggType } from './metrics/metric_agg_type';
+export type { IpRangeKey } from './buckets/lib/ip_range';
+export type { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */
 export interface AggsCommonSetup {
@@ -104,19 +106,6 @@ export interface AggsCommonSetup {
 /** @internal */
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
-  /**
-   * Helper function returning meta data about use date intervals for a data table column.
-   * If the column is not a column created by a date histogram aggregation of the esaggs data source,
-   * this function will return undefined.
-   *
-   * Otherwise, it will return the following attributes in an object:
-   * * `timeZone` time zone used to create the buckets (important e.g. for DST),
-   * * `timeRange` total time range of the fetch data (to infer partial buckets at the beginning and end of the data)
-   * * `interval` Interval used on elasticsearch (`auto` resolved to the actual interval)
-   */
-  getDateMetaByDatatableColumn: (
-    column: DatatableColumn
-  ) => Promise<undefined | { timeZone: string; timeRange?: TimeRange; interval: string }>;
   datatableUtilities: {
     getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>;
     getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>;
@@ -142,6 +131,7 @@ export type AggsStart = Assign<AggsCommonStart, { types: AggTypesRegistryStart }
 export interface BaseAggParams {
   json?: string;
   customLabel?: string;
+  timeShift?: string;
 }
 
 /** @internal */
@@ -151,9 +141,8 @@ export interface AggExpressionType {
 }
 
 /** @internal */
-export type AggExpressionFunctionArgs<
-  Name extends keyof AggParamsMapping
-> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+export type AggExpressionFunctionArgs<Name extends keyof AggParamsMapping> =
+  AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
 
 /**
  * A global list of the param interfaces for each agg type.
@@ -181,6 +170,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.GEO_CENTROID]: AggParamsGeoCentroid;
   [METRIC_TYPES.MAX]: AggParamsMax;
   [METRIC_TYPES.MEDIAN]: AggParamsMedian;
+  [METRIC_TYPES.SINGLE_PERCENTILE]: AggParamsSinglePercentile;
   [METRIC_TYPES.MIN]: AggParamsMin;
   [METRIC_TYPES.STD_DEV]: AggParamsStdDeviation;
   [METRIC_TYPES.SUM]: AggParamsSum;
@@ -188,6 +178,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.MAX_BUCKET]: AggParamsBucketMax;
   [METRIC_TYPES.MIN_BUCKET]: AggParamsBucketMin;
   [METRIC_TYPES.SUM_BUCKET]: AggParamsBucketSum;
+  [METRIC_TYPES.FILTERED_METRIC]: AggParamsFilteredMetric;
   [METRIC_TYPES.CUMULATIVE_SUM]: AggParamsCumulativeSum;
   [METRIC_TYPES.DERIVATIVE]: AggParamsDerivative;
   [METRIC_TYPES.MOVING_FN]: AggParamsMovingAvg;
@@ -217,6 +208,7 @@ export interface AggFunctionsMapping {
   aggBucketMax: ReturnType<typeof aggBucketMax>;
   aggBucketMin: ReturnType<typeof aggBucketMin>;
   aggBucketSum: ReturnType<typeof aggBucketSum>;
+  aggFilteredMetric: ReturnType<typeof aggFilteredMetric>;
   aggCardinality: ReturnType<typeof aggCardinality>;
   aggCount: ReturnType<typeof aggCount>;
   aggCumulativeSum: ReturnType<typeof aggCumulativeSum>;
@@ -225,6 +217,7 @@ export interface AggFunctionsMapping {
   aggGeoCentroid: ReturnType<typeof aggGeoCentroid>;
   aggMax: ReturnType<typeof aggMax>;
   aggMedian: ReturnType<typeof aggMedian>;
+  aggSinglePercentile: ReturnType<typeof aggSinglePercentile>;
   aggMin: ReturnType<typeof aggMin>;
   aggMovingAvg: ReturnType<typeof aggMovingAvg>;
   aggPercentileRanks: ReturnType<typeof aggPercentileRanks>;

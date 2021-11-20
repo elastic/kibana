@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -22,10 +23,10 @@ const getColor = (
   isOpen: boolean,
   isEnabled?: boolean,
   isInvalid?: boolean
-): 'primary' | 'secondary' | 'subdued' | 'danger' => {
+): 'primary' | 'success' | 'subdued' | 'danger' => {
   if (isInvalid === true) return 'danger';
   if (isEnabled === false) return 'subdued';
-  return isOpen ? 'primary' : 'secondary';
+  return isOpen ? 'primary' : 'success';
 };
 
 export const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({

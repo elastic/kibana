@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LayerConfig } from './types';
-import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
-import { IFieldFormat } from '../../../../../src/plugins/data/public';
+import { FormatFactory } from '../../common';
+import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
+import { Datatable } from '../../../../../src/plugins/expressions/public';
+import type {
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '../../../../../src/plugins/field_formats/common';
 
 interface FormattedMetric {
   layer: string;
@@ -14,7 +19,7 @@ interface FormattedMetric {
   fieldFormat: SerializedFieldFormat;
 }
 
-type GroupsConfiguration = Array<{
+export type GroupsConfiguration = Array<{
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
@@ -28,16 +33,17 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function getAxesConfiguration(
-  layers: LayerConfig[],
-  shouldRotate: boolean,
-  tables?: Record<string, Datatable>,
-  formatFactory?: (mapping: SerializedFieldFormat) => IFieldFormat
-): GroupsConfiguration {
-  const series: { auto: FormattedMetric[]; left: FormattedMetric[]; right: FormattedMetric[] } = {
+export function groupAxesByType(layers: XYLayerConfig[], tables?: Record<string, Datatable>) {
+  const series: {
+    auto: FormattedMetric[];
+    left: FormattedMetric[];
+    right: FormattedMetric[];
+    bottom: FormattedMetric[];
+  } = {
     auto: [],
     left: [],
     right: [],
+    bottom: [],
   };
 
   layers?.forEach((layer) => {
@@ -87,6 +93,16 @@ export function getAxesConfiguration(
       series.right.push(currentSeries);
     }
   });
+  return series;
+}
+
+export function getAxesConfiguration(
+  layers: XYLayerConfig[],
+  shouldRotate: boolean,
+  tables?: Record<string, Datatable>,
+  formatFactory?: FormatFactory
+): GroupsConfiguration {
+  const series = groupAxesByType(layers, tables);
 
   const axisGroups: GroupsConfiguration = [];
 
@@ -109,4 +125,18 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
+}
+
+export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
+  const inclusiveZeroError =
+    extent &&
+    hasBarOrArea &&
+    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
+      (extent.upperBound !== undefined && extent.upperBound) < 0);
+  const boundaryError =
+    extent &&
+    extent.lowerBound !== undefined &&
+    extent.upperBound !== undefined &&
+    extent.upperBound <= extent.lowerBound;
+  return { inclusiveZeroError, boundaryError };
 }

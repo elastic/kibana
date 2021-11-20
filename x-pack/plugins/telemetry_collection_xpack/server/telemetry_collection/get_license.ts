@@ -1,30 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 
-// From https://www.elastic.co/guide/en/elasticsearch/reference/current/get-license.html
-export interface ESLicense {
-  status: string;
-  uid: string;
-  type: string;
-  issue_date: string;
-  issue_date_in_millis: number;
-  expiry_date: string;
-  expirty_date_in_millis: number;
-  max_nodes: number;
-  issued_to: string;
-  issuer: string;
-  start_date_in_millis: number;
-}
+export type ESLicense = estypes.LicenseGetLicenseInformation;
 
 let cachedLicense: ESLicense | undefined;
 
 async function fetchLicense(esClient: ElasticsearchClient, local: boolean) {
-  const { body } = await esClient.license.get<{ license: ESLicense }>({
+  const { body } = await esClient.license.get({
     local,
     // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
     accept_enterprise: true,

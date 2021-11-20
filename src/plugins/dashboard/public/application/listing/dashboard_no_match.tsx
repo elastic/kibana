@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
+
 import { useKibana, toMountPoint } from '../../services/kibana_react';
-import { DashboardAppServices } from '../types';
+import { DashboardAppServices } from '../../types';
 import { DashboardConstants } from '../..';
 
 let bannerId: string | undefined;
@@ -23,9 +23,8 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
   useEffect(() => {
     services.restorePreviousUrl();
-
     const { navigated } = services.urlForwarding.navigateToLegacyKibanaUrl(
-      history.location.pathname
+      history.location.pathname + history.location.search
     );
 
     if (!navigated) {

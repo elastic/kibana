@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TaskManagerConfig } from '../config';
 import { of, Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs/operators';
 import { createMonitoringStatsStream, AggregatedStat } from './monitoring_stats_stream';
-import { JsonValue } from 'src/plugins/kibana_utils/common';
+import { JsonValue } from '@kbn/utility-types';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -16,9 +17,7 @@ beforeEach(() => {
 
 describe('createMonitoringStatsStream', () => {
   const configuration: TaskManagerConfig = {
-    enabled: true,
     max_workers: 10,
-    index: 'foo',
     max_attempts: 9,
     poll_interval: 6000000,
     version_conflict_threshold: 80,
@@ -26,6 +25,10 @@ describe('createMonitoringStatsStream', () => {
     max_poll_inactivity_cycles: 10,
     request_capacity: 1000,
     monitored_aggregated_stats_refresh_rate: 5000,
+    monitored_stats_health_verbose_log: {
+      enabled: false,
+      warn_delayed_task_start_in_seconds: 60,
+    },
     monitored_stats_running_average_window: 50,
     monitored_task_execution_thresholds: {
       default: {
@@ -33,6 +36,13 @@ describe('createMonitoringStatsStream', () => {
         warn_threshold: 80,
       },
       custom: {},
+    },
+    ephemeral_tasks: {
+      enabled: true,
+      request_capacity: 10,
+    },
+    unsafe: {
+      exclude_task_types: [],
     },
   };
 

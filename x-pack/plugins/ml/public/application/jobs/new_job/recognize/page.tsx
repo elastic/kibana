@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, Fragment, useEffect } from 'react';
@@ -22,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { merge } from 'lodash';
 import moment from 'moment';
-import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
+import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';
 import {
@@ -40,8 +41,11 @@ import { checkForSavedObjects } from './resolvers';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
 import { TimeRange } from '../common/components';
 import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { TIME_FORMAT } from '../../../../../common/constants/time_format';
+import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
+import { isPopulatedObject } from '../../../../../common/util/object_utils';
+import { RuntimeMappings } from '../../../../../common/types/fields';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -73,7 +77,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const {
     services: { notifications },
   } = useMlKibana();
-  const urlGenerator = useMlUrlGenerator();
+  const locator = useMlLocator();
 
   // #region State
   const [jobPrefix, setJobPrefix] = useState<string>('');
@@ -83,11 +87,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
   const [resultsUrl, setResultsUrl] = useState<string>('');
   const [existingGroups, setExistingGroups] = useState(existingGroupIds);
+  const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
   // #endregion
 
   const {
     currentSavedSearch: savedSearch,
-    currentIndexPattern: indexPattern,
+    currentDataView: dataView,
     combinedQuery,
   } = useMlContext();
   const pageTitle =
@@ -96,9 +101,9 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           defaultMessage: 'saved search {savedSearchTitle}',
           values: { savedSearchTitle: savedSearch.attributes.title as string },
         })
-      : i18n.translate('xpack.ml.newJob.recognize.indexPatternPageTitle', {
-          defaultMessage: 'index pattern {indexPatternTitle}',
-          values: { indexPatternTitle: indexPattern.title },
+      : i18n.translate('xpack.ml.newJob.recognize.dataViewPageTitle', {
+          defaultMessage: 'data view {dataViewName}',
+          values: { dataViewName: dataView.title },
         });
   const displayQueryWarning = savedSearch !== null;
   const tempQuery = savedSearch === null ? undefined : combinedQuery;
@@ -130,10 +135,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     timeRange: TimeRange
   ): Promise<TimeRange> => {
     if (useFullIndexData) {
+      const runtimeMappings = dataView.getComputedFields().runtimeFields as RuntimeMappings;
       const { start, end } = await ml.getTimeFieldRange({
-        index: indexPattern.title,
-        timeFieldName: indexPattern.timeFieldName,
+        index: dataView.title,
+        timeFieldName: dataView.timeFieldName,
         query: combinedQuery,
+        ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
       });
       return {
         start: start.epoch,
@@ -171,7 +178,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         moduleId,
         prefix: resultJobPrefix,
         query: tempQuery,
-        indexPatternName: indexPattern.title,
+        indexPatternName: dataView.title,
         useDedicatedIndex,
         startDatafeed: startDatafeedAfterSave,
         ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
@@ -190,22 +197,34 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       );
       setKibanaObjects(merge(kibanaObjects, kibanaResponse));
 
-      const url = await urlGenerator.createUrl({
-        page: ML_PAGES.ANOMALY_EXPLORER,
-        pageState: {
-          jobIds: jobsResponse.filter(({ success }) => success).map(({ id }) => id),
-          timeRange: {
-            from: moment(resultTimeRange.start).format(TIME_FORMAT),
-            to: moment(resultTimeRange.end).format(TIME_FORMAT),
-            mode: 'absolute',
+      if (locator) {
+        const url = await locator.getUrl({
+          page: ML_PAGES.ANOMALY_EXPLORER,
+          pageState: {
+            jobIds: jobsResponse.filter(({ success }) => success).map(({ id }) => id),
+            timeRange: {
+              from: moment(resultTimeRange.start).format(TIME_FORMAT),
+              to: moment(resultTimeRange.end).format(TIME_FORMAT),
+              mode: 'absolute',
+            },
           },
-        },
-      });
+        });
+        setResultsUrl(url);
+      }
 
-      setResultsUrl(url);
-      const failedJobsCount = jobsResponse.reduce((count, { success }) => {
-        return success ? count : count + 1;
-      }, 0);
+      const failedJobsCount = jobsResponse.reduce(
+        (count, { success }) => (success ? count : count + 1),
+        0
+      );
+
+      const lazyJobsCount = datafeedsResponse.reduce(
+        (count, { awaitingMlNodeAllocation }) =>
+          awaitingMlNodeAllocation === true ? count + 1 : count,
+        0
+      );
+
+      setJobsAwaitingNodeCount(lazyJobsCount);
+
       setSaveState(
         failedJobsCount === 0
           ? SAVE_STATE.SAVED
@@ -289,6 +308,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             <EuiSpacer size="l" />
           </>
         )}
+
+        {jobsAwaitingNodeCount > 0 && <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />}
 
         <EuiFlexGroup wrap={true} gutterSize="m">
           <EuiFlexItem grow={1}>

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -51,12 +51,13 @@ const levelSchema = schema.oneOf(
  */
 export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  context: schema.string(),
+  name: schema.string(),
   level: levelSchema,
 });
 
 /** @public */
 export type LoggerConfigType = TypeOf<typeof loggerSchema>;
+
 export const config = {
   path: 'logging',
   schema: schema.object({
@@ -66,26 +67,17 @@ export const config = {
     loggers: schema.arrayOf(loggerSchema, {
       defaultValue: [],
     }),
-    root: schema.object(
-      {
-        appenders: schema.arrayOf(schema.string(), {
-          defaultValue: [DEFAULT_APPENDER_NAME],
-          minSize: 1,
-        }),
-        level: levelSchema,
-      },
-      {
-        validate(rawConfig) {
-          if (!rawConfig.appenders.includes(DEFAULT_APPENDER_NAME)) {
-            return `"${DEFAULT_APPENDER_NAME}" appender required for migration period till the next major release`;
-          }
-        },
-      }
-    ),
+    root: schema.object({
+      appenders: schema.arrayOf(schema.string(), {
+        defaultValue: [DEFAULT_APPENDER_NAME],
+        minSize: 1,
+      }),
+      level: levelSchema,
+    }),
   }),
 };
 
-export type LoggingConfigType = Omit<TypeOf<typeof config.schema>, 'appenders'> & {
+export type LoggingConfigType = Pick<TypeOf<typeof config.schema>, 'loggers' | 'root'> & {
   appenders: Map<string, AppenderConfigType>;
 };
 
@@ -105,6 +97,7 @@ export const loggerContextConfigSchema = schema.object({
 
 /** @public */
 export type LoggerContextConfigType = TypeOf<typeof loggerContextConfigSchema>;
+
 /** @public */
 export interface LoggerContextConfigInput {
   // config-schema knows how to handle either Maps or Records
@@ -148,15 +141,15 @@ export class LoggingConfig {
     [
       'default',
       {
-        kind: 'console',
-        layout: { kind: 'pattern', highlight: true },
+        type: 'console',
+        layout: { type: 'pattern', highlight: true },
       } as AppenderConfigType,
     ],
     [
       'console',
       {
-        kind: 'console',
-        layout: { kind: 'pattern', highlight: true },
+        type: 'console',
+        layout: { type: 'pattern', highlight: true },
       } as AppenderConfigType,
     ],
   ]);
@@ -182,8 +175,8 @@ export class LoggingConfig {
   public extend(contextConfig: LoggerContextConfigType) {
     // Use a Map to de-dupe any loggers for the same context. contextConfig overrides existing config.
     const mergedLoggers = new Map<string, LoggerConfigType>([
-      ...this.configType.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
-      ...contextConfig.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
+      ...this.configType.loggers.map((l) => [l.name, l] as [string, LoggerConfigType]),
+      ...contextConfig.loggers.map((l) => [l.name, l] as [string, LoggerConfigType]),
     ]);
 
     const mergedConfig: LoggingConfigType = {
@@ -204,13 +197,10 @@ export class LoggingConfig {
   private fillLoggersConfig(loggingConfig: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
-    const loggers = [
-      { context: ROOT_CONTEXT_NAME, ...loggingConfig.root },
-      ...loggingConfig.loggers,
-    ];
+    const loggers = [{ name: ROOT_CONTEXT_NAME, ...loggingConfig.root }, ...loggingConfig.loggers];
 
     const loggerConfigByContext = new Map(
-      loggers.map((loggerConfig) => toTuple(loggerConfig.context, loggerConfig))
+      loggers.map((loggerConfig) => toTuple(loggerConfig.name, loggerConfig))
     );
 
     for (const [loggerContext, loggerConfig] of loggerConfigByContext) {
@@ -247,7 +237,7 @@ function getAppenders(
   loggerConfig: LoggerConfigType,
   loggerConfigByContext: Map<string, LoggerConfigType>
 ) {
-  let currentContext = loggerConfig.context;
+  let currentContext = loggerConfig.name;
   let appenders = loggerConfig.appenders;
 
   while (appenders.length === 0) {

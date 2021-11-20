@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -17,7 +18,13 @@ import { JobIcon } from '../../../../components/job_message_icon';
 import { JobSpacesList } from '../../../../components/job_spaces_list';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
@@ -95,9 +102,9 @@ export class JobsList extends Component {
   }
 
   render() {
-    const { loading, isManagementTable, spacesEnabled } = this.props;
+    const { loading, isManagementTable, spacesApi } = this.props;
     const selectionControls = {
-      selectable: (job) => job.deleting !== true,
+      selectable: (job) => job.blocked === undefined,
       selectableMessage: (selectable, rowItem) =>
         selectable === false
           ? i18n.translate('xpack.ml.jobsList.cannotSelectRowForJobMessage', {
@@ -115,8 +122,8 @@ export class JobsList extends Component {
       onSelectionChange: this.props.selectJobChange,
     };
     // Adding 'width' props to columns for use in the Kibana management jobs list table
-    // The version of the table used in ML > Job Managment depends on many EUI class overrides that set the width explicitly.
-    // The ML > Job Managment table won't change as the overwritten class styles take precedence, though these values may need to
+    // The version of the table used in ML > Job Management depends on many EUI class overrides that set the width explicitly.
+    // The ML > Job Management table won't change as the overwritten class styles take precedence, though these values may need to
     // be updated if we move to always using props for width.
     const columns = [
       {
@@ -133,7 +140,7 @@ export class JobsList extends Component {
         render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
-            isDisabled={item.deleting === true}
+            isDisabled={item.blocked !== undefined}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
             aria-label={
               this.state.itemIdToExpandedRowMap[item.id]
@@ -160,7 +167,7 @@ export class JobsList extends Component {
         }),
         sortable: true,
         truncateText: false,
-        width: '20%',
+        width: '15%',
         scope: 'row',
         render: isManagementTable ? (id) => this.getJobIdLink(id) : undefined,
       },
@@ -171,12 +178,44 @@ export class JobsList extends Component {
             <p>
               <FormattedMessage
                 id="xpack.ml.jobsList.auditMessageColumn.screenReaderDescription"
-                defaultMessage="This column display icons when there are errors or warnings for the job in the past 24 hours"
+                defaultMessage="This column displays icons when there are errors or warnings for the job in the past 24 hours"
               />
             </p>
           </EuiScreenReaderOnly>
         ),
         render: (item) => <JobIcon message={item} showTooltip={true} />,
+      },
+      {
+        field: 'alertingRules',
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.alertingRules.screenReaderDescription"
+                defaultMessage="This column displays icons when there are alert rules associated with a job"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
+        width: '30px',
+        render: (item) => {
+          return Array.isArray(item) ? (
+            <EuiToolTip
+              position="bottom"
+              content={
+                <FormattedMessage
+                  id="xpack.ml.jobsList.alertingRules.tooltipContent"
+                  defaultMessage="Job has {rulesCount} associated alert {rulesCount, plural, one { rule} other { rules}}"
+                  values={{ rulesCount: item.length }}
+                />
+              }
+            >
+              <EuiIcon type="bell" />
+            </EuiToolTip>
+          ) : (
+            <span />
+          );
+        },
       },
       {
         name: i18n.translate('xpack.ml.jobsList.descriptionLabel', {
@@ -238,11 +277,12 @@ export class JobsList extends Component {
           defaultMessage: 'Actions',
         }),
         render: (item) => <ResultLinks jobs={[item]} />,
+        width: '8%',
       },
     ];
 
     if (isManagementTable === true) {
-      if (spacesEnabled === true) {
+      if (spacesApi) {
         // insert before last column
         columns.splice(columns.length - 1, 0, {
           name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
@@ -250,12 +290,14 @@ export class JobsList extends Component {
           }),
           render: (item) => (
             <JobSpacesList
+              spacesApi={spacesApi}
               spaceIds={item.spaceIds}
               jobId={item.id}
               jobType="anomaly-detector"
               refresh={this.props.refreshJobs}
             />
           ),
+          'data-test-subj': 'mlJobListColumnSpaces',
         });
       }
       // Remove actions if Ml not enabled in current space
@@ -296,9 +338,12 @@ export class JobsList extends Component {
         actions: actionsMenuContent(
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
+          this.props.showResetJobModal,
           this.props.showStartDatafeedModal,
-          this.props.refreshJobs
+          this.props.refreshJobs,
+          this.props.showCreateAlertFlyout
         ),
+        width: '40px',
       });
     }
 
@@ -369,6 +414,7 @@ JobsList.propTypes = {
   showEditJobFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
+  showCreateAlertFlyout: PropTypes.func,
   refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { constant, get, set } from 'lodash';
@@ -73,7 +74,7 @@ export function getAlertWithInvalidatedFields(
   alert: Alert,
   paramsErrors: IErrorObject,
   baseAlertErrors: IErrorObject,
-  actionsErrors: Record<string, IErrorObject>
+  actionsErrors: IErrorObject[]
 ) {
   Object.keys(paramsErrors).forEach((errorKey) => {
     if (paramsErrors[errorKey].length >= 1 && get(alert.params, errorKey) === undefined) {
@@ -85,17 +86,15 @@ export function getAlertWithInvalidatedFields(
       set(alert, errorKey, null);
     }
   });
-  Object.keys(actionsErrors).forEach((actionId) => {
-    const actionToValidate = alert.actions.find((action) => action.id === actionId);
-    Object.keys(actionsErrors[actionId]).forEach((errorKey) => {
-      if (
-        actionToValidate &&
-        actionsErrors[actionId][errorKey].length >= 1 &&
-        get(actionToValidate!.params, errorKey) === undefined
-      ) {
-        set(actionToValidate!.params, errorKey, null);
-      }
-    });
+  actionsErrors.forEach((error: IErrorObject, index: number) => {
+    const actionToValidate = alert.actions.length > index ? alert.actions[index] : null;
+    if (actionToValidate) {
+      Object.keys(error).forEach((errorKey) => {
+        if (error[errorKey].length >= 1 && get(actionToValidate!.params, errorKey) === undefined) {
+          set(actionToValidate!.params, errorKey, null);
+        }
+      });
+    }
   });
   return alert;
 }

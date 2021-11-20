@@ -1,23 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
 import { cloneDeep } from 'lodash';
-import { SavedObjectsClientContract } from 'kibana/server';
-import {
-  Field,
-  Aggregation,
-  FieldId,
-  NewJobCaps,
-  METRIC_AGG_TYPE,
-} from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/server';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
-import { aggregations, mlOnlyAggregations } from './aggregations';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IScopedClusterClient } from 'kibana/server';
+import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
+import type { DataViewsService } from '../../../../../../../src/plugins/data_views/common';
+import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
+import { rollupServiceProvider } from './rollup';
+import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
 
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
@@ -42,27 +38,27 @@ export function fieldServiceProvider(
   indexPattern: string,
   isRollup: boolean,
   client: IScopedClusterClient,
-  savedObjectsClient: SavedObjectsClientContract
+  dataViewsService: DataViewsService
 ) {
-  return new FieldsService(indexPattern, isRollup, client, savedObjectsClient);
+  return new FieldsService(indexPattern, isRollup, client, dataViewsService);
 }
 
 class FieldsService {
   private _indexPattern: string;
   private _isRollup: boolean;
   private _mlClusterClient: IScopedClusterClient;
-  private _savedObjectsClient: SavedObjectsClientContract;
+  private _dataViewsService: DataViewsService;
 
   constructor(
     indexPattern: string,
     isRollup: boolean,
     client: IScopedClusterClient,
-    savedObjectsClient: SavedObjectsClientContract
+    dataViewsService: DataViewsService
   ) {
     this._indexPattern = indexPattern;
     this._isRollup = isRollup;
     this._mlClusterClient = client;
-    this._savedObjectsClient = savedObjectsClient;
+    this._dataViewsService = dataViewsService;
   }
 
   private async loadFieldCaps(): Promise<any> {
@@ -74,7 +70,7 @@ class FieldsService {
   }
 
   // create field object from the results from _field_caps
-  private async createFields(): Promise<Field[]> {
+  private async createFields(includeNested: boolean = false): Promise<Field[]> {
     const fieldCaps = await this.loadFieldCaps();
     const fields: Field[] = [];
     if (fieldCaps && fieldCaps.fields) {
@@ -84,7 +80,10 @@ class FieldsService {
         if (firstKey !== undefined) {
           const field = fc[firstKey];
           // add to the list of fields if the field type can be used by ML
-          if (supportedTypes.includes(field.type) === true) {
+          if (
+            (supportedTypes.includes(field.type) === true && field.metadata_field !== true) ||
+            (includeNested && field.type === ES_FIELD_TYPES.NESTED)
+          ) {
             fields.push({
               id: k,
               name: k,
@@ -105,16 +104,17 @@ class FieldsService {
   // based on what is available in the rollup job
   // the _indexPattern will be replaced with a comma separated list
   // of index patterns from all of the rollup jobs
-  public async getData(): Promise<NewJobCaps> {
+  public async getData(includeNested: boolean = false): Promise<NewJobCaps> {
     let rollupFields: RollupFields = {};
 
     if (this._isRollup) {
       const rollupService = await rollupServiceProvider(
         this._indexPattern,
         this._mlClusterClient,
-        this._savedObjectsClient
+        this._dataViewsService
       );
-      const rollupConfigs: RollupJob[] | null = await rollupService.getRollupJobs();
+      const rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[] | null =
+        await rollupService.getRollupJobs();
 
       // if a rollup index has been specified, yet there are no
       // rollup configs, return with no results
@@ -130,95 +130,24 @@ class FieldsService {
     }
 
     const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
-    const fields: Field[] = await this.createFields();
+    const fields: Field[] = await this.createFields(includeNested);
 
-    return await combineFieldsAndAggs(fields, aggs, rollupFields);
+    return combineFieldsAndAggs(fields, aggs, rollupFields);
   }
 }
 
-// cross reference fields and aggs.
-// fields contain a list of aggs that are compatible, and vice versa.
-async function combineFieldsAndAggs(
-  fields: Field[],
-  aggs: Aggregation[],
-  rollupFields: RollupFields
-): Promise<NewJobCaps> {
-  const keywordFields = getKeywordFields(fields);
-  const textFields = getTextFields(fields);
-  const numericalFields = getNumericalFields(fields);
-  const ipFields = getIpFields(fields);
-  const geoFields = getGeoFields(fields);
-
-  const isRollup = Object.keys(rollupFields).length > 0;
-  const mix = mixFactory(isRollup, rollupFields);
-
-  aggs.forEach((a) => {
-    if (a.type === METRIC_AGG_TYPE && a.fields !== undefined) {
-      switch (a.id) {
-        case ML_JOB_AGGREGATION.LAT_LONG:
-          geoFields.forEach((f) => mix(f, a));
-          break;
-        case ML_JOB_AGGREGATION.INFO_CONTENT:
-        case ML_JOB_AGGREGATION.HIGH_INFO_CONTENT:
-        case ML_JOB_AGGREGATION.LOW_INFO_CONTENT:
-          textFields.forEach((f) => mix(f, a));
-        case ML_JOB_AGGREGATION.DISTINCT_COUNT:
-        case ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT:
-        case ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT:
-          // distinct count (i.e. cardinality) takes keywords, ips
-          // as well as numerical fields
-          keywordFields.forEach((f) => mix(f, a));
-          ipFields.forEach((f) => mix(f, a));
-        // note, no break to fall through to add numerical fields.
-        default:
-          // all other aggs take numerical fields
-          numericalFields.forEach((f) => {
-            mix(f, a);
-          });
-          break;
-      }
-    }
-  });
-
-  return {
-    aggs,
-    fields: isRollup ? filterFields(fields) : fields,
-  };
-}
-
-// remove fields that have no aggs associated to them, unless they are date fields
-function filterFields(fields: Field[]): Field[] {
-  return fields.filter(
-    (f) => f.aggs && (f.aggs.length > 0 || (f.aggs.length === 0 && f.type === ES_FIELD_TYPES.DATE))
-  );
-}
-
-// returns a mix function that is used to cross-reference aggs and fields.
-// wrapped in a provider to allow filtering based on rollup job capabilities
-function mixFactory(isRollup: boolean, rollupFields: RollupFields) {
-  return function mix(field: Field, agg: Aggregation): void {
-    if (
-      isRollup === false ||
-      (rollupFields[field.id] && rollupFields[field.id].find((f) => f.agg === agg.dslName))
-    ) {
-      if (field.aggs !== undefined) {
-        field.aggs.push(agg);
-      }
-      if (agg.fields !== undefined) {
-        agg.fields.push(field);
-      }
-    }
-  };
-}
-
-function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
+function combineAllRollupFields(
+  rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[]
+): RollupFields {
   const rollupFields: RollupFields = {};
   rollupConfigs.forEach((conf) => {
     Object.keys(conf.fields).forEach((fieldName) => {
       if (rollupFields[fieldName] === undefined) {
+        // @ts-expect-error fix type. our RollupFields type is better
         rollupFields[fieldName] = conf.fields[fieldName];
       } else {
         const aggs = conf.fields[fieldName];
+        // @ts-expect-error fix type. our RollupFields type is better
         aggs.forEach((agg) => {
           if (rollupFields[fieldName].find((f) => f.agg === agg.agg) === null) {
             rollupFields[fieldName].push(agg);
@@ -228,37 +157,4 @@ function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
     });
   });
   return rollupFields;
-}
-
-function getKeywordFields(fields: Field[]): Field[] {
-  return fields.filter((f) => f.type === ES_FIELD_TYPES.KEYWORD);
-}
-
-function getTextFields(fields: Field[]): Field[] {
-  return fields.filter((f) => f.type === ES_FIELD_TYPES.TEXT);
-}
-
-function getIpFields(fields: Field[]): Field[] {
-  return fields.filter((f) => f.type === ES_FIELD_TYPES.IP);
-}
-
-function getNumericalFields(fields: Field[]): Field[] {
-  return fields.filter(
-    (f) =>
-      f.type === ES_FIELD_TYPES.LONG ||
-      f.type === ES_FIELD_TYPES.UNSIGNED_LONG ||
-      f.type === ES_FIELD_TYPES.INTEGER ||
-      f.type === ES_FIELD_TYPES.SHORT ||
-      f.type === ES_FIELD_TYPES.BYTE ||
-      f.type === ES_FIELD_TYPES.DOUBLE ||
-      f.type === ES_FIELD_TYPES.FLOAT ||
-      f.type === ES_FIELD_TYPES.HALF_FLOAT ||
-      f.type === ES_FIELD_TYPES.SCALED_FLOAT
-  );
-}
-
-function getGeoFields(fields: Field[]): Field[] {
-  return fields.filter(
-    (f) => f.type === ES_FIELD_TYPES.GEO_POINT || f.type === ES_FIELD_TYPES.GEO_SHAPE
-  );
 }

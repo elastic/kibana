@@ -6,15 +6,17 @@
   "false_positives": [
     "Servers that process email traffic may cause false positives and should be excluded from this rule as this is expected behavior."
   ],
+  "from": "now-9m",
   "index": [
+    "auditbeat-*",
     "filebeat-*",
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "SMTP on Port 26/TCP",
-  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:26 or (event.dataset:zeek.smtp and destination.port:26))",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:26 or (event.dataset:zeek.smtp and destination.port:26))\n",
   "references": [
     "https://unit42.paloaltonetworks.com/unit42-badpatch/",
     "https://isc.sans.edu/forums/diary/Next+up+whats+up+with+TCP+port+26/25564/"
@@ -27,7 +29,8 @@
     "Host",
     "Network",
     "Threat Detection",
-    "Command and Control"
+    "Command and Control",
+    "Host"
   ],
   "threat": [
     {
@@ -55,6 +58,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 8
 }

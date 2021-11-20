@@ -1,24 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { makeCheck } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 import { getSha256 } from '../../../api_integration/apis/uptime/rest/helper/make_tls';
 
+const BLANK_INDEX_PATH = 'x-pack/test/functional/es_archives/uptime/blank';
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime } = getPageObjects(['uptime']);
   const uptimeService = getService('uptime');
 
+  const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('certificates', function () {
+  // FLAKY https://github.com/elastic/kibana/issues/114261
+  describe.skip('certificates', function () {
     describe('empty certificates', function () {
       before(async () => {
+        await esArchiver.load(BLANK_INDEX_PATH);
         await makeCheck({ es });
         await uptime.goToRoot(true);
+      });
+
+      after(async () => {
+        await esArchiver.unload(BLANK_INDEX_PATH);
       });
 
       it('go to certs page', async () => {
@@ -33,8 +43,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('with certs', function () {
       before(async () => {
+        await esArchiver.load(BLANK_INDEX_PATH);
         await makeCheck({ es, tls: true });
         await uptime.goToRoot(true);
+      });
+
+      after(async () => {
+        await esArchiver.unload(BLANK_INDEX_PATH);
       });
 
       beforeEach(async () => {

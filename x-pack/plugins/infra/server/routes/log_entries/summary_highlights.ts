@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -34,44 +35,31 @@ export const initLogEntriesSummaryHighlightsRoute = ({
       validate: { body: escapeHatch },
     },
     async (requestContext, request, response) => {
-      try {
-        const payload = pipe(
-          logEntriesSummaryHighlightsRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-        const {
-          sourceId,
-          startTimestamp,
-          endTimestamp,
-          bucketSize,
-          query,
-          highlightTerms,
-        } = payload;
+      const payload = pipe(
+        logEntriesSummaryHighlightsRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
+      const { sourceId, startTimestamp, endTimestamp, bucketSize, query, highlightTerms } = payload;
 
-        const bucketsPerHighlightTerm = await logEntries.getLogSummaryHighlightBucketsBetween(
-          requestContext,
-          sourceId,
-          startTimestamp,
-          endTimestamp,
-          bucketSize,
-          highlightTerms,
-          parseFilterQuery(query)
-        );
+      const bucketsPerHighlightTerm = await logEntries.getLogSummaryHighlightBucketsBetween(
+        requestContext,
+        sourceId,
+        startTimestamp,
+        endTimestamp,
+        bucketSize,
+        highlightTerms,
+        parseFilterQuery(query)
+      );
 
-        return response.ok({
-          body: logEntriesSummaryHighlightsResponseRT.encode({
-            data: bucketsPerHighlightTerm.map((buckets) => ({
-              start: startTimestamp,
-              end: endTimestamp,
-              buckets,
-            })),
-          }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: logEntriesSummaryHighlightsResponseRT.encode({
+          data: bucketsPerHighlightTerm.map((buckets) => ({
+            start: startTimestamp,
+            end: endTimestamp,
+            buckets,
+          })),
+        }),
+      });
     }
   );
 };

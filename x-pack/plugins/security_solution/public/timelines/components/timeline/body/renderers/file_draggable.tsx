@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -18,10 +19,21 @@ interface Props {
   eventId: string;
   fileName: string | null | undefined;
   filePath: string | null | undefined;
+  fileExtOriginalPath: string | null | undefined;
+  isDraggable?: boolean;
 }
 
 export const FileDraggable = React.memo<Props>(
-  ({ contextId, endgameFileName, endgameFilePath, eventId, fileName, filePath }) => {
+  ({
+    contextId,
+    endgameFileName,
+    endgameFilePath,
+    eventId,
+    fileExtOriginalPath,
+    fileName,
+    filePath,
+    isDraggable,
+  }) => {
     if (
       isNillEmptyOrNotFinite(fileName) &&
       isNillEmptyOrNotFinite(endgameFileName) &&
@@ -42,6 +54,7 @@ export const FileDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="file.name"
+              isDraggable={isDraggable}
               value={fileName}
               iconType="document"
             />
@@ -52,6 +65,7 @@ export const FileDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_name"
+              isDraggable={isDraggable}
               value={endgameFileName}
               iconType="document"
             />
@@ -70,6 +84,7 @@ export const FileDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="file.path"
+              isDraggable={isDraggable}
               value={filePath}
               iconType="document"
             />
@@ -80,11 +95,30 @@ export const FileDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_path"
+              isDraggable={isDraggable}
               value={endgameFilePath}
               iconType="document"
             />
           </TokensFlexItem>
         ) : null}
+
+        {!isNillEmptyOrNotFinite(fileExtOriginalPath) && (
+          <>
+            <TokensFlexItem grow={false} component="span">
+              {i18n.FROM_ITS_ORIGINAL_PATH}
+            </TokensFlexItem>
+            <TokensFlexItem grow={false} component="span">
+              <DraggableBadge
+                contextId={contextId}
+                eventId={eventId}
+                field="file.Ext.original.path"
+                isDraggable={isDraggable}
+                value={fileExtOriginalPath}
+                iconType="document"
+              />
+            </TokensFlexItem>
+          </>
+        )}
       </>
     );
   }

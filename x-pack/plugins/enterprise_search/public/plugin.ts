@@ -1,24 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   AppMountParameters,
+  CoreStart,
   CoreSetup,
   HttpSetup,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -26,6 +30,8 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { InitialAppData } from '../common/types';
+
+import { docLinks } from './applications/shared/doc_links';
 
 export interface ClientConfigType {
   host?: string;
@@ -38,11 +44,14 @@ export interface ClientData extends InitialAppData {
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  security: SecurityPluginSetup;
 }
 export interface PluginsStart {
   cloud?: CloudSetup;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  security: SecurityPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -110,6 +119,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
 
+        // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
+        // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
+        if (this.config.host) chrome.setIsVisible(false);
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
@@ -124,11 +136,10 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.registerSolution({
         id: ENTERPRISE_SEARCH_PLUGIN.ID,
         title: ENTERPRISE_SEARCH_PLUGIN.NAME,
-        subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
         icon: 'logoEnterpriseSearch',
         description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
-        appDescriptions: ENTERPRISE_SEARCH_PLUGIN.APP_DESCRIPTIONS,
         path: ENTERPRISE_SEARCH_PLUGIN.URL,
+        order: 100,
       });
 
       plugins.home.featureCatalogue.register({
@@ -153,7 +164,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    // This must be called here in start() and not in `applications/index.tsx` to prevent loading
+    // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
+    docLinks.setDocLinks(core.docLinks);
+  }
 
   public stop() {}
 
@@ -176,7 +191,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
-      this.data = await http.get('/api/enterprise_search/config_data');
+      this.data = await http.get('/internal/enterprise_search/config_data');
       this.hasInitialized = true;
     } catch {
       this.data.errorConnecting = true;

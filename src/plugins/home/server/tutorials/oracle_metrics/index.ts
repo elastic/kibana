@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,17 +23,17 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.oracleMetrics.nameTitle', {
-      defaultMessage: 'oracle metrics',
+      defaultMessage: 'oracle Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.oracleMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from a Oracle server.',
+      defaultMessage: 'Collect metrics from Oracle servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.oracleMetrics.longDescription', {
       defaultMessage:
-        'The `{moduleName}` Metricbeat module fetches internal metrics from a Oracle server. \
+        'The `{moduleName}` Metricbeat module fetches metrics from a Oracle server. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,
@@ -57,5 +57,6 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['security'],
   };
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getPrepackagedRulesStatusRoute } from './get_prepackaged_rules_status_route';
@@ -10,19 +11,18 @@ import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getPrepackagedRulesStatusRequest,
-  getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig } from '../__mocks__';
 import { SecurityPluginSetup } from '../../../../../../security/server';
-import { checkTimelinesStatus } from '../../../timeline/routes/utils/check_timelines_status';
+import { checkTimelinesStatus } from '../../../timeline/utils/check_timelines_status';
 import {
   mockCheckTimelinesStatusBeforeInstallResult,
   mockCheckTimelinesStatusAfterInstallResult,
-} from '../../../timeline/routes/__mocks__/import_timelines';
+} from '../../../timeline/__mocks__/import_timelines';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
-    getPrepackagedRules: () => {
+    getLatestPrepackagedRules: async () => {
       return [
         {
           rule_id: 'rule-1',
@@ -43,13 +43,18 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-jest.mock('../../../timeline/routes/utils/check_timelines_status', () => {
+jest.mock('../../../timeline/utils/check_timelines_status', () => {
+  const actual = jest.requireActual('../../../timeline/utils/check_timelines_status');
   return {
+    ...actual,
     checkTimelinesStatus: jest.fn(),
   };
 });
 
-describe('get_prepackaged_rule_status_route', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('get_prepackaged_rule_status_route - %s', (_, isRuleRegistryEnabled) => {
   const mockGetCurrentUser = {
     user: {
       username: 'mockUser',
@@ -61,20 +66,31 @@ describe('get_prepackaged_rule_status_route', () => {
   let securitySetup: SecurityPluginSetup;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+    clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
-    getPrepackagedRulesStatusRoute(server.router, createMockConfig(), securitySetup);
+    (checkTimelinesStatus as jest.Mock).mockResolvedValue({
+      timelinesToInstall: [],
+      timelinesToUpdate: [],
+      prepackagedTimelines: [],
+    });
+
+    getPrepackagedRulesStatusRoute(
+      server.router,
+      createMockConfig(),
+      securitySetup,
+      isRuleRegistryEnabled
+    );
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -84,14 +100,14 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catch error when finding rules throws error', async () => {
-      clients.alertsClient.find.mockImplementation(async () => {
+      clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
@@ -105,7 +121,7 @@ describe('get_prepackaged_rule_status_route', () => {
 
   describe('responses', () => {
     test('0 rules installed, 0 custom rules, 1 rules not installed, and 1 rule not updated', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, context);
 
@@ -122,7 +138,7 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     test('1 rule installed, 1 custom rules, 0 rules not installed, and 1 rule to not updated', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, context);
 
@@ -139,7 +155,7 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     test('0 timelines installed, 3 timelines not installed, 0 timelines not updated', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       (checkTimelinesStatus as jest.Mock).mockResolvedValue(
         mockCheckTimelinesStatusBeforeInstallResult
       );
@@ -159,7 +175,7 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     test('3 timelines installed, 0 timelines not installed, 0 timelines not updated', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       (checkTimelinesStatus as jest.Mock).mockResolvedValue(
         mockCheckTimelinesStatusAfterInstallResult
       );

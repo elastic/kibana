@@ -1,16 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
-import { Filter } from '../../../../../../src/plugins/data/public';
-import { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';
+import { ReactNode } from 'react';
+import { GeoJsonProperties, Geometry } from 'geojson';
+import { Filter } from 'src/plugins/data/public';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { RawValue } from '../../../../../plugins/maps/common/constants';
+import type { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';
 
 export interface ITooltipProperty {
   getPropertyKey(): string;
-  getPropertyName(): string;
+  getPropertyName(): string | ReactNode;
   getHtmlDisplayValue(): string;
   getRawValue(): string | string[] | undefined;
   isFilterable(): boolean;
@@ -28,13 +33,30 @@ export interface FeatureGeometry {
 }
 
 export interface RenderTooltipContentParams {
-  addFilters(filter: object): void;
-  closeTooltip(): void;
+  addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
+  closeTooltip: () => void;
   features: TooltipFeature[];
+  getActionContext?: () => ActionExecutionContext;
+  getFilterActions?: () => Promise<Action[]>;
+  getLayerName: (layerId: string) => Promise<string | null>;
   isLocked: boolean;
-  getLayerName(layerId: string): Promise<string>;
-  loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<ITooltipProperty[]>;
-  loadFeatureGeometry({ layerId, featureId }: LoadFeatureProps): FeatureGeometry;
+  loadFeatureProperties: ({
+    layerId,
+    featureId,
+    mbProperties,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+    mbProperties: GeoJsonProperties;
+  }) => Promise<ITooltipProperty[]>;
+  loadFeatureGeometry: ({
+    layerId,
+    featureId,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+  }) => Geometry | null;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
 }
 
 export type RenderToolTipContent = (params: RenderTooltipContentParams) => JSX.Element;

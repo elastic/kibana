@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable, Subject } from 'rxjs';
@@ -13,37 +13,38 @@ import { merge } from '@kbn/std';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import {
-  LegacyClusterClient,
-  ILegacyCustomClusterClient,
-  LegacyElasticsearchClientConfig,
-} from './legacy';
-import { ClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
+
+import { ClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
-import { InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart } from './types';
+import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http';
+import type { InternalExecutionContextSetup, IExecutionContext } from '../execution_context';
+import {
+  InternalElasticsearchServicePreboot,
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from './types';
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
+import { isValidConnection } from './is_valid_connection';
+import { isInlineScriptingEnabled } from './is_scripting_enabled';
 
-interface SetupDeps {
+export interface SetupDeps {
   http: InternalHttpServiceSetup;
+  executionContext: InternalExecutionContextSetup;
 }
 
 /** @internal */
 export class ElasticsearchService
-  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart> {
+  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart>
+{
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private stop$ = new Subject();
   private kibanaVersion: string;
   private getAuthHeaders?: GetAuthHeaders;
-
-  private createLegacyCustomClient?: (
-    type: string,
-    clientConfig?: Partial<LegacyElasticsearchClientConfig>
-  ) => ILegacyCustomClusterClient;
-  private legacyClient?: LegacyClusterClient;
-
+  private executionContextClient?: IExecutionContext;
+  private esNodesCompatibility$?: Observable<NodesVersionCompatibility>;
   private client?: ClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -54,13 +55,29 @@ export class ElasticsearchService
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
   }
 
+  public async preboot(): Promise<InternalElasticsearchServicePreboot> {
+    this.log.debug('Prebooting elasticsearch service');
+
+    const config = await this.config$.pipe(first()).toPromise();
+    return {
+      config: {
+        hosts: config.hosts,
+        credentialsSpecified:
+          config.username !== undefined ||
+          config.password !== undefined ||
+          config.serviceAccountToken !== undefined,
+      },
+      createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
+    };
+  }
+
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
     const config = await this.config$.pipe(first()).toPromise();
 
     this.getAuthHeaders = deps.http.getAuthHeaders;
-    this.legacyClient = this.createLegacyClusterClient('data', config);
+    this.executionContextClient = deps.executionContext;
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
@@ -71,43 +88,53 @@ export class ElasticsearchService
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
-    this.createLegacyCustomClient = (type, clientConfig = {}) => {
-      const finalConfig = merge({}, config, clientConfig);
-      return this.createLegacyClusterClient(type, finalConfig);
-    };
+    this.esNodesCompatibility$ = esNodesCompatibility$;
 
     return {
       legacy: {
         config$: this.config$,
-        client: this.legacyClient,
-        createClient: this.createLegacyCustomClient,
       },
       esNodesCompatibility$,
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
+
   public async start(): Promise<InternalElasticsearchServiceStart> {
-    if (!this.legacyClient || !this.createLegacyCustomClient) {
+    if (!this.client || !this.esNodesCompatibility$) {
       throw new Error('ElasticsearchService needs to be setup before calling start');
     }
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const createClient = (
-      type: string,
-      clientConfig: Partial<ElasticsearchClientConfig> = {}
-    ): ICustomClusterClient => {
-      const finalConfig = merge({}, config, clientConfig);
-      return this.createClusterClient(type, finalConfig);
-    };
+    // Log every error we may encounter in the connection to Elasticsearch
+    this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
+
+    if (!config.skipStartupConnectionCheck) {
+      // Ensure that the connection is established and the product is valid before moving on
+      await isValidConnection(this.esNodesCompatibility$);
+
+      // Ensure inline scripting is enabled on the ES cluster
+      const scriptingEnabled = await isInlineScriptingEnabled({
+        client: this.client.asInternalUser,
+      });
+      if (!scriptingEnabled) {
+        throw new Error(
+          'Inline scripting is disabled on the Elasticsearch cluster, and is mandatory for Kibana to function. ' +
+            'Please enabled inline scripting, then restart Kibana. ' +
+            'Refer to https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-security.html for more info.'
+        );
+      }
+    }
 
     return {
       client: this.client!,
-      createClient,
+      createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       legacy: {
         config$: this.config$,
-        client: this.legacyClient,
-        createClient: this.createLegacyCustomClient,
       },
     };
   }
@@ -118,24 +145,20 @@ export class ElasticsearchService
     if (this.client) {
       await this.client.close();
     }
-    if (this.legacyClient) {
-      this.legacyClient.close();
-    }
   }
 
-  private createClusterClient(type: string, config: ElasticsearchClientConfig) {
+  private createClusterClient(
+    type: string,
+    baseConfig: ElasticsearchConfig,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) {
+    const config = clientConfig ? merge({}, baseConfig, clientConfig) : baseConfig;
     return new ClusterClient(
       config,
-      this.coreContext.logger.get('elasticsearch', type),
-      this.getAuthHeaders
-    );
-  }
-
-  private createLegacyClusterClient(type: string, config: LegacyElasticsearchClientConfig) {
-    return new LegacyClusterClient(
-      config,
-      this.coreContext.logger.get('elasticsearch', type),
-      this.getAuthHeaders
+      this.coreContext.logger.get('elasticsearch'),
+      type,
+      this.getAuthHeaders,
+      () => this.executionContextClient?.getAsHeader()
     );
   }
 }

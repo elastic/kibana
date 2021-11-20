@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   Chart,
   LineAnnotation,
@@ -182,7 +183,7 @@ export const WatchVisualization = () => {
               defaultMessage="Cannot load watch visualization"
             />
           }
-          error={(error as unknown) as Error}
+          error={error as unknown as Error}
         />
         <EuiSpacer size="l" />
       </Fragment>
@@ -226,7 +227,12 @@ export const WatchVisualization = () => {
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
+            <Axis
+              domain={{ max: maxY, min: NaN }}
+              id="left"
+              title={aggLabel}
+              position={Position.Left}
+            />
             {watchVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries
@@ -247,7 +253,7 @@ export const WatchVisualization = () => {
                 <LineAnnotation
                   key={specId}
                   id={specId}
-                  domainType={AnnotationDomainTypes.YDomain}
+                  domainType={AnnotationDomainType.YDomain}
                   dataValues={[{ dataValue: watch.threshold[i], details: specId }]}
                 />
               );

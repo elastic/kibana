@@ -1,36 +1,53 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { join } from 'path';
+import loadJsonFile from 'load-json-file';
+
 import {
-  migratorInstanceMock,
   clientProviderInstanceMock,
+  KibanaMigratorMock,
+  migratorInstanceMock,
+  registerRoutesMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
+import { RawPackageInfo } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
 import { Env } from '../config';
+import { getEnvOptions } from '../config/mocks';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
+import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 import { SavedObjectsRepository } from './service/lib/repository';
 import { registerCoreObjectTypes } from './object_types';
+import { getSavedObjectsDeprecationsProvider } from './deprecations';
 
 jest.mock('./service/lib/repository');
 jest.mock('./object_types');
+jest.mock('./deprecations');
 
 describe('SavedObjectsService', () => {
+  let deprecationsSetup: ReturnType<typeof deprecationsServiceMock.createInternalSetupContract>;
+
+  beforeEach(() => {
+    deprecationsSetup = deprecationsServiceMock.createInternalSetupContract();
+  });
+
   const createCoreContext = ({
     skipMigration = true,
     env,
@@ -42,7 +59,7 @@ describe('SavedObjectsService', () => {
       }
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
-        maxImportExportSize: new ByteSizeValue(0),
+        maxImportExportSize: 10000,
       });
     });
     return mockCoreContext.create({ configService, env });
@@ -53,6 +70,7 @@ describe('SavedObjectsService', () => {
     return {
       http: httpServiceMock.createInternalSetupContract(),
       elasticsearch: elasticsearchMock,
+      deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataServiceMock.createSetupContract(),
     };
   };
@@ -77,6 +95,61 @@ describe('SavedObjectsService', () => {
       expect(mockedRegisterCoreObjectTypes).not.toHaveBeenCalled();
       await soService.setup(createSetupDeps());
       expect(mockedRegisterCoreObjectTypes).toHaveBeenCalledTimes(1);
+    });
+
+    it('register the deprecation provider', async () => {
+      const coreContext = createCoreContext();
+      const soService = new SavedObjectsService(coreContext);
+
+      const mockRegistry = deprecationsServiceMock.createSetupContract();
+      deprecationsSetup.getRegistry.mockReturnValue(mockRegistry);
+
+      const deprecations = Symbol('deprecations');
+      const mockedGetSavedObjectsDeprecationsProvider =
+        getSavedObjectsDeprecationsProvider as jest.Mock;
+      mockedGetSavedObjectsDeprecationsProvider.mockReturnValue(deprecations);
+      await soService.setup(createSetupDeps());
+
+      expect(deprecationsSetup.getRegistry).toHaveBeenCalledTimes(1);
+      expect(deprecationsSetup.getRegistry).toHaveBeenCalledWith('savedObjects');
+      expect(mockRegistry.registerDeprecations).toHaveBeenCalledTimes(1);
+      expect(mockRegistry.registerDeprecations).toHaveBeenCalledWith(deprecations);
+    });
+
+    it('registers the deprecation provider with the correct kibanaVersion', async () => {
+      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const kibanaVersion = pkg.version;
+
+      const coreContext = createCoreContext({
+        env: Env.createDefault(REPO_ROOT, getEnvOptions(), {
+          ...pkg,
+          version: `${kibanaVersion}-beta1`, // test behavior when release has a version qualifier
+        }),
+      });
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      expect(getSavedObjectsDeprecationsProvider).toHaveBeenCalledWith(
+        expect.objectContaining({ kibanaVersion })
+      );
+    });
+
+    it('calls registerRoutes with the correct kibanaVersion', async () => {
+      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const kibanaVersion = pkg.version;
+
+      const coreContext = createCoreContext({
+        env: Env.createDefault(REPO_ROOT, getEnvOptions(), {
+          ...pkg,
+          version: `${kibanaVersion}-beta1`, // test behavior when release has a version qualifier
+        }),
+      });
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      expect(registerRoutesMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
     });
 
     describe('#setClientFactoryProvider', () => {
@@ -159,6 +232,16 @@ describe('SavedObjectsService', () => {
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
       });
     });
+
+    describe('#getTypeRegistry', () => {
+      it('returns the internal type registry of the service', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const { getTypeRegistry } = await soService.setup(createSetupDeps());
+
+        expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
+      });
+    });
   });
 
   describe('#start()', () => {
@@ -179,6 +262,24 @@ describe('SavedObjectsService', () => {
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
+    it('calls KibanaMigrator with correct version', async () => {
+      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const kibanaVersion = pkg.version;
+
+      const coreContext = createCoreContext({
+        env: Env.createDefault(REPO_ROOT, getEnvOptions(), {
+          ...pkg,
+          version: `${kibanaVersion}-beta1`, // test behavior when release has a version qualifier
+        }),
+      });
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+      await soService.start(createStartDeps());
+
+      expect(KibanaMigratorMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
+    });
+
     it('waits for all es nodes to be compatible before running migrations', async (done) => {
       expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
@@ -195,8 +296,10 @@ describe('SavedObjectsService', () => {
       await soService.setup(setupDeps);
       soService.start(createStartDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
-      ((setupDeps.elasticsearch
-        .esNodesCompatibility$ as any) as BehaviorSubject<NodesVersionCompatibility>).next({
+      (
+        setupDeps.elasticsearch
+          .esNodesCompatibility$ as any as BehaviorSubject<NodesVersionCompatibility>
+      ).next({
         isCompatible: true,
         incompatibleNodes: [],
         warningNodes: [],
@@ -260,7 +363,7 @@ describe('SavedObjectsService', () => {
     });
 
     describe('#createScopedRepository', () => {
-      it('creates a respository scoped to the user', async () => {
+      it('creates a repository scoped to the user', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
         const soService = new SavedObjectsService(coreContext);
         const coreSetup = createSetupDeps();
@@ -273,14 +376,14 @@ describe('SavedObjectsService', () => {
 
         expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req);
 
-        const [
-          [, , , , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , , , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(includedHiddenTypes).toEqual([]);
       });
 
-      it('creates a respository including hidden types when specified', async () => {
+      it('creates a repository including hidden types when specified', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
         const soService = new SavedObjectsService(coreContext);
         const coreSetup = createSetupDeps();
@@ -291,16 +394,16 @@ describe('SavedObjectsService', () => {
         const req = httpServerMock.createKibanaRequest();
         createScopedRepository(req, ['someHiddenType']);
 
-        const [
-          [, , , , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , , , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
       });
     });
 
     describe('#createInternalRepository', () => {
-      it('creates a respository using the admin user', async () => {
+      it('creates a repository using the admin user', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
         const soService = new SavedObjectsService(coreContext);
         const coreSetup = createSetupDeps();
@@ -310,15 +413,15 @@ describe('SavedObjectsService', () => {
 
         createInternalRepository();
 
-        const [
-          [, , , client, includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , client, , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(coreStart.elasticsearch.client.asInternalUser).toBe(client);
         expect(includedHiddenTypes).toEqual([]);
       });
 
-      it('creates a respository including hidden types when specified', async () => {
+      it('creates a repository including hidden types when specified', async () => {
         const coreContext = createCoreContext({ skipMigration: false });
         const soService = new SavedObjectsService(coreContext);
         const coreSetup = createSetupDeps();
@@ -327,9 +430,9 @@ describe('SavedObjectsService', () => {
 
         createInternalRepository(['someHiddenType']);
 
-        const [
-          [, , , , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , , , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
       });

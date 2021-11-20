@@ -8,12 +8,19 @@
     "data",
     "embeddable",
     "inspector",
-    "kibanaLegacy",
+    "fieldFormats",
     "urlForwarding",
     "navigation",
     "uiActions",
-    "savedObjects"
+    "savedObjects",
+    "indexPatternFieldEditor"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection"],
-  "requiredBundles": ["kibanaUtils", "home", "kibanaReact"]
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
+  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "dataViews"],
+  "extraPublicDirs": ["common"],
+  "owner": {
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
+  },
+  "description": "This plugin contains the Discover application and the saved search embeddable."
 }

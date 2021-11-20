@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -13,8 +13,12 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('conflicts', () => {
-    before(() => esArchiver.load('index_patterns/conflicts'));
-    after(() => esArchiver.unload('index_patterns/conflicts'));
+    before(() =>
+      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
+    );
+    after(() =>
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
+    );
 
     it('flags fields with mismatched types as conflicting', () =>
       supertest
@@ -31,6 +35,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
               {
                 name: 'number_conflict',
@@ -39,6 +44,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
               {
                 name: 'string_conflict',
@@ -47,6 +53,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
+                metadata_field: false,
               },
               {
                 name: 'success',
@@ -59,6 +66,7 @@ export default function ({ getService }) {
                   boolean: ['logs-2017.01.02'],
                   keyword: ['logs-2017.01.01'],
                 },
+                metadata_field: false,
               },
             ],
           });

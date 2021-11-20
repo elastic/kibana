@@ -1,12 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import {
+  IScopedClusterClient,
+  Logger,
+  SavedObjectsClientContract,
+  KibanaRequest,
+} from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
+import { SecurityPluginStart } from '../../../../security/server';
 
 import { ReindexOperation, ReindexStatus } from '../../../common/types';
 
@@ -21,22 +29,24 @@ interface ReindexHandlerArgs {
   indexName: string;
   log: Logger;
   licensing: LicensingPluginSetup;
-  headers: Record<string, any>;
+  request: KibanaRequest;
   credentialStore: CredentialStore;
   reindexOptions?: {
     enqueue?: boolean;
   };
+  security?: SecurityPluginStart;
 }
 
 export const reindexHandler = async ({
   credentialStore,
   dataClient,
-  headers,
+  request,
   indexName,
   licensing,
   log,
   savedObjects,
   reindexOptions,
+  security,
 }: ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.asCurrentUser;
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
@@ -60,7 +70,7 @@ export const reindexHandler = async ({
       : await reindexService.createReindexOperation(indexName, reindexOptions);
 
   // Add users credentials for the worker to use
-  credentialStore.set(reindexOp, headers);
+  await credentialStore.set({ reindexOp, request, security });
 
   return reindexOp.attributes;
 };

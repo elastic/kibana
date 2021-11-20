@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { SearchResponse } from 'elasticsearch';
-import { ApiResponse } from '@elastic/elasticsearch';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
+import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
 import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
 
 interface DescendantsParams {
@@ -196,7 +198,7 @@ export class DescendantsQuery {
       return [];
     }
 
-    let response: ApiResponse<SearchResponse<unknown>>;
+    let response: TransportResult<estypes.SearchResponse<unknown>>;
     if (this.schema.ancestry) {
       response = await client.asCurrentUser.search({
         body: this.queryWithAncestryArray(validNodes, this.schema.ancestry, limit),
@@ -217,6 +219,7 @@ export class DescendantsQuery {
      *
      * So the schema fields are flattened ('process.parent.entity_id')
      */
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     return response.body.hits.hits.map((hit) => hit.fields);
   }
 }

@@ -1,32 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { FlashMessagesLogic } from '../../../shared/flash_messages';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
-
-import { AppLogic } from '../../app_logic';
-
-import { Loading } from '../../../shared/loading';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-
-import { getGroupPath, USERS_PATH } from '../../routes';
-
-import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
-
-import { GroupsLogic } from './groups_logic';
+import { WorkplaceSearchPageTemplate } from '../../components/layout';
+import { NAV } from '../../constants';
+import { getGroupPath, USERS_AND_ROLES_PATH } from '../../routes';
 
 import { AddGroupModal } from './components/add_group_modal';
 import { ClearFiltersLink } from './components/clear_filters_link';
 import { GroupsTable } from './components/groups_table';
 import { TableFilters } from './components/table_filters';
+import { GroupsLogic } from './groups_logic';
 
 export const Groups: React.FC = () => {
   const { messages } = useValues(FlashMessagesLogic);
@@ -46,8 +42,6 @@ export const Groups: React.FC = () => {
     filterValue,
   } = useValues(GroupsLogic);
 
-  const { isFederatedAuth } = useValues(AppLogic);
-
   const hasMessages = messages.length > 0;
 
   useEffect(() => {
@@ -55,15 +49,11 @@ export const Groups: React.FC = () => {
     return resetGroups;
   }, [filteredSources, filteredUsers, filterValue]);
 
-  if (groupsDataLoading) {
-    return <Loading />;
-  }
-
   if (newGroup && hasMessages) {
     messages[0].description = (
       <EuiButtonTo
         to={getGroupPath(newGroup.id)}
-        color="primary"
+        color="success"
         data-test-subj="NewGroupManageButton"
       >
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.newGroup.action', {
@@ -74,26 +64,21 @@ export const Groups: React.FC = () => {
   }
 
   const clearFilters = hasFiltersSet && <ClearFiltersLink />;
-  const inviteUsersButton = !isFederatedAuth ? (
-    <EuiButtonTo to={USERS_PATH} data-test-subj="InviteUsersButton">
+  const inviteUsersButton = (
+    <EuiButtonTo to={USERS_AND_ROLES_PATH} data-test-subj="InviteUsersButton">
       {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action', {
         defaultMessage: 'Invite users',
       })}
     </EuiButtonTo>
-  ) : null;
-
-  const headerAction = (
-    <EuiFlexGroup responsive={false} gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <EuiButton data-test-subj="AddGroupButton" fill={true} onClick={openNewGroupModal}>
-          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.addGroupForm.action', {
-            defaultMessage: 'Create a group',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{inviteUsersButton}</EuiFlexItem>
-    </EuiFlexGroup>
   );
+  const createGroupButton = (
+    <EuiButton data-test-subj="AddGroupButton" fill onClick={openNewGroupModal}>
+      {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.addGroupForm.action', {
+        defaultMessage: 'Create a group',
+      })}
+    </EuiButton>
+  );
+  const headerActions = [inviteUsersButton, createGroupButton];
 
   const noResults = (
     <EuiFlexGroup justifyContent="spaceAround">
@@ -118,23 +103,25 @@ export const Groups: React.FC = () => {
   );
 
   return (
-    <>
-      <FlashMessages />
-      <ViewContentHeader
-        title={i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.heading', {
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.GROUPS]}
+      pageViewTelemetry="groups"
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.heading', {
           defaultMessage: 'Manage groups',
-        })}
-        description={i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.description', {
+        }),
+        description: i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.description', {
           defaultMessage:
-            'Assign shared content sources and users to groups to create relevant search experiences for various internal teams.',
-        })}
-        action={headerAction}
-      />
-      <EuiSpacer size="m" />
+            'Assign organizational content sources and users to groups to create relevant search experiences for various internal teams.',
+        }),
+        rightSideItems: headerActions,
+      }}
+      isLoading={groupsDataLoading}
+    >
       <TableFilters />
       <EuiSpacer />
       {numGroups > 0 && !groupListLoading ? <GroupsTable /> : noResults}
       {newGroupModalOpen && <AddGroupModal />}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

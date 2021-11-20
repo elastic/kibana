@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'snapshotRestore']);
   const log = getService('log');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('Home page', function () {
     before(async () => {
@@ -30,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Repositories Tab', async () => {
       before(async () => {
         await es.snapshot.createRepository({
-          repository: 'my-repository',
+          name: 'my-repository',
           body: {
             type: 'fs',
             settings: {
@@ -54,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       after(async () => {
         await es.snapshot.deleteRepository({
-          repository: 'my-repository',
+          name: 'my-repository',
         });
       });
     });

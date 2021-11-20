@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const dataGrid = getService('dataGrid');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
@@ -19,15 +20,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
+  const security = getService('security');
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'discover',
+    'header',
+    'visualize',
+    'timePicker',
+  ]);
 
   describe('dashboard filter bar', () => {
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     describe('Add a filter bar', function () {
@@ -173,8 +187,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('are added when a cell magnifying glass is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
-        await testSubjects.click('docTableCellFilter');
-
+        const isLegacyDefault = await PageObjects.discover.useLegacyTable();
+        if (isLegacyDefault) {
+          await testSubjects.click('docTableCellFilter');
+        } else {
+          const documentCell = await dataGrid.getCellElement(1, 3);
+          await documentCell.click();
+          const expandCellContentButton = await documentCell.findByClassName(
+            'euiDataGridRowCell__expandButtonIcon'
+          );
+          await expandCellContentButton.click();
+          await testSubjects.click('filterForButton');
+        }
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
       });

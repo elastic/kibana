@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,16 +23,16 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
   return {
     id: 'rabbitmqMetrics',
     name: i18n.translate('home.tutorials.rabbitmqMetrics.nameTitle', {
-      defaultMessage: 'RabbitMQ metrics',
+      defaultMessage: 'RabbitMQ Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.rabbitmqMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the RabbitMQ server.',
+      defaultMessage: 'Collect metrics from RabbitMQ servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.rabbitmqMetrics.longDescription', {
       defaultMessage:
-        'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server. \
+        'The `rabbitmq` Metricbeat module fetches metrics from RabbitMQ server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-rabbitmq.html',
@@ -62,5 +62,6 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['message_queue'],
   };
 }

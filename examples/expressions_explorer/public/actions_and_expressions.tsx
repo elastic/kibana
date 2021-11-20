@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -19,11 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  ExpressionsStart,
-  ReactExpressionRenderer,
-  ExpressionsInspectorAdapter,
-} from '../../../src/plugins/expressions/public';
+import { ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { ExpressionEditor } from './editor/expression_editor';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { NAVIGATE_TRIGGER_ID } from './actions/navigate_trigger';
@@ -42,16 +38,12 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
     updateExpression(value);
   };
 
-  const inspectorAdapters = {
-    expression: new ExpressionsInspectorAdapter(),
-  };
-
   const handleEvents = (event: any) => {
-    if (event.id !== 'NAVIGATE') return;
+    if (event.name !== 'NAVIGATE') return;
     // enrich event context with some extra data
     event.baseUrl = 'http://www.google.com';
 
-    actions.executeTriggerActions(NAVIGATE_TRIGGER_ID, event.value);
+    actions.executeTriggerActions(NAVIGATE_TRIGGER_ID, event.data);
   };
 
   return (
@@ -63,7 +55,7 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent>
+      <EuiPageContent data-test-subj="expressionsActionsTest">
         <EuiPageContentBody>
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -83,10 +75,9 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel paddingSize="none" role="figure">
-                <ReactExpressionRenderer
+                <expressions.ReactExpressionRenderer
                   expression={expression}
                   debug={true}
-                  inspectorAdapters={inspectorAdapters}
                   onEvent={handleEvents}
                   renderError={(message: any) => {
                     return <div>{message}</div>;

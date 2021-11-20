@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -14,6 +15,7 @@ import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framewor
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { findInventoryFields } from '../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export interface InfraMetricsAdapterResponse {
   id: string;
@@ -29,10 +31,10 @@ export const getMetricMetadata = async (
   nodeType: InventoryItemType,
   timeRange: { from: number; to: number }
 ): Promise<InfraMetricsAdapterResponse> => {
-  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
+  const fields = findInventoryFields(nodeType);
   const metricQuery = {
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     index: sourceConfiguration.metricAlias,
     body: {
       query: {
@@ -44,7 +46,7 @@ export const getMetricMetadata = async (
             },
             {
               range: {
-                [sourceConfiguration.fields.timestamp]: {
+                [TIMESTAMP_FIELD]: {
                   gte: timeRange.from,
                   lte: timeRange.to,
                   format: 'epoch_millis',

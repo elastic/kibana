@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent, Fragment } from 'react';
@@ -19,7 +20,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiHorizontalRule,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
@@ -33,14 +34,15 @@ import { indexNameValidator, leaderIndexValidator } from '../../services/input_v
 import { routing } from '../../services/routing';
 import { getFatalErrors } from '../../services/notifications';
 import { loadIndices } from '../../services/api';
+import { documentationLinks } from '../../services/documentation_links';
 import { API_STATUS } from '../../constants';
 import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
 import { RemoteClustersFormField } from '../remote_clusters_form_field';
 import { SectionError } from '../section_error';
 import { FormEntryRow } from '../form_entry_row';
 import {
-  advancedSettingsFields,
-  emptyAdvancedSettings,
+  getAdvancedSettingsFields,
+  getEmptyAdvancedSettings,
   areAdvancedSettingsEdited,
 } from './advanced_settings_fields';
 
@@ -48,44 +50,49 @@ import { FollowerIndexRequestFlyout } from './follower_index_request_flyout';
 
 const indexNameIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
-const fieldToValidatorMap = advancedSettingsFields.reduce(
-  (map, advancedSetting) => {
-    const { field, validator } = advancedSetting;
-    map[field] = validator;
-    return map;
-  },
-  {
-    name: indexNameValidator,
-    leaderIndex: leaderIndexValidator,
-  }
-);
+const getFieldToValidatorMap = (advancedSettingsFields) =>
+  advancedSettingsFields.reduce(
+    (map, advancedSetting) => {
+      const { field, validator } = advancedSetting;
+      map[field] = validator;
+      return map;
+    },
+    {
+      name: indexNameValidator,
+      leaderIndex: leaderIndexValidator,
+    }
+  );
 
 const getEmptyFollowerIndex = (remoteClusterName = '') => ({
   name: '',
   remoteCluster: remoteClusterName,
   leaderIndex: '',
-  ...emptyAdvancedSettings,
+  ...getEmptyAdvancedSettings(documentationLinks),
 });
 
 /**
  * State transitions: fields update
  */
-export const updateFields = (fields) => ({ followerIndex }) => ({
-  followerIndex: {
-    ...followerIndex,
-    ...fields,
-  },
-});
+export const updateFields =
+  (fields) =>
+  ({ followerIndex }) => ({
+    followerIndex: {
+      ...followerIndex,
+      ...fields,
+    },
+  });
 
 /**
  * State transitions: errors update
  */
-export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
-  fieldsErrors: {
-    ...fieldsErrors,
-    ...errors,
-  },
-});
+export const updateFormErrors =
+  (errors) =>
+  ({ fieldsErrors }) => ({
+    fieldsErrors: {
+      ...fieldsErrors,
+      ...errors,
+    },
+  });
 
 export class FollowerIndexForm extends PureComponent {
   static propTypes = {
@@ -120,7 +127,7 @@ export class FollowerIndexForm extends PureComponent {
     // eslint-disable-next-line no-nested-ternary
     const areAdvancedSettingsVisible = isNew
       ? false
-      : areAdvancedSettingsEdited(followerIndex)
+      : areAdvancedSettingsEdited(followerIndex, documentationLinks)
       ? true
       : false;
 
@@ -163,7 +170,8 @@ export class FollowerIndexForm extends PureComponent {
 
   getFieldsErrors = (newFields) => {
     return Object.keys(newFields).reduce((errors, field) => {
-      const validator = fieldToValidatorMap[field];
+      const advancedSettings = getAdvancedSettingsFields(documentationLinks);
+      const validator = getFieldToValidatorMap(advancedSettings)[field];
       const value = newFields[field];
 
       if (validator) {
@@ -277,17 +285,20 @@ export class FollowerIndexForm extends PureComponent {
     }
 
     // Clear the advanced settings form.
-    this.onFieldsChange(emptyAdvancedSettings);
+    this.onFieldsChange(getEmptyAdvancedSettings(documentationLinks));
 
     // Save a cache of the advanced settings.
     const fields = this.getFields();
-    this.cachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
-      const value = fields[field];
-      if (value !== '') {
-        cache[field] = value;
-      }
-      return cache;
-    }, {});
+    this.cachedAdvancedSettings = getAdvancedSettingsFields(documentationLinks).reduce(
+      (cache, { field }) => {
+        const value = fields[field];
+        if (value !== '') {
+          cache[field] = value;
+        }
+        return cache;
+      },
+      {}
+    );
 
     // Hide the advanced settings.
     this.setState({
@@ -613,7 +624,7 @@ export class FollowerIndexForm extends PureComponent {
           {areAdvancedSettingsVisible && (
             <Fragment>
               <EuiSpacer size="s" />
-              {advancedSettingsFields.map((advancedSetting) => {
+              {getAdvancedSettingsFields(documentationLinks).map((advancedSetting) => {
                 const {
                   field,
                   testSubject,
@@ -716,7 +727,7 @@ export class FollowerIndexForm extends PureComponent {
           <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
-                color="secondary"
+                color="success"
                 iconType="check"
                 onClick={this.sendForm}
                 fill
@@ -783,7 +794,7 @@ export class FollowerIndexForm extends PureComponent {
     if (apiStatus === API_STATUS.SAVING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

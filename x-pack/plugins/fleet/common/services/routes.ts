@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EPM_API_ROOT,
   EPM_API_ROUTES,
@@ -57,6 +59,10 @@ export const epmRouteService = {
   getRemovePath: (pkgkey: string) => {
     return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
   },
+
+  getUpdatePath: (pkgkey: string) => {
+    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -78,6 +84,14 @@ export const packagePolicyRouteService = {
 
   getDeletePath: () => {
     return PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN;
+  },
+
+  getUpgradePath: () => {
+    return PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN;
+  },
+
+  getDryRunPath: () => {
+    return PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN;
   },
 };
 
@@ -132,7 +146,6 @@ export const fleetSetupRouteService = {
 export const agentRouteService = {
   getInfoPath: (agentId: string) => AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
   getUpdatePath: (agentId: string) => AGENT_API_ROUTES.UPDATE_PATTERN.replace('{agentId}', agentId),
-  getEventsPath: (agentId: string) => AGENT_API_ROUTES.EVENTS_PATTERN.replace('{agentId}', agentId),
   getUnenrollPath: (agentId: string) =>
     AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
   getBulkUnenrollPath: () => AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
@@ -162,6 +175,7 @@ export const settingsRoutesService = {
 
 export const appRoutesService = {
   getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
+  getRegenerateServiceTokenPath: () => APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {

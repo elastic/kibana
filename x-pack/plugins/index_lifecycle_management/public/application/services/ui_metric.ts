@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -16,7 +17,6 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import {
   UIM_APP_NAME,
   UIM_CONFIG_COLD_PHASE,
-  UIM_CONFIG_FREEZE_INDEX,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_WARM_PHASE,
   defaultIndexPriority,
@@ -66,10 +66,6 @@ export function getUiMetricsForPhases(phases: Phases): string[] {
           isHotPhasePriorityChanged || isWarmPhasePriorityChanged || isColdPhasePriorityChanged
         );
       },
-    },
-    {
-      metric: UIM_CONFIG_FREEZE_INDEX,
-      isTracked: () => phases.cold && phases.cold.actions.freeze,
     },
   ];
 

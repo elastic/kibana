@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,7 +13,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -23,44 +23,47 @@ import React, { useEffect, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { clearCache } from '../../../../services/rest/callApi';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../../services/rest/createCallApmApi';
 
 const APM_INDEX_LABELS = [
   {
-    configurationName: 'apm_oss.sourcemapIndices',
+    configurationName: 'sourcemap',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.sourcemapIndicesLabel',
       { defaultMessage: 'Sourcemap Indices' }
     ),
   },
   {
-    configurationName: 'apm_oss.errorIndices',
+    configurationName: 'error',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
       defaultMessage: 'Error Indices',
     }),
   },
   {
-    configurationName: 'apm_oss.onboardingIndices',
+    configurationName: 'onboarding',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.onboardingIndicesLabel',
       { defaultMessage: 'Onboarding Indices' }
     ),
   },
   {
-    configurationName: 'apm_oss.spanIndices',
+    configurationName: 'span',
     label: i18n.translate('xpack.apm.settings.apmIndices.spanIndicesLabel', {
       defaultMessage: 'Span Indices',
     }),
   },
   {
-    configurationName: 'apm_oss.transactionIndices',
+    configurationName: 'transaction',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.transactionIndicesLabel',
       { defaultMessage: 'Transaction Indices' }
     ),
   },
   {
-    configurationName: 'apm_oss.metricsIndices',
+    configurationName: 'metric',
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
       defaultMessage: 'Metrics Indices',
     }),
@@ -73,7 +76,8 @@ async function saveApmIndices({
   apmIndices: Record<string, string>;
 }) {
   await callApmApi({
-    endpoint: 'POST /api/apm/settings/apm-indices/save',
+    endpoint: 'POST /internal/apm/settings/apm-indices/save',
+    signal: null,
     params: {
       body: apmIndices,
     },
@@ -82,8 +86,11 @@ async function saveApmIndices({
   clearCache();
 }
 
+type ApiResponse =
+  APIReturnType<`GET /internal/apm/settings/apm-index-settings`>;
+
 // avoid infinite loop by initializing the state outside the component
-const INITIAL_STATE = [] as [];
+const INITIAL_STATE: ApiResponse = { apmIndexSettings: [] };
 
 export function ApmIndices() {
   const { core } = useApmPluginContext();
@@ -97,7 +104,7 @@ export function ApmIndices() {
     (_callApmApi) => {
       if (canSave) {
         return _callApmApi({
-          endpoint: `GET /api/apm/settings/apm-index-settings`,
+          endpoint: `GET /internal/apm/settings/apm-index-settings`,
         });
       }
     },
@@ -106,7 +113,7 @@ export function ApmIndices() {
 
   useEffect(() => {
     setApmIndices(
-      data.reduce(
+      data.apmIndexSettings.reduce(
         (acc, { configurationName, savedValue }) => ({
           ...acc,
           [configurationName]: savedValue,
@@ -138,7 +145,7 @@ export function ApmIndices() {
           }
         ),
       });
-    } catch (error) {
+    } catch (error: any) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.failed.title',
@@ -169,100 +176,104 @@ export function ApmIndices() {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h1>
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.apmIndices.description', {
+          defaultMessage: `The APM UI uses data views to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
+        })}
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <EuiTitle size="s">
+        <h2>
           {i18n.translate('xpack.apm.settings.apmIndices.title', {
             defaultMessage: 'Indices',
           })}
-        </h1>
+        </h2>
       </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiText>
-        {i18n.translate('xpack.apm.settings.apmIndices.description', {
-          defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
-        })}
-      </EuiText>
-      <EuiSpacer size="l" />
-      <EuiPanel>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiForm>
-              {APM_INDEX_LABELS.map(({ configurationName, label }) => {
-                const matchedConfiguration = data.find(
-                  ({ configurationName: configName }) =>
-                    configName === configurationName
-                );
-                const defaultValue = matchedConfiguration
-                  ? matchedConfiguration.defaultValue
-                  : '';
-                const savedUiIndexValue = apmIndices[configurationName] || '';
-                return (
-                  <EuiFormRow
-                    key={configurationName}
-                    label={label}
-                    helpText={i18n.translate(
-                      'xpack.apm.settings.apmIndices.helpText',
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiForm>
+            {APM_INDEX_LABELS.map(({ configurationName, label }) => {
+              const matchedConfiguration = data.apmIndexSettings.find(
+                ({ configurationName: configName }) =>
+                  configName === configurationName
+              );
+              const defaultValue = matchedConfiguration
+                ? matchedConfiguration.defaultValue
+                : '';
+              const savedUiIndexValue = apmIndices[configurationName] || '';
+              return (
+                <EuiFormRow
+                  key={configurationName}
+                  label={label}
+                  helpText={i18n.translate(
+                    'xpack.apm.settings.apmIndices.helpText',
+                    {
+                      defaultMessage:
+                        'Overrides {configurationName}: {defaultValue}',
+                      values: {
+                        configurationName: `xpack.apm.indices.${configurationName}`,
+                        defaultValue,
+                      },
+                    }
+                  )}
+                  fullWidth
+                >
+                  <EuiFieldText
+                    disabled={!canSave}
+                    fullWidth
+                    name={configurationName}
+                    placeholder={defaultValue}
+                    value={savedUiIndexValue}
+                    onChange={handleChangeIndexConfigurationEvent}
+                  />
+                </EuiFormRow>
+              );
+            })}
+            <EuiSpacer />
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={refetch}>
+                  {i18n.translate(
+                    'xpack.apm.settings.apmIndices.cancelButton',
+                    { defaultMessage: 'Cancel' }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    !canSave &&
+                    i18n.translate(
+                      'xpack.apm.settings.apmIndices.noPermissionTooltipLabel',
                       {
                         defaultMessage:
-                          'Overrides {configurationName}: {defaultValue}',
-                        values: { configurationName, defaultValue },
+                          "Your user role doesn't have permissions to change APM indices",
                       }
-                    )}
-                    fullWidth
+                    )
+                  }
+                >
+                  <EuiButton
+                    fill
+                    onClick={handleApplyChangesEvent}
+                    isLoading={isSaving}
+                    isDisabled={!canSave}
                   >
-                    <EuiFieldText
-                      disabled={!canSave}
-                      fullWidth
-                      name={configurationName}
-                      placeholder={defaultValue}
-                      value={savedUiIndexValue}
-                      onChange={handleChangeIndexConfigurationEvent}
-                    />
-                  </EuiFormRow>
-                );
-              })}
-              <EuiSpacer />
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={refetch}>
                     {i18n.translate(
-                      'xpack.apm.settings.apmIndices.cancelButton',
-                      { defaultMessage: 'Cancel' }
+                      'xpack.apm.settings.apmIndices.applyButton',
+                      { defaultMessage: 'Apply changes' }
                     )}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={
-                      !canSave &&
-                      i18n.translate(
-                        'xpack.apm.settings.apmIndices.noPermissionTooltipLabel',
-                        {
-                          defaultMessage:
-                            "Your user role doesn't have permissions to change APM indices",
-                        }
-                      )
-                    }
-                  >
-                    <EuiButton
-                      fill
-                      onClick={handleApplyChangesEvent}
-                      isLoading={isSaving}
-                      isDisabled={!canSave}
-                    >
-                      {i18n.translate(
-                        'xpack.apm.settings.apmIndices.applyButton',
-                        { defaultMessage: 'Apply changes' }
-                      )}
-                    </EuiButton>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiForm>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-      </EuiPanel>
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiForm>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }

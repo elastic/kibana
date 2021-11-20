@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -64,32 +65,32 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: 'time',
+          name: 'Time',
         }),
         expect.objectContaining({
-          name: 'severity',
+          field: 'severity',
         }),
         expect.objectContaining({
-          name: 'detector',
+          name: 'Detector',
         }),
         expect.objectContaining({
           field: 'entityValue',
-          name: 'found for',
+          name: 'Found for',
         }),
         expect.objectContaining({
-          name: 'influenced by',
+          name: 'Influenced by',
         }),
         expect.objectContaining({
-          name: 'actual',
+          field: 'actualSort',
         }),
         expect.objectContaining({
-          name: 'typical',
+          field: 'typicalSort',
         }),
         expect.objectContaining({
-          name: 'description',
+          name: 'Description',
         }),
         expect.objectContaining({
-          name: 'category examples',
+          name: 'Category examples',
         }),
       ])
     );
@@ -119,7 +120,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'found for',
+          name: 'Found for',
         }),
       ])
     );
@@ -149,7 +150,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'influenced by',
+          name: 'Influenced by',
         }),
       ])
     );
@@ -179,7 +180,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'actual',
+          name: 'Actual',
         }),
       ])
     );
@@ -209,7 +210,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.not.arrayContaining([
         expect.objectContaining({
-          name: 'typical',
+          name: 'Typical',
         }),
       ])
     );
@@ -239,7 +240,7 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: 'job ID',
+          name: 'Job ID',
         }),
       ])
     );

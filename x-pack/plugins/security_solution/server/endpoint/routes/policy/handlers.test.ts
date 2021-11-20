@@ -1,45 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
 import { createMockAgentService } from '../../../../../fleet/server/mocks';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
 import {
-  ILegacyScopedClusterClient,
   KibanaResponseFactory,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '../../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
-import { SearchResponse } from 'elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { Agent } from '../../../../../fleet/common/types/models';
 import { AgentService } from '../../../../../fleet/server/services';
+import { get } from 'lodash';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ScopedClusterClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
-  let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
+  let mockScopedClient: ScopedClusterClientMock;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
 
   describe('test policy response handler', () => {
     beforeEach(() => {
-      mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
     });
 
@@ -47,13 +54,11 @@ describe('test policy response handler', () => {
 
     it('should return the latest policy response for a host', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-      });
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
-      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
+      (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ body: response })
+      );
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { agentId: 'id' },
       });
@@ -66,18 +71,16 @@ describe('test policy response handler', () => {
 
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as GetHostPolicyResponse;
-      expect(result.policy_response.agent.id).toEqual(response.hits.hits[0]._source.agent.id);
+      expect(result.policy_response.agent.id).toEqual(
+        get(response, 'hits.hits.0._source.agent.id')
+      );
     });
 
     it('should return not found when there is no response policy for host', async () => {
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-      });
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
-      mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
-        Promise.resolve(createSearchResponse())
+      (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ body: createSearchResponse() })
       );
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -114,7 +117,7 @@ describe('test policy response handler', () => {
     };
 
     beforeEach(() => {
-      mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
@@ -128,7 +131,7 @@ describe('test policy response handler', () => {
 
       agentListResult = {
         agents: [
-          ({
+          {
             local_metadata: {
               elastic: {
                 agent: {
@@ -136,8 +139,8 @@ describe('test policy response handler', () => {
                 },
               },
             },
-          } as unknown) as Agent,
-          ({
+          } as unknown as Agent,
+          {
             local_metadata: {
               elastic: {
                 agent: {
@@ -145,8 +148,8 @@ describe('test policy response handler', () => {
                 },
               },
             },
-          } as unknown) as Agent,
-          ({
+          } as unknown as Agent,
+          {
             local_metadata: {
               elastic: {
                 agent: {
@@ -154,12 +157,13 @@ describe('test policy response handler', () => {
                 },
               },
             },
-          } as unknown) as Agent,
+          } as unknown as Agent,
         ],
         total: 2,
         page: 1,
         perPage: 1,
       };
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...createMockEndpointAppContextServiceStartContract(),
         ...{ agentService: mockAgentService },
@@ -177,6 +181,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -207,6 +212,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -236,8 +242,8 @@ describe('test policy response handler', () => {
  */
 function createSearchResponse(
   hostPolicyResponse?: HostPolicyResponse
-): SearchResponse<HostPolicyResponse> {
-  return ({
+): estypes.SearchResponse<HostPolicyResponse> {
+  return {
     took: 15,
     timed_out: false,
     _shards: {
@@ -264,5 +270,5 @@ function createSearchResponse(
           ]
         : [],
     },
-  } as unknown) as SearchResponse<HostPolicyResponse>;
+  } as unknown as estypes.SearchResponse<HostPolicyResponse>;
 }

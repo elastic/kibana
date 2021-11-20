@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -28,6 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
   ]);
 
+  const xyChartSelector = 'visTypeXyChart';
+
   // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
 
   describe('Shakespeare', function describeIndexTests() {
@@ -46,13 +48,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await security.testUser.setRoles(['kibana_admin', 'test_shakespeare_reader']);
-      await esArchiver.load('empty_kibana', { skipExisting: true });
+      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana', {
+        skipExisting: true,
+      });
       log.debug('Load shakespeare data');
-      await esArchiver.loadIfNeeded('getting_started/shakespeare');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/getting_started/shakespeare'
+      );
 
       if (isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': false,
+          'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
       }
@@ -60,6 +66,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
+      await esArchiver.unload('test/functional/fixtures/es_archiver/getting_started/shakespeare');
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should create shakespeare index pattern', async function () {
@@ -85,11 +93,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Remove refresh click when vislib is removed
       // https://github.com/elastic/kibana/issues/56143
-      await PageObjects.visualize.clickRefresh();
+      await PageObjects.visualize.clickRefresh(true);
 
       const expectedChartValues = [111396];
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData('Count');
+        const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Count');
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         expect(data[0] - expectedChartValues[0]).to.be.lessThan(5);
@@ -116,12 +124,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
       const expectedChartValues = [935];
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData('Speaking Parts');
+        const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Speaking Parts');
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         expect(data).to.eql(expectedChartValues);
       });
-      const title = await PageObjects.visChart.getYAxisTitle();
+      const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
       expect(title).to.be('Speaking Parts');
     });
 
@@ -142,13 +150,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const expectedChartValues = [71, 65, 62, 55, 55];
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData('Speaking Parts');
+        const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Speaking Parts');
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         expect(data).to.eql(expectedChartValues);
       });
 
-      const labels = await PageObjects.visChart.getXAxisLabels();
+      const labels = await PageObjects.visChart.getXAxisLabels(xyChartSelector);
       expect(labels).to.eql([
         'Richard III',
         'Henry VI Part 2',
@@ -180,8 +188,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const expectedChartValues = [71, 65, 62, 55, 55];
       const expectedChartValues2 = [177, 106, 153, 132, 162];
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData('Speaking Parts');
-        const data2 = await PageObjects.visChart.getBarChartData('Max Speaking Parts');
+        const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Speaking Parts');
+        const data2 = await PageObjects.visChart.getBarChartData(
+          xyChartSelector,
+          'Max Speaking Parts'
+        );
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         log.debug('data2=' + data2);
@@ -190,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(data2).to.eql(expectedChartValues2);
       });
 
-      const labels = await PageObjects.visChart.getXAxisLabels();
+      const labels = await PageObjects.visChart.getXAxisLabels(xyChartSelector);
       expect(labels).to.eql([
         'Richard III',
         'Henry VI Part 2',
@@ -213,8 +224,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const expectedChartValues = [71, 65, 62, 55, 55];
       const expectedChartValues2 = [177, 106, 153, 132, 162];
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData('Speaking Parts');
-        const data2 = await PageObjects.visChart.getBarChartData('Max Speaking Parts');
+        const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Speaking Parts');
+        const data2 = await PageObjects.visChart.getBarChartData(
+          xyChartSelector,
+          'Max Speaking Parts'
+        );
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         log.debug('data2=' + data2);
@@ -236,17 +250,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
 
       // same values as previous test except scaled down by the 50 for Y-Axis min
-      const expectedChartValues = await PageObjects.visChart.getExpectedValue(
-        [21, 15, 12, 5, 5],
-        [71, 65, 62, 55, 55] // no scaled values in elastic-charts
-      );
-      const expectedChartValues2 = await PageObjects.visChart.getExpectedValue(
-        [127, 56, 103, 82, 112],
-        [177, 106, 153, 132, 162] // no scaled values in elastic-charts
-      );
+      const expectedChartValues = [71, 65, 62, 55, 55];
+      const expectedChartValues2 = [177, 106, 153, 132, 162];
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData('Speaking Parts');
-        const data2 = await PageObjects.visChart.getBarChartData('Max Speaking Parts');
+        const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Speaking Parts');
+        const data2 = await PageObjects.visChart.getBarChartData(
+          xyChartSelector,
+          'Max Speaking Parts'
+        );
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         log.debug('data2=' + data2);

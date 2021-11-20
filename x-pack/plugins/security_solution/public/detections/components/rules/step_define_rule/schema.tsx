@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash';
@@ -9,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 
+import { fromKueryExpression } from '@kbn/es-query';
 import {
   singleEntryThreat,
   containsInvalidItems,
+  customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import { isThreatMatchRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { esKuery } from '../../../../../../../../src/plugins/data/public';
 import { FieldValueQueryBar } from '../query_bar';
 import {
   ERROR_CODE,
@@ -105,7 +107,7 @@ export const schema: FormSchema<DefineStepRule> = {
 
           if (!isEmpty(query.query as string) && query.language === 'kuery') {
             try {
-              esKuery.fromKueryExpression(query.query);
+              fromKueryExpression(query.query);
             } catch (err) {
               return {
                 code: 'ERR_FIELD_FORMAT',
@@ -196,15 +198,37 @@ export const schema: FormSchema<DefineStepRule> = {
       label: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldLabel',
         {
-          defaultMessage: 'Field',
+          defaultMessage: 'Group by',
         }
       ),
       helpText: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldHelpText',
         {
-          defaultMessage: 'Select a field to group results by',
+          defaultMessage: "Select fields to group by. Fields are joined together with 'AND'",
         }
       ),
+      validations: [
+        {
+          validator: (
+            ...args: Parameters<ValidationFunc>
+          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+            const [{ formData }] = args;
+            const needsValidation = isThresholdRule(formData.ruleType);
+            if (!needsValidation) {
+              return;
+            }
+            return fieldValidators.maxLengthField({
+              length: 3,
+              message: i18n.translate(
+                'xpack.securitySolution.detectionEngine.validations.thresholdFieldFieldData.arrayLengthGreaterThanMaxErrorMessage',
+                {
+                  defaultMessage: 'Number of fields must be 3 or less.',
+                }
+              ),
+            })(...args);
+          },
+        },
+      ],
     },
     value: {
       type: FIELD_TYPES.NUMBER,
@@ -238,6 +262,86 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       ],
     },
+    cardinality: {
+      field: {
+        defaultValue: [],
+        fieldsToValidateOnChange: ['threshold.cardinality.field', 'threshold.cardinality.value'],
+        type: FIELD_TYPES.COMBO_BOX,
+        label: i18n.translate(
+          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityFieldLabel',
+          {
+            defaultMessage: 'Count',
+          }
+        ),
+        validations: [
+          {
+            validator: (
+              ...args: Parameters<ValidationFunc>
+            ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+              const [{ formData }] = args;
+              const needsValidation = isThresholdRule(formData.ruleType);
+              if (!needsValidation) {
+                return;
+              }
+              if (
+                isEmpty(formData['threshold.cardinality.field']) &&
+                !isEmpty(formData['threshold.cardinality.value'])
+              ) {
+                return fieldValidators.emptyField(
+                  i18n.translate(
+                    'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityFieldFieldData.thresholdCardinalityFieldNotSuppliedMessage',
+                    {
+                      defaultMessage: 'A Cardinality Field is required.',
+                    }
+                  )
+                )(...args);
+              }
+            },
+          },
+        ],
+        helpText: i18n.translate(
+          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldCardinalityFieldHelpText',
+          {
+            defaultMessage: 'Select a field to check cardinality',
+          }
+        ),
+      },
+      value: {
+        fieldsToValidateOnChange: ['threshold.cardinality.field', 'threshold.cardinality.value'],
+        type: FIELD_TYPES.NUMBER,
+        label: i18n.translate(
+          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityValueFieldLabel',
+          {
+            defaultMessage: 'Unique values',
+          }
+        ),
+        validations: [
+          {
+            validator: (
+              ...args: Parameters<ValidationFunc>
+            ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+              const [{ formData }] = args;
+              const needsValidation = isThresholdRule(formData.ruleType);
+              if (!needsValidation) {
+                return;
+              }
+              if (!isEmpty(formData['threshold.cardinality.field'])) {
+                return fieldValidators.numberGreaterThanField({
+                  than: 1,
+                  message: i18n.translate(
+                    'xpack.securitySolution.detectionEngine.validations.thresholdCardinalityValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
+                    {
+                      defaultMessage: 'Value must be greater than or equal to one.',
+                    }
+                  ),
+                  allowEquality: true,
+                })(...args);
+              }
+            },
+          },
+        ],
+      },
+    },
   },
   threatIndex: {
     type: FIELD_TYPES.COMBO_BOX,
@@ -266,6 +370,19 @@ export const schema: FormSchema<DefineStepRule> = {
               }
             )
           )(...args);
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData, value }] = args;
+          const needsValidation = isThreatMatchRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+
+          return customValidators.forbiddenField(value, '*');
         },
       },
     ],
@@ -348,7 +465,7 @@ export const schema: FormSchema<DefineStepRule> = {
 
           if (!isEmpty(query.query as string) && query.language === 'kuery') {
             try {
-              esKuery.fromKueryExpression(query.query);
+              fromKueryExpression(query.query);
             } catch (err) {
               return {
                 code: 'ERR_FIELD_FORMAT',

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,17 +23,17 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'etcdMetrics',
     name: i18n.translate('home.tutorials.etcdMetrics.nameTitle', {
-      defaultMessage: 'Etcd metrics',
+      defaultMessage: 'Etcd Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.etcdMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Etcd server.',
+      defaultMessage: 'Collect metrics from Etcd servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.etcdMetrics.longDescription', {
       defaultMessage:
-        'The `etcd` Metricbeat module fetches internal metrics from Etcd. \
+        'The `etcd` Metricbeat module fetches metrics from Etcd. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-etcd.html',
@@ -56,5 +56,6 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['elastic_stack', 'datastore'],
   };
 }

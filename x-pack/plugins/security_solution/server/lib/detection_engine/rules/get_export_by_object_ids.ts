@@ -1,16 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { chunk } from 'lodash';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
+
+import { Logger } from 'src/core/server';
+import { ExceptionListClient } from '../../../../../lists/server';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { AlertsClient } from '../../../../../alerts/server';
+import { RulesClient, AlertServices } from '../../../../../alerting/server';
+
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
+
 import { isAlertType } from '../rules/types';
-import { readRules } from './read_rules';
 import { transformAlertToRule } from '../routes/rules/utils';
-import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
+import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
+import { findRules } from './find_rules';
+import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
+
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetBulkRuleActionsSavedObject } from '../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 
 interface ExportSuccessRule {
   statusCode: 200;
@@ -22,8 +34,6 @@ interface ExportFailedRule {
   missingRuleId: { rule_id: string };
 }
 
-type ExportRules = ExportSuccessRule | ExportFailedRule;
-
 export interface RulesErrors {
   exportedCount: number;
   missingRules: Array<{ rule_id: string }>;
@@ -31,49 +41,101 @@ export interface RulesErrors {
 }
 
 export const getExportByObjectIds = async (
-  alertsClient: AlertsClient,
-  objects: Array<{ rule_id: string }>
+  rulesClient: RulesClient,
+  exceptionsClient: ExceptionListClient | undefined,
+  savedObjectsClient: AlertServices['savedObjectsClient'],
+  objects: Array<{ rule_id: string }>,
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
+  exceptionLists: string | null;
 }> => {
-  const rulesAndErrors = await getRulesFromObjects(alertsClient, objects);
+  const rulesAndErrors = await getRulesFromObjects(
+    rulesClient,
+    savedObjectsClient,
+    objects,
+    logger,
+    isRuleRegistryEnabled
+  );
+
+  // Retrieve exceptions
+  const exceptions = rulesAndErrors.rules.flatMap((rule) => rule.exceptions_list ?? []);
+  const { exportData: exceptionLists, exportDetails: exceptionDetails } =
+    await getRuleExceptionsForExport(exceptions, exceptionsClient);
+
   const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
-  const exportDetails = getExportDetailsNdjson(rulesAndErrors.rules, rulesAndErrors.missingRules);
-  return { rulesNdjson, exportDetails };
+  const exportDetails = getExportDetailsNdjson(
+    rulesAndErrors.rules,
+    rulesAndErrors.missingRules,
+    exceptionDetails
+  );
+
+  return {
+    rulesNdjson,
+    exportDetails,
+    exceptionLists,
+  };
 };
 
 export const getRulesFromObjects = async (
-  alertsClient: AlertsClient,
-  objects: Array<{ rule_id: string }>
+  rulesClient: RulesClient,
+  savedObjectsClient: AlertServices['savedObjectsClient'],
+  objects: Array<{ rule_id: string }>,
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
 ): Promise<RulesErrors> => {
-  const alertsAndErrors = await Promise.all(
-    objects.reduce<Array<Promise<ExportRules>>>((accumPromise, object) => {
-      const exportWorkerPromise = new Promise<ExportRules>(async (resolve) => {
-        try {
-          const rule = await readRules({ alertsClient, ruleId: object.rule_id, id: undefined });
-          if (rule != null && isAlertType(rule) && rule.params.immutable !== true) {
-            const transformedRule = transformAlertToRule(rule);
-            resolve({
-              statusCode: 200,
-              rule: transformedRule,
-            });
-          } else {
-            resolve({
-              statusCode: 404,
-              missingRuleId: { rule_id: object.rule_id },
-            });
-          }
-        } catch {
-          resolve({
-            statusCode: 404,
-            missingRuleId: { rule_id: object.rule_id },
-          });
-        }
-      });
-      return [...accumPromise, exportWorkerPromise];
-    }, [])
-  );
+  // If we put more than 1024 ids in one block like "alert.attributes.tags: (id1 OR id2 OR ... OR id1100)"
+  // then the KQL -> ES DSL query generator still puts them all in the same "should" array, but ES defaults
+  // to limiting the length of "should" arrays to 1024. By chunking the array into blocks of 1024 ids,
+  // we can force the KQL -> ES DSL query generator into grouping them in blocks of 1024.
+  // The generated KQL query here looks like
+  // "alert.attributes.tags: (id1 OR id2 OR ... OR id1024) OR alert.attributes.tags: (...) ..."
+  const chunkedObjects = chunk(objects, 1024);
+  const filter = chunkedObjects
+    .map((chunkedArray) => {
+      const joinedIds = chunkedArray
+        .map((object) => `"${INTERNAL_RULE_ID_KEY}:${object.rule_id}"`)
+        .join(' OR ');
+      return `alert.attributes.tags: (${joinedIds})`;
+    })
+    .join(' OR ');
+  const rules = await findRules({
+    isRuleRegistryEnabled,
+    rulesClient,
+    filter,
+    page: 1,
+    fields: undefined,
+    perPage: 10000,
+    sortField: undefined,
+    sortOrder: undefined,
+  });
+  const alertIds = rules.data.map((rule) => rule.id);
+  const legacyActions = await legacyGetBulkRuleActionsSavedObject({
+    alertIds,
+    savedObjectsClient,
+    logger,
+  });
+
+  const alertsAndErrors = objects.map(({ rule_id: ruleId }) => {
+    const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
+    if (
+      matchingRule != null &&
+      isAlertType(isRuleRegistryEnabled, matchingRule) &&
+      matchingRule.params.immutable !== true
+    ) {
+      return {
+        statusCode: 200,
+        rule: transformAlertToRule(matchingRule, undefined, legacyActions[matchingRule.id]),
+      };
+    } else {
+      return {
+        statusCode: 404,
+        missingRuleId: { rule_id: ruleId },
+      };
+    }
+  });
 
   const missingRules = alertsAndErrors.filter(
     (resp) => resp.statusCode === 404

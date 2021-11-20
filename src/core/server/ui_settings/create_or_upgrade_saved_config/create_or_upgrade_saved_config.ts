@@ -1,18 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { defaults } from 'lodash';
 
 import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { SavedObjectsErrorHelpers } from '../../saved_objects/';
-import { Logger } from '../../logging';
+import { Logger, LogMeta } from '../../logging';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
+
+interface ConfigLogMeta extends LogMeta {
+  kibana: {
+    config: { prevVersion: string; newVersion: string };
+  };
+}
 
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
@@ -60,9 +66,13 @@ export async function createOrUpgradeSavedConfig(
   }
 
   if (upgradeableConfig) {
-    log.debug(`Upgrade config from ${upgradeableConfig.id} to ${version}`, {
-      prevVersion: upgradeableConfig.id,
-      newVersion: version,
+    log.debug<ConfigLogMeta>(`Upgrade config from ${upgradeableConfig.id} to ${version}`, {
+      kibana: {
+        config: {
+          prevVersion: upgradeableConfig.id,
+          newVersion: version,
+        },
+      },
     });
   }
 }

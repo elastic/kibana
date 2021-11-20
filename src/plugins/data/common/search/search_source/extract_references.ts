@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectReference } from 'src/core/types';
-import { Filter } from '../../es_query/filters';
+import { Filter } from '@kbn/es-query';
 import { SearchSourceFields } from './types';
+
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../data/common';
 
 export const extractReferences = (
   state: SearchSourceFields
@@ -16,11 +18,11 @@ export const extractReferences = (
   let searchSourceFields: SearchSourceFields & { indexRefName?: string } = { ...state };
   const references: SavedObjectReference[] = [];
   if (searchSourceFields.index) {
-    const indexId = searchSourceFields.index.id || ((searchSourceFields.index as any) as string);
+    const indexId = searchSourceFields.index.id || (searchSourceFields.index as any as string);
     const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     references.push({
       name: refName,
-      type: 'index-pattern',
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       id: indexId,
     });
     searchSourceFields = {
@@ -40,7 +42,7 @@ export const extractReferences = (
         const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
         references.push({
           name: refName,
-          type: 'index-pattern',
+          type: DATA_VIEW_SAVED_OBJECT_TYPE,
           id: filterRow.meta.index,
         });
         return {

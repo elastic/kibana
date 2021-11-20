@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -14,29 +17,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
+  const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
   async function getAlertsByName(name: string) {
     const {
       body: { data: alerts },
-    } = await supertest.get(`/api/alerts/_find?search=${name}&search_fields=name`).expect(200);
+    } = await supertest
+      .get(`/api/alerting/rules/_find?search=${name}&search_fields=name`)
+      .expect(200);
 
     return alerts;
   }
 
   async function deleteAlerts(alertIds: string[]) {
-    alertIds.forEach(async (alertId: string) => {
-      await supertest.delete(`/api/alerts/alert/${alertId}`).set('kbn-xsrf', 'foo').expect(204, '');
+    await asyncForEach(alertIds, async (alertId: string) => {
+      await supertest
+        .delete(`/api/alerting/rule/${alertId}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204, '');
     });
   }
 
-  async function defineAlert(alertName: string) {
+  async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('alertNameInput', alertName);
-    await testSubjects.click('.index-threshold-SelectOption');
+    await testSubjects.click(`.es-query-SelectOption`);
     await testSubjects.click('selectIndexExpression');
-    const comboBox = await find.byCssSelector('#indexSelectSearchBox');
-    await comboBox.click();
-    await comboBox.type('k');
+    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
+    await indexComboBox.click();
+    await indexComboBox.type('k');
     const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
     await filterSelectItem.click();
     await testSubjects.click('thresholdAlertTimeFieldSelect');
@@ -51,21 +61,60 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await nameInput.click();
   }
 
+  async function defineIndexThresholdAlert(alertName: string) {
+    await pageObjects.triggersActionsUI.clickCreateAlertButton();
+    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.click(`.index-threshold-SelectOption`);
+    await testSubjects.click('selectIndexExpression');
+    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
+    await indexComboBox.click();
+    await indexComboBox.type('k');
+    const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
+    await filterSelectItem.click();
+    await testSubjects.click('thresholdAlertTimeFieldSelect');
+    await retry.try(async () => {
+      const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
+      expect(fieldOptions[1]).not.to.be(undefined);
+      await fieldOptions[1].click();
+    });
+    await testSubjects.click('closePopover');
+    // need this two out of popup clicks to close them
+    const nameInput = await testSubjects.find('alertNameInput');
+    await nameInput.click();
+
+    await testSubjects.click('whenExpression');
+    await testSubjects.click('whenExpressionSelect');
+    await retry.try(async () => {
+      const aggTypeOptions = await find.allByCssSelector('#aggTypeField option');
+      expect(aggTypeOptions[1]).not.to.be(undefined);
+      await aggTypeOptions[1].click();
+    });
+
+    await testSubjects.click('ofExpressionPopover');
+    const ofComboBox = await find.byCssSelector('#ofField');
+    await ofComboBox.click();
+    const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+    const ofOptions = ofOptionsString.trim().split('\n');
+    expect(ofOptions.length > 0).to.be(true);
+    await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
+  }
+
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('alertNameInput', alertName);
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  describe('create alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/89397
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('alertsTab');
+      await testSubjects.click('rulesTab');
     });
 
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
-      await defineAlert(alertName);
+      await defineIndexThresholdAlert(alertName);
 
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
@@ -89,32 +138,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await testSubjects.setValue('messageTextArea', 'test message ');
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-alertActionGroup');
+      await testSubjects.click('variableMenuButton-alert.actionGroup');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{alertActionGroup}}'
+        'test message {{alert.actionGroup}}'
       );
       await messageTextArea.type(' some additional text ');
 
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-alertId');
+      await testSubjects.click('variableMenuButton-rule.id');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{alertActionGroup}} some additional text {{alertId}}'
+        'test message {{alert.actionGroup}} some additional text {{rule.id}}'
       );
 
       await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Index threshold',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Index threshold`,
+        tags: '',
+        interval: '1 min',
+      });
+      expect(searchResultAfterSave.duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -155,17 +203,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Always Firing',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Always Firing`,
+        tags: '',
+        interval: '1 min',
+      });
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -188,17 +234,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('confirmAlertSaveModal');
 
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterSave).to.eql([
-        {
-          name: alertName,
-          tagsText: '',
-          alertType: 'Always Firing',
-          interval: '1m',
-        },
-      ]);
+      const searchResultAfterSave = searchResultsAfterSave[0];
+      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+        name: `${alertName}Always Firing`,
+        tags: '',
+        interval: '1 min',
+      });
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
@@ -216,6 +261,55 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('confirmAlertCloseModal');
       await testSubjects.click('confirmAlertCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmAlertCloseModal');
+    });
+
+    it('should successfully test valid es_query alert', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
+
+      // Valid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.existOrFail('testQuerySuccess');
+      await testSubjects.missingOrFail('testQueryError');
+
+      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.existOrFail('confirmAlertCloseModal');
+      await testSubjects.click('confirmAlertCloseModal > confirmModalConfirmButton');
+    });
+
+    it('should show error when es_query is invalid', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
+
+      // Invalid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.missingOrFail('testQuerySuccess');
+      await testSubjects.existOrFail('testQueryError');
+    });
+
+    it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.setValue('alertNameInput', 'alertName');
+      const ruleTypeSearchBox = await find.byCssSelector('[data-test-subj="alertSearchField"]');
+      await ruleTypeSearchBox.type('notexisting rule type');
+      await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
+
+      const ruleTypes = await find.allByCssSelector('.triggersActionsUI__alertTypeNodeHeading');
+      expect(ruleTypes).to.have.length(0);
+
+      const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
+      await searchClearButton.click();
+
+      const ruleTypesClearFilter = await find.allByCssSelector(
+        '.triggersActionsUI__alertTypeNodeHeading'
+      );
+      expect(ruleTypesClearFilter.length).to.above(0);
     });
   });
 };

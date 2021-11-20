@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import chunk from 'lodash/fp/chunk';
@@ -10,61 +11,59 @@ import { getThreatList, getThreatListCount } from './get_threat_list';
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
-import { combineConcurrentResults } from './utils';
+import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
+import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
-  threatMapping,
-  query,
-  inputIndex,
-  type,
-  filters,
-  language,
-  savedId,
-  services,
+  alertId,
+  buildRuleMessage,
+  bulkCreate,
+  completeRule,
+  concurrentSearches,
+  eventsTelemetry,
   exceptionItems,
-  gap,
-  previousStartedAt,
+  filters,
+  inputIndex,
+  itemsPerSearch,
+  language,
   listClient,
   logger,
-  eventsTelemetry,
-  alertId,
   outputIndex,
-  params,
+  query,
+  savedId,
   searchAfterSize,
-  actions,
-  createdBy,
-  createdAt,
-  updatedBy,
-  interval,
-  updatedAt,
-  enabled,
-  refresh,
-  tags,
-  throttle,
+  services,
   threatFilters,
-  threatQuery,
-  threatLanguage,
-  buildRuleMessage,
   threatIndex,
-  name,
-  concurrentSearches,
-  itemsPerSearch,
+  threatIndicatorPath,
+  threatLanguage,
+  threatMapping,
+  threatQuery,
+  tuple,
+  type,
+  wrapHits,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const params = completeRule.ruleParams;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
+  const verifyExecutionCanProceed = buildExecutionIntervalValidator(
+    completeRule.ruleConfig.schedule.interval
+  );
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
+    warning: false,
     bulkCreateTimes: [],
     searchAfterTimes: [],
     lastLookBackDate: null,
     createdSignalsCount: 0,
     createdSignals: [],
     errors: [],
+    warningMessages: [],
   };
 
   let threatListCount = await getThreatListCount({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -74,7 +73,7 @@ export const createThreatSignals = async ({
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
   let threatList = await getThreatList({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -89,44 +88,49 @@ export const createThreatSignals = async ({
     perPage,
   });
 
+  const threatEnrichment = buildThreatEnrichment({
+    buildRuleMessage,
+    exceptionItems,
+    listClient,
+    logger,
+    services,
+    threatFilters,
+    threatIndex,
+    threatIndicatorPath,
+    threatLanguage,
+    threatQuery,
+  });
+
   while (threatList.hits.hits.length !== 0) {
+    verifyExecutionCanProceed();
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
-          threatMapping,
-          query,
-          inputIndex,
-          type,
-          filters,
-          language,
-          savedId,
-          services,
+          alertId,
+          buildRuleMessage,
+          bulkCreate,
+          completeRule,
+          currentResult: results,
+          currentThreatList: slicedChunk,
+          eventsTelemetry,
           exceptionItems,
-          gap,
-          previousStartedAt,
+          filters,
+          inputIndex,
+          language,
           listClient,
           logger,
-          eventsTelemetry,
-          alertId,
           outputIndex,
-          params,
+          query,
+          savedId,
           searchAfterSize,
-          actions,
-          createdBy,
-          createdAt,
-          updatedBy,
-          updatedAt,
-          interval,
-          enabled,
-          tags,
-          refresh,
-          throttle,
-          buildRuleMessage,
-          name,
-          currentThreatList: slicedChunk,
-          currentResult: results,
+          services,
+          threatEnrichment,
+          threatMapping,
+          tuple,
+          type,
+          wrapHits,
         })
     );
     const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
@@ -151,12 +155,13 @@ export const createThreatSignals = async ({
     logger.debug(buildRuleMessage(`Indicator items left to check are ${threatListCount}`));
 
     threatList = await getThreatList({
-      callCluster: services.callCluster,
+      esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
       query: threatQuery,
       language: threatLanguage,
       threatFilters,
       index: threatIndex,
+      // @ts-expect-error@elastic/elasticsearch SearchSortResults might contain null
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
       sortField: undefined,
       sortOrder: undefined,

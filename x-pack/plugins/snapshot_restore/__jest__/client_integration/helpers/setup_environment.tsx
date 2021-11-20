@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
@@ -19,7 +21,6 @@ import { AppContextProvider } from '../../../public/application/app_context';
 import { textService } from '../../../public/application/services/text';
 import { init as initHttpRequests } from './http_requests';
 import { UiMetricService } from '../../../public/application/services';
-import { documentationLinksService } from '../../../public/application/services/documentation';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
@@ -38,7 +39,7 @@ export const services = {
 setUiMetricService(services.uiMetricService);
 
 const appDependencies = {
-  core: coreMock.createSetup(),
+  core: coreMock.createStart(),
   services,
   config: {
     slm_ui: { enabled: true },
@@ -51,7 +52,6 @@ export const setupEnvironment = () => {
   httpService.setup(mockHttpClient);
   breadcrumbService.setup(() => undefined);
   textService.setup(i18n);
-  documentationLinksService.setup({} as any);
   docTitleService.setup(() => undefined);
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
@@ -70,8 +70,9 @@ export const setupEnvironment = () => {
   this.terminate = () => {};
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <AppContextProvider value={appDependencies as any}>
-    <Comp {...props} />
-  </AppContextProvider>
-);
+export const WithAppDependencies = (Comp: any) => (props: any) =>
+  (
+    <AppContextProvider value={appDependencies as any}>
+      <Comp {...props} />
+    </AppContextProvider>
+  );

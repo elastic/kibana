@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
@@ -29,7 +32,7 @@ export const initValidateLogAnalysisDatasetsRoute = ({
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       try {
         const {
-          data: { indices, timestampField, startTime, endTime },
+          data: { indices, timestampField, startTime, endTime, runtimeMappings },
         } = request.body;
 
         const datasets = await Promise.all(
@@ -39,7 +42,8 @@ export const initValidateLogAnalysisDatasetsRoute = ({
               timestampField,
               indexName,
               startTime,
-              endTime
+              endTime,
+              runtimeMappings as estypes.MappingRuntimeFields
             );
 
             return {

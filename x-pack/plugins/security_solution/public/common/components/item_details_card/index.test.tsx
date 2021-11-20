@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -58,8 +60,8 @@ describe('item_details_card', () => {
           <ItemDetailsAction size="s" color="primary">
             {'primary'}
           </ItemDetailsAction>
-          <ItemDetailsAction size="s" color="secondary">
-            {'secondary'}
+          <ItemDetailsAction size="s" color="success">
+            {'success'}
           </ItemDetailsAction>
           <ItemDetailsAction size="s" color="danger">
             {'danger'}

@@ -1,22 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '../../../../triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from './types';
 
 export const validateExpression = (alertParams: GeoContainmentAlertParams): ValidationResult => {
-  const {
-    index,
-    geoField,
-    entity,
-    dateField,
-    boundaryType,
-    boundaryIndexTitle,
-    boundaryGeoField,
-  } = alertParams;
+  const { index, geoField, entity, dateField, boundaryType, boundaryIndexTitle, boundaryGeoField } =
+    alertParams;
   const validationResult = { errors: {} };
   const errors = {
     index: new Array<string>(),
@@ -34,7 +29,7 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
   if (!index) {
     errors.index.push(
       i18n.translate('xpack.stackAlerts.geoContainment.error.requiredIndexTitleText', {
-        defaultMessage: 'Index pattern is required.',
+        defaultMessage: 'Data view is required.',
       })
     );
   }
@@ -74,7 +69,7 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
   if (!boundaryIndexTitle) {
     errors.boundaryIndexTitle.push(
       i18n.translate('xpack.stackAlerts.geoContainment.error.requiredBoundaryIndexTitleText', {
-        defaultMessage: 'Boundary index pattern title is required.',
+        defaultMessage: 'Boundary data view title is required.',
       })
     );
   }

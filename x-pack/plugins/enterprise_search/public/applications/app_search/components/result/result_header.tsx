@@ -1,13 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { ResultActions } from './result_actions';
 import { ResultHeaderItem } from './result_header_item';
-import { ResultMeta } from './types';
+import { ResultMeta, ResultAction } from './types';
 
 import './result_header.scss';
 
@@ -15,33 +21,76 @@ interface Props {
   showScore: boolean;
   isMetaEngine: boolean;
   resultMeta: ResultMeta;
+  actions: ResultAction[];
+  documentLink?: string;
+  resultPosition?: number;
 }
 
-export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta, isMetaEngine }) => {
+export const ResultHeader: React.FC<Props> = ({
+  showScore,
+  resultMeta,
+  isMetaEngine,
+  actions,
+  documentLink,
+  resultPosition,
+}) => {
   return (
     <header className="appSearchResultHeader">
-      {showScore && (
-        <div className="appSearchResultHeader__column">
-          <ResultHeaderItem
-            data-test-subj="ResultScore"
-            field="score"
-            value={resultMeta.score}
-            type="score"
-          />
-        </div>
-      )}
-
-      <div className="appSearchResultHeader__column">
-        {isMetaEngine && (
-          <ResultHeaderItem
-            data-test-subj="ResultEngine"
-            field="engine"
-            value={resultMeta.engine}
-            type="string"
-          />
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        responsive={false}
+        wrap
+      >
+        {typeof resultPosition !== 'undefined' && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.result.resultPositionLabel"
+                defaultMessage="#{resultPosition}"
+                values={{
+                  resultPosition,
+                }}
+              />
+            </EuiBadge>
+          </EuiFlexItem>
         )}
-        <ResultHeaderItem data-test-subj="ResultId" field="id" value={resultMeta.id} type="id" />
-      </div>
+        <EuiFlexItem grow>
+          <ResultHeaderItem
+            href={documentLink}
+            data-test-subj="ResultId"
+            field="ID"
+            value={resultMeta.id}
+            type="id"
+          />
+        </EuiFlexItem>
+        {showScore && (
+          <EuiFlexItem grow={false}>
+            <ResultHeaderItem
+              data-test-subj="ResultScore"
+              field="Score"
+              value={resultMeta.score}
+              type="score"
+            />
+          </EuiFlexItem>
+        )}
+        {isMetaEngine && (
+          <EuiFlexItem grow={false}>
+            <ResultHeaderItem
+              data-test-subj="ResultEngine"
+              field="Engine"
+              value={resultMeta.engine}
+              type="string"
+            />
+          </EuiFlexItem>
+        )}
+        {actions.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <ResultActions actions={actions} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </header>
   );
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -23,22 +24,22 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
 
     it(`alert with notifyWhen=onActiveAlert should always execute actions `, async () => {
       const { body: defaultAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My Default Action',
-          actionTypeId: 'test.noop',
+          connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         })
         .expect(200);
 
       const { body: recoveredAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My Recovered Action',
-          actionTypeId: 'test.noop',
+          connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         })
@@ -51,15 +52,15 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         active ? 'default' : 'recovered'
       );
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.patternFiring',
+            rule_type_id: 'test.patternFiring',
             params: { pattern },
             schedule: { interval: '1s' },
             throttle: null,
-            notifyWhen: 'onActiveAlert',
+            notify_when: 'onActiveAlert',
             actions: [
               {
                 id: defaultAction.id,
@@ -75,7 +76,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           })
         )
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       const events = await retry.try(async () => {
         return await getEventLog({
@@ -100,22 +101,22 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
 
     it(`alert with notifyWhen=onActionGroupChange should execute actions when action group changes`, async () => {
       const { body: defaultAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My Default Action',
-          actionTypeId: 'test.noop',
+          connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         })
         .expect(200);
 
       const { body: recoveredAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My Recovered Action',
-          actionTypeId: 'test.noop',
+          connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         })
@@ -127,15 +128,15 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       const expectedActionGroupBasedOnPattern = ['default', 'recovered', 'default', 'recovered'];
 
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.patternFiring',
+            rule_type_id: 'test.patternFiring',
             params: { pattern },
             schedule: { interval: '1s' },
             throttle: null,
-            notifyWhen: 'onActionGroupChange',
+            notify_when: 'onActionGroupChange',
             actions: [
               {
                 id: defaultAction.id,
@@ -151,7 +152,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           })
         )
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       const events = await retry.try(async () => {
         return await getEventLog({
@@ -176,22 +177,22 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
 
     it(`alert with notifyWhen=onActionGroupChange should only execute actions when action subgroup changes`, async () => {
       const { body: defaultAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My Default Action',
-          actionTypeId: 'test.noop',
+          connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         })
         .expect(200);
 
       const { body: recoveredAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My Recovered Action',
-          actionTypeId: 'test.noop',
+          connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         })
@@ -218,15 +219,15 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       ];
 
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.patternFiring',
+            rule_type_id: 'test.patternFiring',
             params: { pattern },
             schedule: { interval: '1s' },
             throttle: null,
-            notifyWhen: 'onActionGroupChange',
+            notify_when: 'onActionGroupChange',
             actions: [
               {
                 id: defaultAction.id,
@@ -242,7 +243,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           })
         )
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       const events = await retry.try(async () => {
         return await getEventLog({

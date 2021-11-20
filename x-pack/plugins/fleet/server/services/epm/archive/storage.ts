@@ -1,29 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { extname } from 'path';
+
 import { uniq } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
-import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
-import {
-  ASSETS_SAVED_OBJECT_TYPE,
+import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
+
+import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import type {
   InstallablePackage,
   InstallSource,
   PackageAssetReference,
   RegistryDataStream,
 } from '../../../../common';
-import { ArchiveEntry, getArchiveEntry, setArchiveEntry, setArchiveFilelist } from './index';
-import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 import { pkgToPkgKey } from '../registry';
 
+import { appContextService } from '../../app_context';
+
+import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './index';
+import type { ArchiveEntry } from './index';
+import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
+
+const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
-const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
+const MAX_ES_ASSET_BYTES = 4 * ONE_BYTE;
+// Updated to accomodate larger package size in some ML model packages
+const ML_MAX_ES_ASSET_BYTES = 50 * ONE_BYTE;
 
 export interface PackageAsset {
   package_name: string;
@@ -57,15 +67,20 @@ export async function archiveEntryToESDocument(opts: {
   const bufferIsBinary = await isBinaryFile(buffer);
   const dataUtf8 = bufferIsBinary ? '' : buffer.toString('utf8');
   const dataBase64 = bufferIsBinary ? buffer.toString('base64') : '';
+  const currentMaxAssetBytes = path.includes('ml_model')
+    ? ML_MAX_ES_ASSET_BYTES
+    : MAX_ES_ASSET_BYTES;
 
   // validation: filesize? asset type? anything else
-  if (dataUtf8.length > MAX_ES_ASSET_BYTES) {
-    throw new Error(`File at ${path} is larger than maximum allowed size of ${MAX_ES_ASSET_BYTES}`);
+  if (dataUtf8.length > currentMaxAssetBytes) {
+    throw new Error(
+      `File at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
+    );
   }
 
-  if (dataBase64.length > MAX_ES_ASSET_BYTES) {
+  if (dataBase64.length > currentMaxAssetBytes) {
     throw new Error(
-      `After base64 encoding file at ${path} is larger than maximum allowed size of ${MAX_ES_ASSET_BYTES}`
+      `After base64 encoding file at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
   }
 
@@ -82,9 +97,10 @@ export async function archiveEntryToESDocument(opts: {
 
 export async function removeArchiveEntries(opts: {
   savedObjectsClient: SavedObjectsClientContract;
-  refs: PackageAssetReference[];
+  refs?: PackageAssetReference[];
 }) {
   const { savedObjectsClient, refs } = opts;
+  if (!refs) return;
   const results = await Promise.all(
     refs.map((ref) => savedObjectsClient.delete(ASSETS_SAVED_OBJECT_TYPE, ref.id))
   );
@@ -159,6 +175,7 @@ export const getEsPackage = async (
   references: PackageAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
 ) => {
+  const logger = appContextService.getLogger();
   const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
   const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(
     references.map((reference) => ({
@@ -166,9 +183,27 @@ export const getEsPackage = async (
       fields: ['asset_path', 'data_utf8', 'data_base64'],
     }))
   );
+  const errors = bulkRes.saved_objects.filter((so) => so.error || !so.attributes);
   const assets = bulkRes.saved_objects.map((so) => so.attributes);
 
-  // add asset references to cache
+  if (errors.length) {
+    const resolvedErrors = errors.map((so) =>
+      so.error
+        ? { type: so.type, id: so.id, error: so.error }
+        : !so.attributes
+        ? { type: so.type, id: so.id, error: { error: `No attributes retrieved` } }
+        : { type: so.type, id: so.id, error: { error: `Unknown` } }
+    );
+
+    logger.warn(
+      `Failed to retrieve ${pkgName}-${pkgVersion} package from ES storage. bulkGet failed for assets: ${JSON.stringify(
+        resolvedErrors
+      )}`
+    );
+
+    return undefined;
+  }
+
   const paths: string[] = [];
   const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
   entries.forEach(({ path, buffer }) => {
@@ -177,11 +212,10 @@ export const getEsPackage = async (
       paths.push(path);
     }
   });
-  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
+
   // create the packageInfo
   // TODO: this is mostly copied from validtion.ts, needed in case package does not exist in storage yet or is missing from cache
   // we don't want to reach out to the registry again so recreate it here.  should check whether it exists in packageInfoCache first
-
   const manifestPath = `${pkgName}-${pkgVersion}/manifest.yml`;
   const soResManifest = await savedObjectsClient.get<PackageAsset>(
     ASSETS_SAVED_OBJECT_TYPE,
@@ -220,23 +254,20 @@ export const getEsPackage = async (
       );
       const dataStreamManifest = safeLoad(soResDataStreamManifest.attributes.data_utf8);
       const {
-        title: dataStreamTitle,
-        release,
         ingest_pipeline: ingestPipeline,
-        type,
         dataset,
+        streams: manifestStreams,
+        ...dataStreamManifestProps
       } = dataStreamManifest;
-      const streams = parseAndVerifyStreams(dataStreamManifest, dataStreamPath);
+      const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
 
       dataStreams.push({
         dataset: dataset || `${pkgName}.${dataStreamPath}`,
-        title: dataStreamTitle,
-        release,
         package: pkgName,
-        ingest_pipeline: ingestPipeline || 'default',
+        ingest_pipeline: ingestPipeline,
         path: dataStreamPath,
-        type,
         streams,
+        ...dataStreamManifestProps,
       });
     })
   );
@@ -245,6 +276,10 @@ export const getEsPackage = async (
   packageInfo.assets = paths.map((path) => {
     return path.replace(`${pkgName}-${pkgVersion}`, `/package/${pkgName}/${pkgVersion}`);
   });
+
+  // Add asset references to cache
+  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
+  setPackageInfo({ name: pkgName, version: pkgVersion, packageInfo });
 
   return {
     paths,

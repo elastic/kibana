@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ISavedObjectsRepository, SavedObjectsErrorHelpers } from 'src/core/server';
+import type { ISavedObjectsRepository } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
-  const mockSavedObjectsClientContract = ({
+  const mockSavedObjectsClientContract = {
     get: jest.fn((type, id) => {
       const result = spaces.filter((s) => s.id === id);
       if (!result.length) {
@@ -33,11 +35,12 @@ export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
       }
       return {};
     }),
+    bulkUpdate: jest.fn(),
     delete: jest.fn((type: string, id: string) => {
       return {};
     }),
     deleteByNamespace: jest.fn(),
-  } as unknown) as jest.Mocked<ISavedObjectsRepository>;
+  } as unknown as jest.Mocked<ISavedObjectsRepository>;
 
   return mockSavedObjectsClientContract;
 };

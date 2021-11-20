@@ -1,104 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPage,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { Location } from 'history';
-import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useTrackPageview } from '../../../../../observability/public';
-import { Projection } from '../../../../common/projections';
-import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
-import { IUrlParams } from '../../../context/url_params_context/types';
-import { useTransactionListFetcher } from './use_transaction_list';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { TransactionCharts } from '../../shared/charts/transaction_charts';
-import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
-import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
-import { SearchBar } from '../../shared/search_bar';
-import { Correlations } from '../Correlations';
-import { TransactionList } from './TransactionList';
-import { useRedirect } from './useRedirect';
-import { UserExperienceCallout } from './user_experience_callout';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
+import { TransactionCharts } from '../../shared/charts/transaction_charts';
+import { replace } from '../../shared/Links/url_helpers';
+import { TransactionsTable } from '../../shared/transactions_table';
 
-function getRedirectLocation({
-  location,
-  transactionType,
-  urlParams,
-}: {
-  location: Location;
-  transactionType?: string;
-  urlParams: IUrlParams;
-}): Location | undefined {
-  const transactionTypeFromUrlParams = urlParams.transactionType;
+export function TransactionOverview() {
+  const {
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      transactionType: transactionTypeFromUrl,
+    },
+  } = useApmParams('/services/{serviceName}/transactions');
 
-  if (!transactionTypeFromUrlParams && transactionType) {
-    return {
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        transactionType,
-      }),
-    };
-  }
-}
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-interface TransactionOverviewProps {
-  serviceName: string;
-}
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+  const { transactionType, serviceName } = useApmServiceContext();
 
-export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
-  const location = useLocation();
-  const { urlParams } = useUrlParams();
-  const { transactionType, transactionTypes } = useApmServiceContext();
+  const history = useHistory();
 
   // redirect to first transaction type
-  useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
-
-  useTrackPageview({ app: 'apm', path: 'transaction_overview' });
-  useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
-  const {
-    transactionListData,
-    transactionListStatus,
-  } = useTransactionListFetcher();
-
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
-    () => ({
-      shouldFetch: !!transactionType,
-      filterNames: [
-        'transactionResult',
-        'host',
-        'containerId',
-        'podName',
-        'serviceVersion',
-      ],
-      params: {
-        serviceName,
-        transactionType,
-      },
-      projection: Projection.transactionGroups,
-    }),
-    [serviceName, transactionType]
-  );
+  if (!transactionTypeFromUrl && transactionType) {
+    replace(history, { query: { transactionType } });
+  }
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
@@ -108,79 +50,34 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   return (
     <>
-      <SearchBar showTimeComparison />
-
-      <EuiPage>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <Correlations />
-            <LocalUIFilters {...localFiltersConfig}>
-              <TransactionTypeFilter transactionTypes={transactionTypes} />
-              <EuiSpacer size="m" />
-              <EuiHorizontalRule margin="none" />
-            </LocalUIFilters>
-          </EuiFlexItem>
-          <EuiFlexItem grow={7}>
-            {transactionType === TRANSACTION_PAGE_LOAD && (
-              <>
-                <UserExperienceCallout serviceName={serviceName} />
-                <EuiSpacer size="s" />
-              </>
-            )}
-            <TransactionCharts />
-            <EuiSpacer size="s" />
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <h3>Transactions</h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              {!transactionListData.isAggregationAccurate && (
-                <EuiCallOut
-                  title={i18n.translate(
-                    'xpack.apm.transactionCardinalityWarning.title',
-                    {
-                      defaultMessage:
-                        'This view shows a subset of reported transactions.',
-                    }
-                  )}
-                  color="danger"
-                  iconType="alert"
-                >
-                  <p>
-                    <FormattedMessage
-                      id="xpack.apm.transactionCardinalityWarning.body"
-                      defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
-                      values={{
-                        bucketSize: transactionListData.bucketSize,
-                        codeBlock: (
-                          <EuiCode>
-                            xpack.apm.ui.transactionGroupBucketSize
-                          </EuiCode>
-                        ),
-                      }}
-                    />
-
-                    <ElasticDocsLink
-                      section="/kibana"
-                      path="/troubleshooting.html#troubleshooting-too-many-transactions"
-                    >
-                      {i18n.translate(
-                        'xpack.apm.transactionCardinalityWarning.docsLink',
-                        { defaultMessage: 'Learn more in the docs' }
-                      )}
-                    </ElasticDocsLink>
-                  </p>
-                </EuiCallOut>
-              )}
-              <EuiSpacer size="s" />
-              <TransactionList
-                isLoading={transactionListStatus === 'loading'}
-                items={transactionListData.items || []}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPage>
+      {fallbackToTransactions && (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <AggregatedTransactionsBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <TransactionCharts
+        kuery={kuery}
+        environment={environment}
+        start={start}
+        end={end}
+      />
+      <EuiSpacer size="s" />
+      <EuiPanel hasBorder={true}>
+        <TransactionsTable
+          hideViewTransactionsLink
+          numberOfTransactionsPerPage={25}
+          showAggregationAccurateCallout
+          environment={environment}
+          kuery={kuery}
+          start={start}
+          end={end}
+        />
+      </EuiPanel>
     </>
   );
 }

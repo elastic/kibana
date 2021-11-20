@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'kibana/server';
 import { PLUGIN_ID } from '../constants/app';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
@@ -28,6 +30,8 @@ export const userMlCapabilities = {
   canGetAnnotations: false,
   canCreateAnnotation: false,
   canDeleteAnnotation: false,
+  // Alerts
+  canUseMlAlerts: false,
 };
 
 export const adminMlCapabilities = {
@@ -36,6 +40,7 @@ export const adminMlCapabilities = {
   canDeleteJob: false,
   canOpenJob: false,
   canCloseJob: false,
+  canResetJob: false,
   canUpdateJob: false,
   canForecastJob: false,
   canCreateDatafeed: false,
@@ -55,6 +60,9 @@ export const adminMlCapabilities = {
   canCreateDataFrameAnalytics: false,
   canDeleteDataFrameAnalytics: false,
   canStartStopDataFrameAnalytics: false,
+  // Alerts
+  canCreateMlAlerts: false,
+  canUseMlAlerts: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;
@@ -88,7 +96,7 @@ export function getPluginPrivileges() {
   ];
   const privilege = {
     app: [PLUGIN_ID, 'kibana'],
-    excludeFromBasePrivileges: true,
+    excludeFromBasePrivileges: false,
     management: {
       insightsAndAlerting: ['jobsListLink'],
     },
@@ -98,23 +106,39 @@ export function getPluginPrivileges() {
   return {
     admin: {
       ...privilege,
-      api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      api: ['fileUpload:analyzeFile', ...allMlCapabilitiesKeys.map((k) => `ml:${k}`)],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {
         all: savedObjects,
         read: savedObjects,
       },
+      alerting: {
+        rule: {
+          all: Object.values(ML_ALERT_TYPES),
+        },
+        alert: {
+          all: Object.values(ML_ALERT_TYPES),
+        },
+      },
     },
     user: {
       ...privilege,
-      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      api: ['fileUpload:analyzeFile', ...userMlCapabilitiesKeys.map((k) => `ml:${k}`)],
       catalogue: [PLUGIN_ID],
       management: { insightsAndAlerting: [] },
       ui: userMlCapabilitiesKeys,
       savedObject: {
         all: [],
         read: savedObjects,
+      },
+      alerting: {
+        rule: {
+          read: Object.values(ML_ALERT_TYPES),
+        },
+        alert: {
+          read: Object.values(ML_ALERT_TYPES),
+        },
       },
     },
     apmUser: {

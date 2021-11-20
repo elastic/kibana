@@ -1,37 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiSpacer,
-  EuiText,
+  EuiButton,
   EuiBadgeGroup,
-  EuiPageContent,
-  EuiTitle,
+  EuiButtonEmpty,
+  EuiInMemoryTable,
+  EuiPageHeader,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
-import { CreateButton } from '../create_button';
-import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
+import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
-import { EmptyState } from './empty_state';
-import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
-import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
-import { getIndices } from '../create_index_pattern_wizard/lib';
 
 const pagination = {
   initialPageSize: 10,
@@ -54,88 +46,69 @@ const search = {
   },
 };
 
-const ariaRegion = i18n.translate('indexPatternManagement.editIndexPatternLiveRegionAriaLabel', {
-  defaultMessage: 'Index patterns',
+const title = i18n.translate('indexPatternManagement.dataViewTable.title', {
+  defaultMessage: 'Data Views',
 });
 
-const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
-  defaultMessage: 'Index patterns',
-});
+const securityDataView = i18n.translate(
+  'indexPatternManagement.indexPatternTable.badge.securityDataViewTitle',
+  {
+    defaultMessage: 'Security Data View',
+  }
+);
+
+const securitySolution = 'security-solution';
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
+  showCreateDialog?: boolean;
 }
 
-export const IndexPatternTable = ({ canSave, history }: Props) => {
+export const IndexPatternTable = ({
+  history,
+  canSave,
+  showCreateDialog: showCreateDialogProp = false,
+}: Props) => {
   const {
     setBreadcrumbs,
-    savedObjects,
     uiSettings,
     indexPatternManagementStart,
     chrome,
-    docLinks,
-    application,
-    http,
-    getMlCardState,
+    data,
+    IndexPatternEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
-  const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
-  const [sources, setSources] = useState<MatchedItem[]>([]);
-  const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
-  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
+  const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
 
   setBreadcrumbs(getListBreadcrumbs());
   useEffect(() => {
     (async function () {
-      const options = await indexPatternManagementStart.creation.getIndexPatternCreationOptions(
-        history.push
-      );
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-        savedObjects.client,
         uiSettings.get('defaultIndex'),
-        indexPatternManagementStart
+        data.dataViews
       );
-      setIsLoadingIndexPatterns(false);
-      setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
+      setIsLoadingIndexPatterns(false);
+      if (
+        gettedIndexPatterns.length === 0 ||
+        !(await data.dataViews.hasUserDataView().catch(() => false))
+      ) {
+        setShowCreateDialog(true);
+      }
     })();
-  }, [
-    history.push,
-    indexPatterns.length,
-    indexPatternManagementStart,
-    uiSettings,
-    savedObjects.client,
-  ]);
-
-  const removeAliases = (item: MatchedItem) =>
-    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
-
-  const loadSources = () => {
-    getIndices(http, () => [], '*', false).then((dataSources) =>
-      setSources(dataSources.filter(removeAliases))
-    );
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  };
-
-  useEffect(() => {
-    getIndices(http, () => [], '*', false).then((dataSources) => {
-      setSources(dataSources.filter(removeAliases));
-      setIsLoadingSources(false);
-    });
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
-      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
-    );
-  }, [http, creationOptions]);
+  }, [indexPatternManagementStart, uiSettings, data]);
 
   chrome.docTitle.change(title);
+
+  const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
 
   const columns = [
     {
       field: 'title',
-      name: 'Pattern',
+      name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
+        defaultMessage: 'Name',
+      }),
       render: (
         name: string,
         index: {
@@ -147,11 +120,14 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+          <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
             {name}
           </EuiButtonEmpty>
           &emsp;
           <EuiBadgeGroup gutterSize="s">
+            {index.id && index.id.indexOf(securitySolution) === 0 && (
+              <EuiBadge>{securityDataView}</EuiBadge>
+            )}
             {index.tags &&
               index.tags.map(({ key: tagKey, name: tagName }) => (
                 <EuiBadge key={tagKey}>{tagName}</EuiBadge>
@@ -165,65 +141,53 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   ];
 
   const createButton = canSave ? (
-    <CreateButton options={creationOptions}>
+    <EuiButton
+      fill={true}
+      iconType="plusInCircle"
+      onClick={() => setShowCreateDialog(true)}
+      data-test-subj="createIndexPatternButton"
+    >
       <FormattedMessage
-        id="indexPatternManagement.indexPatternTable.createBtn"
-        defaultMessage="Create index pattern"
+        id="indexPatternManagement.dataViewTable.createBtn"
+        defaultMessage="Create data view"
       />
-    </CreateButton>
+    </EuiButton>
   ) : (
     <></>
   );
 
-  if (isLoadingSources || isLoadingIndexPatterns) {
+  if (isLoadingIndexPatterns) {
     return <></>;
   }
 
-  const hasDataIndices = sources.some(({ name }: MatchedItem) => !name.startsWith('.'));
-
-  if (!indexPatterns.length) {
-    if (!hasDataIndices && !remoteClustersExist) {
-      return (
-        <EmptyState
-          onRefresh={loadSources}
-          docLinks={docLinks}
-          navigateToApp={application.navigateToApp}
-          getMlCardState={getMlCardState}
-          canSave={canSave}
-        />
-      );
-    } else {
-      return (
-        <EmptyIndexPatternPrompt
-          canSave={canSave}
-          creationOptions={creationOptions}
-          docLinksIndexPatternIntro={docLinks.links.indexPatterns.introduction}
-          setBreadcrumbs={setBreadcrumbs}
-        />
-      );
-    }
-  }
+  const displayIndexPatternEditor = showCreateDialog ? (
+    <IndexPatternEditor
+      onSave={(indexPattern) => {
+        history.push(`patterns/${indexPattern.id}`);
+      }}
+      onCancel={() => setShowCreateDialog(false)}
+      defaultTypeIsRollup={isRollup}
+    />
+  ) : (
+    <></>
+  );
 
   return (
-    <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>{title}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-                defaultMessage="Create and manage the index patterns that help you retrieve your data from Elasticsearch."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
+    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+      <EuiPageHeader
+        pageTitle={title}
+        description={
+          <FormattedMessage
+            id="indexPatternManagement.dataViewTable.indexPatternExplanation"
+            defaultMessage="Create and manage the data views that help you retrieve your data from Elasticsearch."
+          />
+        }
+        bottomBorder
+        rightSideItems={[createButton]}
+      />
+
+      <EuiSpacer size="l" />
+
       <EuiInMemoryTable
         allowNeutralSort={false}
         itemId="id"
@@ -234,7 +198,8 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         sorting={sorting}
         search={search}
       />
-    </EuiPageContent>
+      {displayIndexPatternEditor}
+    </div>
   );
 };
 

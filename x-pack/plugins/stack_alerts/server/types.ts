@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PluginStartContract as TriggersActionsUiStartContract } from '../../triggers_actions_ui/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
+import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 
-export {
+export type {
   PluginSetupContract as AlertingSetup,
   AlertType,
+  RuleParamsAndRefs,
   AlertExecutorOptions,
-} from '../../alerts/server';
+} from '../../alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   features: FeaturesPluginSetup;
 }
 

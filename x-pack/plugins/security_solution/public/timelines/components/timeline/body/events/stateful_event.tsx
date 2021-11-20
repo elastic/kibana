@@ -1,26 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import {
+  ColumnHeaderOptions,
+  CellValueElementProps,
+  ControlColumnProps,
+  RowRenderer,
+  TimelineExpandedDetailType,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
+import type { SetEventsDeleted, SetEventsLoading } from '../../../../../../../timelines/common';
 import { BrowserFields } from '../../../../../common/containers/source';
 import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { OnPinEvent, OnRowSelected } from '../../events';
+import { OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
-import { ColumnRenderer } from '../renderers/column_renderer';
-import { RowRenderer } from '../renderers/row_renderer';
-import { isEventBuildingBlockType, getEventType } from '../helpers';
+import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
@@ -32,13 +39,14 @@ import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { getMappedNonEcsValue } from '../data_driven_columns';
+import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   actionsColumnWidth: number;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   isEventViewer?: boolean;
@@ -49,11 +57,14 @@ interface Props {
   refetch: inputsModel.Refetch;
   ariaRowindex: number;
   onRuleChange?: () => void;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
   tabType?: TimelineTabs;
   timelineId: string;
+  leadingControlColumns: ControlColumnProps[];
+  trailingControlColumns: ControlColumnProps[];
 }
 
 const emptyNotes: string[] = [];
@@ -70,7 +81,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   browserFields,
   containerRef,
   columnHeaders,
-  columnRenderers,
   event,
   eventIdToNoteIds,
   isEventViewer = false,
@@ -79,31 +89,64 @@ const StatefulEventComponent: React.FC<Props> = ({
   loadingEventIds,
   onRowSelected,
   refetch,
-  onRuleChange,
+  renderCellValue,
   rowRenderers,
+  onRuleChange,
   ariaRowindex,
   selectedEventIds,
   showCheckboxes,
   tabType,
   timelineId,
+  leadingControlColumns,
+  trailingControlColumns,
 }) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
+  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
+  const [activeStatefulEventContext] = useState({
+    timelineID: timelineId,
+    enableHostDetailsFlyout: true,
+    enableIpDetailsFlyout: true,
+    tabType,
+  });
+
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const expandedEvent = useDeepEqualSelector(
-    (state) =>
-      (getTimeline(state, timelineId) ?? timelineDefaults).expandedEvent[
-        tabType ?? TimelineTabs.query
-      ] ?? {}
+  const expandedDetail = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
   );
+  const hostName = useMemo(() => {
+    const hostNameArr = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
+    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
+  }, [event?.data]);
+
+  const hostIPAddresses = useMemo(() => {
+    const hostIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' }) ?? [];
+    const sourceIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' }) ?? [];
+    const destinationIpList =
+      getMappedNonEcsValue({
+        data: event?.data,
+        fieldName: 'destination.ip',
+      }) ?? [];
+    return new Set([...hostIpList, ...sourceIpList, ...destinationIpList]);
+  }, [event?.data]);
+
+  const activeTab = tabType ?? TimelineTabs.query;
+  const activeExpandedDetail = expandedDetail[activeTab];
+
+  const isDetailPanelExpanded: boolean =
+    (activeExpandedDetail?.panelView === 'eventDetail' &&
+      activeExpandedDetail?.params?.eventId === event._id) ||
+    (activeExpandedDetail?.panelView === 'hostDetail' &&
+      activeExpandedDetail?.params?.hostName === hostName) ||
+    (activeExpandedDetail?.panelView === 'networkDetail' &&
+      activeExpandedDetail?.params?.ip &&
+      hostIPAddresses?.has(activeExpandedDetail?.params?.ip)) ||
+    false;
+
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
   const notesById = useDeepEqualSelector(getNotesByIds);
   const noteIds: string[] = eventIdToNoteIds[event._id] || emptyNotes;
-  const isExpanded = useMemo(() => expandedEvent && expandedEvent.eventId === event._id, [
-    event._id,
-    expandedEvent,
-  ]);
 
   const notes: TimelineResultNote[] = useMemo(
     () =>
@@ -117,10 +160,10 @@ const StatefulEventComponent: React.FC<Props> = ({
     [notesById, noteIds]
   );
 
-  const hasRowRenderers: boolean = useMemo(() => getRowRenderer(event.ecs, rowRenderers) != null, [
-    event.ecs,
-    rowRenderers,
-  ]);
+  const hasRowRenderers: boolean = useMemo(
+    () => getRowRenderer(event.ecs, rowRenderers) != null,
+    [event.ecs, rowRenderers]
+  );
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
@@ -140,44 +183,55 @@ const StatefulEventComponent: React.FC<Props> = ({
     });
   }, [event]);
 
-  const onPinEvent: OnPinEvent = useCallback(
-    (eventId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId })),
-    [dispatch, timelineId]
-  );
-
-  const onUnPinEvent: OnPinEvent = useCallback(
-    (eventId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId })),
-    [dispatch, timelineId]
-  );
-
-  const handleOnEventToggled = useCallback(() => {
+  const handleOnEventDetailPanelOpened = useCallback(() => {
     const eventId = event._id;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const indexName = event._index!;
 
+    const updatedExpandedDetail: TimelineExpandedDetailType = {
+      panelView: 'eventDetail',
+      params: {
+        eventId,
+        indexName,
+        refetch,
+      },
+    };
+
     dispatch(
-      timelineActions.toggleExpandedEvent({
+      timelineActions.toggleDetailPanel({
+        ...updatedExpandedDetail,
         tabType,
         timelineId,
-        event: {
-          eventId,
-          indexName,
-        },
       })
     );
 
     if (timelineId === TimelineId.active && tabType === TimelineTabs.query) {
-      activeTimeline.toggleExpandedEvent({ eventId, indexName });
+      activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
     }
-  }, [dispatch, event._id, event._index, tabType, timelineId]);
+  }, [dispatch, event._id, event._index, refetch, tabType, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {
       dispatch(timelineActions.addNoteToEvent({ eventId: event._id, id: timelineId, noteId }));
       if (!isEventPinned) {
-        onPinEvent(event._id); // pin the event, because it has notes
+        dispatch(timelineActions.pinEvent({ id: timelineId, eventId: event._id }));
       }
     },
-    [dispatch, event, isEventPinned, onPinEvent, timelineId]
+    [dispatch, event, isEventPinned, timelineId]
+  );
+
+  const setEventsLoading = useCallback<SetEventsLoading>(
+    ({ eventIds, isLoading }) => {
+      dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
+    },
+    [dispatch, timelineId]
+  );
+
+  const setEventsDeleted = useCallback<SetEventsDeleted>(
+    ({ eventIds, isDeleted }) => {
+      dispatch(timelineActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
+    },
+    [dispatch, timelineId]
   );
 
   const RowRendererContent = useMemo(
@@ -206,63 +260,67 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 
   return (
-    <EventsTrGroup
-      $ariaRowindex={ariaRowindex}
-      className={STATEFUL_EVENT_CSS_CLASS_NAME}
-      data-test-subj="event"
-      eventType={getEventType(event.ecs)}
-      isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
-      isExpanded={isExpanded}
-      ref={trGroupRef}
-      showLeftBorder={!isEventViewer}
-    >
-      <EventColumnView
-        id={event._id}
-        actionsColumnWidth={actionsColumnWidth}
-        ariaRowindex={ariaRowindex}
-        columnHeaders={columnHeaders}
-        columnRenderers={columnRenderers}
-        data={event.data}
-        ecsData={event.ecs}
-        eventIdToNoteIds={eventIdToNoteIds}
-        expanded={isExpanded}
-        hasRowRenderers={hasRowRenderers}
-        isEventPinned={isEventPinned}
-        isEventViewer={isEventViewer}
-        loadingEventIds={loadingEventIds}
-        notesCount={notes.length}
-        onEventToggled={handleOnEventToggled}
-        onPinEvent={onPinEvent}
-        onRowSelected={onRowSelected}
-        onUnPinEvent={onUnPinEvent}
-        refetch={refetch}
-        onRuleChange={onRuleChange}
-        selectedEventIds={selectedEventIds}
-        showCheckboxes={showCheckboxes}
-        showNotes={!!showNotes[event._id]}
-        tabType={tabType}
-        timelineId={timelineId}
-        toggleShowNotes={onToggleShowNotes}
-      />
+    <StatefulEventContext.Provider value={activeStatefulEventContext}>
+      <EventsTrGroup
+        $ariaRowindex={ariaRowindex}
+        className={STATEFUL_EVENT_CSS_CLASS_NAME}
+        data-test-subj="event"
+        eventType={getEventType(event.ecs)}
+        isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
+        isEvenEqlSequence={isEvenEqlSequence(event.ecs)}
+        isExpanded={isDetailPanelExpanded}
+        ref={trGroupRef}
+        showLeftBorder={!isEventViewer}
+      >
+        <EventColumnView
+          id={event._id}
+          actionsColumnWidth={actionsColumnWidth}
+          ariaRowindex={ariaRowindex}
+          columnHeaders={columnHeaders}
+          data={event.data}
+          ecsData={event.ecs}
+          eventIdToNoteIds={eventIdToNoteIds}
+          hasRowRenderers={hasRowRenderers}
+          isEventPinned={isEventPinned}
+          isEventViewer={isEventViewer}
+          loadingEventIds={loadingEventIds}
+          notesCount={notes.length}
+          onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
+          onRowSelected={onRowSelected}
+          refetch={refetch}
+          renderCellValue={renderCellValue}
+          onRuleChange={onRuleChange}
+          selectedEventIds={selectedEventIds}
+          showCheckboxes={showCheckboxes}
+          showNotes={!!showNotes[event._id]}
+          tabType={tabType}
+          timelineId={timelineId}
+          toggleShowNotes={onToggleShowNotes}
+          leadingControlColumns={leadingControlColumns}
+          trailingControlColumns={trailingControlColumns}
+          setEventsLoading={setEventsLoading}
+          setEventsDeleted={setEventsDeleted}
+        />
 
-      <EventsTrSupplementContainerWrapper>
-        <EventsTrSupplement
-          className="siemEventsTable__trSupplement--notes"
-          data-test-subj="event-notes-flex-item"
-        >
-          <NoteCards
-            ariaRowindex={ariaRowindex}
-            associateNote={associateNote}
-            data-test-subj="note-cards"
-            notes={notes}
-            showAddNote={!!showNotes[event._id]}
-            toggleShowAddNote={onToggleShowNotes}
-          />
-        </EventsTrSupplement>
+        <EventsTrSupplementContainerWrapper>
+          <EventsTrSupplement
+            className="siemEventsTable__trSupplement--notes"
+            data-test-subj="event-notes-flex-item"
+          >
+            <NoteCards
+              ariaRowindex={ariaRowindex}
+              associateNote={associateNote}
+              data-test-subj="note-cards"
+              notes={notes}
+              showAddNote={!!showNotes[event._id]}
+              toggleShowAddNote={onToggleShowNotes}
+            />
+          </EventsTrSupplement>
 
-        {RowRendererContent}
-      </EventsTrSupplementContainerWrapper>
-    </EventsTrGroup>
+          {RowRendererContent}
+        </EventsTrSupplementContainerWrapper>
+      </EventsTrGroup>
+    </StatefulEventContext.Provider>
   );
 };
 

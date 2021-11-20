@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
@@ -11,12 +12,16 @@ export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = asy
   uptimeEsClient,
 }) => {
   const {
-    body: {
-      _shards: { total },
-      count,
+    indices,
+    result: {
+      body: {
+        _shards: { total },
+        count,
+      },
     },
-  } = await uptimeEsClient.count({ terminateAfter: 1 });
+  } = await uptimeEsClient.count({ terminate_after: 1 });
   return {
+    indices,
     indexExists: total > 0,
     docCount: count,
   };

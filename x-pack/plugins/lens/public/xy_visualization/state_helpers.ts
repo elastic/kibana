@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import { SeriesType, visualizationTypes, LayerConfig, YConfig, ValidLayer } from './types';
+import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
+import type { SeriesType, XYLayerConfig, YConfig, ValidLayer } from '../../common/expressions';
+import { visualizationTypes } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -14,6 +16,18 @@ export function isHorizontalSeries(seriesType: SeriesType) {
     seriesType === 'bar_horizontal_stacked' ||
     seriesType === 'bar_horizontal_percentage_stacked'
   );
+}
+
+export function isPercentageSeries(seriesType: SeriesType) {
+  return (
+    seriesType === 'bar_percentage_stacked' ||
+    seriesType === 'bar_horizontal_percentage_stacked' ||
+    seriesType === 'area_percentage_stacked'
+  );
+}
+
+export function isStackedChart(seriesType: SeriesType) {
+  return seriesType.includes('stacked');
 }
 
 export function isHorizontalChart(layers: Array<{ seriesType: SeriesType }>) {
@@ -30,7 +44,7 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
   return (definition.icon as EuiIconType) || 'empty';
 }
 
-export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
+export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (layer.splitAccessor) {
     return null;
   }
@@ -39,7 +53,7 @@ export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
   );
 };
 
-export const getColumnToLabelMap = (layer: LayerConfig, datasource: DatasourcePublicAPI) => {
+export const getColumnToLabelMap = (layer: XYLayerConfig, datasource: DatasourcePublicAPI) => {
   const columnToLabel: Record<string, string> = {};
 
   layer.accessors.concat(layer.splitAccessor ? [layer.splitAccessor] : []).forEach((accessor) => {

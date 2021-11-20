@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 
-import * as i18n from './translations';
+import * as i18n from '../rule_preview/translations';
 import { Action, State, queryPreviewReducer } from './reducer';
 import { initialState } from './';
 
@@ -77,7 +79,9 @@ describe('queryPreviewReducer', () => {
 
       expect(update.language).toEqual('kuery');
       expect(update.queryString).toEqual('host.name:*');
-      expect(update.filters).toEqual([{ meta: { alias: '', disabled: false, negate: false } }]);
+      expect(update.filters).toEqual([
+        { meta: { alias: '', disabled: false, negate: false }, query: {} },
+      ]);
     });
 
     test('should create the queryFilter if query type is not eql', () => {
@@ -332,7 +336,14 @@ describe('queryPreviewReducer', () => {
     test('should set thresholdFieldExists to true if threshold field is defined and not empty string', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
-        threshold: { field: 'agent.hostname', value: 200 },
+        threshold: {
+          field: ['agent.hostname'],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
+        },
         ruleType: 'threshold',
       });
 
@@ -342,10 +353,17 @@ describe('queryPreviewReducer', () => {
       expect(update.warnings).toEqual([]);
     });
 
-    test('should set thresholdFieldExists to false if threshold field is not defined', () => {
+    test('should set thresholdFieldExists to false if threshold field is empty array', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
-        threshold: { field: undefined, value: 200 },
+        threshold: {
+          field: [],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
+        },
         ruleType: 'threshold',
       });
 
@@ -358,7 +376,14 @@ describe('queryPreviewReducer', () => {
     test('should set thresholdFieldExists to false if threshold field is empty string', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
-        threshold: { field: '    ', value: 200 },
+        threshold: {
+          field: ['    '],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
+        },
         ruleType: 'threshold',
       });
 
@@ -371,7 +396,14 @@ describe('queryPreviewReducer', () => {
     test('should set showNonEqlHistogram to false if ruleType is eql', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
-        threshold: { field: 'agent.hostname', value: 200 },
+        threshold: {
+          field: ['agent.hostname'],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
+        },
         ruleType: 'eql',
       });
 
@@ -383,7 +415,14 @@ describe('queryPreviewReducer', () => {
     test('should set showNonEqlHistogram to true if ruleType is query', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
-        threshold: { field: 'agent.hostname', value: 200 },
+        threshold: {
+          field: ['agent.hostname'],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
+        },
         ruleType: 'query',
       });
 
@@ -395,7 +434,14 @@ describe('queryPreviewReducer', () => {
     test('should set showNonEqlHistogram to true if ruleType is saved_query', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
-        threshold: { field: 'agent.hostname', value: 200 },
+        threshold: {
+          field: ['agent.hostname'],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
+        },
         ruleType: 'saved_query',
       });
 

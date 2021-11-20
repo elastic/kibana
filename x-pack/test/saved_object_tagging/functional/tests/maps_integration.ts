@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -29,16 +30,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     }
     // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('main .euiFieldSearch');
+    const searchFilter = await find.byCssSelector('.euiPageBody .euiFieldSearch');
     await searchFilter.click();
   };
 
-  describe('maps integration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/89073
+  describe.skip('maps integration', () => {
     before(async () => {
-      await esArchiver.load('maps');
+      await esArchiver.load('x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps');
     });
     after(async () => {
-      await esArchiver.unload('maps');
+      await esArchiver.unload('x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps');
     });
 
     describe('listing', () => {

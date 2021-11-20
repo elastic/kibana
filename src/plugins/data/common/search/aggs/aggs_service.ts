@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
@@ -17,7 +17,6 @@ import {
   getCalculateAutoTimeExpression,
 } from './';
 import { AggsCommonSetup, AggsCommonStart } from './types';
-import { getDateMetaByDatatableColumn } from './utils/time_column_meta';
 import { getDatatableColumnUtilities } from './utils/datatable_column_meta';
 
 /** @internal */
@@ -89,12 +88,6 @@ export class AggsCommonService {
 
     return {
       calculateAutoTimeExpression,
-      getDateMetaByDatatableColumn: getDateMetaByDatatableColumn({
-        calculateAutoTimeExpression,
-        getIndexPattern,
-        getConfig,
-        isDefaultTimezone,
-      }),
       datatableUtilities: getDatatableColumnUtilities({
         getIndexPattern,
         createAggConfigs,

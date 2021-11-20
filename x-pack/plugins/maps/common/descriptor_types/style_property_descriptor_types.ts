@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import {
@@ -223,14 +225,16 @@ export type GeometryTypes = {
   isPolygonsOnly: boolean;
 };
 
+export type FieldMeta = {
+  [key: string]: {
+    range?: RangeFieldMeta;
+    categories?: CategoryFieldMeta;
+  };
+};
+
 export type StyleMetaDescriptor = {
   geometryTypes?: GeometryTypes;
-  fieldMeta: {
-    [key: string]: {
-      range?: RangeFieldMeta;
-      categories?: CategoryFieldMeta;
-    };
-  };
+  fieldMeta: FieldMeta;
 };
 
 export type VectorStyleDescriptor = StyleDescriptor & {

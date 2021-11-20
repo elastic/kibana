@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { JsonObject } from 'src/plugins/kibana_utils/public';
+import { JsonObject } from '@kbn/utility-types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
 
@@ -12,7 +15,8 @@ export interface GetMonitorStatusParams {
   filters?: JsonObject;
   locations: string[];
   numTimes: number;
-  timerange: { from: string; to: string };
+  timespanRange: { from: string; to: string };
+  timestampRange: { from: string | number; to: string };
 }
 
 export interface GetMonitorStatusResult {
@@ -40,7 +44,7 @@ export type AfterKey = Record<string, string | number | null> | undefined;
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ uptimeEsClient, filters, locations, numTimes, timerange: { from, to } }) => {
+> = async ({ uptimeEsClient, filters, locations, numTimes, timespanRange, timestampRange }) => {
   let afterKey: AfterKey;
 
   const STATUS = 'down';
@@ -60,14 +64,22 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
             {
               range: {
                 '@timestamp': {
-                  gte: from,
-                  lte: to,
+                  gte: timestampRange.from,
+                  lte: timestampRange.to,
+                },
+              },
+            },
+            {
+              range: {
+                'monitor.timespan': {
+                  gte: timespanRange.from,
+                  lte: timespanRange.to,
                 },
               },
             },
             // append user filters, if defined
             ...(filters?.bool ? [filters] : []),
-          ],
+          ] as QueryDslQueryContainer[],
         },
       },
       size: 0,
@@ -80,7 +92,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
              * to tell Elasticsearch where it should start on subsequent queries.
              */
             ...(afterKey ? { after: afterKey } : {}),
-            sources: [
+            sources: asMutableArray([
               {
                 monitorId: {
                   terms: {
@@ -103,7 +115,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
                   },
                 },
               },
-            ],
+            ] as const),
           },
           aggs: {
             fields: {

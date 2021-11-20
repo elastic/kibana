@@ -1,56 +1,134 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
-import { px, unit } from '../../style/variables';
+import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
+import { toBoolean, toNumber } from '../../context/url_params_context/helpers';
+import { useApmParams } from '../../hooks/use_apm_params';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
 import { DatePicker } from './DatePicker';
-import { KueryBar } from './KueryBar';
+import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
-import { useBreakPoints } from '../../hooks/use_break_points';
-
-const SearchBarFlexGroup = styled(EuiFlexGroup)`
-  margin: ${({ theme }) =>
-    `${theme.eui.euiSizeM} ${theme.eui.euiSizeM} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeM}`};
-`;
+import { TransactionTypeSelect } from './transaction_type_select';
 
 interface Props {
-  prepend?: React.ReactNode | string;
+  hidden?: boolean;
+  showKueryBar?: boolean;
   showTimeComparison?: boolean;
+  showTransactionTypeSelector?: boolean;
+  kueryBarPlaceholder?: string;
+  kueryBarBoolFilter?: QueryDslQueryContainer[];
 }
 
-function getRowDirection(showColumn: boolean) {
-  return showColumn ? 'column' : 'row';
-}
+function ApmDatePicker() {
+  const { query } = useApmParams('/*');
 
-export function SearchBar({ prepend, showTimeComparison = false }: Props) {
-  const { isMedium, isLarge } = useBreakPoints();
-  const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
+  if (!('rangeFrom' in query)) {
+    throw new Error('range not available in route parameters');
+  }
+
+  const {
+    rangeFrom,
+    rangeTo,
+    refreshPaused: refreshPausedFromUrl = 'true',
+    refreshInterval: refreshIntervalFromUrl = '0',
+  } = query;
+
+  const refreshPaused = toBoolean(refreshPausedFromUrl);
+
+  const refreshInterval = toNumber(refreshIntervalFromUrl);
+
+  const { incrementTimeRangeId } = useTimeRangeId();
+
   return (
-    <SearchBarFlexGroup gutterSize="s" direction={getRowDirection(isLarge)}>
-      <EuiFlexItem>
-        <KueryBar prepend={prepend} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          gutterSize="s"
-          direction={getRowDirection(isMedium)}
-        >
-          {showTimeComparison && (
-            <EuiFlexItem style={{ ...itemsStyle, minWidth: px(300) }}>
-              <TimeComparison />
+    <DatePicker
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
+      refreshPaused={refreshPaused}
+      refreshInterval={refreshInterval}
+      onTimeRangeRefresh={() => {
+        incrementTimeRangeId();
+      }}
+    />
+  );
+}
+
+export function SearchBar({
+  hidden = false,
+  showKueryBar = true,
+  showTimeComparison = false,
+  showTransactionTypeSelector = false,
+  kueryBarBoolFilter,
+  kueryBarPlaceholder,
+}: Props) {
+  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
+
+  if (hidden) {
+    return null;
+  }
+
+  const searchBarDirection: EuiFlexGroupProps['direction'] =
+    isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
+
+  return (
+    <>
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        direction={searchBarDirection}
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup
+            direction={isLarge ? 'columnReverse' : 'row'}
+            gutterSize="s"
+            responsive={false}
+          >
+            {showTransactionTypeSelector && (
+              <EuiFlexItem grow={false}>
+                <TransactionTypeSelect />
+              </EuiFlexItem>
+            )}
+
+            {showKueryBar && (
+              <EuiFlexItem>
+                <KueryBar
+                  placeholder={kueryBarPlaceholder}
+                  boolFilter={kueryBarBoolFilter}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={showTimeComparison && !isXXXL}>
+          <EuiFlexGroup
+            direction={isSmall || isMedium || isLarge ? 'columnReverse' : 'row'}
+            justifyContent={isXXL ? 'flexEnd' : undefined}
+            gutterSize="s"
+            responsive={false}
+          >
+            {showTimeComparison && (
+              <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
+                <TimeComparison />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <ApmDatePicker />
             </EuiFlexItem>
-          )}
-          <EuiFlexItem style={itemsStyle}>
-            <DatePicker />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </SearchBarFlexGroup>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+    </>
   );
 }

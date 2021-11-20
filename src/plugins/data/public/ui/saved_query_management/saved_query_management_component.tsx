@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -61,10 +61,8 @@ export function SavedQueryManagementComponent({
         requestGotCancelled = true;
       };
 
-      const {
-        total: savedQueryCount,
-        queries: savedQueryItems,
-      } = await savedQueryService.findSavedQueries('', perPage, activePage + 1);
+      const { total: savedQueryCount, queries: savedQueryItems } =
+        await savedQueryService.findSavedQueries('', perPage, activePage + 1);
 
       if (requestGotCancelled) return;
 
@@ -77,9 +75,10 @@ export function SavedQueryManagementComponent({
     }
   }, [isOpen, activePage, savedQueryService]);
 
-  const handleTogglePopover = useCallback(() => setIsOpen((currentState) => !currentState), [
-    setIsOpen,
-  ]);
+  const handleTogglePopover = useCallback(
+    () => setIsOpen((currentState) => !currentState),
+    [setIsOpen]
+  );
 
   const handleClosePopover = useCallback(() => setIsOpen(false), []);
 
@@ -196,12 +195,13 @@ export function SavedQueryManagementComponent({
         panelPaddingSize="none"
         buffer={-8}
         repositionOnScroll
+        ownFocus={true}
       >
         <div
           className="kbnSavedQueryManagement__popover"
           data-test-subj="saved-query-management-popover"
         >
-          <EuiPopoverTitle id={'savedQueryManagementPopoverTitle'}>
+          <EuiPopoverTitle paddingSize="m" id={'savedQueryManagementPopoverTitle'}>
             {savedQueryPopoverTitleText}
           </EuiPopoverTitle>
           {savedQueries.length > 0 ? (
@@ -233,7 +233,7 @@ export function SavedQueryManagementComponent({
               <EuiSpacer size="s" />
             </Fragment>
           )}
-          <EuiPopoverFooter>
+          <EuiPopoverFooter paddingSize="m">
             <EuiFlexGroup
               direction="rowReverse"
               gutterSize="s"

@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { IScopedClusterClient } from 'kibana/server';
 import { chunk } from 'lodash';
-import { SearchResponse } from 'elasticsearch';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
 import {
   Token,
   CategorizationAnalyzer,
   CategoryFieldExample,
 } from '../../../../../common/types/categories';
+import { RuntimeMappings } from '../../../../../common/types/fields';
+import { IndicesOptions } from '../../../../../common/types/anomaly_detection_jobs';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
@@ -31,7 +35,9 @@ export function categorizationExamplesProvider({
     timeField: string | undefined,
     start: number,
     end: number,
-    analyzer: CategorizationAnalyzer
+    analyzer: CategorizationAnalyzer,
+    runtimeMappings: RuntimeMappings | undefined,
+    indicesOptions: IndicesOptions | undefined
   ): Promise<{ examples: CategoryFieldExample[]; error?: any }> {
     if (timeField !== undefined) {
       const range = {
@@ -56,7 +62,7 @@ export function categorizationExamplesProvider({
         }
       }
     }
-    const { body } = await asCurrentUser.search<SearchResponse<{ [id: string]: string }>>({
+    const { body } = await asCurrentUser.search<estypes.SearchResponse<{ [id: string]: string }>>({
       index: indexPatternTitle,
       size,
       body: {
@@ -64,7 +70,9 @@ export function categorizationExamplesProvider({
         _source: false,
         query,
         sort: ['_doc'],
+        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
       },
+      ...(indicesOptions ?? {}),
     });
 
     // hit.fields can be undefined if value is originally null
@@ -120,7 +128,7 @@ export function categorizationExamplesProvider({
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
     const {
       body: { tokens },
-    } = await asInternalUser.indices.analyze<{ tokens: Token[] }>({
+    } = await asInternalUser.indices.analyze({
       body: {
         ...getAnalyzer(analyzer),
         text: examples,
@@ -128,23 +136,31 @@ export function categorizationExamplesProvider({
     });
 
     const lengths = examples.map((e) => e.length);
-    const sumLengths = lengths.map(((s) => (a: number) => (s += a))(0));
+    const sumLengths = lengths.map(
+      (
+        (s) => (a: number) =>
+          (s += a)
+      )(0)
+    );
 
     const tokensPerExample: Token[][] = examples.map((e) => []);
 
-    tokens.forEach((t, i) => {
-      for (let g = 0; g < sumLengths.length; g++) {
-        if (t.start_offset <= sumLengths[g] + g) {
-          const offset = g > 0 ? sumLengths[g - 1] + g : 0;
-          tokensPerExample[g].push({
-            ...t,
-            start_offset: t.start_offset - offset,
-            end_offset: t.end_offset - offset,
-          });
-          break;
+    if (tokens !== undefined) {
+      tokens.forEach((t, i) => {
+        for (let g = 0; g < sumLengths.length; g++) {
+          if (t.start_offset <= sumLengths[g] + g) {
+            const offset = g > 0 ? sumLengths[g - 1] + g : 0;
+            const start = t.start_offset - offset;
+            tokensPerExample[g].push({
+              ...t,
+              start_offset: start,
+              end_offset: start + t.token.length,
+            });
+            break;
+          }
         }
-      }
-    });
+      });
+    }
     return tokensPerExample;
   }
 
@@ -164,7 +180,9 @@ export function categorizationExamplesProvider({
     timeField: string | undefined,
     start: number,
     end: number,
-    analyzer: CategorizationAnalyzer
+    analyzer: CategorizationAnalyzer,
+    runtimeMappings: RuntimeMappings | undefined,
+    indicesOptions: IndicesOptions | undefined
   ) {
     const resp = await categorizationExamples(
       indexPatternTitle,
@@ -174,7 +192,9 @@ export function categorizationExamplesProvider({
       timeField,
       start,
       end,
-      analyzer
+      analyzer,
+      runtimeMappings,
+      indicesOptions
     );
 
     const { examples } = resp;

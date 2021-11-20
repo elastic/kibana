@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -28,7 +29,11 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="" popoverContent={() => <p>{'Test popover'}</p>}>
+              <UtilityBarAction
+                dataTestSubj="popover"
+                iconType=""
+                popoverContent={() => <p>{'Test popover'}</p>}
+              >
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -36,7 +41,9 @@ describe('UtilityBar', () => {
 
           <UtilityBarSection>
             <UtilityBarGroup>
-              <UtilityBarAction iconType="cross">{'Test action'}</UtilityBarAction>
+              <UtilityBarAction dataTestSubj="action" iconType="cross">
+                {'Test action'}
+              </UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>
@@ -56,7 +63,11 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="" popoverContent={() => <p>{'Test popover'}</p>}>
+              <UtilityBarAction
+                dataTestSubj="popover"
+                iconType=""
+                popoverContent={() => <p>{'Test popover'}</p>}
+              >
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -64,7 +75,9 @@ describe('UtilityBar', () => {
 
           <UtilityBarSection>
             <UtilityBarGroup>
-              <UtilityBarAction iconType="cross">{'Test action'}</UtilityBarAction>
+              <UtilityBarAction dataTestSubj="action" iconType="cross">
+                {'Test action'}
+              </UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>
@@ -86,7 +99,11 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="" popoverContent={() => <p>{'Test popover'}</p>}>
+              <UtilityBarAction
+                dataTestSubj="popover"
+                iconType=""
+                popoverContent={() => <p>{'Test popover'}</p>}
+              >
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -94,7 +111,9 @@ describe('UtilityBar', () => {
 
           <UtilityBarSection>
             <UtilityBarGroup>
-              <UtilityBarAction iconType="cross">{'Test action'}</UtilityBarAction>
+              <UtilityBarAction dataTestSubj="action" iconType="cross">
+                {'Test action'}
+              </UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { QuotaMetric } from '../classes';
@@ -306,73 +307,6 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
-  index_mem_overall: new SingleIndexMemoryMetric({
-    field: 'memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.luceneTotalLabel', {
-      defaultMessage: 'Lucene Total',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esIndex.luceneTotalDescription', {
-      defaultMessage:
-        'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards.',
-    }),
-  }),
-  index_mem_overall_1: new SingleIndexMemoryMetric({
-    field: 'memory_in_bytes',
-    title: i18n.translate('xpack.monitoring.metrics.esIndex.indexMemoryLucene1Title', {
-      defaultMessage: 'Index Memory - Lucene 1',
-    }),
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.indexMemoryLucene1.luceneTotalLabel', {
-      defaultMessage: 'Lucene Total',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.esIndex.indexMemoryLucene1.luceneTotalDescription',
-      {
-        defaultMessage:
-          'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards.',
-      }
-    ),
-  }),
-  index_mem_overall_2: new SingleIndexMemoryMetric({
-    field: 'memory_in_bytes',
-    title: i18n.translate('xpack.monitoring.metrics.esIndex.indexMemoryLucene2Title', {
-      defaultMessage: 'Index Memory - Lucene 2',
-    }),
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.indexMemoryLucene2.luceneTotalLabel', {
-      defaultMessage: 'Lucene Total',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.esIndex.indexMemoryLucene2.luceneTotalDescription',
-      {
-        defaultMessage:
-          'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards.',
-      }
-    ),
-  }),
-  index_mem_overall_3: new SingleIndexMemoryMetric({
-    field: 'memory_in_bytes',
-    title: i18n.translate('xpack.monitoring.metrics.esIndex.indexMemoryLucene3Title', {
-      defaultMessage: 'Index Memory - Lucene 3',
-    }),
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.indexMemoryLucene3.luceneTotalLabel', {
-      defaultMessage: 'Lucene Total',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.esIndex.indexMemoryLucene3.luceneTotalDescription',
-      {
-        defaultMessage:
-          'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards.',
-      }
-    ),
-  }),
-  index_mem_doc_values: new SingleIndexMemoryMetric({
-    field: 'doc_values_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.docValuesLabel', {
-      defaultMessage: 'Doc Values',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esIndex.docValuesDescription', {
-      defaultMessage: 'Heap memory used by Doc Values. This is a part of Lucene Total.',
-    }),
-  }),
   // Note: This is not segment memory, unlike SingleIndexMemoryMetrics
   index_mem_fielddata: new IndexMemoryMetric({
     field: 'index_stats.total.fielddata.memory_size_in_bytes',
@@ -388,32 +322,15 @@ export const metrics = {
   }),
   index_mem_fixed_bit_set: new SingleIndexMemoryMetric({
     field: 'fixed_bit_set_memory_in_bytes',
+    title: i18n.translate('xpack.monitoring.metrics.esIndex.fixedBitsetsTitle', {
+      defaultMessage: 'Index Memory - Lucene',
+    }),
     label: i18n.translate('xpack.monitoring.metrics.esIndex.fixedBitsetsLabel', {
       defaultMessage: 'Fixed Bitsets',
     }),
     description: i18n.translate('xpack.monitoring.metrics.esIndex.fixedBitsetsDescription', {
       defaultMessage:
         'Heap memory used by Fixed Bit Sets (e.g., deeply nested documents). This is a part of Lucene Total.',
-    }),
-  }),
-  index_mem_norms: new SingleIndexMemoryMetric({
-    field: 'norms_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.normsLabel', {
-      defaultMessage: 'Norms',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esIndex.normsDescription', {
-      defaultMessage:
-        'Heap memory used by Norms (normalization factors for query-time, text scoring). This is a part of Lucene Total.',
-    }),
-  }),
-  index_mem_points: new SingleIndexMemoryMetric({
-    field: 'points_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.pointsLabel', {
-      defaultMessage: 'Points',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esIndex.pointsDescription', {
-      defaultMessage:
-        'Heap memory used by Points (e.g., numbers, IPs, and geo data). This is a part of Lucene Total.',
     }),
   }),
   // Note: This is not segment memory, unlike SingleIndexMemoryMetrics
@@ -446,34 +363,6 @@ export const metrics = {
         'Heap memory used by Request Cache (e.g., instant aggregations). This is for the same shards, but not a part of Lucene Total.',
     }),
     type: 'index',
-  }),
-  index_mem_stored_fields: new SingleIndexMemoryMetric({
-    field: 'stored_fields_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.storedFieldsLabel', {
-      defaultMessage: 'Stored Fields',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esIndex.storedFieldsDescription', {
-      defaultMessage:
-        'Heap memory used by Stored Fields (e.g., _source). This is a part of Lucene Total.',
-    }),
-  }),
-  index_mem_term_vectors: new SingleIndexMemoryMetric({
-    field: 'term_vectors_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.termVectorsLabel', {
-      defaultMessage: 'Term Vectors',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esIndex.termVectorsDescription', {
-      defaultMessage: 'Heap memory used by Term Vectors. This is a part of Lucene Total.',
-    }),
-  }),
-  index_mem_terms: new SingleIndexMemoryMetric({
-    field: 'terms_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esIndex.termsLabel', {
-      defaultMessage: 'Terms',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esIndex.termsDescription', {
-      defaultMessage: 'Heap memory used by Terms (e.g., text). This is a part of Lucene Total.',
-    }),
   }),
   index_mem_versions: new SingleIndexMemoryMetric({
     field: 'version_map_memory_in_bytes',
@@ -1049,73 +938,6 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
-  node_index_mem_overall: new NodeIndexMemoryMetric({
-    field: 'memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.luceneTotalLabel', {
-      defaultMessage: 'Lucene Total',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esNode.luceneTotalDescription', {
-      defaultMessage:
-        'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.',
-    }),
-  }),
-  node_index_mem_overall_1: new NodeIndexMemoryMetric({
-    field: 'memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.indexMemoryLucene1.lucenceTotalLabel', {
-      defaultMessage: 'Lucene Total',
-    }),
-    title: i18n.translate('xpack.monitoring.metrics.esNode.indexMemoryLucene1Title', {
-      defaultMessage: 'Index Memory - Lucene 1',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.esNode.indexMemoryLucene1.lucenceTotalDescription',
-      {
-        defaultMessage:
-          'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.',
-      }
-    ),
-  }),
-  node_index_mem_overall_2: new NodeIndexMemoryMetric({
-    field: 'memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.indexMemoryLucene2.lucenceTotalLabel', {
-      defaultMessage: 'Lucene Total',
-    }),
-    title: i18n.translate('xpack.monitoring.metrics.esNode.indexMemoryLucene2Title', {
-      defaultMessage: 'Index Memory - Lucene 2',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.esNode.indexMemoryLucene2.lucenceTotalDescription',
-      {
-        defaultMessage:
-          'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.',
-      }
-    ),
-  }),
-  node_index_mem_overall_3: new NodeIndexMemoryMetric({
-    field: 'memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.indexMemoryLucene3.lucenceTotalLabel', {
-      defaultMessage: 'Lucene Total',
-    }),
-    title: i18n.translate('xpack.monitoring.metrics.esNode.indexMemoryLucene3Title', {
-      defaultMessage: 'Index Memory - Lucene 3',
-    }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.esNode.indexMemoryLucene3.lucenceTotalDescription',
-      {
-        defaultMessage:
-          'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.',
-      }
-    ),
-  }),
-  node_index_mem_doc_values: new NodeIndexMemoryMetric({
-    field: 'doc_values_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.docValuesLabel', {
-      defaultMessage: 'Doc Values',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esNode.docValuesDescription', {
-      defaultMessage: 'Heap memory used by Doc Values. This is a part of Lucene Total.',
-    }),
-  }),
   // Note: This is not segment memory, unlike the rest of the SingleIndexMemoryMetrics
   node_index_mem_fielddata: new IndexMemoryMetric({
     field: 'node_stats.indices.fielddata.memory_size_in_bytes',
@@ -1131,32 +953,15 @@ export const metrics = {
   }),
   node_index_mem_fixed_bit_set: new NodeIndexMemoryMetric({
     field: 'fixed_bit_set_memory_in_bytes',
+    title: i18n.translate('xpack.monitoring.metrics.esNode.fixedBitsetsTitle', {
+      defaultMessage: 'Index Memory - Lucene',
+    }),
     label: i18n.translate('xpack.monitoring.metrics.esNode.fixedBitsetsLabel', {
       defaultMessage: 'Fixed Bitsets',
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.fixedBitsetsDescription', {
       defaultMessage:
         'Heap memory used by Fixed Bit Sets (e.g., deeply nested documents). This is a part of Lucene Total.',
-    }),
-  }),
-  node_index_mem_norms: new NodeIndexMemoryMetric({
-    field: 'norms_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.normsLabel', {
-      defaultMessage: 'Norms',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esNode.normsDescription', {
-      defaultMessage:
-        'Heap memory used by Norms (normalization factors for query-time, text scoring). This is a part of Lucene Total.',
-    }),
-  }),
-  node_index_mem_points: new NodeIndexMemoryMetric({
-    field: 'points_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.pointsLabel', {
-      defaultMessage: 'Points',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esNode.pointsDescription', {
-      defaultMessage:
-        'Heap memory used by Points (e.g., numbers, IPs, and geo data). This is a part of Lucene Total.',
     }),
   }),
   // Note: This is not segment memory, unlike SingleIndexMemoryMetrics
@@ -1189,34 +994,6 @@ export const metrics = {
         'Heap memory used by Request Cache (e.g., instant aggregations). This is for the same shards, but not a part of Lucene Total.',
     }),
     type: 'node',
-  }),
-  node_index_mem_stored_fields: new NodeIndexMemoryMetric({
-    field: 'stored_fields_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.storedFieldsLabel', {
-      defaultMessage: 'Stored Fields',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esNode.storedFieldsDescription', {
-      defaultMessage:
-        'Heap memory used by Stored Fields (e.g., _source). This is a part of Lucene Total.',
-    }),
-  }),
-  node_index_mem_term_vectors: new NodeIndexMemoryMetric({
-    field: 'term_vectors_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.termVectorsLabel', {
-      defaultMessage: 'Term Vectors',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esNode.termVectorsDescription', {
-      defaultMessage: 'Heap memory used by Term Vectors. This is a part of Lucene Total.',
-    }),
-  }),
-  node_index_mem_terms: new NodeIndexMemoryMetric({
-    field: 'terms_memory_in_bytes',
-    label: i18n.translate('xpack.monitoring.metrics.esNode.termsLabel', {
-      defaultMessage: 'Terms',
-    }),
-    description: i18n.translate('xpack.monitoring.metrics.esNode.termsDescription', {
-      defaultMessage: 'Heap memory used by Terms (e.g., text). This is a part of Lucene Total.',
-    }),
   }),
   node_index_mem_versions: new NodeIndexMemoryMetric({
     field: 'version_map_memory_in_bytes',

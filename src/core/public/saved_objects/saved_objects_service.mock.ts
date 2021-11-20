@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsService, SavedObjectsStart } from './saved_objects_service';
@@ -13,11 +13,13 @@ const createStartContractMock = () => {
     client: {
       create: jest.fn(),
       bulkCreate: jest.fn(),
+      bulkResolve: jest.fn(),
       bulkUpdate: jest.fn(),
       delete: jest.fn(),
       bulkGet: jest.fn(),
       find: jest.fn(),
       get: jest.fn(),
+      resolve: jest.fn(),
       update: jest.fn(),
     },
   };

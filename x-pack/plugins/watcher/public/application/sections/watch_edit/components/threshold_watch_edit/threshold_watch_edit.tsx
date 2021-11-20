@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -17,13 +18,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiPageContent,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiPageHeader,
+  EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -235,19 +237,15 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   };
 
   return (
-    <EuiPageContent>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
-            <h1 data-test-subj="pageTitle">{pageTitle}</h1>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            {watch.titleDescription}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={<span data-test-subj="pageTitle">{pageTitle}</span>}
+        description={watch.titleDescription}
+        bottomBorder
+      />
+
+      <EuiSpacer size="l" />
+
       <EuiForm data-test-subj="thresholdWatchForm">
         {serverError && (
           <Fragment>
@@ -525,7 +523,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                         onClick={() => {
                           setAggFieldPopoverOpen(true);
                         }}
-                        color={watch.aggField ? 'secondary' : 'danger'}
+                        color={watch.aggField ? 'success' : 'danger'}
                       />
                     }
                     isOpen={aggFieldPopoverOpen}
@@ -619,7 +617,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       }}
                       color={
                         watch.groupBy === 'all' || (watch.termSize && watch.termField)
-                          ? 'secondary'
+                          ? 'success'
                           : 'danger'
                       }
                     />
@@ -732,7 +730,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       color={
                         errors.threshold0.length || (errors.threshold1 && errors.threshold1.length)
                           ? 'danger'
-                          : 'secondary'
+                          : 'success'
                       }
                     />
                   }
@@ -818,7 +816,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       onClick={() => {
                         setWatchDurationPopoverOpen(true);
                       }}
-                      color={watch.timeWindowSize ? 'secondary' : 'danger'}
+                      color={watch.timeWindowSize ? 'success' : 'danger'}
                     />
                   }
                   isOpen={watchDurationPopoverOpen}
@@ -892,7 +890,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  color="secondary"
+                  color="success"
                   data-test-subj="saveWatchButton"
                   type="submit"
                   iconType="check"
@@ -956,6 +954,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
           close={() => setIsRequestVisible(false)}
         />
       ) : null}
-    </EuiPageContent>
+    </EuiPageContentBody>
   );
 };

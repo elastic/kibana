@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mapValues, keys } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { API_ROUTE } from '../../../common/lib';
 import { catchErrorHandler } from '../catch_error_handler';
-import { normalizeType } from '../../lib/normalize_type';
+import { normalizeType } from '../../../common/lib/request/normalize_type';
 import { RouteInitializerDeps } from '..';
 
 const ESFieldsRequestSchema = schema.object({
@@ -27,7 +28,7 @@ export function initializeESFieldsRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
+      const client = context.core.elasticsearch.client.asCurrentUser;
       const { index, fields } = request.query;
 
       const config = {
@@ -35,8 +36,8 @@ export function initializeESFieldsRoute(deps: RouteInitializerDeps) {
         fields: fields || '*',
       };
 
-      const esFields = await callAsCurrentUser('fieldCaps', config).then((resp) => {
-        return mapValues(resp.fields, (types) => {
+      const esFields = await client.fieldCaps(config).then((resp) => {
+        return mapValues(resp.body.fields, (types) => {
           if (keys(types).length > 1) {
             return 'conflict';
           }

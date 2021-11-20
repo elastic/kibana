@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLinkProps, EuiText, EuiTextProps } from '@elastic/eui';
 import React from 'react';
 import extendSessionIcon from '../icons/extend_session.svg';
 
-export { OnActionComplete, PopoverActionsMenu } from './actions';
+export type { OnActionComplete } from './actions';
+export { PopoverActionsMenu } from './actions';
 
 export const TableText = ({ children, ...props }: EuiTextProps) => {
   return (
@@ -19,9 +21,9 @@ export const TableText = ({ children, ...props }: EuiTextProps) => {
 };
 
 export interface IClickActionDescriptor {
-  label: string | React.ReactElement;
+  label: React.ReactNode;
   iconType: 'trash' | 'cancel' | typeof extendSessionIcon;
-  textColor: EuiTextProps['color'];
+  onClick: () => Promise<void> | void;
 }
 
 export interface IHrefActionDescriptor {

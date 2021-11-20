@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import dedent from 'dedent';
@@ -19,11 +19,7 @@ interface Options {
 
 type CircularDepList = Set<string>;
 
-const allowedList: CircularDepList = new Set([
-  'x-pack/plugins/apm -> x-pack/plugins/infra',
-  'x-pack/plugins/lists -> x-pack/plugins/security_solution',
-  'x-pack/plugins/security -> x-pack/plugins/spaces',
-]);
+const allowedList: CircularDepList = new Set([]);
 
 run(
   async ({ flags, log }) => {
@@ -44,7 +40,8 @@ run(
     const circularDependenciesFullPaths = parseCircular(depTree).filter((circularDeps) => {
       const first = circularDeps[0];
       const last = circularDeps[circularDeps.length - 1];
-      const matchRegex = /(?<pluginFolder>(src|x-pack)\/plugins|examples|x-pack\/examples)\/(?<pluginName>[^\/]*)\/.*/;
+      const matchRegex =
+        /(?<pluginFolder>(src|x-pack)\/plugins|examples|x-pack\/examples)\/(?<pluginName>[^\/]*)\/.*/;
       const firstMatch = first.match(matchRegex);
       const lastMatch = last.match(matchRegex);
 

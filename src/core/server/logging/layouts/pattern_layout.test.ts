@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { LogLevel, LogRecord } from '@kbn/logging';
@@ -66,28 +66,28 @@ expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 test('`createConfigSchema()` creates correct schema.', () => {
   const layoutSchema = PatternLayout.configSchema;
 
-  const validConfigWithOptional = { kind: 'pattern' };
+  const validConfigWithOptional = { type: 'pattern' };
   expect(layoutSchema.validate(validConfigWithOptional)).toEqual({
     highlight: undefined,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: undefined,
   });
 
   const validConfig = {
     highlight: true,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '%message',
   };
   expect(layoutSchema.validate(validConfig)).toEqual({
     highlight: true,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '%message',
   });
 
-  const wrongConfig1 = { kind: 'json' };
+  const wrongConfig1 = { type: 'json' };
   expect(() => layoutSchema.validate(wrongConfig1)).toThrow();
 
-  const wrongConfig2 = { kind: 'pattern', pattern: 1 };
+  const wrongConfig2 = { type: 'pattern', pattern: 1 };
   expect(() => layoutSchema.validate(wrongConfig2)).toThrow();
 });
 
@@ -108,7 +108,7 @@ test('`format()` correctly formats record with custom pattern.', () => {
 });
 
 test('`format()` correctly formats record with meta data.', () => {
-  const layout = new PatternLayout();
+  const layout = new PatternLayout('[%date][%level][%logger]%meta %message');
 
   expect(
     layout.format({
@@ -118,11 +118,14 @@ test('`format()` correctly formats record with meta data.', () => {
       timestamp,
       pid: 5355,
       meta: {
+        // @ts-expect-error not valid ECS field
         from: 'v7',
         to: 'v8',
       },
     })
-  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta]{"from":"v7","to":"v8"} message-meta');
+  ).toBe(
+    '[2012-02-01T09:30:22.011-05:00][DEBUG][context-meta]{"from":"v7","to":"v8"} message-meta'
+  );
 
   expect(
     layout.format({
@@ -133,7 +136,7 @@ test('`format()` correctly formats record with meta data.', () => {
       pid: 5355,
       meta: {},
     })
-  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta]{} message-meta');
+  ).toBe('[2012-02-01T09:30:22.011-05:00][DEBUG][context-meta]{} message-meta');
 
   expect(
     layout.format({
@@ -143,7 +146,7 @@ test('`format()` correctly formats record with meta data.', () => {
       timestamp,
       pid: 5355,
     })
-  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta] message-meta');
+  ).toBe('[2012-02-01T09:30:22.011-05:00][DEBUG][context-meta] message-meta');
 });
 
 test('`format()` correctly formats record with highlighting.', () => {
@@ -175,6 +178,7 @@ test('`format()` allows specifying pattern with meta.', () => {
       to: 'v8',
     },
   };
+  // @ts-expect-error not valid ECS field
   expect(layout.format(record)).toBe('context-{"from":"v7","to":"v8"}-message');
 });
 
@@ -187,10 +191,10 @@ describe('format', () => {
       timestamp,
       pid: 5355,
     };
-    it('uses ISO8601 as default', () => {
+    it('uses ISO8601_TZ as default', () => {
       const layout = new PatternLayout();
 
-      expect(layout.format(record)).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context] message');
+      expect(layout.format(record)).toBe('[2012-02-01T09:30:22.011-05:00][DEBUG][context] message');
     });
 
     describe('supports specifying a predefined format', () => {

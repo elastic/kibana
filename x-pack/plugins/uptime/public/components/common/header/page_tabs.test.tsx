@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -14,7 +15,6 @@ describe('PageTabs', () => {
     const { getByText } = render(<PageTabs />);
     expect(getByText('Overview')).toBeInTheDocument();
     expect(getByText('Certificates')).toBeInTheDocument();
-    expect(getByText('Settings')).toBeInTheDocument();
   });
 
   it('it keep params while switching', () => {
@@ -30,10 +30,6 @@ describe('PageTabs', () => {
     expect(getByTestId('uptimeCertificatesLink')).toHaveAttribute(
       'href',
       '/certificates?dateRangeStart=now-10m'
-    );
-    expect(getByTestId('settings-page-link')).toHaveAttribute(
-      'href',
-      '/settings?dateRangeStart=now-10m'
     );
   });
 

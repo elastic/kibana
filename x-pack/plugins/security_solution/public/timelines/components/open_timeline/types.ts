@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type React from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
-import { NoteResult } from '../../../graphql/types';
+import { NoteResult } from '../../../../common/types/timeline/note';
 import {
   TimelineTypeLiteral,
   TimelineTypeLiteralWithNull,
@@ -15,6 +16,7 @@ import {
   TemplateTimelineTypeLiteral,
   RowRendererId,
   TimelineStatusLiteralWithNull,
+  SingleTimelineResolveResponse,
 } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
@@ -166,9 +168,9 @@ export interface OpenTimelineProps {
   /** The currently applied search criteria */
   query: string;
   /** Refetch table */
-  refetch?: (existingTimeline?: OpenTimelineResult[], existingCount?: number) => void;
-  /** The results of executing a search */
-  searchResults: OpenTimelineResult[];
+  refetch?: () => void;
+  /** The results of executing a search, null is the status before data fatched */
+  searchResults: OpenTimelineResult[] | null;
   /** the currently-selected timelines in the table */
   selectedItems: OpenTimelineResult[];
   /** Toggle export timelines modal*/
@@ -193,12 +195,17 @@ export interface OpenTimelineProps {
   hideActions?: ActionTimelineToShow[];
 }
 
+export interface ResolveTimelineConfig {
+  alias_target_id: SingleTimelineResolveResponse['data']['alias_target_id'];
+  outcome: SingleTimelineResolveResponse['data']['outcome'];
+}
 export interface UpdateTimeline {
   duplicate: boolean;
   id: string;
   forceNotes?: boolean;
   from: string;
   notes: NoteResult[] | null | undefined;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   timeline: TimelineModel;
   to: string;
   ruleNote?: string;
@@ -209,6 +216,7 @@ export type DispatchUpdateTimeline = ({
   id,
   from,
   notes,
+  resolveTimelineConfig,
   timeline,
   to,
   ruleNote,
@@ -220,13 +228,11 @@ export enum TimelineTabsStyle {
 }
 
 export interface TimelineTab {
-  count: number | undefined;
   disabled: boolean;
   href: string;
   id: TimelineTypeLiteral;
   name: string;
   onClick: (ev: { preventDefault: () => void }) => void;
-  withNext: boolean;
 }
 
 export interface TemplateTimelineFilter {
@@ -236,3 +242,5 @@ export interface TemplateTimelineFilter {
   withNext: boolean;
   count: number | undefined;
 }
+
+export type TimelineErrorCallback = (error: Error, timelineId: string) => void;

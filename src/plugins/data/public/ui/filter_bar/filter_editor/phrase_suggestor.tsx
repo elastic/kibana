@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -17,6 +17,7 @@ export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   indexPattern: IIndexPattern;
   field?: IFieldType;
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 export interface PhraseSuggestorState {
@@ -63,7 +64,8 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   protected updateSuggestions = debounce(async (query: string = '') => {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
-    const { indexPattern, field } = this.props as PhraseSuggestorProps;
+    const { indexPattern, field, timeRangeForSuggestionsOverride } = this
+      .props as PhraseSuggestorProps;
     if (!field || !this.isSuggestingValues()) {
       return;
     }
@@ -74,8 +76,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       field,
       query,
       signal: this.abortController.signal,
-      // Show all results in filter bar autocomplete
-      useTimeRange: false,
+      useTimeRange: timeRangeForSuggestionsOverride,
     });
 
     this.setState({ suggestions, isLoading: false });

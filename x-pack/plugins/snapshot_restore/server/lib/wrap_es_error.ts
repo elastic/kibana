@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 const extractCausedByChain = (causedBy: any = {}, accumulator: any[] = []): any => {
@@ -33,7 +34,7 @@ export const wrapEsError = (err: any, statusCodeToMessageMap: any = {}) => {
       root_cause = [], // eslint-disable-line @typescript-eslint/naming-convention
       caused_by = {}, // eslint-disable-line @typescript-eslint/naming-convention
     } = {},
-  } = JSON.parse(response);
+  } = typeof response === 'string' ? JSON.parse(response) : response;
 
   // If no custom message if specified for the error's status code, just
   // wrap the error as a Boom error response, include the additional information from ES, and return it

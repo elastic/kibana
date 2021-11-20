@@ -1,145 +1,270 @@
 [[introduction]]
-== {kib} &mdash; your window into the Elastic Stack
+== {kib}&mdash;your window into Elastic
 ++++
 <titleabbrev>What is Kibana?</titleabbrev>
 ++++
 
-**_Visualize and analyze your data and manage all things Elastic Stack._**
+{kib} enables you to give
+shape to your data and navigate the Elastic Stack.  With {kib}, you can:
 
-Whether you’re an analyst or an admin, {kib} makes your data actionable by providing
-three key functions. Kibana is:
+* *Search, observe, and protect your data.*
+From discovering documents to analyzing logs to finding security vulnerabilities,
+{kib} is your portal for accessing these capabilities and more.
 
-* **An open-source analytics and visualization platform.**
-Use {kib} to explore your {es} data, and then build beautiful visualizations and dashboards.
+* *Analyze your data.*
+Search for hidden insights, visualize what you've found in charts, gauges,
+maps, graphs, and more, and combine them in a dashboard.
 
-* **A UI for managing the Elastic Stack.**
-Manage your security settings, assign user roles, take snapshots, roll up your data,
-and more &mdash; all from the convenience of a {kib} UI.
+* *Manage, monitor, and secure the Elastic Stack.*
+Manage your data, monitor the health of your
+Elastic Stack cluster, and control which users have access to
+which features.
 
-* **A centralized hub for Elastic's solutions.** From log analytics to
-document discovery to SIEM, {kib} is the portal for accessing these and other capabilities.
-
+[[kibana-home-page]]
 [role="screenshot"]
-image::images/intro-kibana.png[Kibana home page]
+image::images/analytics-home-page.png[Analytics home page]
 
-[float]
-[[get-data-into-kibana]]
-=== Ingest data
+*{kib} is for administrators, analysts, and business users.*
+As an admin, your role is to manage the Elastic Stack, from creating your
+deployment to getting {es} data into {kib}, and then
+managing the data.  As an analyst, you're looking to discover insights
+in the data, visualize your data on dashboards, and share your findings.  As a business user,
+you want to view existing dashboards and drill down into details.
 
-{kib} is designed to use {es} as a data source. Think of Elasticsearch as the engine that stores
-and processes the data, with {kib} sitting on top.
-
-To start working with your data in Kibana, use one of the many ingest options,
-available from the home page. You can collect data from an app or service or upload a file that contains your data.
-If you're not ready to use your own data, you can add a sample data set
-to give {kib} a test drive.
-
-[role="screenshot"]
-image::setup/images/add-data-home.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
-
-[float]
-[[explore-and-query]]
-=== Explore & query
-
-Ready to dive into your data? With <<discover, Discover>>, you can explore your data and
-search for hidden insights and relationships. Ask your questions, and then
-narrow the results to just the data you want.
-
-[role="screenshot"]
-image::images/intro-discover.png[Discover UI]
-
-[float]
-[[visualize-and-analyze]]
-=== Visualize & analyze
-
-A visualization is worth a thousand log lines, and {kib} provides
-many options for showcasing your data. Use <<create-panels-with-lens,Lens>>,
-our drag-and-drop interface,
-to rapidly build
-charts, tables, metrics, and more. If there
-is a better visualization for your data, *Lens* suggests it, allowing for quick
-switching between visualization types.
-
-Once your visualizations are just the way you want,
-use <<dashboard, Dashboard>> to collect them in one place. A dashboard provides
-insights into your data from multiple perspectives.
-
-[role="screenshot"]
-image::images/intro-dashboard.png[Sample eCommerce data set dashboard]
-
-{kib} also offers these visualization features:
-
-* <<canvas, Canvas>> gives you the ability to present your data in a
-visually compelling, pixel-perfect report. Give your data the “wow” factor
-needed to impress your CEO or to captivate coworkers with a big-screen display.
-
-* <<maps, Maps>> enables you to ask (and answer) meaningful
-questions of your location-based data. Maps supports multiple
-layers and data sources, mapping of individual geo points and shapes,
-and dynamic client-side styling.
-
-* <<tsvb-advanced-editor, TSVB>> allows you to combine
-an infinite number of aggregations to display complex data.
-With TSVB, you can customize
-every aspect of your visualization. Choose your own date format and color
-gradients, and easily switch your data view between time series, metric,
-top N, gauge, and markdown.
-
-[float]
-[[organize-and-secure]]
-=== Organize & secure
-
-Want to share Kibana’s goodness with other people or teams? You can do so with
-<<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboards, and indices.
-Think of a space as its own mini {kib} installation &mdash; it’s isolated from
-all other spaces, so you can tailor it to your specific needs without impacting others.
-
-You can even choose which features to enable within each space. Don’t need
-Machine learning in your “Executive” space? Simply turn it off.
-
-[role="screenshot"]
-image::images/intro-spaces.png[Space selector screen]
-
-You can take this all one step further with Kibana’s security features, and
-control which users have access to each space. {kib} allows for fine-grained
-controls, so you can give a user read-only access to
-dashboards in one space, but full access to all of Kibana’s features in another.
-
-[float]
-[[manage-all-things-stack]]
-=== Manage all things Elastic Stack
-
-<<management, Stack Management>> provides guided processes for managing all
-things Elastic Stack &mdash; indices, clusters, licenses, UI settings,
-and more. Want to update your {es} indices? Set user roles and privileges?
-Turn on dark mode? Kibana has UIs for all that.
-
-[role="screenshot"]
-image::images/intro-management.png[]
+*{kib} works with all types of data.* Your data can be structured or unstructured text,
+numerical data, time series data, geospatial data, logs, metrics, security events,
+and more.
+No matter your data, {kib} can help you uncover patterns and relationships and visualize the results.
 
 [float]
 [[extend-your-use-case]]
-=== Extend your use case &mdash; or add a new one
+=== Search, observe, and protect
 
-As a hub for Elastic's https://www.elastic.co/products/[solutions], {kib}
-can help you find security vulnerabilities,
-monitor performance, and address your business needs. Get alerted if a key
-metric spikes. Detect anomalous behavior or forecast future spikes. Root out
-bottlenecks in your application code. Kibana doesn’t limit or dictate how you explore your data.
+Being able to search, observe, and protect your data is a requirement for any analyst.
+{kib} provides solutions for each of these use cases.
+
+* https://www.elastic.co/guide/en/enterprise-search/current/index.html[*Enterprise Search*] enables you to create a search experience for your app, workplace, and website.
+
+* {observability-guide}/observability-introduction.html[*Elastic Observability*] enables you to monitor and apply analytics in real time
+to events happening across all your environments. You can analyze log events, monitor the performance metrics for the host or container
+that it ran in, trace the transaction, and check the overall service availability.
+
+* Designed for security analysts, {security-guide}/es-overview.html[*Elastic Security*] provides an overview of
+the events and alerts from your environment.  Elastic Security helps you defend
+your organization from threats before damage and loss occur.
+
+
+[float]
+[[visualize-and-analyze]]
+=== Analyze
+
+With {kib} <<get-started,*Analytics*>>, you can quickly search through large amounts
+of data, explore fields and values,
+and then use the drag-and-drop interface to rapidly build charts, tables, metrics, and more.
 
 [role="screenshot"]
-image::siem/images/detections-ui.png[]
+image::images/visualization-journey.png[User data analysis journey]
+
+[[get-data-into-kibana]]
+[cols=2*]
+|===
+
+| *1*
+| *Add data.* The best way to add data to the Elastic Stack is to use one of our many <<connect-to-elasticsearch,integrations>>.
+Alternatively, you can add a sample data set or upload a file. All three options are available
+on the home page.
+
+| *2*
+| *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
+insights and relationships. Ask your questions, and then filter the results to just the data you want.
+You can limit your results to the most recent documents added to {es}.
+
+| *3*
+| *Visualize.* {kib} provides many options to create visualizations of your data, from
+aggregation-based data to time series data to geo data.
+<<dashboard, *Dashboard*>> is your starting point to create visualizations,
+and then pulling them together to show your data from multiple perspectives.
+Use <<canvas, *Canvas*>>,
+to give your data
+the “wow” factor for display on a big screen. Use *Graph* to explore patterns and relationships.
+
+| *4*
+| *Model data behavior.*
+Use <<xpack-ml, *{ml-cap}*>> to model the behavior of your data&mdash;forecast unusual behavior and
+perform outlier detection, regression, and classification analysis.
+
+| *5*
+| *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
+a dashboard, share a link, export to PDF, and more.
+|===
+
+[float]
+=== Manage your data
+
+{kib} helps you perform your data management tasks from the convenience of a UI. You can:
+
+* Refresh, flush, and clear the cache of your indices.
+* Define the lifecycle of an index as it ages.
+* Define a policy for taking snapshots of your cluster.
+* Roll up data from one or more indices into a new, compact index.
+* Replicate indices on a remote cluster and copy them to a local cluster.
+
+For a full list of data management UIs, refer to <<management, *Stack Management*>>.
+
+[role="screenshot"]
+image::images/stack-management.png[Index Management view in Stack Management]
+
+
+[float]
+=== Alert and take action
+
+Detecting and acting on significant shifts and signals in your data is a need
+that exists in almost every use case. Alerting allows you to
+detect conditions in different {kib} apps and trigger actions when those conditions are met.
+For example, you might trigger an alert when a shift occurs in your business critical KPIs or when
+memory, CPU, or disk space take a dip.
+When the alert triggers, you can send a notification to a system that is part of your daily workflow:
+email, Slack, PagerDuty, ServiceNow, and other third party integrations.
+
+A dedicated view for creating, searching,
+and editing rules is in <<create-and-manage-rules,*Rules and Connectors*>>.
+
+[role="screenshot"]
+image::images/rules-and-connectors.png[Rules and Connectors view]
+
+[float]
+[[organize-and-secure]]
+=== Organize content
+
+You might be managing tens, hundreds, or even thousands of dashboards, visualizations, and other {kib} assets.
+{kib} has several features for keeping your content organized.
+
+
+[float]
+[[organize-in-spaces]]
+==== Collect related items in a space
+
+{kib} provides <<xpack-spaces, spaces>> for organizing your visualizations, dashboards, {data-sources}, and more.
+Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
+so you can tailor it to your specific needs without impacting others.
+
+[role="screenshot"]
+image::images/select-your-space.png[Space selector view]
+
+[float]
+==== Organize your content with tags
+
+Tags are keywords or labels that you assign to saved objects,
+such as dashboards and visualizations, so you can classify them in a way that is meaningful to you.
+For example, if you tag objects with “design”, you can search and
+filter on the tag to see all related objects.
+Tags are also good for grouping content into categories within a space.
+
+Don’t worry if you have hundreds of dashboards that need to be tagged. Use <<managing-tags,*Tags*>>
+in *Stack Management* to create your tags, then assign and delete
+them in bulk operations.
+
+[float]
+[[intro-kibana-Security]]
+=== Secure {kib}
+
+{kib} offers a range of security features for you to control who has access to what.
+The security features are automatically turned on when
+{ref}/security-minimal-setup.html[security is enabled in
+{es}]. For a description of all available configuration options,
+refer to <<security-settings-kb,Security settings in {kib}>>.
+
+[float]
+==== Log in
+{kib} supports several <<kibana-authentication,authentication providers>>,
+allowing you to login using {es}’s built-in realms, or with your own single sign-on provider.
+
+[role="screenshot"]
+image::security/images/kibana-login.png[Login page]
+
+[float]
+==== Secure access
+
+{kib} provides roles and privileges for controlling which users can
+view and manage {kib} features. Privileges grant permission to view an application
+or perform a specific action and are assigned to roles. Roles allow you to describe
+a “template” of capabilities that you can grant to many users,
+without having to redefine what each user should be able to do.
+
+When you create a role, you can scope the assigned {kib} privileges to specific spaces.
+This makes it possible to grant users different access levels in different spaces,
+or even give users their very own private space. For example, power users might
+have privileges to create and edit visualizations and dashboards,
+while analysts or executives might have *Dashboard* and *Canvas* with read-only privileges.
+
+{kib}’s role management interface allows you to describe these various access
+levels, or you can automate role creation via our <<role-management-api,API>>.
+
+[role="screenshot"]
+image::spaces/images/spaces-roles.png[{kib privileges}]
+
+[float]
+==== Audit access
+
+Once you have your users and roles configured, you might want to maintain a
+record of who did what, when. The {kib} audit log will record this information for you,
+which can then be correlated with {es} audit logs to gain more insights into your
+users’ behavior. For more information, see <<xpack-security-audit-logging,{kib} audit logging>>.
+
+[float]
+[[kibana-navigation-search]]
+=== Find apps and objects
+
+To quickly find apps and the objects you create, use the search field in the global header.
+Search suggestions include deep links into applications,
+allowing you to directly navigate to the views you need most.
+
+[role="screenshot"]
+image::images/app-navigation-search.png[Example of searching for apps]
+
+You can search for objects by type, name, and tag.
+To get the most from the search feature, follow these tips:
+
+* Use the keyboard shortcut&mdash;Ctrl+/ on Windows and Linux, Command+/ on MacOS&mdash;to focus on the input at any time.
+
+* Use the provided syntax keywords.
++
+[cols=2*]
+|===
+|Search by type
+|`type:dashboard`
+
+Available types: `application`, `canvas-workpad`, `dashboard`, `index-pattern`, `lens`, `maps`, `query`, `search`, `visualization`
+
+|Search by tag
+|`tag:mytagname` +
+`tag:"tag name with spaces"`
+
+|Search by type and name
+|`type:dashboard my_dashboard_title`
+
+|Advanced&nbsp;searches
+|`tag:(tagname1 or tagname2) my_dashboard_title` +
+`type:lens tag:(tagname1 or tagname2)` +
+`type:(dashboard or canvas-workpad) logs` +
+|===
+
+This example searches for visualizations with the tag `design` .
+
+[role="screenshot"]
+image::images/tags-search.png[Example of searching for tags]
+
+
+[float]
+=== View all {kib} has to offer
+
+To view the full list of apps and features, go to https://www.elastic.co/kibana/features[{kib} features].
 
 [float]
 [[try-kibana]]
-=== Give {kib} a try
+=== Get help
 
-There is no faster way to try out {kib} than with our hosted {es} Service.
-https://www.elastic.co/cloud/elasticsearch-service/signup[Sign up for a free trial]
-and start exploring data in minutes.
+Click image:images/intro-help-icon.png[Help icon in navigation bar]
+for help with questions or to provide feedback.
 
-You can also <<install, install {kib} on your own>> &mdash; no code, no additional
-infrastructure required.
-
-Our <<get-started, Quick start>> and in-product guidance can
-help you get up and running, faster. Click the help icon image:images/intro-help-icon.png[Help icon in navigation bar] for help with questions or to provide feedback.
+To keep up with what’s new and changed in Elastic, click the celebration icon in the global header.

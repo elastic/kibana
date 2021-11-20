@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -20,8 +21,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { TemplateDeserialized } from '../../../../../../../common';
-import { ILM_PAGES_POLICY_EDIT, ILM_URL_GENERATOR_ID } from '../../../../../constants';
-import { useUrlGenerator } from '../../../../../services/use_url_generator';
+import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
+import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -53,13 +54,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
-  const ilmPolicyLink = useUrlGenerator({
-    urlGeneratorId: ILM_URL_GENERATOR_ID,
-    urlGeneratorState: {
-      page: ILM_PAGES_POLICY_EDIT,
-      policyName: ilmPolicy?.name,
-    },
-  });
+  const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
 
   return (
     <>

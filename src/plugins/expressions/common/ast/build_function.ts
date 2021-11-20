@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ExpressionAstFunction } from './types';
+import { ExpressionAstExpression, ExpressionAstFunction } from './types';
 import {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
@@ -21,22 +21,20 @@ import { format } from './format';
 
 // Infers the types from an ExpressionFunctionDefinition.
 // @internal
-export type InferFunctionDefinition<
-  FnDef extends AnyExpressionFunctionDefinition
-> = FnDef extends ExpressionFunctionDefinition<
-  infer Name,
-  infer Input,
-  infer Arguments,
-  infer Output,
-  infer Context
->
-  ? { name: Name; input: Input; arguments: Arguments; output: Output; context: Context }
-  : never;
+export type InferFunctionDefinition<FnDef extends AnyExpressionFunctionDefinition> =
+  FnDef extends ExpressionFunctionDefinition<
+    infer Name,
+    infer Input,
+    infer Arguments,
+    infer Output,
+    infer Context
+  >
+    ? { name: Name; input: Input; arguments: Arguments; output: Output; context: Context }
+    : never;
 
 // Shortcut for inferring args from a function definition.
-type FunctionArgs<
-  FnDef extends AnyExpressionFunctionDefinition
-> = InferFunctionDefinition<FnDef>['arguments'];
+type FunctionArgs<FnDef extends AnyExpressionFunctionDefinition> =
+  InferFunctionDefinition<FnDef>['arguments'];
 
 // Gets a list of possible arg names for a given function.
 type FunctionArgName<FnDef extends AnyExpressionFunctionDefinition> = {
@@ -164,21 +162,26 @@ export function buildExpressionFunction<
     [K in keyof FunctionArgs<FnDef>]:
       | FunctionArgs<FnDef>[K]
       | ExpressionAstExpressionBuilder
-      | ExpressionAstExpressionBuilder[];
+      | ExpressionAstExpressionBuilder[]
+      | ExpressionAstExpression
+      | ExpressionAstExpression[];
   }
 ): ExpressionAstFunctionBuilder<FnDef> {
-  const args = Object.entries(initialArgs).reduce((acc, [key, value]) => {
-    if (Array.isArray(value)) {
-      acc[key] = value.map((v) => {
-        return isExpressionAst(v) ? buildExpression(v) : v;
-      });
-    } else if (value !== undefined) {
-      acc[key] = isExpressionAst(value) ? [buildExpression(value)] : [value];
-    } else {
-      delete acc[key];
-    }
-    return acc;
-  }, initialArgs as FunctionBuilderArguments<FnDef>);
+  const args = Object.entries(initialArgs).reduce(
+    (acc, [key, value]) => {
+      if (Array.isArray(value)) {
+        acc[key] = value.map((v) => {
+          return isExpressionAst(v) ? buildExpression(v) : v;
+        });
+      } else if (value !== undefined) {
+        acc[key] = isExpressionAst(value) ? [buildExpression(value)] : [value];
+      } else {
+        delete acc[key];
+      }
+      return acc;
+    },
+    { ...initialArgs } as FunctionBuilderArguments<FnDef>
+  );
 
   return {
     type: 'expression_function_builder',

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback } from 'react';
@@ -22,7 +23,7 @@ export const CallOutDismissButton: FC<CallOutDismissButtonProps> = ({
   onClick = noop,
 }) => {
   const { type } = message;
-  const buttonColor = type === 'success' ? 'secondary' : type;
+  const buttonColor = type;
   const buttonText = text ?? i18n.DISMISS_BUTTON;
   const handleClick = useCallback(() => onClick(message), [onClick, message]);
 

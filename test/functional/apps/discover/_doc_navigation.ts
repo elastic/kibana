@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -17,12 +17,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
 
   describe('doc link in discover', function contextSize() {
-    beforeEach(async function () {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('discover');
+    before(async () => {
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': true,
+        'discover:searchFieldsFromSource': true,
+      });
+    });
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.uiSettings.replace({});
+    });
+
+    beforeEach(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
@@ -40,8 +52,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[1].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
+      await retry.waitFor('hit loaded', async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        return !!hasDocHit;
+      });
     });
 
     // no longer relevant as null field won't be returned in the Fields API response

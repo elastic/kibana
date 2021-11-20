@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ConnectableObservable, Subscription, of } from 'rxjs';
+import { ConnectableObservable, Subscription } from 'rxjs';
 import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
 
 import { Env, RawConfigurationProvider } from '../config';
@@ -25,7 +25,7 @@ export class Root {
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
-    private readonly env: Env,
+    env: Env,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
     this.loggingSystem = new LoggingSystem();
@@ -34,10 +34,20 @@ export class Root {
     this.server = new Server(rawConfigProvider, env, this.loggingSystem);
   }
 
+  public async preboot() {
+    try {
+      this.server.setupCoreConfig();
+      await this.setupLogging();
+      this.log.debug('prebooting root');
+      return await this.server.preboot();
+    } catch (e) {
+      await this.shutdown(e);
+      throw e;
+    }
+  }
+
   public async setup() {
     try {
-      await this.server.setupCoreConfig();
-      await this.setupLogging();
       this.log.debug('setting up root');
       return await this.server.setup();
     } catch (e) {
@@ -87,10 +97,7 @@ export class Root {
     // Stream that maps config updates to logger updates, including update failures.
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
-      // except for the CLI process where we only apply the default logging config once
-      switchMap(() =>
-        this.env.isDevCliParent ? of(undefined) : configService.atPath<LoggingConfigType>('logging')
-      ),
+      switchMap(() => configService.atPath<LoggingConfigType>('logging')),
       concatMap((config) => this.loggingSystem.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console

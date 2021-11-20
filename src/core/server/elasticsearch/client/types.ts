@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type {
-  ApiResponse,
+  TransportResult,
   TransportRequestOptions,
   TransportRequestParams,
-  TransportRequestPromise,
-} from '@elastic/elasticsearch/lib/Transport';
+} from '@elastic/elasticsearch';
 
 /**
  * Client used to query the elasticsearch cluster.
@@ -21,13 +20,13 @@ import type {
  */
 export type ElasticsearchClient = Omit<
   KibanaClient,
-  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'
 > & {
   transport: {
-    request(
+    request<TResponse = unknown>(
       params: TransportRequestParams,
       options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse>;
+    ): Promise<TransportResult<TResponse>>;
   };
 };
 
@@ -96,10 +95,11 @@ export interface SearchResponse<T = unknown> {
       highlight?: any;
       inner_hits?: any;
       matched_queries?: string[];
-      sort?: string[];
+      sort?: unknown[];
     }>;
   };
   aggregations?: any;
+  pit_id?: string;
 }
 
 /**
@@ -131,4 +131,11 @@ export interface DeleteDocumentResponse {
   error?: {
     type: string;
   };
+}
+
+/**
+ * @public
+ */
+export interface ElasticsearchErrorDetails {
+  error?: { type: string; reason?: string };
 }

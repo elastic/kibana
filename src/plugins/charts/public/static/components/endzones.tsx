@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { FC } from 'react';
@@ -17,8 +17,10 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import {
+  euiLightVars as lightEuiTheme,
+  euiDarkVars as darkEuiTheme,
+} from '@kbn/ui-shared-deps-src/theme';
 
 interface EndzonesProps {
   isDarkMode: boolean;
@@ -156,32 +158,36 @@ const Prompt = () => (
   </EuiFlexGroup>
 );
 
-export const renderEndzoneTooltip = (
-  xInterval?: number,
-  domainStart?: number,
-  domainEnd?: number,
-  formatter?: (v: any) => string,
-  renderValue = true
-) => (headerData: TooltipValue): JSX.Element | string => {
-  const headerDataValue = headerData.value;
-  const formattedValue = formatter ? formatter(headerDataValue) : headerDataValue;
+export const renderEndzoneTooltip =
+  (
+    xInterval?: number,
+    domainStart?: number,
+    domainEnd?: number,
+    formatter?: (v: any) => string,
+    renderValue = true
+  ) =>
+  (headerData: TooltipValue): JSX.Element | string => {
+    const headerDataValue = headerData.value;
+    const formattedValue = formatter ? formatter(headerDataValue) : headerDataValue;
 
-  if (
-    (domainStart !== undefined && domainStart > headerDataValue) ||
-    (domainEnd !== undefined && xInterval !== undefined && domainEnd - xInterval < headerDataValue)
-  ) {
-    return (
-      <>
-        <Prompt />
-        {renderValue && (
-          <>
-            <EuiSpacer size="xs" />
-            <p>{formattedValue}</p>
-          </>
-        )}
-      </>
-    );
-  }
+    if (
+      (domainStart !== undefined && domainStart > headerDataValue) ||
+      (domainEnd !== undefined &&
+        xInterval !== undefined &&
+        domainEnd - xInterval < headerDataValue)
+    ) {
+      return (
+        <>
+          <Prompt />
+          {renderValue && (
+            <>
+              <EuiSpacer size="xs" />
+              <p>{formattedValue}</p>
+            </>
+          )}
+        </>
+      );
+    }
 
-  return renderValue ? formattedValue : null;
-};
+    return renderValue ? formattedValue : null;
+  };

@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Filter, Query } from 'src/plugins/data/public';
+import { Filter, Query } from '@kbn/es-query';
 
 export interface Pre600FilterQuery {
   // pre 6.0.0 global query:queryString:options were stored per dashboard and would
@@ -29,7 +29,7 @@ export interface SearchSource730 {
 }
 
 function isQueryFilter(filter: Filter | { query: unknown }): filter is Pre600FilterQuery {
-  return filter.query && !(filter as Filter).meta;
+  return filter.query !== undefined && !(filter as Filter).meta;
 }
 
 export function moveFiltersToQuery(

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { ESSearchClient } from '../../../lib/metrics/types';
 
 interface EventDatasetHit {
@@ -18,12 +20,12 @@ export const getDatasetForField = async (
   client: ESSearchClient,
   field: string,
   indexPattern: string,
-  timerange: { field: string; to: number; from: number }
+  timerange: { to: number; from: number }
 ) => {
   const params = {
-    allowNoIndices: true,
-    ignoreUnavailable: true,
-    terminateAfter: 1,
+    allow_no_indices: true,
+    ignore_unavailable: true,
+    terminate_after: 1,
     index: indexPattern,
     body: {
       query: {
@@ -32,7 +34,7 @@ export const getDatasetForField = async (
             { exists: { field } },
             {
               range: {
-                [timerange.field]: {
+                [TIMESTAMP_FIELD]: {
                   gte: timerange.from,
                   lte: timerange.to,
                   format: 'epoch_millis',
@@ -44,7 +46,7 @@ export const getDatasetForField = async (
       },
       size: 1,
       _source: ['event.dataset'],
-      sort: [{ [timerange.field]: { order: 'desc' } }],
+      sort: [{ [TIMESTAMP_FIELD]: { order: 'desc' } }],
     },
   };
 

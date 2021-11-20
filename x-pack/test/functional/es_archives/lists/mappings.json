@@ -63,7 +63,7 @@
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "ingest-agent-policies": "9326f99c977fd2ef5ab24b6336a0675c",
           "url": "c7f66a0df8b1b52f17c28c4adb111105",
-          "endpoint:user-artifact-manifest": "67c28185da541c1404e7852d30498cd6",
+          "endpoint:user-artifact-manifest": "a0d7b04ad405eed54d76e279c3727862",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
           "fleet-agents": "034346488514b7058a79140b19ddf631",
@@ -71,7 +71,6 @@
           "namespace": "2f4316de49999235636386fe51dc06c1",
           "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
           "ingest-package-policies": "48e8bd97e488008e21c0b5a2367b83ad",
-          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
           "config": "c63748b75f39d0c54de12d12c1ccbc20",
           "tsvb-validation-telemetry": "3a37ef6c8700ae6fc97d5c7da00e9215",
@@ -197,27 +196,23 @@
         },
         "apm-indices": {
           "properties": {
-            "apm_oss": {
-              "properties": {
-                "errorIndices": {
-                  "type": "keyword"
-                },
-                "metricsIndices": {
-                  "type": "keyword"
-                },
-                "onboardingIndices": {
-                  "type": "keyword"
-                },
-                "sourcemapIndices": {
-                  "type": "keyword"
-                },
-                "spanIndices": {
-                  "type": "keyword"
-                },
-                "transactionIndices": {
-                  "type": "keyword"
-                }
-              }
+            "error": {
+              "type": "keyword"
+            },
+            "metric": {
+              "type": "keyword"
+            },
+            "onboarding": {
+              "type": "keyword"
+            },
+            "sourcemap": {
+              "type": "keyword"
+            },
+            "span": {
+              "type": "keyword"
+            },
+            "transaction": {
+              "type": "keyword"
             }
           }
         },
@@ -659,9 +654,25 @@
               "type": "date",
               "index": false
             },
-            "ids": {
-              "type": "keyword",
-              "index": false
+            "schemaVersion": {
+              "type": "keyword"
+            },
+            "semanticVersion": {
+              "index": false,
+              "type": "keyword"
+            },
+            "artifacts": {
+              "type": "nested",
+              "properties": {
+                "policyId": {
+                  "type": "keyword",
+                  "index": false
+                },
+                "artifactId": {
+                  "type": "keyword",
+                  "index": false
+                }
+              }
             }
           }
         },
@@ -2246,47 +2257,6 @@
             },
             "userHasSeenNotice": {
               "type": "boolean"
-            }
-          }
-        },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
             }
           }
         },

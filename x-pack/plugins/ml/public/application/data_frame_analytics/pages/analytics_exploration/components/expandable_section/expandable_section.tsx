@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './expandable_section.scss';
 
-import React, { FC, ReactNode, useCallback } from 'react';
+import React, { FC, ReactNode, useCallback, useMemo } from 'react';
 
 import {
   EuiBadge,
@@ -21,7 +22,7 @@ import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,
 } from '../../hooks/use_exploration_url_state';
-import { ExpandablePanels } from '../../../../../../../common/types/ml_url_generator';
+import { ExpandablePanels } from '../../../../../../../common/types/locator';
 
 interface HeaderItem {
   // id is used as the React key and to construct a data-test-subj
@@ -57,11 +58,15 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   docsLink,
   urlStateKey,
 }) => {
-  const [pageUrlState, setPageUrlState] = useExplorationUrlState();
+  const overrides = useMemo(
+    () => (isExpandedDefault !== undefined ? { [urlStateKey]: isExpandedDefault } : undefined),
+    [urlStateKey, isExpandedDefault]
+  );
+  const [pageUrlState, setPageUrlState] = useExplorationUrlState(overrides);
 
   const isExpanded =
     isExpandedDefault !== undefined &&
-    pageUrlState[urlStateKey] === getDefaultExplorationPageUrlState()[urlStateKey]
+    pageUrlState[urlStateKey] === getDefaultExplorationPageUrlState(overrides)[urlStateKey]
       ? isExpandedDefault
       : pageUrlState[urlStateKey];
 
@@ -77,7 +82,6 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
             <EuiButtonEmpty
               onClick={toggleExpanded}
               iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-              size="l"
               iconSide="right"
               flush="left"
             >

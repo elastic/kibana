@@ -1,25 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
-import { createMockReportingCore } from '../../../test_helpers';
-import { generatePngObservableFactory } from '../lib/generate_png';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '../../../test_helpers';
+import { generatePngObservableFactory } from '../../common';
 import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from './';
 
-jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
+jest.mock('../../common/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
 
+let content: string;
 let mockReporting: ReportingCore;
+let stream: jest.Mocked<Writable>;
 
-const cancellationToken = ({
+const cancellationToken = {
   on: jest.fn(),
-} as unknown) as CancellationToken;
+} as unknown as CancellationToken;
 
 const mockLoggerFactory = {
   get: jest.fn().mockImplementation(() => ({
@@ -39,37 +47,20 @@ const encryptHeaders = async (headers: Record<string, string>) => {
 const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPNG;
 
 beforeEach(async () => {
-  const kbnConfig = {
-    'server.basePath': '/sbp',
-  };
-  const reportingConfig = {
+  content = '';
+  stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
+
+  const mockReportingConfig = createMockConfigSchema({
     index: '.reporting-2018.10.10',
     encryptionKey: mockEncryptionKey,
-    'kibanaServer.hostname': 'localhost',
-    'kibanaServer.port': 5601,
-    'kibanaServer.protocol': 'http',
-    'queue.indexInterval': 'daily',
-    'queue.timeout': Infinity,
-  };
-  const mockReportingConfig = {
-    get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')],
-    kbnConfig: { get: (...keys: string[]) => (kbnConfig as any)[keys.join('.')] },
-  };
+    queue: {
+      indexInterval: 'daily',
+      timeout: Infinity,
+    },
+  });
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
-
-  const mockElasticsearch = {
-    legacy: {
-      client: {
-        asScoped: () => ({ callAsCurrentUser: jest.fn() }),
-      },
-    },
-  };
-  const mockGetElasticsearch = jest.fn();
-  mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
-  mockReporting.getElasticsearchService = mockGetElasticsearch;
-  // @ts-ignore over-riding config method
-  mockReporting.config = mockReportingConfig;
+  mockReporting.setConfig(createMockConfig(mockReportingConfig));
 
   (generatePngObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });
@@ -79,7 +70,7 @@ afterEach(() => (generatePngObservableFactory as jest.Mock).mockReset());
 test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
-  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
+  generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
   const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
@@ -90,7 +81,8 @@ test(`passes browserTimezone to generatePng`, async () => {
       browserTimezone,
       headers: encryptedHeaders,
     }),
-    cancellationToken
+    cancellationToken,
+    stream
   );
 
   expect(generatePngObservable.mock.calls).toMatchInlineSnapshot(`
@@ -107,14 +99,14 @@ test(`passes browserTimezone to generatePng`, async () => {
           ],
           "warning": [Function],
         },
-        "http://localhost:5601/sbp/app/kibana#/something",
+        "localhost:80undefined/app/kibana#/something",
         "UTC",
         Object {
           "conditions": Object {
-            "basePath": "/sbp",
+            "basePath": undefined,
             "hostname": "localhost",
-            "port": 5601,
-            "protocol": "http",
+            "port": 80,
+            "protocol": undefined,
           },
           "headers": Object {},
         },
@@ -129,27 +121,29 @@ test(`returns content_type of application/png`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = await generatePngObservableFactory(mockReporting);
-  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of('foo'));
+  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('foo') }));
 
   const { content_type: contentType } = await runTask(
     'pngJobId',
     getBasePayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
-    cancellationToken
+    cancellationToken,
+    stream
   );
   expect(contentType).toBe('image/png');
 });
 
-test(`returns content of generatePng getBuffer base64 encoded`, async () => {
+test(`returns content of generatePng`, async () => {
   const testContent = 'raw string from get_screenhots';
   const generatePngObservable = await generatePngObservableFactory(mockReporting);
-  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ base64: testContent }));
+  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
-  const { content } = await runTask(
+  await runTask(
     'pngJobId',
     getBasePayload({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }),
-    cancellationToken
+    cancellationToken,
+    stream
   );
 
   expect(content).toEqual(testContent);

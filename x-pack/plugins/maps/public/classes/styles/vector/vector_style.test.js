@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { VectorStyle } from './vector_style';
@@ -85,14 +86,8 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
       const nextFields = [];
-      const {
-        hasChanges,
-        nextStyleDescriptor,
-      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
-        nextFields,
-        previousFields,
-        mapColors
-      );
+      const { hasChanges, nextStyleDescriptor } =
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {
@@ -112,20 +107,30 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
       const nextFields = [
-        new MockField({
-          fieldName: previousFieldName,
-          dataType: 'number',
-          supportsAutoDomain: false,
-        }),
+        {
+          getDataType: async () => {
+            return 'number';
+          },
+          getLabel: async () => {
+            return previousFieldName + '_label';
+          },
+          getName: () => {
+            return previousFieldName;
+          },
+          getOrigin: () => {
+            return FIELD_ORIGIN.SOURCE;
+          },
+          // ordinal field must support auto domain
+          supportsFieldMetaFromLocalData: () => {
+            return false;
+          },
+          supportsFieldMetaFromEs: () => {
+            return false;
+          },
+        },
       ];
-      const {
-        hasChanges,
-        nextStyleDescriptor,
-      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
-        nextFields,
-        previousFields,
-        mapColors
-      );
+      const { hasChanges, nextStyleDescriptor } =
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
         options: {
@@ -141,14 +146,8 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
       const nextFields = [new MockField({ fieldName: 'someOtherField', dataType: 'number' })];
-      const {
-        hasChanges,
-        nextStyleDescriptor,
-      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
-        nextFields,
-        previousFields,
-        mapColors
-      );
+      const { hasChanges, nextStyleDescriptor } =
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {

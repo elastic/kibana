@@ -1,31 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 export * from './models';
 export * from './rest_spec';
+
+import type {
+  PreconfiguredAgentPolicy,
+  PreconfiguredPackage,
+  PreconfiguredOutput,
+} from './models/preconfiguration';
 
 export interface FleetConfigType {
   enabled: boolean;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
-    fleetServerEnabled: boolean;
     enabled: boolean;
-    tlsCheckDisabled: boolean;
-    pollingRequestTimeout: number;
-    maxConcurrentConnections: number;
-    kibana: {
-      host?: string[] | string;
-      ca_sha256?: string;
-    };
     elasticsearch: {
-      host?: string;
+      hosts?: string[];
       ca_sha256?: string;
     };
-    agentPolicyRolloutRateLimitIntervalMs: number;
-    agentPolicyRolloutRateLimitRequestPerInterval: number;
+    fleet_server?: {
+      hosts?: string[];
+    };
+  };
+  agentPolicies?: PreconfiguredAgentPolicy[];
+  packages?: PreconfiguredPackage[];
+  outputs?: PreconfiguredOutput[];
+  agentIdVerificationEnabled?: boolean;
+  developer?: {
+    disableRegistryVersionCheck?: boolean;
   };
 }
 

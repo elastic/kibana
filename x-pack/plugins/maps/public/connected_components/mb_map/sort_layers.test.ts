@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable max-classes-per-file */
 
 import _ from 'lodash';
-import { Map as MbMap, Layer as MbLayer, Style as MbStyle } from 'mapbox-gl';
+import type { Map as MbMap, AnyLayer as MbLayer, Style as MbStyle } from '@kbn/mapbox-gl';
 import { getIsTextLayer, syncLayerOrder } from './sort_layers';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
 import { ILayer } from '../../classes/layers/layer';
@@ -112,14 +114,11 @@ describe('sortLayer', () => {
   const BRAVO_LAYER_ID = 'bravo';
   const CHARLIE_LAYER_ID = 'charlie';
 
-  const spatialFilterLayer = (new MockMapLayer(
-    SPATIAL_FILTERS_LAYER_ID,
-    false
-  ) as unknown) as ILayer;
+  const spatialFilterLayer = new MockMapLayer(SPATIAL_FILTERS_LAYER_ID, false) as unknown as ILayer;
   const mapLayers = [
-    (new MockMapLayer(CHARLIE_LAYER_ID, true) as unknown) as ILayer,
-    (new MockMapLayer(BRAVO_LAYER_ID, false) as unknown) as ILayer,
-    (new MockMapLayer(ALPHA_LAYER_ID, false) as unknown) as ILayer,
+    new MockMapLayer(CHARLIE_LAYER_ID, true) as unknown as ILayer,
+    new MockMapLayer(BRAVO_LAYER_ID, false) as unknown as ILayer,
+    new MockMapLayer(ALPHA_LAYER_ID, false) as unknown as ILayer,
   ];
 
   beforeEach(() => {
@@ -147,7 +146,7 @@ describe('sortLayer', () => {
       ],
     };
     const mbMap = new MockMbMap(initialMbStyle);
-    syncLayerOrder((mbMap as unknown) as MbMap, spatialFilterLayer, mapLayers);
+    syncLayerOrder(mbMap as unknown as MbMap, spatialFilterLayer, mapLayers);
     const sortedMbStyle = mbMap.getStyle();
     const sortedMbLayerIds = sortedMbStyle.layers!.map((mbLayer) => {
       return mbLayer.id;
@@ -185,7 +184,7 @@ describe('sortLayer', () => {
       ],
     };
     const mbMap = new MockMbMap(initialMbStyle);
-    syncLayerOrder((mbMap as unknown) as MbMap, spatialFilterLayer, mapLayers);
+    syncLayerOrder(mbMap as unknown as MbMap, spatialFilterLayer, mapLayers);
     const sortedMbStyle = mbMap.getStyle();
     const sortedMbLayerIds = sortedMbStyle.layers!.map((mbLayer) => {
       return mbLayer.id;
@@ -213,7 +212,7 @@ describe('sortLayer', () => {
       ],
     };
     const mbMap = new MockMbMap(initialMbStyle);
-    syncLayerOrder((mbMap as unknown) as MbMap, spatialFilterLayer, mapLayers);
+    syncLayerOrder(mbMap as unknown as MbMap, spatialFilterLayer, mapLayers);
     const sortedMbStyle = mbMap.getStyle();
     const sortedMbLayerIds = sortedMbStyle.layers!.map((mbLayer) => {
       return mbLayer.id;
@@ -240,7 +239,7 @@ describe('sortLayer', () => {
       ],
     };
     const mbMap = new MockMbMap(initialMbStyle);
-    syncLayerOrder((mbMap as unknown) as MbMap, spatialFilterLayer, mapLayers);
+    syncLayerOrder(mbMap as unknown as MbMap, spatialFilterLayer, mapLayers);
     expect(moveCounter).toBe(0);
   });
 });

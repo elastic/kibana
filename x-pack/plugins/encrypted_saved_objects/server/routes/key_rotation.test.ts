@@ -1,22 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Type } from '@kbn/config-schema';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteConfig,
-} from '../../../../../src/core/server';
-import { defineKeyRotationRoutes } from './key_rotation';
+import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import type { EncryptionKeyRotationService } from '../crypto';
 import { routeDefinitionParamsMock } from './index.mock';
-import { EncryptionKeyRotationService } from '../crypto';
+import { defineKeyRotationRoutes } from './key_rotation';
 
 describe('Key rotation routes', () => {
   let router: jest.Mocked<IRouter>;
@@ -29,7 +25,7 @@ describe('Key rotation routes', () => {
     router = routeParamsMock.router;
     mockEncryptionKeyRotationService = routeParamsMock.encryptionKeyRotationService;
 
-    mockContext = ({} as unknown) as RequestHandlerContext;
+    mockContext = {} as unknown as RequestHandlerContext;
 
     defineKeyRotationRoutes(routeParamsMock);
   });
@@ -96,8 +92,7 @@ describe('Key rotation routes', () => {
         payload:
           'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
         options: {
-          body:
-            'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
+          body: 'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
         },
       });
     });
@@ -149,8 +144,7 @@ describe('Key rotation routes', () => {
           'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
         options: {
           statusCode: 429,
-          body:
-            'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
+          body: 'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
         },
       });
 

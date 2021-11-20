@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues } from '../../../../../__mocks__';
-import { shallow } from 'enzyme';
+import { setMockValues } from '../../../../../__mocks__/kea_logic';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+import { shallow } from 'enzyme';
 
 import { CustomSourceIcon } from './custom_source_icon';
-
 import { ExampleSearchResultGroup } from './example_search_result_group';
 
 describe('ExampleSearchResultGroup', () => {
@@ -40,5 +40,27 @@ describe('ExampleSearchResultGroup', () => {
     const wrapper = shallow(<ExampleSearchResultGroup />);
 
     expect(wrapper.find('[data-test-subj="DefaultDescriptionLabel"]')).toHaveLength(1);
+  });
+
+  it('renders optional fields if they exist in result', () => {
+    setMockValues({
+      ...exampleResult,
+      exampleDocuments: [
+        {
+          myLink: 'http://foo',
+          otherTitle: 'foo',
+          otherType: 'File',
+          otherMediaType: 'PDF',
+          otherCreatedBy: 'bar',
+          otherUpdatedBy: 'baz',
+        },
+      ],
+    });
+    const wrapper = shallow(<ExampleSearchResultGroup />);
+
+    expect(wrapper.find('[data-test-subj="CreatedByField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="UpdatedByField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="TypeField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="MediaTypeField"]')).toHaveLength(1);
   });
 });

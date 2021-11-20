@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 
@@ -15,7 +15,6 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCode,
-  EuiCodeEditor,
   EuiConfirmModal,
   EuiFieldNumber,
   EuiFieldText,
@@ -25,7 +24,6 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLink,
-  EuiOverlayMask,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -34,21 +32,21 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { PainlessLang } from '@kbn/monaco';
+import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
-  IndexPatternField,
-  FieldFormatInstanceType,
   IndexPattern,
-  IFieldType,
+  IndexPatternField,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
 } from '../../../../../plugins/data/public';
-import { context as contextType } from '../../../../kibana_react/public';
+import { context as contextType, CodeEditor } from '../../../../kibana_react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
@@ -60,9 +58,6 @@ import { IndexPatternManagmentContextValue } from '../../types';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
-
-// This loads Ace editor's "groovy" mode, used below to highlight the script.
-import 'brace/mode/groovy';
 
 const getFieldTypeFormatsList = (
   field: IndexPatternField['spec'],
@@ -101,7 +96,7 @@ export interface FieldEditorState {
   isReady: boolean;
   isCreating: boolean;
   isDeprecatedLang: boolean;
-  scriptingLangs: string[];
+  scriptingLangs: estypes.ScriptLanguage[];
   fieldTypes: string[];
   fieldTypeFormats: FieldTypeFormat[];
   existingFieldNames: string[];
@@ -132,8 +127,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   public readonly context!: IndexPatternManagmentContextValue;
 
-  supportedLangs: string[] = [];
-  deprecatedLangs: string[] = [];
+  supportedLangs: estypes.ScriptLanguage[] = [];
+  deprecatedLangs: estypes.ScriptLanguage[] = [];
   constructor(props: FieldEdiorProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
 
@@ -146,7 +141,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.getAll().map((f: IFieldType) => f.name),
+      existingFieldNames: indexPattern.fields.getAll().map((f: IndexPatternField) => f.name),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -190,6 +185,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.setState({
       isReady: true,
       isCreating: !indexPattern.fields.getByName(spec.name),
+      // @ts-expect-error '' is not a valid ScriptLanguage
       isDeprecatedLang: this.deprecatedLangs.includes(spec.lang || ''),
       errors: [],
       scriptingLangs,
@@ -225,7 +221,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onLangChange = (lang: string) => {
+  onLangChange = (lang: estypes.ScriptLanguage) => {
     const { spec } = this.state;
     const fieldTypes = get(FIELD_TYPES_BY_LANG, lang, DEFAULT_FIELD_TYPES);
     spec.lang = lang;
@@ -253,7 +249,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onFormatParamsChange = (newParams: { fieldType: string; [key: string]: any }) => {
+  onFormatParamsChange = (newParams: { [key: string]: any }) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId as string, newParams);
   };
@@ -271,7 +267,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderName() {
     const { isCreating, spec } = this.state;
-    const isInvalid = !spec.name || !spec.name.trim();
+    const starCheck = spec?.name?.includes('*');
+    const isInvalid = !spec.name || !spec.name.trim() || starCheck;
 
     return isCreating ? (
       <EuiFormRow
@@ -302,11 +299,17 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         }
         isInvalid={isInvalid}
         error={
-          isInvalid
-            ? i18n.translate('indexPatternManagement.nameErrorMessage', {
+          isInvalid &&
+          (starCheck
+            ? i18n.translate(
+                'indexPatternManagement.starCharacterNotAllowedValidationErrorMessage',
+                {
+                  defaultMessage: 'The field cannot have * in the name.',
+                }
+              )
+            : i18n.translate('indexPatternManagement.nameErrorMessage', {
                 defaultMessage: 'Name is required',
-              })
-            : null
+              }))
         }
       >
         <EuiFieldText
@@ -374,7 +377,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           })}
           data-test-subj="editorFieldLang"
           onChange={(e) => {
-            this.onLangChange(e.target.value);
+            this.onLangChange(e.target.value as estypes.ScriptLanguage);
           }}
         />
       </EuiFormRow>
@@ -488,7 +491,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderFormat() {
     const { spec, fieldTypeFormats, fieldFormatId, fieldFormatParams, format } = this.state;
-    const { indexPatternManagementStart } = this.context.services;
+    const { fieldFormatEditors } = this.context.services;
     const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
 
     const label = defaultFormat ? (
@@ -510,8 +513,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           helpText={
             <FormattedMessage
               id="indexPatternManagement.formatLabel"
-              defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
-              completely changed and prevent highlighting in Discover from working."
+              defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
             />
           }
         >
@@ -532,7 +534,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
             fieldFormatParams={fieldFormatParams || {}}
-            fieldFormatEditors={indexPatternManagementStart.fieldFormatEditors}
+            fieldFormatEditors={fieldFormatEditors}
             onChange={this.onFormatParamsChange}
             onError={this.onFormatParamsError}
           />
@@ -595,13 +597,16 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           isInvalid={isInvalid}
           error={isInvalid ? errorMsg : null}
         >
-          <EuiCodeEditor
-            value={spec.script}
-            data-test-subj="editorFieldScript"
-            onChange={this.onScriptChange}
-            mode="groovy"
+          <CodeEditor
+            languageId={PainlessLang.ID}
             width="100%"
             height="300px"
+            value={spec.script ?? ''}
+            onChange={this.onScriptChange}
+            data-test-subj="editorFieldScript"
+            aria-label={i18n.translate('indexPatternManagement.scriptLabelAriaLabel', {
+              defaultMessage: 'Script editor',
+            })}
           />
         </EuiFormRow>
 
@@ -643,42 +648,40 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec } = this.state;
 
     return this.state.showDeleteModal ? (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
-            defaultMessage: "Delete field '{fieldName}'",
-            values: { fieldName: spec.name },
-          })}
-          onCancel={this.hideDeleteModal}
-          onConfirm={() => {
-            this.hideDeleteModal();
-            this.deleteField();
-          }}
-          cancelButtonText={i18n.translate('indexPatternManagement.deleteField.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('indexPatternManagement.deleteField.deleteButton', {
-            defaultMessage: 'Delete',
-          })}
-          buttonColor="danger"
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        >
-          <p>
-            <FormattedMessage
-              id="indexPatternManagement.deleteFieldLabel"
-              defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
-              values={{
-                separator: (
-                  <span>
-                    <br />
-                    <br />
-                  </span>
-                ),
-              }}
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
+          defaultMessage: "Delete field '{fieldName}'",
+          values: { fieldName: spec.name },
+        })}
+        onCancel={this.hideDeleteModal}
+        onConfirm={() => {
+          this.hideDeleteModal();
+          this.deleteField();
+        }}
+        cancelButtonText={i18n.translate('indexPatternManagement.deleteField.cancelButton', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('indexPatternManagement.deleteField.deleteButton', {
+          defaultMessage: 'Delete',
+        })}
+        buttonColor="danger"
+        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      >
+        <p>
+          <FormattedMessage
+            id="indexPatternManagement.deleteFieldLabel"
+            defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
+            values={{
+              separator: (
+                <span>
+                  <br />
+                  <br />
+                </span>
+              ),
+            }}
+          />
+        </p>
+      </EuiConfirmModal>
     ) : null;
   };
 

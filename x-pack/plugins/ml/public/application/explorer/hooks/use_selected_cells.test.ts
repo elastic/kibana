@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import { renderHook } from '@testing-library/react-hooks';
 import { useSelectedCells } from './use_selected_cells';
-import { ExplorerAppState } from '../../../../common/types/ml_url_generator';
+import { ExplorerAppState } from '../../../../common/types/locator';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 
 import { useTimefilter } from '../../contexts/kibana';

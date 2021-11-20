@@ -1,22 +1,110 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiOverlayMask } from '@elastic/eui';
-import { ComponentStrings } from '../../../../i18n/components';
+import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Popover, ClosePopoverFn } from '../../popover';
 import { ShortcutStrings } from '../../../../i18n/shortcuts';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
 import { CustomElementModal } from '../../custom_element_modal';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
 import { PositionedElement } from '../../../../types';
 
-const { WorkpadHeaderEditMenu: strings } = ComponentStrings;
 const shortcutHelp = ShortcutStrings.getShortcutHelp();
+const strings = {
+  getAlignmentMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.alignmentMenuItemLabel', {
+      defaultMessage: 'Alignment',
+      description:
+        'This refers to the vertical (i.e. left, center, right) and horizontal (i.e. top, middle, bottom) ' +
+        'alignment options of the selected elements',
+    }),
+  getBottomAlignMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.bottomAlignMenuItemLabel', {
+      defaultMessage: 'Bottom',
+    }),
+  getCenterAlignMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.centerAlignMenuItemLabel', {
+      defaultMessage: 'Center',
+      description: 'This refers to alignment centered horizontally.',
+    }),
+  getCreateElementModalTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.createElementModalTitle', {
+      defaultMessage: 'Create new element',
+    }),
+  getDistributionMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.distributionMenutItemLabel', {
+      defaultMessage: 'Distribution',
+      description:
+        'This refers to the options to evenly spacing the selected elements horizontall or vertically.',
+    }),
+  getEditMenuButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.editMenuButtonLabel', {
+      defaultMessage: 'Edit',
+    }),
+  getEditMenuLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.editMenuLabel', {
+      defaultMessage: 'Edit options',
+    }),
+  getGroupMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.groupMenuItemLabel', {
+      defaultMessage: 'Group',
+      description: 'This refers to grouping multiple selected elements.',
+    }),
+  getHorizontalDistributionMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.horizontalDistributionMenutItemLabel', {
+      defaultMessage: 'Horizontal',
+    }),
+  getLeftAlignMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.leftAlignMenuItemLabel', {
+      defaultMessage: 'Left',
+    }),
+  getMiddleAlignMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.middleAlignMenuItemLabel', {
+      defaultMessage: 'Middle',
+      description: 'This refers to alignment centered vertically.',
+    }),
+  getOrderMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.orderMenuItemLabel', {
+      defaultMessage: 'Order',
+      description: 'Refers to the order of the elements displayed on the page from front to back',
+    }),
+  getRedoMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.redoMenuItemLabel', {
+      defaultMessage: 'Redo',
+    }),
+  getRightAlignMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.rightAlignMenuItemLabel', {
+      defaultMessage: 'Right',
+    }),
+  getSaveElementMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.savedElementMenuItemLabel', {
+      defaultMessage: 'Save as new element',
+    }),
+  getTopAlignMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.topAlignMenuItemLabel', {
+      defaultMessage: 'Top',
+    }),
+  getUndoMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.undoMenuItemLabel', {
+      defaultMessage: 'Undo',
+    }),
+  getUngroupMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.ungroupMenuItemLabel', {
+      defaultMessage: 'Ungroup',
+      description: 'This refers to ungrouping a grouped element',
+    }),
+  getVerticalDistributionMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderEditMenu.verticalDistributionMenutItemLabel', {
+      defaultMessage: 'Vertical',
+    }),
+};
 
 export interface Props {
   /**
@@ -159,7 +247,7 @@ export const EditMenu: FunctionComponent<Props> = ({
 
   const editControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty
-      size="xs"
+      size="s"
       aria-label={strings.getEditMenuLabel()}
       onClick={togglePopover}
       data-test-subj="canvasWorkpadEditMenuButton"
@@ -411,13 +499,11 @@ export const EditMenu: FunctionComponent<Props> = ({
         )}
       </Popover>
       {isModalVisible ? (
-        <EuiOverlayMask>
-          <CustomElementModal
-            title={strings.getCreateElementModalTitle()}
-            onSave={handleSave}
-            onCancel={hideModal}
-          />
-        </EuiOverlayMask>
+        <CustomElementModal
+          title={strings.getCreateElementModalTitle()}
+          onSave={handleSave}
+          onCancel={hideModal}
+        />
       ) : null}
     </Fragment>
   );

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionFunctionDefinition, Render } from 'src/plugins/expressions/public';
@@ -32,8 +32,7 @@ export const selfChangingVisFn: SelfChangingVisExpressionFunctionDefinition = {
   name: 'self_changing_vis',
   type: 'render',
   inputTypes: ['kibana_context'],
-  help:
-    'The expression function definition should be registered for a custom visualization to be rendered',
+  help: 'The expression function definition should be registered for a custom visualization to be rendered',
   args: {
     counter: {
       types: ['number'],

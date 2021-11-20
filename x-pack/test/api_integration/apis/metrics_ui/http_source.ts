@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,16 +15,14 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const fetchSource = async (): Promise<SourceResponse | undefined> => {
     const response = await supertest
-      .get('/api/metrics/source/default/metrics')
+      .get('/api/metrics/source/default')
       .set('kbn-xsrf', 'xxx')
       .expect(200);
     return response.body;
   };
-  const fetchHasData = async (
-    type: 'logs' | 'metrics'
-  ): Promise<{ hasData: boolean } | undefined> => {
+  const fetchHasData = async (): Promise<{ hasData: boolean } | undefined> => {
     const response = await supertest
-      .get(`/api/metrics/source/default/${type}/hasData`)
+      .get(`/api/metrics/source/default/hasData`)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
     return response.body;
@@ -31,43 +30,26 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Source API via HTTP', () => {
     describe('8.0.0', () => {
-      before(() => esArchiver.load('infra/8.0.0/logs_and_metrics'));
-      after(() => esArchiver.unload('infra/8.0.0/logs_and_metrics'));
-      describe('/api/metrics/source/default/metrics', () => {
-        it('should just work', () => {
+      before(() =>
+        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
+      after(() =>
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
+      describe('/api/metrics/source/default', () => {
+        it('should just work', async () => {
           const resp = fetchSource();
           return resp.then((data) => {
             expect(data).to.have.property('source');
             expect(data?.source.configuration.metricAlias).to.equal('metrics-*,metricbeat-*');
-            expect(data?.source.configuration.logAlias).to.equal(
-              'logs-*,filebeat-*,kibana_sample_data_logs*'
-            );
-            expect(data?.source.configuration.fields).to.eql({
-              container: 'container.id',
-              host: 'host.name',
-              message: ['message', '@message'],
-              pod: 'kubernetes.pod.uid',
-              tiebreaker: '_doc',
-              timestamp: '@timestamp',
-            });
-            expect(data).to.have.property('status');
-            expect(data?.status.metricIndicesExist).to.equal(true);
-            expect(data?.status.logIndicesExist).to.equal(true);
+            expect(data?.source).to.have.property('status');
+            expect(data?.source.status?.metricIndicesExist).to.equal(true);
           });
         });
       });
-      describe('/api/metrics/source/default/metrics/hasData', () => {
-        it('should just work', () => {
-          const resp = fetchHasData('metrics');
-          return resp.then((data) => {
-            expect(data).to.have.property('hasData');
-            expect(data?.hasData).to.be(true);
-          });
-        });
-      });
-      describe('/api/metrics/source/default/logs/hasData', () => {
-        it('should just work', () => {
-          const resp = fetchHasData('logs');
+      describe('/api/metrics/source/default/hasData', () => {
+        it('should just work', async () => {
+          const resp = fetchHasData();
           return resp.then((data) => {
             expect(data).to.have.property('hasData');
             expect(data?.hasData).to.be(true);

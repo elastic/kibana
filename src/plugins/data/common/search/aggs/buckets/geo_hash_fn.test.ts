@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { functionWrapper } from '../test_helpers';
@@ -47,10 +47,11 @@ describe('agg_expression_functions', () => {
         precision: 10,
         useGeocentroid: true,
         isFilteredByCollar: false,
-        boundingBox: JSON.stringify({
+        boundingBox: {
+          type: 'geo_bounding_box',
           top_left: [-74.1, 40.73],
           bottom_right: [-71.12, 40.01],
-        }),
+        },
       });
 
       expect(actual.value).toMatchInlineSnapshot(`

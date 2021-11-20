@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { checkLicense } from './check_license';
@@ -13,16 +14,16 @@ describe('check_license', () => {
   let license: ILicense;
 
   beforeEach(() => {
-    exportTypesRegistry = ({
+    exportTypesRegistry = {
       getAll: () => [],
-    } as unknown) as ExportTypesRegistry;
+    } as unknown as ExportTypesRegistry;
   });
 
   describe('license information is not ready', () => {
     beforeEach(() => {
-      exportTypesRegistry = ({
+      exportTypesRegistry = {
         getAll: () => [{ id: 'csv' }],
-      } as unknown) as ExportTypesRegistry;
+      } as unknown as ExportTypesRegistry;
     });
 
     it('should set management.showLinks to true', () => {
@@ -51,9 +52,9 @@ describe('check_license', () => {
       license = {
         type: undefined,
       } as ILicense;
-      exportTypesRegistry = ({
+      exportTypesRegistry = {
         getAll: () => [{ id: 'csv' }],
-      } as unknown) as ExportTypesRegistry;
+      } as unknown as ExportTypesRegistry;
     });
 
     it('should set management.showLinks to true', () => {
@@ -85,9 +86,9 @@ describe('check_license', () => {
     describe('& license is > basic', () => {
       beforeEach(() => {
         license.type = 'gold';
-        exportTypesRegistry = ({
+        exportTypesRegistry = {
           getAll: () => [{ id: 'pdf', validLicenses: ['gold'], jobType: 'printable_pdf' }],
-        } as unknown) as ExportTypesRegistry;
+        } as unknown as ExportTypesRegistry;
       });
 
       describe('& license is active', () => {
@@ -146,9 +147,9 @@ describe('check_license', () => {
     describe('& license is basic', () => {
       beforeEach(() => {
         license.type = 'basic';
-        exportTypesRegistry = ({
+        exportTypesRegistry = {
           getAll: () => [{ id: 'pdf', validLicenses: ['gold'], jobType: 'printable_pdf' }],
-        } as unknown) as ExportTypesRegistry;
+        } as unknown as ExportTypesRegistry;
       });
 
       describe('& license is active', () => {

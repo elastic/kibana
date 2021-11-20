@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
+import { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from 'src/core/server';
+import { chain } from 'lodash';
 import { findAll } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
@@ -30,18 +31,27 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { client } = context.core.savedObjects;
+      const { getClient, typeRegistry } = context.core.savedObjects;
+      const { typesToInclude, searchString, references } = req.body;
 
-      const findOptions: SavedObjectsFindOptions = {
-        type: req.body.typesToInclude,
+      const includedHiddenTypes = chain(typesToInclude)
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value();
+
+      const client = getClient({ includedHiddenTypes });
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: typesToInclude,
         perPage: 1000,
       };
-      if (req.body.searchString) {
-        findOptions.search = `${req.body.searchString}*`;
+      if (searchString) {
+        findOptions.search = `${searchString}*`;
         findOptions.searchFields = ['title'];
       }
-      if (req.body.references) {
-        findOptions.hasReference = req.body.references;
+      if (references) {
+        findOptions.hasReference = references;
         findOptions.hasReferenceOperator = 'OR';
       }
 
@@ -54,7 +64,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         return accum;
       }, {} as Record<string, number>);
 
-      for (const type of req.body.typesToInclude) {
+      for (const type of typesToInclude) {
         if (!counts[type]) {
           counts[type] = 0;
         }

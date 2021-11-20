@@ -1,5 +1,9 @@
 {
   "id": "savedObjectsTagging",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "server": true,

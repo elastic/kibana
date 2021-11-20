@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, ChangeEvent, useEffect, useState } from 'react';
@@ -14,6 +15,11 @@ import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { EqlQueryBarFooter } from './footer';
 import { getValidationResults } from './validators';
+import {
+  EqlOptionsData,
+  EqlOptionsSelected,
+  FieldsEqlOptions,
+} from '../../../../../common/search_strategy';
 
 const TextArea = styled(EuiTextArea)`
   display: block;
@@ -27,14 +33,22 @@ export interface EqlQueryBarProps {
   dataTestSubj: string;
   field: FieldHook<DefineStepRule['queryBar']>;
   idAria?: string;
+  optionsData?: EqlOptionsData;
+  optionsSelected?: EqlOptionsSelected;
+  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | null) => void;
   onValidityChange?: (arg: boolean) => void;
+  onValiditingChange?: (arg: boolean) => void;
 }
 
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   dataTestSubj,
   field,
   idAria,
+  optionsData,
+  optionsSelected,
+  onOptionsChange,
   onValidityChange,
+  onValiditingChange,
 }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
@@ -61,10 +75,18 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
     }
   }, [error, addError]);
 
+  useEffect(() => {
+    if (onValiditingChange) {
+      onValiditingChange(isValidating);
+    }
+  }, [isValidating, onValiditingChange]);
+
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
       const newQuery = e.target.value;
-
+      if (onValiditingChange) {
+        onValiditingChange(true);
+      }
       setErrorMessages([]);
       setValue({
         filters: [],
@@ -74,7 +96,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         },
       });
     },
-    [setValue]
+    [setValue, onValiditingChange]
   );
 
   return (
@@ -83,7 +105,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       labelAppend={field.labelAppend}
       helpText={field.helpText}
       error={message}
-      isInvalid={!isValid}
+      isInvalid={!isValid && !isValidating}
       fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
@@ -92,11 +114,17 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         <TextArea
           data-test-subj="eqlQueryBarTextInput"
           fullWidth
-          isInvalid={!isValid}
+          isInvalid={!isValid && !isValidating}
           value={fieldValue}
           onChange={handleChange}
         />
-        <EqlQueryBarFooter errors={errorMessages} isLoading={isValidating} />
+        <EqlQueryBarFooter
+          errors={errorMessages}
+          isLoading={isValidating}
+          optionsData={optionsData}
+          optionsSelected={optionsSelected}
+          onOptionsChange={onOptionsChange}
+        />
       </>
     </EuiFormRow>
   );

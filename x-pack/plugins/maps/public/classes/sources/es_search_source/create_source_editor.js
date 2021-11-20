@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Component } from 'react';
@@ -13,10 +14,9 @@ import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_sel
 import { i18n } from '@kbn/i18n';
 import { SCALING_TYPES } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
-import { ScalingForm } from './scaling_form';
+import { ScalingForm } from './util/scaling_form';
 import {
   getGeoFields,
-  getTermsFields,
   getGeoTileAggNotSupportedReason,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
@@ -33,8 +33,6 @@ const RESET_INDEX_PATTERN_STATE = {
   geoFieldName: undefined,
   filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
   scalingType: SCALING_TYPES.CLUSTERS, // turn on clusting by default
-  topHitsSplitField: undefined,
-  topHitsSize: 1,
 };
 
 export class CreateSourceEditor extends Component {
@@ -96,14 +94,7 @@ export class CreateSourceEditor extends Component {
   };
 
   _previewLayer = () => {
-    const {
-      indexPattern,
-      geoFieldName,
-      filterByMapBounds,
-      scalingType,
-      topHitsSplitField,
-      topHitsSize,
-    } = this.state;
+    const { indexPattern, geoFieldName, filterByMapBounds, scalingType } = this.state;
 
     const sourceConfig =
       indexPattern && geoFieldName
@@ -112,8 +103,6 @@ export class CreateSourceEditor extends Component {
             geoField: geoFieldName,
             filterByMapBounds,
             scalingType,
-            topHitsSplitField,
-            topHitsSize,
           }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
@@ -166,9 +155,8 @@ export class CreateSourceEditor extends Component {
                 )
               : null
           }
-          termFields={getTermsFields(this.state.indexPattern.fields)}
-          topHitsSplitField={this.state.topHitsSplitField}
-          topHitsSize={this.state.topHitsSize}
+          hasJoins={false}
+          clearJoins={() => {}}
         />
       </Fragment>
     );

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export function MonitoringClusterListProvider({ getService, getPageObjects }) {
@@ -14,6 +15,7 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
 
   const SUBJ_CLUSTER_ROW_PREFIX = `${SUBJ_TABLE_CONTAINER} > clusterRow_`;
+  const ALERTS_MODAL_BUTTON = 'alerts-modal-remind-later-button';
 
   return new (class ClusterList {
     async assertDefaults() {
@@ -38,6 +40,10 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
 
     clearFilter() {
       return PageObjects.monitoring.tableClearFilter(SUBJ_SEARCH_BAR);
+    }
+
+    closeAlertsModal() {
+      return testSubjects.click(ALERTS_MODAL_BUTTON);
     }
 
     getClusterLink(clusterUuid) {

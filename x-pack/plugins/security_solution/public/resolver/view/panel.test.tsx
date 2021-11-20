@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
@@ -32,7 +34,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
   /**
    * These are the details we expect to see in the node detail view when the origin is selected.
    */
-  const originEventDetailEntries: ReadonlyMap<string, string> = new Map([
+  const originEventDetailEntries: Array<[string, string]> = [
     ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
     ['process.executable', 'executable'],
     ['process.pid', '0'],
@@ -40,15 +42,15 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     ['user.domain', 'user.domain'],
     ['process.parent.pid', '0'],
     ['process.hash.md5', 'hash.md5'],
-    ['process.args', 'args'],
-  ]);
+    ['process.args', 'args0'],
+    ['process.args', 'args1'],
+    ['process.args', 'args2'],
+  ];
 
   beforeEach(() => {
     // create a mock data access layer
-    const {
-      metadata: dataAccessLayerMetadata,
-      dataAccessLayer,
-    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
+      noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
@@ -127,11 +129,16 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     describe.each([...originEventDetailEntries])(
       'when the user hovers over the description for the field (%p) with their mouse',
       (fieldTitleText, value) => {
+        // If there are multiple values for a field, i.e. an array, this is the index for the value we are testing.
+        const entryIndex = originEventDetailEntries
+          .filter(([fieldName]) => fieldName === fieldTitleText)
+          .findIndex(([_, fieldValue]) => fieldValue === value);
         beforeEach(async () => {
           const dt = await simulator().resolveWrapper(() => {
             return simulator()
               .testSubject('resolver:node-detail:entry-title')
-              .filterWhere((title) => title.text() === fieldTitleText);
+              .filterWhere((title) => title.text() === fieldTitleText)
+              .at(entryIndex);
           });
 
           expect(dt).toHaveLength(1);
@@ -143,13 +150,13 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             .filterWhere(Simulator.isDOM);
 
           expect(copyableFieldHoverArea).toHaveLength(1);
-          copyableFieldHoverArea!.simulate('mouseenter');
+          copyableFieldHoverArea?.simulate('mouseenter');
         });
         describe('and when they click the copy-to-clipboard button', () => {
           beforeEach(async () => {
             const copyButton = await simulator().resolve('resolver:panel:clipboard');
             expect(copyButton).toHaveLength(1);
-            copyButton!.simulate('click');
+            copyButton?.simulate('click');
             simulator().confirmTextWrittenToClipboard();
           });
           it(`should write ${value} to the clipboard`, async () => {
@@ -182,7 +189,9 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         ['user.domain', 'user.domain'],
         ['process.parent.pid', '0'],
         ['process.hash.md5', 'hash.md5'],
-        ['process.args', 'args'],
+        ['process.args', 'args0'],
+        ['process.args', 'args1'],
+        ['process.args', 'args2'],
       ]);
     });
   });
@@ -223,11 +232,11 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             .filterWhere(Simulator.isDOM)
         );
       });
-      cExtHoverArea!.simulate('mouseenter');
+      cExtHoverArea?.simulate('mouseenter');
     });
     describe('and when the user clicks the copy-to-clipboard button', () => {
       beforeEach(async () => {
-        (await simulator().resolve('resolver:panel:clipboard'))!.simulate('click');
+        (await simulator().resolve('resolver:panel:clipboard'))?.simulate('click');
         simulator().confirmTextWrittenToClipboard();
       });
       const expected = 'Sep 23, 2020 @ 08:25:32.316';
@@ -360,7 +369,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
                 beforeEach(async () => {
                   const button = await simulator().resolve('resolver:panel:clipboard');
                   expect(button).toBeTruthy();
-                  button!.simulate('click');
+                  button?.simulate('click');
                   simulator().confirmTextWrittenToClipboard();
                 });
                 it(`should write ${expectedValue} to the clipboard`, async () => {

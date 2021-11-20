@@ -22,6 +22,7 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
       >
         <SuggestionComponent
           ariaId="suggestion-0"
+          index={0}
           innerRef={[Function]}
           key="value - as promised, not helpful"
           onClick={[Function]}
@@ -40,6 +41,7 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
         />
         <SuggestionComponent
           ariaId="suggestion-1"
+          index={1}
           innerRef={[Function]}
           key="field - yep"
           onClick={[Function]}
@@ -84,6 +86,7 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
       >
         <SuggestionComponent
           ariaId="suggestion-0"
+          index={0}
           innerRef={[Function]}
           key="value - as promised, not helpful"
           onClick={[Function]}
@@ -102,6 +105,7 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
         />
         <SuggestionComponent
           ariaId="suggestion-1"
+          index={1}
           innerRef={[Function]}
           key="field - yep"
           onClick={[Function]}

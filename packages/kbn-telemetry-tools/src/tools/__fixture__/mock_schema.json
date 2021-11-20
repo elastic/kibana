@@ -5,6 +5,20 @@
         "flat": {
           "type": "keyword"
         },
+        "interface_terms": {
+          "properties": {
+            "computed_term": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "type": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
         "my_index_signature_prop": {
           "properties": {
             "avg": {

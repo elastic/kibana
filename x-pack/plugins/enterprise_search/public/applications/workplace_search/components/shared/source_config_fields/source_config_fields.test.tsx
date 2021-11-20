@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { ApiKey } from '../api_key';
@@ -23,6 +25,7 @@ describe('SourceConfigFields', () => {
   it('renders with all items, hiding API Keys', () => {
     const wrapper = shallow(
       <SourceConfigFields
+        isOauth1={false}
         clientId="123"
         clientSecret="456"
         publicKey="abc"
@@ -37,7 +40,13 @@ describe('SourceConfigFields', () => {
 
   it('shows API keys', () => {
     const wrapper = shallow(
-      <SourceConfigFields clientSecret="456" publicKey="abc" consumerKey="def" baseUrl="ghi" />
+      <SourceConfigFields
+        isOauth1
+        clientSecret="456"
+        publicKey="abc"
+        consumerKey="def"
+        baseUrl="ghi"
+      />
     );
 
     expect(wrapper.find(ApiKey)).toHaveLength(2);

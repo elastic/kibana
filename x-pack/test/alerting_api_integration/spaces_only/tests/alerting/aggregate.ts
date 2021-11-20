@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -20,12 +21,12 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
     it('should aggregate when there are no alerts', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/_aggregate`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
       );
 
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
-        alertExecutionStatus: {
+        rule_execution_status: {
           ok: 0,
           active: 0,
           error: 0,
@@ -44,12 +45,12 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         [...Array(NumOkAlerts)].map(async () => {
           const okAlertId = await createTestAlert(
             {
-              alertTypeId: 'test.noop',
+              rule_type_id: 'test.noop',
               schedule: { interval: '1s' },
             },
             'ok'
           );
-          objectRemover.add(Spaces.space1.id, okAlertId, 'alert', 'alerts');
+          objectRemover.add(Spaces.space1.id, okAlertId, 'rule', 'alerting');
         })
       );
 
@@ -57,7 +58,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         [...Array(NumActiveAlerts)].map(async () => {
           const activeAlertId = await createTestAlert(
             {
-              alertTypeId: 'test.patternFiring',
+              rule_type_id: 'test.patternFiring',
               schedule: { interval: '1s' },
               params: {
                 pattern: { instance: new Array(100).fill(true) },
@@ -65,7 +66,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
             },
             'active'
           );
-          objectRemover.add(Spaces.space1.id, activeAlertId, 'alert', 'alerts');
+          objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
         })
       );
 
@@ -73,12 +74,12 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         [...Array(NumErrorAlerts)].map(async () => {
           const activeAlertId = await createTestAlert(
             {
-              alertTypeId: 'test.throw',
+              rule_type_id: 'test.throw',
               schedule: { interval: '1s' },
             },
             'error'
           );
-          objectRemover.add(Spaces.space1.id, activeAlertId, 'alert', 'alerts');
+          objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
         })
       );
 
@@ -87,18 +88,87 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       // too early.
       await delay(1000);
       const reponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/_aggregate`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
       );
 
       expect(reponse.status).to.eql(200);
       expect(reponse.body).to.eql({
-        alertExecutionStatus: {
+        rule_execution_status: {
           ok: NumOkAlerts,
           active: NumActiveAlerts,
           error: NumErrorAlerts,
           pending: 0,
           unknown: 0,
         },
+      });
+    });
+
+    describe('legacy', () => {
+      it('should aggregate alert status totals', async () => {
+        const NumOkAlerts = 4;
+        const NumActiveAlerts = 1;
+        const NumErrorAlerts = 2;
+
+        await Promise.all(
+          [...Array(NumOkAlerts)].map(async () => {
+            const okAlertId = await createTestAlert(
+              {
+                rule_type_id: 'test.noop',
+                schedule: { interval: '1s' },
+              },
+              'ok'
+            );
+            objectRemover.add(Spaces.space1.id, okAlertId, 'rule', 'alerting');
+          })
+        );
+
+        await Promise.all(
+          [...Array(NumActiveAlerts)].map(async () => {
+            const activeAlertId = await createTestAlert(
+              {
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                params: {
+                  pattern: { instance: new Array(100).fill(true) },
+                },
+              },
+              'active'
+            );
+            objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
+          })
+        );
+
+        await Promise.all(
+          [...Array(NumErrorAlerts)].map(async () => {
+            const activeAlertId = await createTestAlert(
+              {
+                rule_type_id: 'test.throw',
+                schedule: { interval: '1s' },
+              },
+              'error'
+            );
+            objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
+          })
+        );
+
+        // Adding delay to allow ES refresh cycle to run. Even when the waitForStatus
+        // calls are successful, the call to aggregate may return stale totals if called
+        // too early.
+        await delay(1000);
+        const reponse = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/_aggregate`
+        );
+
+        expect(reponse.status).to.eql(200);
+        expect(reponse.body).to.eql({
+          alertExecutionStatus: {
+            ok: NumOkAlerts,
+            active: NumActiveAlerts,
+            error: NumErrorAlerts,
+            pending: 0,
+            unknown: 0,
+          },
+        });
       });
     });
   });
@@ -115,11 +185,11 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
     }
 
     const response = await supertest.get(
-      `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${id}`
+      `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${id}`
     );
     expect(response.status).to.eql(200);
 
-    const { executionStatus } = response.body || {};
+    const { execution_status: executionStatus } = response.body || {};
     const { status } = executionStatus || {};
 
     const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(
@@ -143,7 +213,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
   async function createTestAlert(testAlertOverrides = {}, status: string) {
     const { body: createdAlert } = await supertest
-      .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+      .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(getTestAlertData(testAlertOverrides))
       .expect(200);

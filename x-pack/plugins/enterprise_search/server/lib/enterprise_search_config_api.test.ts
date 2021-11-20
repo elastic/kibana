@@ -1,18 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
+import '../__mocks__/http_agent.mock.ts';
+
 jest.mock('node-fetch');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mock;
+import fetch from 'node-fetch';
+
 const { Response } = jest.requireActual('node-fetch');
+
+jest.mock('@kbn/utils', () => ({
+  kibanaPackageJson: { version: '1.0.0' },
+}));
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
-import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
-import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
+import {
+  callEnterpriseSearchConfigAPI,
+  warnMismatchedVersions,
+} from './enterprise_search_config_api';
 
 describe('callEnterpriseSearchConfigAPI', () => {
   const mockConfig = {
@@ -36,8 +46,11 @@ describe('callEnterpriseSearchConfigAPI', () => {
     settings: {
       external_url: 'http://some.vanity.url/',
       read_only_mode: false,
-      ilm_enabled: true,
       is_federated_auth: false,
+      search_oauth: {
+        client_id: 'someUID',
+        redirect_url: 'http://localhost:3002/ws/search_callback',
+      },
       configured_limits: {
         app_search: {
           engine: {
@@ -86,7 +99,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
           id: 'some-id-string',
           groups: ['Default', 'Cats'],
           is_admin: true,
-          can_create_personal_sources: true,
+          can_create_private_sources: true,
           can_create_invitations: true,
           is_curated: false,
           viewed_onboarding_page: true,
@@ -100,23 +113,23 @@ describe('callEnterpriseSearchConfigAPI', () => {
   });
 
   it('calls the config API endpoint', async () => {
-    fetchMock.mockImplementationOnce((url: string) => {
+    (fetch as unknown as jest.Mock).mockImplementationOnce((url: string) => {
       expect(url).toEqual('http://localhost:3002/api/ent/v2/internal/client_config');
       return Promise.resolve(new Response(JSON.stringify(mockResponse)));
     });
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
+      ...DEFAULT_INITIAL_APP_DATA,
       access: {
         hasAppSearchAccess: true,
         hasWorkplaceSearchAccess: false,
       },
       publicUrl: 'http://some.vanity.url',
-      ...DEFAULT_INITIAL_APP_DATA,
     });
   });
 
   it('falls back without error when data is unavailable', async () => {
-    fetchMock.mockImplementationOnce((url: string) => Promise.resolve(new Response('{}')));
+    (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.resolve(new Response('{}')));
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
       access: {
@@ -125,8 +138,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
       },
       publicUrl: undefined,
       readOnlyMode: false,
-      ilmEnabled: false,
-      isFederatedAuth: false,
+      searchOAuth: {
+        clientId: undefined,
+        redirectUrl: undefined,
+      },
       configuredLimits: {
         appSearch: {
           engine: {
@@ -166,9 +181,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
           id: undefined,
           groups: [],
           isAdmin: false,
-          canCreatePersonalSources: false,
-          canCreateInvitations: false,
-          isCurated: false,
+          canCreatePrivateSources: false,
           viewedOnboardingPage: false,
         },
       },
@@ -179,21 +192,17 @@ describe('callEnterpriseSearchConfigAPI', () => {
     const config = { host: '' };
 
     expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({});
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('handles server errors', async () => {
-    fetchMock.mockImplementationOnce(() => {
-      return Promise.reject('500');
-    });
+    (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.reject('500'));
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({});
     expect(mockDependencies.log.error).toHaveBeenCalledWith(
       'Could not perform access check to Enterprise Search: 500'
     );
 
-    fetchMock.mockImplementationOnce(() => {
-      return Promise.resolve('Bad Data');
-    });
+    (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.resolve('Bad Data'));
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({});
     expect(mockDependencies.log.error).toHaveBeenCalledWith(
       'Could not perform access check to Enterprise Search: TypeError: response.json is not a function'
@@ -211,7 +220,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
     );
 
     // Timeout
-    fetchMock.mockImplementationOnce(async () => {
+    (fetch as unknown as jest.Mock).mockImplementationOnce(async () => {
       jest.advanceTimersByTime(250);
       return Promise.reject({ name: 'AbortError' });
     });
@@ -219,5 +228,23 @@ describe('callEnterpriseSearchConfigAPI', () => {
     expect(mockDependencies.log.warn).toHaveBeenCalledWith(
       "Exceeded 200ms timeout while checking http://localhost:3002. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses."
     );
+  });
+
+  describe('warnMismatchedVersions', () => {
+    it("logs a warning when Enterprise Search and Kibana's versions are not the same", () => {
+      warnMismatchedVersions('1.1.0', mockDependencies.log);
+
+      expect(mockDependencies.log.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Your Kibana instance (v1.0.0) is not the same version as your Enterprise Search instance (v1.1.0)'
+        )
+      );
+    });
+
+    it("does not log a warning when Enterprise Search and Kibana's versions are the same", () => {
+      warnMismatchedVersions('1.0.0', mockDependencies.log);
+
+      expect(mockDependencies.log.warn).not.toHaveBeenCalled();
+    });
   });
 });

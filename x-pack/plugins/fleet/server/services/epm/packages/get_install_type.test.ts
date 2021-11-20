@@ -1,10 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { SavedObject } from 'src/core/server';
-import { ElasticsearchAssetType, Installation, KibanaSavedObjectType } from '../../../types';
+
+import type { SavedObject } from 'src/core/server';
+
+import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
+import type { Installation } from '../../../types';
+
 import { getInstallType } from './install';
 
 const mockInstallation: SavedObject<Installation> = {
@@ -23,6 +28,7 @@ const mockInstallation: SavedObject<Installation> = {
     install_version: '1.0.0',
     install_started_at: new Date().toISOString(),
     install_source: 'registry',
+    keep_policies_up_to_date: false,
   },
 };
 const mockInstallationUpdateFail: SavedObject<Installation> = {
@@ -41,6 +47,7 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
     install_version: '1.0.1',
     install_started_at: new Date().toISOString(),
     install_source: 'registry',
+    keep_policies_up_to_date: false,
   },
 };
 

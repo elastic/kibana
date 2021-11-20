@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Zoom Child Process",
-  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n process.parent.name : \"Zoom.exe\" and process.name : (\"cmd.exe\", \"powershell.exe\", \"pwsh.exe\")\n",
+  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n process.parent.name : \"Zoom.exe\" and process.name : (\"cmd.exe\", \"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\")\n",
   "risk_score": 47,
   "rule_id": "97aba1ef-6034-4bd3-8c1a-1e0996b27afa",
   "severity": "medium",
@@ -44,6 +45,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 5
 }

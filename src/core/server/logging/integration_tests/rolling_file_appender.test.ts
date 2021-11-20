@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { join } from 'path';
-import { rmdir, mkdtemp, readFile, readdir } from 'fs/promises';
+import { rm, mkdtemp, readFile, readdir } from 'fs/promises';
 import moment from 'moment-timezone';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { getNextRollingTime } from '../appenders/rolling_file/policies/time_interval/get_next_rolling_time';
@@ -19,13 +19,12 @@ const flush = async () => delay(flushDelay);
 function createRoot(appenderConfig: any) {
   return kbnTestServer.createRoot({
     logging: {
-      silent: true, // set "true" in kbnTestServer
       appenders: {
         'rolling-file': appenderConfig,
       },
       loggers: [
         {
-          context: 'test.rolling.file',
+          name: 'test.rolling.file',
           appenders: ['rolling-file'],
           level: 'debug',
         },
@@ -48,11 +47,10 @@ describe('RollingFileAppender', () => {
   });
 
   afterEach(async () => {
-    try {
-      await rmdir(testDir);
-    } catch (e) {
-      /* trap */
+    if (testDir) {
+      await rm(testDir, { recursive: true });
     }
+
     if (root) {
       await root.shutdown();
     }
@@ -61,25 +59,27 @@ describe('RollingFileAppender', () => {
   const message = (index: number) => `some message of around 40 bytes number ${index}`;
   const expectedFileContent = (indices: number[]) => indices.map(message).join('\n') + '\n';
 
-  describe('`size-limit` policy with `numeric` strategy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/108633
+  describe.skip('`size-limit` policy with `numeric` strategy', () => {
     it('rolls the log file in the correct order', async () => {
       root = createRoot({
-        kind: 'rolling-file',
-        path: logFile,
+        type: 'rolling-file',
+        fileName: logFile,
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           pattern: '%message',
         },
         policy: {
-          kind: 'size-limit',
+          type: 'size-limit',
           size: '100b',
         },
         strategy: {
-          kind: 'numeric',
+          type: 'numeric',
           max: 5,
           pattern: '.%i',
         },
       });
+      await root.preboot();
       await root.setup();
 
       const logger = root.logger.get('test.rolling.file');
@@ -109,22 +109,23 @@ describe('RollingFileAppender', () => {
 
     it('only keep the correct number of files', async () => {
       root = createRoot({
-        kind: 'rolling-file',
-        path: logFile,
+        type: 'rolling-file',
+        fileName: logFile,
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           pattern: '%message',
         },
         policy: {
-          kind: 'size-limit',
+          type: 'size-limit',
           size: '60b',
         },
         strategy: {
-          kind: 'numeric',
+          type: 'numeric',
           max: 2,
           pattern: '-%i',
         },
       });
+      await root.preboot();
       await root.setup();
 
       const logger = root.logger.get('test.rolling.file');
@@ -158,23 +159,24 @@ describe('RollingFileAppender', () => {
   describe('`time-interval` policy with `numeric` strategy', () => {
     it('rolls the log file at the given interval', async () => {
       root = createRoot({
-        kind: 'rolling-file',
-        path: logFile,
+        type: 'rolling-file',
+        fileName: logFile,
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           pattern: '%message',
         },
         policy: {
-          kind: 'time-interval',
+          type: 'time-interval',
           interval: '1s',
           modulate: true,
         },
         strategy: {
-          kind: 'numeric',
+          type: 'numeric',
           max: 2,
           pattern: '-%i',
         },
       });
+      await root.preboot();
       await root.setup();
 
       const logger = root.logger.get('test.rolling.file');

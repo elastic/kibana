@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ThreatMap, ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
+
+import { DataViewFieldBase } from '@kbn/es-query';
+import { ThreatMap, ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export interface FormattedEntry {
-  field: IFieldType | undefined;
+  id: string;
+  field: DataViewFieldBase | undefined;
   type: 'mapping';
-  value: IFieldType | undefined;
+  value: DataViewFieldBase | undefined;
   entryIndex: number;
 }
 

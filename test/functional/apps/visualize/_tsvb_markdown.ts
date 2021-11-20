@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -11,7 +11,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
+  const { visualBuilder, timePicker, visualize, visChart } = getPageObjects([
+    'visualBuilder',
+    'timePicker',
+    'visualize',
+    'visChart',
+  ]);
   const retry = getService('retry');
 
   async function cleanupMarkdownData(variableName: 'variable' | 'label', checkedValue: string) {
@@ -31,12 +36,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('visual builder', function describeIndexTests() {
     describe('markdown', () => {
       before(async () => {
+        await visualize.initTests();
         await visualBuilder.resetPage();
         await visualBuilder.clickMarkdown();
         await timePicker.setAbsoluteRange(
           'Sep 22, 2015 @ 06:00:00.000',
           'Sep 22, 2015 @ 11:00:00.000'
         );
+        await visualBuilder.markdownSwitchSubTab('options');
+        await visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await visualBuilder.setDropLastBucket(true);
+        await visualBuilder.markdownSwitchSubTab('markdown');
       });
 
       it('should render subtabs and table variables markdown components', async () => {
@@ -65,6 +75,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.enterMarkdown(html);
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(html);
+      });
+
+      it('markdown variables should be clickable', async () => {
+        await visualBuilder.clearMarkdown();
+        const [firstVariable] = await visualBuilder.getMarkdownTableVariables();
+        await firstVariable.selector.click();
+        await visChart.waitForVisualizationRenderingStabilized();
+        const markdownText = await visualBuilder.getMarkdownText();
+        expect(markdownText).to.be('46');
       });
 
       it('should render mustache list', async () => {
@@ -125,6 +144,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await retry.try(async function aggregationCountCheck() {
           const aggregationLength = await visualBuilder.getAggregationCount();
           expect(aggregationLength).to.be.equal(2);
+        });
+      });
+
+      describe('applying field formats from Advanced Settings for values', () => {
+        before(async () => {
+          await visualBuilder.resetPage();
+          await visualBuilder.clickMarkdown();
+          await visualBuilder.markdownSwitchSubTab('markdown');
+          await visualBuilder.enterMarkdown('{{ average_of_bytes.last.formatted }}');
+          await visualBuilder.markdownSwitchSubTab('data');
+          await visualBuilder.selectAggType('Average');
+          await visualBuilder.setFieldForAggregation('bytes');
+          await visualBuilder.clickSeriesOption();
+        });
+
+        it('should apply field formatting by default', async () => {
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('5.588KB');
+        });
+
+        it('should apply TSVB formatting', async () => {
+          await visualBuilder.changeDataFormatter('percent');
+
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('572,241.265%');
         });
       });
     });

@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
-import { ObservabilityPluginSetupDeps } from '../../../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { render } from '../../../../utils/test_helper';
 import { UXSection } from './';
 import { response } from './mock_data/ux.mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
+import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -24,20 +28,22 @@ jest.mock('react-router-dom', () => ({
 describe('UXSection', () => {
   beforeAll(() => {
     jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
-      hasData: {
+      hasDataMap: {
         ux: {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          hasData: { hasData: true, serviceName: 'elastic-co-frontend' },
+          hasData: true,
+          serviceName: 'elastic-co-frontend',
         },
       },
     } as HasDataContextValue);
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: ({
+      core: {
         uiSettings: { get: jest.fn() },
         http: { basePath: { prepend: jest.fn() } },
-      } as unknown) as CoreStart,
+      } as unknown as CoreStart,
       appMountParameters: {} as AppMountParameters,
-      plugins: ({
+      config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
+      plugins: {
         data: {
           query: {
             timefilter: {
@@ -50,7 +56,9 @@ describe('UXSection', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPluginSetupDeps,
+      } as unknown as ObservabilityPublicPluginsStart,
+      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+      ObservabilityPageTemplate: KibanaPageTemplate,
     }));
   });
   it('renders with core web vitals', () => {
@@ -59,7 +67,9 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, getAllByText } = render(<UXSection bucketSize="60s" />);
+    const { getByText, getAllByText } = render(
+      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+    );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getByText('View in app')).toBeInTheDocument();
@@ -91,7 +101,9 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByText, getAllByText } = render(<UXSection bucketSize="60s" />);
+    const { getByText, queryAllByText, getAllByText } = render(
+      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+    );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('--')).toHaveLength(3);
@@ -104,7 +116,9 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByText, getAllByText } = render(<UXSection bucketSize="60s" />);
+    const { getByText, queryAllByText, getAllByText } = render(
+      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+    );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('No data is available.')).toHaveLength(3);

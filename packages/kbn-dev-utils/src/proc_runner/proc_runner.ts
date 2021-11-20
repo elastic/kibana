@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import * as Rx from 'rxjs';
 import { filter, first, catchError, map } from 'rxjs/operators';
 import exitHook from 'exit-hook';
 
 import { ToolingLog } from '../tooling_log';
-import { createCliError } from './errors';
+import { createFailError } from '../run';
 import { Proc, ProcOptions, startProc } from './proc';
 
 const SECOND = 1000;
@@ -38,6 +37,8 @@ export class ProcRunner {
   private signalUnsubscribe: () => void;
 
   constructor(private log: ToolingLog) {
+    this.log = log.withType('ProcRunner');
+
     this.signalUnsubscribe = exitHook(() => {
       this.teardown().catch((error) => {
         log.error(`ProcRunner teardown error: ${error.stack}`);
@@ -60,7 +61,6 @@ export class ProcRunner {
    */
   async run(name: string, options: RunOptions) {
     const {
-      cmd,
       args = [],
       cwd = process.cwd(),
       stdin = undefined,
@@ -68,6 +68,7 @@ export class ProcRunner {
       waitTimeout = 15 * MINUTE,
       env = process.env,
     } = options;
+    const cmd = options.cmd === 'node' ? process.execPath : options.cmd;
 
     if (this.closing) {
       throw new Error('ProcRunner is closing');
@@ -98,7 +99,7 @@ export class ProcRunner {
             first(),
             catchError((err) => {
               if (err.name !== 'EmptyError') {
-                throw createCliError(`[${name}] exited without matching pattern: ${wait}`);
+                throw createFailError(`[${name}] exited without matching pattern: ${wait}`);
               } else {
                 throw err;
               }
@@ -109,7 +110,7 @@ export class ProcRunner {
             : Rx.timer(waitTimeout).pipe(
                 map(() => {
                   const sec = waitTimeout / SECOND;
-                  throw createCliError(
+                  throw createFailError(
                     `[${name}] failed to match pattern within ${sec} seconds [pattern=${wait}]`
                   );
                 })
@@ -199,8 +200,12 @@ export class ProcRunner {
     // tie into proc outcome$, remove from _procs on compete
     proc.outcome$.subscribe({
       next: (code) => {
-        const duration = moment.duration(Date.now() - startMs);
-        this.log.info('[%s] exited with %s after %s', name, code, duration.humanize());
+        this.log.info(
+          '[%s] exited with %s after %s seconds',
+          name,
+          code,
+          ((Date.now() - startMs) / 1000).toFixed(1)
+        );
       },
       complete: () => {
         remove();

@@ -1,21 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
-import {
-  esQuery,
-  Filter,
-  Query,
-  IIndexPattern,
-} from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -24,7 +21,8 @@ import { combineQueries } from '../../../timelines/components/timeline/helpers';
 
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -39,20 +37,25 @@ const makeMapStateToProps = () => {
   // The mapped Redux state provided to this component includes the global
   // filters that appear at the top of most views in the app, and all the
   // filters in the active timeline:
-  const mapStateToProps = (state: State) => {
+  const mapStateToProps = (state: State, ownProps: { globalFilters?: Filter[] }) => {
     const activeTimeline: TimelineModel = getTimeline(state, TimelineId.active) ?? timelineDefaults;
     const activeTimelineFilters = activeTimeline.filters ?? EMPTY_FILTERS;
     const activeTimelineInput: inputsModel.InputsRange = getInputsTimeline(state);
-
+    const { globalFilters } = ownProps;
     return {
       activeTimelineEventType: activeTimeline.eventType,
-      activeTimelineFilters,
+      activeTimelineFilters:
+        activeTimeline.activeTab === TimelineTabs.query ? activeTimelineFilters : EMPTY_FILTERS,
       activeTimelineFrom: activeTimelineInput.timerange.from,
-      activeTimelineKqlQueryExpression: getKqlQueryTimeline(state, TimelineId.active),
+      activeTimelineKqlQueryExpression:
+        activeTimeline.activeTab === TimelineTabs.query
+          ? getKqlQueryTimeline(state, TimelineId.active)
+          : null,
       activeTimelineTo: activeTimelineInput.timerange.to,
-      dataProviders: activeTimeline.dataProviders,
+      dataProviders:
+        activeTimeline.activeTab === TimelineTabs.query ? activeTimeline.dataProviders : [],
       globalQuery: getGlobalQuerySelector(state),
-      globalFilters: getGlobalFiltersQuerySelector(state),
+      globalFilters: globalFilters ?? getGlobalFiltersQuerySelector(state),
       kqlMode: activeTimeline.kqlMode,
     };
   };
@@ -67,15 +70,17 @@ const connector = connect(makeMapStateToProps);
 //    this component is rendered in the context of the active timeline. This
 //    behavior enables the 'All events' view by appending the alerts index
 //    to the index pattern.
-interface OwnProps {
+export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
-  indexPattern: IIndexPattern;
-  indexNames: string[];
+  indexPattern: DataViewBase;
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
+  showLegend?: boolean;
   value?: string[] | string | null;
+  globalFilters?: Filter[];
 }
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = OwnProps & PropsFromRedux;
@@ -90,11 +95,12 @@ const StatefulTopNComponent: React.FC<Props> = ({
   dataProviders,
   field,
   indexPattern,
-  indexNames,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
   onFilterAdded,
+  paddingSize,
+  showLegend,
   timelineId,
   toggleTopN,
   value,
@@ -111,7 +117,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       timelineId === TimelineId.active
         ? combineQueries({
             browserFields,
-            config: esQuery.getEsQueryConfig(uiSettings),
+            config: getEsQueryConfig(uiSettings),
             dataProviders,
             filters: activeTimelineFilters,
             indexPattern,
@@ -149,13 +155,14 @@ const StatefulTopNComponent: React.FC<Props> = ({
       data-test-subj="top-n"
       defaultView={defaultView}
       deleteQuery={timelineId === TimelineId.active ? undefined : deleteQuery}
-      field={field}
+      field={field as AlertsStackByField}
       filters={timelineId === TimelineId.active ? EMPTY_FILTERS : globalFilters}
       from={timelineId === TimelineId.active ? activeTimelineFrom : from}
       indexPattern={indexPattern}
-      indexNames={indexNames}
       options={options}
+      paddingSize={paddingSize}
       query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
+      showLegend={showLegend}
       setAbsoluteRangeDatePickerTarget={timelineId === TimelineId.active ? 'timeline' : 'global'}
       setQuery={setQuery}
       timelineId={timelineId}
@@ -169,4 +176,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
 
 StatefulTopNComponent.displayName = 'StatefulTopNComponent';
 
-export const StatefulTopN = connector(React.memo(StatefulTopNComponent));
+export const StatefulTopN: React.FunctionComponent<OwnProps> = connector(
+  React.memo(StatefulTopNComponent)
+);

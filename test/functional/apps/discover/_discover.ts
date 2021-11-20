@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -18,7 +18,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
+  const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -26,16 +28,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
-
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+    });
     describe('query', function () {
       const queryName1 = 'Query # 1';
 
@@ -45,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
-        expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
+        expect(rowData).to.contain('Sep 22, 2015 @ 23:50:13.253');
       });
 
       it('save query should show toast message and display query name', async function () {
@@ -90,29 +92,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickHistogramBar();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
-        expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
-        await retry.waitFor('doc table to contain the right search result', async () => {
-          const rowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table: ${rowData}`);
-          return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
-        });
+        expect(time.start).to.be('Sep 21, 2015 @ 12:00:00.000');
+        expect(time.end).to.be('Sep 21, 2015 @ 15:00:00.000');
+        await retry.waitForWithTimeout(
+          'doc table to contain the right search result',
+          1000,
+          async () => {
+            const rowData = await PageObjects.discover.getDocTableField(1);
+            log.debug(`The first timestamp value in doc table: ${rowData}`);
+            return rowData.includes('Sep 21, 2015 @ 14:59:08.840');
+          }
+        );
       });
 
-      it.skip('should modify the time range when the histogram is brushed', async function () {
+      it('should modify the time range when the histogram is brushed', async function () {
+        // this is the number of renderings of the histogram needed when new data is fetched
+        // this needs to be improved
+        const renderingCountInc = 2;
+        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await retry.waitFor('chart rendering complete', async () => {
+          const actualCount = await elasticChart.getVisualizationRenderingCount();
+          const expectedCount = prevRenderingCount + renderingCountInc;
+          log.debug(
+            `renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`
+          );
+          return actualCount === expectedCount;
+        });
+        const prevRowData = await PageObjects.discover.getDocTableField(1);
+        log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-
+        await retry.waitFor('chart rendering complete after being brushed', async () => {
+          const actualCount = await elasticChart.getVisualizationRenderingCount();
+          const expectedCount = prevRenderingCount + renderingCountInc * 2;
+          log.debug(
+            `renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`
+          );
+          return actualCount === expectedCount;
+        });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(Math.round(newDurationHours)).to.be(26);
 
-        await retry.waitFor('doc table to contain the right search result', async () => {
+        await retry.waitFor('doc table containing the documents of the brushed range', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table: ${rowData}`);
-          const dateParsed = Date.parse(rowData);
-          // compare against the parsed date of Sep 20, 2015 @ 17:30:00.000 and Sep 20, 2015 @ 23:30:00.000
-          return dateParsed >= 1442770200000 && dateParsed <= 1442791800000;
+          log.debug(`The first timestamp value in doc table after brushing: ${rowData}`);
+          return prevRowData !== rowData;
         });
       });
 
@@ -123,13 +149,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const expectedInterval = 'Auto';
         expect(actualInterval).to.be(expectedInterval);
-      });
-
-      it('should show Auto chart interval', async function () {
-        const expectedChartInterval = 'Auto';
-
-        const actualInterval = await PageObjects.discover.getChartInterval();
-        expect(actualInterval).to.be(expectedChartInterval);
       });
 
       it('should not show "no results"', async () => {
@@ -146,6 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // reset to persisted state
+        await queryBar.clearQuery();
         await PageObjects.discover.clickResetSavedSearchButton();
         const expectedHitCount = '14,004';
         await retry.try(async function () {
@@ -166,8 +186,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show "no results"', async () => {
-        const isVisible = await PageObjects.discover.hasNoResults();
-        expect(isVisible).to.be(true);
+        await retry.waitFor('no results screen is displayed', async function () {
+          const isVisible = await PageObjects.discover.hasNoResults();
+          return isVisible === true;
+        });
       });
 
       it('should suggest a new time range is picked', async () => {
@@ -201,10 +223,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           await PageObjects.discover.loadSavedSearch(expected.title);
-          const {
-            title,
-            description,
-          } = await PageObjects.common.getSharedItemTitleAndDescription();
+          const { title, description } =
+            await PageObjects.common.getSharedItemTitleAndDescription();
           expect(title).to.eql(expected.title);
           expect(description).to.eql(expected.description);
         });
@@ -213,11 +233,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function () {
-        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
-        await queryBar.clearQuery();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await queryBar.clearQuery();
 
         log.debug(
           'check that the newest doc timestamp is now -7 hours from the UTC time in the first test'
@@ -226,34 +246,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowData.startsWith('Sep 22, 2015 @ 16:50:13.253')).to.be.ok();
       });
     });
-    describe('usage of discover:searchOnPageLoad', () => {
-      it('should fetch data from ES initially when discover:searchOnPageLoad is false', async function () {
-        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
-
-        expect(await PageObjects.discover.getNrOfFetches()).to.be(0);
-      });
-
-      it('should not fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
-        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
-
-        expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
-      });
-    });
 
     describe('invalid time range in URL', function () {
       it('should get the default timerange', async function () {
-        const prevTime = await PageObjects.timePicker.getTimeConfig();
         await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
           useActualUrl: true,
         });
         await PageObjects.header.awaitKibanaChrome();
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be(prevTime.start);
-        expect(time.end).to.be(prevTime.end);
+        expect(time.start).to.be('~ 15 minutes ago');
+        expect(time.end).to.be('now');
       });
     });
 
@@ -266,8 +268,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.awaitKibanaChrome();
         const initialTimeString = await PageObjects.discover.getChartTimespan();
         await queryBar.submitQuery();
-        const refreshedTimeString = await PageObjects.discover.getChartTimespan();
-        expect(refreshedTimeString).not.to.be(initialTimeString);
+
+        await retry.waitFor('chart timespan to have changed', async () => {
+          const refreshedTimeString = await PageObjects.discover.getChartTimespan();
+          log.debug(
+            `Timestamp before: ${initialTimeString}, Timestamp after: ${refreshedTimeString}`
+          );
+          return refreshedTimeString !== initialTimeString;
+        });
       });
     });
 
@@ -276,10 +284,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickFieldListItemAdd('_score');
-        await PageObjects.discover.clickFieldSort('_score');
+        await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
-        await PageObjects.discover.clickFieldListItemAdd('_score');
+        await PageObjects.discover.clickFieldListItemRemove('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
       });
@@ -287,7 +295,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickFieldListItemAdd('referer');
-        await PageObjects.discover.clickFieldSort('referer');
+        await PageObjects.discover.clickFieldSort('referer', 'Sort A-Z');
         expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');
         expect(await PageObjects.discover.getAllFieldNames()).to.contain('Referer custom');
         const url = await browser.getCurrentUrl();
@@ -300,10 +308,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const intervalS = 5;
         await PageObjects.timePicker.startAutoRefresh(intervalS);
 
-        // check inspector panel request stats for timestamp
-        await inspector.open();
-
         const getRequestTimestamp = async () => {
+          // check inspector panel request stats for timestamp
+          await inspector.open();
           const requestStats = await inspector.getTableData();
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')
@@ -311,6 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
             return '';
           }
+          await inspector.close();
           return requestStatsRow[0][1];
         };
 

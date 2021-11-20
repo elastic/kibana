@@ -1,21 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import {
-  TimeRange,
-  Filter,
-  Query,
-  esFilters,
-  QueryState,
-  RefreshInterval,
-} from '../../data/public';
+import type { UrlGeneratorsDefinition } from '../../share/public';
+import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
+import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../share/public';
+import { VIEW_MODE } from './components/view_mode_toggle';
 
 export const DISCOVER_APP_URL_GENERATOR = 'DISCOVER_APP_URL_GENERATOR';
 
@@ -71,14 +66,18 @@ export interface DiscoverUrlGeneratorState {
    * Used interval of the histogram
    */
   interval?: string;
+
   /**
    * Array of the used sorting [[field,direction],...]
    */
   sort?: string[][];
+
   /**
    * id of the used saved query
    */
   savedQuery?: string;
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
 }
 
 interface Params {
@@ -89,7 +88,8 @@ interface Params {
 export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 
 export class DiscoverUrlGenerator
-  implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR> {
+  implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR>
+{
   constructor(private readonly params: Params) {}
 
   public readonly id = DISCOVER_APP_URL_GENERATOR;
@@ -107,6 +107,8 @@ export class DiscoverUrlGenerator
     savedQuery,
     sort,
     interval,
+    viewMode,
+    hideAggregatedPreview,
   }: DiscoverUrlGeneratorState): Promise<string> => {
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -117,6 +119,8 @@ export class DiscoverUrlGenerator
       interval?: string;
       sort?: string[][];
       savedQuery?: string;
+      viewMode?: VIEW_MODE;
+      hideAggregatedPreview?: boolean;
     } = {};
     const queryState: QueryState = {};
 
@@ -133,6 +137,8 @@ export class DiscoverUrlGenerator
     if (filters && filters.length)
       queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
+    if (viewMode) appState.viewMode = viewMode;
+    if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
 
     let url = `${this.params.appBasePath}#/${savedSearchPath}`;
     url = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, url);

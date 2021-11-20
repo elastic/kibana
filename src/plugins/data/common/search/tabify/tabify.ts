@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
@@ -42,8 +42,14 @@ export function tabifyAggResponse(
 
       switch (agg.type.type) {
         case AggGroupNames.Buckets:
-          const aggBucket = get(bucket, agg.id);
+          const aggBucket = get(bucket, agg.id) as Record<string, unknown>;
           const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, respOpts?.timeRange);
+          const precisionError = agg.type.hasPrecisionError?.(aggBucket);
+
+          if (precisionError) {
+            // "сolumn" mutation, we have to do this here as this value is filled in based on aggBucket value
+            column.hasPrecisionError = true;
+          }
 
           if (tabifyBuckets.length) {
             tabifyBuckets.forEach((subBucket, tabifyBucketKey) => {
@@ -139,7 +145,7 @@ export function tabifyAggResponse(
   const write = new TabbedAggResponseWriter(aggConfigs, respOpts || {});
   const topLevelBucket: AggResponseBucket = {
     ...esResponse.aggregations,
-    doc_count: esResponse.hits.total,
+    doc_count: esResponse.aggregations?.doc_count || esResponse.hits?.total,
   };
 
   collectBucket(aggConfigs, write, topLevelBucket, '', 1);

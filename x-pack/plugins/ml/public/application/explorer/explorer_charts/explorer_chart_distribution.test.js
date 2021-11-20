@@ -1,23 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { chartData as mockChartData } from './__mocks__/mock_chart_data_rare';
 import seriesConfig from './__mocks__/mock_series_config_rare.json';
-
-// Mock TimeBuckets and mlFieldFormatService, they don't play well
-// with the jest based test setup yet.
-jest.mock('../../util/time_buckets', () => ({
-  getTimeBucketsFromCache: jest.fn(() => {
-    return {
-      setBounds: jest.fn(),
-      setInterval: jest.fn(),
-      getScaledDateFormat: jest.fn(),
-    };
-  }),
-}));
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
     getFieldFormat: jest.fn(),
@@ -29,7 +18,10 @@ import React from 'react';
 
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
 import { chartLimits } from '../../util/chart_utils';
-
+import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
+const utilityProps = {
+  timeBuckets: timeBucketsMock,
+};
 describe('ExplorerChart', () => {
   const mlSelectSeverityServiceMock = {
     state: {
@@ -54,6 +46,7 @@ describe('ExplorerChart', () => {
       <ExplorerChartDistribution
         mlSelectSeverityService={mlSelectSeverityServiceMock}
         tooltipService={mockTooltipService}
+        {...utilityProps}
       />
     );
 
@@ -79,6 +72,7 @@ describe('ExplorerChart', () => {
         seriesConfig={config}
         mlSelectSeverityService={mlSelectSeverityServiceMock}
         tooltipService={mockTooltipService}
+        {...utilityProps}
       />
     );
 
@@ -111,6 +105,7 @@ describe('ExplorerChart', () => {
           seriesConfig={config}
           mlSelectSeverityService={mlSelectSeverityServiceMock}
           tooltipService={mockTooltipService}
+          {...utilityProps}
         />
       </div>
     );
@@ -144,7 +139,7 @@ describe('ExplorerChart', () => {
     expect(+selectedInterval.getAttribute('height')).toBe(166);
 
     const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
-    expect([...xAxisTicks]).toHaveLength(0);
+    expect([...xAxisTicks]).toHaveLength(1);
     const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(5);
     const emphasizedAxisLabel = wrapper

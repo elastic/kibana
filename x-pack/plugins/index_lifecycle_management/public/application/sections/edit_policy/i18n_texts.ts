@@ -1,16 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
-    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
+    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.enableShrinkLabel', {
       defaultMessage: 'Shrink index',
     }),
+    shrinkCountLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardCountLabel',
+      {
+        defaultMessage: 'Configure shard count',
+      }
+    ),
+    shrinkSizeLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardSizeLabel',
+      {
+        defaultMessage: 'Configure shard size',
+      }
+    ),
+    rolloverOffsetsHotPhaseTiming: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
+      {
+        defaultMessage:
+          'How long it takes to reach the rollover criteria in the hot phase can vary.',
+      }
+    ),
     searchableSnapshotInHotPhase: {
       searchableSnapshotDisallowed: {
         calloutTitle: i18n.translate(
@@ -69,10 +89,28 @@ export const i18nTexts = {
         defaultMessage: 'Select a node attribute',
       }
     ),
-    searchableSnapshotsFieldLabel: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel',
+    searchableSnapshotsRepoFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoFieldLabel',
       {
-        defaultMessage: 'Searchable snapshot repository',
+        defaultMessage: 'Snapshot repository',
+      }
+    ),
+    searchableSnapshotsStorageFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotStorageFieldLabel',
+      {
+        defaultMessage: 'Searchable snapshot storage',
+      }
+    ),
+    maxPrimaryShardSizeLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeLabel',
+      {
+        defaultMessage: 'Maximum primary shard size',
+      }
+    ),
+    maxPrimaryShardSizeUnitsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.maximumPrimaryShardSizeAriaLabel',
+      {
+        defaultMessage: 'Maximum shard size units',
       }
     ),
     errors: {
@@ -86,6 +124,12 @@ export const i18nTexts = {
         'xpack.indexLifecycleMgmt.editPolicy.errors.numberAboveZeroRequiredError',
         {
           defaultMessage: 'Only numbers above 0 are allowed.',
+        }
+      ),
+      integerRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.integerRequiredError',
+        {
+          defaultMessage: 'Only integers are allowed.',
         }
       ),
       maximumAgeRequiredMessage: i18n.translate(
@@ -106,6 +150,12 @@ export const i18nTexts = {
           defaultMessage: 'Maximum documents is required.',
         }
       ),
+      maximumPrimaryShardSizeRequiredMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.maximumPrimaryShardSizeMissingError',
+        {
+          defaultMessage: 'A maximum primary shard size is required',
+        }
+      ),
       rollOverConfigurationCallout: {
         title: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.errors.rolloverConfigurationError.title',
@@ -117,7 +167,7 @@ export const i18nTexts = {
           'xpack.indexLifecycleMgmt.editPolicy.errors.rolloverConfigurationError.body',
           {
             defaultMessage:
-              'A value for one of maximum size, maximum documents, or maximum age is required.',
+              'A value for one of maximum primary shard size, maximum documents, maximum age or maximum index size is required.',
           }
         ),
       },
@@ -180,20 +230,39 @@ export const i18nTexts = {
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
         defaultMessage: 'Cold phase',
       }),
+      frozen: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseTitle', {
+        defaultMessage: 'Frozen phase',
+      }),
+      delete: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseTitle', {
+        defaultMessage: 'Delete phase',
+      }),
     },
     descriptions: {
       hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
         defaultMessage:
-          'This phase is required. You are actively querying and writing to your index. For faster updates, you can roll over the index when it gets too big or too old.',
+          'Store your most recent, most frequently-searched data in the hot tier. The hot tier provides the best indexing and search performance by using the most powerful, expensive hardware.',
       }),
       warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
         defaultMessage:
-          'You are still querying your index, but it is read-only. You can allocate shards to less performant hardware. For faster searches, you can reduce the number of shards and force merge segments.',
+          'Move data to the warm tier when you are still likely to search it, but infrequently need to update it. The warm tier is optimized for search performance over indexing performance.',
       }),
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription', {
         defaultMessage:
-          'You are querying your index less frequently, so you can allocate shards on significantly less performant hardware. Because your queries are slower, you can reduce the number of replicas.',
+          'Move data to the cold tier when you are searching it less often and don’t need to update it. The cold tier is optimized for cost savings over search performance.',
       }),
+      frozen: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription',
+        {
+          defaultMessage:
+            'Move data to the frozen tier for long term retention. The frozen tier provides the most cost-effective way store your data and still be able to search it.',
+        }
+      ),
+      delete: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
+        {
+          defaultMessage: 'Delete data you no longer need.',
+        }
+      ),
     },
   },
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mockEndpointEvent } from './endpoint_event';
@@ -15,11 +16,7 @@ import * as eventModel from '../../../common/endpoint/models/event';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { mockResolverNode } from './resolver_node';
 
-export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
-  originID,
-}: {
-  originID: string;
-}): {
+export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({ originID }: { originID: string }): {
   nodes: ResolverNode[];
   events: SafeResolverEvent[];
 } {
@@ -185,8 +182,7 @@ export function mockTreeWithNoAncestorsAnd2Children({
 
   const secondChildNode: ResolverNode = mockResolverNode({
     id: secondChildID,
-    name:
-      'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
+    name: 'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
     parentID: originID,
     timestamp: 1600863932318,
   });
@@ -318,6 +314,7 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
     secondChildID,
   });
   const parentEntityID = nodeModel.parentId(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     resolverTree.nodes.find((node) => node.id === originID)!
   );
   const relatedEvents = [

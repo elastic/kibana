@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
@@ -28,10 +28,10 @@ jest.mock('./migrate_app_state', () => ({
 const { createStateContainer, syncState } = jest.requireMock('../../../../kibana_utils/public');
 
 describe('createVisualizeAppState', () => {
-  const kbnUrlStateStorage = ({
+  const kbnUrlStateStorage = {
     set: jest.fn(),
     get: jest.fn(() => ({ linked: false })),
-  } as unknown) as IKbnUrlStateStorage;
+  } as unknown as IKbnUrlStateStorage;
 
   const { stateContainer, stopStateSync } = createVisualizeAppState({
     stateDefaults: visualizeAppStateStub,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory, { Action } from 'typescript-fsa';
@@ -64,13 +65,13 @@ export const hasFieldsSelector = createSelector(
 );
 
 /**
- * Saga making notifying angular when fields are selected to re-calculate the state of the save button.
+ * Saga making notifying react when fields are selected to re-calculate the state of the save button.
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) => {
+export const updateSaveButtonSaga = ({ notifyReact }: GraphStoreDependencies) => {
   function* notify(): IterableIterator<void> {
-    notifyAngular();
+    notifyReact();
   }
   return function* () {
     yield takeLatest(matchesOne(selectField, deselectField), notify);
@@ -83,7 +84,7 @@ export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) 
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncFieldsSaga = ({ getWorkspace, setLiveResponseFields }: GraphStoreDependencies) => {
+export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies) => {
   function* syncFields() {
     const workspace = getWorkspace();
     if (!workspace) {
@@ -92,7 +93,6 @@ export const syncFieldsSaga = ({ getWorkspace, setLiveResponseFields }: GraphSto
 
     const currentState = yield select();
     workspace.options.vertex_fields = selectedFieldsSelector(currentState);
-    setLiveResponseFields(liveResponseFieldsSelector(currentState));
   }
   return function* () {
     yield takeEvery(
@@ -108,7 +108,7 @@ export const syncFieldsSaga = ({ getWorkspace, setLiveResponseFields }: GraphSto
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDependencies) => {
+export const syncNodeStyleSaga = ({ getWorkspace, notifyReact }: GraphStoreDependencies) => {
   function* syncNodeStyle(action: Action<InferActionType<typeof updateFieldProperties>>) {
     const workspace = getWorkspace();
     if (!workspace) {
@@ -131,7 +131,7 @@ export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDep
         }
       });
     }
-    notifyAngular();
+    notifyReact();
 
     const selectedFields = selectedFieldsSelector(yield select());
     workspace.options.vertex_fields = selectedFields;

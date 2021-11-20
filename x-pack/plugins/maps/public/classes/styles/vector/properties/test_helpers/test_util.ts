@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // eslint-disable-next-line max-classes-per-file
@@ -18,22 +19,22 @@ import { IStyle } from '../../../style';
 
 export class MockField extends AbstractField {
   private readonly _dataType: string;
-  private readonly _supportsAutoDomain: boolean;
+  private readonly _supportsFieldMetaFromLocalData: boolean;
 
   constructor({
     fieldName,
     origin = FIELD_ORIGIN.SOURCE,
     dataType = 'string',
-    supportsAutoDomain = true,
+    supportsFieldMetaFromLocalData = true,
   }: {
     fieldName: string;
     origin?: FIELD_ORIGIN;
     dataType?: string;
-    supportsAutoDomain?: boolean;
+    supportsFieldMetaFromLocalData?: boolean;
   }) {
     super({ fieldName, origin });
     this._dataType = dataType;
-    this._supportsAutoDomain = supportsAutoDomain;
+    this._supportsFieldMetaFromLocalData = supportsFieldMetaFromLocalData;
   }
 
   async getLabel(): Promise<string> {
@@ -44,11 +45,11 @@ export class MockField extends AbstractField {
     return this._dataType;
   }
 
-  supportsAutoDomain(): boolean {
-    return this._supportsAutoDomain;
+  supportsFieldMetaFromLocalData(): boolean {
+    return this._supportsFieldMetaFromLocalData;
   }
 
-  supportsFieldMeta(): boolean {
+  supportsFieldMetaFromEs(): boolean {
     return true;
   }
 }

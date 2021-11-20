@@ -9,5 +9,5 @@ An object that handles registration of http request context providers.
 <b>Signature:</b>
 
 ```typescript
-export declare type RequestHandlerContextContainer = IContextContainer<RequestHandler>;
+export declare type RequestHandlerContextContainer = IContextContainer;
 ```

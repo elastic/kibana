@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiComboBox,
@@ -16,10 +17,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
+import { debounce, cloneDeep } from 'lodash';
 
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
+import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 
 import {
   ANALYSIS_CONFIG_TYPE,
@@ -27,14 +29,19 @@ import {
   TRAINING_PERCENT_MAX,
   FieldSelectionItem,
 } from '../../../../common/analytics';
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
+import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
+import {
+  isRuntimeMappings,
+  isRuntimeField,
+} from '../../../../../../../common/util/runtime_field_utils';
+import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { Messages } from '../shared';
 import {
-  AnalyticsJobType,
   DEFAULT_MODEL_MEMORY_LIMIT,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { shouldAddAsDepVarOption } from './form_options_validation';
+import { handleExplainErrorMessage, shouldAddAsDepVarOption } from './form_options_validation';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { ANALYTICS_STEPS } from '../../page';
@@ -46,24 +53,17 @@ import { DataGrid } from '../../../../../components/data_grid';
 import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
-import { useSavedSearch } from './use_saved_search';
+import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
-import { LEGEND_TYPES, ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
+import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
+import { RuntimeMappings } from '../runtime_mappings';
+import { ConfigurationStepProps } from './configuration_step';
 
-const getScatterplotMatrixLegendType = (jobType: AnalyticsJobType) => {
-  switch (jobType) {
-    case ANALYSIS_CONFIG_TYPE.CLASSIFICATION:
-      return LEGEND_TYPES.NOMINAL;
-    case ANALYSIS_CONFIG_TYPE.REGRESSION:
-      return LEGEND_TYPES.QUANTITATIVE;
-    default:
-      return undefined;
-  }
-};
-
+const runtimeMappingKey = 'runtime_mapping';
+const notIncludedReason = 'field not in includes list';
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
   {
@@ -72,16 +72,38 @@ const requiredFieldsErrorText = i18n.translate(
   }
 );
 
-export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
+function getIndexDataQuery(savedSearchQuery: SavedSearchQuery, jobConfigQuery: any) {
+  // Return `undefined` if savedSearchQuery itself is `undefined`, meaning it hasn't been initialized yet.
+  if (savedSearchQuery === undefined) {
+    return;
+  }
+
+  return savedSearchQuery !== null ? savedSearchQuery : jobConfigQuery;
+}
+
+function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: RuntimeMappingsType) {
+  const runtimeOptions: EuiComboBoxOptionOption[] = [];
+  Object.keys(runtimeMappings).forEach((id) => {
+    const field = runtimeMappings[id];
+    if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, jobType)) {
+      runtimeOptions.push({
+        label: id,
+      });
+    }
+  });
+  return runtimeOptions;
+}
+
+export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   actions,
+  isClone,
   state,
   setCurrentStep,
 }) => {
   const mlContext = useMlContext();
-  const { currentSavedSearch, currentIndexPattern } = mlContext;
+  const { currentSavedSearch, currentDataView } = mlContext;
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
-  const [loadingFieldOptions, setLoadingFieldOptions] = useState<boolean>(false);
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
   const [loadingDepVarOptions, setLoadingDepVarOptions] = useState<boolean>(false);
   const [dependentVariableFetchFail, setDependentVariableFetchFail] = useState<boolean>(false);
@@ -89,54 +111,66 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     EuiComboBoxOptionOption[]
   >([]);
   const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
+  const [fetchingExplainData, setFetchingExplainData] = useState<boolean>(false);
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
   const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
+  const [noDocsContainMappedFields, setNoDocsContainMappedFields] = useState<boolean>(false);
   const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
     undefined | string
   >();
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
-  const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
+  const { cloneJob, estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
   const {
     dependentVariable,
     includes,
     jobConfigQuery,
+    jobConfigQueryLanguage,
     jobConfigQueryString,
     jobType,
     modelMemoryLimit,
     previousJobType,
     requiredFieldsError,
+    runtimeMappings,
+    previousRuntimeMapping,
+    runtimeMappingsUpdated,
     sourceIndex,
     trainingPercent,
     useEstimatedMml,
   } = form;
+
+  const isJobTypeWithDepVar =
+    jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
+  const dependentVariableEmpty = isJobTypeWithDepVar && dependentVariable === '';
+  const hasBasicRequiredFields = jobType !== undefined;
+  const hasRequiredAnalysisFields =
+    (isJobTypeWithDepVar && dependentVariable !== '') ||
+    jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
+
   const [query, setQuery] = useState<Query>({
     query: jobConfigQueryString ?? '',
-    language: SEARCH_QUERY_LANGUAGE.KUERY,
+    language: jobConfigQueryLanguage ?? SEARCH_QUERY_LANGUAGE.KUERY,
   });
-
-  const scatterplotFieldOptions = useMemo(
-    () =>
-      includesTableItems
-        .filter((d) => d.feature_type === 'numerical' && d.is_included)
-        .map((d) => d.name),
-    [includesTableItems]
-  );
 
   const toastNotifications = getToastNotifications();
 
   const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
     if (update.query) {
-      setFormState({ jobConfigQuery: update.query, jobConfigQueryString: update.queryString });
+      setFormState({
+        jobConfigQuery: update.query,
+        jobConfigQueryLanguage: update.language,
+        jobConfigQueryString: update.queryString,
+      });
     }
     setQuery({ query: update.queryString, language: update.language });
   };
 
   const indexData = useIndexData(
-    currentIndexPattern,
-    savedSearchQuery !== undefined ? savedSearchQuery : jobConfigQuery,
-    toastNotifications
+    currentDataView,
+    getIndexDataQuery(savedSearchQuery, jobConfigQuery),
+    toastNotifications,
+    runtimeMappings
   );
 
   const indexPreviewProps = {
@@ -145,33 +179,32 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     toastNotifications,
   };
 
-  const isJobTypeWithDepVar =
-    jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
-
-  const dependentVariableEmpty = isJobTypeWithDepVar && dependentVariable === '';
-
   const isStepInvalid =
     dependentVariableEmpty ||
     jobType === undefined ||
     maxDistinctValuesError !== undefined ||
     minimumFieldsRequiredMessage !== undefined ||
     requiredFieldsError !== undefined ||
-    unsupportedFieldsError !== undefined;
+    unsupportedFieldsError !== undefined ||
+    fetchingExplainData;
 
-  const loadDepVarOptions = async (formState: State['form']) => {
+  const loadDepVarOptions = async (
+    formState: State['form'],
+    runtimeOptions: EuiComboBoxOptionOption[] = []
+  ) => {
     setLoadingDepVarOptions(true);
     setMaxDistinctValuesError(undefined);
 
     try {
-      if (currentIndexPattern !== undefined) {
+      if (currentDataView !== undefined) {
         const depVarOptions = [];
-        let depVarUpdate = dependentVariable;
+        let depVarUpdate = formState.dependentVariable;
         // Get fields and filter for supported types for job type
-        const { fields } = newJobCapsService;
+        const { fields } = newJobCapsServiceAnalytics;
 
         let resetDependentVariable = true;
         for (const field of fields) {
-          if (shouldAddAsDepVarOption(field, jobType)) {
+          if (shouldAddAsDepVarOption(field.id, field.type, jobType)) {
             depVarOptions.push({
               label: field.id,
             });
@@ -182,10 +215,21 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           }
         }
 
+        if (
+          isRuntimeMappings(formState.runtimeMappings) &&
+          Object.keys(formState.runtimeMappings).includes(form.dependentVariable)
+        ) {
+          resetDependentVariable = false;
+          depVarOptions.push({
+            label: form.dependentVariable,
+            key: `runtime_mapping_${form.dependentVariable}`,
+          });
+        }
+
         if (resetDependentVariable) {
           depVarUpdate = '';
         }
-        setDependentVariableOptions(depVarOptions);
+        setDependentVariableOptions([...runtimeOptions, ...depVarOptions]);
         setLoadingDepVarOptions(false);
         setDependentVariableFetchFail(false);
         setFormState({ dependentVariable: depVarUpdate });
@@ -197,6 +241,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   };
 
   const debouncedGetExplainData = debounce(async () => {
+    setFetchingExplainData(true);
     const jobTypeChanged = previousJobType !== jobType;
     const shouldUpdateModelMemoryLimit =
       (!firstUpdate.current || !modelMemoryLimit) && useEstimatedMml === true;
@@ -206,13 +251,28 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     if (firstUpdate.current) {
       firstUpdate.current = false;
     }
-    // Reset if jobType changes (jobType requires dependent_variable to be set -
-    // which won't be the case if switching from outlier detection)
-    if (jobTypeChanged) {
-      setLoadingFieldOptions(true);
+
+    const depVarNotIncluded =
+      isJobTypeWithDepVar && includes.length > 0 && includes.includes(dependentVariable) === false;
+    // Ensure runtime field is in 'includes' table if it is set as dependent variable
+    const depVarIsRuntimeField =
+      depVarNotIncluded &&
+      runtimeMappings &&
+      Object.keys(runtimeMappings).includes(dependentVariable);
+    let formToUse = form;
+
+    if (depVarIsRuntimeField || depVarNotIncluded) {
+      formToUse = cloneDeep(form);
+      formToUse.includes = [...includes, dependentVariable];
     }
 
-    const { success, expectedMemory, fieldSelection, errorMessage } = await fetchExplainData(form);
+    const {
+      success,
+      expectedMemory,
+      fieldSelection,
+      errorMessage,
+      noDocsContainMappedFields: noDocsWithFields,
+    } = await fetchExplainData(formToUse);
 
     if (success) {
       if (shouldUpdateEstimatedMml) {
@@ -223,57 +283,37 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         (field) => field.is_included === true && field.is_required === false
       );
 
+      const formStateUpdated = {
+        ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
+        ...(depVarIsRuntimeField || jobTypeChanged || depVarNotIncluded
+          ? { includes: formToUse.includes }
+          : {}),
+        requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
+      };
+
       if (jobTypeChanged) {
-        setLoadingFieldOptions(false);
         setFieldOptionsFetchFail(false);
         setMaxDistinctValuesError(undefined);
         setUnsupportedFieldsError(undefined);
+        setNoDocsContainMappedFields(false);
         setIncludesTableItems(fieldSelection ? fieldSelection : []);
-        setFormState({
-          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
-          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
-        });
-      } else {
-        setFormState({
-          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
-          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
-        });
       }
+
+      setFormState(formStateUpdated);
+      setFetchingExplainData(false);
     } else {
-      let maxDistinctValuesErrorMessage;
-      let unsupportedFieldsErrorMessage;
-      if (
-        jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
-      ) {
-        maxDistinctValuesErrorMessage = errorMessage;
-      } else if (
-        errorMessage.includes('status_exception') &&
-        errorMessage.includes('unsupported type')
-      ) {
-        unsupportedFieldsErrorMessage = errorMessage;
-      } else if (
-        errorMessage.includes('status_exception') &&
-        errorMessage.includes('Unable to estimate memory usage as no documents')
-      ) {
-        toastNotifications.addWarning(
-          i18n.translate('xpack.ml.dataframe.analytics.create.allDocsMissingFieldsErrorMessage', {
-            defaultMessage: `Unable to estimate memory usage. There are mapped fields for source index [{index}] that do not exist in any indexed documents. You will have to switch to the JSON editor for explicit field selection and include only fields that exist in indexed documents.`,
-            values: {
-              index: sourceIndex,
-            },
-          })
-        );
-      } else {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.unableToFetchExplainDataMessage',
-            {
-              defaultMessage: 'An error occurred fetching analysis fields data.',
-            }
-          ),
-          text: errorMessage,
-        });
+      const {
+        maxDistinctValuesErrorMessage,
+        unsupportedFieldsErrorMessage,
+        toastNotificationDanger,
+        toastNotificationWarning,
+      } = handleExplainErrorMessage(errorMessage, sourceIndex, jobType);
+
+      if (toastNotificationDanger) {
+        toastNotifications.addDanger(toastNotificationDanger);
+      }
+      if (toastNotificationWarning) {
+        toastNotifications.addWarning(toastNotificationWarning);
       }
 
       const fallbackModelMemoryLimit =
@@ -282,10 +322,11 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection;
 
       setEstimatedModelMemoryLimit(fallbackModelMemoryLimit);
-      setLoadingFieldOptions(false);
       setFieldOptionsFetchFail(true);
       setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
       setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+      setNoDocsContainMappedFields(noDocsWithFields);
+      setFetchingExplainData(false);
       setFormState({
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
@@ -293,28 +334,155 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   }, 300);
 
   useEffect(() => {
-    setFormState({ sourceIndex: currentIndexPattern.title });
+    setFormState({ sourceIndex: currentDataView.title });
   }, []);
 
+  const indexPatternFieldsTableItems = useMemo(() => {
+    if (indexData?.indexPatternFields !== undefined) {
+      return indexData.indexPatternFields.map((field) => ({
+        name: field,
+        is_included: false,
+        is_required: false,
+      }));
+    }
+    return [];
+  }, [`${indexData?.indexPatternFields}`]);
+
   useEffect(() => {
-    if (savedSearchQueryStr !== undefined) {
+    if (typeof savedSearchQueryStr === 'string') {
       setFormState({ jobConfigQuery: savedSearchQuery, jobConfigQueryString: savedSearchQueryStr });
     }
   }, [JSON.stringify(savedSearchQuery), savedSearchQueryStr]);
 
   useEffect(() => {
     if (isJobTypeWithDepVar) {
-      loadDepVarOptions(form);
+      const indexPatternRuntimeFields = getCombinedRuntimeMappings(currentDataView);
+      let runtimeOptions;
+
+      if (indexPatternRuntimeFields) {
+        runtimeOptions = getRuntimeDepVarOptions(jobType, indexPatternRuntimeFields);
+      }
+
+      loadDepVarOptions(form, runtimeOptions);
     }
   }, [jobType]);
 
+  const handleRuntimeUpdate = useCallback(async () => {
+    if (runtimeMappingsUpdated) {
+      // Update dependent variable options
+      let resetDepVar = false;
+      if (isJobTypeWithDepVar) {
+        const filteredOptions = dependentVariableOptions.filter((option) => {
+          if (option.label === dependentVariable && option.key?.includes(runtimeMappingKey)) {
+            resetDepVar = true;
+          }
+          return !option.key?.includes(runtimeMappingKey);
+        });
+        // Runtime fields have been removed
+        if (runtimeMappings === undefined && runtimeMappingsUpdated === true) {
+          setDependentVariableOptions(filteredOptions);
+        } else if (runtimeMappings) {
+          // add to filteredOptions if it's the type supported
+          const runtimeOptions = getRuntimeDepVarOptions(jobType, runtimeMappings);
+          setDependentVariableOptions([...filteredOptions, ...runtimeOptions]);
+        }
+      }
+
+      // Update includes - remove previous runtime fields then add supported runtime fields to includes
+      const updatedIncludes = includes.filter((field) => {
+        const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
+        return !isRemovedRuntimeField;
+      });
+
+      if (resetDepVar) {
+        setFormState({
+          dependentVariable: '',
+          includes: updatedIncludes,
+        });
+        setIncludesTableItems(
+          includesTableItems.filter(({ name }) => {
+            const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[name];
+            return !isRemovedRuntimeField;
+          })
+        );
+      }
+
+      if (!resetDepVar && hasBasicRequiredFields && hasRequiredAnalysisFields) {
+        const formCopy = cloneDeep(form);
+        // When switching back to step ensure runtime field is in 'includes' table if it is set as dependent variable
+        const depVarIsRuntimeField =
+          isJobTypeWithDepVar &&
+          runtimeMappings &&
+          Object.keys(runtimeMappings).includes(dependentVariable) &&
+          formCopy.includes.length > 0 &&
+          formCopy.includes.includes(dependentVariable) === false;
+
+        formCopy.includes = depVarIsRuntimeField
+          ? [...updatedIncludes, dependentVariable]
+          : updatedIncludes;
+
+        const {
+          success,
+          fieldSelection,
+          errorMessage,
+          noDocsContainMappedFields: noDocsWithFields,
+        } = await fetchExplainData(formCopy);
+        if (success) {
+          // update the field selection table
+          const hasRequiredFields = fieldSelection.some(
+            (field) => field.is_included === true && field.is_required === false
+          );
+          let updatedFieldSelection;
+          // Update field selection to select supported runtime fields by default. Add those fields to 'includes'.
+          if (isRuntimeMappings(runtimeMappings)) {
+            updatedFieldSelection = fieldSelection.map((field) => {
+              if (
+                runtimeMappings[field.name] !== undefined &&
+                field.is_included === false &&
+                field.reason?.includes(notIncludedReason)
+              ) {
+                updatedIncludes.push(field.name);
+                field.is_included = true;
+              }
+              return field;
+            });
+          }
+          setIncludesTableItems(updatedFieldSelection ? updatedFieldSelection : fieldSelection);
+          setMaxDistinctValuesError(undefined);
+          setUnsupportedFieldsError(undefined);
+          setNoDocsContainMappedFields(noDocsWithFields);
+          setFormState({
+            includes: updatedIncludes,
+            requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
+          });
+        } else {
+          const {
+            maxDistinctValuesErrorMessage,
+            unsupportedFieldsErrorMessage,
+            toastNotificationDanger,
+            toastNotificationWarning,
+          } = handleExplainErrorMessage(errorMessage, sourceIndex, jobType);
+
+          if (toastNotificationDanger) {
+            toastNotifications.addDanger(toastNotificationDanger);
+          }
+          if (toastNotificationWarning) {
+            toastNotifications.addWarning(toastNotificationWarning);
+          }
+
+          setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
+          setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+          setNoDocsContainMappedFields(noDocsWithFields);
+        }
+      }
+    }
+  }, [JSON.stringify(runtimeMappings)]);
+
   useEffect(() => {
-    const hasBasicRequiredFields = jobType !== undefined;
+    handleRuntimeUpdate();
+  }, [JSON.stringify(runtimeMappings)]);
 
-    const hasRequiredAnalysisFields =
-      (isJobTypeWithDepVar && dependentVariable !== '') ||
-      jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
-
+  useEffect(() => {
     if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
       debouncedGetExplainData();
     }
@@ -324,12 +492,55 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     };
   }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
+  const scatterplotMatrixProps = useMemo(
+    () => ({
+      color: isJobTypeWithDepVar ? dependentVariable : undefined,
+      fields: includesTableItems
+        .filter((d) => d.feature_type === 'numerical' && d.is_included)
+        .map((d) => d.name),
+      index: currentDataView.title,
+      legendType: getScatterplotMatrixLegendType(jobType),
+      searchQuery: jobConfigQuery,
+      runtimeMappings,
+      indexPattern: currentDataView,
+    }),
+    [
+      currentDataView.title,
+      dependentVariable,
+      includesTableItems,
+      isJobTypeWithDepVar,
+      jobConfigQuery,
+      jobType,
+    ]
+  );
+
+  // Show the Scatterplot Matrix only if
+  // - There's more than one suitable field available
+  // - The job type is outlier detection, or
+  // - The job type is regression or classification and the dependent variable has been set
+  const showScatterplotMatrix = useMemo(
+    () =>
+      (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION ||
+        (isJobTypeWithDepVar && !dependentVariableEmpty)) &&
+      scatterplotMatrixProps.fields.length > 1,
+    [dependentVariableEmpty, jobType, scatterplotMatrixProps.fields.length]
+  );
+
+  // Don't render until `savedSearchQuery` has been initialized.
+  // `undefined` means uninitialized, `null` means initialized but not used.
+  if (savedSearchQuery === undefined) return null;
+
+  const tableItems =
+    includesTableItems.length > 0 && !noDocsContainMappedFields
+      ? includesTableItems
+      : indexPatternFieldsTableItems;
+
   return (
     <Fragment>
       <Messages messages={requestMessages} />
       <SupportedFieldsMessage jobType={jobType} />
       <JobType type={jobType} setFormState={setFormState} />
-      {savedSearchQuery === undefined && (
+      {savedSearchQuery === null && (
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceQueryLabel', {
             defaultMessage: 'Query',
@@ -337,16 +548,17 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           fullWidth
         >
           <ExplorationQueryBar
-            indexPattern={currentIndexPattern}
+            indexPattern={currentDataView}
             setSearchQuery={setJobConfigQuery}
             query={query}
           />
         </EuiFormRow>
       )}
+      {((isClone && cloneJob) || !isClone) && <RuntimeMappings actions={actions} state={state} />}
       <EuiFormRow
         label={
           <Fragment>
-            {savedSearchQuery !== undefined && (
+            {savedSearchQuery !== null && (
               <EuiText>
                 {i18n.translate('xpack.ml.dataframe.analytics.create.savedSearchLabel', {
                   defaultMessage: 'Saved search',
@@ -354,9 +566,9 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               </EuiText>
             )}
             <EuiBadge color="hollow">
-              {savedSearchQuery !== undefined
+              {savedSearchQuery !== null
                 ? currentSavedSearch?.attributes.title
-                : currentIndexPattern.title}
+                : currentDataView.title}
             </EuiBadge>
           </Fragment>
         }
@@ -374,11 +586,11 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             helpText={
               dependentVariableOptions.length === 0 &&
               dependentVariableFetchFail === false &&
-              currentIndexPattern &&
+              currentDataView &&
               i18n.translate(
                 'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
                 {
-                  defaultMessage: 'No numeric type fields were found for this index pattern.',
+                  defaultMessage: 'No numeric type fields were found for this data view.',
                 }
               )
             }
@@ -420,22 +632,32 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
                   defaultMessage: 'Enter field to be used as dependent variable.',
                 }
               )}
-              placeholder={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
-                {
-                  defaultMessage: 'dependent variable',
-                }
-              )}
+              placeholder={
+                jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
+                  ? i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
+                      {
+                        defaultMessage: 'Select the numeric field that you want to predict.',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
+                      {
+                        defaultMessage:
+                          'Select the numeric, categorical, or boolean field that you want to predict.',
+                      }
+                    )
+              }
               isDisabled={isJobCreated}
               isLoading={loadingDepVarOptions}
               singleSelection={true}
               options={dependentVariableOptions}
               selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-              onChange={(selectedOptions) =>
+              onChange={(selectedOptions) => {
                 setFormState({
                   dependentVariable: selectedOptions[0].label || '',
-                })
-              }
+                });
+              }}
               isClearable={false}
               isInvalid={dependentVariable === ''}
               data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
@@ -445,6 +667,16 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           </EuiFormRow>
         </Fragment>
       )}
+      <AnalysisFieldsTable
+        dependentVariable={dependentVariable}
+        includes={includes}
+        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
+        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
+        tableItems={firstUpdate.current ? includesTableItems : tableItems}
+        unsupportedFieldsError={unsupportedFieldsError}
+        setUnsupportedFieldsError={setUnsupportedFieldsError}
+        setFormState={setFormState}
+      />
       <EuiFormRow
         fullWidth
         isInvalid={requiredFieldsError !== undefined}
@@ -455,18 +687,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
-      <AnalysisFieldsTable
-        dependentVariable={dependentVariable}
-        includes={includes}
-        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
-        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
-        tableItems={includesTableItems}
-        unsupportedFieldsError={unsupportedFieldsError}
-        setUnsupportedFieldsError={setUnsupportedFieldsError}
-        loadingItems={loadingFieldOptions}
-        setFormState={setFormState}
-      />
-      {scatterplotFieldOptions.length > 1 && (
+      <EuiSpacer />
+      {showScatterplotMatrix && (
         <>
           <EuiFormRow
             data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
@@ -477,7 +699,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               'xpack.ml.dataframe.analytics.create.scatterplotMatrixLabelHelpText',
               {
                 defaultMessage:
-                  'Visualizes the relationships between pairs of selected included fields',
+                  'Visualizes the relationships between pairs of selected included fields.',
               }
             )}
             fullWidth
@@ -488,17 +710,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             paddingSize="m"
             data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixPanel"
           >
-            <ScatterplotMatrix
-              fields={scatterplotFieldOptions}
-              index={currentIndexPattern.title}
-              color={
-                jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
-                jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
-                  ? dependentVariable
-                  : undefined
-              }
-              legendType={getScatterplotMatrixLegendType(jobType)}
-            />
+            <ScatterplotMatrix {...scatterplotMatrixProps} />
           </EuiPanel>
           <EuiSpacer />
         </>

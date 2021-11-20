@@ -141,16 +141,11 @@ def collectVcsInfo(title) {
 def generateReports(title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh true
-    # bootstrap from x-pack folder
-    cd x-pack
-    yarn kbn bootstrap
-    # Return to project root
-    cd ..
     . src/dev/code_coverage/shell_scripts/extract_archives.sh
-    . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-    . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
-    # zip combined reports
-    tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
+    . src/dev/code_coverage/shell_scripts/merge_functional.sh
+    . src/dev/code_coverage/shell_scripts/copy_jest_report.sh
+    # zip functional combined report
+    tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*
   """, title)
 }
 
@@ -162,7 +157,7 @@ def uploadCombinedReports() {
 
   kibanaPipeline.uploadGcsArtifact(
     "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/combined",
-    'kibana-coverage.tar.gz'
+    'kibana-functional-coverage.tar.gz'
   )
 }
 
@@ -194,17 +189,23 @@ def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmen
   }
 }
 
+def prepareKibana() {
+  kibanaPipeline.notifyOnError {
+    runbld("./test/scripts/jenkins_code_coverage.sh", "Verify tests")
+  }
+}
+
 def runTests() {
   parallel([
     'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
     'kibana-oss-agent'   : workers.functional(
       'kibana-oss-tests',
-      { kibanaPipeline.buildOss() },
+      { prepareKibana() },
       ossProks()
     ),
     'kibana-xpack-agent' : workers.functional(
       'kibana-xpack-tests',
-      { kibanaPipeline.buildXpack() },
+      { prepareKibana() },
       xpackProks()
     ),
   ])
@@ -223,7 +224,6 @@ def ossProks() {
     'oss-ciGroup9' : kibanaPipeline.ossCiGroupProcess(9),
     'oss-ciGroup10': kibanaPipeline.ossCiGroupProcess(10),
     'oss-ciGroup11': kibanaPipeline.ossCiGroupProcess(11),
-    'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
   ]
 }
 

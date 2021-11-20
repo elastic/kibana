@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
+import { defer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { StartServicesAccessor } from 'src/core/public';
-import { Adapters } from 'src/plugins/inspector/common';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
   getEsaggsMeta,
-  handleEsaggsRequest,
 } from '../../../common/search/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
@@ -36,37 +36,39 @@ export function getFunctionDefinition({
 }) {
   return (): EsaggsExpressionFunctionDefinition => ({
     ...getEsaggsMeta(),
-    async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
-      const {
-        aggs,
-        deserializeFieldFormat,
-        indexPatterns,
-        searchSource,
-        getNow,
-      } = await getStartDependencies();
+    fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext }) {
+      return defer(async () => {
+        const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
-      const indexPattern = await indexPatterns.create(args.index.value, true);
-      const aggConfigs = aggs.createAggConfigs(
-        indexPattern,
-        args.aggs!.map((agg) => agg.value)
+        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const aggConfigs = aggs.createAggConfigs(
+          indexPattern,
+          args.aggs?.map((agg) => agg.value) ?? []
+        );
+        aggConfigs.hierarchical = args.metricsAtAllLevels;
+
+        const { handleEsaggsRequest } = await import('../../../common/search/expressions');
+
+        return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
+      }).pipe(
+        switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
+          return handleEsaggsRequest({
+            abortSignal,
+            aggs: aggConfigs,
+            filters: get(input, 'filters', undefined),
+            indexPattern,
+            inspectorAdapters,
+            partialRows: args.partialRows,
+            query: get(input, 'query', undefined) as any,
+            searchSessionId: getSearchSessionId(),
+            searchSourceService: searchSource,
+            timeFields: args.timeFields,
+            timeRange: get(input, 'timeRange', undefined),
+            getNow,
+            executionContext: getExecutionContext(),
+          });
+        })
       );
-
-      return await handleEsaggsRequest(input, args, {
-        abortSignal: (abortSignal as unknown) as AbortSignal,
-        aggs: aggConfigs,
-        deserializeFieldFormat,
-        filters: get(input, 'filters', undefined),
-        indexPattern,
-        inspectorAdapters: inspectorAdapters as Adapters,
-        metricsAtAllLevels: args.metricsAtAllLevels,
-        partialRows: args.partialRows,
-        query: get(input, 'query', undefined) as any,
-        searchSessionId: getSearchSessionId(),
-        searchSourceService: searchSource,
-        timeFields: args.timeFields,
-        timeRange: get(input, 'timeRange', undefined),
-        getNow,
-      });
     },
   });
 }
@@ -93,10 +95,9 @@ export function getEsaggs({
   return getFunctionDefinition({
     getStartDependencies: async () => {
       const [, , self] = await getStartServices();
-      const { fieldFormats, indexPatterns, search, nowProvider } = self;
+      const { indexPatterns, search, nowProvider } = self;
       return {
         aggs: search.aggs,
-        deserializeFieldFormat: fieldFormats.deserialize.bind(fieldFormats),
         indexPatterns,
         searchSource: search.searchSource,
         getNow: () => nowProvider.get(),

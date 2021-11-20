@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ConfirmModal } from '../../../components/confirm_modal';
+
 import { UserAPIClient } from '..';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface ConfirmDisableUsersProps {
   usernames: string[];
@@ -54,13 +57,20 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
   }, [services.http]);
 
   return (
-    <ConfirmModal
+    <EuiConfirmModal
+      role="dialog"
       title={i18n.translate('xpack.security.management.users.confirmDisableUsers.title', {
         defaultMessage: "Deactivate {count, plural, one{user '{username}'} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}
       onConfirm={disableUsers}
+      cancelButtonText={i18n.translate(
+        'xpack.security.management.users.confirmDisableUsers.cancelButton',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
       confirmButtonText={
         isSystemUser
           ? i18n.translate(
@@ -77,16 +87,15 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
               values: { count: usernames.length, isLoading: state.loading },
             })
       }
-      confirmButtonColor={isSystemUser ? 'danger' : undefined}
+      buttonColor={isSystemUser ? 'danger' : undefined}
       isLoading={state.loading}
-      ownFocus
     >
       {isSystemUser ? (
         <EuiText>
           <p>
             <FormattedMessage
               id="xpack.security.management.users.confirmDisableUsers.systemUserWarning"
-              defaultMessage="Deactivating the system user will prevent Kibana from communicating with Elasticsearch."
+              defaultMessage="Deactivating this user will prevent Kibana from communicating with Elasticsearch."
             />
           </p>
           <p>
@@ -114,6 +123,6 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
           )}
         </EuiText>
       )}
-    </ConfirmModal>
+    </EuiConfirmModal>
   );
 };

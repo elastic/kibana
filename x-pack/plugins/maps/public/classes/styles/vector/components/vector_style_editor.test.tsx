@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { shallow } from 'enzyme';
 import { StyleProperties, VectorStyleEditor } from './vector_style_editor';
 import { getDefaultStaticProperties } from '../vector_style_defaults';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 import { IVectorSource } from '../../../sources/vector_source';
 import {
   FIELD_ORIGIN,
@@ -27,25 +28,29 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
-class MockField extends AbstractField {}
+class MockField extends AbstractField {
+  supportsFieldMetaFromLocalData(): boolean {
+    return true;
+  }
+}
 
 function createLayerMock(numFields: number, supportedShapeTypes: VECTOR_SHAPE_TYPE[]) {
   const fields: IField[] = [];
   for (let i = 0; i < numFields; i++) {
     fields.push(new MockField({ fieldName: `field${i}`, origin: FIELD_ORIGIN.SOURCE }));
   }
-  return ({
+  return {
     getStyleEditorFields: async () => {
       return fields;
     },
     getSource: () => {
-      return ({
+      return {
         getSupportedShapeTypes: async () => {
           return supportedShapeTypes;
         },
-      } as unknown) as IVectorSource;
+      } as unknown as IVectorSource;
     },
-  } as unknown) as IVectorLayer;
+  } as unknown as IVectorLayer;
 }
 
 const vectorStyleDescriptor = {
@@ -55,8 +60,8 @@ const vectorStyleDescriptor = {
 };
 const vectorStyle = new VectorStyle(
   vectorStyleDescriptor,
-  ({} as unknown) as IVectorSource,
-  ({} as unknown) as IVectorLayer
+  {} as unknown as IVectorSource,
+  {} as unknown as IVectorLayer
 );
 const styleProperties: StyleProperties = {};
 vectorStyle.getAllStyleProperties().forEach((styleProperty) => {

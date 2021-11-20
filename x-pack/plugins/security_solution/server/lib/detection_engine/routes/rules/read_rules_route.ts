@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { Logger } from 'src/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -12,14 +15,19 @@ import {
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getIdError } from './utils';
-import { transformValidate } from './validate';
-import { transformError, buildSiemResponse } from '../utils';
-import { readRules } from '../../rules/read_rules';
-import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { getIdError, transform } from './utils';
+import { buildSiemResponse } from '../utils';
 
-export const readRulesRoute = (router: SecuritySolutionPluginRouter) => {
+import { readRules } from '../../rules/read_rules';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+
+export const readRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
+) => {
   router.get(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -41,44 +49,49 @@ export const readRulesRoute = (router: SecuritySolutionPluginRouter) => {
 
       const { id, rule_id: ruleId } = request.query;
 
-      const alertsClient = context.alerting?.getAlertsClient();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const rulesClient = context.alerting?.getRulesClient();
 
       try {
-        if (!alertsClient) {
+        if (!rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const savedObjectsClient = context.core.savedObjects.client;
         const rule = await readRules({
-          alertsClient,
           id,
+          isRuleRegistryEnabled,
+          rulesClient,
           ruleId,
         });
         if (rule != null) {
-          const ruleActions = await getRuleActionsSavedObject({
+          const legacyRuleActions = await legacyGetRuleActionsSavedObject({
             savedObjectsClient,
             ruleAlertId: rule.id,
+            logger,
           });
-          const ruleStatuses = await ruleStatusClient.find({
-            perPage: 1,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: rule.id,
-            searchFields: ['alertId'],
+          const currentStatus = await ruleStatusClient.getCurrentStatus({
+            ruleId: rule.id,
+            spaceId: context.securitySolution.getSpaceId(),
           });
-          const [currentStatus] = ruleStatuses.saved_objects;
           if (currentStatus != null && rule.executionStatus.status === 'error') {
             currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
-            currentStatus.attributes.lastFailureAt = rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.status = 'failed';
+            currentStatus.attributes.lastFailureAt =
+              rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.statusDate =
+              rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
-          const [validated, errors] = transformValidate(rule, ruleActions, currentStatus);
-          if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
+          const transformed = transform(
+            rule,
+            currentStatus,
+            isRuleRegistryEnabled,
+            legacyRuleActions
+          );
+          if (transformed == null) {
+            return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {
-            return response.ok({ body: validated ?? {} });
+            return response.ok({ body: transformed ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });

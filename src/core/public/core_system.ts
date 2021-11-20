@@ -1,11 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -28,6 +27,8 @@ import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
+import { DeprecationsService } from './deprecations';
+import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
@@ -82,7 +83,8 @@ export class CoreSystem {
   private readonly rendering: RenderingService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreApp;
-
+  private readonly deprecations: DeprecationsService;
+  private readonly theme: ThemeService;
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -97,24 +99,29 @@ export class CoreSystem {
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
+    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
 
+    this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
-    this.chrome = new ChromeService({ browserSupportsCsp });
+    this.chrome = new ChromeService({
+      browserSupportsCsp,
+      kibanaVersion: injectedMetadata.version,
+    });
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
+    this.deprecations = new DeprecationsService();
 
-    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
   }
@@ -133,6 +140,7 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      const theme = this.theme.setup({ injectedMetadata });
 
       const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -143,6 +151,7 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
+        theme,
         uiSettings,
       };
 
@@ -170,40 +179,45 @@ export class CoreSystem {
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const fatalErrors = await this.fatalErrors.start();
+      const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
+      coreUiTargetDomElement.dataset.testSubj = 'kibanaChrome';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
 
       const overlays = this.overlay.start({
         i18n,
-        targetDomElement: overlayTargetDomElement,
+        theme,
         uiSettings,
+        targetDomElement: overlayTargetDomElement,
       });
       const notifications = await this.notifications.start({
         i18n,
         overlays,
+        theme,
         targetDomElement: notificationsTargetDomElement,
       });
-      const application = await this.application.start({ http, overlays });
+      const application = await this.application.start({ http, theme, overlays });
       const chrome = await this.chrome.start({
         application,
         docLinks,
         http,
         injectedMetadata,
         notifications,
-        uiSettings,
       });
+      const deprecations = this.deprecations.start({ http });
 
-      this.coreApp.start({ application, http, notifications, uiSettings });
+      this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
       const core: InternalCoreStart = {
         application,
         chrome,
         docLinks,
         http,
+        theme,
         savedObjects,
         i18n,
         injectedMetadata,
@@ -211,6 +225,7 @@ export class CoreSystem {
         overlays,
         uiSettings,
         fatalErrors,
+        deprecations,
       };
 
       await this.plugins.start(core);
@@ -225,7 +240,9 @@ export class CoreSystem {
       this.rendering.start({
         application,
         chrome,
+        i18n,
         overlays,
+        theme,
         targetDomElement: coreUiTargetDomElement,
       });
 
@@ -253,6 +270,8 @@ export class CoreSystem {
     this.chrome.stop();
     this.i18n.stop();
     this.application.stop();
+    this.deprecations.stop();
+    this.theme.stop();
     this.rootDomElement.textContent = '';
   }
 }

@@ -1,45 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { snakeCase } from 'lodash';
-import {
+import type {
   Logger,
   ElasticsearchClient,
-  ISavedObjectsRepository,
   SavedObjectsClientContract,
   KibanaRequest,
 } from 'src/core/server';
-import { Collector, CollectorOptions } from './collector';
+import { Collector } from './collector';
+import type { ICollector, CollectorOptions } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
-type AnyCollector = Collector<any, any>;
+// Needed for the general array containing all the collectors. We don't really care about their types here
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyCollector = ICollector<any, any>;
 
 interface CollectorSetConfig {
   logger: Logger;
   maximumWaitTimeForAllCollectorsInS?: number;
   collectors?: AnyCollector[];
 }
-
-/**
- * Public interface of the CollectorSet (makes it easier to mock only the public methods)
- */
-export type CollectorSetPublic = Pick<
-  CollectorSet,
-  | 'makeStatsCollector'
-  | 'makeUsageCollector'
-  | 'registerCollector'
-  | 'getCollectorByType'
-  | 'areAllCollectorsReady'
-  | 'bulkFetch'
-  | 'bulkFetchUsage'
-  | 'toObject'
-  | 'toApiFieldNames'
->;
 
 export class CollectorSet {
   private _waitingForAllCollectorsTimestamp?: number;
@@ -100,11 +86,6 @@ export class CollectorSet {
     }
 
     this.collectors.set(collector.type, collector);
-
-    if (collector.init) {
-      this.logger.debug(`Initializing ${collector.type} collector`);
-      collector.init();
-    }
   };
 
   public getCollectorByType = (type: string) => {
@@ -160,7 +141,7 @@ export class CollectorSet {
 
   public bulkFetch = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    soClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
     collectors: Map<string, AnyCollector> = this.collectors
   ) => {
@@ -199,7 +180,7 @@ export class CollectorSet {
 
   public bulkFetchUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    savedObjectsClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
   ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
@@ -211,45 +192,46 @@ export class CollectorSet {
     );
   };
 
-  // convert an array of fetched stats results into key/object
-  public toObject = <Result, T>(statsData: Array<{ type: string; result: T }> = []) => {
-    return statsData.reduce<Result>((accumulatedStats, { type, result }) => {
-      return {
-        ...accumulatedStats,
-        [type]: result,
-      };
-    }, {} as Result);
+  /**
+   * Convert an array of fetched stats results into key/object
+   * @param statsData Array of fetched stats results
+   */
+  public toObject = <Result extends Record<string, unknown>, T = unknown>(
+    statsData: Array<{ type: string; result: T }> = []
+  ): Result => {
+    return Object.fromEntries(statsData.map(({ type, result }) => [type, result])) as Result;
   };
 
-  // rename fields to use api conventions
-  public toApiFieldNames = (apiData: any): any => {
-    const getValueOrRecurse = (value: any) => {
-      if (value == null || typeof value !== 'object') {
-        return value;
-      } else {
-        return this.toApiFieldNames(value); // recurse
-      }
-    };
-
+  /**
+   * Rename fields to use API conventions
+   * @param apiData Data to be normalized
+   */
+  public toApiFieldNames = (
+    apiData: Record<string, unknown> | unknown[]
+  ): Record<string, unknown> | unknown[] => {
     // handle array and return early, or return a reduced object
-
     if (Array.isArray(apiData)) {
-      return apiData.map(getValueOrRecurse);
+      return apiData.map((value) => this.getValueOrRecurse(value));
     }
 
-    return Object.keys(apiData).reduce((accum, field) => {
-      const value = apiData[field];
-      let newName = field;
-      newName = snakeCase(newName);
-      newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
-      newName = newName.replace('_in_bytes', '_bytes');
-      newName = newName.replace('_in_millis', '_ms');
+    return Object.fromEntries(
+      Object.entries(apiData).map(([field, value]) => {
+        let newName = field;
+        newName = snakeCase(newName);
+        newName = newName.replace(/^(1|5|15)_m/, '$1m'); // os.load.15m, os.load.5m, os.load.1m
+        newName = newName.replace('_in_bytes', '_bytes');
+        newName = newName.replace('_in_millis', '_ms');
 
-      return {
-        ...accum,
-        [newName]: getValueOrRecurse(value),
-      };
-    }, {});
+        return [newName, this.getValueOrRecurse(value)];
+      })
+    );
+  };
+
+  private getValueOrRecurse = (value: unknown) => {
+    if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+      return this.toApiFieldNames(value as Record<string, unknown> | unknown[]); // recurse
+    }
+    return value;
   };
 
   private makeCollectorSetFromArray = (collectors: AnyCollector[]) => {

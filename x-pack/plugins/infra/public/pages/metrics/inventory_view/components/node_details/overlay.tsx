@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPortal, EuiTabs, EuiTab, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
@@ -11,12 +12,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { EuiOutsideClickDetector } from '@elastic/eui';
 import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
 import { LogsTab } from './tabs/logs';
 import { ProcessesTab } from './tabs/processes';
 import { PropertiesTab } from './tabs/properties/index';
+import { AnomaliesTab } from './tabs/anomalies/anomalies';
+import { OsqueryTab } from './tabs/osquery';
 import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { getNodeDetailUrl } from '../../../../link_to';
@@ -42,9 +46,14 @@ export const NodeContextPopover = ({
   openAlertFlyout,
 }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab];
+  const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab, AnomaliesTab, OsqueryTab];
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+  const uiCapabilities = useKibana().services.application?.capabilities;
+  const canCreateAlerts = useMemo(
+    () => Boolean(uiCapabilities?.infrastructure?.save),
+    [uiCapabilities]
+  );
 
   const tabs = useMemo(() => {
     return tabConfigs.map((m) => {
@@ -52,11 +61,17 @@ export const NodeContextPopover = ({
       return {
         ...m,
         content: (
-          <TabContent node={node} nodeType={nodeType} currentTime={currentTime} options={options} />
+          <TabContent
+            onClose={onClose}
+            node={node}
+            nodeType={nodeType}
+            currentTime={currentTime}
+            options={options}
+          />
         ),
       };
     });
-  }, [tabConfigs, node, nodeType, currentTime, options]);
+  }, [tabConfigs, node, nodeType, currentTime, onClose, options]);
 
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -88,27 +103,29 @@ export const NodeContextPopover = ({
         <OverlayPanel>
           <OverlayHeader>
             <EuiFlexGroup responsive={false} gutterSize="m">
-              <EuiFlexItem grow={true}>
+              <OverlayTitle grow={true}>
                 <EuiTitle size="xs">
                   <h4>{node.name}</h4>
                 </EuiTitle>
-              </EuiFlexItem>
+              </OverlayTitle>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      onClick={openAlertFlyout}
-                      size="xs"
-                      iconSide={'left'}
-                      flush="both"
-                      iconType="bell"
-                    >
-                      <FormattedMessage
-                        id="xpack.infra.infra.nodeDetails.createAlertLink"
-                        defaultMessage="Create alert"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
+                  {canCreateAlerts && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        onClick={openAlertFlyout}
+                        size="xs"
+                        iconSide={'left'}
+                        flush="both"
+                        iconType="bell"
+                      >
+                        <FormattedMessage
+                          id="xpack.infra.infra.nodeDetails.createAlertLink"
+                          defaultMessage="Create inventory rule"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       size="xs"
@@ -191,5 +208,14 @@ const OverlayPanel = euiStyled(EuiPanel).attrs({ paddingSize: 'none' })`
     bottom: 0;
     max-height: calc(100vh - 97px);
     max-width: 100%;
+  }
+`;
+
+const OverlayTitle = euiStyled(EuiFlexItem)`
+  overflow: hidden;
+  & h4 {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 `;

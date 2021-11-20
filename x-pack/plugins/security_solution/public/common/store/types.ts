@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch, Action, Middleware, CombinedState } from 'redux';
@@ -17,10 +18,12 @@ import { HostsPluginState } from '../../hosts/store';
 import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
+import { UebaPluginState } from '../../ueba/store';
 import { ManagementPluginState } from '../../management';
 
 export type StoreState = HostsPluginState &
   NetworkPluginState &
+  UebaPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
@@ -35,18 +38,6 @@ export type StoreState = HostsPluginState &
  * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
  */
 export type State = CombinedState<StoreState>;
-
-export type KueryFilterQueryKind = 'kuery' | 'lucene';
-
-export interface KueryFilterQuery {
-  kind: KueryFilterQueryKind;
-  expression: string;
-}
-
-export interface SerializedFilterQuery {
-  kuery: KueryFilterQuery | null;
-  serializedQuery: string;
-}
 
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of
@@ -157,8 +148,6 @@ export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }
 >(
   selectorMap: SelectorMap
-) => (
-  state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never
-) => {
+) => (state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
 };

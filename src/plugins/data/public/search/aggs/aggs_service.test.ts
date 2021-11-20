@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -11,7 +11,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
 import { expressionsPluginMock } from '../../../../../plugins/expressions/public/mocks';
 import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
+import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
 import { dataPluginMock } from '../../mocks';
 
 import {
@@ -54,7 +54,7 @@ describe('AggsService - public', () => {
       service.setup(setupDeps);
       const start = service.start(startDeps);
       expect(start.types.getAll().buckets.length).toBe(11);
-      expect(start.types.getAll().metrics.length).toBe(21);
+      expect(start.types.getAll().metrics.length).toBe(23);
     });
 
     test('registers custom agg types', () => {
@@ -71,7 +71,7 @@ describe('AggsService - public', () => {
       const start = service.start(startDeps);
       expect(start.types.getAll().buckets.length).toBe(12);
       expect(start.types.getAll().buckets.some(({ name }) => name === 'foo')).toBe(true);
-      expect(start.types.getAll().metrics.length).toBe(22);
+      expect(start.types.getAll().metrics.length).toBe(24);
       expect(start.types.getAll().metrics.some(({ name }) => name === 'bar')).toBe(true);
     });
   });
@@ -79,9 +79,8 @@ describe('AggsService - public', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(5);
+      expect(Object.keys(start).length).toBe(4);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
-      expect(start).toHaveProperty('getDateMetaByDatatableColumn');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
       expect(start).toHaveProperty('datatableUtilities');

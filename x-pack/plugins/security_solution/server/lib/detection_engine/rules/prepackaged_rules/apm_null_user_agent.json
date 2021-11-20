@@ -25,12 +25,13 @@
     }
   ],
   "index": [
-    "apm-*-transaction*"
+    "apm-*-transaction*",
+    "traces-apm*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Web Application Suspicious Activity: No User Agent",
-  "query": "url.path:*",
+  "query": "url.path:*\n",
   "references": [
     "https://en.wikipedia.org/wiki/User_agent"
   ],
@@ -41,6 +42,7 @@
     "Elastic",
     "APM"
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 7
 }

@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   CoreSetup,
   CoreStart,
+  HttpSetup,
+  IUiSettingsClient,
   NotificationsSetup,
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
-import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
@@ -22,29 +25,29 @@ import {
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { constants, getDefaultLayoutSelectors } from '../common';
+import { constants } from '../common';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
-import {
-  getGeneralErrorToast,
-  ScreenCapturePanelContent as ScreenCapturePanel,
-} from './components';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
-import { GetCsvReportPanelAction } from './panel_actions/get_csv_panel_action';
-import { csvReportingProvider } from './share_context_menu/register_csv_reporting';
-import { reportingPDFPNGProvider } from './share_context_menu/register_pdf_png_reporting';
+import { getGeneralErrorToast } from './notifier';
+import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
+import { getSharedComponents } from './shared';
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+  UiActionsSetup,
+  UiActionsStart,
+} from './shared_imports';
+import { AppNavLinkStatus } from './shared_imports';
+import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 
 export interface ClientConfigType {
-  poll: {
-    jobsRefresh: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-  };
+  poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
+  roles: { enabled: boolean };
 }
 
 function getStored(): JobId[] {
@@ -75,6 +78,7 @@ export interface ReportingPublicPluginSetupDendencies {
 
 export interface ReportingPublicPluginStartDendencies {
   home: HomePublicPluginStart;
+  data: DataPublicPluginStart;
   management: ManagementStart;
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
@@ -88,12 +92,10 @@ export class ReportingPublicPlugin
       ReportingStart,
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
-    > {
-  private readonly contract: ReportingStart = {
-    components: { ScreenCapturePanel },
-    getDefaultLayoutSelectors,
-    ReportingAPIClient,
-  };
+    >
+{
+  private kibanaVersion: string;
+  private apiClient?: ReportingAPIClient;
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
@@ -102,25 +104,55 @@ export class ReportingPublicPlugin
     defaultMessage: 'Reporting',
   });
   private config: ClientConfigType;
+  private contract?: ReportingSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  }
+
+  /*
+   * Use a single instance of ReportingAPIClient for all the reporting code
+   */
+  private getApiClient(http: HttpSetup, uiSettings: IUiSettingsClient) {
+    if (!this.apiClient) {
+      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion);
+    }
+    return this.apiClient;
+  }
+
+  private getContract(core?: CoreSetup) {
+    if (core) {
+      this.contract = {
+        usesUiCapabilities: () => this.config.roles?.enabled === false,
+        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
+      };
+    }
+
+    if (!this.contract) {
+      throw new Error(`Setup error in Reporting plugin!`);
+    }
+
+    return this.contract;
   }
 
   public setup(
-    core: CoreSetup,
-    { home, management, licensing, uiActions, share }: ReportingPublicPluginSetupDendencies
+    core: CoreSetup<ReportingPublicPluginStartDendencies>,
+    setupDeps: ReportingPublicPluginSetupDendencies
   ) {
+    const { getStartServices, uiSettings } = core;
     const {
-      http,
-      notifications: { toasts },
-      getStartServices,
-      uiSettings,
-    } = core;
-    const { license$ } = licensing;
+      home,
+      management,
+      licensing: { license$ }, // FIXME: 'license$' is deprecated
+      share,
+      uiActions,
+    } = setupDeps;
 
-    const apiClient = new ReportingAPIClient(http);
-    const action = new GetCsvReportPanelAction(core, license$);
+    const startServices$ = Rx.from(getStartServices());
+    const usesUiCapabilities = !this.config.roles.enabled;
+
+    const apiClient = this.getApiClient(core.http, core.uiSettings);
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -135,6 +167,7 @@ export class ReportingPublicPlugin
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
+
     management.sections.section.insightsAndAlerting.registerApp({
       id: 'reporting',
       title: this.title,
@@ -143,37 +176,78 @@ export class ReportingPublicPlugin
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[start], { mountManagementSection }] = await Promise.all([
           getStartServices(),
-          import('./mount_management_section'),
+          import('./management/mount_management_section'),
         ]);
-        return await mountManagementSection(
+        const {
+          chrome: { docTitle },
+        } = start;
+        docTitle.change(this.title);
+        const umountAppCallback = await mountManagementSection(
           core,
           start,
           license$,
           this.config.poll,
           apiClient,
+          share.url,
           params
         );
+
+        return () => {
+          docTitle.reset();
+          umountAppCallback();
+        };
       },
     });
 
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
+    core.application.register({
+      id: 'reportingRedirect',
+      mount: async (params) => {
+        const { mountRedirectApp } = await import('./redirect');
+        return mountRedirectApp({ ...params, share, apiClient });
+      },
+      title: 'Reporting redirect app',
+      searchable: false,
+      chromeless: true,
+      exactRoute: true,
+      navLinkStatus: AppNavLinkStatus.hidden,
+    });
 
-    share.register(csvReportingProvider({ apiClient, toasts, license$, uiSettings }));
+    uiActions.addTriggerAction(
+      CONTEXT_MENU_TRIGGER,
+      new ReportingCsvPanelAction({ core, apiClient, startServices$, license$, usesUiCapabilities })
+    );
+
+    const reportingStart = this.getContract(core);
+    const { toasts } = core.notifications;
+
     share.register(
-      reportingPDFPNGProvider({
+      ReportingCsvShareProvider({
         apiClient,
         toasts,
         license$,
+        startServices$,
         uiSettings,
+        usesUiCapabilities,
       })
     );
 
-    return this.contract;
+    share.register(
+      reportingScreenshotShareProvider({
+        apiClient,
+        toasts,
+        license$,
+        startServices$,
+        uiSettings,
+        usesUiCapabilities,
+      })
+    );
+
+    return reportingStart;
   }
 
   public start(core: CoreStart) {
-    const { http, notifications } = core;
-    const apiClient = new ReportingAPIClient(http);
+    const { notifications } = core;
+    const apiClient = this.getApiClient(core.http, core.uiSettings);
     const streamHandler = new StreamHandler(notifications, apiClient);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)
@@ -187,7 +261,7 @@ export class ReportingPublicPlugin
       )
       .subscribe();
 
-    return this.contract;
+    return this.getContract();
   }
 
   public stop() {

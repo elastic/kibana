@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ComponentType, ReactWrapper } from 'enzyme';
+import { Component as ReactComponent } from 'react';
+import { ComponentType, HTMLAttributes, ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
@@ -15,7 +16,14 @@ import {
   mountComponentAsync,
   getJSXComponentWithProps,
 } from './mount_component';
-import { TestBedConfig, TestBed, SetupFunc } from './types';
+import {
+  TestBedConfig,
+  AsyncTestBedConfig,
+  TestBed,
+  SetupFunc,
+  SyncSetupFunc,
+  AsyncSetupFunc,
+} from './types';
 
 const defaultConfig: TestBedConfig = {
   defaultProps: {},
@@ -47,10 +55,18 @@ const defaultConfig: TestBedConfig = {
   });
   ```
  */
-export const registerTestBed = <T extends string = string>(
+export function registerTestBed<T extends string = string>(
+  Component: ComponentType<any>,
+  config: AsyncTestBedConfig
+): AsyncSetupFunc<T>;
+export function registerTestBed<T extends string = string>(
   Component: ComponentType<any>,
   config?: TestBedConfig
-): SetupFunc<T> => {
+): SyncSetupFunc<T>;
+export function registerTestBed<T extends string = string>(
+  Component: ComponentType<any>,
+  config?: AsyncTestBedConfig | TestBedConfig
+): SetupFunc<T> {
   const {
     defaultProps = defaultConfig.defaultProps,
     memoryRouter = defaultConfig.memoryRouter!,
@@ -187,7 +203,7 @@ export const registerTestBed = <T extends string = string>(
         value,
         isAsync = false
       ) => {
-        const formInput = typeof input === 'string' ? find(input) : (input as ReactWrapper);
+        const formInput = typeof input === 'string' ? find(input) : input;
 
         if (!formInput.length) {
           throw new Error(`Input "${input}" was not found.`);
@@ -206,7 +222,7 @@ export const registerTestBed = <T extends string = string>(
         value,
         doUpdateComponent = true
       ) => {
-        const formSelect = typeof select === 'string' ? find(select) : (select as ReactWrapper);
+        const formSelect = typeof select === 'string' ? find(select) : select;
 
         if (!formSelect.length) {
           throw new Error(`Select "${select}" was not found.`);
@@ -250,8 +266,17 @@ export const registerTestBed = <T extends string = string>(
         component.update();
       };
 
-      const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = () => {
-        const errorMessagesWrappers = component.find('.euiFormErrorText');
+      const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = (
+        wrapper?: T | ReactWrapper
+      ) => {
+        let errorMessagesWrappers: ReactWrapper<HTMLAttributes, any, ReactComponent>;
+        if (typeof wrapper === 'string') {
+          errorMessagesWrappers = find(wrapper).find('.euiFormErrorText');
+        } else {
+          errorMessagesWrappers = wrapper
+            ? wrapper.find('.euiFormErrorText')
+            : component.find('.euiFormErrorText');
+        }
         return errorMessagesWrappers.map((err) => err.text());
       };
 
@@ -304,7 +329,7 @@ export const registerTestBed = <T extends string = string>(
         router.history.push(url);
       };
 
-      return {
+      const testBed: TestBed<T> = {
         component,
         exists,
         find,
@@ -326,8 +351,10 @@ export const registerTestBed = <T extends string = string>(
           navigateTo,
         },
       };
+
+      return testBed;
     }
   };
 
   return setup;
-};
+}

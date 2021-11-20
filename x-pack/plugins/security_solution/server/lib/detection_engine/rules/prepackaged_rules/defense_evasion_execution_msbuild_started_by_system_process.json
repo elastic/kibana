@@ -9,12 +9,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started by a System Process",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:MSBuild.exe and process.parent.name:(explorer.exe or wmiprvse.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"MSBuild.exe\" and\n  process.parent.name : (\"explorer.exe\", \"wmiprvse.exe\")\n",
   "risk_score": 47,
   "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae3",
   "severity": "medium",
@@ -37,7 +38,14 @@
         {
           "id": "T1127",
           "name": "Trusted Developer Utilities Proxy Execution",
-          "reference": "https://attack.mitre.org/techniques/T1127/"
+          "reference": "https://attack.mitre.org/techniques/T1127/",
+          "subtechnique": [
+            {
+              "id": "T1127.001",
+              "name": "MSBuild",
+              "reference": "https://attack.mitre.org/techniques/T1127/001/"
+            }
+          ]
         }
       ]
     },
@@ -51,6 +59,7 @@
       "technique": []
     }
   ],
-  "type": "query",
-  "version": 5
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 9
 }

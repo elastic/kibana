@@ -1,43 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { Assign, Ensure } from '@kbn/utility-types';
 
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
-import {
-  ExpressionAstExpression,
-  ExpressionAstArgument,
-  SerializedFieldFormat,
-} from 'src/plugins/expressions/common';
+import { ExpressionAstExpression, ExpressionAstArgument } from 'src/plugins/expressions/common';
+import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
+import { parseTimeShift } from './utils';
 
-type State = string | number | boolean | null | undefined | SerializableState;
-
-/** @internal **/
-export interface SerializableState {
-  [key: string]: State | State[];
-}
-
-/** @internal **/
+/** @public **/
 export type AggConfigSerialized = Ensure<
   {
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: {} | SerializableState;
+    params?: {} | SerializableRecord;
     schema?: string;
   },
-  SerializableState
+  SerializableRecord
 >;
 
 export type AggConfigOptions = Assign<AggConfigSerialized, { type: IAggType }>;
@@ -172,6 +165,30 @@ export class AggConfig {
     return _.get(this.params, key);
   }
 
+  hasTimeShift(): boolean {
+    return Boolean(this.getParam('timeShift'));
+  }
+
+  getTimeShift(): undefined | moment.Duration {
+    const rawTimeShift = this.getParam('timeShift');
+    if (!rawTimeShift) return undefined;
+    const parsedTimeShift = parseTimeShift(rawTimeShift);
+    if (parsedTimeShift === 'invalid') {
+      throw new Error(`could not parse time shift ${rawTimeShift}`);
+    }
+    if (parsedTimeShift === 'previous') {
+      const timeShiftInterval = this.aggConfigs.getTimeShiftInterval();
+      if (timeShiftInterval) {
+        return timeShiftInterval;
+      } else if (!this.aggConfigs.timeRange) {
+        return;
+      }
+      const resolvedBounds = this.aggConfigs.getResolvedTimeRange()!;
+      return moment.duration(moment(resolvedBounds.max).diff(resolvedBounds.min));
+    }
+    return parsedTimeShift;
+  }
+
   write(aggs?: IAggConfigs) {
     return writeParams<AggConfig>(this.type.params, this, aggs);
   }
@@ -232,10 +249,16 @@ export class AggConfig {
     const output = this.write(aggConfigs) as any;
 
     const configDsl = {} as any;
-    configDsl[this.type.dslName || this.type.name] = output.params;
+    if (!this.type.hasNoDslParams) {
+      configDsl[this.type.dslName || this.type.name] = output.params;
+    }
 
     // if the config requires subAggs, write them to the dsl as well
-    if (this.subAggs.length && !output.subAggs) output.subAggs = this.subAggs;
+    if (this.subAggs.length) {
+      if (!output.subAggs) output.subAggs = this.subAggs;
+      else output.subAggs.push(...this.subAggs);
+    }
+
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {
@@ -279,13 +302,14 @@ export class AggConfig {
       id: this.id,
       enabled: this.enabled,
       type: this.type && this.type.name,
-      params: outParams as SerializableState,
+      params: outParams as SerializableRecord,
       ...(this.schema && { schema: this.schema }),
     };
   }
 
   /**
-   * @deprecated - Use serialize() instead.
+   * @deprecated Use serialize() instead.
+   * @removeBy 8.1
    */
   toJSON(): AggConfigSerialized {
     return this.serialize();
@@ -300,7 +324,7 @@ export class AggConfig {
    */
   toSerializedFieldFormat():
     | {}
-    | Ensure<SerializedFieldFormat<SerializableState>, SerializableState> {
+    | Ensure<SerializedFieldFormat<SerializableRecord>, SerializableRecord> {
     return this.type ? this.type.getSerializedFormat(this) : {};
   }
 
@@ -323,7 +347,7 @@ export class AggConfig {
         // If the param provides `toExpressionAst`, we call it with the value
         const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
         if (paramExpressionAst) {
-          acc[key] = [paramExpressionAst];
+          acc[key] = Array.isArray(paramExpressionAst) ? paramExpressionAst : [paramExpressionAst];
         }
       } else if (value && Array.isArray(value)) {
         // For array params which don't provide `toExpressionAst`, we stringify
@@ -433,10 +457,14 @@ export class AggConfig {
   }
 
   fieldIsTimeField() {
-    const indexPattern = this.getIndexPattern();
-    if (!indexPattern) return false;
-    const timeFieldName = indexPattern.timeFieldName;
-    return timeFieldName && this.fieldName() === timeFieldName;
+    const defaultTimeField = this.getIndexPattern()?.getTimeField?.()?.name;
+    const defaultTimeFields = defaultTimeField ? [defaultTimeField] : [];
+    const allTimeFields =
+      this.aggConfigs.timeFields && this.aggConfigs.timeFields.length > 0
+        ? this.aggConfigs.timeFields
+        : defaultTimeFields;
+    const currentFieldName = this.fieldName();
+    return allTimeFields.includes(currentFieldName);
   }
 
   public get type() {

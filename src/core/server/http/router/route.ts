@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { RouteValidatorFullConfig } from './validator';
@@ -70,7 +70,7 @@ export interface RouteConfigOptionsBody {
   /**
    * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
    *
-   * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayloadBytes`.
+   * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayload`.
    */
   maxBytes?: number;
 
@@ -108,8 +108,8 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Defines authentication mode for a route:
    * - true. A user has to have valid credentials to access a resource
    * - false. A user can access a resource without any credentials.
-   * - 'optional'. A user can access a resource if has valid credentials or no credentials at all.
-   * Can be useful when we grant access to a resource but want to identify a user if possible.
+   * - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.
+   *               Can be useful when we grant access to a resource but want to identify a user if possible.
    *
    * Defaults to `true` if an auth mechanism is registered.
    */

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -18,9 +20,10 @@ import {
 import { Repository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { RepositoryValidation } from '../../services/validation';
-import { documentationLinksService } from '../../services/documentation';
 import { TypeSettings } from './type_settings';
 import { textService } from '../../services/text';
+import { useCore } from '../../app_context';
+import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 
 interface Props {
   repository: Repository;
@@ -45,6 +48,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   saveError,
   onBack,
 }) => {
+  const { docLinks } = useCore();
   const hasValidationErrors: boolean = !validation.isValid;
   const {
     name,
@@ -74,7 +78,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getRepositoryTypeDocUrl(typeForDocs)}
+            href={getRepositoryTypeDocUrl(docLinks, typeForDocs)}
             target="_blank"
             iconType="help"
           >
@@ -139,7 +143,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
         )}
         <EuiFlexItem grow={false}>
           <EuiButton
-            color={isManagedRepository ? 'warning' : 'secondary'}
+            color={isManagedRepository ? 'warning' : 'success'}
             iconType="check"
             onClick={onSave}
             fill={isManagedRepository ? false : true}

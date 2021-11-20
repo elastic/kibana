@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -23,6 +24,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./find_list_items'));
     loadTestFile(require.resolve('./import_list_items'));
     loadTestFile(require.resolve('./export_list_items'));
+    loadTestFile(require.resolve('./export_exception_list'));
     loadTestFile(require.resolve('./create_exception_lists'));
     loadTestFile(require.resolve('./create_exception_list_items'));
     loadTestFile(require.resolve('./read_exception_lists'));
@@ -34,5 +36,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./find_exception_lists'));
     loadTestFile(require.resolve('./find_exception_list_items'));
     loadTestFile(require.resolve('./read_list_privileges'));
+    loadTestFile(require.resolve('./summary_exception_lists'));
   });
 };

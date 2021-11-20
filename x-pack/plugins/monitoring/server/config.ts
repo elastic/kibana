@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
   config as ElasticsearchBaseConfig,
@@ -20,9 +22,10 @@ export const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.ext
 });
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
+    debug_mode: schema.boolean({ defaultValue: false }),
+    debug_log_path: schema.string({ defaultValue: '' }),
     ccs: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
@@ -36,6 +39,9 @@ export const configSchema = schema.object({
     elasticsearch: monitoringElasticsearchConfigSchema,
     container: schema.object({
       elasticsearch: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      apm: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
       logstash: schema.object({
@@ -52,6 +58,7 @@ export const configSchema = schema.object({
     }),
   }),
   cluster_alerts: schema.object({
+    allowedSpaces: schema.arrayOf(schema.string(), { defaultValue: ['default'] }),
     enabled: schema.boolean({ defaultValue: true }),
     email_notifications: schema.object({
       enabled: schema.boolean({ defaultValue: true }),

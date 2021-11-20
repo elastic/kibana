@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Query } from 'src/plugins/data/public';
 import type { Operation } from '../../../types';
-import { TimeScaleUnit } from '../../time_scale';
+import type { TimeScaleUnit } from '../../../../common/expressions';
 import type { OperationType } from '../definitions';
 
 export interface BaseIndexPatternColumn extends Operation {
@@ -13,6 +15,8 @@ export interface BaseIndexPatternColumn extends Operation {
   operationType: string;
   customLabel?: boolean;
   timeScale?: TimeScaleUnit;
+  filter?: Query;
+  timeShift?: string;
 }
 
 // Formatting can optionally be added to any column
@@ -37,6 +41,11 @@ export interface ReferenceBasedIndexPatternColumn
     FormattedIndexPatternColumn {
   references: string[];
 }
+
+export type GenericIndexPatternColumn =
+  | BaseIndexPatternColumn
+  | FieldBasedIndexPatternColumn
+  | ReferenceBasedIndexPatternColumn;
 
 // Used to store the temporary invalid state
 export interface IncompleteColumn {

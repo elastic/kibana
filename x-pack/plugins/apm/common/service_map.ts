@@ -1,32 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
-} from './elasticsearch_fieldnames';
 import { ServiceAnomalyStats } from './anomaly_detection';
 
+// These should be imported, but until TypeScript 4.2 we're inlining them here.
+// All instances of "agent.name", "service.name", "service.environment", "span.type",
+// "span.subtype", and "span.destination.service.resource" need to be changed
+// back to using the constants.
+// See https://github.com/microsoft/TypeScript/issues/37888
+//
+// import {
+//   AGENT_NAME,
+//   SERVICE_ENVIRONMENT,
+//   SERVICE_NAME,
+//   SPAN_DESTINATION_SERVICE_RESOURCE,
+//   SPAN_SUBTYPE,
+//   SPAN_TYPE,
+// } from './elasticsearch_fieldnames';
+
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
-  [SERVICE_NAME]: string;
-  [SERVICE_ENVIRONMENT]: string | null;
-  [AGENT_NAME]: string;
+  'service.name': string;
+  'service.environment': string | null;
+  'agent.name': string;
   serviceAnomalyStats?: ServiceAnomalyStats;
   label?: string;
 }
 export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
-  [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
-  [SPAN_TYPE]: string;
-  [SPAN_SUBTYPE]: string;
+  'span.destination.service.resource': string;
+  'span.type': string;
+  'span.subtype': string;
   label?: string;
 }
 
@@ -50,9 +58,9 @@ export interface Connection {
   destination: ConnectionNode;
 }
 
-export interface ServiceNodeStats {
-  avgMemoryUsage: number | null;
-  avgCpuUsage: number | null;
+export interface NodeStats {
+  avgMemoryUsage?: number | null;
+  avgCpuUsage?: number | null;
   transactionStats: {
     avgTransactionDuration: number | null;
     avgRequestsPerMinute: number | null;

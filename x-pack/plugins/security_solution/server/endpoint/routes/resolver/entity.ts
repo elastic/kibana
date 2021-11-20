@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import _ from 'lodash';
-import { RequestHandler, SearchResponse } from 'kibana/server';
+import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { validateEntities } from '../../../../common/endpoint/schema/resolver';
 import { ResolverEntityIndex, ResolverSchema } from '../../../../common/endpoint/types';
 
@@ -86,9 +87,7 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
       query: { _id, indices },
     } = request;
 
-    const queryResponse: ApiResponse<
-      SearchResponse<unknown>
-    > = await context.core.elasticsearch.client.asCurrentUser.search({
+    const queryResponse = await context.core.elasticsearch.client.asCurrentUser.search({
       ignore_unavailable: true,
       index: indices,
       body: {

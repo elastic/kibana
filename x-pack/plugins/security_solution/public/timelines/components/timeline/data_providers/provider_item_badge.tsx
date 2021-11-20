@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
@@ -10,7 +11,10 @@ import { useDispatch } from 'react-redux';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import {
+  useDeepEqualSelector,
+  useShallowEqualSelector,
+} from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
 
 import { OnDataProviderEdited } from '../events';
@@ -18,7 +22,6 @@ import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
 import { DataProvidersAnd, DataProviderType, QueryOperator } from './data_provider';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
-import { useManageTimeline } from '../../manage_timeline';
 
 interface ProviderItemBadgeProps {
   andProviderId?: string;
@@ -74,11 +77,10 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
 
       return getTimeline(state, timelineId)?.timelineType ?? TimelineType.default;
     });
-    const { getManageTimelineById } = useManageTimeline();
-    const isLoading = useMemo(() => getManageTimelineById(timelineId ?? '').isLoading, [
-      getManageTimelineById,
-      timelineId,
-    ]);
+    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+    const { isLoading } = useDeepEqualSelector((state) =>
+      getManageTimeline(state, timelineId ?? '')
+    );
 
     const togglePopover = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);

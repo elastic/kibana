@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renderDataMappingPopover Should disable toggle when field is not backed by geojson source 1`] = `
+exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = `
 <OrdinalDataMappingPopover
   dataMappingFunction="INTERPOLATE"
   fieldMetaOptions={
@@ -16,27 +16,7 @@ exports[`renderDataMappingPopover Should disable toggle when field is not backed
       "PERCENTILES",
     ]
   }
-  switchDisabled={true}
-/>
-`;
-
-exports[`renderDataMappingPopover Should enable toggle when field is backed by geojson-source 1`] = `
-<OrdinalDataMappingPopover
-  dataMappingFunction="INTERPOLATE"
-  fieldMetaOptions={
-    Object {
-      "isEnabled": true,
-    }
-  }
-  onChange={[Function]}
-  styleName="lineColor"
-  supportedDataMappingFunctions={
-    Array [
-      "INTERPOLATE",
-      "PERCENTILES",
-    ]
-  }
-  switchDisabled={false}
+  supportsFieldMetaFromLocalData={true}
 />
 `;
 
@@ -54,6 +34,7 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
       <EuiToolTip
         content="foobar_label"
         delay="regular"
+        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -110,7 +91,7 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
         isPointsOnly={true}
         label={
           <EuiTextColor
-            color="secondary"
+            color="success"
           >
             Other
           </EuiTextColor>
@@ -134,6 +115,7 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
       <EuiToolTip
         content="foobar_label"
         delay="regular"
+        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -197,6 +179,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
       <EuiToolTip
         content="foobar_label"
         delay="regular"
+        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -326,6 +309,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
       <EuiToolTip
         content="foobar_label"
         delay="regular"
+        display="inlineBlock"
         position="top"
         title="Border color"
       >
@@ -433,6 +417,7 @@ exports[`renderLegendDetailRow ordinal Should render single band when interpolat
       <EuiToolTip
         content="foobar_label"
         delay="regular"
+        display="inlineBlock"
         position="top"
         title="Border color"
       >

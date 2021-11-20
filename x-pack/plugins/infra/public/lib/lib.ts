@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,7 +14,6 @@ import {
   SnapshotNodeMetric,
   SnapshotNodePath,
 } from '../../common/http_api/snapshot_api';
-import { SourceQuery } from '../graphql/types';
 import { WaffleSortOption } from '../pages/metrics/inventory_view/hooks/use_waffle_options';
 
 export interface InfraWaffleMapNode {
@@ -123,7 +123,6 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
-  fields?: SourceQuery.Query['source']['configuration']['fields'] | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
   metric: SnapshotMetricInput;

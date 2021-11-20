@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "Remote File Copy via TeamViewer",
-  "query": "event.category:file and event.type:creation and process.name:TeamViewer.exe and file.extension:(exe or dll or scr or com or bat or ps1 or vbs or vbe or js or wsh or hta)",
+  "query": "file where event.type == \"creation\" and process.name : \"TeamViewer.exe\" and\n  file.extension : (\"exe\", \"dll\", \"scr\", \"com\", \"bat\", \"ps1\", \"vbs\", \"vbe\", \"js\", \"wsh\", \"hta\")\n",
   "references": [
     "https://blog.menasec.net/2019/11/hunting-for-suspicious-use-of.html"
   ],
@@ -38,10 +39,16 @@
           "id": "T1105",
           "name": "Ingress Tool Transfer",
           "reference": "https://attack.mitre.org/techniques/T1105/"
+        },
+        {
+          "id": "T1219",
+          "name": "Remote Access Software",
+          "reference": "https://attack.mitre.org/techniques/T1219/"
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 1
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 5
 }

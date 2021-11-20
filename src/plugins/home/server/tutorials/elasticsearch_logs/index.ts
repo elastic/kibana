@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,13 +24,13 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
   return {
     id: 'elasticsearchLogs',
     name: i18n.translate('home.tutorials.elasticsearchLogs.nameTitle', {
-      defaultMessage: 'Elasticsearch logs',
+      defaultMessage: 'Elasticsearch Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     isBeta: true,
     shortDescription: i18n.translate('home.tutorials.elasticsearchLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs created by Elasticsearch.',
+      defaultMessage: 'Collect and parse logs from Elasticsearch clusters with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.elasticsearchLogs.longDescription', {
       defaultMessage:
@@ -58,5 +58,6 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['containers', 'os_system'],
   };
 }

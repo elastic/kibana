@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { MouseEventHandler, FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
-// @ts-expect-error untyped local
-import { Popover, PopoverChildrenProps } from '../popover';
+import { i18n } from '@kbn/i18n';
+import { Popover } from '../popover';
 import { ArgAdd } from '../arg_add';
-// @ts-expect-error untyped local
-import { Arg } from '../../expression_types/arg';
+import type { Arg } from '../../expression_types/arg';
 
-import { ComponentStrings } from '../../../i18n';
-
-const { ArgAddPopover: strings } = ComponentStrings;
+const strings = {
+  getAddAriaLabel: () =>
+    i18n.translate('xpack.canvas.argAddPopover.addAriaLabel', {
+      defaultMessage: 'Add argument',
+    }),
+};
 
 interface ArgOptions {
   arg: Arg;
@@ -43,12 +46,12 @@ export const ArgAddPopover: FC<Props> = ({ options }) => {
       panelPaddingSize="none"
       button={button}
     >
-      {({ closePopover }: PopoverChildrenProps) =>
+      {({ closePopover }) =>
         options.map((opt) => (
           <ArgAdd
             key={`${opt.arg.name}-add`}
-            displayName={opt.arg.displayName}
-            help={opt.arg.help}
+            displayName={opt.arg.displayName ?? ''}
+            help={opt.arg.help ?? ''}
             onValueAdd={() => {
               opt.onValueAdd();
               closePopover();

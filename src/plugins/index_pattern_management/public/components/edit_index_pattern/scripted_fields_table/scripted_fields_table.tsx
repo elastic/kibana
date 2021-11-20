@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
@@ -15,8 +15,10 @@ import {
 
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
 import { ScriptedFieldItem } from './types';
+import { IndexPatternManagmentContext } from '../../../types';
 
 import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
 
 interface ScriptedFieldsTableProps {
   indexPattern: IndexPattern;
@@ -29,6 +31,7 @@ interface ScriptedFieldsTableProps {
   onRemoveField?: () => void;
   painlessDocLink: string;
   saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  userEditPermission: boolean;
 }
 
 interface ScriptedFieldsTableState {
@@ -38,10 +41,16 @@ interface ScriptedFieldsTableState {
   fields: ScriptedFieldItem[];
 }
 
-export class ScriptedFieldsTable extends Component<
-  ScriptedFieldsTableProps,
-  ScriptedFieldsTableState
-> {
+const withHooks = (Comp: typeof Component) => {
+  return (props: any) => {
+    const { application } = useKibana<IndexPatternManagmentContext>().services;
+    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+
+    return <Comp userEditPermission={userEditPermission} {...props} />;
+  };
+};
+
+class ScriptedFields extends Component<ScriptedFieldsTableProps, ScriptedFieldsTableState> {
   constructor(props: ScriptedFieldsTableProps) {
     super(props);
 
@@ -65,7 +74,7 @@ export class ScriptedFieldsTable extends Component<
     const supportedLangs = getSupportedScriptingLanguages();
 
     for (const field of fields) {
-      const lang: string = field.lang;
+      const lang = field.lang;
       if (deprecatedLangs.includes(lang) || !supportedLangs.includes(lang)) {
         deprecatedLangsInUse.push(lang);
       }
@@ -79,7 +88,7 @@ export class ScriptedFieldsTable extends Component<
 
   getFilteredItems = () => {
     const { fields } = this.state;
-    const { fieldFilter, scriptedFieldLanguageFilter } = this.props;
+    const { fieldFilter, scriptedFieldLanguageFilter, userEditPermission } = this.props;
 
     let languageFilteredFields = fields;
 
@@ -98,6 +107,8 @@ export class ScriptedFieldsTable extends Component<
         field.name.toLowerCase().includes(normalizedFieldFilter)
       );
     }
+
+    filteredFields.forEach((field) => (field.isUserEditable = userEditPermission));
 
     return filteredFields;
   };
@@ -157,3 +168,5 @@ export class ScriptedFieldsTable extends Component<
     );
   }
 }
+
+export const ScriptedFieldsTable = withHooks(ScriptedFields);

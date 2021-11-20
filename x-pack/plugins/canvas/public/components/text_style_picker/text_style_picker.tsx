@@ -1,19 +1,58 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FontValue } from 'src/plugins/expressions';
-import { ComponentStrings } from '../../../i18n';
+
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';
 import { fontSizes } from './font_sizes';
 
-const { TextStylePicker: strings } = ComponentStrings;
+const strings = {
+  getAlignCenterOption: () =>
+    i18n.translate('xpack.canvas.textStylePicker.alignCenterOption', {
+      defaultMessage: 'Align center',
+    }),
+  getAlignLeftOption: () =>
+    i18n.translate('xpack.canvas.textStylePicker.alignLeftOption', {
+      defaultMessage: 'Align left',
+    }),
+  getAlignRightOption: () =>
+    i18n.translate('xpack.canvas.textStylePicker.alignRightOption', {
+      defaultMessage: 'Align right',
+    }),
+  getAlignmentOptionsControlLegend: () =>
+    i18n.translate('xpack.canvas.textStylePicker.alignmentOptionsControl', {
+      defaultMessage: 'Alignment options',
+    }),
+  getFontColorLabel: () =>
+    i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
+      defaultMessage: 'Font Color',
+    }),
+  getStyleBoldOption: () =>
+    i18n.translate('xpack.canvas.textStylePicker.styleBoldOption', {
+      defaultMessage: 'Bold',
+    }),
+  getStyleItalicOption: () =>
+    i18n.translate('xpack.canvas.textStylePicker.styleItalicOption', {
+      defaultMessage: 'Italic',
+    }),
+  getStyleUnderlineOption: () =>
+    i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
+      defaultMessage: 'Underline',
+    }),
+  getStyleOptionsControlLegend: () =>
+    i18n.translate('xpack.canvas.textStylePicker.styleOptionsControl', {
+      defaultMessage: 'Style options',
+    }),
+};
 
 export interface StyleProps {
   family?: FontValue;

@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
+import type { Query, Filter, TimeRange, IndexPattern } from 'src/plugins/data/common';
 import {
   getData,
   getCoreChrome,
   getMapsCapabilities,
   getNavigation,
+  getSpacesApi,
+  getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
 import {
@@ -28,10 +32,6 @@ import {
 } from '../url_state';
 import {
   esFilters,
-  Filter,
-  Query,
-  TimeRange,
-  IndexPattern,
   SavedQuery,
   QueryStateChange,
   QueryState,
@@ -39,10 +39,9 @@ import {
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
-import { MapRefreshConfig, MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
-import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getExistingMapPath } from '../../../../common/constants';
+import { getEditPath, getFullPath, APP_ID } from '../../../../common/constants';
+import { getMapEmbeddableDisplayName } from '../../../../common/i18n_getters';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -51,6 +50,8 @@ import {
   unsavedChangesTitle,
   unsavedChangesWarning,
 } from '../saved_map';
+import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
+import { RefreshConfig as MapRefreshConfig, SerializedMapState } from '../saved_map';
 
 export interface Props {
   savedMap: SavedMap;
@@ -64,32 +65,36 @@ export interface Props {
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
   nextIndexPatternIds: string[];
-  dispatchSetQuery: ({
+  setQuery: ({
     forceRefresh,
     filters,
     query,
     timeFilters,
+    searchSessionId,
   }: {
     filters?: Filter[];
     query?: Query;
     timeFilters?: TimeRange;
     forceRefresh?: boolean;
+    searchSessionId?: string;
   }) => void;
   timeFilters: TimeRange;
-  refreshConfig: MapRefreshConfig;
-  setRefreshConfig: (refreshConfig: MapRefreshConfig) => void;
   isSaveDisabled: boolean;
-  query: MapQuery | undefined;
+  query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  history: AppMountParameters['history'];
 }
 
 export interface State {
   initialized: boolean;
   indexPatterns: IndexPattern[];
   savedQuery?: SavedQuery;
+  isRefreshPaused: boolean;
+  refreshInterval: number;
 }
 
 export class MapApp extends React.Component<Props, State> {
+  _autoRefreshSubscription: Subscription | null = null;
   _globalSyncUnsubscribe: (() => void) | null = null;
   _globalSyncChangeMonitorSubscription: Subscription | null = null;
   _appSyncUnsubscribe: (() => void) | null = null;
@@ -102,11 +107,25 @@ export class MapApp extends React.Component<Props, State> {
     this.state = {
       indexPatterns: [],
       initialized: false,
+      isRefreshPaused: true,
+      refreshInterval: 0,
     };
   }
 
   componentDidMount() {
     this._isMounted = true;
+
+    this._autoRefreshSubscription = getTimeFilter()
+      .getAutoRefreshFetch$()
+      .pipe(
+        tap(() => {
+          this.props.setQuery({ forceRefresh: true });
+        }),
+        switchMap((done) =>
+          waitUntilTimeLayersLoad$(this.props.savedMap.getStore()).pipe(finalize(done))
+        )
+      )
+      .subscribe();
 
     this._globalSyncUnsubscribe = startGlobalStateSyncing();
     this._appSyncUnsubscribe = startAppStateSyncing(this._appStateManager);
@@ -137,6 +156,9 @@ export class MapApp extends React.Component<Props, State> {
   componentWillUnmount() {
     this._isMounted = false;
 
+    if (this._autoRefreshSubscription) {
+      this._autoRefreshSubscription.unsubscribe();
+    }
     if (this._globalSyncUnsubscribe) {
       this._globalSyncUnsubscribe();
     }
@@ -185,12 +207,10 @@ export class MapApp extends React.Component<Props, State> {
     filters,
     query,
     time,
-    forceRefresh = false,
   }: {
     filters?: Filter[];
     query?: Query;
     time?: TimeRange;
-    forceRefresh?: boolean;
   }) => {
     const { filterManager } = getData().query;
 
@@ -198,8 +218,8 @@ export class MapApp extends React.Component<Props, State> {
       filterManager.setFilters(filters);
     }
 
-    this.props.dispatchSetQuery({
-      forceRefresh,
+    this.props.setQuery({
+      forceRefresh: false,
       filters: filterManager.getFilters(),
       query,
       timeFilters: time,
@@ -221,20 +241,14 @@ export class MapApp extends React.Component<Props, State> {
     updateGlobalState(updatedGlobalState, !this.state.initialized);
   };
 
-  _initMapAndLayerSettings(mapSavedObjectAttributes: MapSavedObjectAttributes) {
+  _initMapAndLayerSettings(serializedMapState?: SerializedMapState) {
     const globalState: MapsGlobalState = getGlobalState();
 
-    let savedObjectFilters = [];
-    if (mapSavedObjectAttributes.mapStateJSON) {
-      const mapState = JSON.parse(mapSavedObjectAttributes.mapStateJSON);
-      if (mapState.filters) {
-        savedObjectFilters = mapState.filters;
-      }
-    }
+    const savedObjectFilters = serializedMapState?.filters ? serializedMapState.filters : [];
     const appFilters = this._appStateManager.getFilters() || [];
 
     const query = getInitialQuery({
-      mapStateJSON: mapSavedObjectAttributes.mapStateJSON,
+      serializedMapState,
       appState: this._appStateManager.getAppState(),
     });
     if (query) {
@@ -245,14 +259,14 @@ export class MapApp extends React.Component<Props, State> {
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query,
       time: getInitialTimeFilters({
-        mapStateJSON: mapSavedObjectAttributes.mapStateJSON,
+        serializedMapState,
         globalState,
       }),
     });
 
     this._onRefreshConfigChange(
       getInitialRefreshConfig({
-        mapStateJSON: mapSavedObjectAttributes.mapStateJSON,
+        serializedMapState,
         globalState,
       })
     );
@@ -264,14 +278,16 @@ export class MapApp extends React.Component<Props, State> {
     });
   };
 
-  // mapRefreshConfig: MapRefreshConfig
-  _onRefreshConfigChange(mapRefreshConfig: MapRefreshConfig) {
-    this.props.setRefreshConfig(mapRefreshConfig);
+  _onRefreshConfigChange({ isPaused, interval }: MapRefreshConfig) {
+    this.setState({
+      isRefreshPaused: isPaused,
+      refreshInterval: interval,
+    });
     updateGlobalState(
       {
         refreshInterval: {
-          pause: mapRefreshConfig.isPaused,
-          value: mapRefreshConfig.interval,
+          pause: isPaused,
+          value: interval,
         },
       },
       !this.state.initialized
@@ -321,18 +337,37 @@ export class MapApp extends React.Component<Props, State> {
       return;
     }
 
+    const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
+      // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newPath = `${getEditPath(newObjectId)}${this.props.history.location.hash}`;
+      await spaces.ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
+      return;
+    }
+
     this.props.savedMap.setBreadcrumbs();
     getCoreChrome().docTitle.change(this.props.savedMap.getTitle());
     const savedObjectId = this.props.savedMap.getSavedObjectId();
     if (savedObjectId) {
       getCoreChrome().recentlyAccessed.add(
-        getExistingMapPath(savedObjectId),
+        getFullPath(savedObjectId),
         this.props.savedMap.getTitle(),
         savedObjectId
       );
     }
 
-    this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
+    let serializedMapState: SerializedMapState | undefined;
+    try {
+      const attributes = this.props.savedMap.getAttributes();
+      if (attributes.mapStateJSON) {
+        serializedMapState = JSON.parse(attributes.mapStateJSON);
+      }
+    } catch (e) {
+      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+    }
+    this._initMapAndLayerSettings(serializedMapState);
 
     this.setState({ initialized: true });
   }
@@ -355,23 +390,28 @@ export class MapApp extends React.Component<Props, State> {
     return (
       <TopNavMenu
         setMenuMountPoint={this.props.setHeaderActionMenu}
-        appName="maps"
+        appName={APP_ID}
         config={topNavConfig}
         indexPatterns={this.state.indexPatterns}
         filters={this.props.filters}
         query={this.props.query}
         onQuerySubmit={({ dateRange, query }) => {
-          this._onQueryChange({
-            query,
-            time: dateRange,
-            forceRefresh: true,
-          });
+          const isUpdate =
+            !_.isEqual(dateRange, this.props.timeFilters) || !_.isEqual(query, this.props.query);
+          if (isUpdate) {
+            this._onQueryChange({
+              query,
+              time: dateRange,
+            });
+          } else {
+            this.props.setQuery({ forceRefresh: true });
+          }
         }}
         onFiltersUpdated={this._onFiltersChange}
         dateRangeFrom={this.props.timeFilters.from}
         dateRangeTo={this.props.timeFilters.to}
-        isRefreshPaused={this.props.refreshConfig.isPaused}
-        refreshInterval={this.props.refreshConfig.interval}
+        isRefreshPaused={this.state.isRefreshPaused}
+        refreshInterval={this.state.refreshInterval}
         onRefreshChange={({
           isPaused,
           refreshInterval,
@@ -411,6 +451,21 @@ export class MapApp extends React.Component<Props, State> {
     this._onFiltersChange([...this.props.filters, ...newFilters]);
   };
 
+  _renderLegacyUrlConflict() {
+    const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    return spaces && sharingSavedObjectProps?.outcome === 'conflict'
+      ? spaces.ui.components.getLegacyUrlConflict({
+          objectNoun: getMapEmbeddableDisplayName(),
+          currentObjectId: this.props.savedMap.getSavedObjectId()!,
+          otherObjectId: sharingSavedObjectProps.aliasTargetId!,
+          otherObjectPath: `${getEditPath(sharingSavedObjectProps.aliasTargetId!)}${
+            this.props.history.location.hash
+          }`,
+        })
+      : null;
+  }
+
   render() {
     if (!this.state.initialized) {
       return null;
@@ -421,10 +476,13 @@ export class MapApp extends React.Component<Props, State> {
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
+          {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}
             title={this.props.savedMap.getAttributes().title}
             description={this.props.savedMap.getAttributes().description}
+            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this.props.savedMap.getStore())}
+            isSharable
           />
         </div>
       </div>

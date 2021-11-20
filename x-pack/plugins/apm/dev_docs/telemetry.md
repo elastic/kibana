@@ -14,7 +14,7 @@ Telemetry data is uploaded to the "xpack-phone-home" indices.
 
 Information that can be derived from a cluster's APM indices is queried and sent
 to the telemetry cluster using the
-[Usage Collection plugin](../../../../src/plugins/usage_collection/README.md).
+[Usage Collection plugin](../../../../src/plugins/usage_collection/README.mdx).
 
 During the APM server-side plugin's setup phase a
 [Saved Object](https://www.elastic.co/guide/en/kibana/master/managing-saved-objects.html)
@@ -29,7 +29,7 @@ Once uploaded to the telemetry cluster, the data telemetry is stored in
 
 ### Generating sample data
 
-The script in `scripts/upload-telemetry-data` can generate sample telemetry data and upload it to a cluster of your choosing.
+The script in `scripts/upload_telemetry_data` can generate sample telemetry data and upload it to a cluster of your choosing.
 
 You'll need to set the `GITHUB_TOKEN` environment variable to a token that has `repo` scope so it can read from the
 [elastic/telemetry](https://github.com/elastic/telemetry) repository. (You probably have a token that works for this in

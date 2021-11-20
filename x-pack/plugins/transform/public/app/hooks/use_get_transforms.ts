@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpFetchError } from 'src/core/public';
 
 import {
+  isGetTransformNodesResponseSchema,
   isGetTransformsResponseSchema,
   isGetTransformsStatsResponseSchema,
 } from '../../../common/api_schemas/type_guards';
@@ -21,6 +23,7 @@ export type GetTransforms = (forceRefresh?: boolean) => void;
 
 export const useGetTransforms = (
   setTransforms: React.Dispatch<React.SetStateAction<TransformListRow[]>>,
+  setTransformNodes: React.Dispatch<React.SetStateAction<number>>,
   setErrorMessage: React.Dispatch<React.SetStateAction<HttpFetchError | undefined>>,
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
   blockRefresh: boolean
@@ -38,17 +41,21 @@ export const useGetTransforms = (
         return;
       }
 
-      const transformConfigs = await api.getTransforms();
-      const transformStats = await api.getTransformsStats();
+      const fetchOptions = { asSystemRequest: true };
+      const transformNodes = await api.getTransformNodes();
+      const transformConfigs = await api.getTransforms(fetchOptions);
+      const transformStats = await api.getTransformsStats(fetchOptions);
 
       if (
         !isGetTransformsResponseSchema(transformConfigs) ||
-        !isGetTransformsStatsResponseSchema(transformStats)
+        !isGetTransformsStatsResponseSchema(transformStats) ||
+        !isGetTransformNodesResponseSchema(transformNodes)
       ) {
         // An error is followed immediately by setting the state to idle.
         // This way we're able to treat ERROR as a one-time-event like REFRESH.
         refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.ERROR);
         refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
+        setTransformNodes(0);
         setTransforms([]);
 
         setIsInitialized(true);
@@ -80,10 +87,12 @@ export const useGetTransforms = (
           mode:
             typeof config.sync !== 'undefined' ? TRANSFORM_MODE.CONTINUOUS : TRANSFORM_MODE.BATCH,
           stats,
+          alerting_rules: config.alerting_rules,
         });
         return reducedtableRows;
       }, [] as TransformListRow[]);
 
+      setTransformNodes(transformNodes.count);
       setTransforms(tableRows);
       setErrorMessage(undefined);
       setIsInitialized(true);

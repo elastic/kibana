@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 
 import { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
 
@@ -32,6 +33,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -39,8 +41,9 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
+          track_total_hits: true,
           body: {
             aggregations: {
               alertsGroup: {
@@ -112,7 +115,6 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -125,7 +127,8 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
+  track_total_hits: false,
   body: {
     aggregations: {
       host_count: { cardinality: { field: 'host.name' } },
@@ -160,11 +163,11 @@ export const expectedDsl = {
       },
     },
     size: 0,
-    track_total_hits: false,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -198,6 +201,7 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -205,8 +209,9 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
+          track_total_hits: true,
           body: {
             aggs: {
               anomalyActionGroup: {
@@ -257,7 +262,6 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -380,6 +384,7 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -387,8 +392,9 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
+          track_total_hits: true,
           body: {
             aggregations: {
               eventActionGroup: {
@@ -428,7 +434,6 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -946,6 +951,7 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -953,8 +959,9 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
+          track_total_hits: true,
           body: {
             aggregations: {
               eventActionGroup: {
@@ -993,7 +1000,6 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -1921,9 +1927,10 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -1931,20 +1938,18 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
-              dns_count: {
-                cardinality: {
-                  field: 'dns.question.registered_domain',
-                },
-              },
+              dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
               dns_name_query_count: {
                 terms: {
                   field: 'dns.question.registered_domain',
-                  size: 1000000,
+                  order: { unique_domains: 'desc' },
+                  size: 10,
                 },
                 aggs: {
+                  unique_domains: { cardinality: { field: 'dns.question.name' } },
                   dns_question_name: {
                     date_histogram: {
                       field: '@timestamp',
@@ -1953,47 +1958,13 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                       extended_bounds: { min: 1599579675528, max: 1599666075529 },
                     },
                   },
-                  bucket_sort: {
-                    bucket_sort: {
-                      sort: [
-                        {
-                          unique_domains: {
-                            order: 'desc',
-                          },
-                        },
-                        {
-                          _key: {
-                            order: 'asc',
-                          },
-                        },
-                      ],
-                      from: 0,
-                      size: 10,
-                    },
-                  },
-                  unique_domains: {
-                    cardinality: {
-                      field: 'dns.question.name',
-                    },
-                  },
                 },
               },
             },
             query: {
               bool: {
                 filter: [
-                  {
-                    bool: {
-                      must: [],
-                      filter: [
-                        {
-                          match_all: {},
-                        },
-                      ],
-                      should: [],
-                      must_not: [],
-                    },
-                  },
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
                   {
                     range: {
                       '@timestamp': {
@@ -2004,15 +1975,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                     },
                   },
                 ],
-                must_not: [
-                  {
-                    term: {
-                      'dns.question.type': {
-                        value: 'PTR',
-                      },
-                    },
-                  },
-                ],
+                must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
               },
             },
           },
@@ -2125,5 +2088,85 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
     { x: 1605159021402, y: 0, g: 'windows.net' },
     { x: 1605159518499, y: 0, g: 'windows.net' },
   ],
+  totalCount: 0,
+};
+
+export const formattedPreviewStrategyResponse = {
+  ...mockAlertsSearchStrategyResponse,
+  inspect: {
+    dsl: [
+      JSON.stringify(
+        {
+          index: ['.siem-preview-signals-default'],
+          allow_no_indices: true,
+          ignore_unavailable: true,
+          track_total_hits: true,
+          body: {
+            aggregations: {
+              preview: {
+                terms: {
+                  field: 'event.category',
+                  missing: 'All others',
+                  order: { _count: 'desc' },
+                  size: 10,
+                },
+                aggs: {
+                  preview: {
+                    date_histogram: {
+                      field: 'signal.original_time',
+                      fixed_interval: '2700000ms',
+                      min_doc_count: 0,
+                      extended_bounds: { min: 1599574984482, max: 1599661384482 },
+                    },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { match_all: {} },
+                        {
+                          bool: {
+                            filter: [
+                              {
+                                bool: {
+                                  should: [{ match: { 'signal.rule.id': 'test-preview-id' } }],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                  {
+                    range: {
+                      'signal.original_time': {
+                        gte: '2020-09-08T14:23:04.482Z',
+                        lte: '2020-09-09T14:23:04.482Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+          },
+        },
+        null,
+        2
+      ),
+    ],
+  },
+  matrixHistogramData: [],
   totalCount: 0,
 };

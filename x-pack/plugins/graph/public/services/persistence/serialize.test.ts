@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { appStateToSavedWorkspace } from './serialize';
@@ -145,7 +146,7 @@ describe('serialize', () => {
       target: appState.workspace.nodes[0],
       weight: 5,
       width: 5,
-    });
+    } as WorkspaceEdge);
 
     // C <-> E
     appState.workspace.edges.push({
@@ -154,11 +155,11 @@ describe('serialize', () => {
       target: appState.workspace.nodes[4],
       weight: 5,
       width: 5,
-    });
+    } as WorkspaceEdge);
   });
 
   it('should serialize given workspace', () => {
-    const savedWorkspace = ({} as unknown) as GraphWorkspaceSavedObject;
+    const savedWorkspace = {} as unknown as GraphWorkspaceSavedObject;
 
     appStateToSavedWorkspace(savedWorkspace, appState, true);
 
@@ -280,7 +281,7 @@ describe('serialize', () => {
   });
 
   it('should not save data if set to false', () => {
-    const savedWorkspace = ({} as unknown) as GraphWorkspaceSavedObject;
+    const savedWorkspace = {} as unknown as GraphWorkspaceSavedObject;
 
     appStateToSavedWorkspace(savedWorkspace, appState, false);
 

@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+
+import { QueryFilterOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggFiltersFnName = 'aggFilters';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTERS>;
 
-type Arguments = Assign<AggArgs, { filters?: string }>;
+type Arguments = Assign<AggArgs, { filters?: QueryFilterOutput[] }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -54,7 +56,8 @@ export const aggFilters = (): FunctionDefinition => ({
       }),
     },
     filters: {
-      types: ['string'],
+      types: ['kibana_query_filter'],
+      multi: true,
       help: i18n.translate('data.search.aggs.buckets.filters.filters.help', {
         defaultMessage: 'Filters to use for this aggregation',
       }),
@@ -66,20 +69,18 @@ export const aggFilters = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
-
+  fn: (input, { id, enabled, schema, filters, ...params }) => {
     return {
       type: 'agg_type',
       value: {
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.FILTERS,
         params: {
-          ...rest,
-          filters: getParsedValue(args, 'filters'),
+          ...params,
+          filters: filters?.map((filter) => omit(filter, 'type')),
         },
+        type: BUCKET_TYPES.FILTERS,
       },
     };
   },

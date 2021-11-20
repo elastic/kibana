@@ -1,21 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { toMountPoint } from '../../kibana_react/public';
+import { SharePluginStart } from '../../share/public';
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { Adapters } from '../common';
 
 import { getRequestsViewDescription } from './views';
+
+export interface InspectorPluginStartDeps {
+  share: SharePluginStart;
+}
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
@@ -56,7 +61,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
     this.views.register(getRequestsViewDescription());
@@ -70,7 +75,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, startDeps: InspectorPluginStartDeps) {
     const isAvailable: Start['isAvailable'] = (adapters) =>
       this.views!.getVisible(adapters).length > 0;
 
@@ -95,7 +100,12 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
             adapters={adapters}
             title={options.title}
             options={options.options}
-            dependencies={{ uiSettings: core.uiSettings }}
+            dependencies={{
+              application: core.application,
+              http: core.http,
+              uiSettings: core.uiSettings,
+              share: startDeps.share,
+            }}
           />
         ),
         {

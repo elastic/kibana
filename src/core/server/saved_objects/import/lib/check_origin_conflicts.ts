@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import pMap from 'p-map';
@@ -58,11 +58,21 @@ const createQuery = (type: string, id: string, rawIdPrefix: string) =>
 const transformObjectsToAmbiguousConflictFields = (
   objects: Array<SavedObject<{ title?: string }>>
 ) =>
-  objects.map(({ id, attributes, updated_at: updatedAt }) => ({
-    id,
-    title: attributes?.title,
-    updatedAt,
-  }));
+  objects
+    .map(({ id, attributes, updated_at: updatedAt }) => ({
+      id,
+      title: attributes?.title,
+      updatedAt,
+    }))
+    // Sort to ensure that integration tests are not flaky
+    .sort((a, b) => {
+      const aUpdatedAt = a.updatedAt ?? '';
+      const bUpdatedAt = b.updatedAt ?? '';
+      if (aUpdatedAt !== bUpdatedAt) {
+        return aUpdatedAt < bUpdatedAt ? 1 : -1; // descending
+      }
+      return a.id < b.id ? -1 : 1; // ascending
+    });
 const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
   `${object.type}:${object.originId || object.id}`;
 
@@ -95,7 +105,7 @@ const checkOriginConflict = async (
     perPage: 10,
     fields: ['title'],
     sortField: 'updated_at',
-    sortOrder: 'desc',
+    sortOrder: 'desc' as const,
     ...(namespace && { namespaces: [namespace] }),
   };
   const findResult = await savedObjectsClient.find<{ title?: string }>(findOptions);

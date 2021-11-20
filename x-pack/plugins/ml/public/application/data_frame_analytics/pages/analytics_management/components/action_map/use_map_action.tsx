@@ -1,30 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useMlUrlGenerator, useNavigateToPath } from '../../../../../contexts/kibana';
+import { cloneDeep } from 'lodash';
+import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
 import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
-import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { getViewLinkStatus } from '../action_view/get_view_link_status';
+import { useUrlState } from '../../../../../util/url_state';
 
 import { mapActionButtonText, MapButton } from './map_button';
 
 export type MapAction = ReturnType<typeof useMapAction>;
 export const useMapAction = () => {
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();
 
-  const clickHandler = useCallback(async (item: DataFrameAnalyticsListRow) => {
-    const path = await mlUrlGenerator.createUrl({
-      page: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
-      pageState: { jobId: item.id },
-    });
+  const [globalState] = useUrlState('_g');
 
-    await navigateToPath(path, false);
-  }, []);
+  const clickHandler = useCallback(
+    async (item: DataFrameAnalyticsListRow) => {
+      const globalStateClone = cloneDeep(globalState || {});
+      delete globalStateClone.ml;
+
+      const path = await mlLocator.getUrl({
+        page: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+        pageState: {
+          jobId: item.id,
+          globalState: globalStateClone,
+        },
+      });
+
+      await navigateToPath(path, false);
+    },
+    [globalState]
+  );
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({

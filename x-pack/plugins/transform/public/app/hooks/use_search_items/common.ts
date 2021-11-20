@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract, SimpleSavedObject, IUiSettingsClient } from 'src/core/public';
@@ -14,15 +15,15 @@ import {
 
 import { matchAllQuery } from '../../common';
 
+import { isIndexPattern } from '../../../../common/types/index_pattern';
+
 export type SavedSearchQuery = object;
 
 type IndexPatternId = string;
-type SavedSearchId = string;
 
 let indexPatternCache: Array<SimpleSavedObject<Record<string, any>>> = [];
 let fullIndexPatterns;
 let currentIndexPattern = null;
-let currentSavedSearch = null;
 
 export let refreshIndexPatterns: () => Promise<unknown>;
 
@@ -73,15 +74,6 @@ export function loadCurrentIndexPattern(
   return currentIndexPattern;
 }
 
-export function loadCurrentSavedSearch(savedSearches: any, savedSearchId: SavedSearchId) {
-  currentSavedSearch = savedSearches.get(savedSearchId);
-  return currentSavedSearch;
-}
-
-function isIndexPattern(arg: any): arg is IndexPattern {
-  return arg !== undefined;
-}
-
 export interface SearchItems {
   indexPattern: IndexPattern;
   savedSearch: any;
@@ -124,7 +116,7 @@ export function createSearchItems(
   }
 
   if (!isIndexPattern(indexPattern)) {
-    throw new Error('Index Pattern is not defined.');
+    throw new Error('Data view is not defined.');
   }
 
   return {

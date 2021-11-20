@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -13,7 +14,7 @@ import * as beatsMetrics from '../../../../../plugins/monitoring/server/lib/metr
 import * as apmMetrics from '../../../../../plugins/monitoring/server/lib/metrics/apm/metrics';
 
 export default function ({ getService }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const metricSets = [
     {

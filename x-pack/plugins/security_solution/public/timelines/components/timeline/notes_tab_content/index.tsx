@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { filter, uniqBy } from 'lodash/fp';
@@ -15,23 +16,29 @@ import {
   EuiPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
+
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineActions } from '../../../store/timeline';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import {
+  useDeepEqualSelector,
+  useShallowEqualSelector,
+} from '../../../../common/hooks/use_selector';
 import { TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { appSelectors } from '../../../../common/store/app';
 import { AddNote } from '../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../notes/translations';
-import { PARTICIPANTS } from '../../../../cases/translations';
+import { PARTICIPANTS } from '../translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
-import { EventDetails } from '../event_details';
 import { getTimelineNoteSelector } from './selectors';
+import { DetailsPanel } from '../../side_panel';
+import { getScrollToTopSelector } from '../tabs_content/selectors';
+import { useScrollToTop } from '../../../../common/components/scroll_to_top';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -88,8 +95,11 @@ const ParticipantsComponent: React.FC<ParticipantsProps> = ({ users }) => {
   const List = useMemo(
     () =>
       users.map((user) => (
-        <Fragment key={user.updatedBy!}>
-          <UsernameWithAvatar key={user.updatedBy!} username={user.updatedBy!} />
+        <Fragment key={user.updatedBy === null ? undefined : user.updatedBy}>
+          <UsernameWithAvatar
+            key={user.updatedBy === null ? undefined : user.updatedBy}
+            username={String(user.updatedBy)}
+          />
           <EuiSpacer size="s" />
         </Fragment>
       )),
@@ -121,16 +131,23 @@ interface NotesTabContentProps {
 
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
+
+  const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
+  const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
+
+  useScrollToTop('#scrollableNotes', !!scrollToTop);
+
   const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
   const {
     createdBy,
-    expandedEvent,
+    expandedDetail,
     eventIdToNoteIds,
     noteIds,
     status: timelineStatus,
   } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
-
-  const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
 
   const getNotesAsCommentsList = useMemo(
     () => appSelectors.selectNotesAsCommentsListSelector(),
@@ -161,22 +178,30 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     [dispatch, timelineId]
   );
 
-  const handleOnEventClosed = useCallback(() => {
-    dispatch(timelineActions.toggleExpandedEvent({ tabType: TimelineTabs.notes, timelineId }));
+  const handleOnPanelClosed = useCallback(() => {
+    dispatch(timelineActions.toggleDetailPanel({ tabType: TimelineTabs.notes, timelineId }));
   }, [dispatch, timelineId]);
 
-  const EventDetailsContent = useMemo(
+  const DetailsPanelContent = useMemo(
     () =>
-      expandedEvent?.eventId != null ? (
-        <EventDetails
+      expandedDetail[TimelineTabs.notes]?.panelView ? (
+        <DetailsPanel
           browserFields={browserFields}
           docValueFields={docValueFields}
-          handleOnEventClosed={handleOnEventClosed}
+          handleOnPanelClosed={handleOnPanelClosed}
+          runtimeMappings={runtimeMappings}
           tabType={TimelineTabs.notes}
           timelineId={timelineId}
         />
       ) : null,
-    [browserFields, docValueFields, expandedEvent, handleOnEventClosed, timelineId]
+    [
+      browserFields,
+      docValueFields,
+      expandedDetail,
+      handleOnPanelClosed,
+      runtimeMappings,
+      timelineId,
+    ]
   );
 
   const SidebarContent = useMemo(
@@ -201,21 +226,31 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
 
   return (
     <FullWidthFlexGroup>
-      <ScrollableFlexItem grow={2}>
+      <ScrollableFlexItem grow={2} id="scrollableNotes">
         <StyledPanel paddingSize="s">
           <EuiTitle>
             <h3>{NOTES}</h3>
           </EuiTitle>
           <EuiSpacer />
-          <NotePreviews eventIdToNoteIds={eventIdToNoteIds} notes={notes} timelineId={timelineId} />
+          <NotePreviews
+            eventIdToNoteIds={eventIdToNoteIds}
+            notes={notes}
+            timelineId={timelineId}
+            showTimelineDescription
+          />
           <EuiSpacer size="s" />
           {!isImmutable && (
-            <AddNote associateNote={associateNote} newNote={newNote} updateNewNote={setNewNote} />
+            <AddNote
+              associateNote={associateNote}
+              newNote={newNote}
+              updateNewNote={setNewNote}
+              autoFocusDisabled={!!scrollToTop}
+            />
           )}
         </StyledPanel>
       </ScrollableFlexItem>
       <VerticalRule />
-      <ScrollableFlexItem grow={1}>{EventDetailsContent ?? SidebarContent}</ScrollableFlexItem>
+      <ScrollableFlexItem grow={1}>{DetailsPanelContent ?? SidebarContent}</ScrollableFlexItem>
     </FullWidthFlexGroup>
   );
 };

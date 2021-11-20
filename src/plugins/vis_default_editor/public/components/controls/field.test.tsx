@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 
-import { IAggConfig, IndexPatternField } from 'src/plugins/data/public';
+import { IAggConfig, IndexPatternField, AggParam } from 'src/plugins/data/public';
 import { ComboBoxGroupedOptions } from '../../utils';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
 import { EditorVisState } from '../sidebar/state/reducers';
@@ -42,7 +42,7 @@ describe('FieldParamEditor component', () => {
     setTouched = jest.fn();
     onChange = jest.fn();
 
-    field = { displayName: 'bytes' } as IndexPatternField;
+    field = { displayName: 'bytes', type: 'bytes' } as IndexPatternField;
     option = { label: 'bytes', target: field };
     indexedFields = [
       {
@@ -52,7 +52,16 @@ describe('FieldParamEditor component', () => {
     ];
 
     defaultProps = {
-      agg: {} as IAggConfig,
+      agg: {
+        type: {
+          params: [
+            {
+              name: 'field',
+              filterFieldTypes: ['bytes'],
+            } as unknown as AggParam,
+          ],
+        },
+      } as IAggConfig,
       aggParam: {
         name: 'field',
         type: 'field',

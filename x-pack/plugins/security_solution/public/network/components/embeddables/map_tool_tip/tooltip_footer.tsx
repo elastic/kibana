@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,7 +14,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
 import styled from 'styled-components';
 import * as i18n from '../translations';
 
@@ -53,7 +54,7 @@ export const ToolTipFooterComponent = ({
               onClick={previousFeature}
               iconType="arrowLeft"
               aria-label="Next"
-              disabled={featureIndex <= 0}
+              isDisabled={featureIndex <= 0}
             />
             <EuiButtonIcon
               data-test-subj={'next-feature-button'}
@@ -61,7 +62,7 @@ export const ToolTipFooterComponent = ({
               onClick={nextFeature}
               iconType="arrowRight"
               aria-label="Next"
-              disabled={featureIndex >= totalFeatures - 1}
+              isDisabled={featureIndex >= totalFeatures - 1}
             />
           </span>
         </EuiFlexItem>

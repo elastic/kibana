@@ -1,15 +1,11 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Create a map with multiple layers and data sources
-
-++++
-<titleabbrev>Create a multilayer map</titleabbrev>
-++++
+== Build a map to compare metrics by country or region
 
 If you are new to **Maps**, this tutorial is a good place to start.
 It guides you through the common steps for working with your location data.
 
-You'll learn to:
+You will learn to:
 
 - Create a map with multiple layers and data sources
 - Use symbols, colors, and labels to style data values
@@ -38,8 +34,7 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 . Open the main menu, and then click *Dashboard*.
 . Click **Create dashboard**.
 . Set the time range to *Last 7 days*.
-. Click **Create new**.
-. Click **Maps**.
+. Click the **Create new Maps** icon image:maps/images/app_gis_icon.png[]
 
 [float]
 [[maps-add-choropleth-layer]]
@@ -54,25 +49,27 @@ and lighter shades will symbolize countries with less traffic.
 . From the **Layer** dropdown menu, select **World Countries**.
 
 . In **Statistics source**, set:
-** **Index pattern** to **kibana_sample_data_logs**
-** **Join field** to **geo.src**
+** **Data view** to **kibana_sample_data_logs**
+** **Join field** to **geo.dest**
 
 . Click **Add layer**.
 
 . In **Layer settings**, set:
 
-** **Name** to `Total Requests by Country`
+** **Name** to `Total Requests by Destination`
 ** **Opacity** to 50%
 
 . Add a Tooltip field:
 
-** Select **ISO 3166-1 alpha-2 code** and **name**.
-** Click **Add**.
+** **ISO 3166-1 alpha-2 code** is added by default.
+** Click **+ Add** to open field select.
+** Select **name** and click *Add*.
 
-. In **Layer style**, set:
+. In **Layer style**:
 
-** **Fill color** to the grey color ramp
-** **Border color** to white
+** Set **Fill color: As number** to the grey color ramp.
+** Set **Border color** to white.
+** Under **Label**, change **By value** to **Fixed**.
 
 . Click **Save & close**.
 +
@@ -98,7 +95,7 @@ The layer is only visible when users zoom in.
 
 . Click **Add layer**, and then click **Documents**.
 
-. Set **Index pattern** to **kibana_sample_data_logs**.
+. Set **Data view** to **kibana_sample_data_logs**.
 
 . Set **Scaling** to *Limits results to 10000.*
 
@@ -106,7 +103,7 @@ The layer is only visible when users zoom in.
 
 . In **Layer settings**, set:
 ** **Name** to `Actual Requests`
-** **Visibilty** to the range [9, 24]
+** **Visibility** to the range [9, 24]
 ** **Opacity** to 100%
 
 . Add a tooltip field and select **agent**, **bytes**, **clientip**, **host**,
@@ -132,15 +129,16 @@ more total bytes transferred, and smaller circles will symbolize
 grids with less bytes transferred.
 
 . Click **Add layer**, and select **Clusters and grids**.
-. Set **Index pattern** to **kibana_sample_data_logs**.
+. Set **Data view** to **kibana_sample_data_logs**.
 . Click **Add layer**.
 . In **Layer settings**, set:
 ** **Name** to `Total Requests and Bytes`
 ** **Visibility** to the range [0, 9]
 ** **Opacity** to 100%
-. Add a metric with:
-** **Aggregation** set to **Sum**
-** **Field** set to **bytes**
+. In **Metrics**:
+** Set **Aggregation** to **Count**.
+** Click **Add metric**.
+** Set **Aggregation** to **Sum** with **Field** set to **bytes**.
 . In **Layer style**, change **Symbol size**:
 ** Set the field select to *sum bytes*.
 ** Set the min size to 7 and the max size to 25 px.
@@ -156,10 +154,7 @@ image::maps/images/sample_data_web_logs.png[]
 === Step 4. Save the map
 Now that your map is complete, save it and return to the dashboard.
 
-. In the toolbar, click *Save*.
-. Enter `Tutorial web logs map` for the title.
-. Ensure *Add to Dashboard after saving* is enabled.
-. Click *Save and return*.
+. In the toolbar, click *Save and return*.
 
 [float]
 [[maps-embedding]]
@@ -168,15 +163,13 @@ Now that your map is complete, save it and return to the dashboard.
 View your geospatial data alongside a heat map and pie chart, and then filter the data.
 When you apply a filter in one panel, it is applied to all panels on the dashboard.
 
-. In the toolbar, click **Add** to open a list of objects that you can add to the dashboard.
-. Set the **Types** select to **Visualization**.
-. Add **[Logs] Heatmap** and **[Logs] Visitors by OS** to the dashboard.
+. Click **Add from library** to open a list of panels that you can add to the dashboard.
+. Add **[Logs] Unique Visitor Heatmap** and **[Logs] Bytes distribution** to the dashboard.
 +
 [role="screenshot"]
 image::maps/images/gs_dashboard_with_map.png[]
 
-. To filter for documents where **machine.os.keyword** is **osx**, click
-the **osx** slice in the pie chart.
+. To filter for documents with unusually high byte values, click and drag in the *Bytes distribution* chart.
 
 . Remove the filter by clicking **x** next to its name in the filter bar.
 

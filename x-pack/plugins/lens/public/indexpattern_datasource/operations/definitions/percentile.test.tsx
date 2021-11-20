@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,10 +17,13 @@ import { PercentileIndexPatternColumn } from './percentile';
 import { EuiFieldNumber } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
+import { TermsIndexPatternColumn } from './terms';
+
+const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
@@ -28,6 +32,11 @@ const defaultProps = {
     ...createMockedIndexPattern(),
     hasRestrictions: false,
   } as IndexPattern,
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('percentile', () => {
@@ -50,7 +59,7 @@ describe('percentile', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: '23rd percentile of a',
           dataType: 'number',
@@ -60,9 +69,58 @@ describe('percentile', () => {
           params: {
             percentile: 23,
           },
-        },
+        } as PercentileIndexPatternColumn,
       },
     };
+  });
+
+  describe('getPossibleOperationForField', () => {
+    it('should accept number', () => {
+      expect(
+        percentileOperation.getPossibleOperationForField({
+          name: 'bytes',
+          displayName: 'bytes',
+          type: 'number',
+          esTypes: ['long'],
+          searchable: true,
+          aggregatable: true,
+        })
+      ).toEqual({
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      });
+    });
+
+    it('should accept histogram', () => {
+      expect(
+        percentileOperation.getPossibleOperationForField({
+          name: 'response_time',
+          displayName: 'response_time',
+          type: 'histogram',
+          esTypes: ['histogram'],
+          searchable: true,
+          aggregatable: true,
+        })
+      ).toEqual({
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      });
+    });
+
+    it('should reject keywords', () => {
+      expect(
+        percentileOperation.getPossibleOperationForField({
+          name: 'origin',
+          displayName: 'origin',
+          type: 'string',
+          esTypes: ['keyword'],
+          searchable: true,
+          aggregatable: true,
+        })
+      ).toBeUndefined();
+    });
   });
 
   describe('toEsAggsFn', () => {
@@ -72,12 +130,14 @@ describe('percentile', () => {
         percentileColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
-            percents: [23],
+            percentile: [23],
             field: ['a'],
           }),
         })
@@ -128,6 +188,70 @@ describe('percentile', () => {
       expect(percentileColumn.params.percentile).toEqual(95);
       expect(percentileColumn.label).toEqual('95th percentile of test');
     });
+
+    it('should create a percentile from formula', () => {
+      const indexPattern = createMockedIndexPattern();
+      const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
+      bytesField.displayName = 'test';
+      const percentileColumn = percentileOperation.buildColumn(
+        {
+          indexPattern,
+          field: bytesField,
+          layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+        },
+        { percentile: 75 }
+      );
+      expect(percentileColumn.dataType).toEqual('number');
+      expect(percentileColumn.params.percentile).toEqual(75);
+      expect(percentileColumn.label).toEqual('75th percentile of test');
+    });
+
+    it('should create a percentile from formula with filter', () => {
+      const indexPattern = createMockedIndexPattern();
+      const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
+      bytesField.displayName = 'test';
+      const percentileColumn = percentileOperation.buildColumn(
+        {
+          indexPattern,
+          field: bytesField,
+          layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+        },
+        { percentile: 75, kql: 'bytes > 100' }
+      );
+      expect(percentileColumn.dataType).toEqual('number');
+      expect(percentileColumn.params.percentile).toEqual(75);
+      expect(percentileColumn.filter).toEqual({ language: 'kuery', query: 'bytes > 100' });
+      expect(percentileColumn.label).toEqual('75th percentile of test');
+    });
+  });
+
+  describe('isTransferable', () => {
+    it('should transfer from number to histogram', () => {
+      const indexPattern = createMockedIndexPattern();
+      indexPattern.getFieldByName = jest.fn().mockReturnValue({
+        name: 'response_time',
+        displayName: 'response_time',
+        type: 'histogram',
+        esTypes: ['histogram'],
+        aggregatable: true,
+      });
+      expect(
+        percentileOperation.isTransferable(
+          {
+            label: '',
+            sourceField: 'response_time',
+            isBucketed: false,
+            dataType: 'number',
+            operationType: 'percentile',
+            params: {
+              percentile: 95,
+            },
+          },
+          indexPattern,
+          {}
+        )
+      ).toBeTruthy();
+    });
   });
 
   describe('param editor', () => {
@@ -163,12 +287,12 @@ describe('percentile', () => {
 
       jest.runAllTimers();
 
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiFieldNumber);
+      const input = instance.find(
+        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
+      );
 
       await act(async () => {
-        input.prop('onChange')!({ target: { value: '27' } } as React.ChangeEvent<HTMLInputElement>);
+        input.simulate('change', { target: { value: '27' } });
       });
 
       instance.update();
@@ -204,14 +328,12 @@ describe('percentile', () => {
 
       jest.runAllTimers();
 
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiFieldNumber);
+      const input = instance.find(
+        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
+      );
 
       await act(async () => {
-        input.prop('onChange')!({
-          target: { value: '12.12' },
-        } as React.ChangeEvent<HTMLInputElement>);
+        input.simulate('change', { target: { value: '12.12' } });
       });
 
       instance.update();

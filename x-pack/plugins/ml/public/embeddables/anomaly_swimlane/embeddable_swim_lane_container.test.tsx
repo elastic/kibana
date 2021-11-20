@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -18,9 +19,10 @@ import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { SwimlaneContainer } from '../../application/explorer/swimlane_container';
 import { MlDependencies } from '../../application/app';
-import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
 import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
+import { createCoreStartMock } from '../../__mocks__/core_start';
+import { createMlStartDepsMock } from '../../__mocks__/ml_start_deps';
 
 jest.mock('./swimlane_input_resolver', () => ({
   useSwimlaneInputResolver: jest.fn(() => {
@@ -53,17 +55,15 @@ describe('ExplorerSwimlaneContainer', () => {
       id: 'test-swimlane-embeddable',
     } as Partial<AnomalySwimlaneEmbeddableInput>);
 
-    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
+    trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
 
-    const uiActionsMock = uiActionsPluginMock.createStartContract();
-    uiActionsMock.getTrigger.mockReturnValue(trigger);
+    const mlStartMock = createMlStartDepsMock();
+    mlStartMock.uiActions.getTrigger.mockReturnValue(trigger);
 
-    services = ([
-      {},
-      {
-        uiActions: uiActionsMock,
-      },
-    ] as unknown) as ExplorerSwimlaneContainerProps['services'];
+    services = [
+      createCoreStartMock(),
+      mlStartMock,
+    ] as unknown as ExplorerSwimlaneContainerProps['services'];
   });
 
   test('should render a swimlane with a valid embeddable input', async () => {
@@ -106,7 +106,7 @@ describe('ExplorerSwimlaneContainer', () => {
       defaultOptions
     );
 
-    const calledWith = ((SwimlaneContainer as unknown) as jest.Mock<typeof SwimlaneContainer>).mock
+    const calledWith = (SwimlaneContainer as unknown as jest.Mock<typeof SwimlaneContainer>).mock
       .calls[0][0];
 
     expect(calledWith).toMatchObject({

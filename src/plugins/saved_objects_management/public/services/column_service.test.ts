@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { spacesPluginMock } from '../../../../../x-pack/plugins/spaces/public/mocks';
+// import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import {
   SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
@@ -40,8 +42,11 @@ describe('SavedObjectsManagementColumnRegistry', () => {
     it('allows columns to be registered and retrieved', () => {
       const column = createColumn('foo');
       setup.register(column);
-      const start = service.start();
-      expect(start.getAll()).toContain(column);
+      const start = service.start(spacesPluginMock.createStartContract());
+      expect(start.getAll()).toEqual([
+        column,
+        // expect.any(ShareToSpaceSavedObjectsManagementColumn),
+      ]);
     });
 
     it('does not allow columns with duplicate ids to be registered', () => {

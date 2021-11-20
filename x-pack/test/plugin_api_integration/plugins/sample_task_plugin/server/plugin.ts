@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -14,6 +15,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
+  EphemeralTask,
 } from '../../../../../plugins/task_manager/server';
 import { DEFAULT_MAX_WORKERS } from '../../../../../plugins/task_manager/server/config';
 
@@ -27,7 +29,8 @@ export interface SampleTaskManagerFixtureStartDeps {
 
 export class SampleTaskManagerFixturePlugin
   implements
-    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps> {
+    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
+{
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
     .pipe(first())
@@ -36,6 +39,8 @@ export class SampleTaskManagerFixturePlugin
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
+
+    const tmStart = this.taskManagerStart;
 
     const defaultSampleTaskConfig = {
       timeout: '1m',
@@ -65,7 +70,8 @@ export class SampleTaskManagerFixturePlugin
             }
           }
 
-          await core.elasticsearch.legacy.client.callAsInternalUser('index', {
+          const [{ elasticsearch }] = await core.getStartServices();
+          await elasticsearch.client.asInternalUser.index({
             index: '.kibana_task_manager_test_result',
             body: {
               type: 'task',
@@ -104,6 +110,20 @@ export class SampleTaskManagerFixturePlugin
         // fail after the first failed run
         maxAttempts: 1,
       },
+      sampleTaskWithSingleConcurrency: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Single Concurrency',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that can only have one concurrent instance.',
+      },
+      sampleTaskWithLimitedConcurrency: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Max Concurrency of 2',
+        maxConcurrency: 2,
+        timeout: '60s',
+        description: 'A sample task that can only have two concurrent instance.',
+      },
       sampleRecurringTaskTimingOut: {
         title: 'Sample Recurring Task that Times Out',
         description: 'A sample task that times out each run.',
@@ -135,6 +155,85 @@ export class SampleTaskManagerFixturePlugin
         createTaskRunner: () => ({
           async run() {
             return await new Promise((resolve) => {});
+          },
+        }),
+      },
+    });
+
+    const taskWithTiming = {
+      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+        async run() {
+          const stopTiming = startTaskTimer();
+
+          const {
+            params: { delay = 0 },
+            state: { timings = [] },
+          } = taskInstance;
+
+          if (delay) {
+            await new Promise((resolve) => {
+              setTimeout(resolve, delay);
+            });
+          }
+
+          return {
+            state: { timings: [...timings, stopTiming()] },
+          };
+        },
+      }),
+    };
+
+    taskManager.registerTaskDefinitions({
+      timedTask: {
+        title: 'Task With Tracked Timings',
+        timeout: '60s',
+        description: 'A task that tracks its execution timing.',
+        ...taskWithTiming,
+      },
+      timedTaskWithSingleConcurrency: {
+        title: 'Task With Tracked Timings and Single Concurrency',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description:
+          'A task that can only have one concurrent instance and tracks its execution timing.',
+        ...taskWithTiming,
+      },
+      timedTaskWithLimitedConcurrency: {
+        title: 'Task With Tracked Timings and Limited Concurrency',
+        maxConcurrency: 2,
+        timeout: '60s',
+        description:
+          'A task that can only have two concurrent instance and tracks its execution timing.',
+        ...taskWithTiming,
+      },
+      taskWhichExecutesOtherTasksEphemerally: {
+        title: 'Task Which Executes Other Tasks Ephemerally',
+        description: 'A sample task used to validate how ephemeral tasks are executed.',
+        maxAttempts: 1,
+        timeout: '60s',
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const {
+              params: { tasks = [] },
+            } = taskInstance;
+
+            const tm = await tmStart;
+            const executions = await Promise.all(
+              (tasks as EphemeralTask[]).map(async (task) => {
+                return tm
+                  .ephemeralRunNow(task)
+                  .then((result) => ({
+                    result,
+                  }))
+                  .catch((error) => ({
+                    error,
+                  }));
+              })
+            );
+
+            return {
+              state: { executions },
+            };
           },
         }),
       },
@@ -173,7 +272,7 @@ export class SampleTaskManagerFixturePlugin
         return context;
       },
     });
-    initRoutes(core.http.createRouter(), core, this.taskManagerStart, taskTestingEvents);
+    initRoutes(core.http.createRouter(), this.taskManagerStart, taskTestingEvents);
   }
 
   public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {
@@ -198,3 +297,8 @@ const once = function (emitter: EventEmitter, event: string): Promise<Record<str
     emitter.once(event, (data) => resolve(data || {}));
   });
 };
+
+function startTaskTimer(): () => { start: number; stop: number } {
+  const start = Date.now();
+  return () => ({ start, stop: Date.now() });
+}

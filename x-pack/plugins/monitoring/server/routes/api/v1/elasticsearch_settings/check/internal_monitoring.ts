@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
 } from '../../../../../../common/constants';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../../common/ccs_utils';
 // @ts-ignore
 import { handleError } from '../../../../../lib/errors';
-import { RouteDependencies } from '../../../../../types';
+import { RouteDependencies, LegacyServer } from '../../../../../types';
 
 const queryBody = {
   size: 0,
@@ -43,11 +45,11 @@ const queryBody = {
 };
 
 const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, index: string) => {
-  const { client: esClient } = context.core.elasticsearch.legacy;
-  const result = await esClient.callAsCurrentUser('search', {
+  const client = context.core.elasticsearch.client.asCurrentUser;
+  const { body: result } = await client.search<estypes.SearchResponse<unknown>>({
     index,
     body: queryBody,
-  });
+  } as estypes.SearchRequest);
 
   const { aggregations } = result;
   const counts = {
@@ -61,17 +63,14 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
 
   const {
     types: { buckets },
-  } = aggregations;
+  } = aggregations as { types: { buckets: Array<{ key: string }> } };
   counts.mbIndicesCount = buckets.filter(({ key }: { key: string }) => key.includes('-mb-')).length;
 
   counts.legacyIndicesCount = buckets.length - counts.mbIndicesCount;
   return counts;
 };
 
-export function internalMonitoringCheckRoute(
-  server: { config: () => unknown },
-  npRoute: RouteDependencies
-) {
+export function internalMonitoringCheckRoute(server: LegacyServer, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',

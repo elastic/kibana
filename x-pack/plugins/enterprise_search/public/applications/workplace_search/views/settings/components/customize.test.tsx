@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiFieldText } from '@elastic/eui';
 
 import { ContentSection } from '../../../components/shared/content_section';
 
+import { BrandingSection } from './branding_section';
 import { Customize } from './customize';
 
 describe('Customize', () => {
@@ -30,6 +33,7 @@ describe('Customize', () => {
     const wrapper = shallow(<Customize />);
 
     expect(wrapper.find(ContentSection)).toHaveLength(1);
+    expect(wrapper.find(BrandingSection)).toHaveLength(2);
   });
 
   it('handles input change', () => {

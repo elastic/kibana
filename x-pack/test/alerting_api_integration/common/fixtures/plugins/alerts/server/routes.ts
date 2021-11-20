@@ -1,22 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import uuid from 'uuid';
 import {
   CoreSetup,
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
+  Logger,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerts/server/types';
-import { RawAlert } from '../../../../../../../plugins/alerts/server/types';
-import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
+import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerting/server/types';
+import { RawAlert } from '../../../../../../../plugins/alerting/server/types';
+import {
+  ConcreteTaskInstance,
+  TaskInstance,
+} from '../../../../../../../plugins/task_manager/server';
 import { FixtureStartDeps } from './plugin';
+import { retryIfConflicts } from './lib/retry_if_conflicts';
 
-export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
+export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { logger: Logger }) {
   const router = core.http.createRouter();
   router.put(
     {
@@ -37,10 +45,8 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
     ): Promise<IKibanaResponse<any>> => {
       const { id } = req.params;
 
-      const [
-        { savedObjects },
-        { encryptedSavedObjects, security, spaces },
-      ] = await core.getStartServices();
+      const [{ savedObjects }, { encryptedSavedObjects, security, spaces }] =
+        await core.getStartServices();
       if (!security) {
         return res.ok({
           body: {},
@@ -64,7 +70,7 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
 
       const user = await security.authc.getCurrentUser(req);
       if (!user) {
-        return res.internalError({});
+        throw new Error('Failed to get the current user');
       }
 
       // Create an API key using the new grant API - in this case the Kibana system user is creating the
@@ -76,31 +82,38 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
       });
 
       if (!createAPIKeyResult) {
-        return res.internalError({});
+        throw new Error('Failed to grant an API Key');
       }
 
-      const result = await savedObjectsWithAlerts.update<RawAlert>(
-        'alert',
-        id,
-        {
-          ...(
-            await encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawAlert>(
-              'alert',
-              id,
-              {
-                namespace,
-              }
-            )
-          ).attributes,
-          apiKey: Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
-            'base64'
-          ),
-          apiKeyOwner: user.username,
-        },
-        {
-          namespace,
+      const result = await retryIfConflicts(
+        logger,
+        `/api/alerts_fixture/${id}/replace_api_key`,
+        async () => {
+          return await savedObjectsWithAlerts.update<RawAlert>(
+            'alert',
+            id,
+            {
+              ...(
+                await encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawAlert>(
+                  'alert',
+                  id,
+                  {
+                    namespace,
+                  }
+                )
+              ).attributes,
+              apiKey: Buffer.from(
+                `${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`
+              ).toString('base64'),
+              apiKeyOwner: user.username,
+            },
+            {
+              namespace,
+            }
+          );
         }
       );
+
       return res.ok({ body: result });
     }
   );
@@ -142,11 +155,17 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
         includedHiddenTypes: ['alert'],
       });
       const savedAlert = await savedObjectsWithAlerts.get<RawAlert>(type, id);
-      const result = await savedObjectsWithAlerts.update(
-        type,
-        id,
-        { ...savedAlert.attributes, ...attributes },
-        options
+      const result = await retryIfConflicts(
+        logger,
+        `/api/alerts_fixture/saved_object/${type}/${id}`,
+        async () => {
+          return await savedObjectsWithAlerts.update(
+            type,
+            id,
+            { ...savedAlert.attributes, ...attributes },
+            options
+          );
+        }
       );
       return res.ok({ body: result });
     }
@@ -154,10 +173,10 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
 
   router.put(
     {
-      path: '/api/alerts_fixture/{id}/reschedule_task',
+      path: '/api/alerts_fixture/{taskId}/reschedule_task',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          taskId: schema.string(),
         }),
         body: schema.object({
           runAt: schema.string(),
@@ -169,18 +188,61 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> => {
-      const { id } = req.params;
+      const { taskId } = req.params;
       const { runAt } = req.body;
 
       const [{ savedObjects }] = await core.getStartServices();
       const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
         includedHiddenTypes: ['task', 'alert'],
       });
+      const result = await retryIfConflicts(
+        logger,
+        `/api/alerts_fixture/${taskId}/reschedule_task`,
+        async () => {
+          return await savedObjectsWithTasksAndAlerts.update<TaskInstance>('task', taskId, {
+            runAt,
+          });
+        }
+      );
+      return res.ok({ body: result });
+    }
+  );
+
+  router.put(
+    {
+      path: '/api/alerts_fixture/{id}/reset_task_status',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          status: schema.string(),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const [{ savedObjects }] = await core.getStartServices();
+      const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
+        includedHiddenTypes: ['task', 'alert'],
+      });
       const alert = await savedObjectsWithTasksAndAlerts.get<RawAlert>('alert', id);
-      const result = await savedObjectsWithTasksAndAlerts.update<TaskInstance>(
-        'task',
-        alert.attributes.scheduledTaskId!,
-        { runAt }
+      const result = await retryIfConflicts(
+        logger,
+        `/api/alerts_fixture/{id}/reset_task_status`,
+        async () => {
+          return await savedObjectsWithTasksAndAlerts.update<ConcreteTaskInstance>(
+            'task',
+            alert.attributes.scheduledTaskId!,
+            { status }
+          );
+        }
       );
       return res.ok({ body: result });
     }
@@ -207,6 +269,55 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
         return res.ok({
           body: { apiKeysToInvalidate: findResult.saved_objects },
         });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/{id}/enqueue_action',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          params: schema.recordOf(schema.string(), schema.any()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [, { actions, security, spaces }] = await core.getStartServices();
+        const actionsClient = await actions.getActionsClientWithRequest(req);
+
+        const createAPIKeyResult =
+          security &&
+          (await security.authc.apiKeys.grantAsInternalUser(req, {
+            name: `alerts_fixture:enqueue_action:${uuid.v4()}`,
+            role_descriptors: {},
+          }));
+
+        await actionsClient.enqueueExecution({
+          id: req.params.id,
+          spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+          apiKey: createAPIKeyResult
+            ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
+                'base64'
+              )
+            : null,
+          params: req.body.params,
+          source: {
+            type: 'HTTP_REQUEST' as any,
+            source: req,
+          },
+        });
+        return res.noContent();
       } catch (err) {
         return res.badRequest({ body: err });
       }

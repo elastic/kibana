@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const mockStreamWrite = jest.fn();
@@ -15,15 +15,11 @@ jest.mock('fs', () => ({
 
 const dynamicProps = { process: { pid: expect.any(Number) } };
 
-jest.mock('@kbn/legacy-logging', () => ({
-  setupLoggingRotate: jest.fn().mockImplementation(() => Promise.resolve({})),
-}));
-
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 let mockConsoleLog: jest.SpyInstance;
 
 import { createWriteStream } from 'fs';
-const mockCreateWriteStream = (createWriteStream as unknown) as jest.Mock<typeof createWriteStream>;
+const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof createWriteStream>;
 
 import { LoggingSystem, config } from '.';
 
@@ -46,8 +42,9 @@ test('uses default memory buffer logger until config is provided', () => {
   const logger = system.get('test', 'context');
   logger.trace('trace message');
 
-  // We shouldn't create new buffer appender for another context.
+  // We shouldn't create new buffer appender for another context name.
   const anotherLogger = system.get('test', 'context2');
+  // @ts-expect-error ECS custom meta
   anotherLogger.fatal('fatal message', { some: 'value' });
 
   expect(bufferAppendSpy).toHaveBeenCalledTimes(2);
@@ -61,6 +58,7 @@ test('flushes memory buffer logger and switches to real logger once config is pr
   const logger = system.get('test', 'context');
 
   logger.trace('buffered trace message');
+  // @ts-expect-error ECS custom meta
   logger.info('buffered info message', { some: 'value' });
   logger.fatal('buffered fatal message');
 
@@ -69,7 +67,7 @@ test('flushes memory buffer logger and switches to real logger once config is pr
   // Switch to console appender with `info` level, so that `trace` message won't go through.
   await system.upgrade(
     config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
       root: { level: 'info' },
     })
   );
@@ -102,12 +100,12 @@ test('appends records via multiple appenders.', async () => {
   await system.upgrade(
     config.schema.validate({
       appenders: {
-        default: { kind: 'console', layout: { kind: 'pattern' } },
-        file: { kind: 'file', layout: { kind: 'pattern' }, path: 'path' },
+        default: { type: 'console', layout: { type: 'pattern' } },
+        file: { type: 'file', layout: { type: 'pattern' }, fileName: 'path' },
       },
       loggers: [
-        { appenders: ['file'], context: 'tests', level: 'warn' },
-        { context: 'tests.child', level: 'error' },
+        { appenders: ['file'], name: 'tests', level: 'warn' },
+        { name: 'tests.child', level: 'error' },
       ],
     })
   );
@@ -121,10 +119,10 @@ test('appends records via multiple appenders.', async () => {
   expect(mockStreamWrite.mock.calls[1][0]).toMatchSnapshot('file logs');
 });
 
-test('uses `root` logger if context is not specified.', async () => {
+test('uses `root` logger if context name is not specified.', async () => {
   await system.upgrade(
     config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'pattern' } } },
+      appenders: { default: { type: 'console', layout: { type: 'pattern' } } },
     })
   );
 
@@ -134,10 +132,81 @@ test('uses `root` logger if context is not specified.', async () => {
   expect(mockConsoleLog.mock.calls).toMatchSnapshot();
 });
 
+test('attaches appenders to appenders that declare refs', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: {
+        console: {
+          type: 'console',
+          layout: { type: 'pattern', pattern: '[%logger] %message %meta' },
+        },
+        file: {
+          type: 'file',
+          layout: { type: 'pattern', pattern: '[%logger] %message %meta' },
+          fileName: 'path',
+        },
+        rewrite: {
+          type: 'rewrite',
+          appenders: ['console', 'file'],
+          policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+        },
+      },
+      loggers: [{ name: 'tests', level: 'warn', appenders: ['rewrite'] }],
+    })
+  );
+
+  const testLogger = system.get('tests');
+  // @ts-expect-error ECS custom meta
+  testLogger.warn('This message goes to a test context.', { a: 'hi', b: 'remove me' });
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+  expect(mockConsoleLog.mock.calls[0][0]).toMatchInlineSnapshot(
+    `"[tests] This message goes to a test context. {\\"a\\":\\"hi\\"}"`
+  );
+
+  expect(mockStreamWrite).toHaveBeenCalledTimes(1);
+  expect(mockStreamWrite.mock.calls[0][0]).toMatchInlineSnapshot(`
+    "[tests] This message goes to a test context. {\\"a\\":\\"hi\\"}
+    "
+  `);
+});
+
+test('throws if a circular appender reference is detected', async () => {
+  expect(async () => {
+    await system.upgrade(
+      config.schema.validate({
+        appenders: {
+          console: { type: 'console', layout: { type: 'pattern' } },
+          a: {
+            type: 'rewrite',
+            appenders: ['b'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+          b: {
+            type: 'rewrite',
+            appenders: ['c'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+          c: {
+            type: 'rewrite',
+            appenders: ['console', 'a'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+        },
+        loggers: [{ name: 'tests', level: 'warn', appenders: ['a'] }],
+      })
+    );
+  }).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Circular appender reference detected: [b -> c -> a -> b]"`
+  );
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(0);
+});
+
 test('`stop()` disposes all appenders.', async () => {
   await system.upgrade(
     config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
       root: { level: 'info' },
     })
   );
@@ -156,12 +225,13 @@ test('asLoggerFactory() only allows to create new loggers.', async () => {
 
   await system.upgrade(
     config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
       root: { level: 'all' },
     })
   );
 
   logger.trace('buffered trace message');
+  // @ts-expect-error ECS custom meta
   logger.info('buffered info message', { some: 'value' });
   logger.fatal('buffered fatal message');
 
@@ -180,7 +250,7 @@ test('setContextConfig() updates config with relative contexts', async () => {
 
   await system.upgrade(
     config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
       root: { level: 'info' },
     })
   );
@@ -189,10 +259,10 @@ test('setContextConfig() updates config with relative contexts', async () => {
     appenders: new Map([
       [
         'custom',
-        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+        { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
   });
 
   testsLogger.warn('tests log to default!');
@@ -235,7 +305,7 @@ test('setContextConfig() updates config for a root context', async () => {
 
   await system.upgrade(
     config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
       root: { level: 'info' },
     })
   );
@@ -244,10 +314,10 @@ test('setContextConfig() updates config for a root context', async () => {
     appenders: new Map([
       [
         'custom',
-        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+        { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: '', appenders: ['custom'], level: 'debug' }],
+    loggers: [{ name: '', appenders: ['custom'], level: 'debug' }],
   });
 
   testsLogger.warn('tests log to default!');
@@ -273,21 +343,21 @@ test('setContextConfig() updates config for a root context', async () => {
   );
 });
 
-test('custom context configs are applied on subsequent calls to update()', async () => {
+test('custom context name configs are applied on subsequent calls to update()', async () => {
   await system.setContextConfig(['tests', 'child'], {
     appenders: new Map([
       [
         'custom',
-        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+        { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
   });
 
   // Calling upgrade after setContextConfig should not throw away the context-specific config
   await system.upgrade(
     config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
       root: { level: 'info' },
     })
   );
@@ -310,10 +380,10 @@ test('custom context configs are applied on subsequent calls to update()', async
   );
 });
 
-test('subsequent calls to setContextConfig() for the same context override the previous config', async () => {
+test('subsequent calls to setContextConfig() for the same context name override the previous config', async () => {
   await system.upgrade(
     config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
       root: { level: 'info' },
     })
   );
@@ -322,10 +392,10 @@ test('subsequent calls to setContextConfig() for the same context override the p
     appenders: new Map([
       [
         'custom',
-        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+        { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
   });
 
   // Call again, this time with level: 'warn' and a different pattern
@@ -334,12 +404,12 @@ test('subsequent calls to setContextConfig() for the same context override the p
       [
         'custom',
         {
-          kind: 'console',
-          layout: { kind: 'pattern', pattern: '[%level][%logger] second pattern! %message' },
+          type: 'console',
+          layout: { type: 'pattern', pattern: '[%level][%logger] second pattern! %message' },
         },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'warn' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'warn' }],
   });
 
   const logger = system.get('tests', 'child', 'grandchild');
@@ -360,10 +430,10 @@ test('subsequent calls to setContextConfig() for the same context override the p
   );
 });
 
-test('subsequent calls to setContextConfig() for the same context can disable the previous config', async () => {
+test('subsequent calls to setContextConfig() for the same context name can disable the previous config', async () => {
   await system.upgrade(
     config.schema.validate({
-      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
       root: { level: 'info' },
     })
   );
@@ -372,10 +442,10 @@ test('subsequent calls to setContextConfig() for the same context can disable th
     appenders: new Map([
       [
         'custom',
-        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+        { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
   });
 
   // Call again, this time no customizations (effectively disabling)
@@ -394,4 +464,60 @@ test('subsequent calls to setContextConfig() for the same context can disable th
       logger: 'tests.child.grandchild',
     },
   });
+});
+
+test('buffers log records for already created appenders', async () => {
+  // a default config
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const logger = system.get('test', 'context');
+
+  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+
+  const upgradePromise = system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'all' },
+    })
+  );
+
+  logger.trace('message to the known context');
+  expect(bufferAppendSpy).toHaveBeenCalledTimes(1);
+  expect(mockConsoleLog).toHaveBeenCalledTimes(0);
+
+  await upgradePromise;
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0]).message).toBe('message to the known context');
+});
+
+test('buffers log records for appenders created during config upgrade', async () => {
+  // a default config
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+
+  const upgradePromise = system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'all' },
+    })
+  );
+
+  const logger = system.get('test', 'context');
+  logger.trace('message to a new context');
+
+  expect(bufferAppendSpy).toHaveBeenCalledTimes(1);
+  expect(mockConsoleLog).toHaveBeenCalledTimes(0);
+
+  await upgradePromise;
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0]).message).toBe('message to a new context');
 });

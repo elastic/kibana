@@ -1,17 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
+import SemVer from 'semver/classes/semver';
 
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart, CoreSetup } from '../../../../../src/core/public';
 
 import { API_BASE_PATH } from '../../common';
-import { createKibanaReactContext, GlobalFlyout } from '../shared_imports';
+import {
+  createKibanaReactContext,
+  GlobalFlyout,
+  useKibana as useKibanaReactPlugin,
+} from '../shared_imports';
 
 import { AppContextProvider, AppDependencies } from './app_context';
 import { App } from './app';
@@ -30,12 +36,16 @@ export const renderApp = (
 
   const { i18n, docLinks, notifications, application } = core;
   const { Context: I18nContext } = i18n;
-  const { services, history, setBreadcrumbs, uiSettings } = dependencies;
+  const { services, history, setBreadcrumbs, uiSettings, kibanaVersion } = dependencies;
 
   // uiSettings is required by the CodeEditor component used to edit runtime field Painless scripts.
-  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-    uiSettings,
-  });
+  const { Provider: KibanaReactContextProvider } =
+    createKibanaReactContext<KibanaReactContextServices>({
+      uiSettings,
+      kibanaVersion: {
+        get: () => kibanaVersion,
+      },
+    });
 
   const componentTemplateProviderValues = {
     httpClient: services.httpService.httpClient,
@@ -71,4 +81,17 @@ export const renderApp = (
   };
 };
 
-export { AppDependencies };
+interface KibanaReactContextServices {
+  uiSettings: CoreSetup['uiSettings'];
+  kibanaVersion: {
+    get: () => SemVer;
+  };
+}
+
+// We override useKibana() from the react plugin to return a typed version for this app
+const useKibana = () => {
+  return useKibanaReactPlugin<KibanaReactContextServices>();
+};
+
+export type { AppDependencies };
+export { useKibana };

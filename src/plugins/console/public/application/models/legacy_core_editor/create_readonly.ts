@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -13,7 +13,7 @@ import * as OutputMode from './mode/output';
 import smartResize from './smart_resize';
 
 export interface CustomAceEditor extends ace.Editor {
-  update: (text: string, mode?: any, cb?: () => void) => void;
+  update: (text: string, mode?: unknown, cb?: () => void) => void;
   append: (text: string, foldPrevious?: boolean, cb?: () => void) => void;
 }
 
@@ -28,9 +28,9 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
 
   output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
-  output.update = (val: string, mode?: any, cb?: () => void) => {
+  output.update = (val: string, mode?: unknown, cb?: () => void) => {
     if (typeof mode === 'function') {
-      cb = mode;
+      cb = mode as () => void;
       mode = void 0;
     }
 
@@ -65,7 +65,7 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
 
   (function setupSession(session) {
     session.setMode('ace/mode/text');
-    (session as any).setFoldStyle('markbeginend');
+    (session as unknown as { setFoldStyle: (v: string) => void }).setFoldStyle('markbeginend');
     session.setTabSize(2);
     session.setUseWrapMode(true);
   })(output.getSession());

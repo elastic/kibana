@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
 
+import { EuiCodeEditor } from '../code_editor';
 import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props<T extends object = { [key: string]: any }> {
@@ -31,7 +32,12 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
   euiCodeEditorProps,
   error: propsError,
 }: Props<T>) {
-  const { content, setContent, error: internalError, isControlled } = useJson<T>({
+  const {
+    content,
+    setContent,
+    error: internalError,
+    isControlled,
+  } = useJson<T>({
     defaultValue,
     onUpdate,
     value,

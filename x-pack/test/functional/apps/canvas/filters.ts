@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -13,20 +14,24 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/filter';
 
   describe('filters', function () {
     // there is an issue with FF not properly clicking on workpad elements
     this.tags('skipFirefox');
 
     before(async () => {
-      await esArchiver.load('canvas/filter');
+      await kibanaServer.importExport.load(archive);
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-b5618217-56d2-47fa-b756-1be2306cda68/page/1',
       });
     });
 
+    after(async () => {
+      await kibanaServer.importExport.unload(archive);
+    });
     it('filter updates when dropdown is changed', async () => {
       // wait for all our elements to load up
       await retry.try(async () => {

@@ -1,84 +1,85 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function UpgradeAssistantPageProvider({ getPageObjects, getService }: FtrProviderContext) {
-  const retry = getService('retry');
-  const log = getService('log');
-  const browser = getService('browser');
-  const find = getService('find');
-  const testSubjects = getService('testSubjects');
-  const { common } = getPageObjects(['common']);
+export class UpgradeAssistantPageObject extends FtrService {
+  private readonly retry = this.ctx.getService('retry');
+  private readonly log = this.ctx.getService('log');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly common = this.ctx.getPageObject('common');
 
-  class UpgradeAssistant {
-    async initTests() {
-      log.debug('UpgradeAssistant:initTests');
-    }
+  async initTests() {
+    this.log.debug('UpgradeAssistant:initTests');
+  }
 
-    async navigateToPage() {
-      return await retry.try(async () => {
-        await common.navigateToApp('settings');
-        await testSubjects.click('upgrade_assistant');
+  async navigateToPage() {
+    return await this.retry.try(async () => {
+      await this.common.navigateToApp('settings');
+      await this.testSubjects.click('upgrade_assistant');
+      await this.retry.waitFor('url to contain /upgrade_assistant', async () => {
+        const url = await this.browser.getCurrentUrl();
+        return url.includes('/upgrade_assistant');
       });
-    }
+    });
+  }
 
-    async expectUpgradeAssistant() {
-      return await retry.try(async () => {
-        log.debug(`expectUpgradeAssistant()`);
-        expect(await testSubjects.exists('upgradeAssistantRoot')).to.equal(true);
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`/upgrade_assistant`);
-      });
-    }
+  async clickEsDeprecationsPanel() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('esStatsPanel');
+    });
+  }
 
-    async toggleDeprecationLogging() {
-      return await retry.try(async () => {
-        log.debug('toggleDeprecationLogging()');
-        await testSubjects.click('upgradeAssistantDeprecationToggle');
-      });
-    }
+  async clickDeprecationLoggingToggle() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('deprecationLoggingToggle');
+    });
+  }
 
-    async expectDeprecationLoggingLabel(labelText: string) {
-      return await retry.try(async () => {
-        log.debug('expectDeprecationLoggingLabel()');
-        const label = await find.byCssSelector(
-          '[data-test-subj="upgradeAssistantDeprecationToggle"] ~ span'
-        );
-        const value = await label.getVisibleText();
-        expect(value).to.equal(labelText);
-      });
-    }
+  async clickResetLastCheckpointButton() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('resetLastStoredDate');
+    });
+  }
 
-    async clickTab(tabId: string) {
-      return await retry.try(async () => {
-        log.debug('clickTab()');
-        await find.clickByCssSelector(`.euiTabs .euiTab#${tabId}`);
-      });
-    }
+  async clickKibanaDeprecationsPanel() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('kibanaStatsPanel');
+    });
+  }
 
-    async expectIssueSummary(summary: string) {
-      return await retry.try(async () => {
-        log.debug('expectIssueSummary()');
-        const summaryElText = await testSubjects.getVisibleText('upgradeAssistantIssueSummary');
-        expect(summaryElText).to.eql(summary);
-      });
-    }
+  async clickKibanaDeprecation(selectedIssue: string) {
+    const table = await this.testSubjects.find('kibanaDeprecationsTable');
+    const rows = await table.findAllByTestSubject('row');
 
-    async expectTelemetryHasFinish() {
-      return await retry.try(async () => {
-        log.debug('expectTelemetryHasFinish');
-        const isTelemetryFinished = !(await testSubjects.exists(
-          'upgradeAssistantTelemetryRunning'
-        ));
-        expect(isTelemetryFinished).to.equal(true);
-      });
+    const selectedRow = rows.find(async (row) => {
+      const issue = await (await row.findByTestSubject('issueCell')).getVisibleText();
+      return issue === selectedIssue;
+    });
+
+    if (selectedRow) {
+      const issueLink = await selectedRow.findByTestSubject('deprecationDetailsLink');
+      await issueLink.click();
+    } else {
+      this.log.debug('Unable to find selected deprecation row');
     }
   }
 
-  return new UpgradeAssistant();
+  async clickEsDeprecation(deprecationType: 'indexSettings' | 'default' | 'reindex' | 'ml') {
+    const table = await this.testSubjects.find('esDeprecationsTable');
+    const deprecationIssueLink = await (
+      await table.findByTestSubject(`${deprecationType}TableCell-message`)
+    ).findByCssSelector('button');
+
+    if (deprecationIssueLink) {
+      await deprecationIssueLink.click();
+    } else {
+      this.log.debug('Unable to find selected deprecation');
+    }
+  }
 }

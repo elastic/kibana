@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReactWrapper } from 'enzyme';
@@ -42,6 +43,8 @@ export const getSettingsTrigger = (wrapper: ReactWrapper) =>
 export const getPopover = (wrapper: ReactWrapper) => wrapper.find('EuiPopover');
 
 export const getPortal = (wrapper: ReactWrapper) => wrapper.find('EuiPortal');
+
+export const getContextMenu = (wrapper: ReactWrapper) => wrapper.find('EuiContextMenu');
 
 export const getContextMenuItems = (wrapper: ReactWrapper) => wrapper.find('EuiContextMenuItem');
 

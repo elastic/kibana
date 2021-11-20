@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -22,15 +23,16 @@ import styled from 'styled-components';
 import {
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
+  SortFieldTimeline,
 } from '../../../../../common/types/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
-import { SortFieldTimeline, Direction } from '../../../../graphql/types';
 import { isUntitled } from '../../open_timeline/helpers';
 import * as i18nTimeline from '../../open_timeline/translations';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
+import { Direction } from '../../../../../common/search_strategy';
 
 const MyEuiFlexItem = styled(EuiFlexItem)`
   display: inline-block;
@@ -108,8 +110,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         selectableListOuterRef.current &&
         selectableListInnerRef.current
       ) {
-        const clientHeight = selectableListOuterRef.current!.clientHeight;
-        const scrollHeight = selectableListInnerRef.current!.clientHeight;
+        const clientHeight = selectableListOuterRef.current.clientHeight;
+        const scrollHeight = selectableListInnerRef.current.clientHeight;
         const clientHeightTrigger = clientHeight * 1.2;
         if (
           scrollOffset > 10 &&
@@ -202,7 +204,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       incremental: true,
       append: (
         <StyledEuiFilterButton
-          size="l"
           data-test-subj="only-favorites-toggle"
           hasActiveFilters={onlyFavorites}
           onClick={handleOnToggleOnlyFavorites}
@@ -221,7 +222,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       windowProps: {
         onScroll: ({ scrollOffset }) =>
           handleOnScroll(
-            timelines.filter((t) => !hideUntitled || t.title !== '').length,
+            (timelines ?? []).filter((t) => !hideUntitled || t.title !== '').length,
             timelineCount,
             scrollOffset
           ),
@@ -253,7 +254,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     <EuiSelectable
       data-test-subj="selectable-input"
       height={POPOVER_HEIGHT}
-      isLoading={loading && timelines.length === 0}
+      isLoading={loading && timelines == null}
       listProps={listProps}
       renderOption={renderTimelineOption}
       onChange={handleTimelineChange}
@@ -261,7 +262,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       searchProps={searchProps}
       singleSelection={true}
       options={getSelectableOptions({
-        timelines,
+        timelines: timelines ?? [],
         onlyFavorites,
         searchTimelineValue,
         timelineType,

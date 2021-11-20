@@ -2,8 +2,9 @@
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 const fetch = require('node-fetch');
@@ -15,8 +16,8 @@ if (require.main === module) main();
 async function main() {
   let response;
 
-  response = await httpPost('api/actions/action', {
-    actionTypeId: '.email',
+  response = await httpPost('api/actions/connector', {
+    connector_type_id: '.email',
     name: 'an email action',
     config: {
       from: 'patrick.mueller@elastic.co',
@@ -31,12 +32,12 @@ async function main() {
   });
   console.log(`result of create: ${JSON.stringify(response, null, 4)}`);
 
-  const actionId = response.id;
+  const connectorId = response.id;
 
-  response = await httpGet(`api/actions/${actionId}`);
+  response = await httpGet(`api/actions/${connectorId}`);
   console.log(`action after create: ${JSON.stringify(response, null, 4)}`);
 
-  response = await httpPut(`api/actions/action/${actionId}`, {
+  response = await httpPut(`api/actions/connector/${connectorId}`, {
     name: 'an email action',
     config: {
       from: 'patrick.mueller@elastic.co',
@@ -50,10 +51,10 @@ async function main() {
 
   console.log(`response from update: ${JSON.stringify(response, null, 4)}`);
 
-  response = await httpGet(`api/actions/${actionId}`);
+  response = await httpGet(`api/actions/${connectorId}`);
   console.log(`action after update: ${JSON.stringify(response, null, 4)}`);
 
-  response = await httpPost(`api/actions/action/${actionId}/_execute`, {
+  response = await httpPost(`api/actions/connector/${connectorId}/_execute`, {
     params: {
       to: ['patrick.mueller@elastic.co'],
       subject: 'the email subject',

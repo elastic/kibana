@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -20,7 +21,7 @@ import {
   getIndexNameFromLoad,
   waitFor,
 } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 interface StatusResponse {
   index: string;
@@ -43,12 +44,11 @@ interface FinalizeResponse {
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const kbnClient = getService('kibanaServer');
-  const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/88302
-  describe.skip('Finalizing signals migrations', () => {
+  describe('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;
     let createdMigrations: CreateResponse[];
@@ -56,13 +56,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     beforeEach(async () => {
       createdMigrations = [];
-      await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/legacy_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
       outdatedSignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/outdated_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
+      await createSignalsIndex(supertest, log);
 
       ({
         body: { indices: createdMigrations },
@@ -76,13 +76,20 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await esArchiver.unload('signals/outdated_signals_index');
-      await esArchiver.unload('signals/legacy_signals_index');
+      // Finalize the migration after each test so that the .siem-signals alias gets added to the migrated index -
+      // this allows deleteSignalsIndex to find and delete the migrated index
+      await supertest
+        .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ migration_ids: [createdMigration.migration_id] })
+        .expect(200);
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteMigrations({
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('replaces the original index alias with the migrated one', async () => {
@@ -97,31 +104,39 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(indicesBefore).to.contain(createdMigration.index);
       expect(indicesBefore).not.to.contain(createdMigration.migration_index);
 
-      await waitFor(async () => {
-        const {
-          body: {
-            migrations: [{ completed }],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200);
+      await waitFor(
+        async () => {
+          const {
+            body: {
+              migrations: [{ completed }],
+            },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: [createdMigration.migration_id] })
+            .expect(200);
 
-        return completed === true;
-      }, `polling finalize_migration until complete`);
+          return completed === true;
+        },
+        `polling finalize_migration until complete`,
+        log
+      );
 
       let statusAfter: StatusResponse[] = [];
-      await waitFor(async () => {
-        ({
-          body: { indices: statusAfter },
-        } = await supertest
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-          .query({ from: '2020-10-10' })
-          .set('kbn-xsrf', 'true')
-          .expect(200));
-        return statusAfter.some((s) => !s.is_outdated);
-      }, `polling finalize_migration until complete`);
+      await waitFor(
+        async () => {
+          ({
+            body: { indices: statusAfter },
+          } = await supertest
+            .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
+            .query({ from: '2020-10-10' })
+            .set('kbn-xsrf', 'true')
+            .expect(200));
+          return statusAfter.some((s) => !s.is_outdated);
+        },
+        `polling finalize_migration until complete`,
+        log
+      );
 
       const indicesAfter = statusAfter.map((s) => s.index);
 
@@ -139,17 +154,21 @@ export default ({ getService }: FtrProviderContext): void => {
       createdMigrations = [...createdMigrations, ...body.indices];
 
       let finalizeResponse: FinalizeResponse[];
-      await waitFor(async () => {
-        ({
-          body: { migrations: finalizeResponse },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: createdMigrations.map((m) => m.migration_id) })
-          .expect(200));
+      await waitFor(
+        async () => {
+          ({
+            body: { migrations: finalizeResponse },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: createdMigrations.map((m) => m.migration_id) })
+            .expect(200));
 
-        return finalizeResponse.every((index) => index.completed);
-      }, `polling finalize_migration until all complete`);
+          return finalizeResponse.every((index) => index.completed);
+        },
+        `polling finalize_migration until all complete`,
+        log
+      );
 
       const { body: bodyAfter } = await supertest
         .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
@@ -158,26 +177,30 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const statusAfter: StatusResponse[] = bodyAfter.indices;
-      expect(statusAfter.map((s) => s.index)).to.eql(
-        createdMigrations.map((c) => c.migration_index)
-      );
+      expect(statusAfter.map((s) => s.index)).to.eql([
+        ...createdMigrations.map((c) => c.migration_index),
+      ]);
       expect(statusAfter.map((s) => s.is_outdated)).to.eql([false, false]);
     });
 
     it.skip('deletes the underlying migration task', async () => {
-      await waitFor(async () => {
-        const {
-          body: {
-            migrations: [{ completed }],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200);
+      await waitFor(
+        async () => {
+          const {
+            body: {
+              migrations: [{ completed }],
+            },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: [createdMigration.migration_id] })
+            .expect(200);
 
-        return completed;
-      }, `polling finalize_migration until complete`);
+          return completed;
+        },
+        `polling finalize_migration until complete`,
+        log
+      );
 
       // const [{ taskId }] = await getMigration({ id: migration.migration_id });
       // expect(taskId.length).greaterThan(0);
@@ -186,19 +209,23 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('subsequent attempts at finalization are idempotent', async () => {
-      await waitFor(async () => {
-        const {
-          body: {
-            migrations: [{ completed }],
-          },
-        } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ migration_ids: [createdMigration.migration_id] })
-          .expect(200);
+      await waitFor(
+        async () => {
+          const {
+            body: {
+              migrations: [{ completed }],
+            },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_ids: [createdMigration.migration_id] })
+            .expect(200);
 
-        return completed;
-      }, `polling finalize_migration until complete`);
+          return completed;
+        },
+        `polling finalize_migration until complete`,
+        log
+      );
 
       const { body } = await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
@@ -222,18 +249,21 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(indicesAfter).not.to.contain(createdMigration.index);
     });
 
-    it('returns an empty array indicating a no-op for DNE migrations', async () => {
+    it('returns a 404 for DNE migrations', async () => {
       const { body } = await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
         .send({ migration_ids: ['dne-migration'] })
-        .expect(200);
+        .expect(404);
 
-      expect(body).to.eql({ migrations: [] });
+      expect(body).to.eql({
+        message: 'Saved object [security-solution-signals-migration/dne-migration] not found',
+        status_code: 404,
+      });
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createUserAndRole(security, ROLES.t1_analyst);
+      await createUserAndRole(getService, ROLES.t1_analyst);
 
       const { body } = await supertestWithoutAuth
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
@@ -242,15 +272,15 @@ export default ({ getService }: FtrProviderContext): void => {
         .auth(ROLES.t1_analyst, 'changeme')
         .expect(200);
 
-      const finalizeResponse: FinalizeResponse = body.migrations[0];
+      const finalizeResponse: FinalizeResponse & {
+        error: { message: string; status_code: number };
+      } = body.migrations[0];
 
       expect(finalizeResponse.id).to.eql(createdMigration.migration_id);
       expect(finalizeResponse.completed).not.to.eql(true);
-      expect(finalizeResponse.error).to.eql({
-        message:
-          'security_exception: action [cluster:monitor/task/get] is unauthorized for user [t1_analyst]',
-        status_code: 403,
-      });
+      expect(finalizeResponse.error.message).to.match(/^security_exception/);
+      expect(finalizeResponse.error.status_code).to.eql(403);
+      await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
   });
 };

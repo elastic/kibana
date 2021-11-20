@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -18,6 +19,7 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
 
 export function ChangeIndexPattern({
   indexPatternRefs,
+  isMissingCurrent,
   indexPatternId,
   onChangeIndexPattern,
   trigger,
@@ -25,11 +27,19 @@ export function ChangeIndexPattern({
 }: {
   trigger: ChangeIndexPatternTriggerProps;
   indexPatternRefs: IndexPatternRef[];
+  isMissingCurrent?: boolean;
   onChangeIndexPattern: (newId: string) => void;
   indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+
+  // be careful to only add color with a value, otherwise it will fallbacks to "primary"
+  const colorProp = isMissingCurrent
+    ? {
+        color: 'danger' as const,
+      }
+    : {};
 
   const createTrigger = function () {
     const { label, title, ...rest } = trigger;
@@ -38,6 +48,7 @@ export function ChangeIndexPattern({
         title={title}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         fullWidth
+        {...colorProp}
         {...rest}
       >
         {label}
@@ -48,18 +59,21 @@ export function ChangeIndexPattern({
   return (
     <>
       <EuiPopover
-        style={{ width: '100%' }}
+        panelClassName="lnsChangeIndexPatternPopover"
         button={createTrigger()}
+        panelProps={{
+          ['data-test-subj']: 'lnsChangeIndexPatternPopover',
+        }}
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
         display="block"
         panelPaddingSize="s"
         ownFocus
       >
-        <div style={{ width: 320 }} data-test-subj="lnsChangeIndexPatternPopup">
+        <div>
           <EuiPopoverTitle>
-            {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
-              defaultMessage: 'Change index pattern',
+            {i18n.translate('xpack.lens.indexPattern.changeDataViewTitle', {
+              defaultMessage: 'Data view',
             })}
           </EuiPopoverTitle>
           <EuiSelectable<{
@@ -78,7 +92,7 @@ export function ChangeIndexPattern({
               checked: id === indexPatternId ? 'on' : undefined,
             }))}
             onChange={(choices) => {
-              const choice = (choices.find(({ checked }) => checked) as unknown) as {
+              const choice = choices.find(({ checked }) => checked) as unknown as {
                 value: string;
               };
               trackUiEvent('indexpattern_changed');

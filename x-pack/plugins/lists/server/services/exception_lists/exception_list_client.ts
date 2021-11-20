@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import { ENDPOINT_LIST_ID } from '../../../common/constants';
-import {
+import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
+  ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import {
   ConstructorOptions,
@@ -23,6 +24,7 @@ import {
   DeleteExceptionListItemByIdOptions,
   DeleteExceptionListItemOptions,
   DeleteExceptionListOptions,
+  ExportExceptionListAndItemsOptions,
   FindEndpointListItemOptions,
   FindExceptionListItemOptions,
   FindExceptionListOptions,
@@ -31,11 +33,17 @@ import {
   GetEndpointListItemOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
+  GetExceptionListSummaryOptions,
   UpdateEndpointListItemOptions,
   UpdateExceptionListItemOptions,
   UpdateExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
+import {
+  ExportExceptionListAndItemsReturn,
+  exportExceptionListAndItems,
+} from './export_exception_list_and_items';
+import { getExceptionListSummary } from './get_exception_list_summary';
 import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
 import { createExceptionListItem } from './create_exception_list_item';
@@ -69,6 +77,15 @@ export class ExceptionListClient {
   }: GetExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient } = this;
     return getExceptionList({ id, listId, namespaceType, savedObjectsClient });
+  };
+
+  public getExceptionListSummary = async ({
+    listId,
+    id,
+    namespaceType,
+  }: GetExceptionListSummaryOptions): Promise<ExceptionListSummarySchema | null> => {
+    const { savedObjectsClient } = this;
+    return getExceptionListSummary({ id, listId, namespaceType, savedObjectsClient });
   };
 
   public getExceptionListItem = async ({
@@ -478,6 +495,21 @@ export class ExceptionListClient {
       savedObjectsClient,
       sortField,
       sortOrder,
+    });
+  };
+
+  public exportExceptionListAndItems = async ({
+    listId,
+    id,
+    namespaceType,
+  }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
+    const { savedObjectsClient } = this;
+
+    return exportExceptionListAndItems({
+      id,
+      listId,
+      namespaceType,
+      savedObjectsClient,
     });
   };
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -58,17 +58,17 @@ describe('GroupSelection', () => {
   const visTypesRegistry = (visTypes: BaseVisType[]): TypesStart => {
     return {
       get<T>(id: string): BaseVisType<T> {
-        return (visTypes.find((vis) => vis.name === id) as unknown) as BaseVisType<T>;
+        return visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
       },
       all: () => {
-        return (visTypes as unknown) as BaseVisType[];
+        return visTypes as unknown as BaseVisType[];
       },
       getAliases: () => [],
       unRegisterAlias: () => [],
       getByGroup: (group: VisGroups) => {
-        return (visTypes.filter((type) => {
+        return visTypes.filter((type) => {
           return type.group === group;
-        }) as unknown) as BaseVisType[];
+        }) as unknown as BaseVisType[];
       },
     };
   };

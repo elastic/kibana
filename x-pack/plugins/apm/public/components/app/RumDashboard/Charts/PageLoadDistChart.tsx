@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -9,6 +10,7 @@ import numeral from '@elastic/numeral';
 import {
   Axis,
   BrushEndListener,
+  XYBrushEvent,
   Chart,
   CurveType,
   LineSeries,
@@ -19,12 +21,12 @@ import {
   DARK_THEME,
   LIGHT_THEME,
   Fit,
+  Position,
 } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
-import { Position } from '@elastic/charts/dist/utils/commons';
 import styled from 'styled-components';
 import { PercentileAnnotations } from '../PageLoadDistribution/PercentileAnnotations';
 import { I18LABELS } from '../translations';
@@ -63,7 +65,7 @@ export function PageLoadDistChart({
   percentileRange,
 }: Props) {
   const [breakdownLoading, setBreakdownLoading] = useState(false);
-  const onBrushEnd: BrushEndListener = ({ x }) => {
+  const onBrushEnd = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -71,7 +73,6 @@ export function PageLoadDistChart({
     onPercentileChange(minX, maxX);
   };
 
-  // eslint-disable-next-line react/function-component-definition
   const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
     return (
       <div>
@@ -99,7 +100,7 @@ export function PageLoadDistChart({
           <Settings
             baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
             theme={euiChartTheme.theme}
-            onBrushEnd={onBrushEnd}
+            onBrushEnd={onBrushEnd as BrushEndListener}
             tooltip={tooltipProps}
             showLegend
           />

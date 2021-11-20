@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,27 +11,37 @@ import { schema } from '@kbn/config-schema';
 import { CoreSetup } from '../../../../src/core/server';
 import {
   APP_ID,
+  DEFAULT_ANOMALY_SCORE,
+  DEFAULT_APP_REFRESH_INTERVAL,
+  DEFAULT_APP_TIME_RANGE,
+  DEFAULT_FROM,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
-  DEFAULT_ANOMALY_SCORE,
-  DEFAULT_APP_TIME_RANGE,
-  DEFAULT_APP_REFRESH_INTERVAL,
+  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_FROM,
-  DEFAULT_TO,
-  ENABLE_NEWS_FEED_SETTING,
-  NEWS_FEED_URL_SETTING,
-  NEWS_FEED_URL_SETTING_DEFAULT,
-  IP_REPUTATION_LINKS_SETTING,
-  IP_REPUTATION_LINKS_SETTING_DEFAULT,
-  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_RULE_REFRESH_IDLE_VALUE,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_THREAT_INDEX_KEY,
+  DEFAULT_THREAT_INDEX_VALUE,
+  DEFAULT_TO,
+  DEFAULT_TRANSFORMS,
+  DEFAULT_TRANSFORMS_SETTING,
+  ENABLE_NEWS_FEED_SETTING,
+  IP_REPUTATION_LINKS_SETTING,
+  IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  NEWS_FEED_URL_SETTING,
+  NEWS_FEED_URL_SETTING_DEFAULT,
 } from '../common/constants';
+import { transformConfigSchema } from '../common/transforms/types';
+import { ExperimentalFeatures } from '../common/experimental_features';
 
-export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
+export const initUiSettings = (
+  uiSettings: CoreSetup['uiSettings'],
+  experimentalFeatures: ExperimentalFeatures
+) => {
   uiSettings.register({
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
@@ -80,11 +91,30 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       }),
       sensitive: true,
 
-      value: DEFAULT_INDEX_PATTERN,
+      value: experimentalFeatures.uebaEnabled
+        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
+        : DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
       }),
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.arrayOf(schema.string()),
+    },
+    [DEFAULT_THREAT_INDEX_KEY]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
+        defaultMessage: 'Threat indices',
+      }),
+      sensitive: true,
+      value: DEFAULT_THREAT_INDEX_VALUE,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.defaultThreatIndexDescription',
+        {
+          defaultMessage:
+            '<p>Comma-delimited list of Threat Intelligence indices from which the Security app collects indicators.</p>',
+        }
+      ),
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
@@ -180,5 +210,25 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         })
       ),
     },
+    // TODO: Remove this check once the experimental flag is removed
+    ...(experimentalFeatures.metricsEntitiesEnabled
+      ? {
+          [DEFAULT_TRANSFORMS]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.transforms', {
+              defaultMessage: 'Default transforms to use',
+            }),
+            value: DEFAULT_TRANSFORMS_SETTING,
+            type: 'json',
+            description: i18n.translate('xpack.securitySolution.uiSettings.transformDescription', {
+              // TODO: Add a hyperlink to documentation about this feature
+              defaultMessage: 'Experimental: Enable an application cache through transforms',
+            }),
+            sensitive: true,
+            category: [APP_ID],
+            requiresPageReload: false,
+            schema: transformConfigSchema,
+          },
+        }
+      : {}),
   });
 };

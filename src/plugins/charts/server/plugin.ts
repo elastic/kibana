@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from 'kibana/server';
-import { COLOR_MAPPING_SETTING, palette, systemPalette } from '../common';
+import { COLOR_MAPPING_SETTING, LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
 import { ExpressionsServerSetup } from '../../expressions/server';
 
 interface SetupDependencies {
@@ -31,19 +31,35 @@ export class ChartsServerPlugin implements Plugin<object, object> {
         type: 'json',
         description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
           defaultMessage:
-            'Maps values to specific colors in <strong>Visualize</strong> charts and <strong>TSVB</strong>. This setting does not apply to <strong>Lens.</strong>',
+            'Maps values to specific colors in charts using the <strong>Compatibility</strong> palette.',
         }),
         deprecation: {
           message: i18n.translate(
             'charts.advancedSettings.visualization.colorMappingTextDeprecation',
             {
-              defaultMessage: 'This setting is deprecated and will not be supported as of 8.0.',
+              defaultMessage:
+                'This setting is deprecated and will not be supported in a future version.',
             }
           ),
           docLinksKey: 'visualizationSettings',
         },
         category: ['visualization'],
         schema: schema.string(),
+      },
+      [LEGACY_TIME_AXIS]: {
+        name: i18n.translate('charts.advancedSettings.visualization.useLegacyTimeAxis.name', {
+          defaultMessage: 'Legacy chart time axis',
+        }),
+        value: false,
+        description: i18n.translate(
+          'charts.advancedSettings.visualization.useLegacyTimeAxis.description',
+          {
+            defaultMessage:
+              'Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB',
+          }
+        ),
+        category: ['visualization'],
+        schema: schema.boolean(),
       },
     });
 

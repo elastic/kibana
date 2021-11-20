@@ -1,20 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
   createMockVisualization,
+  mockStoreDeps,
   createMockFramePublicAPI,
-  createMockDatasource,
-} from '../../mocks';
-import { EuiKeyPadMenuItem } from '@elastic/eui';
-import { mountWithIntl as mount } from '@kbn/test/jest';
+  mockDatasourceMap,
+  mockDatasourceStates,
+} from '../../../mocks';
+import { mountWithProvider } from '../../../mocks';
+
+// Tests are executed in a jsdom environment who does not have sizing methods,
+// thus the AutoSizer will always compute a 0x0 size space
+// Mock the AutoSizer inside EuiSelectable (Chart Switch) and return some dimensions > 0
+jest.mock('react-virtualized-auto-sizer', () => {
+  return function (props: {
+    children: (dimensions: { width: number; height: number }) => React.ReactNode;
+  }) {
+    const { children } = props;
+    return <div>{children({ width: 100, height: 100 })}</div>;
+  };
+});
+
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
-import { Action } from '../state_management';
 import { ChartSwitch } from './chart_switch';
 import { PaletteOutput } from 'src/plugins/charts/public';
 
@@ -29,6 +43,7 @@ describe('chart_switch', () => {
           icon: 'empty',
           id,
           label: `Label ${id}`,
+          groupLabel: `${id}Group`,
         },
       ],
       initialize: jest.fn((_frame, state?: unknown) => {
@@ -57,7 +72,7 @@ describe('chart_switch', () => {
    *  - Allows a switch to subvisC3
    *  - Allows a switch to subvisC1
    */
-  function mockVisualizations() {
+  function mockVisualizationMap() {
     return {
       visA: generateVisualization('visA'),
       visB: generateVisualization('visB'),
@@ -69,16 +84,19 @@ describe('chart_switch', () => {
             icon: 'empty',
             id: 'subvisC1',
             label: 'C1',
+            groupLabel: 'visCGroup',
           },
           {
             icon: 'empty',
             id: 'subvisC2',
             label: 'C2',
+            groupLabel: 'visCGroup',
           },
           {
             icon: 'empty',
             id: 'subvisC3',
             label: 'C3',
+            groupLabel: 'visCGroup',
           },
         ],
         getVisualizationTypeId: jest.fn((state) => state.type),
@@ -112,126 +130,114 @@ describe('chart_switch', () => {
       datasourceLayers: layers.reduce(
         (acc, layerId) => ({
           ...acc,
-          [layerId]: ({
+          [layerId]: {
             getTableSpec: jest.fn(() => {
               return [{ columnId: 2 }];
             }),
             getOperationForColumnId() {
               return {};
             },
-          } as unknown) as DatasourcePublicAPI,
+          } as unknown as DatasourcePublicAPI,
         }),
         {} as Record<string, unknown>
       ),
     } as FramePublicAPI;
   }
 
-  function mockDatasourceMap() {
-    const datasource = createMockDatasource('testDatasource');
-    datasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
-      {
-        state: {},
-        table: {
-          columns: [],
-          isMultiRow: true,
-          layerId: 'a',
-          changeType: 'unchanged',
-        },
-        keptLayerIds: ['a'],
-      },
-    ]);
-    return {
-      testDatasource: datasource,
-    };
+  function showFlyout(instance: ReactWrapper) {
+    instance.find('[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
   }
 
-  function mockDatasourceStates() {
-    return {
-      testDatasource: {
-        state: {},
-        isLoading: false,
-      },
-    };
+  function switchTo(subType: string, instance: ReactWrapper) {
+    showFlyout(instance);
+    instance.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).first().simulate('click');
   }
 
-  function showFlyout(component: ReactWrapper) {
-    component.find('[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
+  function getMenuItem(subType: string, instance: ReactWrapper) {
+    showFlyout(instance);
+    return instance.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).first();
   }
-
-  function switchTo(subType: string, component: ReactWrapper) {
-    showFlyout(component);
-    component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).first().simulate('click');
-  }
-
-  function getMenuItem(subType: string, component: ReactWrapper) {
-    showFlyout(component);
-    return component
-      .find(EuiKeyPadMenuItem)
-      .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
-      .first();
-  }
-
-  it('should use suggested state if there is a suggestion from the target visualization', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
-    const component = mount(
+  it('should use suggested state if there is a suggestion from the target visualization', async () => {
+    const visualizationMap = mockVisualizationMap();
+    const { instance, lensStore } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={'state from a'}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={mockFrame(['a'])}
         datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: 'state from a',
+          },
+        },
+      }
     );
 
-    switchTo('visB', component);
+    switchTo('visB', instance);
 
-    expect(dispatch).toHaveBeenCalledWith({
-      initialState: 'suggestion visB',
-      newVisualizationId: 'visB',
-      type: 'SWITCH_VISUALIZATION',
-      datasourceId: 'testDatasource',
-      datasourceState: {},
+    expect(lensStore.dispatch).toHaveBeenCalledWith({
+      type: 'lens/switchVisualization',
+      payload: {
+        suggestion: {
+          visualizationState: 'suggestion visB',
+          newVisualizationId: 'visB',
+          datasourceId: 'testDatasource',
+          datasourceState: {},
+        },
+        clearStagedPreview: true,
+      },
     });
   });
 
-  it('should use initial state if there is no suggestion from the target visualization', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
-    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+  it('should use initial state if there is no suggestion from the target visualization', async () => {
+    const visualizationMap = mockVisualizationMap();
+    visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a']);
     (frame.datasourceLayers.a.getTableSpec as jest.Mock).mockReturnValue([]);
-
-    const component = mount(
+    const datasourceMap = mockDatasourceMap();
+    const datasourceStates = mockDatasourceStates();
+    const { instance, lensStore } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+        datasourceMap={datasourceMap}
+      />,
+      {
+        storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
+        preloadedState: {
+          datasourceStates,
+          activeDatasourceId: 'testDatasource',
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    switchTo('visB', component);
-
-    expect(frame.removeLayers).toHaveBeenCalledWith(['a']);
-
-    expect(dispatch).toHaveBeenCalledWith({
-      initialState: 'visB initial state',
-      newVisualizationId: 'visB',
-      type: 'SWITCH_VISUALIZATION',
+    switchTo('visB', instance);
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a'); // from preloaded state
+    expect(lensStore.dispatch).toHaveBeenCalledWith({
+      type: 'lens/switchVisualization',
+      payload: {
+        suggestion: {
+          visualizationState: 'visB initial state',
+          newVisualizationId: 'visB',
+        },
+        clearStagedPreview: true,
+      },
+    });
+    expect(lensStore.dispatch).toHaveBeenCalledWith({
+      type: 'lens/removeLayers',
+      payload: { layerIds: ['a'], visualizationId: 'visA' },
     });
   });
 
-  it('should indicate data loss if not all columns will be used', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
+  it('should indicate data loss if not all columns will be used', async () => {
+    const visualizationMap = mockVisualizationMap();
     const frame = mockFrame(['a']);
-
     const datasourceMap = mockDatasourceMap();
     datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       {
@@ -268,46 +274,60 @@ describe('chart_switch', () => {
       { columnId: 'col3' },
     ]);
 
-    const component = mount(
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+        datasourceMap={datasourceMap}
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(
+      getMenuItem('visB', instance)
+        .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+        .first()
+        .props().type
+    ).toEqual('alert');
   });
 
-  it('should indicate data loss if not all layers will be used', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
+  it('should indicate data loss if not all layers will be used', async () => {
+    const visualizationMap = mockVisualizationMap();
     const frame = mockFrame(['a', 'b']);
-
-    const component = mount(
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
         datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(
+      getMenuItem('visB', instance)
+        .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+        .first()
+        .props().type
+    ).toEqual('alert');
   });
 
-  it('should support multi-layer suggestions without data loss', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
+  it('should support multi-layer suggestions without data loss', async () => {
+    const visualizationMap = mockVisualizationMap();
     const frame = mockFrame(['a', 'b']);
-
     const datasourceMap = mockDatasourceMap();
     datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       {
@@ -331,151 +351,201 @@ describe('chart_switch', () => {
       },
     ]);
 
-    const component = mount(
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
         datasourceMap={datasourceMap}
-        datasourceStates={mockDatasourceStates()}
-      />
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toBeUndefined();
+    expect(
+      getMenuItem('visB', instance).find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+    ).toHaveLength(0);
   });
 
-  it('should indicate data loss if no data will be used', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
-    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+  it('should indicate data loss if no data will be used', async () => {
+    const visualizationMap = mockVisualizationMap();
+    visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a']);
 
-    const component = mount(
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
         datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(
+      getMenuItem('visB', instance)
+        .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+        .first()
+        .props().type
+    ).toEqual('alert');
   });
 
-  it('should not indicate data loss if there is no data', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
-    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+  it('should not indicate data loss if there is no data', async () => {
+    const visualizationMap = mockVisualizationMap();
+    visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a']);
     (frame.datasourceLayers.a.getTableSpec as jest.Mock).mockReturnValue([]);
 
-    const component = mount(
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
         datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+      />,
+
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toBeUndefined();
+    expect(
+      getMenuItem('visB', instance).find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
+    ).toHaveLength(0);
   });
 
-  it('should not show a warning when the subvisualization is the same', () => {
-    const dispatch = jest.fn();
+  it('should not show a warning when the subvisualization is the same', async () => {
     const frame = mockFrame(['a', 'b', 'c']);
-    const visualizations = mockVisualizations();
-    visualizations.visC.getVisualizationTypeId.mockReturnValue('subvisC2');
+    const visualizationMap = mockVisualizationMap();
+    visualizationMap.visC.getVisualizationTypeId.mockReturnValue('subvisC2');
     const switchVisualizationType = jest.fn(() => ({ type: 'subvisC1' }));
 
-    visualizations.visC.switchVisualizationType = switchVisualizationType;
+    visualizationMap.visC.switchVisualizationType = switchVisualizationType;
 
-    const component = mount(
+    const datasourceStates = mockDatasourceStates();
+
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visC"
-        visualizationState={{ type: 'subvisC2' }}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
         datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+      />,
+      {
+        preloadedState: {
+          datasourceStates,
+          activeDatasourceId: 'testDatasource',
+          visualization: {
+            activeId: 'visC',
+            state: { type: 'subvisC2' },
+          },
+        },
+      }
     );
 
-    expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).not.toBeDefined();
+    expect(
+      getMenuItem('subvisC2', instance).find(
+        '[data-test-subj="lnsChartSwitchPopoverAlert_subvisC2"]'
+      )
+    ).toHaveLength(0);
   });
 
-  it('should get suggestions when switching subvisualization', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
-    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+  it('should get suggestions when switching subvisualization', async () => {
+    const visualizationMap = mockVisualizationMap();
+    visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a', 'b', 'c']);
+    const datasourceMap = mockDatasourceMap();
+    datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b', 'c']);
+    const datasourceStates = mockDatasourceStates();
 
-    const component = mount(
+    const { instance, lensStore } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+        datasourceMap={datasourceMap}
+      />,
+      {
+        storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
+        preloadedState: {
+          datasourceStates,
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    switchTo('visB', component);
-
-    expect(frame.removeLayers).toHaveBeenCalledTimes(1);
-    expect(frame.removeLayers).toHaveBeenCalledWith(['a', 'b', 'c']);
-
-    expect(visualizations.visB.getSuggestions).toHaveBeenCalledWith(
+    switchTo('visB', instance);
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'b');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'c');
+    expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
         keptLayerIds: ['a'],
       })
     );
 
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'SWITCH_VISUALIZATION',
-        initialState: 'visB initial state',
-      })
-    );
+    expect(lensStore.dispatch).toHaveBeenCalledWith({
+      type: 'lens/switchVisualization',
+      payload: {
+        suggestion: {
+          datasourceId: undefined,
+          datasourceState: undefined,
+          visualizationState: 'visB initial state',
+          newVisualizationId: 'visB',
+        },
+        clearStagedPreview: true,
+      },
+    });
   });
 
-  it('should query main palette from active chart and pass into suggestions', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
+  it('should query main palette from active chart and pass into suggestions', async () => {
+    const visualizationMap = mockVisualizationMap();
     const mockPalette: PaletteOutput = { type: 'palette', name: 'mock' };
-    visualizations.visA.getMainPalette = jest.fn(() => mockPalette);
-    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+    visualizationMap.visA.getMainPalette = jest.fn(() => mockPalette);
+    visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a', 'b', 'c']);
     const currentVisState = {};
+    const datasourceMap = mockDatasourceMap();
+    datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b', 'c']);
 
-    const component = mount(
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={currentVisState}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+        datasourceMap={datasourceMap}
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: currentVisState,
+          },
+        },
+        storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
+      }
     );
 
-    switchTo('visB', component);
+    switchTo('visB', instance);
 
-    expect(visualizations.visA.getMainPalette).toHaveBeenCalledWith(currentVisState);
+    expect(visualizationMap.visA.getMainPalette).toHaveBeenCalledWith(currentVisState);
 
-    expect(visualizations.visB.getSuggestions).toHaveBeenCalledWith(
+    expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
         keptLayerIds: ['a'],
         mainPalette: mockPalette,
@@ -483,70 +553,83 @@ describe('chart_switch', () => {
     );
   });
 
-  it('should not remove layers when switching between subtypes', () => {
-    const dispatch = jest.fn();
+  it('should not remove layers when switching between subtypes', async () => {
     const frame = mockFrame(['a', 'b', 'c']);
-    const visualizations = mockVisualizations();
+    const visualizationMap = mockVisualizationMap();
     const switchVisualizationType = jest.fn(() => 'switched');
 
-    visualizations.visC.switchVisualizationType = switchVisualizationType;
-
-    const component = mount(
+    visualizationMap.visC.switchVisualizationType = switchVisualizationType;
+    const datasourceMap = mockDatasourceMap();
+    const { instance, lensStore } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visC"
-        visualizationState={{ type: 'subvisC1' }}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+        datasourceMap={datasourceMap}
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visC',
+            state: { type: 'subvisC1' },
+          },
+        },
+        storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
+      }
     );
 
-    switchTo('subvisC3', component);
+    switchTo('subvisC3', instance);
     expect(switchVisualizationType).toHaveBeenCalledWith('subvisC3', { type: 'subvisC3' });
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'SWITCH_VISUALIZATION',
-        initialState: 'switched',
-      })
-    );
-    expect(frame.removeLayers).not.toHaveBeenCalled();
+
+    expect(lensStore.dispatch).toHaveBeenCalledWith({
+      type: 'lens/switchVisualization',
+      payload: {
+        suggestion: {
+          datasourceId: 'testDatasource',
+          datasourceState: {},
+          visualizationState: 'switched',
+          newVisualizationId: 'visC',
+        },
+        clearStagedPreview: true,
+      },
+    });
+    expect(datasourceMap.testDatasource.removeLayer).not.toHaveBeenCalled();
   });
 
-  it('should not remove layers and initialize with existing state when switching between subtypes without data', () => {
-    const dispatch = jest.fn();
+  it('should not remove layers and initialize with existing state when switching between subtypes without data', async () => {
     const frame = mockFrame(['a']);
     frame.datasourceLayers.a.getTableSpec = jest.fn().mockReturnValue([]);
-    const visualizations = mockVisualizations();
-    visualizations.visC.getSuggestions = jest.fn().mockReturnValue([]);
-    visualizations.visC.switchVisualizationType = jest.fn(() => 'switched');
-
-    const component = mount(
+    const visualizationMap = mockVisualizationMap();
+    visualizationMap.visC.getSuggestions = jest.fn().mockReturnValue([]);
+    visualizationMap.visC.switchVisualizationType = jest.fn(() => 'switched');
+    const datasourceMap = mockDatasourceMap();
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visC"
-        visualizationState={{ type: 'subvisC1' }}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+        datasourceMap={datasourceMap}
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visC',
+            state: { type: 'subvisC1' },
+          },
+        },
+        storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
+      }
     );
 
-    switchTo('subvisC3', component);
+    switchTo('subvisC3', instance);
 
-    expect(visualizations.visC.switchVisualizationType).toHaveBeenCalledWith('subvisC3', {
+    expect(visualizationMap.visC.switchVisualizationType).toHaveBeenCalledWith('subvisC3', {
       type: 'subvisC1',
     });
-    expect(frame.removeLayers).not.toHaveBeenCalled();
+    expect(datasourceMap.testDatasource.removeLayer).not.toHaveBeenCalled();
   });
 
-  it('should switch to the updated datasource state', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
+  it('should switch to the updated datasource state', async () => {
+    const visualizationMap = mockVisualizationMap();
     const frame = mockFrame(['a', 'b']);
-
     const datasourceMap = mockDatasourceMap();
     datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       {
@@ -577,105 +660,131 @@ describe('chart_switch', () => {
         keptLayerIds: [],
       },
     ]);
-
-    const component = mount(
+    const { instance, lensStore } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={frame}
         datasourceMap={datasourceMap}
-        datasourceStates={mockDatasourceStates()}
-      />
+      />,
+      {
+        storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    switchTo('visB', component);
+    switchTo('visB', instance);
 
-    expect(dispatch).toHaveBeenCalledWith({
-      type: 'SWITCH_VISUALIZATION',
-      newVisualizationId: 'visB',
-      datasourceId: 'testDatasource',
-      datasourceState: 'testDatasource suggestion',
-      initialState: 'suggestion visB',
-    } as Action);
+    expect(lensStore.dispatch).toHaveBeenCalledWith({
+      type: 'lens/switchVisualization',
+      payload: {
+        suggestion: {
+          newVisualizationId: 'visB',
+          datasourceId: 'testDatasource',
+          datasourceState: 'testDatasource suggestion',
+          visualizationState: 'suggestion visB',
+        },
+        clearStagedPreview: true,
+      },
+    });
   });
 
-  it('should ensure the new visualization has the proper subtype', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
+  it('should ensure the new visualization has the proper subtype', async () => {
+    const visualizationMap = mockVisualizationMap();
     const switchVisualizationType = jest.fn(
       (visualizationType, state) => `${state} ${visualizationType}`
     );
 
-    visualizations.visB.switchVisualizationType = switchVisualizationType;
-
-    const component = mount(
+    visualizationMap.visB.switchVisualizationType = switchVisualizationType;
+    const datasourceMap = mockDatasourceMap();
+    const { instance, lensStore } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
         framePublicAPI={mockFrame(['a'])}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+        visualizationMap={visualizationMap}
+        datasourceMap={datasourceMap}
+      />,
+      {
+        storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    switchTo('visB', component);
+    switchTo('visB', instance);
 
-    expect(dispatch).toHaveBeenCalledWith({
-      initialState: 'suggestion visB visB',
-      newVisualizationId: 'visB',
-      type: 'SWITCH_VISUALIZATION',
-      datasourceId: 'testDatasource',
-      datasourceState: {},
+    expect(lensStore.dispatch).toHaveBeenCalledWith({
+      type: 'lens/switchVisualization',
+      payload: {
+        suggestion: {
+          visualizationState: 'suggestion visB visB',
+          newVisualizationId: 'visB',
+          datasourceId: 'testDatasource',
+          datasourceState: {},
+        },
+        clearStagedPreview: true,
+      },
     });
   });
 
-  it('should use the suggestion that matches the subtype', () => {
-    const dispatch = jest.fn();
-    const visualizations = mockVisualizations();
+  it('should use the suggestion that matches the subtype', async () => {
+    const visualizationMap = mockVisualizationMap();
     const switchVisualizationType = jest.fn();
 
-    visualizations.visC.switchVisualizationType = switchVisualizationType;
-
-    const component = mount(
+    visualizationMap.visC.switchVisualizationType = switchVisualizationType;
+    const datasourceMap = mockDatasourceMap();
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visC"
-        visualizationState={{ type: 'subvisC3' }}
-        visualizationMap={visualizations}
-        dispatch={dispatch}
+        visualizationMap={visualizationMap}
         framePublicAPI={mockFrame(['a'])}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+        datasourceMap={datasourceMap}
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visC',
+            state: { type: 'subvisC3' },
+          },
+        },
+      }
     );
 
-    switchTo('subvisC1', component);
+    switchTo('subvisC1', instance);
     expect(switchVisualizationType).toHaveBeenCalledWith('subvisC1', {
       type: 'subvisC1',
       notPrimary: true,
     });
   });
 
-  it('should show all visualization types', () => {
-    const component = mount(
+  it('should show all visualization types', async () => {
+    const datasourceMap = mockDatasourceMap();
+    const { instance } = await mountWithProvider(
       <ChartSwitch
-        visualizationId="visA"
-        visualizationState={{}}
-        visualizationMap={mockVisualizations()}
-        dispatch={jest.fn()}
+        visualizationMap={mockVisualizationMap()}
         framePublicAPI={mockFrame(['a', 'b'])}
-        datasourceMap={mockDatasourceMap()}
-        datasourceStates={mockDatasourceStates()}
-      />
+        datasourceMap={datasourceMap}
+      />,
+      {
+        preloadedState: {
+          visualization: {
+            activeId: 'visA',
+            state: {},
+          },
+        },
+      }
     );
 
-    showFlyout(component);
+    showFlyout(instance);
 
     const allDisplayed = ['visA', 'visB', 'subvisC1', 'subvisC2', 'subvisC3'].every(
-      (subType) => component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
+      (subType) => instance.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
     );
 
     expect(allDisplayed).toBeTruthy();

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Stream } from 'stream';
@@ -45,7 +45,8 @@ export function isKibanaResponse(response: Record<string, any>): response is IKi
  * @internal
  */
 export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
-  implements IKibanaResponse<T> {
+  implements IKibanaResponse<T>
+{
   constructor(
     public readonly status: number,
     public readonly payload?: T,
@@ -62,6 +63,8 @@ export interface HttpResponseOptions {
   body?: HttpResponsePayload;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
+  /** Bypass the default error formatting */
+  bypassErrorFormat?: boolean;
 }
 
 /**
@@ -79,6 +82,8 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
   body?: T;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
+  /** Bypass the default error formatting */
+  bypassErrorFormat?: boolean;
   statusCode: number;
 }
 
@@ -176,15 +181,6 @@ const errorResponseFactory = {
    */
   conflict: (options: ErrorHttpResponseOptions = {}) =>
     new KibanaResponse(409, options.body || 'Conflict', options),
-
-  // Server error
-  /**
-   * The server encountered an unexpected condition that prevented it from fulfilling the request.
-   * Status code: `500`.
-   * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
-   */
-  internalError: (options: ErrorHttpResponseOptions = {}) =>
-    new KibanaResponse(500, options.body || 'Internal Error', options),
 
   /**
    * Creates an error response with defined status code and payload.
@@ -312,7 +308,7 @@ export const kibanaResponseFactory = {
       );
     }
     const { statusCode: code, body, ...rest } = options;
-    return new KibanaResponse(code, body, rest);
+    return new KibanaResponse(code, body, { ...rest });
   },
 };
 

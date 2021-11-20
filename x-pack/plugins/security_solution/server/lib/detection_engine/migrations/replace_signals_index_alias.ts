@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElasticsearchClient } from 'src/core/server';
@@ -36,6 +37,15 @@ export const replaceSignalsIndexAlias = async ({
       actions: [
         { remove: { index: oldIndex, alias } },
         { add: { index: newIndex, alias, is_write_index: false } },
+      ],
+    },
+  });
+  // TODO: space-aware?
+  await esClient.indices.updateAliases({
+    body: {
+      actions: [
+        { remove: { index: oldIndex, alias: '.siem-signals-default' } },
+        { add: { index: newIndex, alias: '.siem-signals-default', is_write_index: false } },
       ],
     },
   });

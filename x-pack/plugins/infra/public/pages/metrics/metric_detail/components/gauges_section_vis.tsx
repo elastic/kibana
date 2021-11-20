@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -22,23 +23,25 @@ import { InventoryFormatterType } from '../../../../../common/inventory_models/t
 import { SeriesOverrides, VisSectionProps } from '../types';
 import { getChartName } from './helpers';
 
-const getFormatter = (
-  defaultFormatter: InventoryFormatterType = 'number',
-  defaultFormatterTemplate: string = '{{value}}',
-  seriesOverrides: SeriesOverrides = {},
-  seriesId: string
-) => (val: ReactText) => {
-  if (val == null) {
-    return '';
-  }
-  const formatter = get(seriesOverrides, [seriesId, 'formatter'], defaultFormatter);
-  const formatterTemplate = get(
-    seriesOverrides,
-    [seriesId, 'formatterTemplate'],
-    defaultFormatterTemplate
-  );
-  return createFormatter(formatter, formatterTemplate)(val);
-};
+const getFormatter =
+  (
+    defaultFormatter: InventoryFormatterType = 'number',
+    defaultFormatterTemplate: string = '{{value}}',
+    seriesOverrides: SeriesOverrides = {},
+    seriesId: string
+  ) =>
+  (val: ReactText) => {
+    if (val == null) {
+      return '';
+    }
+    const formatter = get(seriesOverrides, [seriesId, 'formatter'], defaultFormatter);
+    const formatterTemplate = get(
+      seriesOverrides,
+      [seriesId, 'formatterTemplate'],
+      defaultFormatterTemplate
+    );
+    return createFormatter(formatter, formatterTemplate)(val);
+  };
 
 export const GaugesSectionVis = ({
   id,

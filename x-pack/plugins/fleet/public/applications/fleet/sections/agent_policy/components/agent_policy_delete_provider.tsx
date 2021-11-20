@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask, EuiCallOut } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+
+import { AGENTS_PREFIX } from '../../../constants';
 import { sendDeleteAgentPolicy, useStartServices, useConfig, sendRequest } from '../../../hooks';
 
 interface Props {
@@ -96,7 +98,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
       path: `/api/fleet/agents`,
       method: 'get',
       query: {
-        kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id : ${agentPolicyToCheck}`,
+        kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyToCheck}`,
       },
     });
     setAgentsCount(data?.total || 0);
@@ -109,69 +111,67 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.fleet.deleteAgentPolicy.confirmModal.deletePolicyTitle"
+            defaultMessage="Delete this agent policy?"
+          />
+        }
+        onCancel={closeModal}
+        onConfirm={deleteAgentPolicy}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.fleet.deleteAgentPolicy.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          isLoading || isLoadingAgentsCount ? (
             <FormattedMessage
-              id="xpack.fleet.deleteAgentPolicy.confirmModal.deletePolicyTitle"
-              defaultMessage="Delete this agent policy?"
+              id="xpack.fleet.deleteAgentPolicy.confirmModal.loadingButtonLabel"
+              defaultMessage="Loading…"
             />
-          }
-          onCancel={closeModal}
-          onConfirm={deleteAgentPolicy}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.fleet.deleteAgentPolicy.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            isLoading || isLoadingAgentsCount ? (
-              <FormattedMessage
-                id="xpack.fleet.deleteAgentPolicy.confirmModal.loadingButtonLabel"
-                defaultMessage="Loading…"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.deleteAgentPolicy.confirmModal.confirmButtonLabel"
-                defaultMessage="Delete policy"
-              />
-            )
-          }
-          buttonColor="danger"
-          confirmButtonDisabled={isLoading || isLoadingAgentsCount || !!agentsCount}
-        >
-          {isLoadingAgentsCount ? (
-            <FormattedMessage
-              id="xpack.fleet.deleteAgentPolicy.confirmModal.loadingAgentsCountMessage"
-              defaultMessage="Checking amount of affected agents…"
-            />
-          ) : agentsCount ? (
-            <EuiCallOut
-              color="danger"
-              title={i18n.translate(
-                'xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsTitle',
-                {
-                  defaultMessage: 'Policy in use',
-                }
-              )}
-            >
-              <FormattedMessage
-                id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
-                defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy."
-                values={{
-                  agentsCount,
-                }}
-              />
-            </EuiCallOut>
           ) : (
             <FormattedMessage
-              id="xpack.fleet.deleteAgentPolicy.confirmModal.irreversibleMessage"
-              defaultMessage="This action cannot be undone."
+              id="xpack.fleet.deleteAgentPolicy.confirmModal.confirmButtonLabel"
+              defaultMessage="Delete policy"
             />
-          )}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+          )
+        }
+        buttonColor="danger"
+        confirmButtonDisabled={isLoading || isLoadingAgentsCount || !!agentsCount}
+      >
+        {isLoadingAgentsCount ? (
+          <FormattedMessage
+            id="xpack.fleet.deleteAgentPolicy.confirmModal.loadingAgentsCountMessage"
+            defaultMessage="Checking amount of affected agents…"
+          />
+        ) : agentsCount ? (
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate(
+              'xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsTitle',
+              {
+                defaultMessage: 'Policy in use',
+              }
+            )}
+          >
+            <FormattedMessage
+              id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
+              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy."
+              values={{
+                agentsCount,
+              }}
+            />
+          </EuiCallOut>
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.deleteAgentPolicy.confirmModal.irreversibleMessage"
+            defaultMessage="This action cannot be undone."
+          />
+        )}
+      </EuiConfirmModal>
     );
   };
 

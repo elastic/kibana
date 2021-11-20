@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -18,11 +18,11 @@ import {
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
 } from '../../services/embeddable';
-import { NotificationsStart } from '../../services/core';
+import { ApplicationStart, NotificationsStart } from '../../services/core';
 import { dashboardAddToLibraryAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
-export const ACTION_ADD_TO_LIBRARY = 'addToFromLibrary';
+export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
 export interface AddToLibraryActionContext {
   embeddable: IEmbeddable;
@@ -33,7 +33,12 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;
 
-  constructor(private deps: { toasts: NotificationsStart['toasts'] }) {}
+  constructor(
+    private deps: {
+      toasts: NotificationsStart['toasts'];
+      capabilities: ApplicationStart['capabilities'];
+    }
+  ) {}
 
   public getDisplayName({ embeddable }: AddToLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -50,8 +55,15 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   }
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
+    // TODO: Fix this, potentially by adding a 'canSave' function to embeddable interface
+    const canSave =
+      embeddable.type === 'map'
+        ? this.deps.capabilities.maps?.save
+        : this.deps.capabilities.visualize.save;
+
     return Boolean(
-      !isErrorEmbeddable(embeddable) &&
+      canSave &&
+        !isErrorEmbeddable(embeddable) &&
         embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&

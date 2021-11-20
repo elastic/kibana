@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { LogRetention } from '../../log_retention/types';
+
 import { LogRetentionPanel } from './log_retention_panel';
 
 describe('<LogRetentionPanel />', () => {
@@ -98,7 +101,7 @@ describe('<LogRetentionPanel />', () => {
     ).toEqual(true);
   });
 
-  it('enables both switches when isLogRetentionUpdating is false', () => {
+  it('enables all switches when isLogRetentionUpdating is false', () => {
     setMockValues({
       isLogRetentionUpdating: false,
       logRetention: mockLogRetention({}),
@@ -110,9 +113,12 @@ describe('<LogRetentionPanel />', () => {
     expect(
       logRetentionPanel.find('[data-test-subj="LogRetentionPanelAPISwitch"]').prop('disabled')
     ).toEqual(false);
+    expect(
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelCrawlerSwitch"]').prop('disabled')
+    ).toEqual(false);
   });
 
-  it('disables both switches when isLogRetentionUpdating is true', () => {
+  it('disables all switches when isLogRetentionUpdating is true', () => {
     setMockValues({
       isLogRetentionUpdating: true,
       logRetention: mockLogRetention({}),
@@ -124,6 +130,9 @@ describe('<LogRetentionPanel />', () => {
     ).toEqual(true);
     expect(
       logRetentionPanel.find('[data-test-subj="LogRetentionPanelAPISwitch"]').prop('disabled')
+    ).toEqual(true);
+    expect(
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelCrawlerSwitch"]').prop('disabled')
     ).toEqual(true);
   });
 
@@ -147,7 +156,7 @@ describe('<LogRetentionPanel />', () => {
     setMockValues({
       isLogRetentionUpdating: false,
       logRetention: mockLogRetention({
-        analytics: {
+        api: {
           enabled: false,
         },
       }),
@@ -155,6 +164,20 @@ describe('<LogRetentionPanel />', () => {
     const logRetentionPanel = shallow(<LogRetentionPanel />);
     logRetentionPanel.find('[data-test-subj="LogRetentionPanelAPISwitch"]').simulate('change');
     expect(actions.toggleLogRetention).toHaveBeenCalledWith('api');
+  });
+
+  it('calls toggleLogRetention when crawler log retention option is changed', () => {
+    setMockValues({
+      isLogRetentionUpdating: false,
+      logRetention: mockLogRetention({
+        crawler: {
+          enabled: false,
+        },
+      }),
+    });
+    const logRetentionPanel = shallow(<LogRetentionPanel />);
+    logRetentionPanel.find('[data-test-subj="LogRetentionPanelCrawlerSwitch"]').simulate('change');
+    expect(actions.toggleLogRetention).toHaveBeenCalledWith('crawler');
   });
 });
 
@@ -170,6 +193,11 @@ const mockLogRetention = (logRetention: Partial<LogRetention>) => {
       enabled: true,
       retentionPolicy: { isDefault: true, minAgeDays: 180 },
     },
+    crawler: {
+      disabledAt: null,
+      enabled: true,
+      retentionPolicy: { isDefault: true, minAgeDays: 180 },
+    },
   };
 
   return {
@@ -180,6 +208,10 @@ const mockLogRetention = (logRetention: Partial<LogRetention>) => {
     api: {
       ...baseLogRetention.api,
       ...logRetention.api,
+    },
+    crawler: {
+      ...baseLogRetention.crawler,
+      ...logRetention.crawler,
     },
   };
 };

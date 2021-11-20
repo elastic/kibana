@@ -1,23 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import '../../../../common/mock/formatted_relative';
-
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
 
+jest.mock('../../../../common/hooks/use_selector');
+
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => jest.fn(),
+  };
+});
+
 describe('NotePreviews', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
   let note1updated: number;
   let note2updated: number;
@@ -28,18 +36,15 @@ describe('NotePreviews', () => {
     note1updated = moment('2019-03-24T04:12:33.000Z').valueOf();
     note2updated = moment(note1updated).add(1, 'minute').valueOf();
     note3updated = moment(note2updated).add(1, 'minute').valueOf();
+    (useDeepEqualSelector as jest.Mock).mockReset();
   });
 
   test('it renders a note preview for each note when isModal is false', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={hasNotes[0].notes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
 
-    hasNotes[0].notes!.forEach(({ savedObjectId }) => {
+    hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
     });
   });
@@ -47,33 +52,11 @@ describe('NotePreviews', () => {
   test('it renders a note preview for each note when isModal is true', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={hasNotes[0].notes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
 
-    hasNotes[0].notes!.forEach(({ savedObjectId }) => {
+    hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
     });
-  });
-
-  test('it does NOT render the preview container if notes is undefined', () => {
-    const wrapper = mountWithIntl(<NotePreviews />);
-
-    expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toBe(false);
-  });
-
-  test('it does NOT render the preview container if notes is null', () => {
-    const wrapper = mountWithIntl(<NotePreviews notes={null} />);
-
-    expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toBe(false);
-  });
-
-  test('it does NOT render the preview container if notes is empty', () => {
-    const wrapper = mountWithIntl(<NotePreviews notes={[]} />);
-
-    expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toBe(false);
   });
 
   test('it filters-out non-unique savedObjectIds', () => {
@@ -98,11 +81,7 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={nonUniqueNotes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
 
     expect(wrapper.find('.euiCommentEvent__headerUsername').at(1).text()).toEqual('bob');
   });
@@ -129,11 +108,7 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={nonUniqueNotes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
 
     expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
   });
@@ -159,12 +134,30 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <NotePreviews notes={nonUniqueNotes} />
-      </ThemeProvider>
-    );
+    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
 
     expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
+  });
+
+  test('it renders timeline description as a note when showTimelineDescription is true and timelineId is defined', () => {
+    const timeline = mockTimelineResults[0];
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+    const wrapper = mountWithIntl(
+      <NotePreviews notes={[]} showTimelineDescription timelineId="test-timeline-id" />
+    );
+
+    expect(wrapper.find('[data-test-subj="note-preview-description"]').first().text()).toContain(
+      timeline.description
+    );
+  });
+
+  test('it does`t render timeline description as a note when it is undefined', () => {
+    const timeline = mockTimelineResults[0];
+    (useDeepEqualSelector as jest.Mock).mockReturnValue({ ...timeline, description: undefined });
+
+    const wrapper = mountWithIntl(<NotePreviews notes={[]} />);
+
+    expect(wrapper.find('[data-test-subj="note-preview-description"]').exists()).toBe(false);
   });
 });

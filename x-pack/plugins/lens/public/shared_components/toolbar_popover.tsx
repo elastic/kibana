@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import './toolbar_popover.scss';
 import React, { useState } from 'react';
 import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
 import { EuiIconLegend } from '../assets/legend';
@@ -13,6 +15,8 @@ const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
   labels: 'visText',
   values: 'number',
+  list: 'list',
+  visualOptions: 'brush',
 };
 
 export interface ToolbarPopoverProps {
@@ -33,6 +37,8 @@ export interface ToolbarPopoverProps {
    */
   groupPosition?: ToolbarButtonProps['groupPosition'];
   buttonDataTestSubj?: string;
+  panelClassName?: string;
+  handleClose?: () => void;
 }
 
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
@@ -42,6 +48,8 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   isDisabled = false,
   groupPosition,
   buttonDataTestSubj,
+  panelClassName = 'lnsVisToolbar__popover',
+  handleClose,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -50,7 +58,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
-        panelClassName="lnsXyToolbar__popover"
+        panelClassName={panelClassName}
         ownFocus
         aria-label={title}
         button={
@@ -71,6 +79,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
         isOpen={open}
         closePopover={() => {
           setOpen(false);
+          handleClose?.();
         }}
         anchorPosition="downRight"
       >

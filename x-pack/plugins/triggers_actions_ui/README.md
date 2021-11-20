@@ -206,13 +206,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   ....
 
   return (
-    <Fragment>
+    <>
       {hasExpressionErrors ? (
-        <Fragment>
+        <>
           <EuiSpacer />
           <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
           <EuiSpacer />
-        </Fragment>
+        </>
       ) : null}
       <EuiSpacer size="l" />
       <EuiFormLabel>
@@ -221,7 +221,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           id="xpack.stackAlerts.threshold.ui.selectIndex"
         />
   ....
-      </Fragment>
+      </>
   );
 };
 
@@ -256,7 +256,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
 IMPORTANT: The current UI supports a single action group only. 
-Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts#get-apialerttypes-list-alert-types).
+Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
 ```
 export interface AlertType {
@@ -289,12 +289,12 @@ function getSomeNewAlertType() {
   return { ... } as AlertTypeModel;
 }
 
-triggersActionsUi.alertTypeRegistry.register(getSomeNewAlertType());
+triggersActionsUi.ruleTypeRegistry.register(getSomeNewAlertType());
 ```
 
 ## Create and register new alert type UI example
 
-Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts#example 
+Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting#example 
 
 Alert type UI is expected to be defined as `AlertTypeModel` object.
 
@@ -322,7 +322,7 @@ Fields of this object `AlertTypeModel` will be mapped properly in the UI below.
 
 2. Define `alertParamsExpression` as `React.FunctionComponent` - this is the form for filling Alert params based on the current Alert type.
 ```
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WhenExpression, OfExpression } from '../../../../common/expression_items';
 import { builtInAggregationTypes } from '../../../../common/constants';
@@ -340,7 +340,7 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
 }) => {
   const [aggType, setAggType] = useState<string>('count');
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup gutterSize="s" wrap>
         <EuiFlexItem grow={false}>
           <WhenExpression
@@ -365,7 +365,7 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-    </Fragment>
+    </>
   );
 };
 
@@ -409,7 +409,7 @@ import { getAlertType as getExampledAlertType } from './example';
 ...
 
 ...
-alertTypeRegistry.register(getExampledAlertType());
+ruleTypeRegistry.register(getExampledAlertType());
 ```
 
 After these four steps, the new `Example Alert Type` is available in UI of Create flyout:
@@ -653,7 +653,7 @@ const ThresholdSpecifier = (
 }) => {
   if (!actionGroup) {
     // render empty if no condition action group is specified
-    return <Fragment />;
+    return null;
   }
 
   return (
@@ -833,7 +833,7 @@ interface AlertAddProps {
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
-  reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
   metadata?: MetaData;
 }
 ```
@@ -845,7 +845,7 @@ interface AlertAddProps {
 |setAddFlyoutVisibility|Function for changing visibility state of the Create Alert flyout.|
 |alertTypeId|Optional property to preselect alert type.|
 |canChangeTrigger|Optional property, that hides change alert type possibility.|
-|reloadAlerts|Optional function, which will be executed if alert was saved sucsessfuly.|
+|onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
 |initialValues|Default values for Alert properties.|
 |metadata|Optional generic property, which allows to define component specific metadata. This metadata can be used for passing down preloaded data for Alert type expression component.|
 
@@ -888,10 +888,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to Server log',
       }
     ),
-    validateConnector: (): ValidationResult => {
+    validateConnector: (): Promise<ValidationResult> => {
       return { errors: {} };
     },
-    validateParams: (actionParams: ServerLogActionParams): ValidationResult => {
+    validateParams: (actionParams: ServerLogActionParams): Promise<ValidationResult> => {
       // validation of action params implementation
     },
     actionConnectorFields: null,
@@ -929,10 +929,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to email',
       }
     ),
-    validateConnector: (action: EmailActionConnector): ValidationResult => {
+    validateConnector: (action: EmailActionConnector): Promise<ValidationResult> => {
       // validation of connector properties implementation
     },
-    validateParams: (actionParams: EmailActionParams): ValidationResult => {
+    validateParams: (actionParams: EmailActionParams): Promise<ValidationResult> => {
       // validation of action params implementation
     },
     actionConnectorFields: EmailActionConnectorFields,
@@ -967,10 +967,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to Slack',
       }
     ),
-    validateConnector: (action: SlackActionConnector): ValidationResult => {
+    validateConnector: (action: SlackActionConnector): Promise<ValidationResult> => {
       // validation of connector properties implementation
     },
-    validateParams: (actionParams: SlackActionParams): ValidationResult => {
+    validateParams: (actionParams: SlackActionParams): Promise<ValidationResult> => {
       // validation of action params implementation 
     },
     actionConnectorFields: SlackActionFields,
@@ -1000,12 +1000,12 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Index data into Elasticsearch.',
       }
     ),
-    validateConnector: (): ValidationResult => {
+    validateConnector: (): Promise<ValidationResult> => {
       return { errors: {} };
     },
     actionConnectorFields: IndexActionConnectorFields,
     actionParamsFields: IndexParamsFields,
-    validateParams: (): ValidationResult => {
+    validateParams: (): Promise<ValidationResult> => {
       return { errors: {} };
     },
   };
@@ -1046,10 +1046,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send a request to a web service.',
       }
     ),
-    validateConnector: (action: WebhookActionConnector): ValidationResult => {
+    validateConnector: (action: WebhookActionConnector): Promise<ValidationResult> => {
       // validation of connector properties implementation
     },
-    validateParams: (actionParams: WebhookActionParams): ValidationResult => {
+    validateParams: (actionParams: WebhookActionParams): Promise<ValidationResult> => {
       // validation of action params implementation
     },
     actionConnectorFields: WebhookActionConnectorFields,
@@ -1073,7 +1073,7 @@ Action type model definition:
 export function getActionType(): ActionTypeModel {
   return {
     id: '.pagerduty',
-    iconClass: 'apps',
+    iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
       {
@@ -1086,10 +1086,10 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send to PagerDuty',
       }
     ),
-    validateConnector: (action: PagerDutyActionConnector): ValidationResult => {
+    validateConnector: (action: PagerDutyActionConnector): Promise<ValidationResult> => {
       // validation of connector properties implementation
     },
-    validateParams: (actionParams: PagerDutyActionParams): ValidationResult => {
+    validateParams: (actionParams: PagerDutyActionParams): Promise<ValidationResult> => {
       // validation of action params implementation
     },
     actionConnectorFields: PagerDutyActionConnectorFields,
@@ -1110,18 +1110,18 @@ and action params form available in Create Alert form:
 Each action type should be defined as an `ActionTypeModel` object with the following properties:
 ```
   id: string;
-  iconClass: string;
+  iconClass: IconType;
   selectMessage: string;
   actionTypeTitle?: string;
-  validateConnector: (connector: any) => ValidationResult;
-  validateParams: (actionParams: any) => ValidationResult;
+  validateConnector: (connector: any) => Promise<ValidationResult>;
+  validateParams: (actionParams: any) => Promise<ValidationResult>;
   actionConnectorFields: React.FunctionComponent<any> | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
 ```
 |Property|Description|
 |---|---|
 |id|Action type id. Should be the same as on server side.|
-|iconClass|Icon of action type, that will be displayed on the select card in UI.|
+|iconClass|Setting for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or a lazy loaded React component, ReactElement.|
 |selectMessage|Short description of action type responsibility, that will be displayed on the select card in UI.|
 |validateConnector|Validation function for action connector.|
 |validateParams|Validation function for action params.|
@@ -1149,7 +1149,7 @@ triggersActionsUi.actionTypeRegistry.register(getSomeNewActionType());
 
 ## Create and register new action type UI
 
-Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#kibana-actions-configuration) should be done first.
+Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions#action-types) should be done first.
 
 Action type UI is expected to be defined as `ActionTypeModel` object.
 
@@ -1157,7 +1157,7 @@ Below is a list of steps that should be done to build and register a new action 
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [ActionTypeModel]:
 ```
-import React, { Fragment, lazy } from 'react';
+import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
@@ -1186,7 +1186,7 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Example Action',
       }
     ),
-    validateConnector: (action: ExampleActionConnector): ValidationResult => {
+    validateConnector: (action: ExampleActionConnector): Promise<ValidationResult> => {
       const validationResult = { errors: {} };
       const errors = {
         someConnectorField: new Array<string>(),
@@ -1204,7 +1204,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (actionParams: ExampleActionParams): ValidationResult => {
+    validateParams: (actionParams: ExampleActionParams): Promise<ValidationResult> => {
       const validationResult = { errors: {} };
       const errors = {
         message: new Array<string>(),
@@ -1230,7 +1230,7 @@ export function getActionType(): ActionTypeModel {
 
 2. Define `actionConnectorFields` as `React.FunctionComponent` - this is the form for action connector.
 ```
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiTextArea } from '@elastic/eui';
@@ -1252,7 +1252,7 @@ const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps
 >> = ({ action, editActionConfig, errors }) => {
   const { someConnectorField } = action.config;
   return (
-    <Fragment>
+    <>
       <EuiFieldText
         fullWidth
         isInvalid={errors.someConnectorField.length > 0 && someConnectorField !== undefined}
@@ -1267,7 +1267,7 @@ const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps
           }
         }}
       />
-    </Fragment>
+    </>
   );
 };
 
@@ -1277,7 +1277,7 @@ export {ExampleConnectorFields as default};
 
 3. Define action type params fields using the property of `ActionTypeModel` `actionParamsFields`: 
 ```
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiTextArea } from '@elastic/eui';
@@ -1300,7 +1300,7 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
 }) => {
   const { message } = actionParams;
   return (
-    <Fragment>
+    <>
       <EuiTextArea
         fullWidth
         isInvalid={errors.message.length > 0 && message !== undefined}
@@ -1315,7 +1315,7 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
           }
         }}
       />
-    </Fragment>
+    </>
   );
 };
 
@@ -1470,9 +1470,9 @@ interface ActionAccordionFormProps {
 
 |Property|Description|
 |---|---|
-|reloadAlerts|Optional function, which will be executed if alert was saved sucsessfuly.|
+|onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
 |http|HttpSetup needed for executing API calls.|
-|alertTypeRegistry|Registry for alert types.|
+|ruleTypeRegistry|Registry for alert types.|
 |actionTypeRegistry|Registry for action types.|
 |uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
 |docLinks|Documentation Links, needed to link to the documentation from informational callouts.|

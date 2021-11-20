@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
-import { IndexPatternManagementStart } from '../../../../../../plugins/index_pattern_management/public';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
+import { areScriptedFieldsEnabled } from '../../utils';
 
 function filterByName(items: IndexPatternField[], filter: string) {
   const lowercaseFilter = (filter || '').toLowerCase();
@@ -68,11 +68,7 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
   return title + count;
 }
 
-export function getTabs(
-  indexPattern: IndexPattern,
-  fieldFilter: string,
-  indexPatternListProvider: IndexPatternManagementStart['list']
-) {
+export function getTabs(indexPattern: IndexPattern, fieldFilter: string) {
   const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.getSourceFiltering());
   const filteredCount = getCounts(
     indexPattern.fields.getAll(),
@@ -88,7 +84,7 @@ export function getTabs(
     'data-test-subj': 'tab-indexedFields',
   });
 
-  if (indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {
+  if (areScriptedFieldsEnabled(indexPattern)) {
     tabs.push({
       name: getTitle('scripted', filteredCount, totalCount),
       id: TAB_SCRIPTED_FIELDS,
@@ -106,7 +102,7 @@ export function getTabs(
 }
 
 export function getPath(field: IndexPatternField, indexPattern: IndexPattern) {
-  return `/patterns/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
+  return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
 const allTypesDropDown = i18n.translate(

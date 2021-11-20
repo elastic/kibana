@@ -4,7 +4,12 @@
 
 ## AppLeaveHandler type
 
-A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return `confirm` to to prompt a message to the user before leaving the page, or `default` to keep the default behavior (doing nothing).
+> Warning: This API is now obsolete.
+> 
+> [AppMountParameters.onAppLeave](./kibana-plugin-core-public.appmountparameters.onappleave.md) has been deprecated in favor of [ScopedHistory.block](./kibana-plugin-core-public.scopedhistory.block.md)
+> 
+
+A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return `confirm` to prompt a message to the user before leaving the page, or `default` to keep the default behavior (doing nothing).
 
 See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for detailed usage examples.
 

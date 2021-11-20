@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 
 import {
   Direction,
@@ -17,6 +18,7 @@ import {
 export const mockOptions: NetworkHttpRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -169,8 +171,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             },
           },
           {
-            key:
-              '/.kibana-task-manager-xavier-m/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
+            key: '/.kibana-task-manager-xavier-m/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
             doc_count: 28715,
             methods: {
               doc_count_error_upper_bound: 0,
@@ -206,8 +207,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             },
           },
           {
-            key:
-              '/.kibana-task-manager-andrewg-local-testing-7-9-ff/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
+            key: '/.kibana-task-manager-andrewg-local-testing-7-9-ff/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
             doc_count: 28161,
             methods: {
               doc_count_error_upper_bound: 0,
@@ -503,15 +503,13 @@ export const formattedSearchStrategyResponse = {
     },
     {
       node: {
-        _id:
-          '/.kibana-task-manager-xavier-m/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
+        _id: '/.kibana-task-manager-xavier-m/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
         domains: ['es.siem.estc.dev:9200'],
         methods: ['POST'],
         statuses: ['200'],
         lastHost: 'bastion00.siem.estc.dev',
         lastSourceIp: '24.168.52.229',
-        path:
-          '/.kibana-task-manager-xavier-m/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
+        path: '/.kibana-task-manager-xavier-m/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
         requestCount: 28715,
       },
       cursor: {
@@ -522,15 +520,13 @@ export const formattedSearchStrategyResponse = {
     },
     {
       node: {
-        _id:
-          '/.kibana-task-manager-andrewg-local-testing-7-9-ff/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
+        _id: '/.kibana-task-manager-andrewg-local-testing-7-9-ff/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
         domains: ['es.siem.estc.dev:9200'],
         methods: ['POST'],
         statuses: ['200'],
         lastHost: 'bastion00.siem.estc.dev',
         lastSourceIp: '67.173.227.94',
-        path:
-          '/.kibana-task-manager-andrewg-local-testing-7-9-ff/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
+        path: '/.kibana-task-manager-andrewg-local-testing-7-9-ff/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
         requestCount: 28161,
       },
       cursor: {
@@ -617,9 +613,10 @@ export const formattedSearchStrategyResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -627,7 +624,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               http_count: { cardinality: { field: 'url.path' } },
@@ -674,9 +671,10 @@ export const formattedSearchStrategyResponse = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -684,7 +682,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   body: {
     aggregations: {
       http_count: { cardinality: { field: 'url.path' } },

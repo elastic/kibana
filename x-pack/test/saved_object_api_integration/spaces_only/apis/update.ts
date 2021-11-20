@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES } from '../../common/lib/spaces';
@@ -14,7 +15,7 @@ const {
   SPACE_1: { spaceId: SPACE_1_ID },
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
-const { fail404 } = testCaseFailures;
+const { fail404, fail409 } = testCaseFailures;
 
 const createTestCases = (spaceId: string) => [
   // for each outcome, if failure !== undefined then we expect to receive
@@ -29,8 +30,15 @@ const createTestCases = (spaceId: string) => [
   },
   { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
   { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+  {
+    ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+    ...fail404(spaceId !== DEFAULT_SPACE_ID),
+  },
+  { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
   CASES.NAMESPACE_AGNOSTIC,
   { ...CASES.HIDDEN, ...fail404() },
+  { ...CASES.ALIAS_CONFLICT_OBJ, upsert: false, ...fail404() },
+  { ...CASES.ALIAS_CONFLICT_OBJ, upsert: true, ...fail409(spaceId === SPACE_1_ID) },
   { ...CASES.DOES_NOT_EXIST, ...fail404() },
 ];
 

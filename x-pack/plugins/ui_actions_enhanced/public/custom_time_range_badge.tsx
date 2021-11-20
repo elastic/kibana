@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,7 +10,6 @@ import { prettyDuration, commonDurationRanges } from '@elastic/eui';
 import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
 import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
-import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { OpenModal, CommonlyUsedRange } from './types';
 
@@ -76,6 +76,9 @@ export class CustomTimeRangeBadge implements Action<TimeBadgeActionContext> {
 
     // Only here for typescript
     if (hasTimeRange(embeddable)) {
+      const CustomizeTimeRangeModal = await import('./customize_time_range_modal').then(
+        (m) => m.CustomizeTimeRangeModal
+      );
       const modalSession = this.openModal(
         <CustomizeTimeRangeModal
           onClose={() => modalSession.close()}

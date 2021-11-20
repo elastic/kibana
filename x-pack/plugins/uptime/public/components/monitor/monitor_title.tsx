@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useMonitorId } from '../../hooks';
@@ -30,6 +32,82 @@ const getPageTitle = (monitorId: string, selectedMonitor: Ping | null) => {
   return monitorId;
 };
 
+export const MonitorPageTitleContent: React.FC = () => {
+  const monitorId = useMonitorId();
+  const selectedMonitor = useSelector(monitorStatusSelector);
+  const type = selectedMonitor?.monitor?.type;
+  const isBrowser = type === 'browser';
+  const renderMonitorType = (monitorType: string) => {
+    switch (monitorType) {
+      case 'http':
+        return (
+          <FormattedMessage
+            id="xpack.uptime.monitorDetails.title.pingType.http"
+            defaultMessage="HTTP ping"
+          />
+        );
+      case 'tcp':
+        return (
+          <FormattedMessage
+            id="xpack.uptime.monitorDetails.title.pingType.tcp"
+            defaultMessage="TCP ping"
+          />
+        );
+      case 'icmp':
+        return (
+          <FormattedMessage
+            id="xpack.uptime.monitorDetails.title.pingType.icmp"
+            defaultMessage="ICMP ping"
+          />
+        );
+      case 'browser':
+        return (
+          <FormattedMessage
+            id="xpack.uptime.monitorDetails.title.pingType.browser"
+            defaultMessage="Browser"
+          />
+        );
+      default:
+        return '';
+    }
+  };
+  return (
+    <>
+      <EuiFlexGroup wrap={false} data-test-subj="monitorTitle">
+        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+          <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor!} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup wrap={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          {isBrowser && type && (
+            <EuiBadge color="hollow">
+              {renderMonitorType(type)}{' '}
+              <FormattedMessage
+                id="xpack.uptime.monitorDetails.title.disclaimer.description"
+                defaultMessage="(BETA)"
+              />
+            </EuiBadge>
+          )}
+        </EuiFlexItem>
+        {isBrowser && (
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" target="_blank">
+                <FormattedMessage
+                  id="xpack.uptime.monitorDetails.title.disclaimer.link"
+                  defaultMessage="See more"
+                />
+              </EuiLink>
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </>
+  );
+};
+
 export const MonitorPageTitle: React.FC = () => {
   const monitorId = useMonitorId();
 
@@ -39,20 +117,5 @@ export const MonitorPageTitle: React.FC = () => {
 
   useBreadcrumbs([{ text: nameOrId }]);
 
-  return (
-    <EuiFlexGroup wrap={false} data-test-subj="monitorTitle">
-      <EuiFlexItem grow={false}>
-        <EuiTitle>
-          <h1 className="eui-textNoWrap">{nameOrId}</h1>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-        <EnableMonitorAlert
-          monitorId={monitorId}
-          monitorName={selectedMonitor?.monitor?.name || selectedMonitor?.url?.full}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return <span className="eui-textNoWrap">{nameOrId}</span>;
 };

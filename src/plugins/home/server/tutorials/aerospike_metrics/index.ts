@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,17 +23,17 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
   return {
     id: 'aerospikeMetrics',
     name: i18n.translate('home.tutorials.aerospikeMetrics.nameTitle', {
-      defaultMessage: 'Aerospike metrics',
+      defaultMessage: 'Aerospike Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.aerospikeMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Aerospike server.',
+      defaultMessage: 'Collect metrics from Aerospike servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.aerospikeMetrics.longDescription', {
       defaultMessage:
-        'The `aerospike` Metricbeat module fetches internal metrics from Aerospike. \
+        'The `aerospike` Metricbeat module fetches metrics from Aerospike. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aerospike.html',
@@ -56,5 +56,6 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['web'],
   };
 }

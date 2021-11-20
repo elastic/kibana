@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { ButtonColor } from '@elastic/eui';
-import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
-import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
 import { useMemo } from 'react';
 import { ResolverProcessType, NodeDataStatus } from '../types';
-import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 import { useSymbolIDs } from './use_symbol_ids';
 import { useColors } from './use_colors';
 
@@ -23,8 +22,6 @@ export function useCubeAssets(
   isProcessTrigger: boolean
 ): NodeStyleConfig {
   const SymbolIds = useSymbolIDs();
-  const isDarkMode = useUiSetting('theme:darkMode');
-  const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
   const colorMap = useColors();
 
   const nodeAssets: NodeStyleMap = useMemo(
@@ -38,7 +35,7 @@ export function useCubeAssets(
         }),
         isLabelFilled: true,
         labelButtonFill: 'primary',
-        strokeColor: theme.euiColorPrimary,
+        strokeColor: euiThemeVars.euiColorPrimary,
       },
       loadingCube: {
         backingFill: colorMap.processBackingFill,
@@ -49,7 +46,7 @@ export function useCubeAssets(
         }),
         isLabelFilled: false,
         labelButtonFill: 'primary',
-        strokeColor: theme.euiColorPrimary,
+        strokeColor: euiThemeVars.euiColorPrimary,
       },
       errorCube: {
         backingFill: colorMap.processBackingFill,
@@ -60,7 +57,7 @@ export function useCubeAssets(
         }),
         isLabelFilled: false,
         labelButtonFill: 'primary',
-        strokeColor: theme.euiColorPrimary,
+        strokeColor: euiThemeVars.euiColorPrimary,
       },
       runningTriggerCube: {
         backingFill: colorMap.triggerBackingFill,
@@ -71,7 +68,7 @@ export function useCubeAssets(
         }),
         isLabelFilled: true,
         labelButtonFill: 'danger',
-        strokeColor: theme.euiColorDanger,
+        strokeColor: euiThemeVars.euiColorDanger,
       },
       terminatedProcessCube: {
         backingFill: colorMap.processBackingFill,
@@ -85,7 +82,7 @@ export function useCubeAssets(
         ),
         isLabelFilled: false,
         labelButtonFill: 'primary',
-        strokeColor: theme.euiColorPrimary,
+        strokeColor: euiThemeVars.euiColorPrimary,
       },
       terminatedTriggerCube: {
         backingFill: colorMap.triggerBackingFill,
@@ -99,10 +96,10 @@ export function useCubeAssets(
         ),
         isLabelFilled: false,
         labelButtonFill: 'danger',
-        strokeColor: theme.euiColorDanger,
+        strokeColor: euiThemeVars.euiColorDanger,
       },
     }),
-    [SymbolIds, colorMap, theme]
+    [SymbolIds, colorMap]
   );
 
   if (cubeType === 'terminated') {

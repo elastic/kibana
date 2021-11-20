@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -16,7 +17,10 @@ import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_creation';
 import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
+import {
+  loadNewJobCapabilities,
+  DATA_FRAME_ANALYTICS,
+} from '../../../services/new_job_capabilities/load_new_job_capabilities';
 
 export const analyticsJobsCreationRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -40,9 +44,10 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     sort: false,
   });
 
-  const { context } = useResolver(index, savedSearchId, deps.config, {
+  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
     ...basicResolvers(deps),
-    jobCaps: () => loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns),
+    analyticsFields: () =>
+      loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, DATA_FRAME_ANALYTICS),
   });
 
   return (

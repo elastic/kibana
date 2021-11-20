@@ -1,53 +1,96 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-// eslint-disable-next-line no-restricted-imports
-import isEmpty from 'lodash/isEmpty';
-import { SourcererModel, SourcererScopeName } from './model';
-import { TimelineEventsType } from '../../../../common/types/timeline';
 
-export interface Args {
-  eventType?: TimelineEventsType;
-  id: SourcererScopeName;
-  selectedPatterns: string[];
-  state: SourcererModel;
-}
-export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, state }: Args) => {
-  const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
-  const newSelectedPatterns = selectedPatterns.filter(
-    (sp) =>
-      state.configIndexPatterns.includes(sp) ||
-      kibanaIndexPatterns.includes(sp) ||
-      (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
-  );
-  if (isEmpty(newSelectedPatterns)) {
-    let defaultIndexPatterns = state.configIndexPatterns;
-    if (id === SourcererScopeName.timeline && isEmpty(newSelectedPatterns)) {
-      defaultIndexPatterns = defaultIndexPatternByEventType({ state, eventType });
-    } else if (id === SourcererScopeName.detections && isEmpty(newSelectedPatterns)) {
-      defaultIndexPatterns = [state.signalIndexName ?? ''];
-    }
-    return defaultIndexPatterns;
+import { isEmpty } from 'lodash';
+import { SourcererDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
+import { SelectedDataViewPayload } from './actions';
+
+export const getScopePatternListSelection = (
+  theDataView: SourcererDataView | undefined,
+  sourcererScope: SourcererScopeName,
+  signalIndexName: SourcererModel['signalIndexName'],
+  isDefaultDataView: boolean
+): string[] => {
+  const patternList: string[] =
+    theDataView != null && theDataView.id !== null ? theDataView.patternList : [];
+
+  if (!isDefaultDataView) {
+    return patternList.sort();
   }
-  return newSelectedPatterns;
+  // when our SIEM data view is set, here are the defaults
+  switch (sourcererScope) {
+    case SourcererScopeName.default:
+      return patternList.filter((index) => index !== signalIndexName).sort();
+    case SourcererScopeName.detections:
+      // set to signalIndexName whether or not it exists yet in the patternList
+      return (signalIndexName != null ? [signalIndexName] : []).sort();
+    case SourcererScopeName.timeline:
+      return patternList.sort();
+  }
 };
 
-export const defaultIndexPatternByEventType = ({
-  state,
-  eventType,
-}: {
-  state: SourcererModel;
-  eventType?: TimelineEventsType;
-}) => {
-  let defaultIndexPatterns = state.configIndexPatterns;
-  if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
-    defaultIndexPatterns = [...state.configIndexPatterns, state.signalIndexName ?? ''];
-  } else if (eventType === 'raw') {
-    defaultIndexPatterns = state.configIndexPatterns;
-  } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
-    defaultIndexPatterns = [state.signalIndexName ?? ''];
+export const validateSelectedPatterns = (
+  state: SourcererModel,
+  payload: SelectedDataViewPayload
+): Partial<SourcererScopeById> => {
+  const { id, ...rest } = payload;
+  let dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
+  // dedupe because these could come from a silly url or pre 8.0 timeline
+  const dedupePatterns = [...new Set(rest.selectedPatterns)];
+  let selectedPatterns =
+    dataView != null
+      ? dedupePatterns.filter(
+          (pattern) =>
+            // Typescript is being mean and telling me dataView could be undefined here
+            // so redoing the dataView != null check
+            (dataView != null && dataView.patternList.includes(pattern)) ||
+            // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
+            state.signalIndexName == null ||
+            state.signalIndexName === pattern
+        )
+      : // 7.16 -> 8.0 this will get hit because dataView == null
+        dedupePatterns;
+
+  if (selectedPatterns.length > 0 && dataView == null) {
+    // we have index patterns, but not a data view id
+    // find out if we have these index patterns in the defaultDataView
+    const areAllPatternsInDefault = selectedPatterns.every(
+      (pattern) => state.defaultDataView.title.indexOf(pattern) > -1
+    );
+    if (areAllPatternsInDefault) {
+      dataView = state.defaultDataView;
+      selectedPatterns = selectedPatterns.filter(
+        (pattern) => dataView != null && dataView.patternList.includes(pattern)
+      );
+    }
   }
-  return defaultIndexPatterns;
+  // TO DO: Steph/sourcerer If dataView is still undefined here, create temporary dataView
+  // and prompt user to go create this dataView
+  // currently UI will take the undefined dataView and default to defaultDataView anyways
+  // this is a "strategically merged" bug ;)
+  // https://github.com/elastic/security-team/issues/1921
+
+  return {
+    [id]: {
+      ...state.sourcererScopes[id],
+      ...rest,
+      selectedDataViewId: dataView?.id ?? null,
+      selectedPatterns,
+      ...(isEmpty(selectedPatterns)
+        ? {
+            selectedPatterns: getScopePatternListSelection(
+              dataView ?? state.defaultDataView,
+              id,
+              state.signalIndexName,
+              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
+            ),
+          }
+        : {}),
+      loading: false,
+    },
+  };
 };

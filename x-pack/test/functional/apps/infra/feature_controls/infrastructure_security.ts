@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
@@ -51,6 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_all_role'),
@@ -60,17 +63,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
-        it(`shows 'Change source configuration' button`, async () => {
+        it('shows no data page', async () => {
           await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('~infrastructureViewSetupInstructionsButton');
-          await testSubjects.existOrFail('~configureSourceButton');
+          await testSubjects.existOrFail('~noDataPage');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -80,11 +82,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('infra/metrics_and_logs');
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         after(async () => {
-          await esArchiver.unload('infra/metrics_and_logs');
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         it(`shows Wafflemap`, async () => {
@@ -149,6 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_read_role'),
@@ -158,17 +161,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
-        it(`doesn't show 'Change source configuration' button`, async () => {
+        it('shows No data page', async () => {
           await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('~infrastructureViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('~configureSourceButton');
+          await testSubjects.existOrFail('~noDataPage');
         });
 
         it(`shows read-only badge`, async () => {
@@ -178,11 +180,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('infra/metrics_and_logs');
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         after(async () => {
-          await esArchiver.unload('infra/metrics_and_logs');
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         it(`shows Wafflemap`, async () => {
@@ -257,11 +259,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('infra/metrics_and_logs');
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         after(async () => {
-          await esArchiver.unload('infra/metrics_and_logs');
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
       });
     });
@@ -310,11 +312,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('infrastructure landing page with data', () => {
         before(async () => {
-          await esArchiver.load('infra/metrics_and_logs');
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         after(async () => {
-          await esArchiver.unload('infra/metrics_and_logs');
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
       });
     });

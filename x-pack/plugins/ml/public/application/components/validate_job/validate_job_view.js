@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -11,15 +12,12 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
-  EuiSpacer,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +28,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getDocLinks } from '../../util/dependency_cache';
 
+import { parseMessages } from '../../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
+import { Callout, statusToEuiIconType } from '../callout';
 import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -49,77 +49,20 @@ const getDefaultState = () => ({
   title: '',
 });
 
-const statusToEuiColor = (status) => {
-  switch (status) {
-    case VALIDATION_STATUS.INFO:
-      return 'primary';
-      break;
-    case VALIDATION_STATUS.ERROR:
-      return 'danger';
-      break;
-    default:
-      return status;
-  }
-};
-
-const statusToEuiIconType = (status) => {
-  switch (status) {
-    case VALIDATION_STATUS.INFO:
-      return 'iInCircle';
-      break;
-    case VALIDATION_STATUS.ERROR:
-      return 'cross';
-      break;
-    case VALIDATION_STATUS.SUCCESS:
-      return 'check';
-      break;
-    case VALIDATION_STATUS.WARNING:
-      return 'alert';
-      break;
-    default:
-      return status;
-  }
-};
-
-const Link = ({ url }) => (
-  <EuiLink href={url} target="_BLANK">
-    <FormattedMessage id="xpack.ml.validateJob.learnMoreLinkText" defaultMessage="Learn more" />
-  </EuiLink>
-);
-Link.propTypes = {
-  url: PropTypes.string.isRequired,
-};
-
-// Message is its own component so it can be passed
-// as the "title" prop in the Callout component.
-const Message = ({ message }) => (
-  <React.Fragment>
-    {message.text} {message.url && <Link url={message.url} />}
-  </React.Fragment>
-);
-Message.propTypes = {
-  message: PropTypes.shape({
-    text: PropTypes.string,
-    url: PropTypes.string,
-  }),
-};
-
 const MessageList = ({ messages, idFilterList }) => {
   const callouts = messages
     .filter((m) => idFilterList.includes(m.id) === false)
-    .map((m, i) => <Callout key={`${m.id}_${i}`} message={m} />);
+    .map((m, i) => <Callout key={`${m.id}_${i}`} {...m} />);
 
   // there could be no error or success messages due to the
   // idFilterList being applied. so rather than showing nothing,
   // show a message saying all passed
   const allPassedCallout = (
     <Callout
-      message={{
-        text: i18n.translate('xpack.ml.validateJob.allPassed', {
-          defaultMessage: 'All validation checks passed successfully',
-        }),
-        status: VALIDATION_STATUS.SUCCESS,
-      }}
+      text={i18n.translate('xpack.ml.validateJob.allPassed', {
+        defaultMessage: 'All validation checks passed successfully',
+      })}
+      status={VALIDATION_STATUS.SUCCESS}
     />
   );
 
@@ -128,27 +71,6 @@ const MessageList = ({ messages, idFilterList }) => {
 MessageList.propTypes = {
   messages: PropTypes.array,
   idFilterList: PropTypes.array,
-};
-
-const Callout = ({ message }) => (
-  <React.Fragment>
-    <EuiCallOut
-      color={statusToEuiColor(message.status)}
-      size="s"
-      title={message.heading || <Message message={message} />}
-      iconType={statusToEuiIconType(message.status)}
-    >
-      {message.heading && <Message message={message} />}
-    </EuiCallOut>
-    <EuiSpacer size="m" />
-  </React.Fragment>
-);
-Callout.propTypes = {
-  message: PropTypes.shape({
-    status: PropTypes.string,
-    text: PropTypes.string,
-    url: PropTypes.string,
-  }),
 };
 
 const LoadingSpinner = () => (
@@ -160,24 +82,19 @@ const LoadingSpinner = () => (
 );
 
 const Modal = ({ close, title, children }) => (
-  <EuiOverlayMask>
-    <EuiModal onClose={close} style={{ width: '800px' }}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-      </EuiModalHeader>
+  <EuiModal onClose={close} style={{ width: '800px' }}>
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+    </EuiModalHeader>
 
-      <EuiModalBody>{children}</EuiModalBody>
+    <EuiModalBody>{children}</EuiModalBody>
 
-      <EuiModalFooter>
-        <EuiButton onClick={close} size="s" fill>
-          <FormattedMessage
-            id="xpack.ml.validateJob.modal.closeButtonLabel"
-            defaultMessage="Close"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-  </EuiOverlayMask>
+    <EuiModalFooter>
+      <EuiButton onClick={close} size="s" fill>
+        <FormattedMessage id="xpack.ml.validateJob.modal.closeButtonLabel" defaultMessage="Close" />
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
 );
 Modal.propType = {
   close: PropTypes.func.isRequired,
@@ -216,7 +133,8 @@ export class ValidateJobUI extends Component {
 
         this.props.ml
           .validateJob({ duration, fields, job })
-          .then((messages) => {
+          .then((validationMessages) => {
+            const messages = parseMessages(validationMessages, getDocLinks());
             shouldShowLoadingIndicator = false;
 
             const messagesContainError = messages.some((m) => m.status === VALIDATION_STATUS.ERROR);

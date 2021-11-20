@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PluginInitializer } from 'src/core/public';
@@ -19,7 +20,7 @@ export const plugin: PluginInitializer<
   GlobalSearchPluginStartDeps
 > = (context) => new GlobalSearchPlugin(context);
 
-export {
+export type {
   GlobalSearchBatchedResults,
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
@@ -28,9 +29,9 @@ export {
   GlobalSearchFindParams,
   GlobalSearchProviderFindParams,
 } from '../common/types';
-export {
+export type {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
   GlobalSearchResultProvider,
 } from './types';
-export { GlobalSearchFindOptions } from './services/types';
+export type { GlobalSearchFindOptions } from './services/types';

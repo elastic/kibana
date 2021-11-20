@@ -1,56 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
-import {
-  CoreSetup,
-  ILegacyCustomClusterClient,
-  Plugin,
-  Logger,
-  PluginInitializerContext,
-  SharedGlobalConfig,
-} from 'src/core/server';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
-import { Dependencies, RollupHandlerContext } from './types';
+import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
 import { rollupDataEnricher } from './rollup_data_enricher';
 import { IndexPatternsFetcher } from './shared_imports';
-import { elasticsearchJsPlugin } from './client/elasticsearch_rollup';
-import { isEsError } from './shared_imports';
+import { handleEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
 
-async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-  const [core] = await getStartServices();
-  // Extend the elasticsearchJs client with additional endpoints.
-  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-
-  return core.elasticsearch.legacy.createClient('rollup', esClientConfig);
-}
-
 export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
-  private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private readonly license: License;
-  private rollupEsClient?: ILegacyCustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
     this.license = new License();
   }
 
   public setup(
-    { http, uiSettings, getStartServices }: CoreSetup,
+    { http, uiSettings, savedObjects, getStartServices }: CoreSetup,
     { features, licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
   ) {
     this.license.setup(
@@ -81,21 +61,11 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext<RollupHandlerContext, 'rollup'>(
-      'rollup',
-      async (context, request) => {
-        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-        return {
-          client: this.rollupEsClient.asScoped(request),
-        };
-      }
-    );
-
     registerApiRoutes({
       router: http.createRouter(),
       license: this.license,
       lib: {
-        isEsError,
+        handleEsError,
         formatEsError,
         getCapabilitiesForRollupIndices,
       },
@@ -106,30 +76,26 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
 
     uiSettings.register({
       [CONFIG_ROLLUPS]: {
-        name: i18n.translate('xpack.rollupJobs.rollupIndexPatternsTitle', {
-          defaultMessage: 'Enable rollup index patterns',
+        name: i18n.translate('xpack.rollupJobs.rollupDataViewsTitle', {
+          defaultMessage: 'Enable rollup data views',
         }),
         value: true,
-        description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
-          defaultMessage: `Enable the creation of index patterns which capture rollup indices,
-              which in turn enable visualizations based on rollup data. Refresh
-              the page to apply the changes.`,
+        description: i18n.translate('xpack.rollupJobs.rollupDataViewsDescription', {
+          defaultMessage: `Enable the creation of data views that capture rollup indices,
+              which in turn enable visualizations based on rollup data.`,
         }),
         category: ['rollups'],
         schema: schema.boolean(),
+        requiresPageReload: true,
       },
     });
 
     if (usageCollection) {
-      this.globalConfig$
-        .pipe(first())
-        .toPromise()
-        .then((globalConfig) => {
-          registerRollupUsageCollector(usageCollection, globalConfig.kibana.index);
-        })
-        .catch((e: any) => {
-          this.logger.warn(`Registering Rollup collector failed: ${e}`);
-        });
+      try {
+        registerRollupUsageCollector(usageCollection, savedObjects.getKibanaIndex());
+      } catch (e) {
+        this.logger.warn(`Registering Rollup collector failed: ${e}`);
+      }
     }
 
     if (indexManagement && indexManagement.indexDataEnricher) {
@@ -139,9 +105,5 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
 
   start() {}
 
-  stop() {
-    if (this.rollupEsClient) {
-      this.rollupEsClient.close();
-    }
-  }
+  stop() {}
 }

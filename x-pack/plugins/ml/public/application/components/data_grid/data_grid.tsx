@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, FC, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useRef, FC } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -17,6 +19,7 @@ import {
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiMutationObserver,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
@@ -34,12 +37,13 @@ import {
   getTopClasses,
 } from './common';
 import { UseIndexDataReturnType } from './types';
-import { DecisionPathPopover } from './feature_importance/decision_path_popover';
+import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
 import {
   FeatureImportanceBaseline,
   FeatureImportance,
   TopClasses,
 } from '../../../../common/types/feature_importance';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
@@ -79,6 +83,7 @@ export const DataGrid: FC<Props> = memo(
       baseline,
       chartsVisible,
       chartsButtonVisible,
+      ccsWarning,
       columnsWithCharts,
       dataTestSubj,
       errorMessage,
@@ -119,7 +124,8 @@ export const DataGrid: FC<Props> = memo(
 
     const popOverContent = useMemo(() => {
       return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
-        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
+        analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
         ? {
             featureImportance: ({ children }: { cellContentsElement: any; children: any }) => {
               const rowIndex = children?.props?.visibleRowIndex;
@@ -152,19 +158,28 @@ export const DataGrid: FC<Props> = memo(
               );
 
               return (
-                <DecisionPathPopover
-                  analysisType={analysisType}
-                  predictedValue={predictedValue}
-                  predictedProbability={predictedProbability}
-                  baseline={baseline}
-                  featureImportance={parsedFIArray}
-                  topClasses={topClasses}
-                  predictionFieldName={
-                    predictionFieldName ? predictionFieldName.replace('_prediction', '') : undefined
-                  }
-                />
+                <div data-test-subj="mlDFAFeatureImportancePopover">
+                  <DecisionPathPopover
+                    analysisType={analysisType}
+                    predictedValue={predictedValue}
+                    predictedProbability={predictedProbability}
+                    baseline={baseline}
+                    featureImportance={parsedFIArray}
+                    topClasses={topClasses}
+                    predictionFieldName={
+                      predictionFieldName
+                        ? predictionFieldName.replace('_prediction', '')
+                        : undefined
+                    }
+                  />
+                </div>
               );
             },
+            featureInfluence: ({
+              cellContentsElement,
+            }: {
+              cellContentsElement: HTMLDivElement;
+            }) => <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>,
           }
         : undefined;
     }, [baseline, data]);
@@ -181,6 +196,8 @@ export const DataGrid: FC<Props> = memo(
         });
       }
     }, [invalidSortingColumnns, toastNotifications]);
+
+    const wrapperEl = useRef<HTMLDivElement>(null);
 
     if (status === INDEX_STATUS.LOADED && data.length === 0) {
       return (
@@ -253,8 +270,22 @@ export const DataGrid: FC<Props> = memo(
       }
     }
 
+    const onMutation = () => {
+      if (wrapperEl.current !== null) {
+        const els = wrapperEl.current.querySelectorAll('.euiDataGrid__virtualized');
+        for (const el of Array.from(els)) {
+          if (isPopulatedObject(el) && isPopulatedObject(el.style) && el.style.height !== 'auto') {
+            el.style.height = 'auto';
+          }
+        }
+      }
+    };
+
     return (
-      <div data-test-subj={`${dataTestSubj} ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}>
+      <div
+        data-test-subj={`${dataTestSubj} ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}
+        ref={wrapperEl}
+      >
         {isWithHeader(props) && (
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>
@@ -284,61 +315,91 @@ export const DataGrid: FC<Props> = memo(
             <EuiSpacer size="m" />
           </div>
         )}
-        <div className="mlDataGrid">
-          <EuiDataGrid
-            aria-label={isWithHeader(props) ? props.title : ''}
-            columns={columnsWithChartsActionized.map((c) => {
-              c.initialWidth = 165;
-              return c;
-            })}
-            columnVisibility={{ visibleColumns, setVisibleColumns }}
-            gridStyle={euiDataGridStyle}
-            rowCount={rowCount}
-            renderCellValue={renderCellValue}
-            sorting={{ columns: sortingColumns, onSort }}
-            toolbarVisibility={{
-              ...euiDataGridToolbarSettings,
-              ...(chartsButtonVisible
-                ? {
-                    additionalControls: (
-                      <EuiToolTip
-                        content={i18n.translate('xpack.ml.dataGrid.histogramButtonToolTipContent', {
-                          defaultMessage:
-                            'Queries run to fetch histogram chart data will use a sample size per shard of {samplerShardSize} documents.',
-                          values: {
-                            samplerShardSize: DEFAULT_SAMPLER_SHARD_SIZE,
-                          },
-                        })}
-                      >
-                        <EuiButtonEmpty
-                          aria-pressed={chartsVisible}
-                          className={`euiDataGrid__controlBtn${
-                            chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
-                          }`}
-                          data-test-subj={`${dataTestSubj}HistogramButton`}
-                          size="xs"
-                          iconType="visBarVertical"
-                          color="text"
-                          onClick={toggleChartVisibility}
-                        >
-                          {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
-                            defaultMessage: 'Histogram charts',
-                          })}
-                        </EuiButtonEmpty>
-                      </EuiToolTip>
-                    ),
-                  }
-                : {}),
-            }}
-            popoverContents={popOverContent}
-            pagination={{
-              ...pagination,
-              pageSizeOptions: [5, 10, 25],
-              onChangeItemsPerPage,
-              onChangePage,
-            }}
-          />
-        </div>
+        {ccsWarning && (
+          <div data-test-subj={`${dataTestSubj} ccsWarning`}>
+            <EuiCallOut
+              title={i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutTitle', {
+                defaultMessage: 'Cross-cluster search returned no fields data.',
+              })}
+              color="warning"
+            >
+              <p>
+                {i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutBody', {
+                  defaultMessage:
+                    'There was an issue retrieving data for the data view. Source preview in combination with cross-cluster search is only supported for versions 7.10 and above. You may still configure and create the transform.',
+                })}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </div>
+        )}
+        <EuiMutationObserver
+          observerOptions={{ subtree: true, attributes: true, childList: true }}
+          onMutation={onMutation}
+        >
+          {(mutationRef) => (
+            <div className="mlDataGrid" ref={mutationRef}>
+              <EuiDataGrid
+                aria-label={isWithHeader(props) ? props.title : ''}
+                columns={columnsWithChartsActionized.map((c) => {
+                  c.initialWidth = 165;
+                  return c;
+                })}
+                columnVisibility={{ visibleColumns, setVisibleColumns }}
+                gridStyle={euiDataGridStyle}
+                rowCount={rowCount}
+                renderCellValue={renderCellValue}
+                sorting={{ columns: sortingColumns, onSort }}
+                toolbarVisibility={{
+                  ...euiDataGridToolbarSettings,
+                  ...(chartsButtonVisible
+                    ? {
+                        additionalControls: (
+                          <EuiToolTip
+                            content={i18n.translate(
+                              'xpack.ml.dataGrid.histogramButtonToolTipContent',
+                              {
+                                defaultMessage:
+                                  'Queries run to fetch histogram chart data will use a sample size per shard of {samplerShardSize} documents.',
+                                values: {
+                                  samplerShardSize: DEFAULT_SAMPLER_SHARD_SIZE,
+                                },
+                              }
+                            )}
+                          >
+                            <EuiButtonEmpty
+                              aria-pressed={chartsVisible === true}
+                              className={`euiDataGrid__controlBtn${
+                                chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
+                              }`}
+                              data-test-subj={`${dataTestSubj}HistogramButton`}
+                              size="xs"
+                              iconType="visBarVertical"
+                              color="text"
+                              onClick={toggleChartVisibility}
+                              disabled={chartsVisible === undefined}
+                            >
+                              <FormattedMessage
+                                id="xpack.ml.dataGrid.histogramButtonText"
+                                defaultMessage="Histogram charts"
+                              />
+                            </EuiButtonEmpty>
+                          </EuiToolTip>
+                        ),
+                      }
+                    : {}),
+                }}
+                popoverContents={popOverContent}
+                pagination={{
+                  ...pagination,
+                  pageSizeOptions: [5, 10, 25],
+                  onChangeItemsPerPage,
+                  onChangePage,
+                }}
+              />
+            </div>
+          )}
+        </EuiMutationObserver>
       </div>
     );
   },

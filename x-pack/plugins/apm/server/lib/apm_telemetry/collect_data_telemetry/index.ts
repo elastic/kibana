@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { merge } from 'lodash';
 import { Logger } from 'kibana/server';
-import { RequestParams } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../typings/elasticsearch';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+} from '../../../../../../../src/core/types/elasticsearch';
+import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';
 
@@ -20,7 +22,7 @@ type TelemetryTaskExecutor = (params: {
     params: TSearchRequest
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
   indicesStats(
-    params: RequestParams.IndicesStats
+    params: estypes.IndicesStatsRequest
     // promise returned by client has an abort property
     // so we cannot use its ReturnType
   ): Promise<{

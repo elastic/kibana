@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -34,6 +36,8 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('updates all assets when updating a package to a different version', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
+
     before(async () => {
       await installPackage(pkgKey);
       await installPackage(pkgUpdateKey);
@@ -42,10 +46,12 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage(pkgUpdateKey);
     });
     it('should have updated the ILM policy', async function () {
-      const resPolicy = await es.transport.request({
-        method: 'GET',
-        path: `/_ilm/policy/all_assets`,
-      });
+      const resPolicy = await es.ilm.getLifecycle(
+        {
+          name: 'all_assets',
+        },
+        { meta: true }
+      );
       expect(resPolicy.body.all_assets.policy).eql({
         phases: {
           hot: {
@@ -61,10 +67,13 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     it('should have updated the index templates', async function () {
-      const resLogsTemplate = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${logsTemplateName}`,
-      });
+      const resLogsTemplate = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${logsTemplateName}`,
+        },
+        { meta: true }
+      );
       expect(resLogsTemplate.statusCode).equal(200);
       expect(
         resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
@@ -93,10 +102,13 @@ export default function (providerContext: FtrProviderContext) {
           },
         },
       });
-      const resMetricsTemplate = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${metricsTemplateName}`,
-      });
+      const resMetricsTemplate = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${metricsTemplateName}`,
+        },
+        { meta: true }
+      );
       expect(resMetricsTemplate.statusCode).equal(200);
       expect(
         resMetricsTemplate.body.index_templates[0].index_template.template.mappings.properties
@@ -124,10 +136,13 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     it('should have installed the new index template', async function () {
-      const resLogsTemplate = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${logsTemplateName2}`,
-      });
+      const resLogsTemplate = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${logsTemplateName2}`,
+        },
+        { meta: true }
+      );
       expect(resLogsTemplate.statusCode).equal(200);
       expect(
         resLogsTemplate.body.index_templates[0].index_template.template.mappings.properties
@@ -155,66 +170,111 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
     it('should have installed the new versionized pipelines', async function () {
-      const res = await es.transport.request({
-        method: 'GET',
-        path: `/_ingest/pipeline/${logsTemplateName}-${pkgUpdateVersion}`,
-      });
+      const res = await es.ingest.getPipeline(
+        {
+          id: `${logsTemplateName}-${pkgUpdateVersion}`,
+        },
+        { meta: true }
+      );
       expect(res.statusCode).equal(200);
-      const resPipeline1 = await es.transport.request({
-        method: 'GET',
-        path: `/_ingest/pipeline/${logsTemplateName}-${pkgUpdateVersion}-pipeline1`,
-      });
+      const resPipeline1 = await es.ingest.getPipeline(
+        {
+          id: `${logsTemplateName}-${pkgUpdateVersion}-pipeline1`,
+        },
+        { meta: true }
+      );
       expect(resPipeline1.statusCode).equal(200);
     });
     it('should have removed the old versionized pipelines', async function () {
-      const res = await es.transport.request(
+      const res = await es.ingest.getPipeline(
         {
-          method: 'GET',
-          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
+          id: `${logsTemplateName}-${pkgVersion}`,
         },
         {
           ignore: [404],
+          meta: true,
         }
       );
       expect(res.statusCode).equal(404);
-      const resPipeline1 = await es.transport.request(
+      const resPipeline1 = await es.ingest.getPipeline(
         {
-          method: 'GET',
-          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+          id: `${logsTemplateName}-${pkgVersion}-pipeline1`,
         },
         {
           ignore: [404],
+          meta: true,
         }
       );
       expect(resPipeline1.statusCode).equal(404);
-      const resPipeline2 = await es.transport.request(
+      const resPipeline2 = await es.ingest.getPipeline(
         {
-          method: 'GET',
-          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+          id: `${logsTemplateName}-${pkgVersion}-pipeline2`,
         },
         {
           ignore: [404],
+          meta: true,
         }
       );
       expect(resPipeline2.statusCode).equal(404);
     });
-    it('should have updated the template components', async function () {
-      const res = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}-mappings`,
-      });
-      expect(res.statusCode).equal(200);
-      expect(res.body.component_templates[0].component_template.template.mappings).eql({
+    it('should have updated the component templates', async function () {
+      const resMappings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName}@mappings`,
+        },
+        { meta: true }
+      );
+      expect(resMappings.statusCode).equal(200);
+      expect(resMappings.body.component_templates[0].component_template.template.mappings).eql({
         dynamic: true,
-        properties: { '@timestamp': { type: 'date' } },
       });
-      const resSettings = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}-settings`,
-      });
-      expect(res.statusCode).equal(200);
+      const resSettings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName}@settings`,
+        },
+        { meta: true }
+      );
+      expect(resSettings.statusCode).equal(200);
       expect(resSettings.body.component_templates[0].component_template.template.settings).eql({
-        index: { lifecycle: { name: 'reference2' } },
+        index: {
+          lifecycle: { name: 'reference2' },
+          codec: 'best_compression',
+          mapping: {
+            total_fields: {
+              limit: '10000',
+            },
+          },
+          query: {
+            default_field: ['logs_test_name', 'new_field_name'],
+          },
+        },
+      });
+      const resUserSettings = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_component_template/${logsTemplateName}@custom`,
+        },
+        { meta: true }
+      );
+      expect(resUserSettings.statusCode).equal(200);
+      expect(resUserSettings.body).eql({
+        component_templates: [
+          {
+            name: 'logs-all_assets.test_logs@custom',
+            component_template: {
+              _meta: {
+                package: {
+                  name: 'all_assets',
+                },
+              },
+              template: {
+                settings: {},
+              },
+            },
+          },
+        ],
       });
     });
     it('should have updated the index patterns', async function () {
@@ -295,11 +355,27 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_lens',
             type: 'lens',
           },
+          {
+            id: 'sample_security_rule',
+            type: 'security-rule',
+          },
+          {
+            id: 'sample_ml_module',
+            type: 'ml-module',
+          },
+          {
+            id: 'sample_tag',
+            type: 'tag',
+          },
         ],
         installed_es: [
           {
             id: 'logs-all_assets.test_logs-all_assets',
             type: 'data_stream_ilm_policy',
+          },
+          {
+            id: 'default',
+            type: 'ml_model',
           },
           {
             id: 'logs-all_assets.test_logs-0.2.0',
@@ -314,12 +390,40 @@ export default function (providerContext: FtrProviderContext) {
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs@mappings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs@settings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs@custom',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs2',
             type: 'index_template',
           },
           {
+            id: 'logs-all_assets.test_logs2@settings',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-all_assets.test_logs2@custom',
+            type: 'component_template',
+          },
+          {
             id: 'metrics-all_assets.test_metrics',
             type: 'index_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@settings',
+            type: 'component_template',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics@custom',
+            type: 'component_template',
           },
         ],
         es_index_patterns: {
@@ -340,21 +444,25 @@ export default function (providerContext: FtrProviderContext) {
           { id: '28523a82-1328-578d-84cb-800970560200', type: 'epm-packages-assets' },
           { id: 'cc1e3e1d-f27b-5d05-86f6-6e4b9a47c7dc', type: 'epm-packages-assets' },
           { id: '5c3aa147-089c-5084-beca-53c00e72ac80', type: 'epm-packages-assets' },
+          { id: '0c8c3c6a-90cb-5f0e-8359-d807785b046c', type: 'epm-packages-assets' },
           { id: '48e582df-b1d2-5f88-b6ea-ba1fafd3a569', type: 'epm-packages-assets' },
           { id: 'bf3b0b65-9fdc-53c6-a9ca-e76140e56490', type: 'epm-packages-assets' },
           { id: '7f4c5aca-b4f5-5f0a-95af-051da37513fc', type: 'epm-packages-assets' },
+          { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
+          { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
+          { id: 'e6ae7d31-6920-5408-9219-91ef1662044b', type: 'epm-packages-assets' },
           { id: 'c7bf1a39-e057-58a0-afde-fb4b48751d8c', type: 'epm-packages-assets' },
           { id: '8c665f28-a439-5f43-b5fd-8fda7b576735', type: 'epm-packages-assets' },
         ],
         name: 'all_assets',
         version: '0.2.0',
-        internal: false,
         removable: true,
         install_version: '0.2.0',
         install_status: 'installed',
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
+        keep_policies_up_to_date: false,
       });
     });
   });

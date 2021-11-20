@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
-import { AnySchema, internals } from '../internals';
+import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 import { ValidationError } from '../errors';
 
@@ -34,8 +35,9 @@ type RequiredProperties<Base extends Props> = Pick<
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.
 export type ObjectResultType<P extends Props> = Readonly<
-  { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } &
-    { [K in keyof RequiredProperties<P>]: TypeOf<P[K]> }
+  { [K in keyof OptionalProperties<P>]?: TypeOf<P[K]> } & {
+    [K in keyof RequiredProperties<P>]: TypeOf<P[K]>;
+  }
 >;
 
 type DefinedProperties<Base extends NullableProps> = Pick<
@@ -45,8 +47,9 @@ type DefinedProperties<Base extends NullableProps> = Pick<
   }[keyof Base]
 >;
 
-type ExtendedProps<P extends Props, NP extends NullableProps> = Omit<P, keyof NP> &
-  { [K in keyof DefinedProperties<NP>]: NP[K] };
+type ExtendedProps<P extends Props, NP extends NullableProps> = Omit<P, keyof NP> & {
+  [K in keyof DefinedProperties<NP>]: NP[K];
+};
 
 type ExtendedObjectType<P extends Props, NP extends NullableProps> = ObjectType<
   ExtendedProps<P, NP>
@@ -185,7 +188,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
         return `expected a plain object value, but found [${typeDetect(value)}] instead.`;
       case 'object.parse':
         return `could not parse object value from json input`;
-      case 'object.allowUnknown':
+      case 'object.unknown':
         return `definition for this key is missing`;
       case 'object.child':
         return reason[0];

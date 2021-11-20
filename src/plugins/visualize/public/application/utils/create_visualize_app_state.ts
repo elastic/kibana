@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { isFunction, omitBy, union } from 'lodash';
@@ -39,12 +39,14 @@ const pureTransitions = {
       ...vis,
     },
   }),
-  unlinkSavedSearch: (state) => ({ query, parentFilters = [] }) => ({
-    ...state,
-    query: query || state.query,
-    filters: union(state.filters, parentFilters),
-    linked: false,
-  }),
+  unlinkSavedSearch:
+    (state) =>
+    ({ query, parentFilters = [] }) => ({
+      ...state,
+      query: query || state.query,
+      filters: union(state.filters, parentFilters),
+      linked: false,
+    }),
   updateVisState: (state) => (newVisState) => ({ ...state, vis: toObject(newVisState) }),
   updateSavedQuery: (state) => (savedQueryId) => {
     const updatedState = {
@@ -62,7 +64,6 @@ const pureTransitions = {
 
 function createVisualizeByValueAppState(stateDefaults: VisualizeAppState) {
   const initialState = migrateAppState({
-    ...stateDefaults,
     ...stateDefaults,
   });
   const stateContainer = createStateContainer<VisualizeAppState, VisualizeAppStateTransitions>(

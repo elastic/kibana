@@ -1,15 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ComponentStrings } from '../../../i18n/components';
+import { i18n } from '@kbn/i18n';
 
-const { ElementControls: strings } = ComponentStrings;
+const strings = {
+  getDeleteAriaLabel: () =>
+    i18n.translate('xpack.canvas.elementControls.deleteAriaLabel', {
+      defaultMessage: 'Delete element',
+    }),
+  getDeleteTooltip: () =>
+    i18n.translate('xpack.canvas.elementControls.deleteToolTip', {
+      defaultMessage: 'Delete',
+    }),
+  getEditAriaLabel: () =>
+    i18n.translate('xpack.canvas.elementControls.editAriaLabel', {
+      defaultMessage: 'Edit element',
+    }),
+  getEditTooltip: () =>
+    i18n.translate('xpack.canvas.elementControls.editToolTip', {
+      defaultMessage: 'Edit',
+    }),
+};
 
 interface Props {
   /**

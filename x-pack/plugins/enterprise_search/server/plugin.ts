@@ -1,11 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   Plugin,
   PluginInitializerContext,
@@ -14,46 +13,55 @@ import {
   SavedObjectsServiceStart,
   IRouter,
   KibanaRequest,
-} from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SpacesPluginStart } from '../../spaces/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { SecurityPluginSetup } from '../../security/server';
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/server';
+import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { InfraPluginSetup } from '../../infra/server';
+import { SecurityPluginSetup } from '../../security/server';
+import { SpacesPluginStart } from '../../spaces/server';
 
 import {
   ENTERPRISE_SEARCH_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  LOGS_SOURCE_ID,
 } from '../common/constants';
-import { ConfigType } from './';
+
+import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
+import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+import { registerEnterpriseSearchIntegrations } from './integrations';
+
 import { checkAccess } from './lib/check_access';
+import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
 import {
   EnterpriseSearchRequestHandler,
   IEnterpriseSearchRequestHandler,
 } from './lib/enterprise_search_request_handler';
 
-import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
-import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
-import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
+import { registerAppSearchRoutes } from './routes/app_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
+import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
+import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
-import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
-import { registerAppSearchRoutes } from './routes/app_search';
-
+import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
-import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
-import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
+
+import { ConfigType } from './';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
+  infra: InfraPluginSetup;
+  customIntegrations?: CustomIntegrationsPluginSetup;
 }
 
 interface PluginsStart {
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface RouteDependencies {
@@ -65,20 +73,29 @@ export interface RouteDependencies {
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
-  private config: Observable<ConfigType>;
-  private logger: Logger;
+  private readonly config: ConfigType;
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.create<ConfigType>();
+    this.config = initializerContext.config.get<ConfigType>();
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(
+  public setup(
     { capabilities, http, savedObjects, getStartServices }: CoreSetup<PluginsStart>,
-    { usageCollection, security, features }: PluginsSetup
+    { usageCollection, security, features, infra, customIntegrations }: PluginsSetup
   ) {
-    const config = await this.config.pipe(first()).toPromise();
+    const config = this.config;
     const log = this.logger;
+
+    if (customIntegrations) {
+      registerEnterpriseSearchIntegrations(http, customIntegrations);
+    }
+
+    /*
+     * Initialize config.ssl.certificateAuthorities file(s) - required for all API calls (+ access checks)
+     */
+    entSearchHttpAgent.initializeHttpAgent(config);
 
     /**
      * Register space/feature control
@@ -152,6 +169,18 @@ export class EnterpriseSearchPlugin implements Plugin {
       }
     });
     registerTelemetryRoute({ ...dependencies, getSavedObjectsService: () => savedObjectsStarted });
+
+    /*
+     * Register logs source configuration, used by LogStream components
+     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
+     */
+    infra.defineInternalSourceConfiguration(LOGS_SOURCE_ID, {
+      name: 'Enterprise Search Logs',
+      logIndices: {
+        type: 'index_name',
+        indexName: '.ent-search-*',
+      },
+    });
   }
 
   public start() {}

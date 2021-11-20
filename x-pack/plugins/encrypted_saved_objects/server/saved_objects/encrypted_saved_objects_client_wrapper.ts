@@ -1,33 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
+import type {
+  ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
-  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkResolveObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsDeleteFromNamespacesOptions,
-  SavedObjectsRemoveReferencesToOptions,
-  ISavedObjectTypeRegistry,
-  SavedObjectsRemoveReferencesToResponse,
-  SavedObjectsUtils,
-} from '../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../security/common/model';
-import { EncryptedSavedObjectsService } from '../crypto';
+} from 'src/core/server';
+
+import { SavedObjectsUtils } from '../../../../../src/core/server';
+import type { AuthenticatedUser } from '../../../security/common/model';
+import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
 
 interface EncryptedSavedObjectsClientOptions {
@@ -59,7 +69,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       return await this.options.baseClient.create(type, attributes, options);
     }
 
-    const id = getValidId(options.id, options.version, options.overwrite);
+    const id = this.getValidId(options.id, options.version, options.overwrite);
     const namespace = getDescriptorNamespace(
       this.options.baseTypeRegistry,
       type,
@@ -93,7 +103,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           return object;
         }
 
-        const id = getValidId(object.id, object.version, options?.overwrite);
+        const id = this.getValidId(object.id, object.version, options?.overwrite);
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           object.type,
@@ -156,9 +166,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.delete(type, id, options);
   }
 
-  public async find<T>(options: SavedObjectsFindOptions) {
+  public async find<T, A>(options: SavedObjectsFindOptions) {
     return await this.handleEncryptedAttributesInBulkResponse(
-      await this.options.baseClient.find<T>(options),
+      await this.options.baseClient.find<T, A>(options),
       undefined
     );
   }
@@ -179,6 +189,28 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       undefined as unknown,
       getDescriptorNamespace(this.options.baseTypeRegistry, type, options?.namespace)
     );
+  }
+
+  public async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
+    options?: SavedObjectsBaseOptions
+  ) {
+    const bulkResolveResult = await this.options.baseClient.bulkResolve<T>(objects, options);
+
+    for (const resolved of bulkResolveResult.resolved_objects) {
+      const savedObject = resolved.saved_object;
+      await this.handleEncryptedAttributesInResponse(
+        savedObject,
+        undefined as unknown,
+        getDescriptorNamespace(
+          this.options.baseTypeRegistry,
+          savedObject.type,
+          savedObject.namespaces ? savedObject.namespaces[0] : undefined
+        )
+      );
+    }
+
+    return bulkResolveResult;
   }
 
   public async resolve<T>(type: string, id: string, options?: SavedObjectsBaseOptions) {
@@ -222,30 +254,55 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
-  public async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options?: SavedObjectsAddToNamespacesOptions
-  ) {
-    return await this.options.baseClient.addToNamespaces(type, id, namespaces, options);
-  }
-
-  public async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options?: SavedObjectsDeleteFromNamespacesOptions
-  ) {
-    return await this.options.baseClient.deleteFromNamespaces(type, id, namespaces, options);
-  }
-
   public async removeReferencesTo(
     type: string,
     id: string,
     options: SavedObjectsRemoveReferencesToOptions = {}
   ): Promise<SavedObjectsRemoveReferencesToResponse> {
     return await this.options.baseClient.removeReferencesTo(type, id, options);
+  }
+
+  public async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions = {}
+  ) {
+    return await this.options.baseClient.openPointInTimeForType(type, options);
+  }
+
+  public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    return await this.options.baseClient.closePointInTime(id, options);
+  }
+
+  public createPointInTimeFinder<T = unknown, A = unknown>(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ) {
+    return this.options.baseClient.createPointInTimeFinder<T, A>(findOptions, {
+      client: this,
+      // Include dependencies last so that subsequent SO client wrappers have their settings applied.
+      ...dependencies,
+    });
+  }
+
+  public async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options?: SavedObjectsCollectMultiNamespaceReferencesOptions
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    return await this.options.baseClient.collectMultiNamespaceReferences(objects, options);
+  }
+
+  public async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options?: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    return await this.options.baseClient.updateObjectsSpaces(
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      options
+    );
   }
 
   /**
@@ -307,27 +364,27 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
     return response;
   }
-}
 
-// Saved objects with encrypted attributes should have IDs that are hard to guess especially
-// since IDs are part of the AAD used during encryption, that's why we control them within this
-// wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
-function getValidId(
-  id: string | undefined,
-  version: string | undefined,
-  overwrite: boolean | undefined
-) {
-  if (id) {
-    // only allow a specified ID if we're overwriting an existing ESO with a Version
-    // this helps us ensure that the document really was previously created using ESO
-    // and not being used to get around the specified ID limitation
-    const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
-    if (!canSpecifyID) {
-      throw new Error(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
-      );
+  // Saved objects with encrypted attributes should have IDs that are hard to guess especially
+  // since IDs are part of the AAD used during encryption, that's why we control them within this
+  // wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
+  private getValidId(
+    id: string | undefined,
+    version: string | undefined,
+    overwrite: boolean | undefined
+  ) {
+    if (id) {
+      // only allow a specified ID if we're overwriting an existing ESO with a Version
+      // this helps us ensure that the document really was previously created using ESO
+      // and not being used to get around the specified ID limitation
+      const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
+      if (!canSpecifyID) {
+        throw this.errors.createBadRequestError(
+          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
+        );
+      }
+      return id;
     }
-    return id;
+    return SavedObjectsUtils.generateId();
   }
-  return SavedObjectsUtils.generateId();
 }

@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, Logger, ElasticsearchClient } from 'kibana/server';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import moment from 'moment';
 import {
   RunContext,
@@ -15,7 +14,7 @@ import {
 } from '../../../task_manager/server';
 
 import { getVisualizationCounts } from './visualization_counts';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
 // into daily rolled-up documents, which will be used in reporting click stats
@@ -27,10 +26,9 @@ export const TASK_ID = `Lens-${TELEMETRY_TASK_TYPE}`;
 export function initializeLensTelemetry(
   logger: Logger,
   core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>,
   taskManager: TaskManagerSetupContract
 ) {
-  registerLensTelemetryTask(logger, core, config, taskManager);
+  registerLensTelemetryTask(logger, core, taskManager);
 }
 
 export function scheduleLensTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
@@ -42,14 +40,13 @@ export function scheduleLensTelemetry(logger: Logger, taskManager?: TaskManagerS
 function registerLensTelemetryTask(
   logger: Logger,
   core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>,
   taskManager: TaskManagerSetupContract
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens usage fetch task',
       timeout: '1m',
-      createTaskRunner: telemetryTaskRunner(logger, core, config),
+      createTaskRunner: telemetryTaskRunner(logger, core),
     },
   });
 }
@@ -136,14 +133,17 @@ export async function getDailyEvents(
   const byDateByType: Record<string, Record<string, number>> = {};
   const suggestionsByDate: Record<string, Record<string, number>> = {};
 
+  // @ts-expect-error no way to declare aggregations for search response
   metrics.aggregations!.daily.buckets.forEach((daily) => {
     const byType: Record<string, number> = byDateByType[daily.key] || {};
+    // @ts-expect-error no way to declare aggregations for search response
     daily.groups.buckets.regularEvents.names.buckets.forEach((bucket) => {
       byType[bucket.key] = (bucket.sums.value || 0) + (byType[daily.key] || 0);
     });
     byDateByType[daily.key] = byType;
 
     const suggestionsByType: Record<string, number> = suggestionsByDate[daily.key] || {};
+    // @ts-expect-error no way to declare aggregations for search response
     daily.groups.buckets.suggestionEvents.names.buckets.forEach((bucket) => {
       suggestionsByType[bucket.key] =
         (bucket.sums.value || 0) + (suggestionsByType[daily.key] || 0);
@@ -173,11 +173,7 @@ export async function getDailyEvents(
   };
 }
 
-export function telemetryTaskRunner(
-  logger: Logger,
-  core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>
-) {
+export function telemetryTaskRunner(logger: Logger, core: CoreSetup) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const getEsClient = async () => {
@@ -187,7 +183,7 @@ export function telemetryTaskRunner(
 
     return {
       async run() {
-        const kibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
+        const kibanaIndex = core.savedObjects.getKibanaIndex();
 
         return Promise.all([
           getDailyEvents(kibanaIndex, getEsClient),

@@ -1,21 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { DefaultDraggable } from '../draggables';
-
-import * as i18n from './translation';
-
-// The "All others" legend item is not draggable
-const AllOthers = styled.span`
-  padding-left: 7px;
-`;
 
 export interface LegendItem {
   color?: string;
@@ -40,19 +33,15 @@ const DraggableLegendItemComponent: React.FC<{
         )}
 
         <EuiFlexItem grow={false}>
-          {value !== i18n.ALL_OTHERS ? (
-            <DefaultDraggable
-              data-test-subj={`legend-item-${dataProviderId}`}
-              field={field}
-              id={dataProviderId}
-              timelineId={timelineId}
-              value={value}
-            />
-          ) : (
-            <>
-              <AllOthers data-test-subj="all-others-legend-item">{value}</AllOthers>
-            </>
-          )}
+          <DefaultDraggable
+            data-test-subj={`legend-item-${dataProviderId}`}
+            field={field}
+            hideTopN={true}
+            id={dataProviderId}
+            isDraggable={false}
+            timelineId={timelineId}
+            value={value}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>

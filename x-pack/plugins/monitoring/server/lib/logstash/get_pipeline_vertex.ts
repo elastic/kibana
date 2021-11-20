@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import boom from '@hapi/boom';
 import { get } from 'lodash';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
-// @ts-ignore
 import { getPipelineVertexStatsAggregation } from './get_pipeline_vertex_stats_aggregation';
-// @ts-ignore
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
-import { LegacyRequest } from '../../types';
+import { LegacyRequest, PipelineVersion } from '../../types';
 import {
   ElasticsearchSource,
   ElasticsearchSourceLogstashPipelineVertex,
@@ -98,7 +96,7 @@ export function _enrichVertexStateWithStatsAggregation(
   }
 
   // Next, iterate over timeseries metrics and attach them to vertex
-  const timeSeriesBuckets = vertexStatsAggregation.aggregations.timeseries.buckets;
+  const timeSeriesBuckets = vertexStatsAggregation.aggregations?.timeseries.buckets ?? [];
   timeSeriesBuckets.forEach((timeSeriesBucket: any) => {
     // each bucket calculates stats for total pipeline CPU time for the associated timeseries
     const totalDurationStats = timeSeriesBucket.pipelines.scoped.total_processor_duration_stats;
@@ -134,32 +132,39 @@ export async function getPipelineVertex(
   lsIndexPattern: string,
   clusterUuid: string,
   pipelineId: string,
-  version: { hash: string; firstSeen: string; lastSeen: string },
+  version: PipelineVersion,
   vertexId: string
 ) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
 
-  const options = {
-    clusterUuid,
-    pipelineId,
-    version,
-    vertexId,
-  };
-
   // Determine metrics' timeseries interval based on version's timespan
   const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
   const timeseriesInterval = calculateTimeseriesInterval(
-    version.firstSeen,
-    version.lastSeen,
-    minIntervalSeconds
+    Number(version.firstSeen),
+    Number(version.lastSeen),
+    Number(minIntervalSeconds)
   );
 
   const [stateDocument, statsAggregation] = await Promise.all([
-    getPipelineStateDocument(req, lsIndexPattern, options),
-    getPipelineVertexStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
+    getPipelineStateDocument({
+      req,
+      logstashIndexPattern: lsIndexPattern,
+      clusterUuid,
+      pipelineId,
+      version,
+    }),
+    getPipelineVertexStatsAggregation({
+      req,
+      logstashIndexPattern: lsIndexPattern,
+      timeSeriesIntervalInSeconds: timeseriesInterval,
+      clusterUuid,
+      pipelineId,
+      version,
+      vertexId,
+    }),
   ]);
 
-  if (stateDocument === null) {
+  if (stateDocument === null || !statsAggregation) {
     return boom.notFound(
       `Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`
     );

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { EMSFileSource, getSourceTitle } from './ems_file_source';
 
@@ -15,7 +16,7 @@ import { EMSFileSource, getSourceTitle } from './ems_file_source';
 import { getEMSSettings } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { EMSBoundariesLayerIcon } from '../../layers/icons/ems_boundaries_layer_icon';
+import { EMSBoundariesLayerIcon } from '../../layers/wizards/icons/ems_boundaries_layer_icon';
 
 function getDescription() {
   const emsSettings = getEMSSettings();
@@ -45,7 +46,7 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
-      const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayers([layerDescriptor]);
     };
     return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;

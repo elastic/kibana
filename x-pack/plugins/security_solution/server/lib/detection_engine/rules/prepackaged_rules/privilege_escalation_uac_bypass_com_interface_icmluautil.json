@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "UAC Bypass via ICMLuaUtil Elevated COM Interface",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name == \"dllhost.exe\" and\n process.parent.args in (\"/Processid:{3E5FC7F9-9A51-4367-9063-A120244FBEC7}\", \"/Processid:{D2E7041B-2927-42FB-8E9F-7CE93B6DC937}\") and\n process.pe.original_file_name != \"WerFault.exe\"\n",
   "risk_score": 73,
@@ -38,7 +39,7 @@
           "subtechnique": [
             {
               "id": "T1548.002",
-              "name": "Bypass User Access Control",
+              "name": "Bypass User Account Control",
               "reference": "https://attack.mitre.org/techniques/T1548/002/"
             }
           ]
@@ -46,6 +47,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 4
 }

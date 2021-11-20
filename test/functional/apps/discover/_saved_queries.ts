@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -17,45 +17,91 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const browser = getService('browser');
-
-  const defaultSettings = {
-    defaultIndex: 'logstash-*',
-  };
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
+  const defaultSettings = {
+    defaultIndex: 'logstash-*',
+  };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89477
-  describe.skip('saved queries saved objects', function describeIndexTests() {
+  const setUpQueriesWithFilters = async () => {
+    // set up a query with filters and a time filter
+    log.debug('set up a query with filters to save');
+    const from = 'Sep 20, 2015 @ 08:00:00.000';
+    const to = 'Sep 21, 2015 @ 08:00:00.000';
+    await PageObjects.common.setTime({ from, to });
+    await PageObjects.common.navigateToApp('discover');
+    await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+    await queryBar.setQuery('response:200');
+  };
+
+  describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
+      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('saved query management component functionality', function () {
-      before(async function () {
-        // set up a query with filters and a time filter
-        log.debug('set up a query with filters to save');
-        await queryBar.setQuery('response:200');
-        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-        const fromTime = 'Sep 20, 2015 @ 08:00:00.000';
-        const toTime = 'Sep 21, 2015 @ 08:00:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await PageObjects.common.unsetTime();
+    });
+
+    describe('saved query selection', () => {
+      before(async () => await setUpQueriesWithFilters());
+
+      it(`should unselect saved query when navigating to a 'new'`, async function () {
+        await savedQueryManagementComponent.saveNewQuery(
+          'test-unselect-saved-query',
+          'mock',
+          true,
+          true
+        );
+
+        await queryBar.submitQuery();
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        expect(await queryBar.getQueryString()).to.eql('response:200');
+
+        await PageObjects.discover.clickNewSearchButton();
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        expect(await queryBar.getQueryString()).to.eql('');
+
+        await PageObjects.discover.selectIndexPattern('date-nested');
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        expect(await queryBar.getQueryString()).to.eql('');
+
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
+        expect(await queryBar.getQueryString()).to.eql('');
+
+        // reset state
+        await savedQueryManagementComponent.deleteSavedQuery('test-unselect-saved-query');
       });
+    });
+
+    describe('saved query management component functionality', function () {
+      before(async () => await setUpQueriesWithFilters());
 
       it('should show the saved query management component when there are no saved queries', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
         expect(descriptionText).to.eql(
-          'SAVED QUERIES\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
+          'Saved Queries\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
         );
       });
 
@@ -120,11 +166,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('does not allow saving a query with a non-unique name', async () => {
+        // this check allows this test to run stand alone, also should fix occacional flakiness
+        const savedQueryExists = await savedQueryManagementComponent.savedQueryExist('OkResponse');
+        if (!savedQueryExists) {
+          await savedQueryManagementComponent.saveNewQuery(
+            'OkResponse',
+            '200 responses for .jpg over 24 hours',
+            true,
+            true
+          );
+          await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        }
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
-      });
-
-      it('does not allow saving a query with leading or trailing whitespace in the name', async () => {
-        await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse ');
       });
 
       it('resets any changes to a loaded query on reloading the same saved query', async () => {

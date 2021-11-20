@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -18,7 +19,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiIconTip,
   EuiPage,
@@ -67,8 +67,15 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
-import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
+// Anomalies Map
+import { AnomaliesMap } from './anomalies_map';
+
+import { getToastNotifications } from '../util/dependency_cache';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ML_APP_LOCATOR } from '../../../common/constants/locator';
+import { AnomalyContextMenu } from './anomaly_context_menu';
+import { isDefined } from '../../../common/types/guards';
 
 const ExplorerPage = ({
   children,
@@ -79,7 +86,6 @@ const ExplorerPage = ({
   filterPlaceHolder,
   indexPattern,
   queryString,
-  filterIconTriggeredQuery,
   updateLanguage,
 }) => (
   <div data-test-subj="mlPageAnomalyExplorer">
@@ -114,7 +120,6 @@ const ExplorerPage = ({
                       filterPlaceHolder={filterPlaceHolder}
                       indexPattern={indexPattern}
                       queryString={queryString}
-                      filterIconTriggeredQuery={filterIconTriggeredQuery}
                       updateLanguage={updateLanguage}
                     />
                   </div>
@@ -135,15 +140,16 @@ const ExplorerPage = ({
   </div>
 );
 
-export class Explorer extends React.Component {
+export class ExplorerUI extends React.Component {
   static propTypes = {
     explorerState: PropTypes.object.isRequired,
     setSelectedCells: PropTypes.func.isRequired,
     severity: PropTypes.number.isRequired,
     showCharts: PropTypes.bool.isRequired,
+    selectedJobsRunning: PropTypes.bool.isRequired,
   };
 
-  state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
+  state = { language: DEFAULT_QUERY_LANG };
   htmlIdGen = htmlIdGenerator();
 
   componentDidMount() {
@@ -192,8 +198,6 @@ export class Explorer extends React.Component {
       }
     }
 
-    this.setState({ filterIconTriggeredQuery: `${newQueryString}` });
-
     try {
       const { clearSettings, settings } = getKqlQueryValues({
         inputString: `${newQueryString}`,
@@ -222,7 +226,18 @@ export class Explorer extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const { showCharts, severity, stoppedPartitions } = this.props;
+    const { share } = this.props.kibana.services;
+
+    const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
+
+    const {
+      showCharts,
+      severity,
+      stoppedPartitions,
+      selectedJobsRunning,
+      timefilter,
+      timeBuckets,
+    } = this.props;
 
     const {
       annotations,
@@ -238,8 +253,29 @@ export class Explorer extends React.Component {
       selectedCells,
       selectedJobs,
       tableData,
+      swimLaneSeverity,
     } = this.props.explorerState;
-    const { annotationsData, aggregations, error: annotationsError } = annotations;
+    const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
+
+    const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;
+    const badge =
+      allAnnotationsCnt > annotationsCnt ? (
+        <EuiBadge color={'hollow'}>
+          <FormattedMessage
+            id="xpack.ml.explorer.annotationsOutOfTotalCountTitle"
+            defaultMessage="First {visibleCount} out of a total of {totalCount}"
+            values={{ visibleCount: annotationsCnt, totalCount: allAnnotationsCnt }}
+          />
+        </EuiBadge>
+      ) : (
+        <EuiBadge color={'hollow'}>
+          <FormattedMessage
+            id="xpack.ml.explorer.annotationsTitleTotalCount"
+            defaultMessage="Total: {count}"
+            values={{ count: annotationsCnt }}
+          />
+        </EuiBadge>
+      );
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -247,6 +283,11 @@ export class Explorer extends React.Component {
 
     const noJobsFound = selectedJobs === null || selectedJobs.length === 0;
     const hasResults = overallSwimlaneData.points && overallSwimlaneData.points.length > 0;
+    const hasResultsWithAnomalies =
+      (hasResults && overallSwimlaneData.points.some((v) => v.value > 0)) ||
+      tableData.anomalies?.length > 0;
+
+    const hasActiveFilter = isDefined(swimLaneSeverity);
 
     if (noJobsFound && !loading) {
       return (
@@ -256,17 +297,19 @@ export class Explorer extends React.Component {
       );
     }
 
-    if (noJobsFound && hasResults === false && !loading) {
+    if (!hasResultsWithAnomalies && !loading && !hasActiveFilter) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
-          <ExplorerNoResultsFound />
+          <ExplorerNoResultsFound
+            hasResults={hasResults}
+            selectedJobsRunning={selectedJobsRunning}
+          />
         </ExplorerPage>
       );
     }
     const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
     const mainColumnClasses = `column ${mainColumnWidthClassName}`;
 
-    const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
     const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
     return (
@@ -276,7 +319,6 @@ export class Explorer extends React.Component {
         influencers={influencers}
         filterActive={filterActive}
         filterPlaceHolder={filterPlaceHolder}
-        filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
         indexPattern={indexPattern}
         queryString={queryString}
         updateLanguage={this.updateLanguage}
@@ -302,6 +344,15 @@ export class Explorer extends React.Component {
                   <FormattedMessage
                     id="xpack.ml.explorer.topInfuencersTitle"
                     defaultMessage="Top influencers"
+                  />
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.ml.explorer.topInfluencersTooltip"
+                        defaultMessage="View the relative impact of the top influencers in the selected time period and add them as filters on the results. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
+                      />
+                    }
+                    position="right"
                   />
                 </h2>
               </EuiTitle>
@@ -335,7 +386,9 @@ export class Explorer extends React.Component {
               explorerState={this.props.explorerState}
               setSelectedCells={this.props.setSelectedCells}
             />
+
             <EuiSpacer size="m" />
+
             {annotationsError !== undefined && (
               <>
                 <EuiTitle
@@ -363,27 +416,25 @@ export class Explorer extends React.Component {
                 <EuiSpacer size="m" />
               </>
             )}
-            {annotationsData.length > 0 && (
+            {loading === false && tableData.anomalies?.length ? (
+              <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
+            ) : null}
+            {annotationsCnt > 0 && (
               <>
                 <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
                   <EuiAccordion
                     id={this.htmlIdGen()}
                     buttonContent={
-                      <EuiTitle className="panel-title">
+                      <EuiTitle
+                        className="panel-title"
+                        data-test-subj="mlAnomalyExplorerAnnotationsPanelButton"
+                      >
                         <h2>
                           <FormattedMessage
                             id="xpack.ml.explorer.annotationsTitle"
                             defaultMessage="Annotations {badge}"
                             values={{
-                              badge: (
-                                <EuiBadge color={'hollow'}>
-                                  <FormattedMessage
-                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
-                                    defaultMessage="Total: {count}"
-                                    values={{ count: annotationsData.length }}
-                                  />
-                                </EuiBadge>
-                              ),
+                              badge,
                             }}
                           />
                         </h2>
@@ -394,7 +445,6 @@ export class Explorer extends React.Component {
                       <AnnotationsTable
                         jobIds={selectedJobIds}
                         annotations={annotationsData}
-                        aggregations={aggregations}
                         drillDown={true}
                         numberBadge={false}
                       />
@@ -407,44 +457,46 @@ export class Explorer extends React.Component {
             )}
             {loading === false && (
               <EuiPanel>
-                <EuiTitle className="panel-title">
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.ml.explorer.anomaliesTitle"
-                      defaultMessage="Anomalies"
-                    />
-                  </h2>
-                </EuiTitle>
-
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="l"
-                  responsive={true}
-                  className="ml-anomalies-controls"
-                >
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-                        defaultMessage: 'Severity threshold',
-                      })}
-                    >
-                      <SelectSeverity />
-                    </EuiFormRow>
+                <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle className="panel-title">
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.ml.explorer.anomaliesTitle"
+                          defaultMessage="Anomalies"
+                        />
+                      </h2>
+                    </EuiTitle>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.explorer.intervalLabel', {
-                        defaultMessage: 'Interval',
-                      })}
-                    >
-                      <SelectInterval />
-                    </EuiFormRow>
+
+                  <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+                    <AnomalyContextMenu
+                      selectedJobs={selectedJobs}
+                      selectedCells={selectedCells}
+                      bounds={bounds}
+                      interval={
+                        this.props.explorerState.swimlaneBucketInterval
+                          ? this.props.explorerState.swimlaneBucketInterval.asSeconds()
+                          : undefined
+                      }
+                      chartsCount={chartsData.seriesToPlot.length}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <SelectSeverity />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <SelectInterval />
                   </EuiFlexItem>
                   {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
-                    <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                      <EuiFormRow label="&#8203;">
-                        <CheckboxShowCharts />
-                      </EuiFormRow>
+                    <EuiFlexItem grow={false}>
+                      <CheckboxShowCharts
+                        showCharts={showCharts}
+                        setShowCharts={explorerService.setShowCharts}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -452,7 +504,18 @@ export class Explorer extends React.Component {
                 <EuiSpacer size="m" />
 
                 <div className="euiText explorer-charts">
-                  {showCharts && <ExplorerChartsContainer {...{ ...chartsData, severity }} />}
+                  {showCharts ? (
+                    <ExplorerChartsContainer
+                      {...{
+                        ...chartsData,
+                        severity,
+                        timefilter,
+                        mlLocator,
+                        timeBuckets,
+                        onSelectEntity: this.applyFilter,
+                      }}
+                    />
+                  ) : null}
                 </div>
 
                 <AnomaliesTable
@@ -468,3 +531,5 @@ export class Explorer extends React.Component {
     );
   }
 }
+
+export const Explorer = withKibana(ExplorerUI);

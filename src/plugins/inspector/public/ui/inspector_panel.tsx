@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './inspector_panel.scss';
@@ -18,11 +18,12 @@ import {
   EuiFlyoutBody,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
+import { ApplicationStart, HttpStart, IUiSettingsClient } from 'kibana/public';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
 import { KibanaContextProvider } from '../../../kibana_react/public';
+import { SharePluginStart } from '../../../share/public';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   return (
@@ -41,7 +42,10 @@ interface InspectorPanelProps {
   options?: unknown;
   views: InspectorViewDescription[];
   dependencies: {
+    application: ApplicationStart;
+    http: HttpStart;
     uiSettings: IUiSettingsClient;
+    share: SharePluginStart;
   };
 }
 

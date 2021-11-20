@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -49,9 +49,8 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
 };
 
 const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
-  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = createStartContractMock(
-    typeRegistry
-  );
+  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> =
+    createStartContractMock(typeRegistry);
 
   return internalStartContract;
 };
@@ -61,7 +60,10 @@ const createSetupContractMock = () => {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
+    getKibanaIndex: jest.fn(),
   };
+
+  setupContract.getKibanaIndex.mockReturnValue('.kibana');
 
   return setupContract;
 };
@@ -73,6 +75,7 @@ const createInternalSetupContractMock = () => {
       level: ServiceStatusLevels.available,
       summary: `SavedObjects is available`,
     }),
+    getTypeRegistry: jest.fn(),
   };
   return internalSetupContract;
 };

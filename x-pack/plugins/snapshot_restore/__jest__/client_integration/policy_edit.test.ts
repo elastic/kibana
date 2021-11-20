@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -185,15 +186,8 @@ describe('<PolicyEdit />', () => {
 
         const latestRequest = server.requests[server.requests.length - 1];
 
-        const {
-          name,
-          isManagedPolicy,
-          schedule,
-          repository,
-          retention,
-          config,
-          snapshotName,
-        } = POLICY_EDIT;
+        const { name, isManagedPolicy, schedule, repository, retention, config, snapshotName } =
+          POLICY_EDIT;
 
         const expected = {
           name,

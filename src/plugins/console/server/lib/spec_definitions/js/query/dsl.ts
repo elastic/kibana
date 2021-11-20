@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -652,10 +652,60 @@ export const query = (specService: SpecDefinitionsService) => {
     },
     geo_shape: {
       __template: {
-        location: {},
-        relation: 'within',
+        FIELD: {
+          shape: {
+            type: 'envelope',
+            coordinates: [
+              [-45, 45],
+              [45, -45],
+            ],
+          },
+          relation: 'within',
+        },
       },
       __scope_link: '.filter.geo_shape',
+    },
+    geo_bounding_box: {
+      __template: {
+        FIELD: {
+          top_left: {
+            lat: 40.73,
+            lon: -74.1,
+          },
+          bottom_right: {
+            lat: 40.717,
+            lon: -73.99,
+          },
+        },
+      },
+      __scope_link: '.filter.geo_bounding_box',
+    },
+    geo_distance: {
+      __template: {
+        distance: 100,
+        FIELD: {
+          lat: 40.73,
+          lon: -74.1,
+        },
+      },
+      __scope_link: '.filter.geo_distance',
+    },
+    geo_polygon: {
+      __template: {
+        FIELD: {
+          points: [
+            {
+              lat: 40.73,
+              lon: -74.1,
+            },
+            {
+              lat: 40.83,
+              lon: -75.1,
+            },
+          ],
+        },
+      },
+      __scope_link: '.filter.geo_polygon',
     },
     // js hint gets confused here
     /* jshint -W015 */

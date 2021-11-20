@@ -1,23 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import {
+  transformError,
+  getIndexExists,
+  getPolicyExists,
+  deletePolicy,
+  deleteAllIndex,
+} from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { transformError, buildSiemResponse } from '../utils';
-import { getIndexExists } from '../../index/get_index_exists';
-import { getPolicyExists } from '../../index/get_policy_exists';
-import { deletePolicy } from '../../index/delete_policy';
-import { getTemplateExists } from '../../index/get_template_exists';
-import { deleteAllIndex } from '../../index/delete_all_index';
-import { deleteTemplate } from '../../index/delete_template';
+import { buildSiemResponse } from '../utils';
 
 /**
  * Deletes all of the indexes, template, ilm policies, and aliases. You can check
  * this by looking at each of these settings from ES after a deletion:
  * GET /_template/.siem-signals-default
+ * GET /_index_template/.siem-signals-default
  * GET /.siem-signals-default-000001/
  * GET /_ilm/policy/.signals-default
  * GET /_alias/.siem-signals-default
@@ -33,20 +36,20 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
+
         const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const callCluster = clusterClient.callAsCurrentUser;
         const index = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(callCluster, index);
+        const indexExists = await getIndexExists(esClient, index);
 
         if (!indexExists) {
           return siemResponse.error({
@@ -54,14 +57,18 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
             body: `index: "${index}" does not exist`,
           });
         } else {
-          await deleteAllIndex(callCluster, `${index}-*`);
-          const policyExists = await getPolicyExists(callCluster, index);
+          await deleteAllIndex(esClient, index);
+          const policyExists = await getPolicyExists(esClient, index);
           if (policyExists) {
-            await deletePolicy(callCluster, index);
+            await deletePolicy(esClient, index);
           }
-          const templateExists = await getTemplateExists(callCluster, index);
+          const templateExists = await esClient.indices.existsIndexTemplate({ name: index });
           if (templateExists) {
-            await deleteTemplate(callCluster, index);
+            await esClient.indices.deleteIndexTemplate({ name: index });
+          }
+          const legacyTemplateExists = await esClient.indices.existsTemplate({ name: index });
+          if (legacyTemplateExists) {
+            await esClient.indices.deleteTemplate({ name: index });
           }
           return response.ok({ body: { acknowledged: true } });
         }

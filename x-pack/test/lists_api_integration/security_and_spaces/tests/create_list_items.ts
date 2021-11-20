@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 
-import { LIST_URL, LIST_ITEM_URL } from '../../../../plugins/lists/common/constants';
+import { LIST_URL, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 import { getCreateMinimalListSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_list_schema.mock';
@@ -26,6 +27,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('create_list_items', () => {
     describe('validation errors', () => {
@@ -45,11 +47,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('creating list items', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
+        await deleteListsIndex(supertest, log);
       });
 
       it('should create a simple list item with a list item id', async () => {

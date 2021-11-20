@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
@@ -201,7 +202,7 @@ const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
       const cells = columns.map((column) => (
         <EuiTableRowCell
           key={`${String(column.field)}-${i}`}
-          header={column.name}
+          mobileOptions={{ header: column.name }}
           align={column.align ?? LEFT_ALIGNMENT}
           textOnly={column.textOnly ?? true}
         >

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -11,7 +12,10 @@ import { ActionWizard } from './action_wizard';
 import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
 import { licensingMock } from '../../../../licensing/public/mocks';
-import { Trigger } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  Trigger,
+  UiActionsActionDefinition as ActionDefinition,
+} from '../../../../../../src/plugins/ui_actions/public';
 import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/data/public';
 import {
   SELECT_RANGE_TRIGGER,
@@ -80,7 +84,7 @@ function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDril
 
 export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
   DashboardDrilldownConfig,
-  any
+  object
 > = {
   id: 'Dashboard',
   getDisplayName: () => 'Go to Dashboard',
@@ -107,7 +111,7 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
     execute: async () => alert('Navigate to dashboard!'),
     enhancements: {},
   }),
-  supportedTriggers(): any[] {
+  supportedTriggers(): string[] {
     return [APPLY_FILTER_TRIGGER];
   },
 };
@@ -168,8 +172,8 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
   isCompatible(context?: object): Promise<boolean> {
     return Promise.resolve(true);
   },
-  create: () => null as any,
-  supportedTriggers(): any[] {
+  create: () => ({} as ActionDefinition),
+  supportedTriggers(): string[] {
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
   },
 };
@@ -179,9 +183,10 @@ export const urlFactory = new ActionFactory(urlDrilldownActionFactory, {
   getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
 });
 
-export const mockActionFactories: ActionFactory[] = ([dashboardFactory, urlFactory] as Array<
-  ActionFactory<any>
->) as ActionFactory[];
+export const mockActionFactories: ActionFactory[] = [
+  dashboardFactory,
+  urlFactory,
+] as unknown as ActionFactory[];
 
 export const mockSupportedTriggers: string[] = [
   VALUE_CLICK_TRIGGER,
@@ -193,13 +198,13 @@ export const mockGetTriggerInfo = (triggerId: string): Trigger => {
     [VALUE_CLICK_TRIGGER]: 'Single click',
     [SELECT_RANGE_TRIGGER]: 'Range selection',
     [APPLY_FILTER_TRIGGER]: 'Apply filter',
-  } as Record<any, string>;
+  } as Record<string, string>;
 
   const descriptionMap = {
     [VALUE_CLICK_TRIGGER]: 'A single point clicked on a visualization',
     [SELECT_RANGE_TRIGGER]: 'Select a group of values',
     [APPLY_FILTER_TRIGGER]: 'Apply filter description...',
-  } as Record<any, string>;
+  } as Record<string, string>;
 
   return {
     id: triggerId,
@@ -208,7 +213,11 @@ export const mockGetTriggerInfo = (triggerId: string): Trigger => {
   };
 };
 
-export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
+export function Demo({
+  actionFactories,
+}: {
+  actionFactories: Array<ActionFactory<BaseActionConfig>>;
+}) {
   const [state, setState] = useState<{
     currentActionFactory?: ActionFactory;
     config?: BaseActionConfig;

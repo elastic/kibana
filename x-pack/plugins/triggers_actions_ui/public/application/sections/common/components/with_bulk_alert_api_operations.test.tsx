@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
 import uuid from 'uuid';
@@ -34,6 +36,7 @@ describe('with_bulk_alert_api_operations', () => {
       expect(typeof props.deleteAlert).toEqual('function');
       expect(typeof props.loadAlert).toEqual('function');
       expect(typeof props.loadAlertTypes).toEqual('function');
+      expect(typeof props.resolveRule).toEqual('function');
       return <div />;
     };
 
@@ -216,6 +219,24 @@ describe('with_bulk_alert_api_operations', () => {
 
     expect(alertApi.loadAlert).toHaveBeenCalledTimes(1);
     expect(alertApi.loadAlert).toHaveBeenCalledWith({ alertId, http });
+  });
+
+  it('resolveRule calls the resolveRule api', () => {
+    const { http } = useKibanaMock().services;
+    const ComponentToExtend = ({
+      resolveRule,
+      ruleId,
+    }: ComponentOpts & { ruleId: Alert['id'] }) => {
+      return <button onClick={() => resolveRule(ruleId)}>{'call api'}</button>;
+    };
+
+    const ExtendedComponent = withBulkAlertOperations(ComponentToExtend);
+    const ruleId = uuid.v4();
+    const component = mount(<ExtendedComponent ruleId={ruleId} />);
+    component.find('button').simulate('click');
+
+    expect(alertApi.resolveRule).toHaveBeenCalledTimes(1);
+    expect(alertApi.resolveRule).toHaveBeenCalledWith({ ruleId, http });
   });
 
   it('loadAlertTypes calls the loadAlertTypes api', () => {

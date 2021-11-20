@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Space, User } from '../common/types';
 
 const NoKibanaPrivileges: User = {
@@ -124,6 +126,47 @@ const GlobalRead: User = {
   },
 };
 
+const FooAll: User = {
+  username: 'foo_all',
+  fullName: 'foo_all',
+  password: 'foo_all-password',
+  role: {
+    name: 'foo_all_role',
+    kibana: [
+      {
+        feature: {
+          foo: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+const FooRead: User = {
+  username: 'foo_read',
+  fullName: 'foo_read',
+  password: 'foo_read-password',
+  role: {
+    name: 'foo_read_role',
+    kibana: [
+      {
+        feature: {
+          foo: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+interface FooAll extends User {
+  username: 'foo_all';
+}
+interface FooRead extends User {
+  username: 'foo_read';
+}
+
 const EverythingSpaceAll: User = {
   username: 'everything_space_all',
   fullName: 'everything_space_all',
@@ -192,6 +235,8 @@ export const Users: User[] = [
   DualPrivilegesRead,
   GlobalAll,
   GlobalRead,
+  FooAll,
+  FooRead,
   EverythingSpaceAll,
   EverythingSpaceRead,
   NothingSpaceAll,
@@ -347,6 +392,42 @@ const GlobalReadAtNothingSpace: GlobalReadAtNothingSpace = {
   space: NothingSpace,
 };
 
+interface FooAllAtEverythingSpace extends Scenario {
+  id: 'foo_all at everything_space';
+}
+const FooAllAtEverythingSpace: FooAllAtEverythingSpace = {
+  id: 'foo_all at everything_space',
+  user: FooAll,
+  space: EverythingSpace,
+};
+
+interface FooAllAtNothingSpace extends Scenario {
+  id: 'foo_all at nothing_space';
+}
+const FooAllAtNothingSpace: FooAllAtNothingSpace = {
+  id: 'foo_all at nothing_space',
+  user: FooAll,
+  space: NothingSpace,
+};
+
+interface FooReadAtEverythingSpace extends Scenario {
+  id: 'foo_read at everything_space';
+}
+const FooReadAtEverythingSpace: FooReadAtEverythingSpace = {
+  id: 'foo_read at everything_space',
+  user: FooRead,
+  space: EverythingSpace,
+};
+
+interface FooReadAtNothingSpace extends Scenario {
+  id: 'foo_read at nothing_space';
+}
+const FooReadAtNothingSpace: FooReadAtNothingSpace = {
+  id: 'foo_read at nothing_space',
+  user: FooRead,
+  space: NothingSpace,
+};
+
 interface EverythingSpaceAllAtEverythingSpace extends Scenario {
   id: 'everything_space_all at everything_space';
 }
@@ -419,7 +500,7 @@ const NothingSpaceReadAtNothingSpace: NothingSpaceReadAtNothingSpace = {
   space: NothingSpace,
 };
 
-export const UserAtSpaceScenarios: [
+export const UserAtSpaceScenarios = [
   NoKibanaPrivilegesAtEverythingSpace,
   NoKibanaPrivilegesAtNothingSpace,
   SuperuserAtEverythingSpace,
@@ -434,29 +515,10 @@ export const UserAtSpaceScenarios: [
   GlobalAllAtNothingSpace,
   GlobalReadAtEverythingSpace,
   GlobalReadAtNothingSpace,
-  EverythingSpaceAllAtEverythingSpace,
-  EverythingSpaceAllAtNothingSpace,
-  EverythingSpaceReadAtEverythingSpace,
-  EverythingSpaceReadAtNothingSpace,
-  NothingSpaceAllAtEverythingSpace,
-  NothingSpaceAllAtNothingSpace,
-  NothingSpaceReadAtEverythingSpace,
-  NothingSpaceReadAtNothingSpace
-] = [
-  NoKibanaPrivilegesAtEverythingSpace,
-  NoKibanaPrivilegesAtNothingSpace,
-  SuperuserAtEverythingSpace,
-  SuperuserAtNothingSpace,
-  LegacyAllAtEverythingSpace,
-  LegacyAllAtNothingSpace,
-  DualPrivilegesAllAtEverythingSpace,
-  DualPrivilegesAllAtNothingSpace,
-  DualPrivilegesReadAtEverythingSpace,
-  DualPrivilegesReadAtNothingSpace,
-  GlobalAllAtEverythingSpace,
-  GlobalAllAtNothingSpace,
-  GlobalReadAtEverythingSpace,
-  GlobalReadAtNothingSpace,
+  FooAllAtEverythingSpace,
+  FooAllAtNothingSpace,
+  FooReadAtEverythingSpace,
+  FooReadAtNothingSpace,
   EverythingSpaceAllAtEverythingSpace,
   EverythingSpaceAllAtNothingSpace,
   EverythingSpaceReadAtEverythingSpace,
@@ -465,4 +527,4 @@ export const UserAtSpaceScenarios: [
   NothingSpaceAllAtNothingSpace,
   NothingSpaceReadAtEverythingSpace,
   NothingSpaceReadAtNothingSpace,
-];
+] as const;

@@ -1,76 +1,187 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import {
+  editTrustedAppFetchError,
+  getCreationDialogFormEntry,
   getCreationError,
+  getCurrentLocation,
   isCreationDialogFormValid,
   isCreationInProgress,
   isCreationSuccessful,
+  isEdit,
+  listOfPolicies,
+  loadingPolicies,
 } from '../../store/selectors';
 import { AppAction } from '../../../../../common/store/actions';
 import { useTrustedAppsSelector } from '../hooks';
-import { ABOUT_TRUSTED_APPS } from '../translations';
 
-type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
+import { ABOUT_TRUSTED_APPS, CREATE_TRUSTED_APP_ERROR } from '../translations';
+import { defaultNewTrustedApp } from '../../store/builders';
+import { getTrustedAppsListPath } from '../../../../common/routing';
+import { useKibana, useToasts } from '../../../../../common/lib/kibana';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { isGlobalEffectScope } from '../../state/type_guards';
+import { NewTrustedApp } from '../../../../../../common/endpoint/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+
+export type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
   ({ onClose, ...flyoutProps }) => {
     const dispatch = useDispatch<(action: AppAction) => void>();
+    const history = useHistory();
+    const toasts = useToasts();
 
     const creationInProgress = useTrustedAppsSelector(isCreationInProgress);
     const creationErrors = useTrustedAppsSelector(getCreationError);
     const creationSuccessful = useTrustedAppsSelector(isCreationSuccessful);
     const isFormValid = useTrustedAppsSelector(isCreationDialogFormValid);
+    const isLoadingPolicies = useTrustedAppsSelector(loadingPolicies);
+    const policyList = useTrustedAppsSelector(listOfPolicies);
+    const isEditMode = useTrustedAppsSelector(isEdit);
+    const trustedAppFetchError = useTrustedAppsSelector(editTrustedAppFetchError);
+    const formValues = useTrustedAppsSelector(getCreationDialogFormEntry) || defaultNewTrustedApp();
+    const location = useTrustedAppsSelector(getCurrentLocation);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const docLinks = useKibana().services.docLinks;
+    const [isFormDirty, setIsFormDirty] = useState(false);
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
-    const getTestId = useCallback(
-      (suffix: string): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
-    );
+    const policies = useMemo<CreateTrustedAppFormProps['policies']>(() => {
+      return {
+        // Casting is needed due to the use of `Immutable<>` on the return value from the selector above
+        options: policyList as CreateTrustedAppFormProps['policies']['options'],
+        isLoading: isLoadingPolicies,
+      };
+    }, [isLoadingPolicies, policyList]);
+
+    const creationErrorsMessage = useMemo<string | undefined>(() => {
+      let errorMessage = creationErrors
+        ? CREATE_TRUSTED_APP_ERROR[creationErrors.message.replace(/(\[(.*)\]\: )/, '')] ||
+          creationErrors.message
+        : undefined;
+
+      if (
+        creationErrors &&
+        creationErrors.attributes &&
+        creationErrors.attributes.type === 'TrustedApps/PolicyNotFound'
+      ) {
+        policies.options.forEach((policy) => {
+          errorMessage = errorMessage?.replace(policy.id, policy.name);
+        });
+      } else if (
+        creationErrors &&
+        creationErrors.attributes &&
+        creationErrors.attributes.type === 'EndpointLicenseError'
+      ) {
+        errorMessage = i18n.translate(
+          'xpack.securitySolution.trustedapps.createTrustedAppFlyout.byPolicyLicenseError',
+          {
+            defaultMessage:
+              'Your Kibana license has been downgraded. As such, individual policy configuration is no longer supported.',
+          }
+        );
+      }
+      return errorMessage;
+    }, [creationErrors, policies]);
+
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
     const handleCancelClick = useCallback(() => {
       if (creationInProgress) {
         return;
       }
       onClose();
     }, [onClose, creationInProgress]);
+
     const handleSaveClick = useCallback(
       () => dispatch({ type: 'trustedAppCreationDialogConfirmed' }),
       [dispatch]
     );
+
     const handleFormOnChange = useCallback<CreateTrustedAppFormProps['onChange']>(
       (newFormState) => {
         dispatch({
           type: 'trustedAppCreationDialogFormStateUpdated',
           payload: { entry: newFormState.item, isValid: newFormState.isValid },
         });
+        if (_.isEqual(formValues, newFormState.item) === false) {
+          setIsFormDirty(true);
+        }
       },
-      [dispatch]
+
+      [dispatch, formValues]
     );
+
+    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
+      'trustedAppsByPolicyEnabled'
+    );
+
+    const isGlobal = useMemo(() => {
+      return isGlobalEffectScope((formValues as NewTrustedApp).effectScope);
+    }, [formValues]);
+
+    const showExpiredLicenseBanner = useMemo(() => {
+      return (
+        isTrustedAppsByPolicyEnabled && !isPlatinumPlus && isEditMode && (!isGlobal || isFormDirty)
+      );
+    }, [isTrustedAppsByPolicyEnabled, isPlatinumPlus, isEditMode, isGlobal, isFormDirty]);
+
+    // If there was a failure trying to retrieve the Trusted App for edit item,
+    // then redirect back to the list ++ show toast message.
+    useEffect(() => {
+      if (trustedAppFetchError) {
+        // Replace the current URL route so that user does not keep hitting this page via browser back/fwd buttons
+        history.replace(
+          getTrustedAppsListPath({
+            ...location,
+            show: undefined,
+            id: undefined,
+          })
+        );
+
+        toasts.addWarning(
+          i18n.translate(
+            'xpack.securitySolution.trustedapps.createTrustedAppFlyout.notFoundToastMessage',
+            {
+              defaultMessage: 'Unable to edit trusted application ({apiMsg})',
+              values: {
+                apiMsg: trustedAppFetchError.message,
+              },
+            }
+          )
+        );
+      }
+    }, [history, location, toasts, trustedAppFetchError]);
 
     // If it was created, then close flyout
     useEffect(() => {
@@ -84,24 +195,68 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 data-test-subj={getTestId('headerTitle')}>
-              <FormattedMessage
-                id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.title"
-                defaultMessage="Add trusted application"
-              />
+              {isEditMode ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.editTitle"
+                  defaultMessage="Edit trusted application"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.createTitle"
+                  defaultMessage="Add trusted application"
+                />
+              )}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-
+        {showExpiredLicenseBanner && (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseTitle',
+              { defaultMessage: 'Expired License' }
+            )}
+            color="warning"
+            iconType="help"
+            data-test-subj={getTestId('expired-license-callout')}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
+              defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
+            />
+            <EuiLink external href={`${docLinks.links.securitySolution.trustedApps}`}>
+              <FormattedMessage
+                id="xpack.securitySolution.trustedapps.docsLink"
+                defaultMessage="Trusted applications documentation."
+              />
+            </EuiLink>
+          </EuiCallOut>
+        )}
         <EuiFlyoutBody>
-          <EuiText color="subdued" size="xs">
-            <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
-            <EuiSpacer size="m" />
+          <EuiText size="xs">
+            <h3>
+              {i18n.translate('xpack.securitySolution.trustedApps.detailsSectionTitle', {
+                defaultMessage: 'Details',
+              })}
+            </h3>
           </EuiText>
+          <EuiSpacer size="xs" />
+          {!isEditMode && (
+            <>
+              <EuiText size="s">
+                <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
+              </EuiText>
+              <EuiSpacer size="m" />
+            </>
+          )}
           <CreateTrustedAppForm
             fullWidth
             onChange={handleFormOnChange}
             isInvalid={!!creationErrors}
-            error={creationErrors?.message}
+            isEditMode={isEditMode}
+            isDirty={isFormDirty}
+            error={creationErrorsMessage}
+            policies={policies}
+            trustedApp={formValues}
             data-test-subj={getTestId('createForm')}
           />
         </EuiFlyoutBody>
@@ -129,10 +284,17 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
                 isLoading={creationInProgress}
                 data-test-subj={getTestId('createButton')}
               >
-                <FormattedMessage
-                  id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.saveButton"
-                  defaultMessage="Add trusted application"
-                />
+                {isEditMode ? (
+                  <FormattedMessage
+                    id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.editSaveButton"
+                    defaultMessage="Save"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.createSaveButton"
+                    defaultMessage="Add trusted application"
+                  />
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

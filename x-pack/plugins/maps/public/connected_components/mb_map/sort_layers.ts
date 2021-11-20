@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Map as MbMap, Layer as MbLayer } from 'mapbox-gl';
+import type { Map as MbMap, Layer as MbLayer } from '@kbn/mapbox-gl';
 import { ILayer } from '../../classes/layers/layer';
 
 // "Layer" is overloaded and can mean the following
@@ -123,11 +124,11 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
   let beneathMbLayerId = getBottomMbLayerId(mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
 
   // Ensure gl-draw layers are on top of all layerList layers
-  const glDrawLayer = ({
+  const glDrawLayer = {
     ownsMbLayerId: (mbLayerId: string) => {
       return isGlDrawLayer(mbLayerId);
     },
-  } as unknown) as ILayer;
+  } as unknown as ILayer;
   moveMapLayer(mbMap, mbLayers, glDrawLayer, LAYER_CLASS.ANY, beneathMbLayerId);
   const glDrawBottomMbLayerId = getBottomMbLayerId(mbLayers, glDrawLayer, LAYER_CLASS.ANY);
   if (glDrawBottomMbLayerId) {

@@ -9,9 +9,9 @@ Creates a new [IContextContainer](./kibana-plugin-core-server.icontextcontainer.
 <b>Signature:</b>
 
 ```typescript
-createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
+createContextContainer(): IContextContainer;
 ```
 <b>Returns:</b>
 
-`IContextContainer<THandler>`
+IContextContainer
 

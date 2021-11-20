@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
-import { Table } from './table';
+import { Table, renderFieldName } from './table';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
-} as IIndexPattern;
+} as IndexPattern;
 
 const items: IndexedFieldItem[] = [
   {
@@ -23,99 +23,144 @@ const items: IndexedFieldItem[] = [
     searchable: true,
     info: [],
     type: 'name',
+    kbnType: 'string',
     excluded: false,
-    format: '',
+    isMapped: true,
+    isUserEditable: true,
+    hasRuntime: false,
   },
   {
     name: 'timestamp',
     displayName: 'timestamp',
     type: 'date',
+    kbnType: 'date',
     info: [],
     excluded: false,
-    format: 'YYYY-MM-DD',
+    isMapped: true,
+    isUserEditable: true,
+    hasRuntime: false,
   },
   {
     name: 'conflictingField',
     displayName: 'conflictingField',
-    type: 'conflict',
+    type: 'text, long',
+    kbnType: 'conflict',
     info: [],
     excluded: false,
-    format: '',
+    isMapped: true,
+    isUserEditable: true,
+    hasRuntime: false,
+  },
+  {
+    name: 'customer',
+    displayName: 'customer',
+    type: 'keyword',
+    kbnType: 'text',
+    info: [],
+    excluded: false,
+    isMapped: false,
+    isUserEditable: true,
+    hasRuntime: true,
+  },
+  {
+    name: 'noedit',
+    displayName: 'noedit',
+    type: 'keyword',
+    kbnType: 'text',
+    info: [],
+    excluded: false,
+    isMapped: false,
+    isUserEditable: false,
+    hasRuntime: true,
   },
 ];
 
+const renderTable = (
+  { editField } = {
+    editField: () => {},
+  }
+) =>
+  shallow(
+    <Table indexPattern={indexPattern} items={items} editField={editField} deleteField={() => {}} />
+  );
+
 describe('Table', () => {
   test('should render normally', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    expect(component).toMatchSnapshot();
+    expect(renderTable()).toMatchSnapshot();
   });
 
   test('should render normal field name', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[0].render('Elastic', items[0]));
+    const tableCell = shallow(renderTable().prop('columns')[0].render('Elastic', items[0]));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render timestamp field name', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[0].render('timestamp', items[1]));
+    const tableCell = shallow(renderTable().prop('columns')[0].render('timestamp', items[1]));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render the boolean template (true)', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[3].render(true));
+    const tableCell = shallow(renderTable().prop('columns')[3].render(true));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render the boolean template (false)', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[3].render(false, items[2]));
+    const tableCell = shallow(renderTable().prop('columns')[3].render(false, items[2]));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render normal type', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[1].render('string'));
+    const tableCell = shallow(renderTable().prop('columns')[1].render('string', {}));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render conflicting type', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
+    const tableCell = shallow(
+      renderTable().prop('columns')[1].render('conflict', { kbnType: 'conflict' })
     );
-
-    const tableCell = shallow(component.prop('columns')[1].render('conflict', true));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should allow edits', () => {
     const editField = jest.fn();
 
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={editField} />
-    );
-
     // Click the edit button
-    component.prop('columns')[6].actions[0].onClick();
+    renderTable({ editField }).prop('columns')[6].actions[0].onClick();
     expect(editField).toBeCalled();
+  });
+
+  test('should not allow edit or deletion for user with only read access', () => {
+    const editAvailable = renderTable().prop('columns')[6].actions[0].available(items[4]);
+    const deleteAvailable = renderTable().prop('columns')[7].actions[0].available(items[4]);
+    expect(editAvailable).toBeFalsy();
+    expect(deleteAvailable).toBeFalsy();
+  });
+
+  test('render name', () => {
+    const mappedField = {
+      name: 'customer',
+      info: [],
+      excluded: false,
+      kbnType: 'string',
+      type: 'keyword',
+      isMapped: true,
+      isUserEditable: true,
+      hasRuntime: false,
+    };
+
+    expect(renderFieldName(mappedField)).toMatchSnapshot();
+
+    const runtimeField = {
+      name: 'customer',
+      info: [],
+      excluded: false,
+      kbnType: 'string',
+      type: 'keyword',
+      isMapped: false,
+      isUserEditable: true,
+      hasRuntime: true,
+    };
+
+    expect(renderFieldName(runtimeField)).toMatchSnapshot();
   });
 });

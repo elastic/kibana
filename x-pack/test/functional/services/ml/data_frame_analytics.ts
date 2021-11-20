@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,6 +16,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,
   mlApi: MlApi
 ) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return {
@@ -49,12 +51,14 @@ export function MachineLearningDataFrameAnalyticsProvider(
     },
 
     async startAnalyticsCreation() {
-      if (await testSubjects.exists('mlNoDataFrameAnalyticsFound')) {
-        await testSubjects.click('mlAnalyticsCreateFirstButton');
-      } else {
-        await testSubjects.click('mlAnalyticsButtonCreate');
-      }
-      await testSubjects.existOrFail('analyticsCreateSourceIndexModal');
+      await retry.tryForTime(20 * 1000, async () => {
+        if (await testSubjects.exists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
+          await testSubjects.click('mlAnalyticsCreateFirstButton');
+        } else {
+          await testSubjects.click('mlAnalyticsButtonCreate');
+        }
+        await testSubjects.existOrFail('analyticsCreateSourceIndexModal');
+      });
     },
 
     async waitForAnalyticsCompletion(analyticsId: string) {

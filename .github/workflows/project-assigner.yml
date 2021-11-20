@@ -8,10 +8,19 @@ jobs:
     name: Assign issue or PR to project based on label
     steps:
       - name: Assign to project
-        uses: elastic/github-actions/project-assigner@v2.0.0
+        uses: elastic/github-actions/project-assigner@v2.1.0
         id: project_assigner
         with:
-          issue-mappings: '[{"label": "Feature:Lens", "projectNumber": 32, "columnName": "Long-term goals"}, {"label": "Feature:Canvas", "projectNumber": 38, "columnName": "Inbox"}, {"label": "Feature:Dashboard", "projectNumber": 68, "columnName": "Inbox"}, {"label": "Feature:Drilldowns", "projectNumber": 68, "columnName": "Inbox"}]'
+          issue-mappings: |
+            [
+              {"label": "Feature:Lens", "projectNumber": 32, "columnName": "Long-term goals"},
+              {"label": "Team:DataDiscovery", "projectNumber": 44, "columnName": "Inbox"},
+              {"label": "Feature:Canvas", "projectNumber": 38, "columnName": "Inbox"},
+              {"label": "Feature:Dashboard", "projectNumber": 68, "columnName": "Inbox"},
+              {"label": "Feature:Drilldowns", "projectNumber": 68, "columnName": "Inbox"},
+              {"label": "Feature:Input Controls", "projectNumber": 72, "columnName": "Inbox"},
+              {"label": "Team:Security", "projectNumber": 320, "columnName": "Awaiting triage", "projectScope": "org"},
+              {"label": "Team:Operations", "projectNumber": 314, "columnName": "Triage", "projectScope": "org"},
+              {"label": "Team:Fleet", "projectNumber": 490, "columnName": "Inbox", "projectScope": "org"}
+            ]
           ghToken: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
-
-

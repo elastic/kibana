@@ -1,15 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect, Route, RouteProps } from 'react-router-dom';
-import { CoreStart, AppMountParameters } from 'src/core/public';
-import { FleetConfigType, FleetStartServices } from '../../plugin';
+import type { RouteProps } from 'react-router-dom';
+import { Redirect, Route } from 'react-router-dom';
+import type { CoreStart, AppMountParameters } from 'src/core/public';
+
+import type { FleetConfigType, FleetStartServices } from '../../plugin';
+
 import { licenseService } from './hooks';
-import { UIExtensionsStorage } from './types';
+import type { UIExtensionsStorage } from './types';
 import { AppRoutes, FleetAppContext, WithPermissionsAndSetup } from './app';
 
 export interface ProtectedRouteProps extends RouteProps {
@@ -32,6 +37,7 @@ interface FleetAppProps {
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 const FleetApp = ({
   basepath,
@@ -40,6 +46,7 @@ const FleetApp = ({
   history,
   kibanaVersion,
   extensions,
+  setHeaderActionMenu,
 }: FleetAppProps) => {
   return (
     <FleetAppContext
@@ -51,7 +58,7 @@ const FleetApp = ({
       extensions={extensions}
     >
       <WithPermissionsAndSetup>
-        <AppRoutes />
+        <AppRoutes setHeaderActionMenu={setHeaderActionMenu} />
       </WithPermissionsAndSetup>
     </FleetAppContext>
   );
@@ -59,7 +66,7 @@ const FleetApp = ({
 
 export function renderApp(
   startServices: FleetStartServices,
-  { element, appBasePath, history }: AppMountParameters,
+  { element, appBasePath, history, setHeaderActionMenu }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage
@@ -72,6 +79,7 @@ export function renderApp(
       history={history}
       kibanaVersion={kibanaVersion}
       extensions={extensions}
+      setHeaderActionMenu={setHeaderActionMenu}
     />,
     element
   );

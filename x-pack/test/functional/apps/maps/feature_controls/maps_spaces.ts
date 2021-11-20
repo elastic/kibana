@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { APP_ID } from '../../../../../plugins/maps/common/constants';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'maps', 'security']);
+  const PageObjects = getPageObjects(['common', 'maps', 'security', 'header']);
+  const listingTable = getService('listingTable');
   const appsMenu = getService('appsMenu');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/38414
-  describe.skip('spaces feature controls', () => {
+  describe('spaces feature controls', () => {
     before(async () => {
       PageObjects.maps.setBasePath('/s/custom_space');
     });
 
     after(async () => {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
       PageObjects.maps.setBasePath('');
     });
@@ -44,21 +48,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a map to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('maps', '', {
+        await PageObjects.common.navigateToActualUrl(APP_ID, '/map', {
           basePath: `/s/custom_space`,
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
+        await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.saveMap('my test map');
       });
 
       it(`allows a map to be deleted`, async () => {
-        await PageObjects.common.navigateToActualUrl('maps', '', {
+        await PageObjects.common.navigateToActualUrl(APP_ID, '/', {
           basePath: `/s/custom_space`,
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.maps.deleteSavedMaps('my test map');
+
+        // Can not use maps.deleteSavedMaps because maps.deleteSavedMaps will
+        // navigate to default space if on list page check fails
+        await listingTable.searchForItemWithName('my test map');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await listingTable.checkListingSelectAllCheckbox();
+        await listingTable.clickDeleteSelected();
+        await PageObjects.common.clickConfirmOnModal();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await listingTable.expectItemsCount('map', 0);
       });
     });
 
@@ -76,9 +90,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`returns a 404`, async () => {
-        await PageObjects.common.navigateToActualUrl('maps', '', {
+        await PageObjects.common.navigateToActualUrl(APP_ID, '/', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
         const messageText = await PageObjects.common.getJsonBodyText();

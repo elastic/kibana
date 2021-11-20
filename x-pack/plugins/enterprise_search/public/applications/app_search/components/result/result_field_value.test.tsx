@@ -1,11 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
+
+import { SchemaType, InternalSchemaType } from '../../../shared/schema/types';
 
 import { ResultFieldValue } from '.';
 
@@ -13,7 +17,7 @@ describe('ResultFieldValue', () => {
   describe('when no raw or snippet values are provided', () => {
     let wrapper: ShallowWrapper;
     beforeAll(() => {
-      wrapper = shallow(<ResultFieldValue type="string" />);
+      wrapper = shallow(<ResultFieldValue />);
     });
 
     it('will render a dash', () => {
@@ -25,7 +29,7 @@ describe('ResultFieldValue', () => {
     describe('and the value is a string', () => {
       let wrapper: ShallowWrapper;
       beforeAll(() => {
-        wrapper = shallow(<ResultFieldValue raw="foo" type="string" />);
+        wrapper = shallow(<ResultFieldValue raw="foo" type={SchemaType.Text} />);
       });
 
       it('will render a display value', () => {
@@ -33,14 +37,16 @@ describe('ResultFieldValue', () => {
       });
 
       it('will have the appropriate type class', () => {
-        expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--string');
+        expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--text');
       });
     });
 
     describe('and the value is a string array', () => {
       let wrapper: ShallowWrapper;
       beforeAll(() => {
-        wrapper = shallow(<ResultFieldValue raw={['foo', 'bar']} type="string" />);
+        wrapper = shallow(
+          <ResultFieldValue raw={['foo', 'bar']} type={InternalSchemaType.String} />
+        );
       });
 
       it('will render a display value', () => {
@@ -55,7 +61,7 @@ describe('ResultFieldValue', () => {
     describe('and the value is a number', () => {
       let wrapper: ShallowWrapper;
       beforeAll(() => {
-        wrapper = shallow(<ResultFieldValue raw={1} type="number" />);
+        wrapper = shallow(<ResultFieldValue raw={1} type={SchemaType.Number} />);
       });
 
       it('will render a display value', () => {
@@ -70,7 +76,7 @@ describe('ResultFieldValue', () => {
     describe('and the value is an array of numbers', () => {
       let wrapper: ShallowWrapper;
       beforeAll(() => {
-        wrapper = shallow(<ResultFieldValue raw={[1, 2]} type="number" />);
+        wrapper = shallow(<ResultFieldValue raw={[1, 2]} type={InternalSchemaType.Float} />);
       });
 
       it('will render a display value', () => {
@@ -78,14 +84,14 @@ describe('ResultFieldValue', () => {
       });
 
       it('will have the appropriate type class', () => {
-        expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--number');
+        expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--float');
       });
     });
 
     describe('and the value is a location', () => {
       let wrapper: ShallowWrapper;
       beforeAll(() => {
-        wrapper = shallow(<ResultFieldValue raw={'44.6, -110.5'} type="location" />);
+        wrapper = shallow(<ResultFieldValue raw={'44.6, -110.5'} type={SchemaType.Geolocation} />);
       });
 
       it('will render a display value', () => {
@@ -93,7 +99,7 @@ describe('ResultFieldValue', () => {
       });
 
       it('will have the appropriate type class', () => {
-        expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--location');
+        expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--geolocation');
       });
     });
 
@@ -101,7 +107,10 @@ describe('ResultFieldValue', () => {
       let wrapper: ShallowWrapper;
       beforeAll(() => {
         wrapper = shallow(
-          <ResultFieldValue raw={['44.6, -110.5', '44.7, -111.0']} type="location" />
+          <ResultFieldValue
+            raw={['44.6, -110.5', '44.7, -111.0']}
+            type={InternalSchemaType.Location}
+          />
         );
       });
 
@@ -117,7 +126,7 @@ describe('ResultFieldValue', () => {
     describe('and the value is a date', () => {
       let wrapper: ShallowWrapper;
       beforeAll(() => {
-        wrapper = shallow(<ResultFieldValue raw="1872-03-01T06:00:00Z" type="date" />);
+        wrapper = shallow(<ResultFieldValue raw="1872-03-01T06:00:00Z" type={SchemaType.Date} />);
       });
 
       it('will render a display value', () => {
@@ -133,7 +142,10 @@ describe('ResultFieldValue', () => {
       let wrapper: ShallowWrapper;
       beforeAll(() => {
         wrapper = shallow(
-          <ResultFieldValue raw={['1872-03-01T06:00:00Z', '1472-04-01T06:00:00Z']} type="date" />
+          <ResultFieldValue
+            raw={['1872-03-01T06:00:00Z', '1472-04-01T06:00:00Z']}
+            type={InternalSchemaType.Date}
+          />
         );
       });
 
@@ -154,7 +166,7 @@ describe('ResultFieldValue', () => {
         <ResultFieldValue
           raw="I am a long description of a thing"
           snippet="a <em>long</em> description"
-          type="string"
+          type={InternalSchemaType.String}
         />
       );
     });

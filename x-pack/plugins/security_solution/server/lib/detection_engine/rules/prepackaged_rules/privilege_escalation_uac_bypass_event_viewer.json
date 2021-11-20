@@ -6,15 +6,16 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "Bypass UAC via Event Viewer",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:eventvwr.exe and not process.executable:(\"C:\\Windows\\SysWOW64\\mmc.exe\" or \"C:\\Windows\\System32\\mmc.exe\")",
-  "risk_score": 21,
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"eventvwr.exe\" and\n  not process.executable : \n            (\"?:\\\\Windows\\\\SysWOW64\\\\mmc.exe\", \n             \"?:\\\\Windows\\\\System32\\\\mmc.exe\",\n             \"?:\\\\Windows\\\\SysWOW64\\\\WerFault.exe\",\n             \"?:\\\\Windows\\\\System32\\\\WerFault.exe\")\n",
+  "risk_score": 73,
   "rule_id": "31b4c719-f2b4-41f6-a9bd-fce93c2eaf62",
-  "severity": "low",
+  "severity": "high",
   "tags": [
     "Elastic",
     "Host",
@@ -38,7 +39,7 @@
           "subtechnique": [
             {
               "id": "T1548.002",
-              "name": "Bypass User Access Control",
+              "name": "Bypass User Account Control",
               "reference": "https://attack.mitre.org/techniques/T1548/002/"
             }
           ]
@@ -46,6 +47,7 @@
       ]
     }
   ],
-  "type": "query",
-  "version": 5
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 9
 }

@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiTitle, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ClusterView } from './components/cluster_view';
 import './shard_allocation.scss';
+import { ClusterView } from './components/cluster_view';
 
-export const ShardAllocation = ({ scope, type, shardStats }) => {
+export const ShardAllocation = (props) => {
   const types = [
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.primaryLabel', {
@@ -23,7 +24,7 @@ export const ShardAllocation = ({ scope, type, shardStats }) => {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.replicaLabel', {
         defaultMessage: 'Replica',
       }),
-      color: 'secondary',
+      color: 'success',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.relocatingLabel', {
@@ -76,13 +77,7 @@ export const ShardAllocation = ({ scope, type, shardStats }) => {
         ))}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <ClusterView
-        scope={scope}
-        shardStats={shardStats}
-        showSystemIndices={scope.showSystemIndices}
-        toggleShowSystemIndices={scope.toggleShowSystemIndices}
-        type={type}
-      />
+      <ClusterView {...props} />
     </div>
   );
 };

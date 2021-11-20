@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -29,7 +30,7 @@ jest.mock('../../../../../../application/util/dependency_cache', () => ({
 
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
-    services: mockCoreServices.createStart(),
+    services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
   }),
   useNotifications: () => {
     return {
@@ -68,7 +69,7 @@ describe('DeleteAction', () => {
   });
 
   describe('When delete model is open', () => {
-    it('should allow to delete target index by default.', () => {
+    it('should not allow to delete target index by default.', () => {
       const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
       mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
 
@@ -100,10 +101,9 @@ describe('DeleteAction', () => {
       const deleteButton = getByTestId('mlAnalyticsJobDeleteButton');
       fireEvent.click(deleteButton);
       expect(getByTestId('mlAnalyticsJobDeleteModal')).toBeInTheDocument();
-      expect(getByTestId('mlAnalyticsJobDeleteIndexSwitch')).toBeInTheDocument();
-      const mlAnalyticsJobDeleteIndexSwitch = getByTestId('mlAnalyticsJobDeleteIndexSwitch');
-      expect(mlAnalyticsJobDeleteIndexSwitch).toHaveAttribute('aria-checked', 'true');
+      expect(queryByTestId('mlAnalyticsJobDeleteIndexSwitch')).toBeNull();
       expect(queryByTestId('mlAnalyticsJobDeleteIndexPatternSwitch')).toBeNull();
+
       mock.mockRestore();
     });
   });

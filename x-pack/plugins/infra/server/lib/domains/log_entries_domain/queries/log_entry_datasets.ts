@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { commonSearchSuccessResponseFieldsRT } from '../../../../utils/elasticsearch_runtime_types';
 
@@ -13,6 +15,7 @@ export const createLogEntryDatasetsQuery = (
   timestampField: string,
   startTime: number,
   endTime: number,
+  runtimeMappings: estypes.MappingRuntimeFields,
   size: number,
   afterKey?: CompositeDatasetKey
 ) => ({
@@ -26,6 +29,7 @@ export const createLogEntryDatasetsQuery = (
               [timestampField]: {
                 gte: startTime,
                 lte: endTime,
+                format: 'epoch_millis',
               },
             },
           },
@@ -37,6 +41,7 @@ export const createLogEntryDatasetsQuery = (
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     aggs: {
       dataset_buckets: {
         composite: {
@@ -61,10 +66,10 @@ export const createLogEntryDatasetsQuery = (
 });
 
 const defaultRequestParameters = {
-  allowNoIndices: true,
-  ignoreUnavailable: true,
-  trackScores: false,
-  trackTotalHits: false,
+  allow_no_indices: true,
+  ignore_unavailable: true,
+  track_scores: false,
+  track_total_hits: false,
 };
 
 const compositeDatasetKeyRT = rt.type({

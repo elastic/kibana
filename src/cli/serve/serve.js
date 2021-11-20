@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { set as lodashSet } from '@elastic/safer-lodash-set';
@@ -12,10 +12,7 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath } from '@kbn/utils';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
-import { fromRoot } from '../../core/server/utils';
-import { bootstrap } from '../../core/server';
+import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
 import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
@@ -31,8 +28,20 @@ function canRequire(path) {
   }
 }
 
-const DEV_MODE_PATH = resolve(__dirname, '../../dev/cli_dev_mode');
+const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
+
+const getBootstrapScript = (isDev) => {
+  if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
+    // need dynamic require to exclude it from production build
+    // eslint-disable-next-line import/no-dynamic-require
+    const { bootstrapDevMode } = require(DEV_MODE_PATH);
+    return bootstrapDevMode;
+  } else {
+    const { bootstrap } = require('../../core/server');
+    return bootstrap;
+  }
+};
 
 const pathCollector = function () {
   const paths = [];
@@ -43,7 +52,6 @@ const pathCollector = function () {
 };
 
 const configPathCollector = pathCollector();
-const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
@@ -51,24 +59,27 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
-
   if (opts.oss) {
     delete rawConfig.xpack;
   }
 
+  // only used to set cliArgs.envName, we don't want to inject that into the config
+  delete extraCliOptions.env;
+
   if (opts.dev) {
-    set('env', 'development');
+    if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
+      if (!has('elasticsearch.username')) {
+        set('elasticsearch.username', 'kibana_system');
+      }
 
-    if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'kibana_system');
-    }
-
-    if (!has('elasticsearch.password')) {
-      set('elasticsearch.password', 'changeme');
+      if (!has('elasticsearch.password')) {
+        set('elasticsearch.password', 'changeme');
+      }
     }
 
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
+      // eslint-disable-next-line import/no-extraneous-dependencies
       const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
       const customElasticsearchHosts = opts.elasticsearch
         ? opts.elasticsearch.split(',')
@@ -79,6 +90,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
           throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
         }
       }
+
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('server.ssl.keystore.path');
@@ -112,12 +124,14 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
   if (opts.port) set('server.port', opts.port);
   if (opts.host) set('server.host', opts.host);
-  if (opts.quiet) set('logging.quiet', true);
-  if (opts.silent) set('logging.silent', true);
-  if (opts.verbose) set('logging.verbose', true);
-  if (opts.logFile) set('logging.dest', opts.logFile);
 
-  set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
+  if (opts.silent) {
+    set('logging.root.level', 'off');
+  }
+  if (opts.verbose) {
+    set('logging.root.level', 'all');
+  }
+
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   merge(extraCliOptions);
@@ -140,17 +154,12 @@ export default function (program) {
       [getConfigPath()]
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
-    .option('-q, --quiet', 'Prevent all logging except errors')
-    .option('-Q, --silent', 'Prevent all logging')
-    .option('--verbose', 'Turns on verbose logging')
+    .option('-Q, --silent', 'Set the root logger level to off')
+    .option('--verbose', 'Set the root logger level to all')
     .option('-H, --host <host>', 'The host to bind to')
-    .option('-l, --log-file <path>', 'The file to log to')
     .option(
-      '--plugin-dir <path>',
-      'A path to scan for plugins, this can be specified multiple ' +
-        'times to specify multiple directories',
-      pluginDirCollector,
-      [fromRoot('plugins')]
+      '-l, --log-file <path>',
+      'Deprecated, set logging file destination in your configuration'
     )
     .option(
       '--plugin-path <path>',
@@ -159,10 +168,9 @@ export default function (program) {
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
-  if (!IS_KIBANA_DISTRIBUTABLE) {
+  if (!isKibanaDistributable()) {
     command
       .option('--oss', 'Start Kibana without X-Pack')
       .option(
@@ -183,7 +191,11 @@ export default function (program) {
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
       .option('--no-optimizer', 'Disable the kbn/optimizer completely')
       .option('--no-cache', 'Disable the kbn/optimizer cache')
-      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode')
+      .option(
+        '--no-dev-credentials',
+        'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
+      );
   }
 
   command.action(async function (opts) {
@@ -199,30 +211,39 @@ export default function (program) {
     }
 
     const unknownOptions = this.getUnknownOptions();
-    await bootstrap({
-      configs: [].concat(opts.config || []),
-      cliArgs: {
-        dev: !!opts.dev,
-        envName: unknownOptions.env ? unknownOptions.env.name : undefined,
-        quiet: !!opts.quiet,
-        silent: !!opts.silent,
-        watch: !!opts.watch,
-        runExamples: !!opts.runExamples,
-        // We want to run without base path when the `--run-examples` flag is given so that we can use local
-        // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
-        // We can tell users they only have to run with `yarn start --run-examples` to get those
-        // local links to work.  Similar to what we do for "View in Console" links in our
-        // elastic.co links.
-        basePath: opts.runExamples ? false : !!opts.basePath,
-        optimize: !!opts.optimize,
-        disableOptimizer: !opts.optimizer,
-        oss: !!opts.oss,
-        cache: !!opts.cache,
-        dist: !!opts.dist,
-      },
-      features: {
-        isCliDevModeSupported: DEV_MODE_SUPPORTED,
-      },
+    const configs = [].concat(opts.config || []);
+    const cliArgs = {
+      dev: !!opts.dev,
+      envName: unknownOptions.env ? unknownOptions.env.name : undefined,
+      silent: !!opts.silent,
+      verbose: !!opts.verbose,
+      watch: !!opts.watch,
+      runExamples: !!opts.runExamples,
+      // We want to run without base path when the `--run-examples` flag is given so that we can use local
+      // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
+      // We can tell users they only have to run with `yarn start --run-examples` to get those
+      // local links to work.  Similar to what we do for "View in Console" links in our
+      // elastic.co links.
+      basePath: opts.runExamples ? false : !!opts.basePath,
+      optimize: !!opts.optimize,
+      disableOptimizer: !opts.optimizer,
+      oss: !!opts.oss,
+      cache: !!opts.cache,
+      dist: !!opts.dist,
+    };
+
+    // In development mode, the main process uses the @kbn/dev-cli-mode
+    // bootstrap script instead of core's. The DevCliMode instance
+    // is in charge of starting up the optimizer, and spawning another
+    // `/script/kibana` process with the `isDevCliChild` varenv set to true.
+    // This variable is then used to identify that we're the 'real'
+    // Kibana server process, and will be using core's bootstrap script
+    // to effectively start Kibana.
+    const bootstrapScript = getBootstrapScript(cliArgs.dev);
+
+    await bootstrapScript({
+      configs,
+      cliArgs,
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });

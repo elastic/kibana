@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop, pick } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
-
 import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import {
   HostAuthenticationsRequestOptions,
@@ -33,6 +33,8 @@ import { InspectResponse } from '../../../types';
 import { hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'hostsAuthenticationsQuery';
 
@@ -71,14 +73,15 @@ export const useAuthentications = ({
   const { activePage, limit } = useDeepEqualSelector((state) =>
     pick(['activePage', 'limit'], getAuthenticationsSelector(state, type))
   );
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    authenticationsRequest,
-    setAuthenticationsRequest,
-  ] = useState<HostAuthenticationsRequestOptions | null>(null);
+  const [authenticationsRequest, setAuthenticationsRequest] =
+    useState<HostAuthenticationsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
+  const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -120,13 +123,11 @@ export const useAuthentications = ({
       if (request == null || skip) {
         return;
       }
-
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<HostAuthenticationsRequestOptions, HostAuthenticationsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
@@ -134,61 +135,60 @@ export const useAuthentications = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setAuthenticationsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    authentications: response.edges,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    refetch: refetch.current,
-                    totalCount: response.totalCount,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setAuthenticationsResponse((prevResponse) => ({
+                  ...prevResponse,
+                  authentications: response.edges,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  pageInfo: response.pageInfo,
+                  refetch: refetch.current,
+                  totalCount: response.totalCount,
+                }));
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                notifications.toasts.addWarning(i18n.ERROR_AUTHENTICATIONS);
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                addWarning(i18n.ERROR_AUTHENTICATIONS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_AUTHENTICATIONS,
-                  text: msg.message,
-                });
-              }
+              setLoading(false);
+              addError(msg, {
+                title: i18n.FAIL_AUTHENTICATIONS,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: HostsQueries.authentications,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        docValueFields: docValueFields ?? [],
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange,
         sort: {} as SortField,
       };
       if (!deepEqual(prevRequest, myRequest)) {
@@ -196,10 +196,23 @@ export const useAuthentications = ({
       }
       return prevRequest;
     });
-  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, startDate]);
+  }, [
+    activePage,
+    docValueFields,
+    endDate,
+    filterQuery,
+    indexNames,
+    limit,
+    startDate,
+    getTransformChangesIfTheyExist,
+  ]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [authenticationsRequest, authenticationsSearch]);
 
   return [loading, authenticationsResponse];

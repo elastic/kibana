@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { Component, CSSProperties } from 'react';
 // @ts-expect-error
 import { getMakiSymbolSvg, styleSvg, buildSrcUrl } from '../../symbol_utils';
 
@@ -12,6 +13,7 @@ interface Props {
   symbolId: string;
   fill?: string;
   stroke?: string;
+  style: CSSProperties;
 }
 
 interface State {

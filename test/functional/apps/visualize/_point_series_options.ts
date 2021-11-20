@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
   ]);
   const inspector = getService('inspector');
+  const xyChartSelector = 'visTypeXyChart';
 
   async function initChart() {
     log.debug('navigateToApp visualize');
@@ -57,71 +58,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('Average memory value axis - ValueAxis-2');
     await PageObjects.visEditor.setSeriesAxis(1, 'ValueAxis-2');
     await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-    await PageObjects.visEditor.clickGo();
+    await PageObjects.visEditor.clickGo(true);
   }
 
   describe('point series', function describeIndexTests() {
-    before(initChart);
+    before(async () => {
+      await PageObjects.visualize.initTests();
+      await initChart();
+    });
 
     describe('secondary value axis', function () {
       it('should show correct chart', async function () {
         const expectedChartValues = [
           [
-            37,
-            202,
-            740,
-            1437,
-            1371,
-            751,
-            188,
-            31,
-            42,
-            202,
-            683,
-            1361,
-            1415,
-            707,
-            177,
-            27,
-            32,
-            175,
-            707,
-            1408,
-            1355,
-            726,
-            201,
-            29,
+            37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683, 1361, 1415, 707, 177, 27, 32, 175,
+            707, 1408, 1355, 726, 201, 29,
           ],
           [
-            14018300000,
-            13284800000,
-            13198800000,
-            13093400000,
-            13067800000,
-            12976600000,
-            13561800000,
-            14339600000,
-            14011000000,
-            12775300000,
-            13304500000,
-            12988900000,
-            13143500000,
-            13244400000,
-            12154800000,
-            15907300000,
-            13757300000,
-            13022200000,
-            12807300000,
-            13375700000,
-            13190800000,
-            12627500000,
-            12731500000,
-            13153300000,
+            14018300000, 13284800000, 13198800000, 13093400000, 13067800000, 12976600000,
+            13561800000, 14339600000, 14011000000, 12775300000, 13304500000, 12988900000,
+            13143500000, 13244400000, 12154800000, 15907300000, 13757300000, 13022200000,
+            12807300000, 13375700000, 13190800000, 12627500000, 12731500000, 13153300000,
           ],
         ];
 
         await retry.try(async () => {
-          const data = await PageObjects.visChart.getLineChartData('Count');
+          const data = await PageObjects.visChart.getLineChartData(xyChartSelector, 'Count');
           log.debug('count data=' + data);
           log.debug('data.length=' + data.length);
           expect(data).to.eql(expectedChartValues[0]);
@@ -129,8 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           const avgMemoryData = await PageObjects.visChart.getLineChartData(
-            'Average machine.ram',
-            'ValueAxis-2'
+            xyChartSelector,
+            'Average machine.ram'
           );
           log.debug('average memory data=' + avgMemoryData);
           log.debug('data.length=' + avgMemoryData.length);
@@ -146,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should put secondary axis on the right', async function () {
-        const length = await PageObjects.visChart.getRightValueAxesCount();
+        const length = await PageObjects.visChart.getAxesCountByPosition('right', xyChartSelector);
         expect(length).to.be(1);
       });
     });
@@ -154,8 +116,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('multiple chart types', function () {
       it('should change average series type to histogram', async function () {
         await PageObjects.visEditor.setSeriesType(1, 'histogram');
-        await PageObjects.visEditor.clickGo();
-        const length = await PageObjects.visChart.getHistogramSeriesCount();
+        await PageObjects.visEditor.clickGo(true);
+        const length = await PageObjects.visChart.getHistogramSeriesCount(xyChartSelector);
         expect(length).to.be(1);
       });
     });
@@ -167,10 +129,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show category grid lines', async function () {
         await PageObjects.visEditor.toggleGridCategoryLines();
-        await PageObjects.visEditor.clickGo();
-        const gridLines = await PageObjects.visChart.getGridLines();
-        const expectedCount = await PageObjects.visChart.getExpectedValue(9, 5);
-        expect(gridLines.length).to.be(expectedCount);
+        await PageObjects.visEditor.clickGo(true);
+        const gridLines = await PageObjects.visChart.getGridLines(xyChartSelector);
+        // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
+        // The objective here is to check whenever the grid lines are rendered, not the exact quantity
+        expect(gridLines.length).to.be.greaterThan(0);
         gridLines.forEach((gridLine) => {
           expect(gridLine.y).to.be(0);
         });
@@ -179,10 +142,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show value axis grid lines', async function () {
         await PageObjects.visEditor.setGridValueAxis('ValueAxis-2');
         await PageObjects.visEditor.toggleGridCategoryLines();
-        await PageObjects.visEditor.clickGo();
-        const gridLines = await PageObjects.visChart.getGridLines();
-        const expectedCount = await PageObjects.visChart.getExpectedValue(9, 8);
-        expect(gridLines.length).to.be(expectedCount);
+        await PageObjects.visEditor.clickGo(true);
+        const gridLines = await PageObjects.visChart.getGridLines(xyChartSelector);
+        // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
+        // The objective here is to check whenever the grid lines are rendered, not the exact quantity
+        expect(gridLines.length).to.be.greaterThan(0);
         gridLines.forEach((gridLine) => {
           expect(gridLine.x).to.be(0);
         });
@@ -201,22 +165,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Terms');
         log.debug('Field = geo.src');
         await PageObjects.visEditor.selectField('geo.src');
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         log.debug('Open Options tab');
         await PageObjects.visEditor.clickOptionsTab();
       });
 
       it('should show values on bar chart', async () => {
         await PageObjects.visEditor.toggleValuesOnChart();
-        await PageObjects.visEditor.clickGo();
-        const values = await PageObjects.visChart.getChartValues();
+        await PageObjects.visEditor.clickGo(true);
+        const values = await PageObjects.visChart.getChartValues(xyChartSelector);
         expect(values).to.eql(['2,592', '2,373', '1,194', '489', '415']);
       });
 
       it('should hide values on bar chart', async () => {
         await PageObjects.visEditor.toggleValuesOnChart();
-        await PageObjects.visEditor.clickGo();
-        const values = await PageObjects.visChart.getChartValues();
+        await PageObjects.visEditor.clickGo(true);
+        const values = await PageObjects.visChart.getChartValues(xyChartSelector);
         expect(values.length).to.be(0);
       });
     });
@@ -230,20 +194,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visEditor.selectYAxisAggregation('Average', 'bytes', customLabel, 1);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         await PageObjects.visEditor.clickMetricsAndAxes();
         await PageObjects.visEditor.clickYAxisOptions('ValueAxis-1');
       });
 
       it('should render a custom label when one is set', async function () {
-        const title = await PageObjects.visChart.getYAxisTitle();
+        const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
         expect(title).to.be(customLabel);
       });
 
       it('should render a custom axis title when one is set, overriding the custom label', async function () {
         await PageObjects.visEditor.setAxisTitle(axisTitle);
-        await PageObjects.visEditor.clickGo();
-        const title = await PageObjects.visChart.getYAxisTitle();
+        await PageObjects.visEditor.clickGo(true);
+        const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
         expect(title).to.be(axisTitle);
       });
 
@@ -255,43 +219,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickDataTab();
         await PageObjects.visEditor.toggleOpenEditor(1);
         await PageObjects.visEditor.setCustomLabel('test', 1);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         await PageObjects.visEditor.clickMetricsAndAxes();
         await PageObjects.visEditor.clickYAxisOptions('ValueAxis-1');
-        const title = await PageObjects.visChart.getYAxisTitle();
+        const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
         expect(title).to.be(axisTitle);
       });
     });
 
     describe('timezones', async function () {
       it('should show round labels in default timezone', async function () {
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00'],
-          ['2015-09-19 12:00', '2015-09-20 12:00', '2015-09-21 12:00', '2015-09-22 12:00']
-        );
+        const expectedLabels = [
+          '2015-09-20 00:00',
+          '2015-09-21 00:00',
+          '2015-09-22 00:00',
+          '2015-09-23 00:00',
+        ];
         await initChart();
-        const labels = await PageObjects.visChart.getXAxisLabels();
+        const labels = await PageObjects.visChart.getXAxisLabels(xyChartSelector);
         expect(labels.join()).to.contain(expectedLabels.join());
       });
 
       it('should show round labels in different timezone', async function () {
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00'],
-          [
-            '2015-09-19 12:00',
-            '2015-09-20 06:00',
-            '2015-09-21 00:00',
-            '2015-09-21 18:00',
-            '2015-09-22 12:00',
-          ]
-        );
+        const expectedLabels = [
+          '2015-09-20 00:00',
+          '2015-09-21 00:00',
+          '2015-09-22 00:00',
+          '2015-09-23 00:00',
+        ];
 
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
         await initChart();
 
-        const labels = await PageObjects.visChart.getXAxisLabels();
+        const labels = await PageObjects.visChart.getXAxisLabels(xyChartSelector);
 
         expect(labels.join()).to.contain(expectedLabels.join());
       });
@@ -307,27 +269,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'wait for x-axis labels to match expected for Phoenix',
           5000,
           async () => {
-            const labels = (await PageObjects.visChart.getXAxisLabels()) ?? '';
+            const labels = (await PageObjects.visChart.getXAxisLabels(xyChartSelector)) ?? '';
             log.debug(`Labels: ${labels}`);
 
-            const xLabels = await PageObjects.visChart.getExpectedValue(
-              ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
-              [
-                '09:30',
-                '10:00',
-                '10:30',
-                '11:00',
-                '11:30',
-                '12:00',
-                '12:30',
-                '13:00',
-                '13:30',
-                '14:00',
-                '14:30',
-                '15:00',
-                '15:30',
-              ]
-            );
+            const xLabels = [
+              '09:30',
+              '10:00',
+              '10:30',
+              '11:00',
+              '11:30',
+              '12:00',
+              '12:30',
+              '13:00',
+              '13:30',
+              '14:00',
+              '14:30',
+              '15:00',
+              '15:30',
+              '16:00',
+            ];
             return labels.toString() === xLabels.toString();
           }
         );
@@ -367,7 +327,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         // wait some time before trying to check for rendering count
         await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.visualize.clickRefresh();
+        await PageObjects.visualize.clickRefresh(true);
         await PageObjects.visChart.waitForRenderingCount();
         log.debug('getXAxisLabels');
 
@@ -375,27 +335,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'wait for x-axis labels to match expected for UTC',
           5000,
           async () => {
-            const labels2 = (await PageObjects.visChart.getXAxisLabels()) ?? '';
+            const labels2 = (await PageObjects.visChart.getXAxisLabels(xyChartSelector)) ?? '';
             log.debug(`Labels: ${labels2}`);
 
-            const xLabels2 = await PageObjects.visChart.getExpectedValue(
-              ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'],
-              [
-                '16:30',
-                '17:00',
-                '17:30',
-                '18:00',
-                '18:30',
-                '19:00',
-                '19:30',
-                '20:00',
-                '20:30',
-                '21:00',
-                '21:30',
-                '22:00',
-                '22:30',
-              ]
-            );
+            const xLabels2 = [
+              '16:30',
+              '17:00',
+              '17:30',
+              '18:00',
+              '18:30',
+              '19:00',
+              '19:30',
+              '20:00',
+              '20:30',
+              '21:00',
+              '21:30',
+              '22:00',
+              '22:30',
+              '23:00',
+            ];
             return labels2.toString() === xLabels2.toString();
           }
         );

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
 
@@ -13,77 +15,60 @@ import {
   transform,
   transformTags,
   getIdBulkError,
-  transformOrBulkError,
   transformAlertsToRules,
-  transformOrImportError,
   getDuplicates,
   getTupleDuplicateErrorsAndUniqueRules,
+  getInvalidConnectors,
 } from './utils';
-import { getResult } from '../__mocks__/request_responses';
+import { getAlertMock } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { PartialFilter, RuleTypeParams } from '../../types';
-import { BulkError, ImportSuccessError } from '../utils';
+import { PartialFilter } from '../../types';
+import { BulkError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { PartialAlert } from '../../../../../../alerts/server';
-import { SanitizedAlert } from '../../../../../../alerts/server/types';
+import { PartialAlert } from '../../../../../../alerting/server';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
+import {
+  getMlRuleParams,
+  getQueryRuleParams,
+  getThreatRuleParams,
+} from '../../schemas/rule_schemas.mock';
+import { requestContextMock } from '../__mocks__';
+
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
-describe('utils', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('utils - %s', (_, isRuleRegistryEnabled) => {
+  const { clients } = requestContextMock.createTools();
+
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
-      const fullRule = getResult();
+      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       const rule = transformAlertToRule(fullRule);
       expect(rule).toEqual(getOutputRuleAlertForRest());
     });
 
-    test('should work with a partial data set missing data', () => {
-      const fullRule = getResult();
-      const { from, language, ...omitParams } = fullRule.params;
-      fullRule.params = omitParams as RuleTypeParams;
+    test('should omit note if note is undefined', () => {
+      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      fullRule.params.note = undefined;
       const rule = transformAlertToRule(fullRule);
-      const {
-        from: from2,
-        language: language2,
-        ...expectedWithoutFromWithoutLanguage
-      } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutFromWithoutLanguage);
-    });
-
-    test('should omit query if query is undefined', () => {
-      const fullRule = getResult();
-      fullRule.params.query = undefined;
-      const rule = transformAlertToRule(fullRule);
-      const { query, ...expectedWithoutQuery } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutQuery);
-    });
-
-    test('should omit a mix of undefined, null, and missing fields', () => {
-      const fullRule = getResult();
-      fullRule.params.query = undefined;
-      fullRule.params.language = undefined;
-      const { from, ...omitParams } = fullRule.params;
-      fullRule.params = omitParams as RuleTypeParams;
-      const { enabled, ...omitEnabled } = fullRule;
-      const rule = transformAlertToRule(omitEnabled as RuleAlertType);
-      const {
-        from: from2,
-        enabled: enabled2,
-        language,
-        query,
-        ...expectedWithoutFromEnabledLanguageQuery
-      } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutFromEnabledLanguageQuery);
+      const { note, ...expectedWithoutNote } = getOutputRuleAlertForRest();
+      expect(rule).toEqual(expectedWithoutNote);
     });
 
     test('should return enabled is equal to false', () => {
-      const fullRule = getResult();
+      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       fullRule.enabled = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -92,7 +77,7 @@ describe('utils', () => {
     });
 
     test('should return immutable is equal to false', () => {
-      const fullRule = getResult();
+      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       fullRule.params.immutable = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -100,7 +85,7 @@ describe('utils', () => {
     });
 
     test('should work with tags but filter out any internal tags', () => {
-      const fullRule = getResult();
+      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -109,23 +94,23 @@ describe('utils', () => {
     });
 
     test('transforms ML Rule fields', () => {
-      const mlRule = getResult();
+      const mlRule = getAlertMock(isRuleRegistryEnabled, getMlRuleParams());
       mlRule.params.anomalyThreshold = 55;
-      mlRule.params.machineLearningJobId = 'some_job_id';
+      mlRule.params.machineLearningJobId = ['some_job_id'];
       mlRule.params.type = 'machine_learning';
 
       const rule = transformAlertToRule(mlRule);
       expect(rule).toEqual(
         expect.objectContaining({
           anomaly_threshold: 55,
-          machine_learning_job_id: 'some_job_id',
+          machine_learning_job_id: ['some_job_id'],
           type: 'machine_learning',
         })
       );
     });
 
     test('transforms threat_matching fields', () => {
-      const threatRule = getResult();
+      const threatRule = getAlertMock(isRuleRegistryEnabled, getThreatRuleParams());
       const threatFilters: PartialFilter[] = [
         {
           query: {
@@ -176,7 +161,10 @@ describe('utils', () => {
     // This has to stay here until we do data migration of saved objects and lists is removed from:
     // signal_params_schema.ts
     test('does not leak a lists structure in the transform which would cause validation issues', () => {
-      const result: RuleAlertType & { lists: [] } = { lists: [], ...getResult() };
+      const result: RuleAlertType & { lists: [] } = {
+        lists: [],
+        ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+      };
       const rule = transformAlertToRule(result);
       expect(rule).toEqual(
         expect.not.objectContaining({
@@ -190,7 +178,7 @@ describe('utils', () => {
     test('does not leak an exceptions_list structure in the transform which would cause validation issues', () => {
       const result: RuleAlertType & { exceptions_list: [] } = {
         exceptions_list: [],
-        ...getResult(),
+        ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
       };
       const rule = transformAlertToRule(result);
       expect(rule).toEqual(
@@ -277,7 +265,7 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, []);
+      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, {}, {});
       expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
@@ -287,9 +275,10 @@ describe('utils', () => {
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getResult()],
+          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
         },
-        []
+        {},
+        {}
       );
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual({
@@ -300,31 +289,84 @@ describe('utils', () => {
       });
     });
 
-    test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ([{ name: 'something else' }] as unknown) as SanitizedAlert[];
+    test('outputs 200 if the data is of type siem alert and has undefined for the legacyRuleActions', () => {
       const output = transformFindAlerts(
         {
-          data: unsafeCast,
           page: 1,
-          perPage: 1,
-          total: 1,
+          perPage: 0,
+          total: 0,
+          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
         },
-        []
+        {},
+        {
+          '123': undefined,
+        }
       );
-      expect(output).toBeNull();
+      const expected = getOutputRuleAlertForRest();
+      expect(output).toEqual({
+        page: 1,
+        perPage: 0,
+        total: 0,
+        data: [expected],
+      });
+    });
+
+    test('outputs 200 if the data is of type siem alert and has a legacy rule action', () => {
+      const actions: LegacyRuleAlertAction[] = [
+        {
+          id: '456',
+          params: {},
+          group: '',
+          action_type_id: 'action_123',
+        },
+      ];
+
+      const legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined> = {
+        [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()).id]: {
+          id: '123',
+          actions,
+          alertThrottle: '1h',
+          ruleThrottle: '1h',
+        },
+      };
+      const output = transformFindAlerts(
+        {
+          page: 1,
+          perPage: 0,
+          total: 0,
+          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+        },
+        {},
+        legacyRuleActions
+      );
+      const expected = {
+        ...getOutputRuleAlertForRest(),
+        throttle: '1h',
+        actions,
+      };
+      expect(output).toEqual({
+        page: 1,
+        perPage: 0,
+        total: 0,
+        data: [expected],
+      });
     });
   });
 
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transform(getResult());
+      const output = transform(
+        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+        undefined,
+        isRuleRegistryEnabled
+      );
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ({ data: [{ random: 1 }] } as unknown) as PartialAlert;
-      const output = transform(unsafeCast);
+      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialAlert;
+      const output = transform(unsafeCast, undefined, isRuleRegistryEnabled);
       expect(output).toBeNull();
     });
   });
@@ -430,111 +472,30 @@ describe('utils', () => {
     });
   });
 
-  describe('transformOrBulkError', () => {
-    test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrBulkError('rule-1', getResult(), {
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        actions: [],
-        ruleThrottle: 'no_actions',
-        alertThrottle: null,
-      });
-      const expected = getOutputRuleAlertForRest();
-      expect(output).toEqual(expected);
-    });
-
-    test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
-      const output = transformOrBulkError('rule-1', unsafeCast, {
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        actions: [],
-        ruleThrottle: 'no_actions',
-        alertThrottle: null,
-      });
-      const expected: BulkError = {
-        rule_id: 'rule-1',
-        error: { message: 'Internal error transforming', status_code: 500 },
-      };
-      expect(output).toEqual(expected);
-    });
-  });
-
   describe('transformAlertsToRules', () => {
     test('given an empty array returns an empty array', () => {
-      expect(transformAlertsToRules([])).toEqual([]);
+      expect(transformAlertsToRules([], {})).toEqual([]);
     });
 
     test('given single alert will return the alert transformed', () => {
-      const result1 = getResult();
-      const transformed = transformAlertsToRules([result1]);
+      const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const transformed = transformAlertsToRules([result1], {});
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
 
     test('given two alerts will return the two alerts transformed', () => {
-      const result1 = getResult();
-      const result2 = getResult();
+      const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const result2 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 
-      const transformed = transformAlertsToRules([result1, result2]);
+      const transformed = transformAlertsToRules([result1, result2], {});
       const expected1 = getOutputRuleAlertForRest();
       const expected2 = getOutputRuleAlertForRest();
       expected2.id = 'some other id';
       expected2.rule_id = 'some other id';
       expect(transformed).toEqual([expected1, expected2]);
-    });
-  });
-
-  describe('transformOrImportError', () => {
-    test('returns 1 given success if the alert is an alert type and the existing success count is 0', () => {
-      const output = transformOrImportError('rule-1', getResult(), {
-        success: true,
-        success_count: 0,
-        errors: [],
-      });
-      const expected: ImportSuccessError = {
-        success: true,
-        errors: [],
-        success_count: 1,
-      };
-      expect(output).toEqual(expected);
-    });
-
-    test('returns 2 given successes if the alert is an alert type and the existing success count is 1', () => {
-      const output = transformOrImportError('rule-1', getResult(), {
-        success: true,
-        success_count: 1,
-        errors: [],
-      });
-      const expected: ImportSuccessError = {
-        success: true,
-        errors: [],
-        success_count: 2,
-      };
-      expect(output).toEqual(expected);
-    });
-
-    test('returns 1 error and success of false if the data is not of type siem alert', () => {
-      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
-      const output = transformOrImportError('rule-1', unsafeCast, {
-        success: true,
-        success_count: 1,
-        errors: [],
-      });
-      const expected: ImportSuccessError = {
-        success: false,
-        errors: [
-          {
-            rule_id: 'rule-1',
-            error: {
-              message: 'Internal error transforming',
-              status_code: 500,
-            },
-          },
-        ],
-        success_count: 1,
-      };
-      expect(output).toEqual(expected);
     });
   });
 
@@ -573,6 +534,7 @@ describe('utils', () => {
 
   describe('getTupleDuplicateErrorsAndUniqueRules', () => {
     test('returns tuple of empty duplicate errors array and rule array with instance of Syntax Error when imported rule contains parse error', async () => {
+      // This is a string because we have a double "::" below to make an error happen on purpose.
       const multipartPayload =
         '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\n';
       const ndJsonStream = new Readable({
@@ -687,6 +649,471 @@ describe('utils', () => {
 
       expect(isInstanceOfError).toEqual(true);
       expect(errors.length).toEqual(0);
+    });
+  });
+
+  describe('getInvalidConnectors', () => {
+    beforeEach(() => {
+      clients.actionsClient.getAll.mockReset();
+    });
+
+    test('returns empty errors array and rule array with instance of Syntax Error when imported rule contains parse error', async () => {
+      // This is a string because we have a double "::" below to make an error happen on purpose.
+      const multipartPayload =
+        '{"name"::"Simple Rule Query","description":"Simple Rule Query","risk_score":1,"rule_id":"rule-1","severity":"high","type":"query","query":"user.name: root or user.name: admin"}\n';
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(multipartPayload);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const isInstanceOfError = output[0] instanceof Error;
+
+      expect(isInstanceOfError).toEqual(true);
+      expect(errors.length).toEqual(0);
+    });
+
+    test('creates error with a rule has an action that does not exist within the actions client', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(output.length).toEqual(0);
+      expect(errors).toEqual<BulkError[]>([
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 123',
+            status_code: 404,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
+
+    test('creates output with no errors if 1 rule with an action exists within the actions client', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(0);
+      expect(output.length).toEqual(1);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
+    });
+
+    test('creates output with no errors if 1 rule with 2 actions exists within the actions client', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(0);
+      expect(output.length).toEqual(1);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
+    });
+
+    test('creates output with no errors if 2 rules with 1 action each exists within the actions client', async () => {
+      const rule1: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const rule2: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-2'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule1)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(0);
+      expect(output.length).toEqual(2);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
+      expect(output[1]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule2));
+    });
+
+    test('creates output with 1 error if 2 rules with 1 action each exists within the actions client but 1 has a nonexistent action', async () => {
+      const rule1: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const rule2: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-2'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '456', // <--- Non-existent that triggers the error.
+            action_type_id: '456',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule1)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(1);
+      expect(output.length).toEqual(1);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
+      expect(errors).toEqual<BulkError[]>([
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 456',
+            status_code: 404,
+          },
+          rule_id: 'rule-2',
+        },
+      ]);
+    });
+
+    test('creates output with error if 1 rule with 2 actions but 1 action does not exist within the actions client', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '101112', // <-- Does not exist
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(1);
+      expect(output.length).toEqual(0);
+      expect(errors).toEqual<BulkError[]>([
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 101112',
+            status_code: 404,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
+
+    test('creates output with 2 errors if 3 rules with actions but 1 action does not exist within the actions client', async () => {
+      const rule1: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '101112', // <-- Does not exist
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const rule2: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const rule3: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [
+          {
+            group: 'default',
+            id: '123',
+            action_type_id: '456',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '789',
+            action_type_id: '101112',
+            params: {},
+          },
+          {
+            group: 'default',
+            id: '101112', // <-- Does not exist
+            action_type_id: '101112',
+            params: {},
+          },
+        ],
+      };
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule1)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
+          this.push(`${JSON.stringify(rule3)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      clients.actionsClient.getAll.mockResolvedValue([
+        {
+          id: '123',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+        {
+          id: '789',
+          referencedByCount: 1,
+          actionTypeId: 'default',
+          name: 'name',
+          isPreconfigured: false,
+        },
+      ]);
+      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      expect(errors.length).toEqual(2);
+      expect(output.length).toEqual(1);
+      expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule2));
+      expect(errors).toEqual<BulkError[]>([
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 101112',
+            status_code: 404,
+          },
+          rule_id: 'rule-1',
+        },
+        {
+          error: {
+            message: '1 connector is missing. Connector id missing is: 101112',
+            status_code: 404,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
     });
   });
 });

@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes } from 'kibana/public';
 import { SavedObject, SavedObjectKibanaServices } from '../../types';
@@ -40,7 +40,7 @@ export async function createSource(
     return await savedObjectsClient.create(esType, source, options);
   } catch (err) {
     // record exists, confirm overwriting
-    if (_.get(err, 'res.status') === 409) {
+    if (get(err, 'res.status') === 409) {
       const confirmMessage = i18n.translate(
         'savedObjects.confirmModal.overwriteConfirmationMessage',
         {

@@ -1,10 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-/* eslint-disable react/display-name */
 
 import {
   EuiBasicTableColumn,
@@ -12,15 +11,18 @@ import {
   EuiText,
   EuiHealth,
   EuiToolTip,
+  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as H from 'history';
+import { sum } from 'lodash';
 import React, { Dispatch } from 'react';
 
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import { FormattedDate } from '../../../../../common/components/formatted_date';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { ActionToaster } from '../../../../../common/components/toasters';
 import { getStatusColor } from '../../../../components/rules/rule_status/helpers';
@@ -33,16 +35,24 @@ import {
   editRuleAction,
   exportRulesAction,
 } from './actions';
-import { Action } from './reducer';
-import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
+import { RulesTableAction } from '../../../../containers/detection_engine/rules/rules_table';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
+import { PopoverTooltip } from './popover_tooltip';
 import { TagsDisplay } from './tag_display';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
+import {
+  APP_UI_ID,
+  SecurityPageName,
+  DEFAULT_RELATIVE_DATE_THRESHOLD,
+} from '../../../../../../common/constants';
+import { DocLinksStart, NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 
 export const getActions = (
-  dispatch: React.Dispatch<Action>,
+  dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
   reFetchRules: () => Promise<void>,
   refetchPrePackagedRulesStatus: () => Promise<void>,
   actionsPrivileges:
@@ -62,10 +72,11 @@ export const getActions = (
       i18n.EDIT_RULE_SETTINGS
     ),
     icon: 'controlsHorizontal',
-    onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
+    onClick: (rowItem: Rule) => editRuleAction(rowItem.id, navigateToApp),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
+    'data-test-subj': 'duplicateRuleAction',
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: !actionsPrivileges ? (
@@ -77,9 +88,15 @@ export const getActions = (
     ),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
-      await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
-      await reFetchRules();
-      await refetchPrePackagedRulesStatus();
+      const createdRules = await duplicateRulesAction(
+        [rowItem],
+        [rowItem.id],
+        dispatch,
+        dispatchToaster
+      );
+      if (createdRules?.length) {
+        editRuleAction(createdRules[0].id, navigateToApp);
+      }
     },
   },
   {
@@ -87,7 +104,7 @@ export const getActions = (
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
-    onClick: (rowItem: Rule) => exportRulesAction([rowItem.rule_id], dispatch),
+    onClick: (rowItem: Rule) => exportRulesAction([rowItem.rule_id], dispatch, dispatchToaster),
     enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
@@ -111,13 +128,14 @@ export type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType
 export type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
 type FormatUrl = (path: string) => string;
 interface GetColumns {
-  dispatch: React.Dispatch<Action>;
+  dispatch: React.Dispatch<RulesTableAction>;
   dispatchToaster: Dispatch<ActionToaster>;
   formatUrl: FormatUrl;
   history: H.History;
   hasMlPermissions: boolean;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   loadingRuleIds: string[];
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   reFetchRules: () => Promise<void>;
   refetchPrePackagedRulesStatus: () => Promise<void>;
   hasReadActionsPrivileges:
@@ -133,8 +151,9 @@ export const getColumns = ({
   formatUrl,
   history,
   hasMlPermissions,
-  hasNoPermissions,
+  hasPermissions,
   loadingRuleIds,
+  navigateToApp,
   reFetchRules,
   refetchPrePackagedRulesStatus,
   hasReadActionsPrivileges,
@@ -148,14 +167,16 @@ export const getColumns = ({
           data-test-subj="ruleName"
           onClick={(ev: { preventDefault: () => void }) => {
             ev.preventDefault();
-            history.push(getRuleDetailsUrl(item.id));
+            navigateToApp(APP_UI_ID, {
+              deepLinkId: SecurityPageName.rules,
+              path: getRuleDetailsUrl(item.id),
+            });
           }}
           href={formatUrl(getRuleDetailsUrl(item.id))}
         >
           {value}
         </LinkAnchor>
       ),
-      truncateText: true,
       width: '20%',
       sortable: true,
     },
@@ -167,14 +188,12 @@ export const getColumns = ({
           {value}
         </EuiText>
       ),
-      truncateText: true,
       width: '10%',
     },
     {
       field: 'severity',
       name: i18n.COLUMN_SEVERITY,
       render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-      truncateText: true,
       width: '12%',
     },
     {
@@ -184,12 +203,14 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
-            <FormattedRelative value={value} />
-          </LocalizedDateTooltip>
+          <FormattedRelativePreferenceDate
+            tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+            relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+            value={value}
+            tooltipAnchorClassName="eui-textTruncate"
+          />
         );
       },
-      truncateText: true,
       width: '14%',
     },
     {
@@ -199,13 +220,12 @@ export const getColumns = ({
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
       },
       width: '12%',
-      truncateText: true,
     },
     {
       field: 'updated_at',
@@ -214,13 +234,15 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_UPDATE} date={new Date(value)}>
-            <FormattedDate value={value} fieldName={'last rule update date'} />
-          </LocalizedDateTooltip>
+          <FormattedRelativePreferenceDate
+            tooltipFieldName={i18n.COLUMN_LAST_UPDATE}
+            relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+            value={value}
+            tooltipAnchorClassName="eui-textTruncate"
+          />
         );
       },
       sortable: true,
-      truncateText: true,
       width: '14%',
     },
     {
@@ -235,7 +257,6 @@ export const getColumns = ({
           </EuiText>
         );
       },
-      truncateText: true,
       width: '8%',
     },
     {
@@ -247,7 +268,6 @@ export const getColumns = ({
         }
         return getEmptyTagValue();
       },
-      truncateText: true,
       width: '20%',
     },
     {
@@ -266,7 +286,7 @@ export const getColumns = ({
             enabled={item.enabled}
             isDisabled={
               !canEditRuleWithActions(item, hasReadActionsPrivileges) ||
-              hasNoPermissions ||
+              !hasPermissions ||
               (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
             }
             isLoading={loadingRuleIds.includes(item.id)}
@@ -283,6 +303,7 @@ export const getColumns = ({
         dispatch,
         dispatchToaster,
         history,
+        navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges
@@ -291,12 +312,13 @@ export const getColumns = ({
     } as EuiTableActionsColumnType<Rule>,
   ];
 
-  return hasNoPermissions ? cols : [...cols, ...actions];
+  return hasPermissions ? [...cols, ...actions] : cols;
 };
 
 export const getMonitoringColumns = (
-  history: H.History,
-  formatUrl: FormatUrl
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
+  formatUrl: FormatUrl,
+  docLinks: DocLinksStart
 ): RulesStatusesColumns[] => {
   const cols: RulesStatusesColumns[] = [
     {
@@ -308,66 +330,87 @@ export const getMonitoringColumns = (
             data-test-subj="ruleName"
             onClick={(ev: { preventDefault: () => void }) => {
               ev.preventDefault();
-              history.push(getRuleDetailsUrl(item.id));
+              navigateToApp(APP_UI_ID, {
+                deepLinkId: SecurityPageName.rules,
+                path: getRuleDetailsUrl(item.id),
+              });
             }}
             href={formatUrl(getRuleDetailsUrl(item.id))}
           >
-            {value}
+            {/* Temporary fix if on upgrade a rule has a status of 'partial failure' we want to display that text as 'warning' */}
+            {/* On the next subsequent rule run, that 'partial failure' status will be re-written as a 'warning' status */}
+            {/* and this code will no longer be necessary */}
+            {/* TODO: remove this code in 8.0.0 */}
+            {value === 'partial failure' ? 'warning' : value}
           </LinkAnchor>
         );
       },
-      truncateText: true,
       width: '24%',
     },
     {
       field: 'current_status.bulk_create_time_durations',
-      name: i18n.COLUMN_INDEXING_TIMES,
+      name: (
+        <>
+          {i18n.COLUMN_INDEXING_TIMES}{' '}
+          <EuiToolTip content={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}>
+            <EuiIcon size="m" color="subdued" type="questionInCircle" style={{ margin: 4 }} />
+          </EuiToolTip>
+        </>
+      ),
       render: (value: RuleStatus['current_status']['bulk_create_time_durations']) => (
         <EuiText data-test-subj="bulk_create_time_durations" size="s">
-          {value != null && value.length > 0
-            ? Math.max(...value?.map((item) => Number.parseFloat(item)))
-            : getEmptyTagValue()}
+          {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
-      truncateText: true,
       width: '14%',
     },
     {
       field: 'current_status.search_after_time_durations',
-      name: i18n.COLUMN_QUERY_TIMES,
+      name: (
+        <>
+          {i18n.COLUMN_QUERY_TIMES}{' '}
+          <EuiToolTip content={i18n.COLUMN_QUERY_TIMES_TOOLTIP}>
+            <EuiIcon size="m" color="subdued" type="questionInCircle" style={{ margin: 4 }} />
+          </EuiToolTip>
+        </>
+      ),
       render: (value: RuleStatus['current_status']['search_after_time_durations']) => (
         <EuiText data-test-subj="search_after_time_durations" size="s">
-          {value != null && value.length > 0
-            ? Math.max(...value?.map((item) => Number.parseFloat(item)))
-            : getEmptyTagValue()}
+          {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
-      truncateText: true,
       width: '14%',
     },
     {
       field: 'current_status.gap',
-      name: i18n.COLUMN_GAP,
+      name: (
+        <>
+          {i18n.COLUMN_GAP}
+          <PopoverTooltip columnName={i18n.COLUMN_GAP}>
+            <EuiText style={{ width: 300 }}>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
+                  id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
+                  values={{
+                    seeDocs: (
+                      <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
+                        {'see documentation'}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </PopoverTooltip>
+        </>
+      ),
       render: (value: RuleStatus['current_status']['gap']) => (
         <EuiText data-test-subj="gap" size="s">
           {value ?? getEmptyTagValue()}
         </EuiText>
       ),
-      truncateText: true,
       width: '14%',
-    },
-    {
-      field: 'current_status.last_look_back_date',
-      name: i18n.COLUMN_LAST_LOOKBACK_DATE,
-      render: (value: RuleStatus['current_status']['last_look_back_date']) => {
-        return value == null ? (
-          getEmptyTagValue()
-        ) : (
-          <FormattedDate value={value} fieldName={'last look back date'} />
-        );
-      },
-      truncateText: true,
-      width: '16%',
     },
     {
       field: 'current_status.status_date',
@@ -376,12 +419,14 @@ export const getMonitoringColumns = (
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
-            <FormattedRelative value={value} />
-          </LocalizedDateTooltip>
+          <FormattedRelativePreferenceDate
+            tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+            relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+            value={value}
+            tooltipAnchorClassName="eui-textTruncate"
+          />
         );
       },
-      truncateText: true,
       width: '20%',
     },
     {
@@ -391,13 +436,12 @@ export const getMonitoringColumns = (
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
       },
       width: '16%',
-      truncateText: true,
     },
     {
       field: 'activate',

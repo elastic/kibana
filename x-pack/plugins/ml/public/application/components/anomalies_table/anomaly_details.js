@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -25,6 +26,7 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 
@@ -46,7 +48,7 @@ function getFilterEntity(entityName, entityValue, filter) {
   return <EntityCell entityName={entityName} entityValue={entityValue} filter={filter} />;
 }
 
-function getDetailsItems(anomaly, examples, filter) {
+function getDetailsItems(anomaly, filter) {
   const source = anomaly.source;
 
   // TODO - when multivariate analyses are more common,
@@ -122,14 +124,14 @@ function getDetailsItems(anomaly, examples, filter) {
   }
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.timeTitle', {
-      defaultMessage: 'time',
+      defaultMessage: 'Time',
     }),
     description: timeDesc,
   });
 
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.functionTitle', {
-      defaultMessage: 'function',
+      defaultMessage: 'Function',
     }),
     description:
       source.function !== ML_JOB_AGGREGATION.METRIC ? source.function : source.function_description,
@@ -138,7 +140,7 @@ function getDetailsItems(anomaly, examples, filter) {
   if (source.field_name !== undefined) {
     items.push({
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.fieldNameTitle', {
-        defaultMessage: 'fieldName',
+        defaultMessage: 'Field name',
       }),
       description: source.field_name,
     });
@@ -148,7 +150,7 @@ function getDetailsItems(anomaly, examples, filter) {
   if (anomaly.actual !== undefined && showActualForFunction(functionDescription) === true) {
     items.push({
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.actualTitle', {
-        defaultMessage: 'actual',
+        defaultMessage: 'Actual',
       }),
       description: formatValue(anomaly.actual, source.function, undefined, source),
     });
@@ -157,7 +159,7 @@ function getDetailsItems(anomaly, examples, filter) {
   if (anomaly.typical !== undefined && showTypicalForFunction(functionDescription) === true) {
     items.push({
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
-        defaultMessage: 'typical',
+        defaultMessage: 'Typical',
       }),
       description: formatValue(anomaly.typical, source.function, undefined, source),
     });
@@ -165,7 +167,7 @@ function getDetailsItems(anomaly, examples, filter) {
 
   items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.jobIdTitle', {
-      defaultMessage: 'job ID',
+      defaultMessage: 'Job ID',
     }),
     description: anomaly.jobId,
   });
@@ -176,17 +178,61 @@ function getDetailsItems(anomaly, examples, filter) {
   ) {
     items.push({
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.multiBucketImpactTitle', {
-        defaultMessage: 'multi-bucket impact',
+        defaultMessage: 'Multi-bucket impact',
       }),
       description: getMultiBucketImpactLabel(source.multi_bucket_impact),
     });
   }
 
   items.push({
+    title: (
+      <EuiToolTip
+        position="left"
+        content={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip', {
+          defaultMessage:
+            'A normalized score between 0-100, which indicates the relative significance of the anomaly record result. This value might change as new data is analyzed.',
+        })}
+      >
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTitle', {
+            defaultMessage: 'Record score',
+          })}
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </span>
+      </EuiToolTip>
+    ),
+    description: Math.floor(1000 * source.record_score) / 1000,
+  });
+
+  items.push({
+    title: (
+      <EuiToolTip
+        position="left"
+        content={i18n.translate(
+          'xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTooltip',
+          {
+            defaultMessage:
+              'A normalized score between 0-100, which indicates the relative significance of the anomaly record when the bucket was initially processed.',
+          }
+        )}
+      >
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTitle', {
+            defaultMessage: 'Initial record score',
+          })}
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </span>
+      </EuiToolTip>
+    ),
+    description: Math.floor(1000 * source.initial_record_score) / 1000,
+  });
+
+  items.push({
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.probabilityTitle', {
-      defaultMessage: 'probability',
+      defaultMessage: 'Probability',
     }),
-    description: source.probability,
+    description:
+      source.probability !== undefined ? Number.parseFloat(source.probability).toPrecision(3) : '',
   });
 
   // If there was only one cause, the actual, typical and by_field
@@ -468,7 +514,7 @@ export class AnomalyDetails extends Component {
   }
 
   renderDetails() {
-    const detailItems = getDetailsItems(this.props.anomaly, this.props.examples, this.props.filter);
+    const detailItems = getDetailsItems(this.props.anomaly, this.props.filter);
     const isInterimResult = get(this.props.anomaly, 'source.is_interim', false);
     return (
       <React.Fragment>
@@ -564,7 +610,7 @@ export class AnomalyDetails extends Component {
             <EuiLink onClick={() => this.toggleAllInfluencers()}>
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDescriptionShowLessLinkText"
-                defaultMessage="show less"
+                defaultMessage="Show less"
               />
             </EuiLink>
           )}

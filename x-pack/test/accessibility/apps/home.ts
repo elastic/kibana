@@ -1,98 +1,71 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'home']);
+  const { common, home } = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
-  const retry = getService('retry');
-  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/80929
-  describe.skip('Kibana Home', () => {
+  describe('Kibana Home', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('home');
+      await common.navigateToApp('home');
     });
 
     it('Kibana Home view', async () => {
       await a11y.testAppSnapshot();
     });
 
-    it('all plugins view page meets a11y requirements', async () => {
-      await PageObjects.home.clickAllKibanaPlugins();
+    it('Kibana overview page meets a11y requirements ', async () => {
+      await testSubjects.click('homSolutionPanel homSolutionPanel_kibana');
       await a11y.testAppSnapshot();
     });
 
-    it('visualize & explore details tab meets a11y requirements', async () => {
-      await PageObjects.home.clickVisualizeExplorePlugins();
+    /**
+     * Test fails claiming that a user can focus on an element with aria-hidden
+     * But axe does not recognize our focus trap which prevents a user from ever actually doing that
+     * Open question on why this doesn't fail in other areas though but the structure is the
+     */
+    it.skip('toggle side nav meets a11y requirements', async () => {
+      await home.openCollapsibleNav();
       await a11y.testAppSnapshot();
     });
 
-    it('administrative detail tab meets a11y requirements', async () => {
-      await PageObjects.home.clickAdminPlugin();
-      await a11y.testAppSnapshot();
-    });
-
-    it('navigating to console app from administration tab meets a11y requirements', async () => {
-      await PageObjects.home.clickOnConsole();
-      // wait till dev tools app is loaded (lazy loading the bundle)
-      await retry.waitFor(
-        'switched to dev tools',
-        async () => (await globalNav.getLastBreadcrumb()) === 'Dev Tools'
+    // skipped for same reason as above "toggle side nav meets a11y requirements" test
+    it.skip('click on collapse on observability in side nav to test a11y of collapse button', async () => {
+      await home.openCollapsibleNav();
+      await find.clickByCssSelector(
+        '[data-test-subj="collapsibleNavGroup-observability"] .euiCollapsibleNavGroup__title'
       );
       await a11y.testAppSnapshot();
     });
 
-    it('navigating back to home page from console meets a11y requirements', async () => {
-      await PageObjects.home.clickOnLogo();
+    it('Enterprise search overview page meets a11y requirements ', async () => {
+      await home.clickGoHome();
+      await testSubjects.click('homSolutionPanel homSolutionPanel_enterpriseSearch');
       await a11y.testAppSnapshot();
     });
 
-    it('click on Add logs panel to open all log examples page meets a11y requirements ', async () => {
-      await PageObjects.home.clickOnAddData();
+    it('Observability overview page meets a11y requirements ', async () => {
+      await home.clickGoHome();
+      await testSubjects.click('homSolutionPanel homSolutionPanel_observability');
       await a11y.testAppSnapshot();
     });
 
-    it('click on ActiveMQ logs panel to open tutorial meets a11y requirements', async () => {
-      await PageObjects.home.clickOnLogsTutorial();
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on cloud tutorial meets a11y requirements', async () => {
-      await PageObjects.home.clickOnCloudTutorial();
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on side nav to see all the side nav menu', async () => {
-      await PageObjects.home.clickOnLogo();
-      await PageObjects.home.clickOnToggleNavButton();
-      await a11y.testAppSnapshot();
-    });
-
-    it('Dock the side nav', async () => {
-      await PageObjects.home.dockTheSideNav();
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on collapse on observability in side nav to test a11y of collapse button', async () => {
-      await PageObjects.home.collapseObservabibilitySideNav();
-      await a11y.testAppSnapshot();
-    });
-
-    // TODO https://github.com/elastic/kibana/issues/77828
-    it.skip('undock the side nav', async () => {
-      await PageObjects.home.dockTheSideNav();
+    it('Security overview page meets a11y requirements ', async () => {
+      await home.clickGoHome();
+      await testSubjects.click('homSolutionPanel homSolutionPanel_securitySolution');
       await a11y.testAppSnapshot();
     });
 
     it('passes with searchbox open', async () => {
-      await PageObjects.common.navigateToApp('home');
-      await testSubjects.click('header-search');
+      await testSubjects.click('nav-search-popover');
       await a11y.testAppSnapshot();
     });
   });

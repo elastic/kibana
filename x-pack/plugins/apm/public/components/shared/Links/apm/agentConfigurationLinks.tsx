@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IBasePath } from 'kibana/public';
 import { AgentConfigurationIntake } from '../../../../../common/agent_configuration/configuration_types';
-import { getAPMHref } from './APMLink';
+import { getLegacyApmHref } from './APMLink';
 
 export function editAgentConfigurationHref(
   configService: AgentConfigurationIntake['service'],
   search: string,
   basePath: IBasePath
 ) {
-  return getAPMHref({
+  return getLegacyApmHref({
     basePath,
     path: '/settings/agent-configuration/edit',
     search,
@@ -23,16 +24,5 @@ export function editAgentConfigurationHref(
       name: configService.name,
       environment: configService.environment,
     },
-  });
-}
-
-export function createAgentConfigurationHref(
-  search: string,
-  basePath: IBasePath
-) {
-  return getAPMHref({
-    basePath,
-    path: '/settings/agent-configuration/create',
-    search,
   });
 }

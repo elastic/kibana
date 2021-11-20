@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SpecDefinitionsService } from '../../../services';
@@ -179,6 +179,29 @@ const dropProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/enrich-processor.html
+const enrichProcessorDefinition = {
+  enrich: {
+    __template: {
+      policy_name: '',
+      field: '',
+      target_field: '',
+    },
+    policy_name: '',
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    override: {
+      __one_of: [true, false],
+    },
+    max_matches: 1,
+    shape_relation: 'INTERSECTS',
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/fail-processor.html
 const failProcessorDefinition = {
   fail: {
@@ -279,13 +302,26 @@ const inferenceProcessorDefinition = {
   inference: {
     __template: {
       model_id: '',
-      field_map: {},
       inference_config: {},
+      field_mappings: {},
     },
-    model_id: '',
-    field_map: {},
-    inference_config: {},
     target_field: '',
+    model_id: '',
+    field_mappings: {
+      __template: {},
+    },
+    inference_config: {
+      regression: {
+        __template: {},
+        results_field: '',
+      },
+      classification: {
+        __template: {},
+        results_field: '',
+        num_top_classes: 2,
+        top_classes_results_field: '',
+      },
+    },
     ...commonPipelineParams,
   },
 };
@@ -530,6 +566,7 @@ const processorDefinition = {
     dissectProcessorDefinition,
     dotExpanderProcessorDefinition,
     dropProcessorDefinition,
+    enrichProcessorDefinition,
     failProcessorDefinition,
     foreachProcessorDefinition,
     geoipProcessorDefinition,

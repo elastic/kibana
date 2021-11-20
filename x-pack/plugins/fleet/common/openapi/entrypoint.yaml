@@ -1,15 +1,51 @@
 openapi: 3.0.0
+tags: []
 info:
-  title: Ingest Manager
+  title: Fleet
+  description: OpenAPI schema for Fleet API endpoints
   version: '0.2'
   contact:
-    name: Ingest Team
+    name: Fleet Team
   license:
-    name: Elastic
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: 'http://localhost:5601/api/fleet'
     description: local
 paths:
+  # plugin-wide endpoint(s)
+  /setup:
+    $ref: paths/setup.yaml
+  /settings:
+    $ref: paths/settings.yaml
+  # EPM / integrations endpoints
+  /epm/categories:
+    $ref: paths/epm@categories.yaml
+  /epm/packages:
+    $ref: paths/epm@packages.yaml
+  '/epm/packages/{pkgkey}':
+    $ref: 'paths/epm@packages@{pkgkey}.yaml'
+  # Agent-related endpoints
+  /agents/setup:
+    $ref: paths/agents@setup.yaml
+  /agent-status:
+    $ref: paths/agent_status.yaml
+  /agents:
+    $ref: paths/agents.yaml
+  /agents/bulk_upgrade:
+    $ref: paths/agents@bulk_upgrade.yaml
+  '/agents/{agentId}':
+    $ref: 'paths/agents@{agent_id}.yaml'
+  '/agents/{agentId}/reassign':
+    $ref: 'paths/agents@{agent_id}@reassign.yaml'
+  '/agents/{agentId}/unenroll':
+    $ref: 'paths/agents@{agent_id}@unenroll.yaml'
+  '/agents/{agentId}/upgrade':
+    $ref: 'paths/agents@{agent_id}@upgrade.yaml'
+  '/agents/bulk_reassign':
+    $ref: 'paths/agents@bulk_reassign.yaml'
+  '/agents/bulk_unenroll':
+    $ref: 'paths/agents@bulk_unenroll.yaml'
   /agent_policies:
     $ref: paths/agent_policies.yaml
   '/agent_policies/{agentPolicyId}':
@@ -18,57 +54,37 @@ paths:
     $ref: 'paths/agent_policies@{agent_policy_id}@copy.yaml'
   /agent_policies/delete:
     $ref: paths/agent_policies@delete.yaml
-  /agent-status:
-    $ref: paths/agent_status.yaml
-  /agents:
-    $ref: paths/agents.yaml
-  '/agents/{agentId}/acks':
-    $ref: 'paths/agents@{agent_id}@acks.yaml'
-  '/agents/{agentId}/checkin':
-    $ref: 'paths/agents@{agent_id}@checkin.yaml'
-  '/agents/{agentId}/events':
-    $ref: 'paths/agents@{agent_id}@events.yaml'
-  '/agents/{agentId}/unenroll':
-    $ref: 'paths/agents@{agent_id}@unenroll.yaml'
-  '/agents/{agentId}/upgrade':
-    $ref: 'paths/agents@{agent_id}@upgrade.yaml'
-  /agents/bulk_upgrade:
-    $ref: paths/agents@bulk_upgrade.yaml
-  /agents/enroll:
-    $ref: paths/agents@enroll.yaml
-  /agents/setup:
-    $ref: paths/agents@setup.yaml
   /enrollment-api-keys:
     $ref: paths/enrollment_api_keys.yaml
   '/enrollment-api-keys/{keyId}':
     $ref: 'paths/enrollment_api_keys@{key_id}.yaml'
-  /epm/categories:
-    $ref: paths/epm@categories.yaml
-  /epm/packages:
-    $ref: paths/epm@packages.yaml
-  '/epm/packages/{pkgkey}':
-    $ref: 'paths/epm@packages@{pkgkey}.yaml'
-  '/agents/{agentId}':
-    $ref: 'paths/agents@{agent_id}.yaml'
-  '/install/{osType}':
-    $ref: 'paths/install@{os_type}.yaml'
   /package_policies:
     $ref: paths/package_policies.yaml
+  /package_policies/delete:
+    $ref: paths/package_policies@delete.yaml
+  /package_policies/upgrade:
+    $ref: paths/package_policies@upgrade.yaml
+  /package_policies/upgrade/dryrun:
+    $ref: paths/package_policies@upgrade_dryrun.yaml
   '/package_policies/{packagePolicyId}':
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
-  /setup:
-    $ref: paths/setup.yaml
+  /outputs:
+    $ref: paths/outputs.yaml
+  /outputs/{outputId}:
+    $ref: paths/outputs@{output_id}.yaml
+  '/epm/packages/{pkgName}/stats':
+    $ref: 'paths/epm@packages@{pkg_name}@stats.yaml'
 components:
   securitySchemes:
     basicAuth:
       type: http
       scheme: basic
-    Enrollment API Key:
+    Enrollment_API_Key:
       name: Authorization
       type: apiKey
       in: header
       description: 'e.g. Authorization: ApiKey base64EnrollmentApiKey'
-    Access API Key:
+    Access_API_Key:
       name: Authorization
       type: apiKey
       in: header

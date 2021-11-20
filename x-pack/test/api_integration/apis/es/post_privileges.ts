@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -30,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      expect(response.body).to.eql({
+      expect(response).to.eql({
         foo: {
           all: { created: true },
           read: { created: true },
@@ -60,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      expect(updateResponse.body).to.eql({
+      expect(updateResponse).to.eql({
         foo: {
           other: { created: true },
           read: { created: false },
@@ -68,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const retrievedPrivilege = await es.security.getPrivileges({ application });
-      expect(retrievedPrivilege.body).to.eql({
+      expect(retrievedPrivilege).to.eql({
         foo: {
           // "all" is maintained even though the subsequent update did not specify this privilege
           all: {

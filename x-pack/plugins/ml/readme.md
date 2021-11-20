@@ -139,18 +139,18 @@ and Kibana instance that the tests will be run against.
          node scripts/functional_tests_server --config test/accessibility/config.ts
          node scripts/functional_test_runner.js --config test/accessibility/config.ts --grep=ml
 
-    ML accessibility tests are located in `x-pack/test/accessibility/app`.
+    ML accessibility tests are located in `x-pack/test/accessibility/apps`.
 
 ## Shared functions
 
 You can find the ML shared functions in the following files in GitHub:
 
 ```
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/public/shared.ts
+https://github.com/elastic/kibana/blob/main/x-pack/plugins/ml/public/shared.ts
 ```
 
 ```
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/server/shared.ts
+https://github.com/elastic/kibana/blob/main/x-pack/plugins/ml/server/shared.ts
 ```
 
 These functions are shared from the root of the ML plugin, you can import them with an import statement. For example:

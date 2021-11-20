@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SpacesPluginSetup } from '../../../spaces/server';
-import { AuditServiceSetup } from '../audit';
-import { AuthorizationServiceSetup } from '../authorization';
-import { LegacySpacesAuditLogger } from './legacy_audit_logger';
+import { SavedObjectsClient } from '../../../../../src/core/server';
+import type { SpacesPluginSetup } from '../../../spaces/server';
+import type { AuditServiceSetup } from '../audit';
+import type { AuthorizationServiceSetup } from '../authorization';
 import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 interface Deps {
@@ -29,8 +30,6 @@ export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
     return savedObjectsStart.createScopedRepository(request, ['space']);
   });
 
-  const spacesAuditLogger = new LegacySpacesAuditLogger(audit.getLogger());
-
   spacesClient.registerClientWrapper(
     (request, baseClient) =>
       new SecureSpacesClientWrapper(
@@ -38,7 +37,7 @@ export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
         request,
         authz,
         audit.asScoped(request),
-        spacesAuditLogger
+        SavedObjectsClient.errors
       )
   );
 };

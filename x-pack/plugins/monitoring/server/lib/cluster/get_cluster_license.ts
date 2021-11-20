@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-ignore
@@ -19,8 +20,8 @@ export function getClusterLicense(req: LegacyRequest, esIndexPattern: string, cl
   const params = {
     index: esIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: 'hits.hits._source.license',
+    ignore_unavailable: true,
+    filter_path: ['hits.hits._source.license'],
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({

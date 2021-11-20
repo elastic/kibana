@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,21 +19,22 @@ import {
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import * as i18n from './translations';
-import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { SeverityOptionItem } from '../step_about_rule/data';
-import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
-import {
-  IFieldType,
-  IIndexPattern,
-} from '../../../../../../../../src/plugins/data/common/index_patterns';
-import { FieldComponent } from '../../../../common/components/autocomplete/field';
-import { AutocompleteFieldMatchComponent } from '../../../../common/components/autocomplete/field_value_match';
 import {
   Severity,
   SeverityMapping,
   SeverityMappingItem,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  FieldComponent,
+  AutocompleteFieldMatchComponent,
+} from '@kbn/securitysolution-autocomplete';
+
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import * as i18n from './translations';
+import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { SeverityOptionItem } from '../step_about_rule/data';
+import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const NestedContent = styled.div`
   margin-left: 24px;
@@ -54,7 +56,7 @@ interface SeverityFieldProps {
   dataTestSubj: string;
   field: FieldHook<AboutStepSeverity>;
   idAria: string;
-  indices: IIndexPattern;
+  indices: DataViewBase;
   isDisabled: boolean;
   options: SeverityOptionItem[];
 }
@@ -67,6 +69,7 @@ export const SeverityField = ({
   isDisabled,
   options,
 }: SeverityFieldProps) => {
+  const { services } = useKibana();
   const { value, isMappingChecked, mapping } = field.value;
   const { setValue } = field;
 
@@ -82,7 +85,7 @@ export const SeverityField = ({
   );
 
   const handleFieldChange = useCallback(
-    (index: number, severity: Severity, [newField]: IFieldType[]): void => {
+    (index: number, severity: Severity, [newField]: DataViewFieldBase[]): void => {
       const newMappingItems: SeverityMapping = [
         {
           ...mapping[index],
@@ -253,6 +256,7 @@ export const SeverityField = ({
 
                       <EuiFlexItemComboBoxColumn>
                         <AutocompleteFieldMatchComponent
+                          autocompleteService={services.data.autocomplete}
                           placeholder={''}
                           selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
                           selectedValue={severityMappingItem.value}
@@ -291,8 +295,8 @@ export const SeverityField = ({
 };
 
 /**
- * Looks for field metadata (IFieldType) in existing index pattern.
- * If specified field doesn't exist, returns a stub IFieldType created based on the mapping --
+ * Looks for field metadata (DataViewFieldBase) in existing index pattern.
+ * If specified field doesn't exist, returns a stub DataViewFieldBase created based on the mapping --
  * because the field might not have been indexed yet, but we still need to display the mapping.
  *
  * @param mapping Mapping of a specified field name + value to a certain severity value.
@@ -300,8 +304,8 @@ export const SeverityField = ({
  */
 const getFieldTypeByMapping = (
   mapping: SeverityMappingItem,
-  pattern: IIndexPattern
-): IFieldType => {
+  pattern: DataViewBase
+): DataViewFieldBase => {
   const { field } = mapping;
   const [knownFieldType] = pattern.fields.filter(({ name }) => field === name);
   return knownFieldType ?? { name: field, type: 'string' };

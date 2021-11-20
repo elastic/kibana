@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import d3 from 'd3';
 import { getTimezoneOffsetInMs } from './get_timezone_offset_in_ms';
+import { IUiSettingsClient } from '../../../../../../../../src/core/public';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 
 interface Params {
   domain: [number, number];
@@ -29,3 +33,15 @@ export const getDomainTZ = (min: number, max: number): [number, number] => {
   );
   return [xMinZone, xMaxZone];
 };
+
+export function getTimeZone(uiSettings?: IUiSettingsClient) {
+  const kibanaTimeZone = uiSettings?.get<'Browser' | string>(
+    UI_SETTINGS.DATEFORMAT_TZ
+  );
+
+  if (!kibanaTimeZone || kibanaTimeZone === 'Browser') {
+    return 'local';
+  }
+
+  return kibanaTimeZone;
+}

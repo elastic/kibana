@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -23,14 +25,13 @@ export function useProcessListRowChart(command: string) {
       fold(throwErrors(createPlainError), identity)
     );
   };
-  const { hostTerm, timefield, indexPattern, to } = useProcessListContext();
+  const { hostTerm, indexPattern, to } = useProcessListContext();
 
   const { error, loading, response, makeRequest } = useHTTPRequest<ProcessListAPIChartResponse>(
     '/api/metrics/process_list/chart',
     'POST',
     JSON.stringify({
       hostTerm,
-      timefield,
       indexPattern,
       to,
       command,

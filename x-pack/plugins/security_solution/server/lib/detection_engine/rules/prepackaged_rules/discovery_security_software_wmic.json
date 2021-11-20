@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Security Software Discovery using WMIC",
   "query": "process where event.type in (\"start\", \"process_started\") and\n   (process.name:\"wmic.exe\" or process.pe.original_file_name:\"wmic.exe\") and\n    process.args:\"/namespace:\\\\\\\\root\\\\SecurityCenter2\" and process.args:\"Get\"\n",
   "risk_score": 47,
@@ -34,11 +35,19 @@
         {
           "id": "T1518",
           "name": "Software Discovery",
-          "reference": "https://attack.mitre.org/techniques/T1518/"
+          "reference": "https://attack.mitre.org/techniques/T1518/",
+          "subtechnique": [
+            {
+              "id": "T1518.001",
+              "name": "Security Software Discovery",
+              "reference": "https://attack.mitre.org/techniques/T1518/001/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 4
 }

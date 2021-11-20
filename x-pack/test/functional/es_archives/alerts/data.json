@@ -43,6 +43,147 @@
 {
   "type": "doc",
   "value": {
+    "id": "alert:99f3e6d7-b7bb-477d-ac28-92ee22726969",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [{
+          "actionRef": "action_0",
+          "actionTypeId": ".servicenow",
+          "group": "threshold met",
+          "params": {
+            "subAction": "pushToService",
+            "subActionParams": {
+                "severity":"2",
+                "impact":"2",
+                "urgency":"2",
+                "savedObjectId":"{{alertId}}",
+                "title":"SN short desc",
+                "description":"SN desc",
+                "comment":"sn comment"
+            }
+          }
+        },
+          {
+            "actionRef": "action_1",
+            "actionTypeId": ".jira",
+            "group": "threshold met",
+            "params": {
+              "subAction": "pushToService",
+              "subActionParams": {
+                "title":"Jira summary",
+                "issueType":"10001",
+                "comments":[
+                  {
+                    "commentId":"1",
+                    "comment":"jira comment"
+                  }
+                ],
+                "description":"Jira description",
+                "savedObjectId":"{{alertId}}",
+                "priority":"Highest",
+                "parent":"CASES-78",
+                "labels":[
+                  "test"
+                ]
+              }
+            }
+          },
+          {
+            "actionRef": "action_2",
+            "actionTypeId": ".resilient",
+            "group": "threshold met",
+            "params": {
+              "subAction": "pushToService",
+              "subActionParams": {
+                "savedObjectId":"{{alertId}}",
+                "incidentTypes":[
+                  "17",
+                  "21"
+                ],
+                "severityCode":"5",
+                "title":"IBM name",
+                "description":"IBM description",
+                "comments":[
+                  {
+                    "commentId":"alert-comment",
+                    "comment":"IBM comment"
+                  }
+                ]
+              }
+            }
+          }],
+        "alertTypeId": "test.noop",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-22T15:16:07.451Z",
+        "createdBy": null,
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "rbg",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.11.0"
+      },
+      "references": [{
+        "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+        "name": "action_0",
+        "type": "action"
+      },
+        {
+          "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+          "name": "action_1",
+          "type": "action"
+        },
+        {
+          "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+          "name": "action_2",
+          "type": "action"
+        }],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:66a8ab7a-35cf-445e-ade3-215a029c6969",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId": ".servicenow",
+        "config": {
+          "apiUrl": "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/servicenow"
+        },
+        "name": "A servicenow action",
+        "secrets": "kvjaTWYKGmCqptyv4giaN+nQGgsZrKXmlULcbAP8KK3JmR8Ei9ADqh5mB+uVC+x+Q7/vTQ5SKZCj3dHv3pmNzZ5WGyZYQFBaaa63Mkp3kIcnpE1OdSAv+3Z/Y+XihHAM19zUm3JRpojnIpYegoS5/vMx1sOzcf/+miYUuZw2lgo0lNE="
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-09-22T15:16:06.924Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "alert:74f3e6d7-b7bb-477d-ac28-fdf248d5f2a4",
     "index": ".kibana_1",
     "source": {
@@ -189,6 +330,165 @@
       ],
       "type": "alert",
       "updated_at": "2020-09-22T15:16:08.456Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:38482620-ef1b-11eb-ad71-7de7959be71c",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test upgrade of exceptionsList",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+          "ruleId" : "4ec223b9-77fa-4895-8539-6b3e586a2858",
+          "exceptionsList" : [
+            {
+              "id" : "endpoint_list",
+              "list_id" : "endpoint_list",
+              "namespace_type" : "agnostic",
+              "type" : "endpoint"
+            },
+            {
+              "list_id" : "cd152d0d-3590-4a45-a478-eed04da7936b",
+              "namespace_type" : "single",
+              "id" : "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
+              "type" : "detection"
+            }
+          ]
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:9c003b00-00ee-11ec-b067-2524946ba327",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [{
+          "actionRef": "action_0",
+          "actionTypeId": "test.noop",
+          "group": "default",
+          "params": {
+          }
+        },
+          {
+            "actionRef": "action_1",
+            "actionTypeId": ".slack",
+            "group": "default",
+            "params": {
+              "message": "something happened!"
+            }
+          }],
+        "alertTypeId": "test.noop",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-22T15:16:07.451Z",
+        "createdBy": null,
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "test migration of preconfigured connector",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.15.0"
+      },
+      "references": [
+        {
+          "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+          "name": "action_0",
+          "type": "action"
+        },
+        {
+          "id": "my-slack1",
+          "name": "action_1",
+          "type": "action"
+        }
+      ],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:d7a8c6a1-9394-48df-a634-d5457c35d747",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test upgrade of ruleAlertId",
+        "alertTypeId" : "siem.notifications",
+        "consumer" : "alertsFixture",
+        "params" : {
+          "ruleAlertId" : "1a4ed6ae-3c89-44b2-999d-db554144504c"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
     }
   }
 }

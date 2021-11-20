@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -31,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GET saved_objects/initialize', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
 
       await ml.api.createAnomalyDetectionJobES(
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobId)
@@ -67,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should not initialize jobs if all jobs have spaces assigned', async () => {
       const body = await runRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
 
-      expect(body).to.eql({ jobs: [], success: true });
+      expect(body).to.eql({ datafeeds: [], jobs: [], success: true });
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', ['*']);
       await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', ['*']);
     });

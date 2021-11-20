@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -18,11 +19,14 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/setup/collection/es_and_kibana_mb', {
-          from: 'Apr 9, 2019 @ 00:00:00.741',
-          to: 'Apr 9, 2019 @ 23:59:59.741',
-          useSuperUser: true,
-        });
+        await setup(
+          'x-pack/test/functional/es_archives/monitoring/setup/collection/es_and_kibana',
+          {
+            from: 'Apr 9, 2019 @ 00:00:00.741',
+            to: 'Apr 9, 2019 @ 23:59:59.741',
+            useSuperUser: true,
+          }
+        );
       });
 
       after(async () => {

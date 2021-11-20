@@ -1,24 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './spaces_menu.scss';
+
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldSearch,
-  EuiText,
   EuiLoadingContent,
+  EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { Component, ReactElement } from 'react';
-import { Capabilities, ApplicationStart } from 'src/core/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
-import { addSpaceIdToPath, SPACE_SEARCH_COUNT_THRESHOLD, ENTER_SPACE_PATH } from '../../../common';
+import type { ReactElement } from 'react';
+import React, { Component, lazy, Suspense } from 'react';
+
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import type { ApplicationStart, Capabilities } from 'src/core/public';
+
+import type { Space } from '../../../common';
+import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';
-import { SpaceAvatar } from '../../space_avatar';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   id: string;
@@ -121,14 +133,12 @@ class SpacesMenuUI extends Component<Props, State> {
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
         {
-          // @ts-ignore
           <EuiFieldSearch
             placeholder={intl.formatMessage({
               id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
               defaultMessage: 'Find a space',
             })}
             incremental={true}
-            // FIXME needs updated typedef
             onSearch={this.onSearch}
             onKeyDown={this.onSearchKeyDown}
             onFocus={this.onSearchFocus}
@@ -147,7 +157,7 @@ class SpacesMenuUI extends Component<Props, State> {
 
     const keyCode = e.keyCode;
     if (focusableKeyCodes.includes(keyCode)) {
-      // Allows the spaces list panel to recieve focus. This enables keyboard and screen reader navigation
+      // Allows the spaces list panel to receive focus. This enables keyboard and screen reader navigation
       this.setState({
         allowSpacesListFocus: true,
       });
@@ -180,7 +190,11 @@ class SpacesMenuUI extends Component<Props, State> {
   };
 
   private renderSpaceMenuItem = (space: Space): JSX.Element => {
-    const icon = <SpaceAvatar space={space} size={'s'} />;
+    const icon = (
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LazySpaceAvatar space={space} size={'s'} />
+      </Suspense>
+    );
     return (
       <EuiContextMenuItem
         key={space.id}
@@ -190,7 +204,7 @@ class SpacesMenuUI extends Component<Props, State> {
         toolTipTitle={space.description && space.name}
         toolTipContent={space.description}
       >
-        {space.name}
+        <EuiText className="spcMenu__item">{space.name}</EuiText>
       </EuiContextMenuItem>
     );
   };

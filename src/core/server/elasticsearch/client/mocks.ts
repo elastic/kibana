@@ -1,36 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Client, ApiResponse } from '@elastic/elasticsearch';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { PublicKeys } from '@kbn/utility-types';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
 
-const createInternalClientMock = (
-  res?: MockedTransportRequestPromise<unknown>
-): DeeplyMockedKeys<Client> => {
-  // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
-  const client = new Client({
-    node: 'http://localhost',
-  }) as any;
+const omittedProps = [
+  'diagnostic',
+  'name',
+  'connectionPool',
+  'transport',
+  'serializer',
+  'helpers',
+] as Array<PublicKeys<KibanaClient>>;
 
-  const omittedProps = [
-    '_events',
-    '_eventsCount',
-    '_maxListeners',
-    'constructor',
-    'name',
-    'serializer',
-    'connectionPool',
-    'transport',
-    'helpers',
-  ];
+// the product header expected in every response from es
+const PRODUCT_RESPONSE_HEADER = 'x-elastic-product';
+
+// use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
+const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');
+const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<KibanaClient> => {
+  // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
+  const client = new UnmockedClient({
+    node: 'http://127.0.0.1',
+  });
 
   const getAllPropertyDescriptors = (obj: Record<string, any>) => {
     const descriptors = Object.entries(Object.getOwnPropertyDescriptors(obj));
@@ -73,22 +74,22 @@ const createInternalClientMock = (
   };
 
   // `on`, `off`, and `once` are properties without a setter.
-  // We can't `client.on = jest.fn()` because the following error will be thrown:
+  // We can't `client.diagnostic.on = jest.fn()` because the following error will be thrown:
   // TypeError: Cannot set property on of #<Client> which has only a getter
-  mockGetter(client, 'on');
-  mockGetter(client, 'off');
-  mockGetter(client, 'once');
+  mockGetter(client.diagnostic, 'on');
+  mockGetter(client.diagnostic, 'off');
+  mockGetter(client.diagnostic, 'once');
   client.transport = {
     request: jest.fn(),
   };
 
-  return client as DeeplyMockedKeys<Client>;
+  return client as DeeplyMockedKeys<KibanaClient>;
 };
 
 export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 
-const createClientMock = (res?: MockedTransportRequestPromise<unknown>): ElasticsearchClientMock =>
-  (createInternalClientMock(res) as unknown) as ElasticsearchClientMock;
+const createClientMock = (res?: Promise<unknown>): ElasticsearchClientMock =>
+  createInternalClientMock(res) as unknown as ElasticsearchClientMock;
 
 export interface ScopedClusterClientMock {
   asInternalUser: ElasticsearchClientMock;
@@ -135,32 +136,27 @@ const createCustomClusterClientMock = () => {
   return mock;
 };
 
-export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
-  abort: jest.MockedFunction<() => undefined>;
-};
-
 const createSuccessTransportRequestPromise = <T>(
   body: T,
-  { statusCode = 200 }: { statusCode?: number } = {}
-): MockedTransportRequestPromise<ApiResponse<T>> => {
-  const response = createApiResponse({ body, statusCode });
-  const promise = Promise.resolve(response);
-  (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();
+  { statusCode = 200 }: { statusCode?: number } = {},
+  headers: Record<string, string | string[]> = { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' }
+): Promise<TransportResult<T>> => {
+  const response = createApiResponse({ body, statusCode, headers });
 
-  return promise as MockedTransportRequestPromise<ApiResponse<T>>;
+  return Promise.resolve(response) as Promise<TransportResult<T>>;
 };
 
-const createErrorTransportRequestPromise = (err: any): MockedTransportRequestPromise<never> => {
-  const promise = Promise.reject(err);
-  (promise as MockedTransportRequestPromise<never>).abort = jest.fn();
-  return promise as MockedTransportRequestPromise<never>;
+const createErrorTransportRequestPromise = (err: any): Promise<TransportResult<never>> => {
+  return Promise.reject(err);
 };
 
-function createApiResponse(opts: Partial<ApiResponse> = {}): ApiResponse {
+function createApiResponse<TResponse = Record<string, any>>(
+  opts: Partial<TransportResult<TResponse>> = {}
+): TransportResult<TResponse> {
   return {
-    body: {},
+    body: {} as any,
     statusCode: 200,
-    headers: {},
+    headers: { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' },
     warnings: [],
     meta: {} as any,
     ...opts,

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
 
-export const CA_CERT_PATH = resolve(__dirname, '../certs/ca.crt');
+export const CA_CERT_PATH = process.env.TEST_CA_CERT_PATH || resolve(__dirname, '../certs/ca.crt');
 export const ES_KEY_PATH = resolve(__dirname, '../certs/elasticsearch.key');
 export const ES_CERT_PATH = resolve(__dirname, '../certs/elasticsearch.crt');
 export const ES_P12_PATH = resolve(__dirname, '../certs/elasticsearch.p12');

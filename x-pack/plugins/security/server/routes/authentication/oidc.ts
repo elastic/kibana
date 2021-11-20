@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, KibanaResponseFactory } from '../../../../../../src/core/server';
-import { OIDCLogin } from '../../authentication';
-import { createLicensedRouteHandler } from '../licensed_route_handler';
+import type { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+
+import type { RouteDefinitionParams } from '../';
+import { OIDCAuthenticationProvider, OIDCLogin } from '../../authentication';
+import type { ProviderLoginAttempt } from '../../authentication/providers/oidc';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import {
-  OIDCAuthenticationProvider,
-  ProviderLoginAttempt,
-} from '../../authentication/providers/oidc';
-import { RouteDefinitionParams } from '..';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 /**
  * Defines routes required for SAML authentication.
@@ -106,7 +106,7 @@ export function defineOIDCRoutes({
             { unknowns: 'allow' }
           ),
         },
-        options: { authRequired: false },
+        options: { authRequired: false, tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW] },
       },
       createLicensedRouteHandler(async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -183,7 +183,11 @@ export function defineOIDCRoutes({
             { unknowns: 'allow' }
           ),
         },
-        options: { authRequired: false, xsrfRequired: false },
+        options: {
+          authRequired: false,
+          xsrfRequired: false,
+          tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+        },
       },
       createLicensedRouteHandler(async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -222,7 +226,10 @@ export function defineOIDCRoutes({
           { unknowns: 'allow' }
         ),
       },
-      options: { authRequired: false },
+      options: {
+        authRequired: false,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       return performOIDCLogin(request, response, {

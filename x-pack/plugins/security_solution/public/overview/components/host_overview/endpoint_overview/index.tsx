@@ -1,41 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexItem, EuiHealth } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
+import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-import { EndpointFields, HostPolicyResponseActionStatus } from '../../../../graphql/types';
-import { DescriptionListStyled } from '../../../../common/components/page';
-
 import * as i18n from './translations';
+import {
+  EndpointFields,
+  HostPolicyResponseActionStatus,
+} from '../../../../../common/search_strategy/security_solution/hosts';
+import { AgentStatus } from '../../../../common/components/endpoint/agent_status';
+import { EndpointHostIsolationStatus } from '../../../../common/components/endpoint/host_isolation';
 
 interface Props {
+  contextID?: string;
   data: EndpointFields | null;
 }
 
-const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
-  <EuiFlexItem key={key}>
-    <DescriptionListStyled data-test-subj="endpoint-overview" listItems={descriptionList} />
-  </EuiFlexItem>
-);
-
-export const EndpointOverview = React.memo<Props>(({ data }) => {
+export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
   const getDefaultRenderer = useCallback(
     (fieldName: string, fieldData: EndpointFields, attrName: string) => (
       <DefaultFieldRenderer
         rowItems={[getOr('', fieldName, fieldData)]}
         attrName={attrName}
-        idPrefix="endpoint-overview"
+        idPrefix={contextID ? `endpoint-overview-${contextID}` : 'endpoint-overview'}
       />
     ),
-    []
+    [contextID]
   );
   const descriptionLists: Readonly<DescriptionList[][]> = useMemo(
     () => [
@@ -75,14 +75,37 @@ export const EndpointOverview = React.memo<Props>(({ data }) => {
               : getEmptyTagValue(),
         },
       ],
-      [], // needs 4 columns for design
+      [
+        {
+          title: i18n.FLEET_AGENT_STATUS,
+          description:
+            data != null && data.elasticAgentStatus ? (
+              <>
+                <AgentStatus hostStatus={data.elasticAgentStatus} />
+                <EndpointHostIsolationStatus
+                  isIsolated={Boolean(data.isolation)}
+                  pendingIsolate={data.pendingActions?.isolate ?? 0}
+                  pendingUnIsolate={data.pendingActions?.unisolate ?? 0}
+                />
+              </>
+            ) : (
+              getEmptyTagValue()
+            ),
+        },
+      ],
     ],
     [data, getDefaultRenderer]
   );
 
   return (
     <>
-      {descriptionLists.map((descriptionList, index) => getDescriptionList(descriptionList, index))}
+      {descriptionLists.map((descriptionList, index) => (
+        <OverviewDescriptionList
+          dataTestSubj="endpoint-overview"
+          descriptionList={descriptionList}
+          key={index}
+        />
+      ))}
     </>
   );
 });

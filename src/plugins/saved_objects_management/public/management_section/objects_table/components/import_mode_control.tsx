@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 
 export interface ImportModeControlProps {
   initialValues: ImportMode;
-  isLegacyFile: boolean;
   updateSelection: (result: ImportMode) => void;
 }
 
@@ -87,11 +86,7 @@ const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
   </EuiFlexGroup>
 );
 
-export const ImportModeControl = ({
-  initialValues,
-  isLegacyFile,
-  updateSelection,
-}: ImportModeControlProps) => {
+export const ImportModeControl = ({ initialValues, updateSelection }: ImportModeControlProps) => {
   const [createNewCopies, setCreateNewCopies] = useState(initialValues.createNewCopies);
   const [overwrite, setOverwrite] = useState(initialValues.overwrite);
 
@@ -103,20 +98,6 @@ export const ImportModeControl = ({
     }
     updateSelection({ createNewCopies, overwrite, ...partial });
   };
-
-  const overwriteRadio = (
-    <EuiRadioGroup
-      options={[overwriteEnabled, overwriteDisabled]}
-      idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
-      onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
-      disabled={createNewCopies && !isLegacyFile}
-      data-test-subj={'savedObjectsManagement-importModeControl-overwriteRadioGroup'}
-    />
-  );
-
-  if (isLegacyFile) {
-    return overwriteRadio;
-  }
 
   return (
     <EuiFormFieldset
@@ -134,7 +115,13 @@ export const ImportModeControl = ({
         checked={!createNewCopies}
         onChange={() => onChange({ createNewCopies: false })}
       >
-        {overwriteRadio}
+        <EuiRadioGroup
+          options={[overwriteEnabled, overwriteDisabled]}
+          idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
+          onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
+          disabled={createNewCopies}
+          data-test-subj={'savedObjectsManagement-importModeControl-overwriteRadioGroup'}
+        />
       </EuiCheckableCard>
 
       <EuiSpacer size="s" />

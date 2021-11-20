@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -66,7 +67,7 @@ expect.extend({
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
-            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1]!)
+            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1])
               ? `Received:     ${this.utils.printReceived(received[received.length - 1])}`
               : ''
           }`
@@ -130,7 +131,7 @@ expect.extend({
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
-            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1]!)
+            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1])
               ? `Received:     ${this.utils.printReceived(received[received.length - 1])}`
               : ''
           }`

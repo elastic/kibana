@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -17,7 +18,7 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { cloneActionNameText, CloneActionName } from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;
-export const useCloneAction = (forceDisable: boolean) => {
+export const useCloneAction = (forceDisable: boolean, transformNodes: number) => {
   const history = useHistory();
   const appDeps = useAppDependencies();
   const savedObjectsClient = appDeps.savedObjects.client;
@@ -32,17 +33,17 @@ export const useCloneAction = (forceDisable: boolean) => {
     async (item: TransformListRow) => {
       try {
         await loadIndexPatterns(savedObjectsClient, indexPatterns);
-        const indexPatternTitle = Array.isArray(item.config.source.index)
+        const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
+        const indexPatternId = getIndexPatternIdByTitle(dataViewTitle);
 
         if (indexPatternId === undefined) {
           toastNotifications.addDanger(
-            i18n.translate('xpack.transform.clone.noIndexPatternErrorPromptText', {
+            i18n.translate('xpack.transform.clone.noDataViewErrorPromptText', {
               defaultMessage:
-                'Unable to clone the transform . No index pattern exists for {indexPattern}.',
-              values: { indexPattern: indexPatternTitle },
+                'Unable to clone the transform {transformId}. No data view exists for {dataViewTitle}.',
+              values: { dataViewTitle, transformId: item.id },
             })
           );
         } else {
@@ -51,11 +52,11 @@ export const useCloneAction = (forceDisable: boolean) => {
           );
         }
       } catch (e) {
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.clone.errorPromptText', {
-            defaultMessage: 'An error occurred checking if source index pattern exists',
-          })
-        );
+        toastNotifications.addError(e, {
+          title: i18n.translate('xpack.transform.clone.errorPromptText', {
+            defaultMessage: 'An error occurred checking if source data view exists',
+          }),
+        });
       }
     },
     [
@@ -71,14 +72,14 @@ export const useCloneAction = (forceDisable: boolean) => {
   const action: TransformListAction = useMemo(
     () => ({
       name: (item: TransformListRow) => <CloneActionName disabled={!canCreateTransform} />,
-      enabled: () => canCreateTransform && !forceDisable,
+      enabled: () => canCreateTransform && !forceDisable && transformNodes > 0,
       description: cloneActionNameText,
       icon: 'copy',
       type: 'icon',
       onClick: clickHandler,
       'data-test-subj': 'transformActionClone',
     }),
-    [canCreateTransform, forceDisable, clickHandler]
+    [canCreateTransform, forceDisable, clickHandler, transformNodes]
   );
 
   return { action };

@@ -3,7 +3,12 @@
   "version": "kibana",
   "server": true,
   "ui": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
   "configPath": ["xpack", "upgrade_assistant"],
-  "requiredPlugins": ["management", "licensing", "features"],
-  "optionalPlugins": ["cloud", "usageCollection"]
+  "requiredPlugins": ["management", "data", "licensing", "features", "share"],
+  "optionalPlugins": ["usageCollection", "cloud", "security", "infra"],
+  "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils"]
 }

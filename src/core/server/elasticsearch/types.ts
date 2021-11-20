@@ -1,23 +1,55 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
 import { Headers } from '../http/router';
-import { LegacyRequest, KibanaRequest } from '../http';
+import { KibanaRequest } from '../http';
 import { ElasticsearchConfig } from './elasticsearch_config';
-import {
-  LegacyElasticsearchClientConfig,
-  ILegacyClusterClient,
-  ILegacyCustomClusterClient,
-} from './legacy';
 import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus } from '../status';
+
+/**
+ * @public
+ */
+export interface ElasticsearchServicePreboot {
+  /**
+   * A limited set of Elasticsearch configuration entries.
+   *
+   * @example
+   * ```js
+   * const { hosts, credentialsSpecified } = core.elasticsearch.config;
+   * ```
+   */
+  readonly config: Readonly<ElasticsearchConfigPreboot>;
+
+  /**
+   * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
+   *
+   * @param type Unique identifier of the client
+   * @param clientConfig A config consists of Elasticsearch JS client options and
+   * valid sub-set of Elasticsearch service config.
+   * We fill all the missing properties in the `clientConfig` using the default
+   * Elasticsearch config so that we don't depend on default values set and
+   * controlled by underlying Elasticsearch JS client.
+   * We don't run validation against the passed config and expect it to be valid.
+   *
+   * @example
+   * ```js
+   * const client = elasticsearch.createClient('my-app-name', config);
+   * const data = await client.asInternalUser.search();
+   * ```
+   */
+  readonly createClient: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ICustomClusterClient;
+}
 
 /**
  * @public
@@ -34,46 +66,11 @@ export interface ElasticsearchServiceSetup {
      * @deprecated this will be removed in a later version.
      */
     readonly config$: Observable<ElasticsearchConfig>;
-    /**
-     * @deprecated
-     * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.createClient} instead.
-     *
-     * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
-     *
-     * @param type Unique identifier of the client
-     * @param clientConfig A config consists of Elasticsearch JS client options and
-     * valid sub-set of Elasticsearch service config.
-     * We fill all the missing properties in the `clientConfig` using the default
-     * Elasticsearch config so that we don't depend on default values set and
-     * controlled by underlying Elasticsearch JS client.
-     * We don't run validation against the passed config and expect it to be valid.
-     *
-     * @example
-     * ```js
-     * const client = elasticsearch.createCluster('my-app-name', config);
-     * const data = await client.callAsInternalUser();
-     * ```
-     */
-    readonly createClient: (
-      type: string,
-      clientConfig?: Partial<LegacyElasticsearchClientConfig>
-    ) => ILegacyCustomClusterClient;
-
-    /**
-     * @deprecated
-     * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.client} instead.
-     *
-     * All Elasticsearch config value changes are processed under the hood.
-     * See {@link ILegacyClusterClient}.
-     *
-     * @example
-     * ```js
-     * const client = core.elasticsearch.legacy.client;
-     * ```
-     */
-    readonly client: ILegacyClusterClient;
   };
 }
+
+/** @internal */
+export type InternalElasticsearchServicePreboot = ElasticsearchServicePreboot;
 
 /** @internal */
 export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceSetup {
@@ -128,37 +125,6 @@ export interface ElasticsearchServiceStart {
      * @deprecated this will be removed in a later version.
      */
     readonly config$: Observable<ElasticsearchConfig>;
-    /**
-     * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
-     *
-     * @param type Unique identifier of the client
-     * @param clientConfig A config consists of Elasticsearch JS client options and
-     * valid sub-set of Elasticsearch service config.
-     * We fill all the missing properties in the `clientConfig` using the default
-     * Elasticsearch config so that we don't depend on default values set and
-     * controlled by underlying Elasticsearch JS client.
-     * We don't run validation against the passed config and expect it to be valid.
-     *
-     * @example
-     * ```js
-     * const client = elasticsearch.legacy.createClient('my-app-name', config);
-     * const data = await client.callAsInternalUser();
-     * ```
-     */
-    readonly createClient: (
-      type: string,
-      clientConfig?: Partial<LegacyElasticsearchClientConfig>
-    ) => ILegacyCustomClusterClient;
-
-    /**
-     * A pre-configured {@link ILegacyClusterClient | legacy Elasticsearch client}.
-     *
-     * @example
-     * ```js
-     * const client = core.elasticsearch.legacy.client;
-     * ```
-     */
-    readonly client: ILegacyClusterClient;
   };
 }
 
@@ -171,6 +137,7 @@ export type InternalElasticsearchServiceStart = ElasticsearchServiceStart;
 export interface ElasticsearchStatusMeta {
   warningNodes: NodesVersionCompatibility['warningNodes'];
   incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+  nodesInfoRequestError?: NodesVersionCompatibility['nodesInfoRequestError'];
 }
 
 /**
@@ -189,4 +156,22 @@ export interface FakeRequest {
  * @public
  * See {@link KibanaRequest}.
  */
-export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
+export type ScopeableRequest = KibanaRequest | FakeRequest;
+
+/**
+ * A limited set of Elasticsearch configuration entries exposed to the `preboot` plugins at `setup`.
+ *
+ * @public
+ */
+export interface ElasticsearchConfigPreboot {
+  /**
+   * Hosts that the client will connect to. If sniffing is enabled, this list will
+   * be used as seeds to discover the rest of your cluster.
+   */
+  readonly hosts: string[];
+
+  /**
+   * Indicates whether Elasticsearch configuration includes credentials (`username`, `password` or `serviceAccountToken`).
+   */
+  readonly credentialsSpecified: boolean;
+}

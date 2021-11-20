@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,6 +13,7 @@ import {
   FormSchema,
   ValidationFunc,
   ERROR_CODE,
+  VALIDATION_TYPES,
 } from '../../../../shared_imports';
 import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { OptionalFieldLabel } from '../optional_field_label';
@@ -37,6 +39,20 @@ export const schema: FormSchema<AboutStepRule> = {
       }
     ),
     labelAppend: OptionalFieldLabel,
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate(
+            'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.authorFieldEmptyError',
+            {
+              defaultMessage: 'An author must not be empty',
+            }
+          )
+        ),
+        type: VALIDATION_TYPES.ARRAY_ITEM,
+        isBlocking: false,
+      },
+    ],
   },
   name: {
     type: FIELD_TYPES.TEXT,
@@ -192,6 +208,23 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  threatIndicatorPath: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
+      {
+        defaultMessage: 'Indicator prefix override',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
+      {
+        defaultMessage:
+          'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   timestampOverride: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(
@@ -225,6 +258,20 @@ export const schema: FormSchema<AboutStepRule> = {
       }
     ),
     labelAppend: OptionalFieldLabel,
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate(
+            'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.tagFieldEmptyError',
+            {
+              defaultMessage: 'A tag must not be empty',
+            }
+          )
+        ),
+        type: VALIDATION_TYPES.ARRAY_ITEM,
+        isBlocking: false,
+      },
+    ],
   },
   note: {
     type: FIELD_TYPES.TEXTAREA,
@@ -243,4 +290,34 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+};
+
+export const threatIndicatorPathRequiredSchemaValue = {
+  type: FIELD_TYPES.TEXT,
+  label: i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
+    {
+      defaultMessage: 'Indicator prefix override',
+    }
+  ),
+  helpText: i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
+    {
+      defaultMessage:
+        'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
+    }
+  ),
+  validations: [
+    {
+      validator: emptyField(
+        i18n.translate(
+          'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.threatIndicatorPathFieldEmptyError',
+          {
+            defaultMessage: 'Indicator prefix override must not be empty',
+          }
+        )
+      ),
+      type: VALIDATION_TYPES.FIELD,
+    },
+  ],
 };

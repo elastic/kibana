@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -10,7 +11,8 @@ import React from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
-import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME, Port } from '../port';
+import { Port } from '../port';
+import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
 import * as i18n from '../../../timelines/components/timeline/body/renderers/translations';
 
 import { GeoFields } from './geo_fields';
@@ -87,54 +89,67 @@ const IpAdressesWithPorts = React.memo<{
   destinationIp?: string[] | null;
   destinationPort?: Array<number | string | null> | null;
   eventId: string;
+  isDraggable?: boolean;
   sourceIp?: string[] | null;
   sourcePort?: Array<number | string | null> | null;
   type: SourceDestinationType;
-}>(({ contextId, destinationIp, destinationPort, eventId, sourceIp, sourcePort, type }) => {
-  const ip = type === 'source' ? sourceIp : destinationIp;
-  const ipFieldName = type === 'source' ? SOURCE_IP_FIELD_NAME : DESTINATION_IP_FIELD_NAME;
-  const port = type === 'source' ? sourcePort : destinationPort;
-  const portFieldName = type === 'source' ? SOURCE_PORT_FIELD_NAME : DESTINATION_PORT_FIELD_NAME;
+}>(
+  ({
+    contextId,
+    destinationIp,
+    destinationPort,
+    eventId,
+    isDraggable,
+    sourceIp,
+    sourcePort,
+    type,
+  }) => {
+    const ip = type === 'source' ? sourceIp : destinationIp;
+    const ipFieldName = type === 'source' ? SOURCE_IP_FIELD_NAME : DESTINATION_IP_FIELD_NAME;
+    const port = type === 'source' ? sourcePort : destinationPort;
+    const portFieldName = type === 'source' ? SOURCE_PORT_FIELD_NAME : DESTINATION_PORT_FIELD_NAME;
 
-  if (ip == null) {
-    return null; // if ip is not populated as an array, ports will be ignored
+    if (ip == null) {
+      return null; // if ip is not populated as an array, ports will be ignored
+    }
+
+    // IMPORTANT: The ip and port arrays are parallel arrays; the port at
+    // index `i` corresponds with the ip address at index `i`. We must
+    // preserve the relationships between the parallel arrays:
+    const ipPortPairs: IpPortPair[] =
+      port != null && ip.length === port.length
+        ? ip.map((address, i) => ({
+            ip: address,
+            port: port[i] != null ? `${port[i]}` : null, // use the corresponding port in the parallel array
+          }))
+        : ip.map((address) => ({
+            ip: address,
+            port: null, // drop the port, because the length of the parallel ip and port arrays is different
+          }));
+
+    return (
+      <EuiFlexGroup gutterSize="none">
+        {uniqWith(deepEqual, ipPortPairs).map(
+          (ipPortPair) =>
+            ipPortPair.ip != null && (
+              <EuiFlexItem grow={false} key={ipPortPair.ip}>
+                <IpWithPort
+                  contextId={contextId}
+                  data-test-subj={`${type}-ip-and-port`}
+                  eventId={eventId}
+                  ip={ipPortPair.ip}
+                  ipFieldName={ipFieldName}
+                  isDraggable={isDraggable}
+                  port={ipPortPair.port}
+                  portFieldName={portFieldName}
+                />
+              </EuiFlexItem>
+            )
+        )}
+      </EuiFlexGroup>
+    );
   }
-
-  // IMPORTANT: The ip and port arrays are parallel arrays; the port at
-  // index `i` corresponds with the ip address at index `i`. We must
-  // preserve the relationships between the parallel arrays:
-  const ipPortPairs: IpPortPair[] =
-    port != null && ip.length === port.length
-      ? ip.map((address, i) => ({
-          ip: address,
-          port: port[i] != null ? `${port[i]}` : null, // use the corresponding port in the parallel array
-        }))
-      : ip.map((address) => ({
-          ip: address,
-          port: null, // drop the port, because the length of the parallel ip and port arrays is different
-        }));
-
-  return (
-    <EuiFlexGroup gutterSize="none">
-      {uniqWith(deepEqual, ipPortPairs).map(
-        (ipPortPair) =>
-          ipPortPair.ip != null && (
-            <EuiFlexItem grow={false} key={ipPortPair.ip}>
-              <IpWithPort
-                contextId={contextId}
-                data-test-subj={`${type}-ip-and-port`}
-                eventId={eventId}
-                ip={ipPortPair.ip}
-                ipFieldName={ipFieldName}
-                port={ipPortPair.port}
-                portFieldName={portFieldName}
-              />
-            </EuiFlexItem>
-          )
-      )}
-    </EuiFlexGroup>
-  );
-});
+);
 
 IpAdressesWithPorts.displayName = 'IpAdressesWithPorts';
 
@@ -158,6 +173,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
     destinationIp,
     destinationPort,
     eventId,
+    isDraggable,
     sourceGeoContinentName,
     sourceGeoCountryName,
     sourceGeoCountryIsoCode,
@@ -188,6 +204,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
                 destinationIp={destinationIp}
                 destinationPort={destinationPort}
                 eventId={eventId}
+                isDraggable={isDraggable}
                 sourceIp={sourceIp}
                 sourcePort={sourcePort}
                 type={type}
@@ -201,6 +218,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
                       data-test-subj="port"
                       eventId={eventId}
                       fieldName={`${type}.port`}
+                      isDraggable={isDraggable}
                       value={port}
                     />
                   </EuiFlexItem>
@@ -217,6 +235,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
               destinationGeoRegionName={destinationGeoRegionName}
               destinationGeoCityName={destinationGeoCityName}
               eventId={eventId}
+              isDraggable={isDraggable}
               sourceGeoContinentName={sourceGeoContinentName}
               sourceGeoCountryName={sourceGeoCountryName}
               sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}

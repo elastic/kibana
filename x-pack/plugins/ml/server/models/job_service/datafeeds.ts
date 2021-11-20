@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { IScopedClusterClient } from 'kibana/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
@@ -21,12 +24,15 @@ export interface MlDatafeedsStatsResponse {
 
 interface Results {
   [id: string]: {
-    started: boolean;
+    started?: estypes.MlStartDatafeedResponse['started'];
+    stopped?: estypes.MlStopDatafeedResponse['stopped'];
     error?: any;
   };
 }
 
-export function datafeedsProvider(mlClient: MlClient) {
+export type DatafeedsService = ReturnType<typeof datafeedsProvider>;
+
+export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
     const jobIds = await getJobIdsByDatafeedId();
     const doStartsCalled = datafeedIds.reduce((acc, cur) => {
@@ -99,8 +105,10 @@ export function datafeedsProvider(mlClient: MlClient) {
   async function startDatafeed(datafeedId: string, start?: number, end?: number) {
     return mlClient.startDatafeed({
       datafeed_id: datafeedId,
-      start: (start as unknown) as string,
-      end: (end as unknown) as string,
+      body: {
+        start: start !== undefined ? String(start) : undefined,
+        end: end !== undefined ? String(end) : undefined,
+      },
     });
   }
 
@@ -109,18 +117,16 @@ export function datafeedsProvider(mlClient: MlClient) {
 
     for (const datafeedId of datafeedIds) {
       try {
-        const { body } = await mlClient.stopDatafeed<{
-          started: boolean;
-        }>({
+        const { body } = await mlClient.stopDatafeed({
           datafeed_id: datafeedId,
         });
-        results[datafeedId] = body;
+        results[datafeedId] = { stopped: body.stopped };
       } catch (error) {
         if (isRequestTimeout(error)) {
           return fillResultsWithTimeouts(results, datafeedId, datafeedIds, DATAFEED_STATE.STOPPED);
         } else {
           results[datafeedId] = {
-            started: false,
+            stopped: false,
             error: error.body,
           };
         }
@@ -160,11 +166,77 @@ export function datafeedsProvider(mlClient: MlClient) {
     }, {} as { [id: string]: string });
   }
 
+  async function getDatafeedByJobId(
+    jobId: string[],
+    excludeGenerated?: boolean
+  ): Promise<Datafeed[] | undefined>;
+
+  async function getDatafeedByJobId(
+    jobId: string,
+    excludeGenerated?: boolean
+  ): Promise<Datafeed | undefined>;
+
+  async function getDatafeedByJobId(
+    jobId: string | string[],
+    excludeGenerated?: boolean
+  ): Promise<Datafeed | Datafeed[] | undefined> {
+    const jobIds = Array.isArray(jobId) ? jobId : [jobId];
+
+    async function findDatafeed() {
+      // if the job was doesn't use the standard datafeedId format
+      // get all the datafeeds and match it with the jobId
+      const {
+        body: { datafeeds },
+      } = await mlClient.getDatafeeds(excludeGenerated ? { exclude_generated: true } : {});
+      if (typeof jobId === 'string') {
+        return datafeeds.find((v) => v.job_id === jobId);
+      }
+
+      if (Array.isArray(jobId)) {
+        return datafeeds.filter((v) => jobIds.includes(v.job_id));
+      }
+    }
+    // if the job was created by the wizard,
+    // then we can assume it uses the standard format of the datafeedId
+    const assumedDefaultDatafeedId = jobIds.map((v) => `datafeed-${v}`).join(',');
+    try {
+      const {
+        body: { datafeeds: datafeedsResults },
+      } = await mlClient.getDatafeeds({
+        datafeed_id: assumedDefaultDatafeedId,
+        ...(excludeGenerated ? { exclude_generated: true } : {}),
+      });
+      if (Array.isArray(datafeedsResults)) {
+        const result = datafeedsResults.filter((d) => jobIds.includes(d.job_id));
+
+        if (typeof jobId === 'string') {
+          if (datafeedsResults.length === 1 && datafeedsResults[0].job_id === jobId) {
+            return datafeedsResults[0];
+          } else {
+            return await findDatafeed();
+          }
+        }
+
+        if (result.length === jobIds.length) {
+          return datafeedsResults;
+        } else {
+          return await findDatafeed();
+        }
+      } else {
+        return await findDatafeed();
+      }
+    } catch (e) {
+      // if assumedDefaultDatafeedId does not exist, ES will throw an error
+      return await findDatafeed();
+    }
+  }
+
   return {
     forceStartDatafeeds,
     stopDatafeeds,
     forceDeleteDatafeed,
     getDatafeedIdsByJobId,
     getJobIdsByDatafeedId,
+    getDatafeedByJobId,
   };
 }

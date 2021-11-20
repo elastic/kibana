@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import fs from 'fs';
@@ -246,6 +246,7 @@ export async function gunzip(source: string, destination: string) {
 
 interface CompressTarOptions {
   createRootDirectory: boolean;
+  rootDirectoryName?: string;
   source: string;
   destination: string;
   archiverOptions?: archiver.TarOptions & archiver.CoreOptions;
@@ -255,11 +256,12 @@ export async function compressTar({
   destination,
   archiverOptions,
   createRootDirectory,
+  rootDirectoryName,
 }: CompressTarOptions) {
   const output = fs.createWriteStream(destination);
   const archive = archiver('tar', archiverOptions);
-  const name = createRootDirectory ? source.split(sep).slice(-1)[0] : false;
-
+  const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];
+  const name = createRootDirectory ? folder : false;
   archive.pipe(output);
 
   let fileCount = 0;
@@ -276,6 +278,7 @@ export async function compressTar({
 
 interface CompressZipOptions {
   createRootDirectory: boolean;
+  rootDirectoryName?: string;
   source: string;
   destination: string;
   archiverOptions?: archiver.ZipOptions & archiver.CoreOptions;
@@ -285,11 +288,12 @@ export async function compressZip({
   destination,
   archiverOptions,
   createRootDirectory,
+  rootDirectoryName,
 }: CompressZipOptions) {
   const output = fs.createWriteStream(destination);
   const archive = archiver('zip', archiverOptions);
-  const name = createRootDirectory ? source.split(sep).slice(-1)[0] : false;
-
+  const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];
+  const name = createRootDirectory ? folder : false;
   archive.pipe(output);
 
   let fileCount = 0;

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { join } from 'path';
@@ -35,7 +35,7 @@ const mockReadFile = ({
   uuid: string;
   error: any;
 }>) => {
-  ((readFile as unknown) as jest.Mock).mockImplementation(() => {
+  (readFile as unknown as jest.Mock).mockImplementation(() => {
     if (error) {
       return Promise.reject(error);
     } else {
@@ -45,7 +45,7 @@ const mockReadFile = ({
 };
 
 const mockWriteFile = (error?: object) => {
-  ((writeFile as unknown) as jest.Mock).mockImplementation(() => {
+  (writeFile as unknown as jest.Mock).mockImplementation(() => {
     if (error) {
       return Promise.reject(error);
     } else {
@@ -227,7 +227,7 @@ describe('resolveInstanceUuid', () => {
       await expect(
         resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EACCES"`
+        `"Unable to read UUID file at data-folder/uuid.  Ensure Kibana has sufficient permissions to read / write to this file.  Error was: EACCES"`
       );
     });
     it('throws an explicit error for file write errors', async () => {
@@ -235,7 +235,7 @@ describe('resolveInstanceUuid', () => {
       await expect(
         resolveInstanceUuid({ pathConfig, serverConfig, logger })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to write Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EISDIR"`
+        `"Unable to write to UUID file at data-folder/uuid. Ensure Kibana has sufficient permissions to read / write to this file.  Error was: EISDIR"`
       );
     });
   });

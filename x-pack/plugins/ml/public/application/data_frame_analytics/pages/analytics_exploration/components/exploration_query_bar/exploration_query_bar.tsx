@@ -1,21 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { debounce } from 'lodash';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Dictionary } from '../../../../../../../common/types/common';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
-import {
-  esKuery,
-  esQuery,
-  Query,
-  QueryStringInput,
-} from '../../../../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../../../../src/plugins/data_views/common';
+import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   SEARCH_QUERY_LANGUAGE,
@@ -30,7 +29,7 @@ interface ErrorMessage {
 }
 
 export interface ExplorationQueryBarProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   setSearchQuery: (update: {
     queryString: string;
     query?: SavedSearchQuery;
@@ -58,22 +57,50 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
+  const regex = useMemo(
+    () => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'),
+    [filters?.columnId]
+  );
+
+  /**
+   * Restoring state from the URL once on load. If a filter option is active
+   * in the url set the corresponding options button to selected mode.
+   */
+  useEffect(function updateIdToSelectedMap() {
+    if (filters !== undefined) {
+      const match: string[] | null = query.query.match(regex);
+      let filterKeyInEffect: string | undefined;
+
+      if (match !== null && match[0].includes('true')) {
+        // set { training: true }
+        filterKeyInEffect = Object.keys(filters.key).find((i) => filters.key[i] === true);
+      } else if (match !== null && match[0].includes('false')) {
+        // set { testing: true }
+        filterKeyInEffect = Object.keys(filters.key).find((i) => filters.key[i] === false);
+      }
+
+      if (filterKeyInEffect) {
+        setIdToSelectedMap({ [filterKeyInEffect]: true });
+      }
+    }
+  }, []);
+
   /**
    * Component is responsible for parsing the query string,
    * hence it should sync submitted query string.
    */
   useEffect(() => {
     try {
-      let convertedQuery;
+      let convertedQuery: estypes.QueryDslQueryContainer = {};
       switch (query.language) {
         case SEARCH_QUERY_LANGUAGE.KUERY:
-          convertedQuery = esKuery.toElasticsearchQuery(
-            esKuery.fromKueryExpression(query.query as string),
+          convertedQuery = toElasticsearchQuery(
+            fromKueryExpression(query.query as string),
             indexPattern
           );
           break;
         case SEARCH_QUERY_LANGUAGE.LUCENE:
-          convertedQuery = esQuery.luceneStringToDsl(query.query as string);
+          convertedQuery = luceneStringToDsl(query.query as string);
           break;
         default:
           setErrorMessage({
@@ -106,11 +133,10 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     });
   };
 
-  const handleFilterUpdate = (optionId: string, currentIdToSelectedMap: any) => {
+  const debouncedHandleFilterUpdate = debounce((optionId: string, currentIdToSelectedMap: any) => {
     let newQuery = '';
     const filterValue = filters?.key[optionId];
     const filterQueryString = `${filters?.columnId}:${filterValue}`;
-    const regex = new RegExp(`${filters?.columnId}\s?:\s?(true|false)`, 'g');
 
     // Toggling selected optionId to 'off' - remove column id query from filter
     if (currentIdToSelectedMap[optionId] === false) {
@@ -139,7 +165,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
     setSearchInput(newSearchInput);
     searchSubmitHandler(newSearchInput, true);
-  };
+  }, 200);
 
   return (
     <EuiInputPopover
@@ -149,7 +175,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <QueryStringInput
-              bubbleSubmitEvent={true}
+              bubbleSubmitEvent={false}
               query={searchInput}
               indexPatterns={[indexPattern]}
               onChange={searchChangeHandler}
@@ -188,7 +214,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
                 onChange={(optionId: string) => {
                   const newIdToSelectedMap = { [optionId]: !idToSelectedMap[optionId] };
                   setIdToSelectedMap(newIdToSelectedMap);
-                  handleFilterUpdate(optionId, newIdToSelectedMap);
+                  debouncedHandleFilterUpdate(optionId, newIdToSelectedMap);
                 }}
               />
             </EuiFlexItem>

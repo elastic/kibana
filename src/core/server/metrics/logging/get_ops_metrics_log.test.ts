@@ -1,26 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { OpsMetrics } from '..';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
+import { collectorMock } from '../collectors/mocks';
 
 function createBaseOpsMetrics(): OpsMetrics {
+  const mockProcess = collectorMock.createOpsProcessMetrics();
+
   return {
     collected_at: new Date('2020-01-01 01:00:00'),
-    process: {
-      memory: {
-        heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
-        resident_set_size_in_bytes: 1,
-      },
-      event_loop_delay: 1,
-      pid: 1,
-      uptime_in_millis: 1,
-    },
+    process: mockProcess,
+    processes: [mockProcess],
     os: {
       platform: 'darwin' as const,
       platformRelease: 'test',
@@ -41,7 +37,7 @@ function createMockOpsMetrics(testMetrics: Partial<OpsMetrics>): OpsMetrics {
     ...testMetrics,
   };
 }
-const testMetrics = ({
+const testMetrics = {
   process: {
     memory: { heap: { used_in_bytes: 100 } },
     uptime_in_millis: 1500,
@@ -54,7 +50,7 @@ const testMetrics = ({
       '15m': 30,
     },
   },
-} as unknown) as Partial<OpsMetrics>;
+} as unknown as Partial<OpsMetrics>;
 
 describe('getEcsOpsMetricsLog', () => {
   it('provides correctly formatted message', () => {
@@ -66,58 +62,54 @@ describe('getEcsOpsMetricsLog', () => {
 
   it('correctly formats process uptime', () => {
     const logMeta = getEcsOpsMetricsLog(createMockOpsMetrics(testMetrics));
-    expect(logMeta.process!.uptime).toEqual(1);
+    expect(logMeta.meta.process!.uptime).toEqual(1);
   });
 
   it('excludes values from the message if unavailable', () => {
     const baseMetrics = createBaseOpsMetrics();
-    const missingMetrics = ({
+    const missingMetrics = {
       ...baseMetrics,
       process: {},
       os: {},
-    } as unknown) as OpsMetrics;
+    } as unknown as OpsMetrics;
     const logMeta = getEcsOpsMetricsLog(missingMetrics);
     expect(logMeta.message).toMatchInlineSnapshot(`""`);
-  });
-
-  it('specifies correct ECS version', () => {
-    const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
-    expect(logMeta.ecs.version).toBe('1.7.0');
   });
 
   it('provides an ECS-compatible response', () => {
     const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
     expect(logMeta).toMatchInlineSnapshot(`
       Object {
-        "ecs": Object {
-          "version": "1.7.0",
-        },
-        "event": Object {
-          "category": Array [
-            "process",
-            "host",
-          ],
-          "kind": "metric",
-          "type": "info",
-        },
-        "host": Object {
-          "os": Object {
-            "load": Object {
-              "15m": 1,
-              "1m": 1,
-              "5m": 1,
-            },
-          },
-        },
         "message": "memory: 1.0B load: [1.00,1.00,1.00] delay: 1.000",
-        "process": Object {
-          "eventLoopDelay": 1,
-          "memory": Object {
-            "heap": Object {
-              "usedInBytes": 1,
+        "meta": Object {
+          "event": Object {
+            "category": Array [
+              "process",
+              "host",
+            ],
+            "kind": "metric",
+            "type": Array [
+              "info",
+            ],
+          },
+          "host": Object {
+            "os": Object {
+              "load": Object {
+                "15m": 1,
+                "1m": 1,
+                "5m": 1,
+              },
             },
           },
-          "uptime": 0,
+          "process": Object {
+            "eventLoopDelay": 1,
+            "memory": Object {
+              "heap": Object {
+                "usedInBytes": 1,
+              },
+            },
+            "uptime": 0,
+          },
         },
       }
     `);
@@ -125,8 +117,8 @@ describe('getEcsOpsMetricsLog', () => {
 
   it('logs ECS fields in the log meta', () => {
     const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
-    expect(logMeta.event!.kind).toBe('metric');
-    expect(logMeta.event!.category).toEqual(expect.arrayContaining(['process', 'host']));
-    expect(logMeta.event!.type).toBe('info');
+    expect(logMeta.meta.event!.kind).toBe('metric');
+    expect(logMeta.meta.event!.category).toEqual(expect.arrayContaining(['process', 'host']));
+    expect(logMeta.meta.event!.type).toEqual(expect.arrayContaining(['info']));
   });
 });

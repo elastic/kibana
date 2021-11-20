@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo } from 'react';
@@ -20,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
-import { JobOverride } from '../../../../../../common/types/modules';
+import { JobOverride, DatafeedResponse } from '../../../../../../common/types/modules';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 
 interface JobItemProps {
@@ -52,7 +53,7 @@ export const JobItem: FC<JobItemProps> = memo(
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="secondary">
+              <EuiText size="s" color="success">
                 {jobPrefix}
                 {id}
               </EuiText>
@@ -86,7 +87,7 @@ export const JobItem: FC<JobItemProps> = memo(
           </EuiText>
 
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {jobGroups.map((group) => (
+            {(jobGroups ?? []).map((group) => (
               <EuiFlexItem grow={false} key={group}>
                 <EuiBadge color={tabColor(group)}>{group}</EuiBadge>
               </EuiFlexItem>
@@ -117,7 +118,7 @@ export const JobItem: FC<JobItemProps> = memo(
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type={setupResult.success ? 'check' : 'cross'}
-                  color={setupResult.success ? 'secondary' : 'danger'}
+                  color={setupResult.success ? 'success' : 'danger'}
                   size="m"
                   aria-label={
                     setupResult.success
@@ -134,7 +135,7 @@ export const JobItem: FC<JobItemProps> = memo(
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type={datafeedResult.success ? 'check' : 'cross'}
-                  color={datafeedResult.success ? 'secondary' : 'danger'}
+                  color={datafeedResult.success ? 'success' : 'danger'}
                   size="m"
                   aria-label={
                     setupResult.success
@@ -150,8 +151,8 @@ export const JobItem: FC<JobItemProps> = memo(
 
               <EuiFlexItem grow={false}>
                 <EuiIcon
-                  type={datafeedResult.started ? 'check' : 'cross'}
-                  color={datafeedResult.started ? 'secondary' : 'danger'}
+                  type={getDatafeedStartedIcon(datafeedResult).type}
+                  color={getDatafeedStartedIcon(datafeedResult).color}
                   size="m"
                   aria-label={
                     setupResult.success
@@ -171,3 +172,14 @@ export const JobItem: FC<JobItemProps> = memo(
     );
   }
 );
+
+function getDatafeedStartedIcon({ awaitingMlNodeAllocation, success }: DatafeedResponse): {
+  type: string;
+  color: string;
+} {
+  if (awaitingMlNodeAllocation === true) {
+    return { type: 'alert', color: 'warning' };
+  }
+
+  return success ? { type: 'check', color: 'success' } : { type: 'cross', color: 'danger' };
+}

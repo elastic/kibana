@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PARTITION_FIELDS } from '../constants/anomalies';
+import { PARTITION_FIELDS, ANOMALY_RESULT_TYPE } from '../constants/anomalies';
 
 export interface Influencer {
   influencer_field_name: string;
   influencer_field_values: string[];
 }
+
+export type MLAnomalyDoc = AnomalyRecordDoc;
 
 export interface AnomalyRecordDoc {
   [key: string]: any;
@@ -76,3 +79,5 @@ export interface AnomalyCategorizerStatsDoc {
 }
 
 export type EntityFieldType = 'partition_field' | 'over_field' | 'by_field';
+
+export type AnomalyResultType = typeof ANOMALY_RESULT_TYPE[keyof typeof ANOMALY_RESULT_TYPE];

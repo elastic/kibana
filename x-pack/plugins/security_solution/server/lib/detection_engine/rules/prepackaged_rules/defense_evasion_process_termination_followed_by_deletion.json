@@ -8,7 +8,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Process Termination followed by Deletion",
   "query": "sequence by host.id with maxspan=5s\n   [process where event.type == \"end\" and \n    process.code_signature.trusted == false and\n    not process.executable : (\"C:\\\\Windows\\\\SoftwareDistribution\\\\*.exe\", \"C:\\\\Windows\\\\WinSxS\\\\*.exe\")\n   ] by process.executable\n   [file where event.type == \"deletion\" and file.extension : (\"exe\", \"scr\", \"com\")] by file.path\n",
   "risk_score": 47,
@@ -33,11 +33,18 @@
         {
           "id": "T1070",
           "name": "Indicator Removal on Host",
-          "reference": "https://attack.mitre.org/techniques/T1070/"
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.004",
+              "name": "File Deletion",
+              "reference": "https://attack.mitre.org/techniques/T1070/004/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 3
 }

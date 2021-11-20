@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 import { getFoundListItemSchemaMock } from '../../../common/schemas/response/found_list_item_schema.mock';
 import { getFoundListSchemaMock } from '../../../common/schemas/response/found_list_schema.mock';
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
-import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import {
   IMPORT_BUFFER_SIZE,
   IMPORT_TIMEOUT,
@@ -62,15 +65,14 @@ export class ListClientMock extends ListClient {
 
 export const getListClientMock = (): ListClient => {
   const mock = new ListClientMock({
-    callCluster: getCallClusterMock(),
     config: {
-      enabled: true,
       importBufferSize: IMPORT_BUFFER_SIZE,
       importTimeout: IMPORT_TIMEOUT,
       listIndex: LIST_INDEX,
       listItemIndex: LIST_ITEM_INDEX,
       maxImportPayloadBytes: MAX_IMPORT_PAYLOAD_BYTES,
     },
+    esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
     spaceId: 'default',
     user: 'elastic',
   });

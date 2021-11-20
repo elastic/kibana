@@ -1,19 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { defaults } from 'lodash/fp';
-import { validate } from '../../../../common/validate';
-import { PartialAlert } from '../../../../../alerts/server';
+import { PartialAlert } from '../../../../../alerting/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { PatchRulesOptions } from './types';
+import {
+  normalizeMachineLearningJobIds,
+  normalizeThresholdObject,
+} from '../../../../common/detection_engine/utils';
+import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';
-import { calculateVersion, calculateName, calculateInterval, removeUndefined } from './utils';
-import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
-import { internalRuleUpdate } from '../schemas/rule_schemas';
-import { RuleTypeParams } from '../types';
+import { enableRule } from './enable_rule';
+import { PatchRulesOptions } from './types';
+import {
+  calculateInterval,
+  calculateName,
+  calculateVersion,
+  maybeMute,
+  removeUndefined,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+} from './utils';
 
 class PatchError extends Error {
   public readonly statusCode: number;
@@ -24,10 +36,12 @@ class PatchError extends Error {
 }
 
 export const patchRules = async ({
-  alertsClient,
+  rulesClient,
+  savedObjectsClient,
   author,
   buildingBlockType,
-  savedObjectsClient,
+  ruleStatusClient,
+  spaceId,
   description,
   eventCategoryOverride,
   falsePositives,
@@ -63,16 +77,18 @@ export const patchRules = async ({
   concurrentSearches,
   itemsPerSearch,
   timestampOverride,
+  throttle,
   to,
   type,
   references,
+  namespace,
   note,
   version,
   exceptionsList,
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: PatchRulesOptions): Promise<PartialAlert<RuleTypeParams> | null> => {
+}: PatchRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   if (rule == null) {
     return null;
   }
@@ -117,6 +133,7 @@ export const patchRules = async ({
     type,
     references,
     version,
+    namespace,
     note,
     exceptionsList,
     anomalyThreshold,
@@ -150,7 +167,7 @@ export const patchRules = async ({
       severity,
       severityMapping,
       threat,
-      threshold,
+      threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
       threatFilters,
       threatIndex,
       threatQuery,
@@ -162,60 +179,47 @@ export const patchRules = async ({
       to,
       type,
       references,
+      namespace,
       note,
       version: calculatedVersion,
       exceptionsList,
       anomalyThreshold,
-      machineLearningJobId,
+      machineLearningJobId: machineLearningJobId
+        ? normalizeMachineLearningJobIds(machineLearningJobId)
+        : undefined,
     }
   );
 
   const newRule = {
     tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
-    throttle: null,
-    notifyWhen: null,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),
     },
-    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
     params: removeUndefined(nextParams),
+    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
+    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
+    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
   };
+
   const [validated, errors] = validate(newRule, internalRuleUpdate);
   if (errors != null || validated === null) {
     throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
   }
 
-  /**
-   * TODO: Remove this use of `as` by utilizing the proper type
-   */
-  const update = (await alertsClient.update({
+  const update = await rulesClient.update({
     id: rule.id,
     data: validated,
-  })) as PartialAlert<RuleTypeParams>;
+  });
+
+  if (throttle !== undefined) {
+    await maybeMute({ rulesClient, muteAll: rule.muteAll, throttle, id: update.id });
+  }
 
   if (rule.enabled && enabled === false) {
-    await alertsClient.disable({ id: rule.id });
+    await rulesClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
-    await alertsClient.enable({ id: rule.id });
-
-    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-    const ruleCurrentStatus = await ruleStatusClient.find({
-      perPage: 1,
-      sortField: 'statusDate',
-      sortOrder: 'desc',
-      search: rule.id,
-      searchFields: ['alertId'],
-    });
-
-    // set current status for this rule to be 'going to run'
-    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
-      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
-      await ruleStatusClient.update(currentStatusToDisable.id, {
-        ...currentStatusToDisable.attributes,
-        status: 'going to run',
-      });
-    }
+    await enableRule({ rule, rulesClient, ruleStatusClient, spaceId });
   } else {
     // enabled is null or undefined and we do not touch the rule
   }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -30,5 +31,13 @@ export const DETECTIONS_REQUIREMENTS_LINK_TEXT = i18n.translate(
   'xpack.securitySolution.documentationLinks.detectionsRequirements.text',
   {
     defaultMessage: 'Detections prerequisites and requirements',
+  }
+);
+
+export const ML_JOB_COMPATIBILITY_LINK_PATH = 'alerts-ui-monitor.html#ml-job-compatibility';
+export const ML_JOB_COMPATIBILITY_LINK_TEXT = i18n.translate(
+  'xpack.securitySolution.documentationLinks.mlJobCompatibility.text',
+  {
+    defaultMessage: 'ML job compatibility',
   }
 );

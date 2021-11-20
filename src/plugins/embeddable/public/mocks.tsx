@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -89,7 +89,8 @@ export const mockRefOrValEmbeddable = <
     mockedByValueInput: ValTypeInput;
   }
 ): OriginalEmbeddableType & ReferenceOrValueEmbeddable => {
-  const newEmbeddable: ReferenceOrValueEmbeddable = (embeddable as unknown) as ReferenceOrValueEmbeddable;
+  const newEmbeddable: ReferenceOrValueEmbeddable =
+    embeddable as unknown as ReferenceOrValueEmbeddable;
   newEmbeddable.inputIsRefType = (input: unknown): input is RefTypeInput =>
     !!(input as RefTypeInput).savedObjectId;
   newEmbeddable.getInputAsRefType = () => Promise.resolve(options.mockedByReferenceInput);
@@ -113,7 +114,7 @@ const createStartContract = (): Start => {
     telemetry: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),
-    migrate: jest.fn(),
+    getAllMigrations: jest.fn(),
     EmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getAttributeService: jest.fn(),

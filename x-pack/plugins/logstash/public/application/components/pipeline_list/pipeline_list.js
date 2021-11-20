@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,9 +12,8 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
-  EuiPageContent,
-  EuiTitle,
-  EuiText,
+  EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -291,36 +291,34 @@ class PipelineListUi extends React.Component {
     const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
     const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
     return (
-      <div data-test-subj="pipelineList">
-        <EuiPageContent horizontalPosition="center">
-          <EuiTitle size="m">
-            <h1>
-              <FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" />
-            </h1>
-          </EuiTitle>
-          <EuiText color="subdued" size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.logstash.pipelineList.subhead"
-                defaultMessage="Manage logstash event processing and see the result visually"
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          {this.renderNoPermissionCallOut()}
-          <PipelinesTable
-            clonePipeline={clonePipeline}
-            createPipeline={createPipeline}
-            isReadOnly={isReadOnly}
-            isSelectable={isSelectable}
-            message={message}
-            pipelines={pipelines}
-            selection={selection}
-            onDeleteSelectedPipelines={this.onDeleteSelectedPipelines}
-            onSelectionChange={this.onSelectionChange}
-            openPipeline={openPipeline}
-          />
-        </EuiPageContent>
+      <EuiPageContentBody data-test-subj="pipelineList">
+        <EuiPageHeader
+          pageTitle={
+            <FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.logstash.pipelineList.subhead"
+              defaultMessage="Manage logstash event processing and see the result visually"
+            />
+          }
+          bottomBorder
+        />
+        <EuiSpacer size="l" />
+        {this.renderNoPermissionCallOut()}
+        <PipelinesTable
+          clonePipeline={clonePipeline}
+          createPipeline={createPipeline}
+          isReadOnly={isReadOnly}
+          isSelectable={isSelectable}
+          message={message}
+          pipelines={pipelines}
+          selection={selection}
+          onDeleteSelectedPipelines={this.onDeleteSelectedPipelines}
+          onSelectionChange={this.onSelectionChange}
+          openPipeline={openPipeline}
+        />
+
         <ConfirmDeleteModal
           cancelDeletePipelines={this.cancelDeletePipelines}
           deleteSelectedPipelines={this.deleteSelectedPipelines}
@@ -331,7 +329,7 @@ class PipelineListUi extends React.Component {
           showAddRoleAlert={this.state.showAddRoleAlert}
           showEnableMonitoringAlert={this.state.showEnableMonitoringAlert}
         />
-      </div>
+      </EuiPageContentBody>
     );
   }
 }

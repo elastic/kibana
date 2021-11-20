@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -13,18 +14,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  describe('Security', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/96372
+  describe.skip('Security', () => {
     describe('Login Page', () => {
       before(async () => {
-        await esArchiver.load('empty_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
         await PageObjects.security.forceLogout();
       });
 
       after(async () => {
-        await esArchiver.unload('empty_kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
       afterEach(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 

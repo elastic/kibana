@@ -1,20 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useRef, useState } from 'react';
 
 import { htmlIdGenerator } from '@elastic/eui';
-import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
 import {
+  INITIAL_LOCATION,
+  LayerDescriptor,
+  MAP_SAVED_OBJECT_TYPE,
+} from '../../../../../maps/common';
+import type {
   MapEmbeddable,
   MapEmbeddableInput,
   MapEmbeddableOutput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../maps/public/embeddable';
-import { MAP_SAVED_OBJECT_TYPE, RenderTooltipContentParams } from '../../../../../maps/public';
+  RenderTooltipContentParams,
+} from '../../../../../maps/public';
+
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
@@ -74,28 +79,16 @@ export function MlEmbeddedMapComponent({
         attributes: { title: '' },
         filters: [],
         hidePanelTitles: true,
-        refreshConfig: {
-          value: 0,
-          pause: false,
-        },
         viewMode: ViewMode.VIEW,
         isLayerTOCOpen: false,
         hideFilterActions: true,
-        // Zoom Lat/Lon values are set to make sure map is in center in the panel
-        // It will also omit Greenland/Antarctica etc. NOTE: Can be removed when initialLocation is set
-        mapCenter: {
-          lon: 11,
-          lat: 20,
-          zoom: 1,
-        },
         // can use mapSettings to center map on anomalies
         mapSettings: {
           disableInteractive: false,
           hideToolbarOverlay: false,
           hideLayerControl: false,
           hideViewControl: false,
-          // Doesn't currently work with GEO_JSON. Will uncomment when https://github.com/elastic/kibana/pull/88294 is in
-          // initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
+          initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
           autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
         },
       };

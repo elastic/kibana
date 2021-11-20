@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -36,17 +37,21 @@ import { addNameToTimeline, closeTimeline, populateTimeline } from '../../tasks/
 import { HOSTS_URL } from '../../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 
-import { timeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 import { TIMELINE } from '../../screens/create_new_case';
 import { cleanKibana } from '../../tasks/common';
 
 const ABSOLUTE_DATE = {
-  endTime: '2019-08-01T20:33:29.186Z',
+  endTime: 'Aug 1, 2019 @ 20:33:29.186',
   endTimeTimeline: '2019-08-02T21:03:29.186Z',
+  endTimeTimelineFormatted: 'Aug 2, 2019 @ 21:03:29.186',
   newEndTimeTyped: 'Aug 01, 2019 @ 15:03:29.186',
   newStartTimeTyped: 'Aug 01, 2019 @ 14:33:29.186',
-  startTime: '2019-08-01T20:03:29.186Z',
+  startTime: 'Aug 1, 2019 @ 20:03:29.186',
   startTimeTimeline: '2019-08-02T20:03:29.186Z',
+  startTimeTimelineFormatted: 'Aug 2, 2019 @ 20:03:29.186',
+  firefoxEndTimeTyped: '2019-08-01T15:03:29',
+  firefoxStartTimeTyped: '2019-08-01T14:33:29',
 };
 
 describe('url state', () => {
@@ -72,13 +77,20 @@ describe('url state', () => {
     setEndDate(ABSOLUTE_DATE.newEndTimeTyped);
     updateDates();
 
+    let startDate: string;
+    let endDate: string;
+
+    if (Cypress.browser.name === 'firefox') {
+      startDate = new Date(ABSOLUTE_DATE.firefoxStartTimeTyped).toISOString().replace('000', '186');
+      endDate = new Date(ABSOLUTE_DATE.firefoxEndTimeTyped).toISOString().replace('000', '186');
+    } else {
+      startDate = new Date(ABSOLUTE_DATE.newStartTimeTyped).toISOString();
+      endDate = new Date(ABSOLUTE_DATE.newEndTimeTyped).toISOString();
+    }
+
     cy.url().should(
       'include',
-      `(global:(linkTo:!(timeline),timerange:(from:%27${new Date(
-        ABSOLUTE_DATE.newStartTimeTyped
-      ).toISOString()}%27,kind:absolute,to:%27${new Date(
-        ABSOLUTE_DATE.newEndTimeTyped
-      ).toISOString()}%27))`
+      `(global:(linkTo:!(timeline),timerange:(from:%27${startDate}%27,kind:absolute,to:%27${endDate}%27))`
     );
   });
 
@@ -112,12 +124,12 @@ describe('url state', () => {
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).should(
       'have.attr',
       'title',
-      ABSOLUTE_DATE.startTimeTimeline
+      ABSOLUTE_DATE.startTimeTimelineFormatted
     );
     cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE).should(
       'have.attr',
       'title',
-      ABSOLUTE_DATE.endTimeTimeline
+      ABSOLUTE_DATE.endTimeTimelineFormatted
     );
   });
 
@@ -129,13 +141,20 @@ describe('url state', () => {
     setTimelineEndDate(ABSOLUTE_DATE.newEndTimeTyped);
     updateTimelineDates();
 
+    let startDate: string;
+    let endDate: string;
+
+    if (Cypress.browser.name === 'firefox') {
+      startDate = new Date(ABSOLUTE_DATE.firefoxStartTimeTyped).toISOString().replace('000', '186');
+      endDate = new Date(ABSOLUTE_DATE.firefoxEndTimeTyped).toISOString().replace('000', '186');
+    } else {
+      startDate = new Date(ABSOLUTE_DATE.newStartTimeTyped).toISOString();
+      endDate = new Date(ABSOLUTE_DATE.newEndTimeTyped).toISOString();
+    }
+
     cy.url().should(
       'include',
-      `timeline:(linkTo:!(),timerange:(from:%27${new Date(
-        ABSOLUTE_DATE.newStartTimeTyped
-      ).toISOString()}%27,kind:absolute,to:%27${new Date(
-        ABSOLUTE_DATE.newEndTimeTyped
-      ).toISOString()}%27))`
+      `timeline:(linkTo:!(),timerange:(from:%27${startDate}%27,kind:absolute,to:%27${endDate}%27))`
     );
   });
 
@@ -163,11 +182,10 @@ describe('url state', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     kqlSearch('source.ip: "10.142.0.9" {enter}');
     navigateFromHeaderTo(HOSTS);
-
     cy.get(NETWORK).should(
       'have.attr',
       'href',
-      `/app/security/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&sourcerer=(default:!(\'auditbeat-*\'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))`
+      `/app/security/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))`
     );
   });
 
@@ -180,12 +198,12 @@ describe('url state', () => {
     cy.get(HOSTS).should(
       'have.attr',
       'href',
-      `/app/security/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&sourcerer=(default:!(\'auditbeat-*\'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
+      `/app/security/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
     );
     cy.get(NETWORK).should(
       'have.attr',
       'href',
-      `/app/security/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&sourcerer=(default:!(\'auditbeat-*\'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
+      `/app/security/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
     );
     cy.get(HOSTS_NAMES).first().should('have.text', 'siem-kibana');
 
@@ -196,21 +214,21 @@ describe('url state', () => {
     cy.get(ANOMALIES_TAB).should(
       'have.attr',
       'href',
-      "/app/security/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&sourcerer=(default:!('auditbeat-*'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))"
+      "/app/security/hosts/siem-kibana/anomalies?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')"
     );
     cy.get(BREADCRUMBS)
       .eq(1)
       .should(
         'have.attr',
         'href',
-        `/app/security/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&sourcerer=(default:!(\'auditbeat-*\'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
+        `/app/security/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
       );
     cy.get(BREADCRUMBS)
       .eq(2)
       .should(
         'have.attr',
         'href',
-        `/app/security/hosts/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&sourcerer=(default:!(\'auditbeat-*\'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
+        `/app/security/hosts/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
       );
   });
 
@@ -227,19 +245,19 @@ describe('url state', () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
 
-    addNameToTimeline(timeline.title);
+    addNameToTimeline(getTimeline().title);
 
     cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
-      cy.wrap(response!.statusCode).should('eql', 200);
-      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      cy.wrap(response?.statusCode).should('eql', 200);
+      const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
       cy.visit('/app/home');
       cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
+      cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
     });
   });
 });

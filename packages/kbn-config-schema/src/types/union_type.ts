@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import typeDetect from 'type-detect';
@@ -13,20 +13,21 @@ import { Type, TypeOptions } from './type';
 
 export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
   constructor(types: RTS, options?: TypeOptions<T>) {
-    const schema = internals.alternatives(types.map((type) => type.getSchema()));
+    const schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
 
     super(schema, options);
   }
 
-  protected handleError(type: string, { reason, value }: Record<string, any>, path: string[]) {
+  protected handleError(type: string, { value, details }: Record<string, any>, path: string[]) {
     switch (type) {
       case 'any.required':
         return `expected at least one defined value but got [${typeDetect(value)}]`;
-      case 'alternatives.child':
+      case 'alternatives.match':
         return new SchemaTypesError(
           'types that failed validation:',
           path,
-          reason.map((e: SchemaTypeError, index: number) => {
+          details.map((detail: AlternativeErrorDetail, index: number) => {
+            const e = detail.context.error;
             const childPathWithIndex = e.path.slice();
             childPathWithIndex.splice(path.length, 0, index.toString());
 
@@ -37,4 +38,10 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
         );
     }
   }
+}
+
+interface AlternativeErrorDetail {
+  context: {
+    error: SchemaTypeError;
+  };
 }

@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { functionWrapper } from '../../test_helpers/function_wrapper';
 import { testPie } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
+import { functionWrapper, fontStyle } from '../../../../../src/plugins/presentation_util/public';
 import {
-  fontStyle,
   grayscalePalette,
   seriesStyle,
 } from '../../canvas_plugin_src/functions/common/__fixtures__/test_styles';
@@ -17,7 +17,7 @@ describe('pie', () => {
   const fn = functionWrapper(
     pieFunctionFactory({
       get: () => ({
-        getColors: () => ['red', 'black'],
+        getCategoricalColors: () => ['red', 'black'],
       }),
     })
   );
@@ -29,9 +29,9 @@ describe('pie', () => {
   });
 
   describe('data', () => {
-    const result = fn(testPie).value.data;
-
     it('has one series per unique label', () => {
+      const result = fn(testPie).value.data;
+
       const uniqueLabels = testPie.rows.reduce(
         (unique, series) =>
           !unique.includes(series.color) ? unique.concat([series.color]) : unique,
@@ -43,6 +43,8 @@ describe('pie', () => {
     });
 
     it('populates the data of the plot with points from the pointseries', () => {
+      const result = fn(testPie).value.data;
+
       expect(result[0].data).toEqual([202]);
       expect(result[1].data).toEqual([67]);
       expect(result[2].data).toEqual([311]);
@@ -58,7 +60,7 @@ describe('pie', () => {
         const mockedFn = functionWrapper(
           pieFunctionFactory({
             get: () => ({
-              getColors: mockedColors,
+              getCategoricalColors: mockedColors,
             }),
           })
         );

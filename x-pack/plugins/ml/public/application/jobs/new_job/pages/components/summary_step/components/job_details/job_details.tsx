@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useContext } from 'react';
@@ -110,10 +111,10 @@ export const JobDetails: FC = () => {
         defaultMessage: 'Population field',
       }),
       description:
-        isPopulationJobCreator(jobCreator) && jobCreator.splitField !== null ? (
-          jobCreator.splitField.name
+        isPopulationJobCreator(jobCreator) && jobCreator.populationField !== null ? (
+          jobCreator.populationField.name
         ) : (
-          <span style={{ fontStyle: jobCreator.splitField !== null ? 'inherit' : 'italic' }}>
+          <span style={{ fontStyle: jobCreator.populationField !== null ? 'inherit' : 'italic' }}>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.summaryStep.jobDetails.populationField.placeholder"
               defaultMessage="No population field selected"

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('uuid', () => ({
@@ -15,6 +15,7 @@ import supertest from 'supertest';
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
+import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 import { schema } from '@kbn/config-schema';
@@ -26,12 +27,14 @@ const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
   context: contextSetup,
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 
-beforeEach(() => {
+beforeEach(async () => {
   logger = loggingSystemMock.create();
 
   server = createHttpServer({ logger });
+  await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
 afterEach(async () => {
@@ -163,24 +166,24 @@ describe('KibanaRequest', () => {
 
   describe('events', () => {
     describe('aborted$', () => {
-      it('emits once and completes when request aborted', async (done) => {
+      it('emits once and completes when request aborted', async () => {
         expect.assertions(1);
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
-        router.get({ path: '/', validate: false }, async (context, request, res) => {
-          request.events.aborted$.subscribe({
-            next: nextSpy,
-            complete: () => {
-              expect(nextSpy).toHaveBeenCalledTimes(1);
-              done();
-            },
-          });
 
-          // prevents the server to respond
-          await delay(30000);
-          return res.ok({ body: 'ok' });
+        const done = new Promise<void>((resolve) => {
+          router.get({ path: '/', validate: false }, async (context, request, res) => {
+            request.events.aborted$.subscribe({
+              next: nextSpy,
+              complete: resolve,
+            });
+
+            // prevents the server to respond
+            await delay(30000);
+            return res.ok({ body: 'ok' });
+          });
         });
 
         await server.start();
@@ -191,6 +194,8 @@ describe('KibanaRequest', () => {
           .end();
 
         setTimeout(() => incomingRequest.abort(), 50);
+        await done;
+        expect(nextSpy).toHaveBeenCalledTimes(1);
       });
 
       it('completes & does not emit when request handled', async () => {
@@ -240,9 +245,11 @@ describe('KibanaRequest', () => {
       });
 
       it('does not complete before response has been sent', async () => {
-        const { server: innerServer, createRouter, registerOnPreAuth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerOnPreAuth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
@@ -299,25 +306,24 @@ describe('KibanaRequest', () => {
         expect(completeSpy).toHaveBeenCalledTimes(1);
       });
 
-      it('emits once and completes when response is aborted', async (done) => {
+      it('emits once and completes when response is aborted', async () => {
         expect.assertions(2);
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
 
-        router.get({ path: '/', validate: false }, async (context, req, res) => {
-          req.events.completed$.subscribe({
-            next: nextSpy,
-            complete: () => {
-              expect(nextSpy).toHaveBeenCalledTimes(1);
-              done();
-            },
-          });
+        const done = new Promise<void>((resolve) => {
+          router.get({ path: '/', validate: false }, async (context, req, res) => {
+            req.events.completed$.subscribe({
+              next: nextSpy,
+              complete: resolve,
+            });
 
-          expect(nextSpy).not.toHaveBeenCalled();
-          await delay(30000);
-          return res.ok({ body: 'ok' });
+            expect(nextSpy).not.toHaveBeenCalled();
+            await delay(30000);
+            return res.ok({ body: 'ok' });
+          });
         });
 
         await server.start();
@@ -327,6 +333,8 @@ describe('KibanaRequest', () => {
           // end required to send request
           .end();
         setTimeout(() => incomingRequest.abort(), 50);
+        await done;
+        expect(nextSpy).toHaveBeenCalledTimes(1);
       });
     });
   });

@@ -1,12 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 
-import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
+import {
+  validateParams,
+  validateConfig,
+  validateSecrets,
+  validateConnector,
+} from './validate_with_schema';
 import { ActionType, ExecutorType } from '../types';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
@@ -46,6 +52,9 @@ test('should validate when there are no individual validators', () => {
 
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(testValue);
+
+  result = validateConnector(actionType, { config: testValue });
+  expect(result).toBeNull();
 });
 
 test('should validate when validators return incoming value', () => {
@@ -73,6 +82,9 @@ test('should validate when validators return incoming value', () => {
 
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(testValue);
+
+  result = validateConnector(actionType, { config: testValue });
+  expect(result).toBeNull();
 });
 
 test('should validate when validators return different values', () => {
@@ -101,6 +113,9 @@ test('should validate when validators return different values', () => {
 
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(returnedValue);
+
+  result = validateConnector(actionType, { config: testValue, secrets: { user: 'test' } });
+  expect(result).toBeNull();
 });
 
 test('should throw with expected error when validators fail', () => {
@@ -118,6 +133,9 @@ test('should throw with expected error when validators fail', () => {
       params: erroringValidator,
       config: erroringValidator,
       secrets: erroringValidator,
+      connector: () => {
+        return 'test error';
+      },
     },
   };
 
@@ -134,6 +152,10 @@ test('should throw with expected error when validators fail', () => {
   expect(() => validateSecrets(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
     `"error validating action type secrets: test error"`
   );
+
+  expect(() =>
+    validateConnector(actionType, { config: testValue, secrets: { user: 'test' } })
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type connector: test error"`);
 });
 
 test('should work with @kbn/config-schema', () => {
@@ -147,6 +169,7 @@ test('should work with @kbn/config-schema', () => {
       params: testSchema,
       config: testSchema,
       secrets: testSchema,
+      connector: () => null,
     },
   };
 

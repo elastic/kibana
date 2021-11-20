@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -36,7 +37,7 @@ test('should render EntityIndexExpression', async () => {
       setAlertParamsGeoField={() => {}}
       setAlertProperty={() => {}}
       setIndexPattern={() => {}}
-      indexPattern={('' as unknown) as IIndexPattern}
+      indexPattern={'' as unknown as IIndexPattern}
       isInvalid={false}
       data={dataStartMock}
     />
@@ -55,7 +56,7 @@ test('should render EntityIndexExpression w/ invalid flag if invalid', async () 
       setAlertParamsGeoField={() => {}}
       setAlertProperty={() => {}}
       setIndexPattern={() => {}}
-      indexPattern={('' as unknown) as IIndexPattern}
+      indexPattern={'' as unknown as IIndexPattern}
       isInvalid={true}
       data={dataStartMock}
     />
@@ -69,7 +70,7 @@ test('should render BoundaryIndexExpression', async () => {
     <BoundaryIndexExpression
       alertParams={alertParams}
       errors={{} as IErrorObject}
-      boundaryIndexPattern={('' as unknown) as IIndexPattern}
+      boundaryIndexPattern={'' as unknown as IIndexPattern}
       setBoundaryIndexPattern={() => {}}
       setBoundaryGeoField={() => {}}
       setBoundaryNameField={() => {}}

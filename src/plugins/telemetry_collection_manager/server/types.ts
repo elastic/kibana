@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -11,7 +11,6 @@ import {
   Logger,
   KibanaRequest,
   SavedObjectsClientContract,
-  ISavedObjectsRepository,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
@@ -57,7 +56,7 @@ export interface ClusterDetails {
 export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
   esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  soClient: SavedObjectsClientContract;
   kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
 }
 
@@ -73,6 +72,11 @@ export interface BasicStatsPayload {
 
 export interface UsageStatsPayload extends BasicStatsPayload {
   collectionSource: string;
+}
+
+export interface OptInStatsPayload {
+  cluster_uuid: string;
+  opt_in_status: boolean;
 }
 
 export interface StatsCollectionContext {

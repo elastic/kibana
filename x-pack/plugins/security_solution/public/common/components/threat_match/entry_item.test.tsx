@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -9,11 +10,8 @@ import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { EntryItem } from './entry_item';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { IndexPattern } from 'src/plugins/data/public';
+import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
+import type { DataViewBase } from '@kbn/es-query';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -22,6 +20,7 @@ describe('EntryItem', () => {
     const wrapper = mount(
       <EntryItem
         entry={{
+          id: '123',
           field: undefined,
           value: undefined,
           type: 'mapping',
@@ -32,7 +31,7 @@ describe('EntryItem', () => {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         showLabel={true}
         onChange={jest.fn()}
@@ -41,7 +40,7 @@ describe('EntryItem', () => {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
       />
     );
@@ -54,6 +53,7 @@ describe('EntryItem', () => {
     const wrapper = mount(
       <EntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           type: 'mapping',
           value: getField('ip'),
@@ -64,26 +64,29 @@ describe('EntryItem', () => {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         threatIndexPatterns={
           {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         showLabel={false}
         onChange={mockOnChange}
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(0).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'machine.os' }]);
+    (
+      wrapper.find(EuiComboBox).at(0).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
+        id: '123',
         field: 'machine.os',
         type: 'mapping',
         value: 'ip',
@@ -97,6 +100,7 @@ describe('EntryItem', () => {
     const wrapper = mount(
       <EntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           type: 'mapping',
           value: getField('ip'),
@@ -107,24 +111,29 @@ describe('EntryItem', () => {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         threatIndexPatterns={
           {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         showLabel={false}
         onChange={mockOnChange}
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange([{ label: 'is not' }]);
+    (
+      wrapper.find(EuiComboBox).at(1).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'is not' }]);
 
-    expect(mockOnChange).toHaveBeenCalledWith({ field: 'ip', type: 'mapping', value: '' }, 0);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      { id: '123', field: 'ip', type: 'mapping', value: '' },
+      0
+    );
   });
 });

@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { ArgumentType } from './arguments';
-import { TypeToString } from '../types/common';
+import { TypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
 import { ExecutionContext } from '../execution/types';
 import {
   ExpressionFunctionClog,
@@ -19,6 +18,7 @@ import {
   ExpressionFunctionCumulativeSum,
   ExpressionFunctionDerivative,
   ExpressionFunctionMovingAverage,
+  ExpressionFunctionOverallMetric,
 } from './specs';
 import { ExpressionAstFunction } from '../ast';
 import { PersistableStateDefinition } from '../../../kibana_utils/common';
@@ -30,7 +30,7 @@ import { PersistableStateDefinition } from '../../../kibana_utils/common';
 export interface ExpressionFunctionDefinition<
   Name extends string,
   Input,
-  Arguments extends Record<string, any>,
+  Arguments extends Record<keyof unknown, unknown>,
   Output,
   Context extends ExecutionContext = ExecutionContext
 > extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
@@ -47,7 +47,7 @@ export interface ExpressionFunctionDefinition<
   /**
    * Name of type of value this function outputs.
    */
-  type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+  type?: TypeString<Output> | UnmappedTypeStrings;
 
   /**
    * List of allowed type names for input value of this function. If this
@@ -99,12 +99,14 @@ export interface ExpressionFunctionDefinition<
 /**
  * Type to capture every possible expression function definition.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
   string,
   any,
   Record<string, any>,
   any
 >;
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * A mapping of `ExpressionFunctionDefinition`s for functions which the
@@ -120,6 +122,7 @@ export interface ExpressionFunctionDefinitions {
   var: ExpressionFunctionVar;
   theme: ExpressionFunctionTheme;
   cumulative_sum: ExpressionFunctionCumulativeSum;
+  overall_metric: ExpressionFunctionOverallMetric;
   derivative: ExpressionFunctionDerivative;
   moving_average: ExpressionFunctionMovingAverage;
 }

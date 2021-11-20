@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { PublicUiSettingsParams, StringValidationRegex } from 'src/core/public';
+import { PublicUiSettingsParams } from 'src/core/public';
 import expect from '@kbn/expect';
 import { toEditableConfig } from './to_editable_config';
 
@@ -82,19 +82,6 @@ describe('Settings', function () {
             expect(invoke({ def }).type).to.equal('array');
           });
         });
-
-        describe('that contains a validation object', function () {
-          it('constructs a validation regex with message', function () {
-            def.validation = {
-              regexString: '^foo',
-              message: 'must start with "foo"',
-            };
-            const result = invoke({ def });
-            const validationTyped = result.validation as StringValidationRegex;
-            expect(validationTyped.regex).to.be.a(RegExp);
-            expect(validationTyped.message).to.equal('must start with "foo"');
-          });
-        });
       });
 
       describe('when not given a setting definition object', function () {
@@ -112,10 +99,6 @@ describe('Settings', function () {
 
         it('sets options to undefined', function () {
           expect(invoke({}).options).to.be(undefined);
-        });
-
-        it('sets validation to undefined', function () {
-          expect(invoke({}).validation).to.be(undefined);
         });
       });
     });

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import {
   RequestHandlerContext,
@@ -10,7 +12,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
-  CoreSetup,
+  IScopedClusterClient,
 } from 'src/core/server';
 import { EventEmitter } from 'events';
 import { TaskManagerStartContract } from '../../../../../plugins/task_manager/server';
@@ -34,12 +36,11 @@ const taskManagerQuery = {
 
 export function initRoutes(
   router: IRouter,
-  core: CoreSetup,
   taskManagerStart: Promise<TaskManagerStartContract>,
   taskTestingEvents: EventEmitter
 ) {
-  async function ensureIndexIsRefreshed() {
-    return await core.elasticsearch.legacy.client.callAsInternalUser('indices.refresh', {
+  async function ensureIndexIsRefreshed(client: IScopedClusterClient) {
+    return await client.asInternalUser.indices.refresh({
       index: '.kibana_task_manager',
     });
   }
@@ -69,20 +70,16 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      try {
-        const taskManager = await taskManagerStart;
-        const { task: taskFields } = req.body;
-        const task = {
-          ...taskFields,
-          scope: [scope],
-        };
+      const taskManager = await taskManagerStart;
+      const { task: taskFields } = req.body;
+      const task = {
+        ...taskFields,
+        scope: [scope],
+      };
 
-        const taskResult = await taskManager.schedule(task, { req });
+      const taskResult = await taskManager.schedule(task, { req });
 
-        return res.ok({ body: taskResult });
-      } catch (err) {
-        return res.internalError({ body: err });
-      }
+      return res.ok({ body: taskResult });
     }
   );
 
@@ -110,6 +107,45 @@ export function initRoutes(
         return res.ok({ body: await taskManager.runNow(id) });
       } catch (err) {
         return res.ok({ body: { id, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/sample_tasks/ephemeral_run_now`,
+      validate: {
+        body: schema.object({
+          task: schema.object({
+            taskType: schema.string(),
+            state: schema.recordOf(schema.string(), schema.any()),
+            params: schema.recordOf(schema.string(), schema.any()),
+          }),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<
+        any,
+        any,
+        {
+          task: {
+            taskType: string;
+            params: Record<string, any>;
+            state: Record<string, any>;
+          };
+        },
+        any
+      >,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const { task } = req.body;
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.ephemeralRunNow(task) });
+      } catch (err) {
+        return res.ok({ body: { task, error: `${err}` } });
       }
     }
   );
@@ -213,13 +249,12 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       try {
-        await ensureIndexIsRefreshed();
+        await ensureIndexIsRefreshed(context.core.elasticsearch.client);
         const taskManager = await taskManagerStart;
         return res.ok({ body: await taskManager.get(req.params.taskId) });
-      } catch (err) {
-        return res.ok({ body: err });
+      } catch ({ isBoom, output, message }) {
+        return res.ok({ body: isBoom ? output.payload : { message } });
       }
-      return res.ok({ body: {} });
     }
   );
 
@@ -233,7 +268,7 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      await ensureIndexIsRefreshed();
+      await ensureIndexIsRefreshed(context.core.elasticsearch.client);
       return res.ok({ body: {} });
     }
   );
@@ -249,6 +284,7 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       try {
+        await ensureIndexIsRefreshed(context.core.elasticsearch.client);
         let tasksFound = 0;
         const taskManager = await taskManagerStart;
         do {
@@ -259,8 +295,8 @@ export function initRoutes(
           await Promise.all(tasks.map((task) => taskManager.remove(task.id)));
         } while (tasksFound > 0);
         return res.ok({ body: 'OK' });
-      } catch (err) {
-        return res.ok({ body: err });
+      } catch ({ isBoom, output, message }) {
+        return res.ok({ body: isBoom ? output.payload : { message } });
       }
     }
   );

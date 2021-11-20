@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import {
@@ -17,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Agent, AgentPolicy } from '../../../../../types';
-import { useKibanaVersion, useLink } from '../../../../../hooks';
+
+import type { Agent, AgentPolicy } from '../../../../../types';
+import { useKibanaVersion } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
-import { AgentPolicyPackageBadges } from '../../../components/agent_policy_package_badges';
-import { LinkAndRevision } from '../../../../../components';
+import { AgentPolicyPackageBadges, AgentPolicySummaryLine } from '../../../../../components';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -32,8 +34,8 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
-  const { getHref } = useLink();
   const kibanaVersion = useKibanaVersion();
+
   return (
     <EuiPanel>
       <EuiDescriptionList compressed>
@@ -49,13 +51,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Agent policy',
             }),
             description: agentPolicy ? (
-              <LinkAndRevision
-                href={getHref('policy_details', { policyId: agentPolicy.id })}
-                title={agentPolicy.name || agent.policy_id}
-                revision={agentPolicy.revision}
-              >
-                {agentPolicy.name || agentPolicy.id}
-              </LinkAndRevision>
+              <AgentPolicySummaryLine policy={agentPolicy} />
             ) : (
               agent.policy_id || '-'
             ),
@@ -137,33 +133,37 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             title: i18n.translate('xpack.fleet.agentDetails.monitorLogsLabel', {
               defaultMessage: 'Monitor logs',
             }),
-            description: agentPolicy?.monitoring_enabled?.includes('logs') ? (
-              <FormattedMessage
-                id="xpack.fleet.agentList.monitorLogsEnabledText"
-                defaultMessage="True"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentList.monitorLogsDisabledText"
-                defaultMessage="False"
-              />
-            ),
+            description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+              agentPolicy?.monitoring_enabled?.includes('logs') ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.monitorLogsEnabledText"
+                  defaultMessage="True"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.monitorLogsDisabledText"
+                  defaultMessage="False"
+                />
+              )
+            ) : null,
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.monitorMetricsLabel', {
               defaultMessage: 'Monitor metrics',
             }),
-            description: agentPolicy?.monitoring_enabled?.includes('metrics') ? (
-              <FormattedMessage
-                id="xpack.fleet.agentList.monitorMetricsEnabledText"
-                defaultMessage="True"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentList.monitorMetricsDisabledText"
-                defaultMessage="False"
-              />
-            ),
+            description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+              agentPolicy?.monitoring_enabled?.includes('metrics') ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.monitorMetricsEnabledText"
+                  defaultMessage="True"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.agentList.monitorMetricsDisabledText"
+                  defaultMessage="False"
+                />
+              )
+            ) : null,
           },
         ].map(({ title, description }) => {
           return (
@@ -172,7 +172,9 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               </FlexItemWithMinWidth>
               <FlexItemWithMinWidth grow={7}>
-                <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+                <EuiDescriptionListDescription className="eui-textTruncate">
+                  {description}
+                </EuiDescriptionListDescription>
               </FlexItemWithMinWidth>
             </EuiFlexGroup>
           );

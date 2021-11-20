@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
@@ -26,14 +27,9 @@ export const track: TrackFn = (type, event, count) => {
 };
 
 export const initTelemetry = (
-  {
-    usageCollection,
-    telemetryManagementSection,
-  }: Pick<SetupPlugins, 'usageCollection' | 'telemetryManagementSection'>,
+  { usageCollection }: Pick<SetupPlugins, 'usageCollection'>,
   appId: string
 ) => {
-  telemetryManagementSection?.toggleSecuritySolutionExample(true);
-
   _track = usageCollection?.reportUiCounter?.bind(null, appId) ?? noop;
 };
 

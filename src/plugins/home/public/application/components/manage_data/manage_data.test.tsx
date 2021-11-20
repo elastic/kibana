@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { ManageData } from './manage_data';
 import { shallowWithIntl } from '@kbn/test/jest';
+import { ApplicationStart } from 'kibana/public';
+import { FeatureCatalogueEntry, FeatureCatalogueCategory } from '../../../services';
 
 jest.mock('../app_navigation_handler', () => {
   return {
@@ -18,6 +20,7 @@ jest.mock('../app_navigation_handler', () => {
 
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
+    share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
     trackUiMetric: jest.fn(),
   }),
 }));
@@ -26,11 +29,19 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+const applicationStartMock = {
+  capabilities: { navLinks: { management: true, dev_tools: true } },
+} as unknown as ApplicationStart;
+
+const applicationStartMockRestricted = {
+  capabilities: { navLinks: { management: false, dev_tools: false } },
+} as unknown as ApplicationStart;
+
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
-const mockFeatures = [
+const mockFeatures: FeatureCatalogueEntry[] = [
   {
-    category: 'admin',
+    category: FeatureCatalogueCategory.ADMIN,
     description: 'Control who has access and what tasks they can perform.',
     icon: 'securityApp',
     id: 'security',
@@ -40,7 +51,7 @@ const mockFeatures = [
     showOnHomePage: true,
   },
   {
-    category: 'admin',
+    category: FeatureCatalogueCategory.ADMIN,
     description: 'Track the real-time health and performance of your deployment.',
     icon: 'monitoringApp',
     id: 'monitoring',
@@ -50,7 +61,7 @@ const mockFeatures = [
     showOnHomePage: true,
   },
   {
-    category: 'admin',
+    category: FeatureCatalogueCategory.ADMIN,
     description:
       'Save snapshots to a backup repository, and restore to recover index and cluster state.',
     icon: 'storage',
@@ -61,7 +72,7 @@ const mockFeatures = [
     showOnHomePage: true,
   },
   {
-    category: 'admin',
+    category: FeatureCatalogueCategory.ADMIN,
     description: 'Define lifecycle policies to automatically perform operations as an index ages.',
     icon: 'indexSettings',
     id: 'index_lifecycle_management',
@@ -75,13 +86,30 @@ const mockFeatures = [
 describe('ManageData', () => {
   test('render', () => {
     const component = shallowWithIntl(
-      <ManageData addBasePath={addBasePathMock} features={mockFeatures} />
+      <ManageData
+        addBasePath={addBasePathMock}
+        application={applicationStartMock}
+        features={mockFeatures}
+      />
     );
     expect(component).toMatchSnapshot();
   });
 
-  test('render empty without any features', () => {
-    const component = shallowWithIntl(<ManageData addBasePath={addBasePathMock} features={[]} />);
+  test('render null without any features', () => {
+    const component = shallowWithIntl(
+      <ManageData addBasePath={addBasePathMock} application={applicationStartMock} features={[]} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('hide dev tools and stack management links if unavailable', () => {
+    const component = shallowWithIntl(
+      <ManageData
+        addBasePath={addBasePathMock}
+        application={applicationStartMockRestricted}
+        features={mockFeatures}
+      />
+    );
     expect(component).toMatchSnapshot();
   });
 });

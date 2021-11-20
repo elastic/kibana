@@ -1,31 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiHideFor,
-  EuiTitle,
-} from '@elastic/eui';
-import { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
+import React, { useCallback, useEffect, useState, useContext } from 'react';
+import dateMath from '@elastic/datemath';
+import moment from 'moment';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { Source } from '../../../../containers/metrics_source';
 import { InventoryMetric, InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useNodeDetails } from '../hooks/use_node_details';
 import { MetricsSideNav } from './side_nav';
-import { AutoSizer } from '../../../../components/auto_sizer';
 import { MetricsTimeControls } from './time_controls';
 import { SideNavContext, NavItem } from '../lib/side_nav_context';
 import { PageBody } from './page_body';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { InfraMetadata } from '../../../../../common/http_api/metadata_api';
 import { PageError } from './page_error';
 import { MetadataContext } from '../containers/metadata_context';
+import { MetricsPageTemplate } from '../../page_template';
 
 interface Props {
   name: string;
@@ -35,7 +30,6 @@ interface Props {
   nodeType: InventoryItemType;
   sourceId: string;
   timeRange: MetricsTimeInput;
-  parsedTimeRange: InfraTimerangeInput;
   metadataLoading: boolean;
   isAutoReloading: boolean;
   refreshInterval: number;
@@ -47,20 +41,36 @@ interface Props {
   triggerRefresh(): void;
   setTimeRange(timeRange: MetricsTimeInput): void;
 }
+
+const parseRange = (range: MetricsTimeInput) => {
+  const parsedFrom = dateMath.parse(range.from.toString());
+  const parsedTo = dateMath.parse(range.to.toString(), { roundUp: true });
+  return {
+    ...range,
+    from: (parsedFrom && parsedFrom.valueOf()) || moment().subtract(1, 'hour').valueOf(),
+    to: (parsedTo && parsedTo.valueOf()) || moment().valueOf(),
+  };
+};
+
 export const NodeDetailsPage = (props: Props) => {
-  const { parsedTimeRange } = props;
+  const { metricIndicesExist } = useContext(Source.Context);
+  const [parsedTimeRange, setParsedTimeRange] = useState(parseRange(props.timeRange));
   const { metrics, loading, makeRequest, error } = useNodeDetails(
     props.requiredMetrics,
     props.nodeId,
     props.nodeType,
     props.sourceId,
-    props.parsedTimeRange,
+    parsedTimeRange,
     props.cloudId
   );
 
   const refetch = useCallback(() => {
-    makeRequest();
-  }, [makeRequest]);
+    setParsedTimeRange(parseRange(props.timeRange));
+  }, [props.timeRange]);
+
+  useEffect(() => {
+    setParsedTimeRange(parseRange(props.timeRange));
+  }, [props.timeRange]);
 
   useEffect(() => {
     makeRequest();
@@ -71,69 +81,48 @@ export const NodeDetailsPage = (props: Props) => {
   }
 
   return (
-    <EuiPage style={{ flex: '1 0 auto' }}>
-      <MetricsSideNav loading={props.metadataLoading} name={props.name} items={props.sideNav} />
-      <AutoSizer content={false} bounds detectAnyWindowResize>
-        {({ bounds: { width = 0 } }) => {
-          const w = width ? `${width}px` : `100%`;
-          return (
-            <MetricsDetailsPageColumn>
-              <EuiPageBody style={{ width: w }}>
-                <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                  <EuiPageHeaderSection style={{ width: '100%' }}>
-                    <MetricsTitleTimeRangeContainer>
-                      <EuiHideFor sizes={['xs', 's']}>
-                        <EuiTitle size="m">
-                          <h1>{props.name}</h1>
-                        </EuiTitle>
-                      </EuiHideFor>
-                      <MetricsTimeControls
-                        currentTimeRange={props.timeRange}
-                        isLiveStreaming={props.isAutoReloading}
-                        refreshInterval={props.refreshInterval}
-                        setRefreshInterval={props.setRefreshInterval}
-                        onChangeTimeRange={props.setTimeRange}
-                        setAutoReload={props.setAutoReload}
-                        onRefresh={refetch}
-                      />
-                    </MetricsTitleTimeRangeContainer>
-                  </EuiPageHeaderSection>
-                </EuiPageHeader>
-                <SideNavContext.Provider
-                  value={{
-                    items: props.sideNav,
-                    addNavItem: props.addNavItem,
-                  }}
-                >
-                  <MetadataContext.Provider value={props.metadata}>
-                    <PageBody
-                      loading={metrics.length > 0 && props.isAutoReloading ? false : loading}
-                      refetch={refetch}
-                      type={props.nodeType}
-                      metrics={metrics}
-                      onChangeRangeTime={props.setTimeRange}
-                      isLiveStreaming={props.isAutoReloading}
-                      stopLiveStreaming={() => props.setAutoReload(false)}
-                    />
-                  </MetadataContext.Provider>
-                </SideNavContext.Provider>
-              </EuiPageBody>
-            </MetricsDetailsPageColumn>
-          );
-        }}
-      </AutoSizer>
-    </EuiPage>
+    <MetricsPageTemplate
+      hasData={metricIndicesExist}
+      pageHeader={{
+        pageTitle: props.name,
+        rightSideItems: [
+          <MetricsTimeControls
+            currentTimeRange={props.timeRange}
+            isLiveStreaming={props.isAutoReloading}
+            refreshInterval={props.refreshInterval}
+            setRefreshInterval={props.setRefreshInterval}
+            onChangeTimeRange={props.setTimeRange}
+            setAutoReload={props.setAutoReload}
+            onRefresh={refetch}
+          />,
+        ],
+      }}
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <MetricsSideNav loading={props.metadataLoading} name={props.name} items={props.sideNav} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SideNavContext.Provider
+            value={{
+              items: props.sideNav,
+              addNavItem: props.addNavItem,
+            }}
+          >
+            <MetadataContext.Provider value={props.metadata}>
+              <PageBody
+                loading={metrics.length > 0 && props.isAutoReloading ? false : loading}
+                refetch={refetch}
+                type={props.nodeType}
+                metrics={metrics}
+                onChangeRangeTime={props.setTimeRange}
+                isLiveStreaming={props.isAutoReloading}
+                stopLiveStreaming={() => props.setAutoReload(false)}
+              />
+            </MetadataContext.Provider>
+          </SideNavContext.Provider>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </MetricsPageTemplate>
   );
 };
-
-const MetricsDetailsPageColumn = euiStyled.div`
-  flex: 1 0 0%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const MetricsTitleTimeRangeContainer = euiStyled.div`
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-`;

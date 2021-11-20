@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreStart } from 'kibana/public';
@@ -17,8 +17,8 @@ import {
   SavedObjectEmbeddableInput,
 } from '../../services/embeddable';
 import { UnlinkFromLibraryAction } from '.';
-import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
@@ -29,6 +29,7 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '../../services/embeddable_test_samples';
+import { getStubPluginServices } from '../../../../presentation_util/public';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -55,6 +56,7 @@ beforeEach(async () => {
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreStart.http,
+    presentationUtil: getStubPluginServices(),
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ComponentType, memo } from 'react';
@@ -12,6 +13,8 @@ import { CurrentLicense } from '../../../../../common/components/current_license
 import { StartPlugins } from '../../../../../types';
 import { managementReducer } from '../../../../store/reducer';
 import { managementMiddlewareFactory } from '../../../../store/middleware';
+import { appReducer } from '../../../../../common/store/app';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 
 type ComposeType = typeof compose;
 declare global {
@@ -50,8 +53,16 @@ export const withSecurityContext = <P extends {}>({
       store = createStore(
         combineReducers({
           management: managementReducer,
+          app: appReducer,
         }),
-        { management: undefined },
+        {
+          management: undefined,
+          // ignore this error as we just need the enableExperimental and it's temporary
+          // @ts-expect-error TS2739
+          app: {
+            enableExperimental: ExperimentalFeaturesService.get(),
+          },
+        },
         composeEnhancers(applyMiddleware(...managementMiddlewareFactory(coreStart, depsStart)))
       );
     }

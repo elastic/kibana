@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { Space } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
-import { SpacesClient } from './spaces_client';
+import type { SpacesClient } from './spaces_client';
 
 const createSpacesClientMock = () =>
-  (({
+  ({
     getAll: jest.fn().mockResolvedValue([
       {
         id: DEFAULT_SPACE_ID,
@@ -28,7 +29,8 @@ const createSpacesClientMock = () =>
     create: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     update: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     delete: jest.fn(),
-  } as unknown) as jest.Mocked<SpacesClient>);
+    disableLegacyUrlAliases: jest.fn(),
+  } as unknown as jest.Mocked<SpacesClient>);
 
 export const spacesClientMock = {
   create: createSpacesClientMock,

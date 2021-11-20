@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { Query, IIndexPattern, Filter } from 'src/plugins/data/public';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTableType } from '../../store/model';
 import { HostsQueryProps } from '../types';
@@ -60,8 +61,8 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
     docValueFields?: DocValueFields[];
     indexNames: string[];
     pageFilters?: Filter[];
-    filterQuery: string;
-    indexPattern: IIndexPattern;
+    filterQuery?: string;
+    indexPattern: DataViewBase;
     type: hostsModel.HostsType;
   };
 

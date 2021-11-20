@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -55,6 +55,9 @@ describe('DateRangesParamEditor component', () => {
   });
 
   it('should validate range values with date math', function () {
+    const mockedConsoleWarn = jest.spyOn(console, 'warn'); // mocked console.warn to avoid console messages when running tests
+    mockedConsoleWarn.mockImplementation(() => {});
+
     const component = mountWithIntl(<DateRangesWrapped {...defaultProps} />);
 
     // should allow empty values
@@ -86,5 +89,7 @@ describe('DateRangesParamEditor component', () => {
 
     component.setProps({ value: [{ from: '5/5/2005+3d' }] });
     expect(setValidity).toHaveBeenNthCalledWith(10, false);
+
+    mockedConsoleWarn.mockRestore();
   });
 });

@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
   const pkgName = 'datastreams';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
@@ -21,6 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   const pkgUpdateKey = `${pkgName}-${pkgUpdateVersion}`;
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
+  const namespaces = ['default', 'foo', 'bar'];
 
   const uninstallPackage = async (pkg: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
@@ -35,86 +37,136 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('datastreams', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
+
     beforeEach(async () => {
       await installPackage(pkgKey);
-      await es.transport.request({
-        method: 'POST',
-        path: `/${logsTemplateName}-default/_doc`,
-        body: {
-          '@timestamp': '2015-01-01',
-          logs_test_name: 'test',
-          data_stream: {
-            dataset: `${pkgName}.test_logs`,
-            namespace: 'default',
-            type: 'logs',
-          },
-        },
-      });
-      await es.transport.request({
-        method: 'POST',
-        path: `/${metricsTemplateName}-default/_doc`,
-        body: {
-          '@timestamp': '2015-01-01',
-          logs_test_name: 'test',
-          data_stream: {
-            dataset: `${pkgName}.test_metrics`,
-            namespace: 'default',
-            type: 'metrics',
-          },
-        },
-      });
+      await Promise.all(
+        namespaces.map(async (namespace) => {
+          const createLogsRequest = es.transport.request(
+            {
+              method: 'POST',
+              path: `/${logsTemplateName}-${namespace}/_doc`,
+              body: {
+                '@timestamp': '2015-01-01',
+                logs_test_name: 'test',
+                data_stream: {
+                  dataset: `${pkgName}.test_logs`,
+                  namespace,
+                  type: 'logs',
+                },
+              },
+            },
+            { meta: true }
+          );
+          const createMetricsRequest = es.transport.request(
+            {
+              method: 'POST',
+              path: `/${metricsTemplateName}-${namespace}/_doc`,
+              body: {
+                '@timestamp': '2015-01-01',
+                logs_test_name: 'test',
+                data_stream: {
+                  dataset: `${pkgName}.test_metrics`,
+                  namespace,
+                  type: 'metrics',
+                },
+              },
+            },
+            { meta: true }
+          );
+          return Promise.all([createLogsRequest, createMetricsRequest]);
+        })
+      );
     });
+
     afterEach(async () => {
-      if (!server.enabled) return;
-      await es.transport.request({
-        method: 'DELETE',
-        path: `/_data_stream/${logsTemplateName}-default`,
-      });
-      await es.transport.request({
-        method: 'DELETE',
-        path: `/_data_stream/${metricsTemplateName}-default`,
-      });
+      await Promise.all(
+        namespaces.map(async (namespace) => {
+          const deleteLogsRequest = es.transport.request(
+            {
+              method: 'DELETE',
+              path: `/_data_stream/${logsTemplateName}-${namespace}`,
+            },
+            { meta: true }
+          );
+          const deleteMetricsRequest = es.transport.request(
+            {
+              method: 'DELETE',
+              path: `/_data_stream/${metricsTemplateName}-${namespace}`,
+            },
+            { meta: true }
+          );
+          return Promise.all([deleteLogsRequest, deleteMetricsRequest]);
+        })
+      );
       await uninstallPackage(pkgKey);
       await uninstallPackage(pkgUpdateKey);
     });
+
     it('should list the logs and metrics datastream', async function () {
-      const resLogsDatastream = await es.transport.request({
-        method: 'GET',
-        path: `/_data_stream/${logsTemplateName}-default`,
+      await asyncForEach(namespaces, async (namespace) => {
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${logsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
+        const resMetricsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${metricsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
+        expect(resLogsDatastream.body.data_streams.length).equal(1);
+        expect(resLogsDatastream.body.data_streams[0].indices.length).equal(1);
+        expect(resMetricsDatastream.body.data_streams.length).equal(1);
+        expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(1);
       });
-      const resMetricsDatastream = await es.transport.request({
-        method: 'GET',
-        path: `/_data_stream/${metricsTemplateName}-default`,
-      });
-      expect(resLogsDatastream.body.data_streams.length).equal(1);
-      expect(resLogsDatastream.body.data_streams[0].indices.length).equal(1);
-      expect(resMetricsDatastream.body.data_streams.length).equal(1);
-      expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(1);
     });
 
     it('after update, it should have rolled over logs datastream because mappings are not compatible and not metrics', async function () {
       await installPackage(pkgUpdateKey);
-      const resLogsDatastream = await es.transport.request({
-        method: 'GET',
-        path: `/_data_stream/${logsTemplateName}-default`,
+      await asyncForEach(namespaces, async (namespace) => {
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${logsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
+        const resMetricsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${metricsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
+        expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
+        expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(1);
       });
-      const resMetricsDatastream = await es.transport.request({
-        method: 'GET',
-        path: `/_data_stream/${metricsTemplateName}-default`,
-      });
-      expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
-      expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(1);
     });
+
     it('should be able to upgrade a package after a rollover', async function () {
-      await es.transport.request({
-        method: 'POST',
-        path: `/${logsTemplateName}-default/_rollover`,
+      await asyncForEach(namespaces, async (namespace) => {
+        await es.transport.request<any>(
+          {
+            method: 'POST',
+            path: `/${logsTemplateName}-${namespace}/_rollover`,
+          },
+          { meta: true }
+        );
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${logsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
+        expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
       });
-      const resLogsDatastream = await es.transport.request({
-        method: 'GET',
-        path: `/_data_stream/${logsTemplateName}-default`,
-      });
-      expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
       await installPackage(pkgUpdateKey);
     });
   });

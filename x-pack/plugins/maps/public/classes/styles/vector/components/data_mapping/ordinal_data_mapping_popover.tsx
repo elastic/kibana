@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -78,9 +79,9 @@ interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;
   styleName: VECTOR_STYLES;
   onChange: (updatedOptions: DynamicOptions) => void;
-  switchDisabled: boolean;
   dataMappingFunction: DATA_MAPPING_FUNCTION;
   supportedDataMappingFunctions: DATA_MAPPING_FUNCTION[];
+  supportsFieldMetaFromLocalData: boolean;
 }
 
 export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
@@ -167,8 +168,8 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
               })}
               checked={props.fieldMetaOptions.isEnabled}
               onChange={onIsEnabledChange}
+              disabled={!props.supportsFieldMetaFromLocalData}
               compressed
-              disabled={props.switchDisabled}
             />{' '}
             <EuiToolTip
               content={

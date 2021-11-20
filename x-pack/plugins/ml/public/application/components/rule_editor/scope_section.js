@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -17,14 +18,14 @@ import { ScopeExpression } from './scope_expression';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
-import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
+import { ML_PAGES } from '../../../../common/constants/locator';
+import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 
 function NoFilterListsCallOut() {
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
   const redirectToFilterManagementPage = async () => {
-    const path = await mlUrlGenerator.createUrl({
+    const path = await mlLocator.getUrl({
       page: ML_PAGES.FILTER_LISTS_MANAGE,
     });
     await navigateToPath(path, true);
@@ -44,7 +45,7 @@ function NoFilterListsCallOut() {
         <FormattedMessage
           id="xpack.ml.ruleEditor.scopeSection.createFilterListsDescription"
           defaultMessage="To configure scope, you must first use the&nbsp;{filterListsLink} settings page
-            to create the list of values you want to include or exclude in the rule."
+            to create the list of values you want to include or exclude in the job rule."
           values={{
             filterListsLink: (
               <EuiLink onClick={redirectToFilterManagementPage}>
@@ -133,7 +134,7 @@ export function ScopeSection({
         label={
           <FormattedMessage
             id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
-            defaultMessage="Add a filter list to limit where the rule applies."
+            defaultMessage="Add a filter list to limit where the job rule applies."
           />
         }
         checked={isEnabled}

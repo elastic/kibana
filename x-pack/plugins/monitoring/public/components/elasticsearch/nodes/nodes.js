@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -136,7 +137,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         <AlertsStatus
           showBadge={true}
           alerts={alerts}
-          stateFilter={(state) => state.nodeId === node.resolver}
+          stateFilter={(state) => (state.nodeId || state.nodeUuid) === node.resolver}
         />
       );
     },
@@ -297,15 +298,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const {
-    sorting,
-    pagination,
-    onTableChange,
-    clusterUuid,
-    setupMode,
-    fetchMoreData,
-    alerts,
-  } = props;
+  const { sorting, pagination, onTableChange, clusterUuid, setupMode, alerts } = props;
 
   const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts);
 
@@ -480,7 +473,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
               },
             }}
             onTableChange={onTableChange}
-            fetchMoreData={fetchMoreData}
+            {...props}
           />
         </EuiPageContent>
       </EuiPageBody>

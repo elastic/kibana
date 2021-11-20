@@ -1,14 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+import type { Client } from '@elastic/elasticsearch';
+import { SerializedConcreteTaskInstance } from '../../../../plugins/task_manager/server/task';
 
+export interface TaskManagerDoc {
+  type: string;
+  task: SerializedConcreteTaskInstance;
+}
 export class TaskManagerUtils {
-  private readonly es: any;
+  private readonly es: Client;
   private readonly retry: any;
 
-  constructor(es: any, retry: any) {
+  constructor(es: Client, retry: any) {
     this.es = es;
     this.retry = retry;
   }
@@ -29,7 +36,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     'task.scheduledAt': {
-                      gte: taskRunAtFilter,
+                      gte: taskRunAtFilter.getTime().toString(),
                     },
                   },
                 },
@@ -38,7 +45,9 @@ export class TaskManagerUtils {
           },
         },
       });
+      // @ts-expect-error
       if (searchResult.hits.total.value) {
+        // @ts-expect-error
         throw new Error(`Expected 0 tasks but received ${searchResult.hits.total.value}`);
       }
     });
@@ -60,7 +69,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     'task.scheduledAt': {
-                      gte: taskRunAtFilter,
+                      gte: taskRunAtFilter.getTime().toString(),
                     },
                   },
                 },
@@ -76,7 +85,9 @@ export class TaskManagerUtils {
           },
         },
       });
+      // @ts-expect-error
       if (searchResult.hits.total.value) {
+        // @ts-expect-error
         throw new Error(`Expected 0 non-idle tasks but received ${searchResult.hits.total.value}`);
       }
     });
@@ -98,7 +109,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     updated_at: {
-                      gte: createdAtFilter,
+                      gte: createdAtFilter.getTime().toString(),
                     },
                   },
                 },
@@ -107,8 +118,10 @@ export class TaskManagerUtils {
           },
         },
       });
+      // @ts-expect-error
       if (searchResult.hits.total.value) {
         throw new Error(
+          // @ts-expect-error
           `Expected 0 action_task_params objects but received ${searchResult.hits.total.value}`
         );
       }

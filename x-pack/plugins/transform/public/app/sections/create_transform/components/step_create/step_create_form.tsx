@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
@@ -11,7 +12,6 @@ import {
   EuiButton,
   EuiCard,
   EuiCopy,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -23,7 +23,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
+
+import {
+  DISCOVER_APP_URL_GENERATOR,
+  DiscoverUrlGeneratorState,
+} from '../../../../../../../../../src/plugins/discover/public';
 
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
@@ -35,16 +41,20 @@ import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
-import { getTransformProgress, getDiscoverUrl } from '../../../../common';
+import { getTransformProgress } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
-import { DuplicateIndexPatternError } from '../../../../../../../../../src/plugins/data/public';
+import { DuplicateDataViewError } from '../../../../../../../../../src/plugins/data/public';
 import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
+import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common';
+import { isPopulatedObject } from '../../../../../../common/shared_imports';
+import { isContinuousTransform, isLatestTransform } from '../../../../../../common/types/transform';
+import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -78,17 +88,50 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [loading, setLoading] = useState(false);
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
+    const [alertFlyoutVisible, setAlertFlyoutVisible] = useState(false);
     const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
     const [progressPercentComplete, setProgressPercentComplete] = useState<undefined | number>(
       undefined
     );
+    const [discoverLink, setDiscoverLink] = useState<string>();
 
     const deps = useAppDependencies();
     const indexPatterns = deps.data.indexPatterns;
     const toastNotifications = useToastNotifications();
+    const { getUrlGenerator } = deps.share.urlGenerators;
+    const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
+      let unmounted = false;
+
       onChange({ created, started, indexPatternId });
+
+      const getDiscoverUrl = async (): Promise<void> => {
+        const state: DiscoverUrlGeneratorState = {
+          indexPatternId,
+        };
+
+        let discoverUrlGenerator;
+        try {
+          discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
+        } catch (error) {
+          // ignore error thrown when url generator is not available
+          return;
+        }
+
+        const discoverUrl = await discoverUrlGenerator.createUrl(state);
+        if (!unmounted) {
+          setDiscoverLink(discoverUrl);
+        }
+      };
+
+      if (started === true && indexPatternId !== undefined && isDiscoverAvailable) {
+        getDiscoverUrl();
+      }
+
+      return () => {
+        unmounted = true;
+      };
       // custom comparison
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
@@ -187,22 +230,29 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
 
     const createKibanaIndexPattern = async () => {
       setLoading(true);
-      const indexPatternName = transformConfig.dest.index;
+      const dataViewName = transformConfig.dest.index;
+      const runtimeMappings = transformConfig.source.runtime_mappings as Record<
+        string,
+        RuntimeField
+      >;
 
       try {
         const newIndexPattern = await indexPatterns.createAndSave(
           {
-            title: indexPatternName,
+            title: dataViewName,
             timeFieldName,
+            ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
+              ? { runtimeFieldMap: runtimeMappings }
+              : {}),
           },
           false,
           true
         );
 
         toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.createIndexPatternSuccessMessage', {
-            defaultMessage: 'Kibana index pattern {indexPatternName} created successfully.',
-            values: { indexPatternName },
+          i18n.translate('xpack.transform.stepCreateForm.createDataViewSuccessMessage', {
+            defaultMessage: 'Kibana data view {dataViewName} created successfully.',
+            values: { dataViewName },
           })
         );
 
@@ -210,20 +260,19 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
         setLoading(false);
         return true;
       } catch (e) {
-        if (e instanceof DuplicateIndexPatternError) {
+        if (e instanceof DuplicateDataViewError) {
           toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepCreateForm.duplicateIndexPatternErrorMessage', {
+            i18n.translate('xpack.transform.stepCreateForm.duplicateDataViewErrorMessage', {
               defaultMessage:
-                'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
-              values: { indexPatternName },
+                'An error occurred creating the Kibana data view {dataViewName}: The data view already exists.',
+              values: { dataViewName },
             })
           );
         } else {
           toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
-              defaultMessage:
-                'An error occurred creating the Kibana index pattern {indexPatternName}:',
-              values: { indexPatternName },
+            title: i18n.translate('xpack.transform.stepCreateForm.createDataViewErrorMessage', {
+              defaultMessage: 'An error occurred creating the Kibana data view {dataViewName}:',
+              values: { dataViewName },
             }),
             text: toMountPoint(
               <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
@@ -351,6 +400,31 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
+          {isContinuousTransform(transformConfig) && created ? (
+            <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+              <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+                <EuiButton
+                  fill
+                  isDisabled={loading}
+                  onClick={setAlertFlyoutVisible.bind(null, true)}
+                  data-test-subj="transformWizardCreateAlertButton"
+                >
+                  <FormattedMessage
+                    id="xpack.transform.stepCreateForm.createAlertRuleButton"
+                    defaultMessage="Create alert rule"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('xpack.transform.stepCreateForm.createAlertRuleDescription', {
+                    defaultMessage:
+                      'Opens a wizard to create an alert rule for monitoring transform health.',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
           <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
               <EuiButton
@@ -367,7 +441,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.transform.stepCreateForm.createTransformDescription', {
                   defaultMessage:
-                    'Create the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
+                    'Creates the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -432,8 +506,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           {created && (
             <Fragment>
               <EuiHorizontalRule />
-              <EuiFlexGrid gutterSize="l">
-                <EuiFlexItem style={PANEL_ITEM_STYLE}>
+              <EuiFlexGroup gutterSize="l">
+                <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="list" />}
                     title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
@@ -450,15 +524,15 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   />
                 </EuiFlexItem>
                 {started === true && createIndexPattern === true && indexPatternId === undefined && (
-                  <EuiFlexItem style={PANEL_ITEM_STYLE}>
+                  <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                     <EuiPanel style={{ position: 'relative' }}>
                       <EuiProgress size="xs" color="primary" position="absolute" />
                       <EuiText color="subdued" size="s">
                         <p>
                           {i18n.translate(
-                            'xpack.transform.stepCreateForm.creatingIndexPatternMessage',
+                            'xpack.transform.stepCreateForm.creatingDataViewMessage',
                             {
-                              defaultMessage: 'Creating Kibana index pattern ...',
+                              defaultMessage: 'Creating Kibana data view ...',
                             }
                           )}
                         </p>
@@ -466,8 +540,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                     </EuiPanel>
                   </EuiFlexItem>
                 )}
-                {started === true && indexPatternId !== undefined && (
-                  <EuiFlexItem style={PANEL_ITEM_STYLE}>
+                {isDiscoverAvailable && discoverLink !== undefined && (
+                  <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                     <EuiCard
                       icon={<EuiIcon size="xxl" type="discoverApp" />}
                       title={i18n.translate('xpack.transform.stepCreateForm.discoverCardTitle', {
@@ -479,15 +553,21 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                           defaultMessage: 'Use Discover to explore the transform.',
                         }
                       )}
-                      href={getDiscoverUrl(indexPatternId, deps.http.basePath.get())}
+                      href={discoverLink}
                       data-test-subj="transformWizardCardDiscover"
                     />
                   </EuiFlexItem>
                 )}
-              </EuiFlexGrid>
+              </EuiFlexGroup>
             </Fragment>
           )}
         </EuiForm>
+        {alertFlyoutVisible ? (
+          <TransformAlertFlyout
+            ruleParams={{ includeTransforms: [transformId] }}
+            onCloseFlyout={setAlertFlyoutVisible.bind(null, false)}
+          />
+        ) : null}
       </div>
     );
   }

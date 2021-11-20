@@ -1,20 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 
 import {
-  getOperatorType,
-  getExceptionOperatorSelect,
   getFormattedComments,
-  filterExceptionItems,
-  getNewExceptionItem,
   formatOperatingSystems,
-  getEntryValue,
   formatExceptionItemForUpdate,
   enrichNewExceptionItemsWithComments,
   enrichExistingExceptionItemWithComments,
@@ -23,36 +20,76 @@ import {
   entryHasNonEcsType,
   prepareExceptionItemsForBulkClose,
   lowercaseHashValues,
-  getPrepopulatedItem,
-  getCodeSignatureValue,
+  getPrepopulatedEndpointException,
   defaultEndpointExceptionItems,
+  getFileCodeSignature,
+  getProcessCodeSignature,
+  retrieveAlertOsTypes,
+  filterIndexPatterns,
+  getCodeSignatureValue,
 } from './helpers';
-import { EmptyEntry } from './types';
+import { AlertData, Flattened } from './types';
 import {
-  isOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isNotOneOfOperator,
-  isInListOperator,
-  isNotInListOperator,
-  existsOperator,
-  doesNotExistOperator,
-} from '../autocomplete/operators';
-import { OperatorTypeEnum, OperatorEnum, EntryNested } from '../../../shared_imports';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
-import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/entry_match_any.mock';
-import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
-import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
-import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
-import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
-import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
+  ListOperatorTypeEnum as OperatorTypeEnum,
   EntriesArray,
   OsTypeArray,
-} from '../../../../../lists/common/schemas';
-import { IIndexPattern } from 'src/plugins/data/common';
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
+import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
+import { fields } from '../../../../../../../src/plugins/data/common/mocks';
+import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
+import { CodeSignature } from '../../../../common/ecs/file';
+import type { DataViewBase } from '@kbn/es-query';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123'),
+}));
+
+const getMockIndexPattern = (): DataViewBase => ({
+  fields,
+  id: '1234',
+  title: 'logstash-*',
+});
+
+const mockEndpointFields = [
+  {
+    name: 'file.path.caseless',
+    type: 'string',
+    esTypes: ['keyword'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+  {
+    name: 'file.Ext.code_signature.status',
+    type: 'string',
+    esTypes: ['text'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+    subType: { nested: { path: 'file.Ext.code_signature' } },
+  },
+];
+
+const mockLinuxEndpointFields = [
+  {
+    name: 'file.path',
+    type: 'string',
+    esTypes: ['keyword'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+];
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -63,125 +100,32 @@ describe('Exception helpers', () => {
     moment.tz.setDefault('Browser');
   });
 
-  describe('#getOperatorType', () => {
-    test('returns operator type "match" if entry.type is "match"', () => {
-      const payload = getEntryMatchMock();
-      const operatorType = getOperatorType(payload);
+  describe('#filterIndexPatterns', () => {
+    test('it returns index patterns without filtering if list type is "detection"', () => {
+      const mockIndexPatterns = getMockIndexPattern();
+      const output = filterIndexPatterns(mockIndexPatterns, 'detection', ['windows']);
 
-      expect(operatorType).toEqual(OperatorTypeEnum.MATCH);
+      expect(output).toEqual(mockIndexPatterns);
     });
 
-    test('returns operator type "match_any" if entry.type is "match_any"', () => {
-      const payload = getEntryMatchAnyMock();
-      const operatorType = getOperatorType(payload);
+    test('it returns filtered index patterns if list type is "endpoint"', () => {
+      const mockIndexPatterns = {
+        ...getMockIndexPattern(),
+        fields: [...fields, ...mockEndpointFields],
+      };
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['windows']);
 
-      expect(operatorType).toEqual(OperatorTypeEnum.MATCH_ANY);
+      expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockEndpointFields] });
     });
 
-    test('returns operator type "list" if entry.type is "list"', () => {
-      const payload = getEntryListMock();
-      const operatorType = getOperatorType(payload);
+    test('it returns filtered index patterns if list type is "endpoint" and os contains "linux"', () => {
+      const mockIndexPatterns = {
+        ...getMockIndexPattern(),
+        fields: [...fields, ...mockLinuxEndpointFields],
+      };
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['linux']);
 
-      expect(operatorType).toEqual(OperatorTypeEnum.LIST);
-    });
-
-    test('returns operator type "exists" if entry.type is "exists"', () => {
-      const payload = getEntryExistsMock();
-      const operatorType = getOperatorType(payload);
-
-      expect(operatorType).toEqual(OperatorTypeEnum.EXISTS);
-    });
-  });
-
-  describe('#getExceptionOperatorSelect', () => {
-    test('it returns "isOperator" when "operator" is "included" and operator type is "match"', () => {
-      const payload = getEntryMatchMock();
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isOperator);
-    });
-
-    test('it returns "isNotOperator" when "operator" is "excluded" and operator type is "match"', () => {
-      const payload = getEntryMatchMock();
-      payload.operator = 'excluded';
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isNotOperator);
-    });
-
-    test('it returns "isOneOfOperator" when "operator" is "included" and operator type is "match_any"', () => {
-      const payload = getEntryMatchAnyMock();
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isOneOfOperator);
-    });
-
-    test('it returns "isNotOneOfOperator" when "operator" is "excluded" and operator type is "match_any"', () => {
-      const payload = getEntryMatchAnyMock();
-      payload.operator = 'excluded';
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isNotOneOfOperator);
-    });
-
-    test('it returns "existsOperator" when "operator" is "included" and no operator type is provided', () => {
-      const payload = getEntryExistsMock();
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(existsOperator);
-    });
-
-    test('it returns "doesNotExistsOperator" when "operator" is "excluded" and no operator type is provided', () => {
-      const payload = getEntryExistsMock();
-      payload.operator = 'excluded';
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(doesNotExistOperator);
-    });
-
-    test('it returns "isInList" when "operator" is "included" and operator type is "list"', () => {
-      const payload = getEntryListMock();
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isInListOperator);
-    });
-
-    test('it returns "isNotInList" when "operator" is "excluded" and operator type is "list"', () => {
-      const payload = getEntryListMock();
-      payload.operator = 'excluded';
-      const result = getExceptionOperatorSelect(payload);
-
-      expect(result).toEqual(isNotInListOperator);
-    });
-  });
-
-  describe('#getEntryValue', () => {
-    it('returns "match" entry value', () => {
-      const payload = getEntryMatchMock();
-      const result = getEntryValue(payload);
-      const expected = 'some host name';
-      expect(result).toEqual(expected);
-    });
-
-    it('returns "match any" entry values', () => {
-      const payload = getEntryMatchAnyMock();
-      const result = getEntryValue(payload);
-      const expected = ['some host name'];
-      expect(result).toEqual(expected);
-    });
-
-    it('returns "exists" entry value', () => {
-      const payload = getEntryExistsMock();
-      const result = getEntryValue(payload);
-      const expected = undefined;
-      expect(result).toEqual(expected);
-    });
-
-    it('returns "list" entry value', () => {
-      const payload = getEntryListMock();
-      const result = getEntryValue(payload);
-      const expected = 'some-list-id';
-      expect(result).toEqual(expected);
+      expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockLinuxEndpointFields] });
     });
   });
 
@@ -225,116 +169,6 @@ describe('Exception helpers', () => {
     });
   });
 
-  describe('#filterExceptionItems', () => {
-    test('it removes entry items with "value" of "undefined"', () => {
-      const { entries, ...rest } = getExceptionListItemSchemaMock();
-      const mockEmptyException: EmptyEntry = {
-        field: 'host.name',
-        type: OperatorTypeEnum.MATCH,
-        operator: OperatorEnum.INCLUDED,
-        value: undefined,
-      };
-      const exceptions = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
-    });
-
-    test('it removes "match" entry items with "value" of empty string', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EmptyEntry = {
-        field: 'host.name',
-        type: OperatorTypeEnum.MATCH,
-        operator: OperatorEnum.INCLUDED,
-        value: '',
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
-    });
-
-    test('it removes "match" entry items with "field" of empty string', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EmptyEntry = {
-        field: '',
-        type: OperatorTypeEnum.MATCH,
-        operator: OperatorEnum.INCLUDED,
-        value: 'some value',
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
-    });
-
-    test('it removes "match_any" entry items with "field" of empty string', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EmptyEntry = {
-        field: '',
-        type: OperatorTypeEnum.MATCH_ANY,
-        operator: OperatorEnum.INCLUDED,
-        value: ['some value'],
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
-    });
-
-    test('it removes "nested" entry items with "field" of empty string', () => {
-      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
-      const mockEmptyException: EntryNested = {
-        field: '',
-        type: OperatorTypeEnum.NESTED,
-        entries: [getEntryMatchMock()],
-      };
-      const output: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema
-      > = filterExceptionItems([
-        {
-          ...rest,
-          entries: [...entries, mockEmptyException],
-        },
-      ]);
-
-      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
-    });
-
-    test('it removes `temporaryId` from items', () => {
-      const { meta, ...rest } = getNewExceptionItem({
-        listId: '123',
-        namespaceType: 'single',
-        ruleName: 'rule name',
-      });
-      const exceptions = filterExceptionItems([{ ...rest, meta }]);
-
-      expect(exceptions).toEqual([{ ...rest, entries: [], meta: undefined }]);
-    });
-  });
-
   describe('#formatExceptionItemForUpdate', () => {
     test('it should return correct update fields', () => {
       const payload = getExceptionListItemSchemaMock();
@@ -348,7 +182,7 @@ describe('Exception helpers', () => {
         meta: {},
         name: 'some name',
         namespace_type: 'single',
-        os_types: ['linux'],
+        os_types: [],
         tags: ['user added string for a tag', 'malware'],
         type: 'simple',
       };
@@ -460,6 +294,25 @@ describe('Exception helpers', () => {
     });
   });
 
+  describe('#retrieveAlertOsTypes', () => {
+    test('it should retrieve os type if alert data is provided', () => {
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        host: { os: { family: 'windows' } },
+      };
+      const result = retrieveAlertOsTypes(alertDataMock);
+      const expected = ['windows'];
+      expect(result).toEqual(expected);
+    });
+
+    test('it should return default os types if alert data is not provided', () => {
+      const result = retrieveAlertOsTypes();
+      const expected = ['windows', 'macos'];
+      expect(result).toEqual(expected);
+    });
+  });
+
   describe('#entryHasListType', () => {
     test('it should return false with an empty array', () => {
       const payload: ExceptionListItemSchema[] = [];
@@ -486,6 +339,17 @@ describe('Exception helpers', () => {
     });
   });
 
+  describe('#getCodeSignatureValue', () => {
+    test('it should return empty string if code_signature nested value are undefined', () => {
+      // Using the unsafe casting because with our types this shouldn't be possible but there have been issues with old data having undefined values in these fields
+      const payload = [{ trusted: undefined, subject_name: undefined }] as unknown as Flattened<
+        CodeSignature[]
+      >;
+      const result = getCodeSignatureValue(payload);
+      expect(result).toEqual([{ trusted: '', subjectName: '' }]);
+    });
+  });
+
   describe('#entryHasNonEcsType', () => {
     const mockEcsIndexPattern = {
       title: 'testIndex',
@@ -500,7 +364,7 @@ describe('Exception helpers', () => {
           name: 'nested.field',
         },
       ],
-    } as IIndexPattern;
+    } as DataViewBase;
 
     test('it should return false with an empty array', () => {
       const payload: ExceptionListItemSchema[] = [];
@@ -633,76 +497,95 @@ describe('Exception helpers', () => {
   });
 
   describe('getPrepopulatedItem', () => {
-    test('it returns prepopulated items', () => {
-      const prepopulatedItem = getPrepopulatedItem({
+    const alertDataMock: AlertData = {
+      '@timestamp': '1234567890',
+      _id: 'test-id',
+      file: { path: 'some-file-path', hash: { sha256: 'some-hash' } },
+    };
+    test('it returns prepopulated fields with empty values', () => {
+      const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: '', trusted: '' },
-        filePath: '',
-        sha256Hash: '',
         eventCode: '',
+        alertEcsData: { ...alertDataMock, file: { path: '', hash: { sha256: '' } } },
       });
 
       expect(prepopulatedItem.entries).toEqual([
         {
           entries: [
-            { field: 'subject_name', operator: 'included', type: 'match', value: '' },
-            { field: 'trusted', operator: 'included', type: 'match', value: '' },
+            { id: '123', field: 'subject_name', operator: 'included', type: 'match', value: '' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: '' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
-        { field: 'file.path.caseless', operator: 'included', type: 'match', value: '' },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
-        { field: 'event.code', operator: 'included', type: 'match', value: '' },
+        { id: '123', field: 'file.path.caseless', operator: 'included', type: 'match', value: '' },
+        { id: '123', field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
+        { id: '123', field: 'event.code', operator: 'included', type: 'match', value: '' },
       ]);
     });
 
-    test('it returns prepopulated items with values', () => {
-      const prepopulatedItem = getPrepopulatedItem({
+    test('it returns prepopulated items with actual values', () => {
+      const prepopulatedItem = getPrepopulatedEndpointException({
         listId: 'some_id',
         ruleName: 'my rule',
         codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
-        filePath: 'some-file-path',
-        sha256Hash: 'some-hash',
         eventCode: 'some-event-code',
+        alertEcsData: alertDataMock,
       });
 
       expect(prepopulatedItem.entries).toEqual([
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'someSubjectName',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some-file-path',
         },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some-hash' },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'some-event-code' },
+        {
+          id: '123',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some-hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some-event-code',
+        },
       ]);
     });
   });
 
-  describe('getCodeSignatureValue', () => {
+  describe('getFileCodeSignature', () => {
     test('it works when file.Ext.code_signature is an object', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
           Ext: {
             code_signature: {
-              subject_name: ['some_subject'],
-              trusted: ['false'],
+              subject_name: 'some_subject',
+              trusted: 'false',
             },
           },
         },
@@ -712,13 +595,13 @@ describe('Exception helpers', () => {
     });
 
     test('it works when file.Ext.code_signature is nested type', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
           Ext: {
             code_signature: [
-              { subject_name: ['some_subject'], trusted: ['false'] },
-              { subject_name: ['some_subject_2'], trusted: ['true'] },
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
             ],
           },
         },
@@ -734,11 +617,11 @@ describe('Exception helpers', () => {
     });
 
     test('it returns default when file.Ext.code_signatures values are empty', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
           Ext: {
-            code_signature: { subject_name: [], trusted: [] },
+            code_signature: { subject_name: '', trusted: '' },
           },
         },
       });
@@ -747,7 +630,7 @@ describe('Exception helpers', () => {
     });
 
     test('it returns default when file.Ext.code_signatures is empty array', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
           Ext: {
@@ -760,7 +643,81 @@ describe('Exception helpers', () => {
     });
 
     test('it returns default when file.Ext.code_signatures does not exist', () => {
-      const codeSignatures = getCodeSignatureValue({
+      const codeSignatures = getFileCodeSignature({
+        _id: '123',
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+  });
+
+  describe('getProcessCodeSignature', () => {
+    test('it works when file.Ext.code_signature is an object', () => {
+      const codeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: {
+              subject_name: 'some_subject',
+              trusted: 'false',
+            },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: 'some_subject', trusted: 'false' }]);
+    });
+
+    test('it works when file.Ext.code_signature is nested type', () => {
+      const codeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
+            ],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([
+        { subjectName: 'some_subject', trusted: 'false' },
+        {
+          subjectName: 'some_subject_2',
+          trusted: 'true',
+        },
+      ]);
+    });
+
+    test('it returns default when file.Ext.code_signatures values are empty', () => {
+      const codeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: { subject_name: '', trusted: '' },
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures is empty array', () => {
+      const codeSignatures = getProcessCodeSignature({
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: [],
+          },
+        },
+      });
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default when file.Ext.code_signatures does not exist', () => {
+      const codeSignatures = getProcessCodeSignature({
         _id: '123',
       });
 
@@ -769,23 +726,23 @@ describe('Exception helpers', () => {
   });
 
   describe('defaultEndpointExceptionItems', () => {
-    test('it should return pre-populated items', () => {
+    test('it should return pre-populated Endpoint items for non-specified event code', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         file: {
           Ext: {
             code_signature: [
-              { subject_name: ['some_subject'], trusted: ['false'] },
-              { subject_name: ['some_subject_2'], trusted: ['true'] },
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
             ],
           },
-          path: ['some file path'],
+          path: 'some file path',
           hash: {
-            sha256: ['some hash'],
+            sha256: 'some hash',
           },
         },
         event: {
-          code: ['some event code'],
+          code: 'some event code',
         },
       });
 
@@ -793,47 +750,773 @@ describe('Exception helpers', () => {
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+        {
+          id: '123',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some event code',
+        },
       ]);
       expect(defaultItems[1].entries).toEqual([
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject_2',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'true' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+        {
+          id: '123',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some event code',
+        },
+      ]);
+    });
+  });
+  describe('ransomware protection exception items', () => {
+    test('it should return pre-populated ransomware items for event code `ransomware`', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
+            ],
+          },
+          executable: 'some file path',
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        Ransomware: {
+          feature: 'some ransomware feature',
+        },
+        event: {
+          code: 'ransomware',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          entries: [
+            {
+              id: '123',
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+          id: '123',
+        },
+        {
+          id: '123',
+          field: 'process.executable',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
+          field: 'Ransomware.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'some ransomware feature',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'ransomware',
+        },
+      ]);
+      expect(defaultItems[1].entries).toEqual([
+        {
+          entries: [
+            {
+              id: '123',
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject_2',
+            },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+          id: '123',
+        },
+        {
+          id: '123',
+          field: 'process.executable',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
+          field: 'Ransomware.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'some ransomware feature',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'ransomware',
+        },
+      ]);
+    });
+  });
+
+  describe('memory protection exception items', () => {
+    test('it should return pre-populated memory signature items for event code `memory_signature`', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: 'some name',
+          executable: 'some file path',
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'signature',
+        },
+        event: {
+          code: 'memory_signature',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'signature',
+          id: '123',
+        },
+        {
+          field: 'process.executable.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+          id: '123',
+        },
+        {
+          field: 'process.name.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some name',
+          id: '123',
+        },
+        {
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+          id: '123',
+        },
+      ]);
+    });
+
+    test('it should return pre-populated memory signature items for event code `memory_signature` and skip Empty', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: '', // name is empty
+          // executable: '',  left intentionally commented
+          hash: {
+            sha256: 'some hash',
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'signature',
+        },
+        event: {
+          code: 'memory_signature',
+        },
+      });
+
+      // should not contain name or executable
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'signature',
+          id: '123',
+        },
+        {
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+          id: '123',
+        },
+      ]);
+    });
+
+    test('it should return pre-populated memory shellcode items for event code `shellcode_thread`', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: 'some name',
+          executable: 'some file path',
+          Ext: {
+            token: {
+              integrity_level_name: 'high',
+            },
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'shellcode_thread',
+          self_injection: true,
+        },
+        event: {
+          code: 'shellcode_thread',
+        },
+        Target: {
+          process: {
+            thread: {
+              Ext: {
+                start_address_allocation_offset: 0,
+                start_address_bytes_disasm_hash: 'a disam hash',
+                start_address_details: {
+                  allocation_type: 'PRIVATE',
+                  allocation_size: 4000,
+                  region_size: 4000,
+                  region_protection: 'RWX',
+                  memory_pe: {
+                    imphash: 'a hash',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'shellcode_thread',
+          id: '123',
+        },
+        {
+          field: 'Memory_protection.self_injection',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+          id: '123',
+        },
+        {
+          field: 'process.executable.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+          id: '123',
+        },
+        {
+          field: 'process.name.caseless',
+          operator: 'included',
+          type: 'match',
+          value: 'some name',
+          id: '123',
+        },
+        {
+          field: 'process.Ext.token.integrity_level_name',
+          operator: 'included',
+          type: 'match',
+          value: 'high',
+          id: '123',
+        },
+      ]);
+    });
+
+    test('it should return pre-populated memory shellcode items for event code `shellcode_thread` and skip empty', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        process: {
+          name: '', // name is empty
+          // executable: '',  left intentionally commented
+          Ext: {
+            token: {
+              integrity_level_name: 'high',
+            },
+          },
+        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: {
+          feature: 'shellcode_thread',
+          self_injection: true,
+        },
+        event: {
+          code: 'shellcode_thread',
+        },
+        Target: {
+          process: {
+            thread: {
+              Ext: {
+                start_address_allocation_offset: 0,
+                start_address_bytes_disasm_hash: 'a disam hash',
+                start_address_details: {
+                  // allocation_type: '', left intentionally commented
+                  allocation_size: 4000,
+                  region_size: 4000,
+                  region_protection: 'RWX',
+                  memory_pe: {
+                    imphash: 'a hash',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // no name, no exceutable, no allocation_type
+      expect(defaultItems[0].entries).toEqual([
+        {
+          field: 'Memory_protection.feature',
+          operator: 'included',
+          type: 'match',
+          value: 'shellcode_thread',
+          id: '123',
+        },
+        {
+          field: 'Memory_protection.self_injection',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+          id: '123',
+        },
+        {
+          field: 'process.Ext.token.integrity_level_name',
+          operator: 'included',
+          type: 'match',
+          value: 'high',
+          id: '123',
+        },
+      ]);
+    });
+  });
+  describe('behavior protection exception items', () => {
+    test('it should return pre-populated behavior protection items', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        rule: {
+          id: '123',
+        },
+        process: {
+          command_line: 'command_line',
+          executable: 'some file path',
+          parent: {
+            executable: 'parent file path',
+          },
+          code_signature: {
+            subject_name: 'subject-name',
+            trusted: 'true',
+          },
+        },
+        event: {
+          code: 'behavior',
+        },
+        file: {
+          path: 'fake-file-path',
+          name: 'fake-file-name',
+        },
+        source: {
+          ip: '0.0.0.0',
+        },
+        destination: {
+          ip: '0.0.0.0',
+        },
+        registry: {
+          path: 'registry-path',
+          value: 'registry-value',
+          data: {
+            strings: 'registry-strings',
+          },
+        },
+        dll: {
+          path: 'dll-path',
+          code_signature: {
+            subject_name: 'dll-code-signature-subject-name',
+            trusted: 'false',
+          },
+          pe: {
+            original_file_name: 'dll-pe-original-file-name',
+          },
+        },
+        dns: {
+          question: {
+            name: 'dns-question-name',
+            type: 'dns-question-type',
+          },
+        },
+        user: {
+          id: '0987',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          id: '123',
+          field: 'rule.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '123',
+        },
+        {
+          id: '123',
+          field: 'process.executable.caseless',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'process.command_line',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'command_line',
+        },
+        {
+          id: '123',
+          field: 'process.parent.executable',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'parent file path',
+        },
+        {
+          id: '123',
+          field: 'process.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'subject-name',
+        },
+        {
+          id: '123',
+          field: 'file.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-path',
+        },
+        {
+          id: '123',
+          field: 'file.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-name',
+        },
+        {
+          id: '123',
+          field: 'source.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'destination.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'registry.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-path',
+        },
+        {
+          id: '123',
+          field: 'registry.value',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-value',
+        },
+        {
+          id: '123',
+          field: 'registry.data.strings',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-strings',
+        },
+        {
+          id: '123',
+          field: 'dll.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-path',
+        },
+        {
+          id: '123',
+          field: 'dll.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-code-signature-subject-name',
+        },
+        {
+          id: '123',
+          field: 'dll.pe.original_file_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-pe-original-file-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.type',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-type',
+        },
+        {
+          id: '123',
+          field: 'user.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0987',
+        },
+      ]);
+    });
+    test('it should return pre-populated behavior protection fields and skip empty', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        rule: {
+          id: '123',
+        },
+        process: {
+          // command_line: 'command_line', intentionally left commented
+          executable: 'some file path',
+          parent: {
+            executable: 'parent file path',
+          },
+          code_signature: {
+            subject_name: 'subject-name',
+            trusted: 'true',
+          },
+        },
+        event: {
+          code: 'behavior',
+        },
+        file: {
+          // path: 'fake-file-path', intentionally left commented
+          name: 'fake-file-name',
+        },
+        source: {
+          ip: '0.0.0.0',
+        },
+        destination: {
+          ip: '0.0.0.0',
+        },
+        // intentionally left commented
+        // registry: {
+        // path: 'registry-path',
+        // value: 'registry-value',
+        // data: {
+        // strings: 'registry-strings',
+        // },
+        // },
+        dll: {
+          path: 'dll-path',
+          code_signature: {
+            subject_name: 'dll-code-signature-subject-name',
+            trusted: 'false',
+          },
+          pe: {
+            original_file_name: 'dll-pe-original-file-name',
+          },
+        },
+        dns: {
+          question: {
+            name: 'dns-question-name',
+            type: 'dns-question-type',
+          },
+        },
+        user: {
+          id: '0987',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          id: '123',
+          field: 'rule.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '123',
+        },
+        {
+          id: '123',
+          field: 'process.executable.caseless',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'process.parent.executable',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'parent file path',
+        },
+        {
+          id: '123',
+          field: 'process.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'subject-name',
+        },
+        {
+          id: '123',
+          field: 'file.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-name',
+        },
+        {
+          id: '123',
+          field: 'source.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'destination.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'dll.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-path',
+        },
+        {
+          id: '123',
+          field: 'dll.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-code-signature-subject-name',
+        },
+        {
+          id: '123',
+          field: 'dll.pe.original_file_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-pe-original-file-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.type',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-type',
+        },
+        {
+          id: '123',
+          field: 'user.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0987',
+        },
       ]);
     });
   });

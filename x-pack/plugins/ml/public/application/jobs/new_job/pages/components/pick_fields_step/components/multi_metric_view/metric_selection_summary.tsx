@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
@@ -15,9 +16,12 @@ import { ChartGrid } from './chart_grid';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export const MultiMetricDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
 
   const jobCreator = jc as MultiMetricJobCreator;
 
@@ -40,7 +44,11 @@ export const MultiMetricDetectorsSummary: FC = () => {
     (async () => {
       if (jobCreator.splitField !== null) {
         try {
-          const tempFieldValues = await chartLoader.loadFieldExampleValues(jobCreator.splitField);
+          const tempFieldValues = await chartLoader.loadFieldExampleValues(
+            jobCreator.splitField,
+            jobCreator.runtimeMappings,
+            jobCreator.datafeedConfig.indices_options
+          );
           setFieldValues(tempFieldValues);
         } catch (error) {
           getToastNotificationService().displayErrorToast(error);
@@ -71,7 +79,9 @@ export const MultiMetricDetectorsSummary: FC = () => {
           jobCreator.aggFieldPairs,
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
-          cs.intervalMs
+          cs.intervalMs,
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
         );
         setLineChartsData(resp);
       } catch (error) {

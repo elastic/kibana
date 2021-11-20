@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-const babelEslint = require('babel-eslint');
+const babelEslint = require('@babel/eslint-parser');
 
 const { assert, normalizeWhitespace, init } = require('../lib');
 
@@ -38,7 +38,7 @@ module.exports = {
 
           assert(!!license, '"license" option is required');
 
-          const parsed = babelEslint.parse(license);
+          const parsed = babelEslint.parse(license, { requireConfigFile: false });
           assert(!parsed.body.length, '"license" option must only include a single comment');
           assert(
             parsed.comments.length === 1,

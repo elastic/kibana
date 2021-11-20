@@ -1,16 +1,5 @@
-.kbnOverviewWrapper {
-  background-color: $euiColorEmptyShade;
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
-}
-
-.kbnOverviewContent {
-  margin: 0 auto;
-  max-width: 1200px;
-  padding: $euiSizeXL $euiSize;
-  width: 100%;
-
+.kbnOverviewApps__item,
+.kbnOverviewMore__item {
   // Ensure card heights are stretched equally when wrapped with this element
   .kbnRedirectCrossAppLinks {
     align-items: flex-start;
@@ -57,12 +46,22 @@
   }
 }
 
-.kbnOverviewSolution__icon {
-  background-color: $euiColorEmptyShade !important;
-  box-shadow: none !important;
-  height: $euiSizeL * 2;
-  padding: $euiSizeM;
-  width: $euiSizeL * 2;
+.kbnOverviewSolution {
+  &.enterpriseSearch {
+    .euiCard__image {
+      background-color: $euiColorWarning;
+    }
+  }
+  &.observability {
+    .euiCard__image {
+      background-color: $euiColorAccent;
+    }
+  }
+  &.securitySolution {
+    .euiCard__image {
+      background-color: $euiColorSuccess;
+    }
+  }
 }
 
 .kbnOverviewSupplements--noNews .kbnOverviewMore {
@@ -87,11 +86,6 @@
     margin-bottom: 0 !important;
     margin-top: 0 !important;
   }
-}
-
-// Accounting for no `flush="both"` prop on EuiButtonEmpty
-.kbnOverviewDataAdd__actionButton {
-  margin-right: 0;
 }
 
 .kbnOverviewDataManage__item:not(:only-child) {

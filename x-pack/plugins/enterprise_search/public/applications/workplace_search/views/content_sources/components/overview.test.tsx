@@ -1,26 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import '../../../../__mocks__/shallow_useeffect.mock';
-
-import { setMockValues } from '../../../../__mocks__';
-
-import React from 'react';
-import { shallow } from 'enzyme';
-
-import { EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
-
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { fullContentSources } from '../../../__mocks__/content_sources.mock';
 
-import { Loading } from '../../../../shared/loading';
+import React from 'react';
+
+import { shallow } from 'enzyme';
+
+import { EuiConfirmModal, EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
+
 import { ComponentLoader } from '../../../components/shared/component_loader';
 
 import { Overview } from './overview';
 
 describe('Overview', () => {
+  const initializeSourceSynchronization = jest.fn();
   const contentSource = fullContentSources[0];
   const dataLoading = false;
   const isOrganization = true;
@@ -33,6 +32,7 @@ describe('Overview', () => {
 
   beforeEach(() => {
     setMockValues({ ...mockValues });
+    setMockActions({ initializeSourceSynchronization });
   });
 
   it('renders', () => {
@@ -41,13 +41,6 @@ describe('Overview', () => {
 
     expect(documentSummary).toHaveLength(1);
     expect(documentSummary.find('[data-test-subj="DocumentSummaryRow"]')).toHaveLength(1);
-  });
-
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<Overview />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders ComponentLoader when loading', () => {
@@ -126,5 +119,15 @@ describe('Overview', () => {
     const wrapper = shallow(<Overview />);
 
     expect(wrapper.find('[data-test-subj="DocumentPermissionsDisabled"]')).toHaveLength(1);
+  });
+
+  it('handles confirmModal submission', () => {
+    const wrapper = shallow(<Overview />);
+    const button = wrapper.find('[data-test-subj="SyncButton"]');
+    button.prop('onClick')!({} as any);
+    const modal = wrapper.find(EuiConfirmModal);
+    modal.prop('onConfirm')!({} as any);
+
+    expect(initializeSourceSynchronization).toHaveBeenCalled();
   });
 });

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
@@ -19,7 +21,7 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../../common/util/validation_utils';
 import { ml } from '../../../../services/ml_api_service';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 
 export interface RichDetector {
   agg: Aggregation | null;
@@ -27,9 +29,10 @@ export interface RichDetector {
   byField: SplitField;
   overField: SplitField;
   partitionField: SplitField;
-  excludeFrequent: string | null;
+  excludeFrequent: estypes.MlExcludeFrequent | null;
   description: string | null;
   customRules: CustomRule[] | null;
+  useNull: boolean | null;
 }
 
 export class AdvancedJobCreator extends JobCreator {
@@ -37,11 +40,7 @@ export class AdvancedJobCreator extends JobCreator {
   private _richDetectors: RichDetector[] = [];
   private _queryString: string;
 
-  constructor(
-    indexPattern: IndexPattern,
-    savedSearch: SavedSearchSavedObject | null,
-    query: object
-  ) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     super(indexPattern, savedSearch, query);
 
     this._queryString = JSON.stringify(this._datafeed_config.query);
@@ -55,8 +54,9 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
-    description: string | null
+    excludeFrequent: estypes.MlExcludeFrequent | null,
+    description: string | null,
+    useNull: boolean | null
   ) {
     // addDetector doesn't support adding new custom rules.
     // this will be added in the future once it's supported in the UI
@@ -69,7 +69,8 @@ export class AdvancedJobCreator extends JobCreator {
       partitionField,
       excludeFrequent,
       description,
-      customRules
+      customRules,
+      useNull
     );
 
     this._addDetector(detector, agg, field);
@@ -82,9 +83,10 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.MlExcludeFrequent | null,
     description: string | null,
-    index: number
+    index: number,
+    useNull: boolean | null
   ) {
     const customRules =
       this._detectors[index] !== undefined ? this._detectors[index].custom_rules || null : null;
@@ -97,7 +99,8 @@ export class AdvancedJobCreator extends JobCreator {
       partitionField,
       excludeFrequent,
       description,
-      customRules
+      customRules,
+      useNull
     );
 
     this._editDetector(detector, agg, field, index);
@@ -113,9 +116,10 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.MlExcludeFrequent | null,
     description: string | null,
-    customRules: CustomRule[] | null
+    customRules: CustomRule[] | null,
+    useNull: boolean | null
   ): { detector: Detector; richDetector: RichDetector } {
     const detector: Detector = createBasicDetector(agg, field);
 
@@ -137,6 +141,9 @@ export class AdvancedJobCreator extends JobCreator {
     if (customRules !== null) {
       detector.custom_rules = customRules;
     }
+    if (useNull !== null) {
+      detector.use_null = useNull;
+    }
 
     const richDetector: RichDetector = {
       agg,
@@ -147,6 +154,7 @@ export class AdvancedJobCreator extends JobCreator {
       excludeFrequent,
       description,
       customRules,
+      useNull,
     };
 
     return { detector, richDetector };
@@ -176,16 +184,14 @@ export class AdvancedJobCreator extends JobCreator {
   // load the start and end times for the selected index
   // and apply them to the job creator
   public async autoSetTimeRange() {
-    try {
-      const { start, end } = await ml.getTimeFieldRange({
-        index: this._indexPatternTitle,
-        timeFieldName: this.timeFieldName,
-        query: this.query,
-      });
-      this.setTimeRange(start.epoch, end.epoch);
-    } catch (error) {
-      throw Error(error);
-    }
+    const { start, end } = await ml.getTimeFieldRange({
+      index: this._indexPatternTitle,
+      timeFieldName: this.timeFieldName,
+      query: this.query,
+      runtimeMappings: this.datafeedConfig.runtime_mappings,
+      indicesOptions: this.datafeedConfig.indices_options,
+    });
+    this.setTimeRange(start.epoch, end.epoch);
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
@@ -208,7 +214,8 @@ export class AdvancedJobCreator extends JobCreator {
           dtr.overField,
           dtr.partitionField,
           dtr.excludeFrequent,
-          dtr.description
+          dtr.description,
+          dtr.useNull
         );
       }
     });

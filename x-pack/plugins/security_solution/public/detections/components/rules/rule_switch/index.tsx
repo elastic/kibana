@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -16,9 +17,8 @@ import styled from 'styled-components';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
 import * as i18n from '../../../pages/detection_engine/rules/translations';
-import { enableRules } from '../../../containers/detection_engine/rules';
+import { enableRules, RulesTableAction } from '../../../containers/detection_engine/rules';
 import { enableRulesAction } from '../../../pages/detection_engine/rules/all/actions';
-import { Action } from '../../../pages/detection_engine/rules/all/reducer';
 import { useStateToaster, displayErrorToast } from '../../../../common/components/toasters';
 import { bucketRulesResponse } from '../../../pages/detection_engine/rules/all/helpers';
 
@@ -32,7 +32,7 @@ const StaticSwitch = styled(EuiSwitch)`
 StaticSwitch.displayName = 'StaticSwitch';
 
 export interface RuleSwitchProps {
-  dispatch?: React.Dispatch<Action>;
+  dispatch?: React.Dispatch<RulesTableAction>;
   id: string;
   enabled: boolean;
   isDisabled?: boolean;
@@ -61,9 +61,9 @@ export const RuleSwitchComponent = ({
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
       if (dispatch != null) {
-        await enableRulesAction([id], event.target.checked!, dispatch, dispatchToaster);
+        await enableRulesAction([id], event.target.checked, dispatch, dispatchToaster);
       } else {
-        const enabling = event.target.checked!;
+        const enabling = event.target.checked;
         const title = enabling
           ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(1)
           : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(1);
@@ -109,7 +109,7 @@ export const RuleSwitchComponent = ({
 
   const showLoader = useMemo((): boolean => {
     if (myIsLoading !== isLoading) {
-      return isLoading ?? false;
+      return isLoading || myIsLoading;
     }
 
     return myIsLoading;

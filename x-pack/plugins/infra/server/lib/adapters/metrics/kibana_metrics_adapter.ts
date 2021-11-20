@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
@@ -20,6 +22,7 @@ import {
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { isVisSeriesData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;
@@ -33,8 +36,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     options: InfraMetricsRequestOptions,
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
-    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
-    const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
+    const indexPattern = `${options.sourceConfiguration.metricAlias}`;
+    const fields = findInventoryFields(options.nodeType);
     const nodeField = fields.id;
 
     const search = <Aggregation>(searchOptions: object) =>
@@ -58,7 +61,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     return Promise.all(requests)
       .then((results) => {
-        return results.map((result) => {
+        return results.filter(isVisSeriesData).map((result) => {
           const metricIds = Object.keys(result).filter(
             (k) => !['type', 'uiRestrictions'].includes(k)
           );
@@ -81,7 +84,10 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
                 return {
                   id: series.id,
                   label: series.label,
-                  data: series.data.map((point) => ({ timestamp: point[0], value: point[1] })),
+                  data: series.data.map((point) => ({
+                    timestamp: point[0] as number,
+                    value: point[1] as number | null,
+                  })),
                 };
               }),
             };
@@ -111,17 +117,13 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       );
     }
 
-    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
+    const indexPattern = `${options.sourceConfiguration.metricAlias}`;
     const timerange = {
       min: options.timerange.from,
       max: options.timerange.to,
     };
 
-    const model = createTSVBModel(
-      options.sourceConfiguration.fields.timestamp,
-      indexPattern,
-      options.timerange.interval
-    );
+    const model = createTSVBModel(TIMESTAMP_FIELD, indexPattern, options.timerange.interval);
 
     const client = <Hit = {}, Aggregation = undefined>(
       opts: CallWithRequestParams
@@ -131,8 +133,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     const calculatedInterval = await calculateMetricInterval(
       client,
       {
-        indexPattern: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
-        timestampField: options.sourceConfiguration.fields.timestamp,
+        indexPattern: `${options.sourceConfiguration.metricAlias}`,
         timerange: options.timerange,
       },
       model.requires

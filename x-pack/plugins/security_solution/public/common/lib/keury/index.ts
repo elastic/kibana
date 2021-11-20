@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty, isString, flow } from 'lodash/fp';
@@ -10,34 +11,29 @@ import {
   EsQueryConfig,
   Query,
   Filter,
-  esQuery,
-  esKuery,
-  IIndexPattern,
-} from '../../../../../../../src/plugins/data/public';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
+  buildEsQuery,
+  toElasticsearchQuery,
+  fromKueryExpression,
+  DataViewBase,
+} from '@kbn/es-query';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern?: IIndexPattern
+  indexPattern?: DataViewBase
 ) => {
   try {
     return kueryExpression
-      ? JSON.stringify(
-          esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
-        )
+      ? JSON.stringify(toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern))
       : '';
   } catch (err) {
     return '';
   }
 };
 
-export const convertKueryToDslFilter = (
-  kueryExpression: string,
-  indexPattern: IIndexPattern
-): JsonObject => {
+export const convertKueryToDslFilter = (kueryExpression: string, indexPattern: DataViewBase) => {
   try {
     return kueryExpression
-      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
+      ? toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
       : {};
   } catch (err) {
     return {};
@@ -76,23 +72,26 @@ export const convertToBuildEsQuery = ({
   filters,
 }: {
   config: EsQueryConfig;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   queries: Query[];
   filters: Filter[];
-}) => {
+}): [string, undefined] | [undefined, Error] => {
   try {
-    return JSON.stringify(
-      esQuery.buildEsQuery(
-        indexPattern,
-        queries,
-        filters.filter((f) => f.meta.disabled === false),
-        {
-          ...config,
-          dateFormatTZ: undefined,
-        }
-      )
-    );
-  } catch (exp) {
-    return '';
+    return [
+      JSON.stringify(
+        buildEsQuery(
+          indexPattern,
+          queries,
+          filters.filter((f) => f.meta.disabled === false),
+          {
+            ...config,
+            dateFormatTZ: undefined,
+          }
+        )
+      ),
+      undefined,
+    ];
+  } catch (error) {
+    return [undefined, error];
   }
 };

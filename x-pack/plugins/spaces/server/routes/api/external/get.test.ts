@@ -1,27 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as Rx from 'rxjs';
-import {
-  createSpaces,
-  createMockSavedObjectsRepository,
-  mockRouteContextWithInvalidLicense,
-  mockRouteContext,
-} from '../__fixtures__';
-import { initGetSpaceApi } from './get';
+
 import { kibanaResponseFactory } from 'src/core/server';
 import {
-  loggingSystemMock,
-  httpServiceMock,
-  httpServerMock,
   coreMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
-import { SpacesService } from '../../../spaces_service';
+
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
+import { SpacesService } from '../../../spaces_service';
 import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
+import {
+  createMockSavedObjectsRepository,
+  createSpaces,
+  mockRouteContext,
+  mockRouteContextWithInvalidLicense,
+} from '../__fixtures__';
+import { initGetSpaceApi } from './get';
 
 describe('GET space', () => {
   const spacesSavedObjects = createSpaces();

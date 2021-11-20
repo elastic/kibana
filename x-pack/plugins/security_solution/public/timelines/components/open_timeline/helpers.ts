@@ -1,33 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
-import { oneTimelineQuery } from '../../containers/one/index.gql_query';
-import {
-  TimelineResult,
-  GetOneTimeline,
-  NoteResult,
-  FilterTimelineResult,
-  ColumnHeaderResult,
-  PinnedEvent,
-  DataProviderResult,
-} from '../../../graphql/types';
 
 import {
+  ColumnHeaderOptions,
   DataProviderType,
   TimelineId,
   TimelineStatus,
   TimelineType,
   TimelineTabs,
+  TimelineResult,
+  SingleTimelineResolveResponse,
+  ColumnHeaderResult,
+  FilterTimelineResult,
+  DataProviderResult,
 } from '../../../../common/types/timeline';
 
 import {
@@ -43,7 +39,7 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {
@@ -55,7 +51,12 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../timeline/body/constants';
 
-import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
+import {
+  OpenTimelineResult,
+  UpdateTimeline,
+  DispatchUpdateTimeline,
+  TimelineErrorCallback,
+} from './types';
 import { createNote } from '../notes/helpers';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
@@ -65,6 +66,9 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
+import { resolveTimeline } from '../../containers/api';
+import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import { NoteResult } from '../../../../common/types/timeline/note';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -116,7 +120,8 @@ const setTimelineColumn = (col: ColumnHeaderResult) =>
     {
       columnHeaderType: defaultColumnHeaderType,
       id: col.id != null ? col.id : 'unknown',
-      width: col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+      initialWidth:
+        col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
     }
   );
 
@@ -201,9 +206,11 @@ const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) => 
   if (dataProvider.type === DataProviderType.template) {
     return deepMerge(dataProvider, {
       type: DataProviderType.default,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       enabled: dataProvider.queryMatch!.operator !== IS_OPERATOR,
       queryMatch: {
         value:
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           dataProvider.queryMatch!.operator === IS_OPERATOR ? '' : dataProvider.queryMatch!.value,
       },
     });
@@ -258,6 +265,7 @@ export const defaultTimelineToTimelineModel = (
   const timelineEntries = {
     ...timeline,
     columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
+    defaultColumns: defaultHeaders,
     dateRange:
       timeline.status === TimelineStatus.immutable &&
       timeline.timelineType === TimelineType.template
@@ -309,11 +317,11 @@ export const formatTimelineResultToModel = (
 
 export interface QueryTimelineById<TCache> {
   activeTimelineTab?: TimelineTabs;
-  apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
   graphEventId?: string;
   timelineId: string;
   timelineType?: TimelineType;
+  onError?: TimelineErrorCallback;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   updateIsLoading: ({
@@ -328,144 +336,154 @@ export interface QueryTimelineById<TCache> {
 
 export const queryTimelineById = <TCache>({
   activeTimelineTab = TimelineTabs.query,
-  apolloClient,
   duplicate = false,
   graphEventId = '',
   timelineId,
   timelineType,
+  onError,
   onOpenTimeline,
   openTimeline = true,
   updateIsLoading,
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
   updateIsLoading({ id: TimelineId.active, isLoading: true });
-  if (apolloClient) {
-    apolloClient
-      .query<GetOneTimeline.Query, GetOneTimeline.Variables>({
-        query: oneTimelineQuery,
-        fetchPolicy: 'no-cache',
-        variables: { id: timelineId },
-      })
-      .then((result) => {
-        const timelineToOpen: TimelineResult = omitTypenameInTimeline(
-          getOr({}, 'data.getOneTimeline', result)
-        );
+  Promise.resolve(resolveTimeline(timelineId))
+    .then((result) => {
+      const data: SingleTimelineResolveResponse['data'] | null = getOr(null, 'data', result);
+      if (!data) return;
 
-        const { timeline, notes } = formatTimelineResultToModel(
-          timelineToOpen,
+      const timelineToOpen = omitTypenameInTimeline(data.timeline);
+
+      const { timeline, notes } = formatTimelineResultToModel(
+        timelineToOpen,
+        duplicate,
+        timelineType
+      );
+
+      if (onOpenTimeline != null) {
+        onOpenTimeline(timeline);
+      } else if (updateTimeline) {
+        const { from, to } = normalizeTimeRange({
+          from: getOr(null, 'dateRange.start', timeline),
+          to: getOr(null, 'dateRange.end', timeline),
+        });
+        updateTimeline({
           duplicate,
-          timelineType
-        );
-
-        if (onOpenTimeline != null) {
-          onOpenTimeline(timeline);
-        } else if (updateTimeline) {
-          const { from, to } = normalizeTimeRange({
-            from: getOr(null, 'dateRange.start', timeline),
-            to: getOr(null, 'dateRange.end', timeline),
-          });
-          updateTimeline({
-            duplicate,
-            from,
-            id: TimelineId.active,
-            notes,
-            timeline: {
-              ...timeline,
-              activeTab: activeTimelineTab,
-              graphEventId,
-              show: openTimeline,
-              dateRange: { start: from, end: to },
-            },
-            to,
-          })();
-        }
-      })
-      .finally(() => {
-        updateIsLoading({ id: TimelineId.active, isLoading: false });
-      });
-  }
-};
-
-export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
-  duplicate,
-  id,
-  forceNotes = false,
-  from,
-  notes,
-  timeline,
-  to,
-  ruleNote,
-}: UpdateTimeline): (() => void) => () => {
-  if (!isEmpty(timeline.indexNames)) {
-    dispatch(
-      sourcererActions.initTimelineIndexPatterns({
-        id: SourcererScopeName.timeline,
-        selectedPatterns: timeline.indexNames,
-        eventType: timeline.eventType,
-      })
-    );
-  }
-  if (
-    timeline.status === TimelineStatus.immutable &&
-    timeline.timelineType === TimelineType.template
-  ) {
-    dispatch(
-      dispatchSetRelativeRangeDatePicker({
-        id: 'timeline',
-        fromStr: 'now-24h',
-        toStr: 'now',
-        from: DEFAULT_FROM_MOMENT.toISOString(),
-        to: DEFAULT_TO_MOMENT.toISOString(),
-      })
-    );
-  } else {
-    dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
-  }
-  dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
-  if (
-    timeline.kqlQuery != null &&
-    timeline.kqlQuery.filterQuery != null &&
-    timeline.kqlQuery.filterQuery.kuery != null &&
-    timeline.kqlQuery.filterQuery.kuery.expression !== ''
-  ) {
-    dispatch(
-      dispatchApplyKqlFilterQuery({
-        id,
-        filterQuery: {
-          kuery: {
-            kind: 'kuery',
-            expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+          from,
+          id: TimelineId.active,
+          notes,
+          resolveTimelineConfig: {
+            outcome: data.outcome,
+            alias_target_id: data.alias_target_id,
           },
-          serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',
-        },
-      })
-    );
-  }
-
-  if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-    const newNote = createNote({ newNote: ruleNote });
-    dispatch(dispatchUpdateNote({ note: newNote }));
-    dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
-  }
-
-  if (!duplicate || forceNotes) {
-    dispatch(
-      dispatchAddNotes({
-        notes:
-          notes != null
-            ? notes.map((note: NoteResult) => ({
-                created: note.created != null ? new Date(note.created) : new Date(),
-                id: note.noteId,
-                lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
-                note: note.note || '',
-                user: note.updatedBy || 'unknown',
-                saveObjectId: note.noteId,
-                version: note.version,
-                eventId: note.eventId ?? null,
-                timelineId: note.timelineId ?? null,
-              }))
-            : [],
-      })
-    );
-  }
+          timeline: {
+            ...timeline,
+            activeTab: activeTimelineTab,
+            graphEventId,
+            show: openTimeline,
+            dateRange: { start: from, end: to },
+          },
+          to,
+        })();
+      }
+    })
+    .catch((error) => {
+      if (onError != null) {
+        onError(error, timelineId);
+      }
+    })
+    .finally(() => {
+      updateIsLoading({ id: TimelineId.active, isLoading: false });
+    });
 };
+
+export const dispatchUpdateTimeline =
+  (dispatch: Dispatch): DispatchUpdateTimeline =>
+  ({
+    duplicate,
+    id,
+    forceNotes = false,
+    from,
+    notes,
+    resolveTimelineConfig,
+    timeline,
+    to,
+    ruleNote,
+  }: UpdateTimeline): (() => void) =>
+  () => {
+    if (!isEmpty(timeline.indexNames)) {
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.timeline,
+          selectedDataViewId: timeline.dataViewId,
+          selectedPatterns: timeline.indexNames,
+          eventType: timeline.eventType,
+        })
+      );
+    }
+    if (
+      timeline.status === TimelineStatus.immutable &&
+      timeline.timelineType === TimelineType.template
+    ) {
+      dispatch(
+        dispatchSetRelativeRangeDatePicker({
+          id: 'timeline',
+          fromStr: 'now-24h',
+          toStr: 'now',
+          from: DEFAULT_FROM_MOMENT.toISOString(),
+          to: DEFAULT_TO_MOMENT.toISOString(),
+        })
+      );
+    } else {
+      dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
+    }
+    dispatch(
+      dispatchAddTimeline({ id, timeline, resolveTimelineConfig, savedTimeline: duplicate })
+    );
+    if (
+      timeline.kqlQuery != null &&
+      timeline.kqlQuery.filterQuery != null &&
+      timeline.kqlQuery.filterQuery.kuery != null &&
+      timeline.kqlQuery.filterQuery.kuery.expression !== ''
+    ) {
+      dispatch(
+        dispatchApplyKqlFilterQuery({
+          id,
+          filterQuery: {
+            kuery: {
+              kind: timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
+              expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
+            },
+            serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',
+          },
+        })
+      );
+    }
+
+    if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
+      const newNote = createNote({ newNote: ruleNote });
+      dispatch(dispatchUpdateNote({ note: newNote }));
+      dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
+    }
+
+    if (!duplicate || forceNotes) {
+      dispatch(
+        dispatchAddNotes({
+          notes:
+            notes != null
+              ? notes.map((note: NoteResult) => ({
+                  created: note.created != null ? new Date(note.created) : new Date(),
+                  id: note.noteId,
+                  lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
+                  note: note.note || '',
+                  user: note.updatedBy || 'unknown',
+                  saveObjectId: note.noteId,
+                  version: note.version,
+                  eventId: note.eventId ?? null,
+                  timelineId: note.timelineId ?? null,
+                }))
+              : [],
+        })
+      );
+    }
+  };

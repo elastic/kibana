@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
-import { DevToolsSettings } from '../../services';
+import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
 import { TextObject } from '../../../common/text_object';
+import { SenseEditor } from '../models';
 
 export interface Store {
   ready: boolean;
@@ -21,15 +22,15 @@ export interface Store {
 export const initialValue: Store = produce<Store>(
   {
     ready: false,
-    settings: null as any,
+    settings: DEFAULT_SETTINGS,
     currentTextObject: null,
   },
   identity
 );
 
 export type Action =
-  | { type: 'setInputEditor'; payload: any }
-  | { type: 'setCurrentTextObject'; payload: any }
+  | { type: 'setInputEditor'; payload: SenseEditor }
+  | { type: 'setCurrentTextObject'; payload: TextObject }
   | { type: 'updateSettings'; payload: DevToolsSettings };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>

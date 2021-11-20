@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const fetch = require('node-fetch');
@@ -194,10 +194,22 @@ exports.Artifact = class Artifact {
    * @param {string} dest
    * @return {Promise<void>}
    */
-  async download(dest) {
+  async download(dest, { useCached = false }) {
     await retry(this._log, async () => {
       const cacheMeta = cache.readMeta(dest);
       const tmpPath = `${dest}.tmp`;
+
+      if (useCached) {
+        if (cacheMeta.exists) {
+          this._log.info(
+            'use-cached passed, forcing to use existing snapshot',
+            chalk.bold(cacheMeta.ts)
+          );
+          return;
+        } else {
+          this._log.info('use-cached passed but no cached snapshot found. Continuing to download');
+        }
+      }
 
       const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
       if (artifactResp.cached) {

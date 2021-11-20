@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { machineLearningRule } from '../../objects/rule';
+import { getMachineLearningRule } from '../../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -45,12 +46,11 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeToThreeHundredRowsPerPage,
+  changeRowsPerPageTo100,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -62,13 +62,13 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules, machine learning', () => {
-  const expectedUrls = machineLearningRule.referenceUrls.join('');
-  const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
-  const expectedTags = machineLearningRule.tags.join('');
-  const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
+  const expectedUrls = getMachineLearningRule().referenceUrls.join('');
+  const expectedFalsePositives = getMachineLearningRule().falsePositivesExamples.join('');
+  const expectedTags = getMachineLearningRule().tags.join('');
+  const expectedMitre = formatMitreAttackDescription(getMachineLearningRule().mitre);
   const expectedNumberOfRules = 1;
 
   beforeEach(() => {
@@ -76,22 +76,21 @@ describe('Detection rules, machine learning', () => {
   });
 
   it('Creates and activates a new ml rule', () => {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     goToCreateNewRule();
     selectMachineLearningRuleType();
-    fillDefineMachineLearningRuleAndContinue(machineLearningRule);
-    fillAboutRuleAndContinue(machineLearningRule);
-    fillScheduleRuleAndContinue(machineLearningRule);
+    fillDefineMachineLearningRuleAndContinue(getMachineLearningRule());
+    fillAboutRuleAndContinue(getMachineLearningRule());
+    fillScheduleRuleAndContinue(getMachineLearningRule());
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    changeRowsPerPageTo100();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -102,18 +101,18 @@ describe('Detection rules, machine learning', () => {
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
     });
-    cy.get(RULE_NAME).should('have.text', machineLearningRule.name);
-    cy.get(RISK_SCORE).should('have.text', machineLearningRule.riskScore);
-    cy.get(SEVERITY).should('have.text', machineLearningRule.severity);
+    cy.get(RULE_NAME).should('have.text', getMachineLearningRule().name);
+    cy.get(RISK_SCORE).should('have.text', getMachineLearningRule().riskScore);
+    cy.get(SEVERITY).should('have.text', getMachineLearningRule().severity);
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name}`);
-    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', machineLearningRule.description);
+    cy.get(RULE_NAME_HEADER).should('contain', `${getMachineLearningRule().name}`);
+    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getMachineLearningRule().description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS).should('have.text', machineLearningRule.severity);
-      getDetails(RISK_SCORE_DETAILS).should('have.text', machineLearningRule.riskScore);
+      getDetails(SEVERITY_DETAILS).should('have.text', getMachineLearningRule().severity);
+      getDetails(RISK_SCORE_DETAILS).should('have.text', getMachineLearningRule().riskScore);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
         expect(removeExternalLinkText(details.text())).equal(expectedUrls);
       });
@@ -126,21 +125,23 @@ describe('Detection rules, machine learning', () => {
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(ANOMALY_SCORE_DETAILS).should(
         'have.text',
-        machineLearningRule.anomalyScoreThreshold
+        getMachineLearningRule().anomalyScoreThreshold
       );
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'Stopped');
-      cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', machineLearningRule.machineLearningJob);
+      getMachineLearningRule().machineLearningJobs.forEach((machineLearningJob, jobIndex) => {
+        cy.get(MACHINE_LEARNING_JOB_STATUS).eq(jobIndex).should('have.text', 'Stopped');
+        cy.get(MACHINE_LEARNING_JOB_ID).eq(jobIndex).should('have.text', machineLearningJob);
+      });
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS).should(
         'have.text',
-        `${machineLearningRule.runsEvery.interval}${machineLearningRule.runsEvery.type}`
+        `${getMachineLearningRule().runsEvery.interval}${getMachineLearningRule().runsEvery.type}`
       );
       getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
         'have.text',
-        `${machineLearningRule.lookBack.interval}${machineLearningRule.lookBack.type}`
+        `${getMachineLearningRule().lookBack.interval}${getMachineLearningRule().lookBack.type}`
       );
     });
   });

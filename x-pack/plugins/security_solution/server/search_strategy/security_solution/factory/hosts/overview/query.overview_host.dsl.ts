@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { HostOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 export const buildOverviewHostQuery = ({
@@ -26,9 +28,10 @@ export const buildOverviewHostQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         auditd_count: {
@@ -287,9 +290,9 @@ export const buildOverviewHostQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
-  };
+  } as const;
 
+  // @ts-expect-error @elastic-elasticsearch readonly [] is not assignable to mutable QueryDslQueryContainer[]
   return dslQuery;
 };

@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, mapTo, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
@@ -23,13 +23,15 @@ function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
-> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput> {
+> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput>
+{
   static runtimeId: number = 0;
 
   public readonly runtimeId = Embeddable.runtimeId++;
 
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
+  public readonly deferEmbeddableLoad: boolean = false;
   public abstract readonly type: string;
   public readonly id: string;
   public fatalError?: Error;
@@ -46,7 +48,7 @@ export abstract class Embeddable<
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
-  private destroyed: boolean = false;
+  protected destroyed: boolean = false;
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
@@ -109,12 +111,11 @@ export abstract class Embeddable<
    * Merges input$ and output$ streams and debounces emit till next macro-task.
    * Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously.
    * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
-   * which allows to skip any state handling in case `reload` already handled it.
+   * which allows to skip state handling in case `reload` already handled it.
    */
-  public getUpdated$(): Readonly<Rx.Observable<void>> {
+  public getUpdated$(): Readonly<Rx.Observable<TEmbeddableInput | TEmbeddableOutput>> {
     return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
-      debounceTime(0),
-      mapTo(undefined)
+      debounceTime(0)
     );
   }
 
@@ -183,7 +184,7 @@ export abstract class Embeddable<
 
   /**
    * Called when this embeddable is no longer used, this should be the place for
-   * implementors to add any additional clean up tasks, like unmounting and unsubscribing.
+   * implementors to add additional clean up tasks, like un-mounting and unsubscribing.
    */
   public destroy(): void {
     this.destroyed = true;
@@ -195,6 +196,16 @@ export abstract class Embeddable<
       this.parentSubscription.unsubscribe();
     }
     return;
+  }
+
+  /**
+   * communicate to the parent embeddable that this embeddable's initialization is finished.
+   * This only applies to embeddables which defer their loading state with deferEmbeddableLoad.
+   */
+  protected setInitializationFinished() {
+    if (this.deferEmbeddableLoad && this.parent?.isContainer) {
+      this.parent.setChildLoaded(this);
+    }
   }
 
   protected updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
@@ -211,6 +222,11 @@ export abstract class Embeddable<
   protected onFatalError(e: Error) {
     this.fatalError = e;
     this.output$.error(e);
+    // if the container is waiting for this embeddable to complete loading,
+    // a fatal error counts as complete.
+    if (this.deferEmbeddableLoad && this.parent?.isContainer) {
+      this.parent.setChildLoaded(this);
+    }
   }
 
   private onResetInput(newInput: TEmbeddableInput) {

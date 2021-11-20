@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 interface UninitializedLoadingResult {
@@ -63,12 +64,15 @@ export const createSuccessResult = <Parameters = any, Payload = any>(
   time: Date.now(),
 });
 
-export const createSuccessResultReducer = <Parameters = any, Payload = any>(
-  isExhausted: (params: Parameters, result: Payload) => boolean
-) => (
-  state: LoadingResult<Parameters>,
-  { params, result }: { params: Parameters; result: Payload }
-): SuccessLoadingResult<Parameters> => createSuccessResult(params, isExhausted(params, result));
+export const createSuccessResultReducer =
+  <Parameters = any, Payload = any>(
+    isExhausted: (params: Parameters, result: Payload) => boolean
+  ) =>
+  (
+    state: LoadingResult<Parameters>,
+    { params, result }: { params: Parameters; result: Payload }
+  ): SuccessLoadingResult<Parameters> =>
+    createSuccessResult(params, isExhausted(params, result));
 
 export const createFailureResult = <Parameters = any, ErrorPayload = any>(
   parameters: Parameters,
@@ -80,9 +84,12 @@ export const createFailureResult = <Parameters = any, ErrorPayload = any>(
   time: Date.now(),
 });
 
-export const createFailureResultReducer = <Parameters = any, ErrorPayload = any>(
-  convertErrorToString: (error: ErrorPayload) => string = (error) => `${error}`
-) => (
-  state: LoadingResult<Parameters>,
-  { params, error }: { params: Parameters; error: ErrorPayload }
-): FailureLoadingResult<Parameters> => createFailureResult(params, convertErrorToString(error));
+export const createFailureResultReducer =
+  <Parameters = any, ErrorPayload = any>(
+    convertErrorToString: (error: ErrorPayload) => string = (error) => `${error}`
+  ) =>
+  (
+    state: LoadingResult<Parameters>,
+    { params, error }: { params: Parameters; error: ErrorPayload }
+  ): FailureLoadingResult<Parameters> =>
+    createFailureResult(params, convertErrorToString(error));

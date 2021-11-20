@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // common properties on time_series_query and alert_type_params
@@ -43,13 +44,8 @@ export type CoreQueryParams = TypeOf<typeof CoreQueryParamsSchema>;
 // above.
 // Using direct type not allowed, circular reference, so body is typed to unknown.
 export function validateCoreQueryBody(anyParams: unknown): string | undefined {
-  const {
-    aggType,
-    aggField,
-    groupBy,
-    termField,
-    termSize,
-  }: CoreQueryParams = anyParams as CoreQueryParams;
+  const { aggType, aggField, groupBy, termField, termSize }: CoreQueryParams =
+    anyParams as CoreQueryParams;
   if (aggType !== 'count' && !aggField) {
     return i18n.translate(
       'xpack.triggersActionsUI.data.coreQueryParams.aggTypeRequiredErrorMessage',

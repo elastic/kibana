@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
-import { IndexPattern } from '../../../index_patterns';
+import { IndexPattern } from '../../..';
 import { AggParamsDateHistogram } from '../buckets';
 
 export function inferTimeZone(
@@ -20,7 +20,8 @@ export function inferTimeZone(
   if (!tz && params.field) {
     // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
     // field requires a specific time_zone
-    tz = indexPattern.typeMeta?.aggs?.date_histogram?.[params.field]?.time_zone;
+    const fieldName = typeof params.field === 'string' ? params.field : params.field.name;
+    tz = indexPattern.typeMeta?.aggs?.date_histogram?.[fieldName]?.time_zone;
   }
   if (!tz) {
     // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz

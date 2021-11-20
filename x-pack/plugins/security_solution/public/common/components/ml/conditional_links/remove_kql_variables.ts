@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RisonValue, encode } from 'rison-node';
@@ -10,7 +11,8 @@ import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
 export const operators = ['and', 'or', 'not'];
 
 export const removeKqlVariablesUsingRegex = (expression: string) => {
-  const myRegexp = /(\s+)*(and|or|not){0,1}(\s+)*([\w\.\-\[\]]+)\s*:\s*"(\$[\w\.\-\(\)\[\]]+\$)"(\s+)*(and|or|not){0,1}(\s+)*/g;
+  const myRegexp =
+    /(\s+)*(and|or|not){0,1}(\s+)*([\w\.\-\[\]]+)\s*:\s*"(\$[\w\.\-\(\)\[\]]+\$)"(\s+)*(and|or|not){0,1}(\s+)*/g;
   return expression.replace(myRegexp, replacer);
 };
 

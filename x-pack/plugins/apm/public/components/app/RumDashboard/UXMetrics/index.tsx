@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useMemo } from 'react';
@@ -19,13 +20,13 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { getCoreVitalsComponent } from '../../../../../../observability/public';
 import { CsmSharedContext } from '../CsmSharedContext';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getPercentileLabel } from './translations';
 
 export function UXMetrics() {
   const {
     urlParams: { percentile },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const uxQuery = useUxQuery();
 
@@ -33,7 +34,7 @@ export function UXMetrics() {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/web-core-vitals',
+          endpoint: 'GET /internal/apm/ux/web-core-vitals',
           params: {
             query: uxQuery,
           },
@@ -61,8 +62,8 @@ export function UXMetrics() {
   );
 
   return (
-    <EuiPanel>
-      <EuiFlexGroup justifyContent="spaceBetween" wrap>
+    <EuiPanel hasBorder={true}>
+      <EuiFlexGroup justifyContent="spaceBetween" wrap responsive={false}>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiTitle size="xs">
             <h3>
@@ -77,7 +78,11 @@ export function UXMetrics() {
       <EuiHorizontalRule margin="xs" />
 
       <EuiFlexGroup justifyContent="spaceBetween" wrap>
-        <EuiFlexItem grow={1} data-cy={`client-metrics`}>
+        <EuiFlexItem
+          grow={1}
+          data-cy={`client-metrics`}
+          style={{ minHeight: 150 }}
+        >
           <EuiSpacer size="s" />
           {CoreVitals}
         </EuiFlexItem>

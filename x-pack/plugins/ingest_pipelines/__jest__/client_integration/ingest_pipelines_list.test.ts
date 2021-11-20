@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -51,14 +52,14 @@ describe('<PipelinesList />', () => {
 
       // Verify app title
       expect(exists('appTitle')).toBe(true);
-      expect(find('appTitle').text()).toEqual('Ingest Node Pipelines');
+      expect(find('appTitle').text()).toEqual('Ingest Pipelines');
 
       // Verify documentation link
       expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Ingest Node Pipelines docs');
+      expect(find('documentationLink').text()).toBe('Ingest Pipelines docs');
 
-      // Verify create button exists
-      expect(exists('createPipelineButton')).toBe(true);
+      // Verify create dropdown exists
+      expect(exists('createPipelineDropdown')).toBe(true);
 
       // Verify table content
       const { tableCellsValues } = table.getMetaData('pipelinesTable');
@@ -161,7 +162,7 @@ describe('<PipelinesList />', () => {
       const { exists, find } = testBed;
 
       expect(exists('pipelineLoadError')).toBe(true);
-      expect(find('pipelineLoadError').text()).toContain('Unable to load pipelines.');
+      expect(find('pipelineLoadError').text()).toContain('Unable to load pipelines');
     });
   });
 });

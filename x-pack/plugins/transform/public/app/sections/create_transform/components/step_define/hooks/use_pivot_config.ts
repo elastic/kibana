@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useMemo, useState } from 'react';
@@ -13,12 +14,8 @@ import { dictionaryToArray } from '../../../../../../../common/types/common';
 import { useToastNotifications } from '../../../../../app_dependencies';
 import {
   DropDownLabel,
-  getEsAggFromAggConfig,
-  getEsAggFromGroupByConfig,
-  GroupByConfigWithUiSupport,
-  isGroupByDateHistogram,
-  isGroupByHistogram,
-  isGroupByTerms,
+  getRequestPayload,
+  isPivotGroupByConfigWithUiSupport,
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -30,14 +27,14 @@ import {
   StepDefineExposedState,
 } from '../common';
 import { StepDefineFormProps } from '../step_define_form';
-import { isPivotAggsWithExtendedForm } from '../../../../../common/pivot_aggs';
 import {
-  DateHistogramAgg,
-  HistogramAgg,
-  TermsAgg,
-} from '../../../../../../../common/types/pivot_group_by';
-import { PivotTransformPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
+  isPivotAggConfigTopMetric,
+  isPivotAggsWithExtendedForm,
+} from '../../../../../common/pivot_aggs';
 import { TransformPivotConfig } from '../../../../../../../common/types/transform';
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
+import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/common';
+import { isPivotAggConfigWithUiSupport } from '../../../../../common/pivot_group_by';
 
 /**
  * Clones aggregation configuration and updates parent references
@@ -101,21 +98,15 @@ function getRootAggregation(item: PivotAggsConfig) {
   return rootItem;
 }
 
-export const getMissingBucketConfig = (
-  g: GroupByConfigWithUiSupport
-): { missing_bucket?: boolean } => {
-  return g.missing_bucket !== undefined ? { missing_bucket: g.missing_bucket } : {};
-};
-
 export const usePivotConfig = (
   defaults: StepDefineExposedState,
   indexPattern: StepDefineFormProps['searchItems']['indexPattern']
 ) => {
   const toastNotifications = useToastNotifications();
 
-  const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData } = useMemo(
-    () => getPivotDropdownOptions(indexPattern),
-    [indexPattern]
+  const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData, fields } = useMemo(
+    () => getPivotDropdownOptions(indexPattern, defaults.runtimeMappings),
+    [defaults.runtimeMappings, indexPattern]
   );
 
   // The list of selected aggregations
@@ -181,7 +172,48 @@ export const usePivotConfig = (
     (d: DropDownLabel[]) => {
       const label: AggName = d[0].label;
       const config: PivotAggsConfig = aggOptionsData[label];
-      const aggName: AggName = config.aggName;
+
+      let aggName: AggName = config.aggName;
+
+      if (isPivotAggConfigTopMetric(config)) {
+        let suggestedSortField = [
+          ...new Set(
+            Object.values(groupByList).map((v) =>
+              isPivotGroupByConfigWithUiSupport(v) ? v.field : undefined
+            )
+          ),
+        ].find((v) => fields.find((x) => x.name === v)?.type === KBN_FIELD_TYPES.DATE);
+
+        if (!suggestedSortField) {
+          suggestedSortField = [
+            ...new Set(
+              Object.values(aggList)
+                .map((v) => (isPivotAggConfigWithUiSupport(v) ? v.field : undefined))
+                .flat()
+            ),
+          ].find((v) => fields.find((x) => x.name === v)?.type === KBN_FIELD_TYPES.DATE);
+        }
+
+        if (suggestedSortField) {
+          config.aggConfig.sortField = suggestedSortField;
+          config.aggConfig.sortSettings = {};
+          config.aggConfig.sortSettings.order = 'desc';
+        }
+      }
+
+      if (aggList[aggName] && aggName === PIVOT_SUPPORTED_AGGS.TOP_METRICS) {
+        // handle special case for naming top_metric aggs
+        const regExp = new RegExp(`^${PIVOT_SUPPORTED_AGGS.TOP_METRICS}(\\d)*$`);
+        const increment: number = Object.keys(aggList).reduce((acc, curr) => {
+          const match = curr.match(regExp);
+          if (!match || !match[1]) return acc;
+          const n = Number(match[1]);
+          return n > acc ? n : acc;
+        }, 0 as number);
+
+        aggName = `${PIVOT_SUPPORTED_AGGS.TOP_METRICS}${increment + 1}`;
+        config.aggName = aggName;
+      }
 
       const aggNameConflictMessages = getAggNameConflictToastMessages(
         aggName,
@@ -196,7 +228,7 @@ export const usePivotConfig = (
       aggList[aggName] = config;
       setAggList({ ...aggList });
     },
-    [aggList, aggOptionsData, groupByList, toastNotifications]
+    [aggList, aggOptionsData, groupByList, toastNotifications, fields]
   );
 
   /**
@@ -314,56 +346,10 @@ export const usePivotConfig = (
   const pivotAggsArr = useMemo(() => dictionaryToArray(aggList), [aggList]);
   const pivotGroupByArr = useMemo(() => dictionaryToArray(groupByList), [groupByList]);
 
-  const requestPayload = useMemo(() => {
-    const request = {
-      pivot: {
-        group_by: {},
-        aggregations: {},
-      } as PivotTransformPreviewRequestSchema['pivot'],
-    };
-
-    pivotGroupByArr.forEach((g) => {
-      if (isGroupByTerms(g)) {
-        const termsAgg: TermsAgg = {
-          terms: {
-            field: g.field,
-          },
-          ...getMissingBucketConfig(g),
-        };
-        request.pivot.group_by[g.aggName] = termsAgg;
-      } else if (isGroupByHistogram(g)) {
-        const histogramAgg: HistogramAgg = {
-          histogram: {
-            field: g.field,
-            interval: g.interval,
-          },
-          ...getMissingBucketConfig(g),
-        };
-        request.pivot.group_by[g.aggName] = histogramAgg;
-      } else if (isGroupByDateHistogram(g)) {
-        const dateHistogramAgg: DateHistogramAgg = {
-          date_histogram: {
-            field: g.field,
-            calendar_interval: g.calendar_interval,
-          },
-          ...getMissingBucketConfig(g),
-        };
-        request.pivot.group_by[g.aggName] = dateHistogramAgg;
-      } else {
-        request.pivot.group_by[g.aggName] = getEsAggFromGroupByConfig(g);
-      }
-    });
-
-    pivotAggsArr.forEach((agg) => {
-      const result = getEsAggFromAggConfig(agg);
-      if (result === null) {
-        return;
-      }
-      request.pivot.aggregations[agg.aggName] = result;
-    });
-
-    return request;
-  }, [pivotAggsArr, pivotGroupByArr]);
+  const requestPayload = useMemo(
+    () => getRequestPayload(pivotAggsArr, pivotGroupByArr),
+    [pivotAggsArr, pivotGroupByArr]
+  );
 
   const validationStatus = useMemo(() => {
     return validatePivotConfig(requestPayload.pivot);
@@ -409,6 +395,7 @@ export const usePivotConfig = (
         pivotGroupByArr,
         validationStatus,
         requestPayload,
+        fields,
       },
     };
   }, [
@@ -423,6 +410,7 @@ export const usePivotConfig = (
     pivotGroupByArr,
     validationStatus,
     requestPayload,
+    fields,
   ]);
 };
 

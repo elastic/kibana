@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const fs = require('fs');
@@ -13,18 +13,12 @@ const chalk = require('chalk');
 const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
-const {
-  log: defaultLog,
-  parseEsLog,
-  extractConfigFiles,
-  decompress,
-  NativeRealm,
-} = require('./utils');
+const { log: defaultLog, parseEsLog, extractConfigFiles, NativeRealm } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD } = require('@kbn/dev-utils');
+const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD, extract } = require('@kbn/dev-utils');
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
@@ -42,7 +36,7 @@ const first = (stream, map) =>
 
 exports.Cluster = class Cluster {
   constructor({ log = defaultLog, ssl = false } = {}) {
-    this._log = log;
+    this._log = log.withType('@kbn/es Cluster');
     this._ssl = ssl;
     this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
@@ -133,23 +127,28 @@ exports.Cluster = class Cluster {
   }
 
   /**
-   * Unpakcs a tar or zip file containing the data directory for an
+   * Unpacks a tar or zip file containing the data directory for an
    * ES cluster.
    *
    * @param {String} installPath
    * @param {String} archivePath
+   * @param {String} [extractDirName]
    */
-  async extractDataDirectory(installPath, archivePath) {
+  async extractDataDirectory(installPath, archivePath, extractDirName = 'data') {
     this._log.info(chalk.bold(`Extracting data directory`));
     this._log.indent(4);
 
-    // decompress excludes the root directory as that is how our archives are
+    // stripComponents=1 excludes the root directory as that is how our archives are
     // structured. This works in our favor as we can explicitly extract into the data dir
-    const extractPath = path.resolve(installPath, 'data');
+    const extractPath = path.resolve(installPath, extractDirName);
     this._log.info(`Data archive: ${archivePath}`);
     this._log.info(`Extract path: ${extractPath}`);
 
-    await decompress(archivePath, extractPath);
+    await extract({
+      archivePath,
+      targetDir: extractPath,
+      stripComponents: 1,
+    });
 
     this._log.indent(-4);
   }
@@ -235,10 +234,14 @@ exports.Cluster = class Cluster {
    * @private
    * @param {String} installPath
    * @param {Object} options
-   * @property {Array} options.esArgs
+   * @property {string|Array} options.esArgs
+   * @property {string} options.esJavaOpts
+   * @property {Boolean} options.skipNativeRealmSetup
    * @return {undefined}
    */
-  _exec(installPath, options = {}) {
+  _exec(installPath, opts = {}) {
+    const { skipNativeRealmSetup = false, reportTime = () => {}, startTime, ...options } = opts;
+
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
     }
@@ -246,14 +249,21 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const esArgs = ['indices.query.bool.max_nested_depth=100'].concat(options.esArgs || []);
+    const esArgs = [
+      'action.destructive_requires_name=true',
+      'ingest.geoip.downloader.enabled=false',
+    ].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
-      esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
-      esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
-      esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+
+      // Include default keystore settings only if keystore isn't configured.
+      if (!esArgs.some((arg) => arg.startsWith('xpack.security.http.ssl.keystore'))) {
+        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+        esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
+        esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+      }
     }
 
     const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
@@ -265,14 +275,18 @@ exports.Cluster = class Cluster {
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
 
-    options.esEnvVars = options.esEnvVars || {};
+    let esJavaOpts = `${options.esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
 
     // ES now automatically sets heap size to 50% of the machine's available memory
     // so we need to set it to a smaller size for local dev and CI
     // especially because we currently run many instances of ES on the same machine during CI
-    options.esEnvVars.ES_JAVA_OPTS =
-      (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars.ES_JAVA_OPTS} ` : '') +
-      '-Xms1g -Xmx1g';
+    // inital and max must be the same, so we only need to check the max
+    if (!esJavaOpts.includes('Xmx')) {
+      // 1536m === 1.5g
+      esJavaOpts += ' -Xms1536m -Xmx1536m';
+    }
+
+    this._log.debug('ES_JAVA_OPTS: %s', esJavaOpts.trim());
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
@@ -280,7 +294,7 @@ exports.Cluster = class Cluster {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-        ...(options.esEnvVars || {}),
+        ES_JAVA_OPTS: esJavaOpts.trim(),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -296,6 +310,10 @@ exports.Cluster = class Cluster {
 
     // once the http port is available setup the native realm
     this._nativeRealmSetup = httpPort.then(async (port) => {
+      if (skipNativeRealmSetup) {
+        return;
+      }
+
       const caCert = await this._caCertPromise;
       const nativeRealm = new NativeRealm({
         port,
@@ -307,10 +325,17 @@ exports.Cluster = class Cluster {
       await nativeRealm.setPasswords(options);
     });
 
+    let reportSent = false;
     // parse and forward es stdout to the log
     this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
       lines.forEach((line) => {
+        if (!reportSent && line.message.includes('publish_address')) {
+          reportSent = true;
+          reportTime(startTime, 'ready', {
+            success: true,
+          });
+        }
         this._log.info(line.formattedMessage);
       });
     });
@@ -327,7 +352,16 @@ exports.Cluster = class Cluster {
 
       // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
       if (code > 0 && !(code === 143 || code === 130)) {
+        reportTime(startTime, 'abort', {
+          success: true,
+          error: code,
+        });
         throw createCliError(`ES exited with code ${code}`);
+      } else {
+        reportTime(startTime, 'error', {
+          success: false,
+          error: `exited with ${code}`,
+        });
       }
     });
   }

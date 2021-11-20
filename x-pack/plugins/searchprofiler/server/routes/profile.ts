@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../types';
 
@@ -31,16 +33,15 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
         body: { query, index },
       } = request;
 
-      const parsed = {
-        // Activate profiler mode for this query.
-        profile: true,
-        ...query,
-      };
-
       const body = {
         index,
-        body: JSON.stringify(parsed, null, 2),
+        body: {
+          // Activate profiler mode for this query.
+          profile: true,
+          ...query,
+        },
       };
+
       try {
         const client = ctx.core.elasticsearch.client.asCurrentUser;
         const resp = await client.search(body);

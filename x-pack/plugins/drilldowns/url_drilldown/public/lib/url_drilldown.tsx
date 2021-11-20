@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { getFlattenedObject } from '@kbn/std';
-import { IExternalUrl } from 'src/core/public';
-import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
+import { IExternalUrl, IUiSettingsClient } from 'src/core/public';
 import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
@@ -20,6 +19,11 @@ import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/publ
 import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import {
+  reactToUiComponent,
+  UrlTemplateEditorVariable,
+  KibanaContextProvider,
+} from '../../../../../../src/plugins/kibana_react/public';
+import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownGlobalScope,
   UrlDrilldownConfig,
@@ -28,8 +32,10 @@ import {
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '../../../../ui_actions_enhanced/public';
-import { getPanelVariables, getEventScope, getEventVariableList } from './url_drilldown_scope';
 import { txtUrlDrilldownDisplayName } from './i18n';
+import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
+import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
+import { getGlobalVariableList } from './variables/global_variables';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -46,6 +52,7 @@ interface UrlDrilldownDeps {
   navigateToUrl: (url: string) => Promise<void>;
   getSyntaxHelpDocsLink: () => string;
   getVariablesHelpDocsLink: () => string;
+  uiSettings: IUiSettingsClient;
 }
 
 export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
@@ -72,7 +79,6 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   readonly minimalLicense = 'gold';
   readonly licenseFeatureName = 'URL drilldown';
-  readonly isBeta = true;
 
   public readonly getDisplayName = () => txtUrlDrilldownDisplayName;
 
@@ -87,23 +93,31 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     onConfig,
     context,
   }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const variables = React.useMemo(() => this.getVariableList(context), [context]);
+
     return (
-      <UrlDrilldownCollectConfig
-        variables={variables}
-        config={config}
-        onConfig={onConfig}
-        syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
-        variablesHelpDocsLink={this.deps.getVariablesHelpDocsLink()}
-      />
+      <KibanaContextProvider
+        services={{
+          uiSettings: this.deps.uiSettings,
+        }}
+      >
+        <UrlDrilldownCollectConfig
+          variables={variables}
+          config={config}
+          onConfig={onConfig}
+          syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
+          variablesHelpDocsLink={this.deps.getVariablesHelpDocsLink()}
+        />
+      </KibanaContextProvider>
     );
   };
 
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
-    url: { template: '' },
+    url: {
+      template: 'https://example.com/?{{event.key}}={{event.value}}',
+    },
     openInNewTab: true,
     encodeUrl: true,
   });
@@ -114,7 +128,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
     const scope = this.getRuntimeVariables(context);
-    const { isValid, error } = urlDrilldownValidateUrlTemplate(config.url, scope);
+    const { isValid, error } = await urlDrilldownValidateUrlTemplate(config.url, scope);
 
     if (!isValid) {
       // eslint-disable-next-line no-console
@@ -124,7 +138,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       return false;
     }
 
-    const url = this.buildUrl(config, context);
+    const url = await this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {
       return false;
@@ -133,9 +147,9 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return true;
   };
 
-  private buildUrl(config: Config, context: ActionContext): string {
+  private async buildUrl(config: Config, context: ActionContext): Promise<string> {
     const doEncode = config.encodeUrl ?? true;
-    const url = urlDrilldownCompileUrl(
+    const url = await urlDrilldownCompileUrl(
       config.url.template,
       this.getRuntimeVariables(context),
       doEncode
@@ -144,7 +158,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   }
 
   public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
-    const url = this.buildUrl(config, context);
+    const url = await this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {
       throw new Error(
@@ -166,21 +180,20 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly getRuntimeVariables = (context: ActionContext) => {
     return {
+      event: getEventScopeValues(context),
+      context: getContextScopeValues(context),
       ...this.deps.getGlobalScope(),
-      context: {
-        panel: getPanelVariables(context),
-      },
-      event: getEventScope(context),
     };
   };
 
-  public readonly getVariableList = (context: ActionFactoryContext): string[] => {
+  public readonly getVariableList = (
+    context: ActionFactoryContext
+  ): UrlTemplateEditorVariable[] => {
+    const globalScopeValues = this.deps.getGlobalScope();
     const eventVariables = getEventVariableList(context);
-    const contextVariables = Object.keys(getFlattenedObject(getPanelVariables(context))).map(
-      (key) => 'context.panel.' + key
-    );
-    const globalVariables = Object.keys(getFlattenedObject(this.deps.getGlobalScope()));
+    const contextVariables = getContextVariableList(context);
+    const globalVariables = getGlobalVariableList(globalScopeValues);
 
-    return [...eventVariables.sort(), ...contextVariables.sort(), ...globalVariables.sort()];
+    return [...eventVariables, ...contextVariables, ...globalVariables];
   };
 }

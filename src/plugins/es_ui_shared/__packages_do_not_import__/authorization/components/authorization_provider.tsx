@@ -1,21 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { HttpSetup } from 'kibana/public';
 import React, { createContext, useContext } from 'react';
 
-import { useRequest } from '../../../public';
+import { useRequest } from '../../../public/request';
 
-import { Error as CustomError } from './section_error';
+import { Privileges, Error as CustomError } from '../types';
 
-import { Privileges } from '../types';
-
-interface Authorization {
+export interface Authorization {
   isLoading: boolean;
   apiError: CustomError | null;
   privileges: Privileges;
@@ -47,7 +45,11 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, httpClient, children }: Props) => {
-  const { isLoading, error, data: privilegesData } = useRequest<any, CustomError>(httpClient, {
+  const {
+    isLoading,
+    error,
+    data: privilegesData,
+  } = useRequest<any, CustomError>(httpClient, {
     path: privilegesEndpoint,
     method: 'get',
   });

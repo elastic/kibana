@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -38,7 +39,7 @@ const getLicenseCheckResult = (actionType: ActionType) => {
       <EuiCard
         titleSize="xs"
         title={i18n.translate(
-          'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseMessageTitle',
+          'xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByLicenseMessageTitle',
           {
             defaultMessage: 'This feature requires a {minimumLicenseRequired} license.',
             values: {
@@ -49,7 +50,7 @@ const getLicenseCheckResult = (actionType: ActionType) => {
         // The "re-enable" terminology is used here because this message is used when an alert
         // action was previously enabled and needs action to be re-enabled.
         description={i18n.translate(
-          'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseMessageDescription',
+          'xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByLicenseMessageDescription',
           { defaultMessage: 'To re-enable this action, please upgrade your license.' }
         )}
         className="actCheckActionTypeEnabled__disabledActionWarningCard"
@@ -57,7 +58,7 @@ const getLicenseCheckResult = (actionType: ActionType) => {
           <EuiLink href={VIEW_LICENSE_OPTIONS_LINK} target="_blank">
             <FormattedMessage
               defaultMessage="View license options"
-              id="xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseLinkTitle"
+              id="xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByLicenseLinkTitle"
             />
           </EuiLink>
         }
@@ -75,7 +76,7 @@ const configurationCheckResult = {
   messageCard: (
     <EuiCard
       title={i18n.translate(
-        'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByConfigMessageTitle',
+        'xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByConfigMessageTitle',
         { defaultMessage: 'This feature is disabled by the Kibana configuration.' }
       )}
       description=""

@@ -1,68 +1,137 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { DocValueFields } from '../../../../common/search_strategy/common';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   BrowserFields,
+  DocValueFields,
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
-  EMPTY_INDEX_PATTERN,
-} from '../../../../common/search_strategy/index_fields';
-
-export type ErrorModel = Error[];
-
+  EMPTY_INDEX_FIELDS,
+} from '../../../../../timelines/common';
+import { SecuritySolutionDataViewBase } from '../../types';
+/** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {
   default = 'default',
   detections = 'detections',
   timeline = 'timeline',
 }
 
-export interface ManageScope {
-  browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
-  errorMessage: string | null;
+/**
+ * Data related to each sourcerer scope
+ */
+export interface SourcererScope {
+  /** Uniquely identifies a Sourcerer Scope */
   id: SourcererScopeName;
-  indexPattern: IIndexPattern;
-  indicesExist: boolean | undefined | null;
+  /** is an update being made to the sourcerer data view */
   loading: boolean;
+  /** selected data view id */
+  selectedDataViewId: string;
+  /** selected patterns within the data view */
   selectedPatterns: string[];
 }
 
-export interface ManageScopeInit extends Partial<ManageScope> {
-  id: SourcererScopeName;
+export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
+
+export interface KibanaDataView {
+  /** Uniquely identifies a Kibana Data View */
+  id: string;
+  /**  list of active patterns that return data  */
+  patternList: string[];
+  /**
+   * title of Kibana Data View
+   * title also serves as "all pattern list", including inactive
+   * comma separated string
+   */
+  title: string;
 }
 
-export type SourcererScopeById = {
-  [id in SourcererScopeName]: ManageScope;
-};
+/**
+ * DataView from Kibana + timelines/index_fields enhanced field data
+ */
+export interface SourcererDataView extends KibanaDataView {
+  /** we need this for @timestamp data */
+  browserFields: BrowserFields;
+  /** we need this for @timestamp data */
+  docValueFields: DocValueFields[];
+  /** comes from dataView.fields.toSpec() */
+  indexFields: SecuritySolutionDataViewBase['fields'];
+  /** set when data view fields are fetched */
+  loading: boolean;
+  /**
+   * Needed to pass to search strategy
+   * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
+   */
+  runtimeMappings: MappingRuntimeFields;
+}
 
-export type KibanaIndexPatterns = Array<{ id: string; title: string }>;
+/**
+ * Combined data from SourcererDataView and SourcererScope to create
+ * selected data view state
+ */
+export interface SelectedDataView {
+  browserFields: SourcererDataView['browserFields'];
+  dataViewId: SourcererDataView['id'];
+  docValueFields: SourcererDataView['docValueFields'];
+  /**
+   * DataViewBase with enhanced index fields used in timelines
+   */
+  indexPattern: SecuritySolutionDataViewBase;
+  /** do the selected indices exist  */
+  indicesExist: boolean;
+  /** is an update being made to the data view */
+  loading: boolean;
+  /** all active & inactive patterns from SourcererDataView['title']  */
+  patternList: string[];
+  runtimeMappings: SourcererDataView['runtimeMappings'];
+  /** all selected patterns from SourcererScope['selectedPatterns']  */
+  selectedPatterns: string[];
+}
 
-// ManageSourcerer
+/**
+ * sourcerer model for redux
+ */
 export interface SourcererModel {
-  kibanaIndexPatterns: KibanaIndexPatterns;
-  configIndexPatterns: string[];
+  /** default security-solution data view */
+  defaultDataView: SourcererDataView & { error?: unknown };
+  /** all Kibana data views, including security-solution */
+  kibanaDataViews: SourcererDataView[];
+  /** security solution signals index name */
   signalIndexName: string | null;
+  /** sourcerer scope data by id */
   sourcererScopes: SourcererScopeById;
 }
 
-export const initSourcererScope = {
+export type SourcererUrlState = Partial<{
+  [id in SourcererScopeName]: {
+    id: string;
+    selectedPatterns: string[];
+  };
+}>;
+
+export const initSourcererScope: Omit<SourcererScope, 'id'> = {
+  loading: false,
+  selectedDataViewId: '',
+  selectedPatterns: [],
+};
+export const initDataView = {
   browserFields: EMPTY_BROWSER_FIELDS,
   docValueFields: EMPTY_DOCVALUE_FIELD,
-  errorMessage: null,
-  indexPattern: EMPTY_INDEX_PATTERN,
-  indicesExist: true,
+  id: '',
+  indexFields: EMPTY_INDEX_FIELDS,
   loading: false,
-  selectedPatterns: [],
+  patternList: [],
+  runtimeMappings: {},
+  title: '',
 };
 
 export const initialSourcererState: SourcererModel = {
-  kibanaIndexPatterns: [],
-  configIndexPatterns: [],
+  defaultDataView: initDataView,
+  kibanaDataViews: [],
   signalIndexName: null,
   sourcererScopes: {
     [SourcererScopeName.default]: {
@@ -79,8 +148,3 @@ export const initialSourcererState: SourcererModel = {
     },
   },
 };
-
-export type FSourcererScopePatterns = {
-  [id in SourcererScopeName]: string[];
-};
-export type SourcererScopePatterns = Partial<FSourcererScopePatterns>;

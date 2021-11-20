@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SettingsProps } from './settings';
 import { AdvancedSettings } from '../../types';
+import { SettingsStateProps } from './settings';
 
 // Helper type to get all keys of an interface
 // that are of type number.
@@ -25,9 +26,10 @@ export function AdvancedSettingsForm({
   advancedSettings,
   updateSettings,
   allFields,
-}: Pick<SettingsProps, 'advancedSettings' | 'updateSettings' | 'allFields'>) {
+}: Pick<SettingsStateProps, 'advancedSettings' | 'updateSettings' | 'allFields'>) {
   // keep a local state during changes
   const [formState, updateFormState] = useState({ ...advancedSettings });
+
   // useEffect update localState only based on the main store
   useEffect(() => {
     updateFormState(advancedSettings);

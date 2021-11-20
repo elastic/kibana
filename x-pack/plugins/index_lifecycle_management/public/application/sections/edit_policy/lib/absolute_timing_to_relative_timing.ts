@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -14,36 +15,48 @@
  *
  * This code converts the absolute timings to _relative_ timings of the form: 30 days in hot phase,
  * 40 days in warm phase then forever in cold phase.
+ *
+ * All functions exported from this file can be viewed as utilities for working with form data and
+ * other defined interfaces to calculate the relative amount of time data will spend in a phase.
  */
 
 import moment from 'moment';
-import { flow } from 'fp-ts/lib/function';
-import { i18n } from '@kbn/i18n';
+
+import { Phase, PhaseWithTiming } from '../../../../../common/types';
 
 import { splitSizeAndUnits } from '../../../lib/policies';
-
 import { FormInternal } from '../types';
 
-type MinAgePhase = 'warm' | 'cold' | 'delete';
+/* -===- Private functions and types -===- */
 
-type Phase = 'hot' | MinAgePhase;
+const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'frozen', 'delete'];
 
-const i18nTexts = {
-  forever: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.Forever', {
-    defaultMessage: 'Forever',
-  }),
-  lessThanADay: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.lessThanADay', {
-    defaultMessage: 'Less than a day',
-  }),
-  day: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.day', {
-    defaultMessage: 'day',
-  }),
-  days: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.days', {
-    defaultMessage: 'days',
-  }),
+const getMinAge = (phase: PhaseWithTiming, formData: FormInternal) => ({
+  min_age: formData.phases?.[phase]?.min_age
+    ? formData.phases[phase]!.min_age! + formData._meta[phase].minAgeUnit
+    : '0ms',
+});
+
+/**
+ * See https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math
+ * for all date math values. ILM policies also support "micros" and "nanos".
+ */
+export const getPhaseMinAgeInMilliseconds = (size: string, units: string): number => {
+  let milliseconds: number;
+
+  if (units === 'micros') {
+    milliseconds = parseInt(size, 10) / 1e3;
+  } else if (units === 'nanos') {
+    milliseconds = parseInt(size, 10) / 1e6;
+  } else {
+    milliseconds = moment.duration(size, units as any).asMilliseconds();
+  }
+  return milliseconds;
 };
 
-interface AbsoluteTimings {
+/* -===- Public functions and types -===- */
+
+export interface AbsoluteTimings {
   hot: {
     min_age: undefined;
   };
@@ -51,6 +64,9 @@ interface AbsoluteTimings {
     min_age: string;
   };
   cold?: {
+    min_age: string;
+  };
+  frozen?: {
     min_age: string;
   };
   delete?: {
@@ -64,19 +80,11 @@ export interface PhaseAgeInMilliseconds {
     hot: number;
     warm?: number;
     cold?: number;
+    frozen?: number;
   };
 }
 
-const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'delete'];
-
-const getMinAge = (phase: MinAgePhase, formData: FormInternal) => ({
-  min_age:
-    formData.phases && formData.phases[phase]?.min_age
-      ? formData.phases[phase]!.min_age! + formData._meta[phase].minAgeUnit
-      : '0ms',
-});
-
-const formDataToAbsoluteTimings = (formData: FormInternal): AbsoluteTimings => {
+export const formDataToAbsoluteTimings = (formData: FormInternal): AbsoluteTimings => {
   const { _meta } = formData;
   if (!_meta) {
     return { hot: { min_age: undefined } };
@@ -85,32 +93,18 @@ const formDataToAbsoluteTimings = (formData: FormInternal): AbsoluteTimings => {
     hot: { min_age: undefined },
     warm: _meta.warm.enabled ? getMinAge('warm', formData) : undefined,
     cold: _meta.cold.enabled ? getMinAge('cold', formData) : undefined,
+    frozen: _meta.frozen?.enabled ? getMinAge('frozen', formData) : undefined,
     delete: _meta.delete.enabled ? getMinAge('delete', formData) : undefined,
   };
-};
-
-/**
- * See https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math
- * for all date math values. ILM policies also support "micros" and "nanos".
- */
-const getPhaseMinAgeInMilliseconds = (phase: { min_age: string }): number => {
-  let milliseconds: number;
-  const { units, size } = splitSizeAndUnits(phase.min_age);
-  if (units === 'micros') {
-    milliseconds = parseInt(size, 10) / 1e3;
-  } else if (units === 'nanos') {
-    milliseconds = parseInt(size, 10) / 1e6;
-  } else {
-    milliseconds = moment.duration(size, units as any).asMilliseconds();
-  }
-  return milliseconds;
 };
 
 /**
  * Given a set of phase minimum age absolute timings, like hot phase 0ms and warm phase 3d, work out
  * the number of milliseconds data will reside in phase.
  */
-const calculateMilliseconds = (inputs: AbsoluteTimings): PhaseAgeInMilliseconds => {
+export const calculateRelativeFromAbsoluteMilliseconds = (
+  inputs: AbsoluteTimings
+): PhaseAgeInMilliseconds => {
   return phaseOrder.reduce<PhaseAgeInMilliseconds>(
     (acc, phaseName, idx) => {
       // Delete does not have an age associated with it
@@ -129,7 +123,10 @@ const calculateMilliseconds = (inputs: AbsoluteTimings): PhaseAgeInMilliseconds 
 
       // If we have a next phase, calculate the timing between this phase and the next
       if (nextPhase && inputs[nextPhase]?.min_age) {
-        nextPhaseMinAge = getPhaseMinAgeInMilliseconds(inputs[nextPhase] as { min_age: string });
+        const { units, size } = splitSizeAndUnits(
+          (inputs[nextPhase] as { min_age: string }).min_age
+        );
+        nextPhaseMinAge = getPhaseMinAgeInMilliseconds(size, units);
       }
 
       return {
@@ -147,40 +144,10 @@ const calculateMilliseconds = (inputs: AbsoluteTimings): PhaseAgeInMilliseconds 
         hot: 0,
         warm: inputs.warm ? 0 : undefined,
         cold: inputs.cold ? 0 : undefined,
+        frozen: inputs.frozen ? 0 : undefined,
       },
     }
   );
 };
 
-const millisecondsToDays = (milliseconds?: number): string | undefined => {
-  if (milliseconds == null) {
-    return;
-  }
-  if (!isFinite(milliseconds)) {
-    return i18nTexts.forever;
-  }
-  const days = milliseconds / 8.64e7;
-  return days < 1
-    ? i18nTexts.lessThanADay
-    : `${Math.floor(days)} ${days === 1 ? i18nTexts.day : i18nTexts.days}`;
-};
-
-export const normalizeTimingsToHumanReadable = ({
-  total,
-  phases,
-}: PhaseAgeInMilliseconds): { total?: string; hot?: string; warm?: string; cold?: string } => {
-  return {
-    total: millisecondsToDays(total),
-    hot: millisecondsToDays(phases.hot),
-    warm: millisecondsToDays(phases.warm),
-    cold: millisecondsToDays(phases.cold),
-  };
-};
-
-export const calculateRelativeTimingMs = flow(formDataToAbsoluteTimings, calculateMilliseconds);
-
-export const absoluteTimingToRelativeTiming = flow(
-  formDataToAbsoluteTimings,
-  calculateMilliseconds,
-  normalizeTimingsToHumanReadable
-);
+export type RelativePhaseTimingInMs = ReturnType<typeof calculateRelativeFromAbsoluteMilliseconds>;

@@ -1,47 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useMemo, useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiAccordion,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
   EuiIcon,
   EuiIconTip,
+  EuiInMemoryTable,
   EuiSpacer,
-  EuiAccordion,
   EuiTitle,
 } from '@elastic/eui';
-import { Space } from '../../../../../../../../spaces/public';
-import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import React, { Fragment, useMemo, useState } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { Space, SpacesApiUi } from '../../../../../../../../spaces/public';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { FeatureTableCell } from '../feature_table_cell';
-import { SpaceColumnHeader } from './space_column_header';
+import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
+import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
-import { SecuredFeature, KibanaPrivileges } from '../../../../model';
-import {
-  PrivilegeSummaryCalculator,
-  EffectiveFeaturePrivileges,
-} from './privilege_summary_calculator';
+import { SpaceColumnHeader } from './space_column_header';
 
-interface Props {
+export interface PrivilegeSummaryTableProps {
   role: Role;
   spaces: Space[];
   kibanaPrivileges: KibanaPrivileges;
   canCustomizeSubFeaturePrivileges: boolean;
+  spacesApiUi: SpacesApiUi;
 }
 
 function getColumnKey(entry: RoleKibanaPrivilege) {
   return `privilege_entry_${entry.spaces.join('|')}`;
 }
 
-export const PrivilegeSummaryTable = (props: Props) => {
+export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
   const [expandedFeatures, setExpandedFeatures] = useState<string[]>([]);
 
   const featureCategories = useMemo(() => {
@@ -112,7 +114,9 @@ export const PrivilegeSummaryTable = (props: Props) => {
   const privilegeColumns = rawKibanaPrivileges.map((entry) => {
     const key = getColumnKey(entry);
     return {
-      name: <SpaceColumnHeader entry={entry} spaces={props.spaces} />,
+      name: (
+        <SpaceColumnHeader entry={entry} spaces={props.spaces} spacesApiUi={props.spacesApiUi} />
+      ),
       field: key,
       render: (kibanaPrivilege: EffectiveFeaturePrivileges, record: { featureId: string }) => {
         const { primary, hasCustomizedSubFeaturePrivileges } = kibanaPrivilege[record.featureId];

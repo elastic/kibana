@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -9,15 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
 
 describe('documents routes', () => {
-  describe('POST /api/app_search/engines/{engineName}/documents', () => {
+  describe('POST /internal/app_search/engines/{engineName}/documents', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{engineName}/documents',
-        payload: 'body',
+        path: '/internal/app_search/engines/{engineName}/documents',
       });
 
       registerDocumentsRoutes({
@@ -31,40 +31,18 @@ describe('documents routes', () => {
         path: '/as/engines/:engineName/documents/new',
       });
     });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = { body: { documents: [{ foo: 'bar' }] } };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('missing documents', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('wrong document type', () => {
-        const request = { body: { documents: ['test'] } };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('non-array documents type', () => {
-        const request = { body: { documents: { foo: 'bar' } } };
-        mockRouter.shouldThrow(request);
-      });
-    });
   });
 });
 
 describe('document routes', () => {
-  describe('GET /api/app_search/engines/{engineName}/documents/{documentId}', () => {
+  describe('GET /internal/app_search/engines/{engineName}/documents/{documentId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+        path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       });
 
       registerDocumentRoutes({
@@ -80,14 +58,14 @@ describe('document routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{engineName}/documents/{documentId}', () => {
+  describe('DELETE /internal/app_search/engines/{engineName}/documents/{documentId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+        path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       });
 
       registerDocumentRoutes({

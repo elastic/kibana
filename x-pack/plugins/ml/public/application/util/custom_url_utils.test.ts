@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -582,6 +583,45 @@ describe('ML - custom URL utils', () => {
     test('returns expected URL for other type URL', () => {
       expect(getUrlForRecord(TEST_OTHER_URL, TEST_RECORD)).toBe(
         'http://airlinecodes.info/airline-code-AAL'
+      );
+    });
+
+    test('returns expected URL with preserving custom filter', () => {
+      const urlWithCustomFilter: UrlConfig = {
+        url_name: 'URL with a custom filter',
+        url_value: `discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:subSystem.keyword,negate:!f,params:(query:JDBC),type:phrase),query:(match_phrase:(subSystem.keyword:JDBC)))),index:'eap_wls_server_12c*,*:eap_wls_server_12c*',query:(language:kuery,query:'wlscluster.keyword:"$wlscluster.keyword$"'))`,
+      };
+
+      const testRecords = {
+        job_id: 'farequote',
+        result_type: 'record',
+        probability: 6.533287347648861e-45,
+        record_score: 93.84475,
+        initial_record_score: 94.867922946384,
+        bucket_span: 300,
+        detector_index: 0,
+        is_interim: false,
+        timestamp: 1486656600000,
+        partition_field_name: 'wlscluster.keyword',
+        partition_field_value: 'AAL',
+        function: 'mean',
+        function_description: 'mean',
+        typical: [99.2329899996025],
+        actual: [274.7279901504516],
+        field_name: 'wlscluster.keyword',
+        influencers: [
+          {
+            influencer_field_name: 'wlscluster.keyword',
+            influencer_field_values: ['AAL'],
+          },
+        ],
+        'wlscluster.keyword': ['AAL'],
+        earliest: '2019-02-01T16:00:00.000Z',
+        latest: '2019-02-01T18:59:59.999Z',
+      };
+
+      expect(getUrlForRecord(urlWithCustomFilter, testRecords)).toBe(
+        `discover#/?_g=(time:(from:'2019-02-01T16:00:00.000Z',mode:absolute,to:'2019-02-01T18:59:59.999Z'))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:subSystem.keyword,negate:!f,params:(query:JDBC),type:phrase),query:(match_phrase:(subSystem.keyword:JDBC)))),index:'eap_wls_server_12c*,*:eap_wls_server_12c*',query:(language:kuery,query:'wlscluster.keyword:\"AAL\"'))`
       );
     });
   });

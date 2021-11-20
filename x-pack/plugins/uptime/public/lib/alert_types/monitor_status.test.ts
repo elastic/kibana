@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { initMonitorStatusAlertType } from './monitor_status';
@@ -205,6 +206,7 @@ describe('monitor status alert type', () => {
         "defaultActionMessage": "Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}",
         "description": "Alert when a monitor is down or an availability threshold is breached.",
         "documentationUrl": [Function],
+        "format": [Function],
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
         "requiresAppContext": false,

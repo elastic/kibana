@@ -1,84 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiPage,
-  EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
-} from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
-import { MetricsChart } from '../../shared/charts/metrics_chart';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { Projection } from '../../../../common/projections';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { SearchBar } from '../../shared/search_bar';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { MetricsChart } from '../../shared/charts/metrics_chart';
 
-interface ServiceMetricsProps {
-  agentName: string;
-  serviceName: string;
-}
+export function ServiceMetrics() {
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/metrics');
 
-export function ServiceMetrics({
-  agentName,
-  serviceName,
-}: ServiceMetricsProps) {
-  const { urlParams } = useUrlParams();
   const { data, status } = useServiceMetricChartsFetcher({
     serviceNodeName: undefined,
+    environment,
+    kuery,
   });
-  const { start, end } = urlParams;
-
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
-    () => ({
-      filterNames: ['host', 'containerId', 'podName', 'serviceVersion'],
-      params: {
-        serviceName,
-      },
-      projection: Projection.metrics,
-      showCount: false,
-    }),
-    [serviceName]
-  );
+  const { start, end } = useTimeRange({
+    rangeFrom,
+    rangeTo,
+  });
 
   return (
-    <>
-      <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <LocalUIFilters {...localFiltersConfig} />
+    <ChartPointerEventContextProvider>
+      <EuiFlexGrid columns={2} gutterSize="s">
+        {data.charts.map((chart) => (
+          <EuiFlexItem key={chart.key}>
+            <EuiPanel hasBorder={true}>
+              <MetricsChart
+                start={start}
+                end={end}
+                chart={chart}
+                fetchStatus={status}
+              />
+            </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow={7}>
-            <ChartPointerEventContextProvider>
-              <EuiFlexGrid columns={2} gutterSize="s">
-                {data.charts.map((chart) => (
-                  <EuiFlexItem key={chart.key}>
-                    <EuiPanel>
-                      <MetricsChart
-                        start={start}
-                        end={end}
-                        chart={chart}
-                        fetchStatus={status}
-                      />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGrid>
-              <EuiSpacer size="xxl" />
-            </ChartPointerEventContextProvider>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPage>
-    </>
+        ))}
+      </EuiFlexGrid>
+      <EuiSpacer size="xxl" />
+    </ChartPointerEventContextProvider>
   );
 }

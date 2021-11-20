@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -23,16 +24,12 @@ export default function optInTest({ getService }: FtrProviderContext) {
 
       await supertest.put('/api/telemetry/v2/userHasSeenNotice').set('kbn-xsrf', 'xxx').expect(200);
 
-      const {
-        body: {
-          _source: { telemetry },
-        },
-      } = await client.get({
+      const { _source } = await client.get<{ telemetry: { userHasSeenNotice: boolean } }>({
         index: '.kibana',
         id: 'telemetry:telemetry',
       });
 
-      expect(telemetry.userHasSeenNotice).to.be(true);
+      expect(_source?.telemetry.userHasSeenNotice).to.be(true);
     });
   });
 }

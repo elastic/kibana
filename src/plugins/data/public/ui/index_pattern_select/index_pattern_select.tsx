@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -23,7 +23,6 @@ export type IndexPatternSelectProps = Required<
 > & {
   onChange: (indexPatternId?: string) => void;
   indexPatternId: string;
-  fieldTypes?: string[];
   onNoIndexPatterns?: () => void;
 };
 
@@ -62,7 +61,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
   componentDidMount() {
     this.isMounted = true;
-    this.fetchOptions();
+    this.fetchOptions('');
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
@@ -102,36 +101,28 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
   };
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
-    const { fieldTypes, onNoIndexPatterns, indexPatternService } = this.props;
-    const indexPatterns = await indexPatternService.find(`${searchValue}*`, 100);
-
-    // We need this check to handle the case where search results come back in a different
-    // order than they were sent out. Only load results for the most recent search.
-    if (searchValue !== this.state.searchValue || !this.isMounted) {
+    const idsAndTitles = await this.props.indexPatternService.getIdsWithTitle();
+    if (!this.isMounted || searchValue !== this.state.searchValue) {
       return;
     }
 
-    const options = indexPatterns
-      .filter((indexPattern) => {
-        return fieldTypes
-          ? indexPattern.fields.some((field) => {
-              return fieldTypes.includes(field.type);
-            })
-          : true;
-      })
-      .map((indexPattern) => {
-        return {
-          label: indexPattern.title,
-          value: indexPattern.id,
-        };
-      });
+    const options = [];
+    for (let i = 0; i < idsAndTitles.length; i++) {
+      if (idsAndTitles[i].title.toLowerCase().includes(searchValue.toLowerCase())) {
+        options.push({
+          label: idsAndTitles[i].title,
+          value: idsAndTitles[i].id,
+        });
+      }
+    }
+
     this.setState({
       isLoading: false,
       options,
     });
 
-    if (onNoIndexPatterns && searchValue === '' && options.length === 0) {
-      onNoIndexPatterns();
+    if (this.props.onNoIndexPatterns && searchValue === '' && options.length === 0) {
+      this.props.onNoIndexPatterns();
     }
   }, 300);
 
@@ -151,7 +142,6 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
   render() {
     const {
-      fieldTypes,
       onChange,
       indexPatternId,
       placeholder,

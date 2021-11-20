@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -17,7 +19,7 @@ export default function spaceSelectorFunctonalTests({
 
   describe('Copy Saved Objects to Space', function () {
     before(async () => {
-      await esArchiver.load('spaces/copy_saved_objects');
+      await esArchiver.load('x-pack/test/functional/es_archives/spaces/copy_saved_objects');
 
       await spaces.create({
         id: 'marketing',
@@ -43,7 +45,7 @@ export default function spaceSelectorFunctonalTests({
     after(async () => {
       await spaces.delete('sales');
       await spaces.delete('marketing');
-      await esArchiver.unload('spaces/copy_saved_objects');
+      await esArchiver.unload('x-pack/test/functional/es_archives/spaces/copy_saved_objects');
     });
 
     it('allows a dashboard to be copied to the marketing space, with all references', async () => {

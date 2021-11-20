@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Datatable } from 'src/plugins/expressions/public';
 import { CoreStart } from '../../../../../core/public';
-import { FormatFactory } from '../../../../data/common/field_formats/utils';
+import { FormatFactory } from '../../../../field_formats/common';
 
 import { DataPublicPluginStart, exporters } from '../../services/data';
 import { downloadMultipleAs } from '../../services/share';
@@ -94,6 +94,7 @@ export class ExportCSVAction implements Action<ExportContext> {
                 csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
                 quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
                 formatFactory,
+                escapeFormulaValues: false,
               }),
               type: exporters.CSV_MIME_TYPE,
             };
@@ -105,7 +106,7 @@ export class ExportCSVAction implements Action<ExportContext> {
 
       // useful for testing
       if (context.asString) {
-        return (content as unknown) as Promise<void>;
+        return content as unknown as Promise<void>;
       }
 
       if (content) {

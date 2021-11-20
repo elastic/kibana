@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -22,18 +22,19 @@ import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } fro
 export interface TelemetryServiceMockOptions {
   reportOptInStatusChange?: boolean;
   currentKibanaVersion?: string;
+  isScreenshotMode?: boolean;
   config?: Partial<TelemetryPluginConfig>;
 }
 
 export function mockTelemetryService({
   reportOptInStatusChange,
   currentKibanaVersion = 'mockKibanaVersion',
+  isScreenshotMode = false,
   config: configOverride = {},
 }: TelemetryServiceMockOptions = {}) {
   const config = {
     enabled: true,
-    url: 'http://localhost',
-    optInStatusUrl: 'http://localhost',
+    sendUsageTo: 'staging' as const,
     sendUsageFrom: 'browser' as const,
     optIn: true,
     banner: true,
@@ -47,6 +48,7 @@ export function mockTelemetryService({
     config,
     http: httpServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    isScreenshotMode,
     currentKibanaVersion,
     reportOptInStatusChange,
   });

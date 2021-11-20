@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment-timezone';
@@ -48,6 +49,7 @@ const indexWithoutLifecyclePolicy: Index = {
   primary_size: '3.4kb',
   aliases: 'none',
   isFrozen: false,
+  hidden: false,
   ilm: {
     index: 'testy1',
     managed: false,
@@ -67,6 +69,7 @@ const indexWithLifecyclePolicy: Index = {
   primary_size: '6.5kb',
   aliases: 'none',
   isFrozen: false,
+  hidden: false,
   ilm: {
     index: 'testy3',
     managed: true,
@@ -94,6 +97,7 @@ const indexWithLifecycleError = {
   primary_size: '6.5kb',
   aliases: 'none',
   isFrozen: false,
+  hidden: false,
   ilm: {
     index: 'testy3',
     managed: true,

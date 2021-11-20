@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,6 +10,7 @@ import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
 import { RedirectToHostDetailViaIP } from './redirect_to_host_detail_via_ip';
+import { RedirectToInventory } from './redirect_to_inventory';
 import { inventoryModels } from '../../../common/inventory_models';
 
 interface LinkToPageProps {
@@ -28,6 +30,7 @@ export const LinkToMetricsPage: React.FC<LinkToPageProps> = (props) => {
         path={`${props.match.url}/host-detail-via-ip/:hostIp`}
         component={RedirectToHostDetailViaIP}
       />
+      <Route path={`${props.match.url}/inventory`} component={RedirectToInventory} />
       <Redirect to="/" />
     </Switch>
   );

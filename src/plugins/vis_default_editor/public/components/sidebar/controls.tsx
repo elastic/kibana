@@ -1,13 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiToolTip,
+  EuiIconTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -84,19 +91,32 @@ function DefaultEditorControls({
                 </EuiButton>
               </EuiToolTip>
             ) : (
-              <EuiButton
-                data-test-subj="visualizeEditorRenderButton"
-                disabled={!isDirty}
-                fill
-                iconType="play"
-                onClick={applyChanges}
-                size="s"
-              >
-                <FormattedMessage
-                  id="visDefaultEditor.sidebar.updateChartButtonLabel"
-                  defaultMessage="Update"
-                />
-              </EuiButton>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate('visDefaultEditor.sidebar.updateInfoTooltip', {
+                      defaultMessage: 'CTRL + Enter is a shortcut for Update.',
+                    })}
+                    type="keyboardShortcut"
+                    color="subdued"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="visualizeEditorRenderButton"
+                    disabled={!isDirty}
+                    fill
+                    iconType="play"
+                    onClick={applyChanges}
+                    size="s"
+                  >
+                    <FormattedMessage
+                      id="visDefaultEditor.sidebar.updateChartButtonLabel"
+                      defaultMessage="Update"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

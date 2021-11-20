@@ -1,37 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { pickBy, countBy } from 'lodash/fp';
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
+import { countBy } from 'lodash/fp';
 import uuid from 'uuid';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
-import { PartialAlert, FindResult } from '../../../../../../alerts/server';
+import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { ActionsClient } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
   isAlertType,
-  isAlertTypes,
-  IRuleSavedAttributesSavedObjectAttributes,
-  isRuleStatusFindType,
-  isRuleStatusFindTypes,
-  isRuleStatusSavedObjectType,
+  isRuleStatusSavedObjectAttributes,
+  IRuleStatusSOAttributes,
 } from '../../rules/types';
-import {
-  createBulkErrorObject,
-  BulkError,
-  createSuccessObject,
-  ImportSuccessError,
-  createImportErrorObject,
-  OutputError,
-} from '../utils';
-import { RuleActions } from '../../rule_actions/types';
-import { RuleTypeParams } from '../../types';
+import { createBulkErrorObject, BulkError, OutputError } from '../utils';
+import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
+import { RuleParams } from '../../schemas/rule_schemas';
+import { SanitizedAlert } from '../../../../../../alerting/common';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -101,160 +95,56 @@ export const transformTags = (tags: string[]): string[] => {
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
 export const transformAlertToRule = (
-  alert: RuleAlertType,
-  ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  alert: SanitizedAlert<RuleParams>,
+  ruleStatus?: IRuleStatusSOAttributes,
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> => {
-  return pickBy<RulesSchema>((value: unknown) => value != null, {
-    author: alert.params.author ?? [],
-    actions: ruleActions?.actions ?? [],
-    building_block_type: alert.params.buildingBlockType,
-    created_at: alert.createdAt.toISOString(),
-    updated_at: alert.updatedAt.toISOString(),
-    created_by: alert.createdBy ?? 'elastic',
-    description: alert.params.description,
-    enabled: alert.enabled,
-    anomaly_threshold: alert.params.anomalyThreshold,
-    event_category_override: alert.params.eventCategoryOverride,
-    false_positives: alert.params.falsePositives,
-    filters: alert.params.filters,
-    from: alert.params.from,
-    id: alert.id,
-    immutable: alert.params.immutable,
-    index: alert.params.index,
-    interval: alert.schedule.interval,
-    rule_id: alert.params.ruleId,
-    language: alert.params.language,
-    license: alert.params.license,
-    output_index: alert.params.outputIndex,
-    max_signals: alert.params.maxSignals,
-    machine_learning_job_id: alert.params.machineLearningJobId,
-    risk_score: alert.params.riskScore,
-    risk_score_mapping: alert.params.riskScoreMapping ?? [],
-    rule_name_override: alert.params.ruleNameOverride,
-    name: alert.name,
-    query: alert.params.query,
-    references: alert.params.references,
-    saved_id: alert.params.savedId,
-    timeline_id: alert.params.timelineId,
-    timeline_title: alert.params.timelineTitle,
-    meta: alert.params.meta,
-    severity: alert.params.severity,
-    severity_mapping: alert.params.severityMapping ?? [],
-    updated_by: alert.updatedBy ?? 'elastic',
-    tags: transformTags(alert.tags),
-    to: alert.params.to,
-    type: alert.params.type,
-    threat: alert.params.threat ?? [],
-    threshold: alert.params.threshold,
-    threat_filters: alert.params.threatFilters,
-    threat_index: alert.params.threatIndex,
-    threat_query: alert.params.threatQuery,
-    threat_mapping: alert.params.threatMapping,
-    threat_language: alert.params.threatLanguage,
-    concurrent_searches: alert.params.concurrentSearches,
-    items_per_search: alert.params.itemsPerSearch,
-    throttle: ruleActions?.ruleThrottle || 'no_actions',
-    timestamp_override: alert.params.timestampOverride,
-    note: alert.params.note,
-    version: alert.params.version,
-    status: ruleStatus?.attributes.status ?? undefined,
-    status_date: ruleStatus?.attributes.statusDate,
-    last_failure_at: ruleStatus?.attributes.lastFailureAt ?? undefined,
-    last_success_at: ruleStatus?.attributes.lastSuccessAt ?? undefined,
-    last_failure_message: ruleStatus?.attributes.lastFailureMessage ?? undefined,
-    last_success_message: ruleStatus?.attributes.lastSuccessMessage ?? undefined,
-    exceptions_list: alert.params.exceptionsList ?? [],
-  });
+  return internalRuleToAPIResponse(alert, ruleStatus, legacyRuleActions);
 };
 
-export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
-  return alerts.map((alert) => transformAlertToRule(alert));
+export const transformAlertsToRules = (
+  alerts: RuleAlertType[],
+  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
+): Array<Partial<RulesSchema>> => {
+  return alerts.map((alert) => transformAlertToRule(alert, undefined, legacyRuleActions[alert.id]));
 };
 
 export const transformFindAlerts = (
-  findResults: FindResult<RuleTypeParams>,
-  ruleActions: Array<RuleActions | null>,
-  ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
+  findResults: FindResult<RuleParams>,
+  currentStatusesByRuleId: { [key: string]: IRuleStatusSOAttributes | undefined },
+  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
 ): {
   page: number;
   perPage: number;
   total: number;
   data: Array<Partial<RulesSchema>>;
 } | null => {
-  if (!ruleStatuses && isAlertTypes(findResults.data)) {
-    return {
-      page: findResults.page,
-      perPage: findResults.perPage,
-      total: findResults.total,
-      data: findResults.data.map((alert, idx) => transformAlertToRule(alert, ruleActions[idx])),
-    };
-  } else if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
-    return {
-      page: findResults.page,
-      perPage: findResults.perPage,
-      total: findResults.total,
-      data: findResults.data.map((alert, idx) =>
-        transformAlertToRule(alert, ruleActions[idx], ruleStatuses[idx].saved_objects[0])
-      ),
-    };
-  } else {
-    return null;
-  }
+  return {
+    page: findResults.page,
+    perPage: findResults.perPage,
+    total: findResults.total,
+    data: findResults.data.map((alert) => {
+      const status = currentStatusesByRuleId[alert.id];
+      return internalRuleToAPIResponse(alert, status, legacyRuleActions[alert.id]);
+    }),
+  };
 };
 
 export const transform = (
-  alert: PartialAlert<RuleTypeParams>,
-  ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  alert: PartialAlert<RuleParams>,
+  ruleStatus?: IRuleStatusSOAttributes,
+  isRuleRegistryEnabled?: boolean,
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
-  if (isAlertType(alert)) {
+  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     return transformAlertToRule(
       alert,
-      ruleActions,
-      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined
+      isRuleStatusSavedObjectAttributes(ruleStatus) ? ruleStatus : undefined,
+      legacyRuleActions
     );
   }
 
   return null;
-};
-
-export const transformOrBulkError = (
-  ruleId: string,
-  alert: PartialAlert<RuleTypeParams>,
-  ruleActions: RuleActions,
-  ruleStatus?: unknown
-): Partial<RulesSchema> | BulkError => {
-  if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
-      return transformAlertToRule(alert, ruleActions, ruleStatus?.saved_objects[0] ?? ruleStatus);
-    } else {
-      return transformAlertToRule(alert, ruleActions);
-    }
-  } else {
-    return createBulkErrorObject({
-      ruleId,
-      statusCode: 500,
-      message: 'Internal error transforming',
-    });
-  }
-};
-
-export const transformOrImportError = (
-  ruleId: string,
-  alert: PartialAlert<RuleTypeParams>,
-  existingImportSuccessError: ImportSuccessError
-): ImportSuccessError => {
-  if (isAlertType(alert)) {
-    return createSuccessObject(existingImportSuccessError);
-  } else {
-    return createImportErrorObject({
-      ruleId,
-      statusCode: 500,
-      message: 'Internal error transforming',
-      existingImportSuccessError,
-    });
-  }
 };
 
 export const getDuplicates = (ruleDefinitions: CreateRulesBulkSchema, by: 'rule_id'): string[] => {
@@ -292,6 +182,60 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
         acc.rulesAcc.set(ruleId, parsedRule);
       }
 
+      return acc;
+    }, // using map (preserves ordering)
+    {
+      errors: new Map<string, BulkError>(),
+      rulesAcc: new Map<string, PromiseFromStreams>(),
+    }
+  );
+
+  return [Array.from(errors.values()), Array.from(rulesAcc.values())];
+};
+
+/**
+ * Given a set of rules and an actions client this will return connectors that are invalid
+ * such as missing connectors and filter out the rules that have invalid connectors.
+ * @param rules The rules to check for invalid connectors
+ * @param actionsClient The actions client to get all the connectors.
+ * @returns An array of connector errors if it found any and then the promise stream of valid and invalid connectors.
+ */
+export const getInvalidConnectors = async (
+  rules: PromiseFromStreams[],
+  actionsClient: ActionsClient
+): Promise<[BulkError[], PromiseFromStreams[]]> => {
+  const actionsFind = await actionsClient.getAll();
+  const actionIds = new Set(actionsFind.map((action) => action.id));
+  const { errors, rulesAcc } = rules.reduce(
+    (acc, parsedRule) => {
+      if (parsedRule instanceof Error) {
+        acc.rulesAcc.set(uuid.v4(), parsedRule);
+      } else {
+        const { rule_id: ruleId, actions } = parsedRule;
+        const missingActionIds = actions.flatMap((action) => {
+          if (!actionIds.has(action.id)) {
+            return [action.id];
+          } else {
+            return [];
+          }
+        });
+        if (missingActionIds.length === 0) {
+          acc.rulesAcc.set(ruleId, parsedRule);
+        } else {
+          const errorMessage =
+            missingActionIds.length > 1
+              ? 'connectors are missing. Connector ids missing are:'
+              : 'connector is missing. Connector id missing is:';
+          acc.errors.set(
+            uuid.v4(),
+            createBulkErrorObject({
+              ruleId,
+              statusCode: 404,
+              message: `${missingActionIds.length} ${errorMessage} ${missingActionIds.join(', ')}`,
+            })
+          );
+        }
+      }
       return acc;
     }, // using map (preserves ordering)
     {

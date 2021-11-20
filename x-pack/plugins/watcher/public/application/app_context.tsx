@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { createContext, useContext } from 'react';
@@ -15,18 +16,14 @@ interface ContextValue extends Omit<AppDeps, 'docLinks'> {
 
 const AppContext = createContext<ContextValue>(null as any);
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const generateDocLinks = ({ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }: DocLinksStart) => {
-  const elasticDocLinkBase = `${ELASTIC_WEBSITE_URL}guide/en/`;
-  const esBase = `${elasticDocLinkBase}elasticsearch/reference/${DOC_LINK_VERSION}`;
-  const kibanaBase = `${elasticDocLinkBase}kibana/${DOC_LINK_VERSION}`;
-  const putWatchApiUrl = `${esBase}/watcher-api-put-watch.html`;
-  const executeWatchApiUrl = `${esBase}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`;
-  const watcherGettingStartedUrl = `${kibanaBase}/watcher-ui.html`;
+const generateDocLinks = ({ links }: DocLinksStart) => {
+  const putWatchApiUrl = `${links.apis.putWatch}`;
+  const executeWatchApiUrl = `${links.apis.executeWatchActionModes}`;
+  const watcherGettingStartedUrl = `${links.watcher.ui}`;
   const watchActionsConfigurationMap = {
-    [ACTION_TYPES.SLACK]: `${esBase}/actions-slack.html#configuring-slack`,
-    [ACTION_TYPES.PAGERDUTY]: `${esBase}/actions-pagerduty.html#configuring-pagerduty`,
-    [ACTION_TYPES.JIRA]: `${esBase}/actions-jira.html#configuring-jira`,
+    [ACTION_TYPES.SLACK]: `${links.watcher.slackAction}`,
+    [ACTION_TYPES.PAGERDUTY]: `${links.watcher.pagerDutyAction}`,
+    [ACTION_TYPES.JIRA]: `${links.watcher.jiraAction}`,
   };
 
   return {

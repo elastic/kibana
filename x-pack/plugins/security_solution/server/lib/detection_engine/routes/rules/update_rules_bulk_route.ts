@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { updateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
@@ -18,12 +19,13 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { updateRules } from '../../rules/update_rules';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { legacyMigrate } from '../../rules/utils';
+import { readRules } from '../../rules/read_rules';
 
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.put(
     {
@@ -38,11 +40,11 @@ export const updateRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution?.getAppClient();
 
-      if (!siemClient || !alertsClient) {
+      if (!siemClient || !rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -53,7 +55,7 @@ export const updateRulesBulkRoute = (
         savedObjectsClient,
       });
 
-      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
@@ -69,30 +71,34 @@ export const updateRulesBulkRoute = (
 
             throwHttpError(await mlAuthz.validateRuleType(payloadRule.type));
 
-            const rule = await updateRules({
-              alertsClient,
+            const existingRule = await readRules({
+              isRuleRegistryEnabled,
+              rulesClient,
+              ruleId: payloadRule.rule_id,
+              id: payloadRule.id,
+            });
+
+            const migratedRule = await legacyMigrate({
+              rulesClient,
               savedObjectsClient,
+              rule: existingRule,
+            });
+
+            const rule = await updateRules({
+              spaceId: context.securitySolution.getSpaceId(),
+              rulesClient,
+              ruleStatusClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
+              existingRule: migratedRule,
               ruleUpdate: payloadRule,
+              isRuleRegistryEnabled,
             });
             if (rule != null) {
-              const ruleActions = await updateRulesNotifications({
-                ruleAlertId: rule.id,
-                alertsClient,
-                savedObjectsClient,
-                enabled: payloadRule.enabled ?? true,
-                actions: payloadRule.actions,
-                throttle: payloadRule.throttle,
-                name: payloadRule.name,
+              const ruleStatus = await ruleStatusClient.getCurrentStatus({
+                ruleId: rule.id,
+                spaceId: context.securitySolution.getSpaceId(),
               });
-              const ruleStatuses = await ruleStatusClient.find({
-                perPage: 1,
-                sortField: 'statusDate',
-                sortOrder: 'desc',
-                search: rule.id,
-                searchFields: ['alertId'],
-              });
-              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatus, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

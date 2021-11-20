@@ -1,11 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-export function getYRange(chartData: any[]) {
+
+export function getYRange(chartData?: any[]) {
+  const fit = false;
+
+  if (chartData === undefined) {
+    return { fit, min: NaN, max: NaN };
+  }
+
   if (chartData.length === 0) {
-    return { min: 0, max: 0 };
+    return { min: 0, max: 0, fit };
   }
 
   let max: number = Number.MIN_VALUE;
@@ -22,6 +30,7 @@ export function getYRange(chartData: any[]) {
   return {
     min,
     max,
+    fit,
   };
 }
 

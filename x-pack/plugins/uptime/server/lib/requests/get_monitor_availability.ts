@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { GetMonitorAvailabilityParams, Ping } from '../../../common/runtime_types';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { AfterKey } from './get_monitor_status';
-import { SortOptions } from '../../../../../typings/elasticsearch';
 
 export interface AvailabilityKey {
   monitorId: string;
@@ -78,7 +79,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
           composite: {
             size: 2000,
             ...(afterKey ? { after: afterKey } : {}),
-            sources: [
+            sources: asMutableArray([
               {
                 monitorId: {
                   terms: {
@@ -94,7 +95,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
                   },
                 },
               },
-            ],
+            ] as const),
           },
           aggs: {
             fields: {
@@ -103,10 +104,10 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
                 sort: [
                   {
                     '@timestamp': {
-                      order: 'desc',
+                      order: 'desc' as const,
                     },
                   },
-                ] as SortOptions,
+                ],
               },
             },
             up_sum: {
@@ -147,9 +148,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
     };
 
     const { body: result } = await uptimeEsClient.search({ body: esParams });
-
     afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
-
     queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || []));
   } while (afterKey !== undefined);
 

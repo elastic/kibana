@@ -1,0 +1,29 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "../../../typings/**/*",
+    "__jest__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "public/**/*.json",
+    "server/**/*.json"
+  ],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/management/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../features/tsconfig.json" },
+    { "path": "../licensing/tsconfig.json" },
+    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
+    { "path": "../infra/tsconfig.json" },
+    { "path": "../cloud/tsconfig.json" },
+  ]
+}

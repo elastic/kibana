@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTextProps, EuiToolTipProps } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common/';
 import { UISession } from '../types';
 import { LocaleWrapper } from '../__mocks__';
 import { getStatusText, StatusIndicator } from './status';
@@ -26,10 +27,14 @@ describe('Background Search Session management status labels', () => {
       id: 'wtywp9u2802hahgp-gsla',
       restoreUrl: '/app/great-app-url/#45',
       reloadUrl: '/app/great-app-url/#45',
+      numSearches: 1,
       appId: 'security',
       status: SearchSessionStatus.IN_PROGRESS,
       created: '2020-12-02T00:19:32Z',
       expires: '2020-12-07T00:19:32Z',
+      initialState: {},
+      restoreState: {},
+      version: '8.0.0',
     };
   });
 
@@ -77,7 +82,7 @@ describe('Background Search Session management status labels', () => {
       const label = statusIndicator
         .find(`[data-test-subj="sessionManagementStatusLabel"][data-test-status="complete"]`)
         .first();
-      expect((label.props() as EuiTextProps).color).toBe('secondary');
+      expect((label.props() as EuiTextProps).color).toBe('success');
       expect(label.text()).toBe('Complete');
     });
 

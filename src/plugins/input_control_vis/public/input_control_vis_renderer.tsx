@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
@@ -24,8 +24,7 @@ export const getInputControlVisRenderer: (
     if (!registeredController) {
       const { createInputControlVisController } = await import('./vis_controller');
 
-      const Controller = createInputControlVisController(deps, handlers);
-      registeredController = new Controller(domNode);
+      registeredController = createInputControlVisController(deps, handlers, domNode);
       inputControlVisRegistry.set(domNode, registeredController);
 
       handlers.onDestroy(() => {

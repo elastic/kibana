@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { IndexPatternField, IndexPattern, IFieldType } from '../../../../../../plugins/data/public';
+import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
+import { IndexPatternManagmentContext } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: IndexPatternField[];
@@ -18,20 +20,28 @@ interface IndexedFieldsTableProps {
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
-    redirectToRoute: (obj: any) => void;
-    getFieldInfo: (indexPattern: IndexPattern, field: IFieldType) => string[];
+    editField: (fieldName: string) => void;
+    deleteField: (fieldName: string) => void;
+    getFieldInfo: (indexPattern: IndexPattern, field: IndexPatternField) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
+  userEditPermission: boolean;
 }
 
 interface IndexedFieldsTableState {
   fields: IndexedFieldItem[];
 }
 
-export class IndexedFieldsTable extends Component<
-  IndexedFieldsTableProps,
-  IndexedFieldsTableState
-> {
+const withHooks = (Comp: typeof Component) => {
+  return (props: any) => {
+    const { application } = useKibana<IndexPatternManagmentContext>().services;
+    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+
+    return <Comp userEditPermission={userEditPermission} {...props} />;
+  };
+};
+
+class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTableState> {
   constructor(props: IndexedFieldsTableProps) {
     super(props);
 
@@ -49,7 +59,7 @@ export class IndexedFieldsTable extends Component<
   }
 
   mapFields(fields: IndexPatternField[]): IndexedFieldItem[] {
-    const { indexPattern, fieldWildcardMatcher, helpers } = this.props;
+    const { indexPattern, fieldWildcardMatcher, helpers, userEditPermission } = this.props;
     const sourceFilters =
       indexPattern.sourceFilters &&
       indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
@@ -60,10 +70,15 @@ export class IndexedFieldsTable extends Component<
         fields.map((field) => {
           return {
             ...field.spec,
+            type: field.esTypes?.join(', ') || '',
+            kbnType: field.type,
             displayName: field.displayName,
             format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
+            isMapped: !!field.isMapped,
+            isUserEditable: userEditPermission,
+            hasRuntime: !!field.runtimeField,
           };
         })) ||
       []
@@ -102,9 +117,12 @@ export class IndexedFieldsTable extends Component<
         <Table
           indexPattern={indexPattern}
           items={fields}
-          editField={(field) => this.props.helpers.redirectToRoute(field)}
+          editField={(field) => this.props.helpers.editField(field.name)}
+          deleteField={(fieldName) => this.props.helpers.deleteField(fieldName)}
         />
       </div>
     );
   }
 }
+
+export const IndexedFieldsTable = withHooks(IndexedFields);

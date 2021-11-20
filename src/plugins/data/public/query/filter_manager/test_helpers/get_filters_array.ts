@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Filter } from '../../../../common';
@@ -11,15 +11,15 @@ import { Filter } from '../../../../common';
 export function getFiltersArray(): Filter[] {
   return [
     {
-      query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
+      query: { match: { extension: { query: 'jpg' } } },
       meta: { index: 'logstash-*', negate: false, disabled: false, alias: null },
     },
     {
-      query: { match: { '@tags': { query: 'info', type: 'phrase' } } },
+      query: { match: { '@tags': { query: 'info' } } },
       meta: { index: 'logstash-*', negate: false, disabled: false, alias: null },
     },
     {
-      query: { match: { _type: { query: 'nginx', type: 'phrase' } } },
+      query: { match: { _type: { query: 'nginx' } } },
       meta: { index: 'logstash-*', negate: false, disabled: false, alias: null },
     },
   ];

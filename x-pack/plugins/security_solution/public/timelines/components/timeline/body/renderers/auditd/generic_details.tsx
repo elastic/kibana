@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
@@ -35,6 +36,7 @@ interface Props {
   workingDirectory: string | null | undefined;
   args: string[] | null | undefined;
   session: string | null | undefined;
+  isDraggable?: boolean;
 }
 
 export const AuditdGenericLine = React.memo<Props>(
@@ -54,6 +56,7 @@ export const AuditdGenericLine = React.memo<Props>(
     result,
     session,
     text,
+    isDraggable,
   }) => (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
       <SessionUserHostWorkingDir
@@ -65,6 +68,7 @@ export const AuditdGenericLine = React.memo<Props>(
         secondary={secondary}
         workingDirectory={workingDirectory}
         session={session}
+        isDraggable={isDraggable}
       />
       {processExecutable != null && (
         <TokensFlexItem grow={false} component="span">
@@ -80,9 +84,16 @@ export const AuditdGenericLine = React.memo<Props>(
           processPid={processPid}
           processName={processName}
           processExecutable={processExecutable}
+          isDraggable={isDraggable}
         />
       </TokensFlexItem>
-      <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
+      <Args
+        eventId={id}
+        args={args}
+        contextId={contextId}
+        isDraggable={isDraggable}
+        processTitle={processTitle}
+      />
       {result != null && (
         <TokensFlexItem grow={false} component="span">
           {i18n.WITH_RESULT}
@@ -93,6 +104,7 @@ export const AuditdGenericLine = React.memo<Props>(
           contextId={contextId}
           eventId={id}
           field="auditd.result"
+          isDraggable={isDraggable}
           queryValue={result}
           value={result}
         />
@@ -106,13 +118,14 @@ AuditdGenericLine.displayName = 'AuditdGenericLine';
 interface GenericDetailsProps {
   browserFields: BrowserFields;
   data: Ecs;
+  isDraggable?: boolean;
   contextId: string;
   text: string;
   timelineId: string;
 }
 
 export const AuditdGenericDetails = React.memo<GenericDetailsProps>(
-  ({ data, contextId, text, timelineId }) => {
+  ({ data, contextId, isDraggable, text, timelineId }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -145,9 +158,10 @@ export const AuditdGenericDetails = React.memo<GenericDetailsProps>(
             primary={primary}
             result={result}
             secondary={secondary}
+            isDraggable={isDraggable}
           />
           <EuiSpacer size="s" />
-          <NetflowRenderer data={data} timelineId={timelineId} />
+          <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
         </Details>
       );
     } else {

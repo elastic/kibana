@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState, useReducer } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState, useReducer, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { PopulationJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Field, AggFieldPair } from '../../../../../../../../../common/types/fields';
+import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
-import { SplitFieldSelector } from '../split_field';
+import { PopulationFieldSelector } from '../population_field';
 import { ChartGrid } from './chart_grid';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
@@ -35,7 +37,10 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
-  const { fields } = newJobCapsService;
+  const fields = useMemo(
+    () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    []
+  );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs
@@ -46,7 +51,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const [end, setEnd] = useState(jobCreator.end);
   const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
-  const [splitField, setSplitField] = useState(jobCreator.splitField);
+  const [populationField, setPopulationField] = useState(jobCreator.populationField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
   const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number, action: any) => number>(
     (s) => s + 1,
@@ -103,7 +108,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   // if the split field or by fields have changed
   useEffect(() => {
     loadCharts();
-  }, [JSON.stringify(fieldValuesPerDetector), splitField, pageReady]);
+  }, [JSON.stringify(fieldValuesPerDetector), populationField, pageReady]);
 
   // watch for change in jobCreator
   useEffect(() => {
@@ -118,7 +123,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
       loadCharts();
     }
 
-    setSplitField(jobCreator.splitField);
+    setPopulationField(jobCreator.populationField);
 
     // update by fields and their by fields
     let update = false;
@@ -141,7 +146,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   // changes to fieldValues here will trigger the card effect via setFieldValuesPerDetector
   useEffect(() => {
     loadFieldExamples();
-  }, [splitField, byFieldsUpdated]);
+  }, [populationField, byFieldsUpdated]);
 
   async function loadCharts() {
     if (allDataReady()) {
@@ -153,8 +158,10 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           jobCreator.start,
           jobCreator.end,
           aggFieldPairList,
-          jobCreator.splitField,
-          cs.intervalMs
+          jobCreator.populationField,
+          cs.intervalMs,
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
         );
 
         setLineChartsData(resp);
@@ -174,7 +181,11 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           (async (index: number, field: Field) => {
             return {
               index,
-              fields: await chartLoader.loadFieldExampleValues(field),
+              fields: await chartLoader.loadFieldExampleValues(
+                field,
+                jobCreator.runtimeMappings,
+                jobCreator.datafeedConfig.indices_options
+              ),
             };
           })(i, af.by.field)
         );
@@ -214,14 +225,14 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
 
   return (
     <Fragment>
-      <SplitFieldSelector />
-      {splitField !== null && <EuiHorizontalRule margin="l" />}
+      <PopulationFieldSelector />
+      {populationField !== null && <EuiHorizontalRule margin="l" />}
 
-      {splitField !== null && (
+      {populationField !== null && (
         <ChartGrid
           aggFieldPairList={aggFieldPairList}
           chartSettings={chartSettings}
-          splitField={splitField}
+          splitField={populationField}
           lineChartsData={lineChartsData}
           modelData={[]}
           anomalyData={[]}
@@ -231,7 +242,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           loading={loadingData}
         />
       )}
-      {splitField !== null && (
+      {populationField !== null && (
         <MetricSelector
           fields={fields}
           detectorChangeHandler={detectorChangeHandler}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -19,11 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  getLayerWizards,
-  LayerWizard,
-  LayerWizardWithMeta,
-} from '../../../classes/layers/layer_wizard_registry';
+import { getLayerWizards, LayerWizard, LayerWizardWithMeta } from '../../../classes/layers';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import './layer_wizard_select.scss';
 
@@ -160,6 +157,7 @@ export class LayerWizardSelect extends Component<Props, State> {
           <EuiCard
             title={layerWizard.title}
             titleSize="xs"
+            betaBadgeProps={{ label: layerWizard.isBeta ? 'beta' : undefined }}
             icon={icon}
             onClick={onClick}
             description={layerWizard.description}

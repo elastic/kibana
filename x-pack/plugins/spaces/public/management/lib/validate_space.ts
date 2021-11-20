@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { isValidHex } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+
 import { isReservedSpace } from '../../../common/is_reserved_space';
+import type { FormValues } from '../edit_space/manage_space_page';
 import { isValidSpaceIdentifier } from './space_identifier_utils';
 
 interface SpaceValidatorOptions {
@@ -27,7 +32,7 @@ export class SpaceValidator {
     this.shouldValidate = false;
   }
 
-  public validateSpaceName(space: Partial<Space>) {
+  public validateSpaceName(space: FormValues) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -35,7 +40,7 @@ export class SpaceValidator {
     if (!space.name || !space.name.trim()) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.requiredNameErrorMessage', {
-          defaultMessage: 'Name is required.',
+          defaultMessage: 'Enter a name.',
         })
       );
     }
@@ -51,7 +56,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateSpaceDescription(space: Partial<Space>) {
+  public validateSpaceDescription(space: FormValues) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -67,7 +72,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateURLIdentifier(space: Partial<Space>) {
+  public validateURLIdentifier(space: FormValues) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -79,7 +84,7 @@ export class SpaceValidator {
     if (!space.id) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.urlIdentifierRequiredErrorMessage', {
-          defaultMessage: 'URL identifier is required.',
+          defaultMessage: 'Enter a URL identifier.',
         })
       );
     }
@@ -99,17 +104,93 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateEnabledFeatures(space: Partial<Space>) {
+  public validateAvatarInitials(space: FormValues) {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    if (space.avatarType !== 'image') {
+      if (!space.initials) {
+        return invalid(
+          i18n.translate('xpack.spaces.management.validateSpace.requiredInitialsErrorMessage', {
+            defaultMessage: 'Enter initials.',
+          })
+        );
+      }
+      if (space.initials.length > 2) {
+        return invalid(
+          i18n.translate('xpack.spaces.management.validateSpace.maxLengthInitialsErrorMessage', {
+            defaultMessage: 'Enter no more than 2 characters.',
+          })
+        );
+      }
+    }
+
     return valid();
   }
 
-  public validateForSave(space: Space) {
+  public validateAvatarColor(space: FormValues) {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    if (!space.color) {
+      return invalid(
+        i18n.translate('xpack.spaces.management.validateSpace.requiredColorErrorMessage', {
+          defaultMessage: 'Select a background color.',
+        })
+      );
+    }
+
+    if (!isValidHex(space.color)) {
+      return invalid(
+        i18n.translate('xpack.spaces.management.validateSpace.invalidColorErrorMessage', {
+          defaultMessage: 'Enter a valid HEX color code.',
+        })
+      );
+    }
+
+    return valid();
+  }
+
+  public validateAvatarImage(space: FormValues) {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    if (space.avatarType === 'image' && !space.imageUrl) {
+      return invalid(
+        i18n.translate('xpack.spaces.management.validateSpace.requiredImageErrorMessage', {
+          defaultMessage: 'Upload an image.',
+        })
+      );
+    }
+
+    return valid();
+  }
+
+  public validateEnabledFeatures(space: FormValues) {
+    return valid();
+  }
+
+  public validateForSave(space: FormValues) {
     const { isInvalid: isNameInvalid } = this.validateSpaceName(space);
     const { isInvalid: isDescriptionInvalid } = this.validateSpaceDescription(space);
     const { isInvalid: isIdentifierInvalid } = this.validateURLIdentifier(space);
+    const { isInvalid: isAvatarInitialsInvalid } = this.validateAvatarInitials(space);
+    const { isInvalid: isAvatarColorInvalid } = this.validateAvatarColor(space);
+    const { isInvalid: isAvatarImageInvalid } = this.validateAvatarImage(space);
     const { isInvalid: areFeaturesInvalid } = this.validateEnabledFeatures(space);
 
-    if (isNameInvalid || isDescriptionInvalid || isIdentifierInvalid || areFeaturesInvalid) {
+    if (
+      isNameInvalid ||
+      isDescriptionInvalid ||
+      isIdentifierInvalid ||
+      isAvatarInitialsInvalid ||
+      isAvatarColorInvalid ||
+      isAvatarImageInvalid ||
+      areFeaturesInvalid
+    ) {
       return invalid();
     }
 

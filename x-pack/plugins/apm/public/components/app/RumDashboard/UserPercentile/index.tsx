@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect } from 'react';
 
 import { EuiSelect } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { I18LABELS } from '../translations';
 
@@ -19,7 +20,7 @@ export function UserPercentile() {
 
   const {
     urlParams: { percentile },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const updatePercentile = useCallback(
     (percentileN?: number, replaceHistory?: boolean) => {
@@ -79,9 +80,9 @@ export function UserPercentile() {
 
   return (
     <EuiSelect
+      fullWidth
       prepend={I18LABELS.percentile}
       data-test-subj="uxPercentileSelect"
-      style={{ width: 150 }}
       options={options}
       onChange={(evt) => onChange(evt.target.value)}
     />

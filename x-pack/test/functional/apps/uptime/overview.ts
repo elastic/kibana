@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,17 +13,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
 
-  describe('overview page', function () {
+  const testSubjects = getService('testSubjects');
+
+  // FLAKY: https://github.com/elastic/kibana/issues/89072
+  describe.skip('overview page', function () {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
 
     before(async () => {
-      await esArchiver.loadIfNeeded('uptime/full_heartbeat');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/uptime/full_heartbeat');
     });
 
     beforeEach(async () => {
       await uptime.goToRoot();
       await uptime.setDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+
       await uptime.resetFilters();
     });
 
@@ -36,9 +41,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('applies filters for multiple fields', async () => {
       await uptime.selectFilterItems({
-        location: ['mpls'],
-        port: ['5678'],
-        scheme: ['http'],
+        Location: ['mpls'],
+        Port: ['5678'],
+        Scheme: ['http'],
       });
       await uptime.pageHasExpectedIds([
         '0000-intermittent',
@@ -56,43 +61,52 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('pagination is cleared when filter criteria changes', async () => {
       await uptime.changePage('next');
-      await uptime.pageHasExpectedIds([
-        '0010-down',
-        '0011-up',
-        '0012-up',
-        '0013-up',
-        '0014-up',
-        '0015-intermittent',
-        '0016-up',
-        '0017-up',
-        '0018-up',
-        '0019-up',
-      ]);
+      await retry.try(async () => {
+        await uptime.pageHasExpectedIds([
+          '0010-down',
+          '0011-up',
+          '0012-up',
+          '0013-up',
+          '0014-up',
+          '0015-intermittent',
+          '0016-up',
+          '0017-up',
+          '0018-up',
+          '0019-up',
+        ]);
+      });
       // there should now be pagination data in the URL
       await uptime.pageUrlContains('pagination');
       await uptime.setStatusFilter('up');
-      await uptime.pageHasExpectedIds([
-        '0000-intermittent',
-        '0001-up',
-        '0002-up',
-        '0003-up',
-        '0004-up',
-        '0005-up',
-        '0006-up',
-        '0007-up',
-        '0008-up',
-        '0009-up',
-      ]);
+      await retry.try(async () => {
+        await uptime.pageHasExpectedIds([
+          '0000-intermittent',
+          '0001-up',
+          '0002-up',
+          '0003-up',
+          '0004-up',
+          '0005-up',
+          '0006-up',
+          '0007-up',
+          '0008-up',
+          '0009-up',
+        ]);
+      });
       // ensure that pagination is removed from the URL
       await uptime.pageUrlContains('pagination', false);
     });
 
     it('clears pagination parameters when size changes', async () => {
       await uptime.changePage('next');
-      await uptime.pageUrlContains('pagination');
+      await retry.try(async () => {
+        await uptime.pageUrlContains('pagination');
+      });
       await uptime.setMonitorListPageSize(50);
       // the pagination parameter should be cleared after a size change
-      await uptime.pageUrlContains('pagination', false);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await retry.try(async () => {
+        await uptime.pageUrlContains('pagination', false);
+      });
     });
 
     it('pagination size updates to reflect current selection', async () => {
@@ -179,6 +193,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const counts = await uptime.getSnapshotCount();
           expect(counts).to.eql({ up: '93', down: '7' });
         });
+      });
+
+      it('can change query syntax to kql', async () => {
+        await testSubjects.click('switchQueryLanguageButton');
+        await testSubjects.click('languageToggle');
       });
 
       it('runs filter query without issues', async () => {

@@ -1,23 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import {
-  ActionTypeRegistryContract,
   Alert,
-  AlertTypeRegistryContract,
   AlertTypeParams,
   AlertUpdates,
+  AlertFlyoutCloseReason,
+  IErrorObject,
+  AlertAddProps,
+  RuleTypeIndex,
 } from '../../../types';
-import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
+import { AlertForm } from './alert_form';
+import { getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_errors';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
-import { createAlert } from '../../lib/alert_api';
+import { createAlert, loadAlertTypes } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmAlertSave } from './confirm_alert_save';
 import { ConfirmAlertClose } from './confirm_alert_close';
@@ -27,45 +32,38 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
-
-export interface AlertAddProps<MetaData = Record<string, any>> {
-  consumer: string;
-  alertTypeRegistry: AlertTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: () => void;
-  alertTypeId?: string;
-  canChangeTrigger?: boolean;
-  initialValues?: Partial<Alert>;
-  reloadAlerts?: () => Promise<void>;
-  metadata?: MetaData;
-}
+import { DEFAULT_ALERT_INTERVAL } from '../../constants';
 
 const AlertAdd = ({
   consumer,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   actionTypeRegistry,
   onClose,
   canChangeTrigger,
   alertTypeId,
   initialValues,
+
   reloadAlerts,
+  onSave,
   metadata,
+  ...props
 }: AlertAddProps) => {
-  const initialAlert: InitialAlert = useMemo(
-    () => ({
+  const onSaveHandler = onSave ?? reloadAlerts;
+
+  const initialAlert: InitialAlert = useMemo(() => {
+    return {
       params: {},
       consumer,
       alertTypeId,
       schedule: {
-        interval: '1m',
+        interval: DEFAULT_ALERT_INTERVAL,
       },
       actions: [],
       tags: [],
       notifyWhen: 'onActionGroupChange',
       ...(initialValues ? initialValues : {}),
-    }),
-    [alertTypeId, consumer, initialValues]
-  );
+    };
+  }, [alertTypeId, consumer, initialValues]);
 
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
@@ -74,6 +72,10 @@ const AlertAdd = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
+  const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
+    props.ruleTypeIndex
+  );
+  const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
 
   const setAlert = (value: InitialAlert) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
@@ -98,6 +100,19 @@ const AlertAdd = ({
   }, [alertTypeId]);
 
   useEffect(() => {
+    if (!props.ruleTypeIndex) {
+      (async () => {
+        const alertTypes = await loadAlertTypes({ http });
+        const index: RuleTypeIndex = new Map();
+        for (const alertType of alertTypes) {
+          index.set(alertType.id, alertType);
+        }
+        setRuleTypeIndex(index);
+      })();
+    }
+  }, [props.ruleTypeIndex, http]);
+
+  useEffect(() => {
     if (isEmpty(alert.params) && !isEmpty(initialAlertParams)) {
       // alert params are explicitly cleared when the alert type is cleared.
       // clear the "initial" params in order to capture the
@@ -110,6 +125,33 @@ const AlertAdd = ({
     }
   }, [alert.params, initialAlertParams, setInitialAlertParams]);
 
+  const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      setIsLoading(false);
+      setAlertActionsErrors([...res]);
+    })();
+  }, [alert, actionTypeRegistry]);
+
+  useEffect(() => {
+    if (alert.alertTypeId && ruleTypeIndex) {
+      const type = ruleTypeIndex.get(alert.alertTypeId);
+      if (type?.defaultScheduleInterval && !changedFromDefaultInterval) {
+        setAlertProperty('schedule', { interval: type.defaultScheduleInterval });
+      }
+    }
+  }, [alert.alertTypeId, ruleTypeIndex, alert.schedule.interval, changedFromDefaultInterval]);
+
+  useEffect(() => {
+    if (alert.schedule.interval !== DEFAULT_ALERT_INTERVAL && !changedFromDefaultInterval) {
+      setChangedFromDefaultInterval(true);
+    }
+  }, [alert.schedule.interval, changedFromDefaultInterval]);
+
   const checkForChangesAndCloseFlyout = () => {
     if (
       hasAlertChanged(alert, initialAlert, false) ||
@@ -117,7 +159,7 @@ const AlertAdd = ({
     ) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
-      onClose();
+      onClose(AlertFlyoutCloseReason.CANCELED);
     }
   };
 
@@ -125,18 +167,19 @@ const AlertAdd = ({
     const savedAlert = await onSaveAlert();
     setIsSaving(false);
     if (savedAlert) {
-      onClose();
-      if (reloadAlerts) {
-        reloadAlerts();
+      onClose(AlertFlyoutCloseReason.SAVED);
+      if (onSaveHandler) {
+        onSaveHandler();
       }
     }
   };
 
-  const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
-  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+  const alertType = alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null;
+
+  const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Alert,
-    actionTypeRegistry,
-    alertType
+    alertType,
+    alert.alertTypeId ? ruleTypeIndex?.get(alert.alertTypeId) : undefined
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this alert
@@ -147,9 +190,9 @@ const AlertAdd = ({
       const newAlert = await createAlert({ http, alert: alert as AlertUpdates });
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-          defaultMessage: 'Created alert "{alertName}"',
+          defaultMessage: 'Created rule "{ruleName}"',
           values: {
-            alertName: newAlert.name,
+            ruleName: newAlert.name,
           },
         })
       );
@@ -158,7 +201,7 @@ const AlertAdd = ({
       toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
-            defaultMessage: 'Cannot create alert.',
+            defaultMessage: 'Cannot create rule.',
           })
       );
     }
@@ -171,12 +214,13 @@ const AlertAdd = ({
         aria-labelledby="flyoutAlertAddTitle"
         size="m"
         maxWidth={620}
+        ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create alert"
+                defaultMessage="Create rule"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
             </h3>
@@ -197,15 +241,16 @@ const AlertAdd = ({
                   }
                 )}
                 actionTypeRegistry={actionTypeRegistry}
-                alertTypeRegistry={alertTypeRegistry}
+                ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
               />
             </EuiFlyoutBody>
             <AlertAddFooter
               isSaving={isSaving}
+              isFormLoading={isLoading}
               onSave={async () => {
                 setIsSaving(true);
-                if (!isValidAlert(alert, alertErrors, alertActionsErrors)) {
+                if (isLoading || !isValidAlert(alert, alertErrors, alertActionsErrors)) {
                   setAlert(
                     getAlertWithInvalidatedFields(
                       alert as Alert,
@@ -243,7 +288,7 @@ const AlertAdd = ({
           <ConfirmAlertClose
             onConfirm={() => {
               setIsConfirmAlertCloseModalOpen(false);
-              onClose();
+              onClose(AlertFlyoutCloseReason.CANCELED);
             }}
             onCancel={() => {
               setIsConfirmAlertCloseModalOpen(false);

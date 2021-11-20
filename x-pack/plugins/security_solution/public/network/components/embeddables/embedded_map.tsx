@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink, EuiText } from '@elastic/eui';
@@ -10,6 +11,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
+import type { Filter, Query } from '@kbn/es-query';
 import {
   ErrorEmbeddable,
   isErrorEmbeddable,
@@ -25,10 +27,10 @@ import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
-import { getDefaultSourcererSelector } from './selector';
 import { getLayerList } from './map_config';
+import { sourcererSelectors } from '../../../common/store/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 interface EmbeddableMapProps {
@@ -94,13 +96,13 @@ export const EmbeddedMapComponent = ({
   const [isIndexError, setIsIndexError] = useState(false);
 
   const [, dispatchToaster] = useStateToaster();
-  const defaultSourcererScopeSelector = useMemo(getDefaultSourcererSelector, []);
-  const { kibanaIndexPatterns, sourcererScope } = useDeepEqualSelector(
-    defaultSourcererScopeSelector
-  );
+
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const { kibanaDataViews, sourcererScope }: sourcererSelectors.SourcererScopeSelector =
+    useDeepEqualSelector((state) => sourcererScopeSelector(state, SourcererScopeName.default));
 
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
-    kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title))
+    kibanaDataViews.filter((dataView) => sourcererScope.selectedPatterns.includes(dataView.title))
   );
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
@@ -113,8 +115,8 @@ export const EmbeddedMapComponent = ({
 
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {
-      const newIndexPatterns = kibanaIndexPatterns.filter((kip) =>
-        sourcererScope.selectedPatterns.includes(kip.title)
+      const newIndexPatterns = kibanaDataViews.filter((dataView) =>
+        sourcererScope.selectedPatterns.includes(dataView.title)
       );
       if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
         if (newIndexPatterns.length === 0) {
@@ -124,7 +126,7 @@ export const EmbeddedMapComponent = ({
       }
       return prevMapIndexPatterns;
     });
-  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns]);
+  }, [kibanaDataViews, sourcererScope.selectedPatterns]);
 
   // Initial Load useEffect
   useEffect(() => {
@@ -220,10 +222,7 @@ export const EmbeddedMapComponent = ({
     <Embeddable>
       <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
         <EuiText size="xs">
-          <EuiLink
-            href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${services.docLinks.DOC_LINK_VERSION}/conf-map-ui.html`}
-            target="_blank"
-          >
+          <EuiLink href={`${services.docLinks.links.siem.networkMap}`} target="_blank">
             {i18n.EMBEDDABLE_HEADER_HELP}
           </EuiLink>
         </EuiText>

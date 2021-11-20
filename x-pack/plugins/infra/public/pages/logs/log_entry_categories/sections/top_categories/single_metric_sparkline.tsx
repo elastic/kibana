@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
-import { Chart, Settings, AreaSeries } from '@elastic/charts';
+import { Chart, Settings, AreaSeries, ScaleType, TooltipType } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_LIGHT,
   EUI_SPARKLINE_THEME_PARTIAL,
@@ -52,12 +53,12 @@ export const SingleMetricSparkline: React.FunctionComponent<{
 
   return (
     <Chart size={sparklineSize}>
-      <Settings showLegend={false} theme={theme} tooltip="none" xDomain={xDomain} />
+      <Settings showLegend={false} theme={theme} tooltip={TooltipType.None} xDomain={xDomain} />
       <AreaSeries
-        data={metric}
         id="metric"
+        data={metric}
         xAccessor={timestampAccessor}
-        xScaleType="time"
+        xScaleType={ScaleType.Time}
         yAccessors={valueAccessor}
       />
     </Chart>

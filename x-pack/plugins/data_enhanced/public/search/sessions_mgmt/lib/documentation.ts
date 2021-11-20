@@ -1,22 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DocLinksStart } from 'kibana/public';
 
 export class AsyncSearchIntroDocumentation {
-  private docsBasePath: string = '';
+  private docUrl: string = '';
 
   constructor(docs: DocLinksStart) {
-    const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docs;
-    const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
-    // TODO: There should be Kibana documentation link about Search Sessions in Kibana
-    this.docsBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
+    const { links } = docs;
+    this.docUrl = links.search.sessions;
   }
 
   public getElasticsearchDocLink() {
-    return `${this.docsBasePath}/async-search-intro.html`;
+    return `${this.docUrl}`;
   }
 }

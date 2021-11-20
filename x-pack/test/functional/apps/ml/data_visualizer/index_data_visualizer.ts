@@ -1,353 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
-import { FieldVisConfig } from '../../../../../plugins/ml/public/application/datavisualizer/stats_table/types';
-
-interface MetricFieldVisConfig extends FieldVisConfig {
-  statsMaxDecimalPlaces: number;
-  docCountFormatted: string;
-  topValuesCount: number;
-}
-
-interface NonMetricFieldVisConfig extends FieldVisConfig {
-  docCountFormatted: string;
-  exampleCount: number;
-}
-
-interface TestData {
-  suiteTitle: string;
-  sourceIndexOrSavedSearch: string;
-  fieldNameFilters: string[];
-  fieldTypeFilters: string[];
-  rowsPerPage?: 10 | 25 | 50;
-  sampleSizeValidations: Array<{
-    size: number;
-    expected: { field: string; docCountFormatted: string };
-  }>;
-  expected: {
-    totalDocCountFormatted: string;
-    metricFields?: MetricFieldVisConfig[];
-    nonMetricFields?: NonMetricFieldVisConfig[];
-    emptyFields: string[];
-    visibleMetricFieldsCount: number;
-    totalMetricFieldsCount: number;
-    populatedFieldsCount: number;
-    totalFieldsCount: number;
-    fieldNameFiltersResultCount: number;
-    fieldTypeFiltersResultCount: number;
-  };
-}
+import { TestData, MetricFieldVisConfig } from './types';
+import {
+  farequoteDataViewTestData,
+  farequoteKQLFiltersSearchTestData,
+  farequoteKQLSearchTestData,
+  farequoteLuceneSearchTestData,
+  sampleLogTestData,
+} from './index_test_data';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-
-  const farequoteIndexPatternTestData: TestData = {
-    suiteTitle: 'index pattern',
-    sourceIndexOrSavedSearch: 'ft_farequote',
-    fieldNameFilters: ['airline', '@timestamp'],
-    fieldTypeFilters: [ML_JOB_FIELD_TYPES.KEYWORD],
-    sampleSizeValidations: [
-      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
-      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
-    ],
-    expected: {
-      totalDocCountFormatted: '86,274',
-      metricFields: [
-        {
-          fieldName: 'responsetime',
-          type: ML_JOB_FIELD_TYPES.NUMBER,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          docCountFormatted: '5000 (100%)',
-          statsMaxDecimalPlaces: 3,
-          topValuesCount: 10,
-        },
-      ],
-      nonMetricFields: [
-        {
-          fieldName: '@timestamp',
-          type: ML_JOB_FIELD_TYPES.DATE,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          docCountFormatted: '5000 (100%)',
-          exampleCount: 2,
-        },
-        {
-          fieldName: '@version',
-          type: ML_JOB_FIELD_TYPES.TEXT,
-          existsInDocs: true,
-          aggregatable: false,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '',
-        },
-        {
-          fieldName: '@version.keyword',
-          type: ML_JOB_FIELD_TYPES.KEYWORD,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '5000 (100%)',
-        },
-        {
-          fieldName: 'airline',
-          type: ML_JOB_FIELD_TYPES.KEYWORD,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          exampleCount: 10,
-          docCountFormatted: '5000 (100%)',
-        },
-        {
-          fieldName: 'type',
-          type: ML_JOB_FIELD_TYPES.TEXT,
-          existsInDocs: true,
-          aggregatable: false,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '',
-        },
-        {
-          fieldName: 'type.keyword',
-          type: ML_JOB_FIELD_TYPES.KEYWORD,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '5000 (100%)',
-        },
-      ],
-      emptyFields: ['sourcetype'],
-      visibleMetricFieldsCount: 1,
-      totalMetricFieldsCount: 1,
-      populatedFieldsCount: 7,
-      totalFieldsCount: 8,
-      fieldNameFiltersResultCount: 2,
-      fieldTypeFiltersResultCount: 3,
-    },
-  };
-
-  const farequoteKQLSearchTestData: TestData = {
-    suiteTitle: 'KQL saved search',
-    sourceIndexOrSavedSearch: 'ft_farequote_kuery',
-    fieldNameFilters: ['@version'],
-    fieldTypeFilters: [ML_JOB_FIELD_TYPES.DATE, ML_JOB_FIELD_TYPES.TEXT],
-    sampleSizeValidations: [
-      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
-      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
-    ],
-    expected: {
-      totalDocCountFormatted: '34,415',
-      metricFields: [
-        {
-          fieldName: 'responsetime',
-          type: ML_JOB_FIELD_TYPES.NUMBER,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          docCountFormatted: '5000 (100%)',
-          statsMaxDecimalPlaces: 3,
-          topValuesCount: 10,
-        },
-      ],
-      nonMetricFields: [
-        {
-          fieldName: '@timestamp',
-          type: ML_JOB_FIELD_TYPES.DATE,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          docCountFormatted: '5000 (100%)',
-          exampleCount: 2,
-        },
-        {
-          fieldName: '@version',
-          type: ML_JOB_FIELD_TYPES.TEXT,
-          existsInDocs: true,
-          aggregatable: false,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '',
-        },
-        {
-          fieldName: '@version.keyword',
-          type: ML_JOB_FIELD_TYPES.KEYWORD,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '5000 (100%)',
-        },
-        {
-          fieldName: 'airline',
-          type: ML_JOB_FIELD_TYPES.KEYWORD,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          exampleCount: 5,
-          docCountFormatted: '5000 (100%)',
-        },
-        {
-          fieldName: 'type',
-          type: ML_JOB_FIELD_TYPES.TEXT,
-          existsInDocs: true,
-          aggregatable: false,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '',
-        },
-        {
-          fieldName: 'type.keyword',
-          type: ML_JOB_FIELD_TYPES.KEYWORD,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '5000 (100%)',
-        },
-      ],
-      emptyFields: ['sourcetype'],
-      visibleMetricFieldsCount: 1,
-      totalMetricFieldsCount: 1,
-      populatedFieldsCount: 7,
-      totalFieldsCount: 8,
-      fieldNameFiltersResultCount: 1,
-      fieldTypeFiltersResultCount: 3,
-    },
-  };
-
-  const farequoteLuceneSearchTestData: TestData = {
-    suiteTitle: 'lucene saved search',
-    sourceIndexOrSavedSearch: 'ft_farequote_lucene',
-    fieldNameFilters: ['@version.keyword', 'type'],
-    fieldTypeFilters: [ML_JOB_FIELD_TYPES.NUMBER],
-    sampleSizeValidations: [
-      { size: 1000, expected: { field: 'airline', docCountFormatted: '1000 (100%)' } },
-      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
-    ],
-    expected: {
-      totalDocCountFormatted: '34,416',
-      metricFields: [
-        {
-          fieldName: 'responsetime',
-          type: ML_JOB_FIELD_TYPES.NUMBER,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          docCountFormatted: '5000 (100%)',
-          statsMaxDecimalPlaces: 3,
-          topValuesCount: 10,
-        },
-      ],
-      nonMetricFields: [
-        {
-          fieldName: '@timestamp',
-          type: ML_JOB_FIELD_TYPES.DATE,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          docCountFormatted: '5000 (100%)',
-          exampleCount: 2,
-        },
-        {
-          fieldName: '@version',
-          type: ML_JOB_FIELD_TYPES.TEXT,
-          existsInDocs: true,
-          aggregatable: false,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '',
-        },
-        {
-          fieldName: '@version.keyword',
-          type: ML_JOB_FIELD_TYPES.KEYWORD,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '5000 (100%)',
-        },
-        {
-          fieldName: 'airline',
-          type: ML_JOB_FIELD_TYPES.KEYWORD,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          exampleCount: 5,
-          docCountFormatted: '5000 (100%)',
-        },
-        {
-          fieldName: 'type',
-          type: ML_JOB_FIELD_TYPES.TEXT,
-          existsInDocs: true,
-          aggregatable: false,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '',
-        },
-        {
-          fieldName: 'type.keyword',
-          type: ML_JOB_FIELD_TYPES.KEYWORD,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          exampleCount: 1,
-          docCountFormatted: '5000 (100%)',
-        },
-      ],
-      emptyFields: ['sourcetype'],
-      visibleMetricFieldsCount: 1,
-      totalMetricFieldsCount: 1,
-      populatedFieldsCount: 7,
-      totalFieldsCount: 8,
-      fieldNameFiltersResultCount: 2,
-      fieldTypeFiltersResultCount: 1,
-    },
-  };
-
-  const sampleLogTestData: TestData = {
-    suiteTitle: 'geo point field',
-    sourceIndexOrSavedSearch: 'ft_module_sample_logs',
-    fieldNameFilters: ['geo.coordinates'],
-    fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
-    rowsPerPage: 50,
-    expected: {
-      totalDocCountFormatted: '408',
-      metricFields: [],
-      // only testing the geo_point fields
-      nonMetricFields: [
-        {
-          fieldName: 'geo.coordinates',
-          type: ML_JOB_FIELD_TYPES.GEO_POINT,
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-          docCountFormatted: '408 (100%)',
-          exampleCount: 10,
-        },
-      ],
-      emptyFields: [],
-      visibleMetricFieldsCount: 4,
-      totalMetricFieldsCount: 5,
-      populatedFieldsCount: 35,
-      totalFieldsCount: 36,
-      fieldNameFiltersResultCount: 1,
-      fieldTypeFiltersResultCount: 1,
-    },
-    sampleSizeValidations: [
-      { size: 1000, expected: { field: 'geo.coordinates', docCountFormatted: '408 (100%)' } },
-      { size: 5000, expected: { field: '@timestamp', docCountFormatted: '408 (100%)' } },
-    ],
-  };
 
   function runTests(testData: TestData) {
     it(`${testData.suiteTitle} loads the source data in the data visualizer`, async () => {
@@ -407,6 +77,13 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
 
+      if (testData.expected.filters) {
+        await ml.testExecution.logTestStep('displays filters in filter bar correctly');
+        for (const filter of testData.expected.filters!) {
+          await ml.dataVisualizerIndexBased.assertFilterBarFilterContent(filter);
+        }
+      }
+
       await ml.testExecution.logTestStep(
         'displays details for metric fields and non-metric fields correctly'
       );
@@ -416,7 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.dataVisualizerTable.assertNumberFieldContents(
           fieldRow.fieldName,
           fieldRow.docCountFormatted,
-          fieldRow.topValuesCount
+          fieldRow.topValuesCount,
+          fieldRow.viewableInLens
         );
       }
 
@@ -425,7 +103,10 @@ export default function ({ getService }: FtrProviderContext) {
           fieldRow.type,
           fieldRow.fieldName!,
           fieldRow.docCountFormatted,
-          fieldRow.exampleCount
+          fieldRow.exampleCount,
+          fieldRow.viewableInLens,
+          false,
+          fieldRow.exampleContent
         );
       }
 
@@ -472,27 +153,29 @@ export default function ({ getService }: FtrProviderContext) {
   describe('index based', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
-      await esArchiver.loadIfNeeded('ml/module_sample_logs');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
 
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createIndexPatternIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
     });
 
-    describe('with farequote', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/118472
+    describe.skip('with farequote', function () {
       // Run tests on full farequote index.
-      it(`${farequoteIndexPatternTestData.suiteTitle} loads the data visualizer selector page`, async () => {
+      it(`${farequoteDataViewTestData.suiteTitle} loads the data visualizer selector page`, async () => {
         // Start navigation from the base of the ML app.
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToDataVisualizer();
       });
 
-      runTests(farequoteIndexPatternTestData);
+      runTests(farequoteDataViewTestData);
 
       // Run tests on farequote KQL saved search.
       it(`${farequoteKQLSearchTestData.suiteTitle} loads the data visualizer selector page`, async () => {
@@ -511,10 +194,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       runTests(farequoteLuceneSearchTestData);
+
+      it(`${farequoteKQLFiltersSearchTestData.suiteTitle} loads the data visualizer selector page`, async () => {
+        // Start navigation from the base of the ML app.
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToDataVisualizer();
+      });
+
+      runTests(farequoteKQLFiltersSearchTestData);
     });
 
     describe('with module_sample_logs ', function () {
-      // Run tests on full farequote index.
+      // Run tests on full ft_module_sample_logs index.
       it(`${sampleLogTestData.suiteTitle} loads the data visualizer selector page`, async () => {
         // Start navigation from the base of the ML app.
         await ml.navigation.navigateToMl();

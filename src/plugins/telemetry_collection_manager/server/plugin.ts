@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -15,9 +15,11 @@ import {
   Logger,
   IClusterClient,
   SavedObjectsServiceStart,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
 } from 'src/core/server';
 
-import {
+import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
   BasicStatsPayload,
@@ -26,19 +28,23 @@ import {
   StatsGetterConfig,
   StatsCollectionConfig,
   UsageStatsPayload,
+  OptInStatsPayload,
   StatsCollectionContext,
+  UnencryptedStatsGetterConfig,
+  EncryptedStatsGetterConfig,
 } from './types';
-import { isClusterOptedIn } from './util';
 import { encryptTelemetry } from './encryption';
+import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
 interface TelemetryCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
 }
 
 export class TelemetryCollectionManagerPlugin
-  implements Plugin<TelemetryCollectionManagerPluginSetup, TelemetryCollectionManagerPluginStart> {
+  implements Plugin<TelemetryCollectionManagerPluginSetup, TelemetryCollectionManagerPluginStart>
+{
   private readonly logger: Logger;
-  private collectionStrategy: CollectionStrategy<any> | undefined;
+  private collectionStrategy: CollectionStrategy | undefined;
   private usageGetterMethodPriority = -1;
   private usageCollection?: UsageCollectionSetup;
   private elasticsearchClient?: IClusterClient;
@@ -115,14 +121,8 @@ export class TelemetryCollectionManagerPlugin
     config: StatsGetterConfig,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig | undefined {
-    // Scope the new elasticsearch Client appropriately and pass to the stats collection config
-    const esClient = config.unencrypted
-      ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
-      : this.elasticsearchClient?.asInternalUser;
-    // Scope the saved objects client appropriately and pass to the stats collection config
-    const soClient = config.unencrypted
-      ? this.savedObjectsService?.getScopedClient(config.request)
-      : this.savedObjectsService?.createInternalRepository();
+    const esClient = this.getElasticsearchClient(config);
+    const soClient = this.getSavedObjectsClient(config);
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? config.request : void 0;
 
@@ -131,6 +131,47 @@ export class TelemetryCollectionManagerPlugin
     }
   }
 
+  /**
+   * Returns the ES client scoped to the requester or Kibana's internal user
+   * depending on whether the request is encrypted or not:
+   * If the request is unencrypted, we intentionally scope the results to "what the user can see".
+   * @param config {@link StatsGetterConfig}
+   * @private
+   */
+  private getElasticsearchClient(config: StatsGetterConfig): ElasticsearchClient | undefined {
+    return config.unencrypted
+      ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
+      : this.elasticsearchClient?.asInternalUser;
+  }
+
+  /**
+   * Returns the SavedObjects client scoped to the requester or Kibana's internal user
+   * depending on whether the request is encrypted or not:
+   * If the request is unencrypted, we intentionally scope the results to "what the user can see"
+   * @param config {@link StatsGetterConfig}
+   * @private
+   */
+  private getSavedObjectsClient(config: StatsGetterConfig): SavedObjectsClientContract | undefined {
+    if (config.unencrypted) {
+      // Intentionally using the scoped client here to make use of all the security wrappers.
+      // It also returns spaces-scoped telemetry.
+      return this.savedObjectsService?.getScopedClient(config.request);
+    } else if (this.savedObjectsService) {
+      // Wrapping the internalRepository with the `TelemetrySavedObjectsClient`
+      // to ensure some best practices when collecting "all the telemetry"
+      // (i.e.: `.find` requests should query all spaces)
+      return new TelemetrySavedObjectsClient(this.savedObjectsService.createInternalRepository());
+    }
+  }
+
+  private async getOptInStats(
+    optInStatus: boolean,
+    config: UnencryptedStatsGetterConfig
+  ): Promise<Array<{ clusterUuid: string; stats: OptInStatsPayload }>>;
+  private async getOptInStats(
+    optInStatus: boolean,
+    config: EncryptedStatsGetterConfig
+  ): Promise<Array<{ clusterUuid: string; stats: string }>>;
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
     if (!this.usageCollection) {
       return [];
@@ -147,13 +188,23 @@ export class TelemetryCollectionManagerPlugin
             optInStatus,
             statsCollectionConfig
           );
-          if (optInStats && optInStats.length) {
-            this.logger.debug(`Got Opt In stats using ${collection.title} collection.`);
-            if (config.unencrypted) {
-              return optInStats;
-            }
-            return encryptTelemetry(optInStats, { useProdKey: this.isDistributable });
-          }
+
+          this.logger.debug(`Received Opt In stats using ${collection.title} collection.`);
+
+          return await Promise.all(
+            optInStats.map(async (clusterStats) => {
+              const clusterUuid = clusterStats.cluster_uuid;
+
+              return {
+                clusterUuid,
+                stats: config.unencrypted
+                  ? clusterStats
+                  : await encryptTelemetry(clusterStats, {
+                      useProdKey: this.isDistributable,
+                    }),
+              };
+            })
+          );
         } catch (err) {
           this.logger.debug(
             `Failed to collect any opt in stats with collection ${collection.title}.`
@@ -173,7 +224,7 @@ export class TelemetryCollectionManagerPlugin
     collection: CollectionStrategy,
     optInStatus: boolean,
     statsCollectionConfig: StatsCollectionConfig
-  ) => {
+  ): Promise<OptInStatsPayload[]> => {
     const context: StatsCollectionContext = {
       logger: this.logger.get(collection.title),
       version: this.version,
@@ -186,6 +237,12 @@ export class TelemetryCollectionManagerPlugin
     }));
   };
 
+  private async getStats(
+    config: UnencryptedStatsGetterConfig
+  ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayload }>>;
+  private async getStats(
+    config: EncryptedStatsGetterConfig
+  ): Promise<Array<{ clusterUuid: string; stats: string }>>;
   private async getStats(config: StatsGetterConfig) {
     if (!this.usageCollection) {
       return [];
@@ -197,16 +254,25 @@ export class TelemetryCollectionManagerPlugin
       if (statsCollectionConfig) {
         try {
           const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
-          if (usageData.length) {
-            this.logger.debug(`Got Usage using ${collection.title} collection.`);
-            if (config.unencrypted) {
-              return usageData;
-            }
+          this.logger.debug(`Received Usage using ${collection.title} collection.`);
 
-            return encryptTelemetry(usageData.filter(isClusterOptedIn), {
-              useProdKey: this.isDistributable,
-            });
-          }
+          return await Promise.all(
+            usageData.map(async (clusterStats) => {
+              const { cluster_uuid: clusterUuid } = clusterStats.cluster_stats as Record<
+                string,
+                string
+              >;
+
+              return {
+                clusterUuid,
+                stats: config.unencrypted
+                  ? clusterStats
+                  : await encryptTelemetry(clusterStats, {
+                      useProdKey: this.isDistributable,
+                    }),
+              };
+            })
+          );
         } catch (err) {
           this.logger.debug(
             `Failed to collect any usage with registered collection ${collection.title}.`

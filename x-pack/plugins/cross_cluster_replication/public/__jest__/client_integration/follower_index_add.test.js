@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
@@ -41,10 +42,6 @@ describe('Create Follower index', () => {
       expect(exists('remoteClustersLoading')).toBe(true);
       expect(find('remoteClustersLoading').text()).toBe('Loading remote clusters…');
     });
-
-    test('should have a link to the documentation', () => {
-      expect(exists('docsButton')).toBe(true);
-    });
   });
 
   describe('when remote clusters are loaded', () => {
@@ -59,6 +56,10 @@ describe('Create Follower index', () => {
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
+    });
+
+    test('should have a link to the documentation', () => {
+      expect(exists('docsButton')).toBe(true);
     });
 
     test('should display the Follower index form', async () => {
@@ -101,9 +102,8 @@ describe('Create Follower index', () => {
         autoFollowPatternAddComponent.update();
 
         const remoteClusterFormFieldFollowerIndex = component.find(RemoteClustersFormField);
-        const remoteClusterFormFieldAutoFollowPattern = autoFollowPatternAddComponent.find(
-          RemoteClustersFormField
-        );
+        const remoteClusterFormFieldAutoFollowPattern =
+          autoFollowPatternAddComponent.find(RemoteClustersFormField);
 
         expect(remoteClusterFormFieldFollowerIndex.length).toBe(1);
         expect(remoteClusterFormFieldAutoFollowPattern.length).toBe(1);

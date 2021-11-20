@@ -1,16 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import {
-  SavedObjectsComplexFieldMapping,
-  IndexMapping,
-  SavedObjectsMappingProperties,
-} from '../types';
+import { SavedObjectsFieldMapping, IndexMapping, SavedObjectsMappingProperties } from '../types';
 import { getRootProperties } from './get_root_properties';
 
 /**
@@ -36,7 +32,7 @@ export function getRootPropertiesObjects(mappings: IndexMapping) {
     // we consider the existence of the properties or type of object to designate that this is an object datatype
     if (
       !omittedRootProps.includes(key) &&
-      ((value as SavedObjectsComplexFieldMapping).properties || value.type === 'object')
+      ((value as SavedObjectsFieldMapping).properties || value.type === 'object')
     ) {
       acc[key] = value;
     }

@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiBadge, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
+import { Filter, isFilterPinned } from '@kbn/es-query';
 import { FilterLabel } from '../';
-import { Filter, isFilterPinned } from '../../../../common';
 import type { FilterLabelStatus } from '../filter_item';
 
 interface Props {
@@ -63,7 +63,8 @@ export const FilterView: FC<Props> = ({
       }}
       iconOnClick={iconOnClick}
       iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeIconAriaLabel', {
-        defaultMessage: 'Delete',
+        defaultMessage: 'Delete {filter}',
+        values: { filter: innerText },
       })}
       onClick={onClick}
       onClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeAriaLabel', {

@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
-
 import { REPO_ROOT } from '@kbn/utils';
-
-import { TestInvoker } from './lib/types';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -18,7 +17,7 @@ interface CreateTestConfigOptions {
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license, disabledPlugins = [] } = options;
 
-  return async ({ readConfigFile }: TestInvoker) => {
+  return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
       kibana: {
         api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
@@ -34,7 +33,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       servers: config.xpack.api.get('servers'),
       services: {
         es: config.kibana.api.get('services.es'),
-        legacyEs: config.kibana.api.get('services.legacyEs'),
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
@@ -44,10 +42,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,
-      },
-
-      esArchiver: {
-        directory: path.join(__dirname, 'fixtures', 'es_archiver'),
       },
 
       esTestCluster: {
@@ -67,7 +61,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
           `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

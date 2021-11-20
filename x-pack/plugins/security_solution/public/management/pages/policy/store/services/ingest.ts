@@ -1,22 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import {
-  GetPackagePoliciesRequest,
   GetAgentStatusResponse,
   GetAgentsResponse,
   DeletePackagePoliciesResponse,
   DeletePackagePoliciesRequest,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
 } from '../../../../../../../fleet/common';
-import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../types';
+import { GetPolicyResponse, UpdatePolicyResponse } from '../../types';
 import { NewPolicyData } from '../../../../../../common/endpoint/types';
 
 const INGEST_API_ROOT = `/api/fleet`;
@@ -26,27 +25,6 @@ const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_ROOT}/agent-status`;
 export const INGEST_API_FLEET_AGENTS = `${INGEST_API_ROOT}/agents`;
 export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
 const INGEST_API_DELETE_PACKAGE_POLICY = `${INGEST_API_PACKAGE_POLICIES}/delete`;
-
-/**
- * Retrieves a list of endpoint specific package policies (those created with a `package.name` of
- * `endpoint`) from Ingest
- * @param http
- * @param options
- */
-export const sendGetEndpointSpecificPackagePolicies = (
-  http: HttpStart,
-  options: HttpFetchOptions & Partial<GetPackagePoliciesRequest> = {}
-): Promise<GetPolicyListResponse> => {
-  return http.get<GetPolicyListResponse>(INGEST_API_PACKAGE_POLICIES, {
-    ...options,
-    query: {
-      ...options.query,
-      kuery: `${
-        options?.query?.kuery ? `${options.query.kuery} and ` : ''
-      }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-    },
-  });
-};
 
 /**
  * Retrieves a single package policy based on ID from ingest
@@ -147,7 +125,7 @@ export const sendGetFleetAgentsWithEndpoint = (
     query: {
       page: 1,
       perPage: 1,
-      kuery: 'fleet-agents.packages : "endpoint"',
+      kuery: 'packages : "endpoint"',
     },
   });
 };

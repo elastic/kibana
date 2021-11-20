@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UiSettingsParams } from '../../../types';
@@ -29,18 +29,28 @@ describe('theme settings', () => {
       );
     });
   });
+});
 
-  describe('theme:version', () => {
-    const validate = getValidationFn(themeSettings['theme:version']);
+describe('process.env.KBN_OPTIMIZER_THEMES handling', () => {
+  it('defaults to properties of first tag', () => {
+    process.env.KBN_OPTIMIZER_THEMES = 'v8dark,v8light';
+    let settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:darkMode'].value).toBe(true);
 
-    it('should only accept valid values', () => {
-      expect(() => validate('v7')).not.toThrow();
-      expect(() => validate('v8 (beta)')).not.toThrow();
-      expect(() => validate('v12')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value to equal [v7]
-- [1]: expected value to equal [v8 (beta)]"
-`);
-    });
+    process.env.KBN_OPTIMIZER_THEMES = 'v8light,v8dark';
+    settings = getThemeSettings({ isDist: false });
+    expect(settings['theme:darkMode'].value).toBe(false);
+  });
+
+  it('ignores the value when isDist is undefined', () => {
+    process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
+    const settings = getThemeSettings({ isDist: undefined });
+    expect(settings['theme:darkMode'].value).toBe(false);
+  });
+
+  it('ignores the value when isDist is true', () => {
+    process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
+    const settings = getThemeSettings({ isDist: true });
+    expect(settings['theme:darkMode'].value).toBe(false);
   });
 });

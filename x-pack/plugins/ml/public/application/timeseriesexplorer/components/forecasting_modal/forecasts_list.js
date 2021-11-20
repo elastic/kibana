@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -77,6 +78,12 @@ function getColumns(viewForecast) {
 // TODO - add in ml-info-icon to the h3 element,
 //        then remove tooltip and inline style.
 export function ForecastsList({ forecasts, viewForecast }) {
+  const getRowProps = (item) => {
+    return {
+      'data-test-subj': `mlForecastsListRow row-${item.rowId}`,
+    };
+  };
+
   return (
     <EuiText>
       <h3
@@ -104,6 +111,7 @@ export function ForecastsList({ forecasts, viewForecast }) {
         columns={getColumns(viewForecast)}
         pagination={false}
         data-test-subj="mlModalForecastTable"
+        rowProps={getRowProps}
       />
     </EuiText>
   );

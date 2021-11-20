@@ -1,24 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { merge } from 'lodash';
 // @ts-ignore
-import { checkParam } from '../error_missing_required';
+import { checkParam, MissingRequiredError } from '../error_missing_required';
 // @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 
 export function handleResponse(resp: ElasticsearchResponse) {
-  const source = resp.hits?.hits[0]?._source.kibana_stats;
-  const kibana = source?.kibana;
+  const legacySource = resp.hits?.hits[0]?._source.kibana_stats;
+  const mbSource = resp.hits?.hits[0]?._source.kibana?.stats;
+  const kibana = resp.hits?.hits[0]?._source.kibana?.kibana ?? legacySource?.kibana;
+  const availabilityTimestamp =
+    resp.hits?.hits[0]?._source['@timestamp'] ?? legacySource?.timestamp;
+  if (!availabilityTimestamp) {
+    throw new MissingRequiredError('timestamp');
+  }
   return merge(kibana, {
-    availability: calculateAvailability(source?.timestamp),
-    os_memory_free: source?.os?.memory?.free_in_bytes,
-    uptime: source?.process?.uptime_in_millis,
+    availability: calculateAvailability(availabilityTimestamp),
+    os_memory_free: mbSource?.os?.memory?.free_in_bytes ?? legacySource?.os?.memory?.free_in_bytes,
+    uptime: mbSource?.process?.uptime?.ms ?? legacySource?.process?.uptime_in_millis,
   });
 }
 
@@ -32,12 +39,16 @@ export function getKibanaInfo(
   const params = {
     index: kbnIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.kibana_stats.kibana',
+      'hits.hits._source.kibana.kibana',
       'hits.hits._source.kibana_stats.os.memory.free_in_bytes',
+      'hits.hits._source.kibana.stats.os.memory.free_in_bytes',
       'hits.hits._source.kibana_stats.process.uptime_in_millis',
+      'hits.hits._source.kibana.stats.process.uptime.ms',
       'hits.hits._source.kibana_stats.timestamp',
+      'hits.hits._source.@timestamp',
     ],
     body: {
       query: {

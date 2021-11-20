@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState, useRef } from 'react';
 
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { HttpStart } from '../../../../../../../../src/core/public';
-import { List } from '../../../../../common/detection_engine/schemas/types/lists';
 import { patchRule } from './api';
 
 type Func = (lists: List[]) => void;
@@ -42,31 +43,31 @@ export const useDissasociateExceptionList = ({
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    const dissasociateListFromRule = (id: string) => async (
-      exceptionLists: List[]
-    ): Promise<void> => {
-      try {
-        if (isSubscribed) {
-          setLoading(true);
+    const dissasociateListFromRule =
+      (id: string) =>
+      async (exceptionLists: List[]): Promise<void> => {
+        try {
+          if (isSubscribed) {
+            setLoading(true);
 
-          await patchRule({
-            ruleProperties: {
-              rule_id: id,
-              exceptions_list: exceptionLists,
-            },
-            signal: abortCtrl.signal,
-          });
+            await patchRule({
+              ruleProperties: {
+                rule_id: id,
+                exceptions_list: exceptionLists,
+              },
+              signal: abortCtrl.signal,
+            });
 
-          onSuccess();
-          setLoading(false);
+            onSuccess();
+            setLoading(false);
+          }
+        } catch (err) {
+          if (isSubscribed) {
+            setLoading(false);
+            onError(err);
+          }
         }
-      } catch (err) {
-        if (isSubscribed) {
-          setLoading(false);
-          onError(err);
-        }
-      }
-    };
+      };
 
     dissasociateList.current = dissasociateListFromRule(ruleRuleId);
 

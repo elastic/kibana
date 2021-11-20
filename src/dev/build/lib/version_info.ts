@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import execa from 'execa';
+import fs from 'fs';
+import { join } from 'path';
+import { REPO_ROOT } from '@kbn/utils';
 import { getBuildNumber } from './get_build_number';
 
 interface Options {
@@ -27,8 +30,12 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
     isRelease ? '' : '-SNAPSHOT'
   );
 
+  const buildSha = fs.existsSync(join(REPO_ROOT, '.git'))
+    ? (await execa('git', ['rev-parse', 'HEAD'], { cwd: REPO_ROOT })).stdout
+    : process.env.GIT_COMMIT || process.env.BUILDKITE_COMMIT || '';
+
   return {
-    buildSha: (await execa('git', ['rev-parse', 'HEAD'])).stdout,
+    buildSha,
     buildVersion,
     buildNumber: await getBuildNumber(),
   };

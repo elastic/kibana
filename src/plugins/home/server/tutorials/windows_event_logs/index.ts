@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,17 +23,17 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
   return {
     id: 'windowsEventLogs',
     name: i18n.translate('home.tutorials.windowsEventLogs.nameTitle', {
-      defaultMessage: 'Windows Event Log',
+      defaultMessage: 'Windows Event Logs',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.windowsEventLogs.shortDescription', {
-      defaultMessage: 'Fetch logs from the Windows Event Log.',
+      defaultMessage: 'Collect and parse logs from Windows Event Logs with WinLogBeat.',
     }),
     longDescription: i18n.translate('home.tutorials.windowsEventLogs.longDescription', {
       defaultMessage:
-        'Use Winlogbeat to collect the logs from the Windows Event Log. \
+        'Use Winlogbeat to collect the logs from Windows Event Logs. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.winlogbeat}/index.html',
@@ -56,5 +56,6 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
     onPrem: onPremInstructions(context),
     elasticCloud: cloudInstructions(),
     onPremElasticCloud: onPremCloudInstructions(),
+    integrationBrowserCategories: ['os_system', 'security'],
   };
 }

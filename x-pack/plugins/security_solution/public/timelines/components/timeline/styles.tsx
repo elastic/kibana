@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { TimelineEventsType } from '../../../../common/types/timeline';
-import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
@@ -215,20 +216,35 @@ export const EventsTrGroup = styled.div.attrs(
 )<{
   className?: string;
   eventType: Omit<TimelineEventsType, 'all'>;
-  isExpanded: boolean;
+  isEvenEqlSequence: boolean;
   isBuildingBlockType: boolean;
+  isExpanded: boolean;
   showLeftBorder: boolean;
 }>`
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
-  ${({ theme, eventType, showLeftBorder }) =>
+  ${({ theme, eventType, isEvenEqlSequence, showLeftBorder }) =>
     showLeftBorder
       ? `border-left: 4px solid
-    ${eventType === 'raw' ? theme.eui.euiColorLightShade : theme.eui.euiColorWarning}`
+    ${
+      eventType === 'raw'
+        ? theme.eui.euiColorLightShade
+        : eventType === 'eql' && isEvenEqlSequence
+        ? theme.eui.euiColorPrimary
+        : eventType === 'eql' && !isEvenEqlSequence
+        ? theme.eui.euiColorAccent
+        : theme.eui.euiColorWarning
+    }`
       : ''};
   ${({ isBuildingBlockType }) =>
     isBuildingBlockType
-      ? `background: repeating-linear-gradient(127deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);`
+      ? 'background: repeating-linear-gradient(127deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);'
+      : ''};
+  ${({ eventType, isEvenEqlSequence }) =>
+    eventType === 'eql'
+      ? isEvenEqlSequence
+        ? 'background: repeating-linear-gradient(127deg, rgba(0, 107, 180, 0.2), rgba(0, 107, 180, 0.2) 1px, rgba(0, 107, 180, 0.05) 2px, rgba(0, 107, 180, 0.05) 10px);'
+        : 'background: repeating-linear-gradient(127deg, rgba(221, 10, 115, 0.2), rgba(221, 10, 115, 0.2) 1px, rgba(221, 10, 115, 0.05) 2px, rgba(221, 10, 115, 0.05) 10px);'
       : ''};
 
   &:hover {
@@ -255,13 +271,13 @@ export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
 const TIMELINE_EVENT_DETAILS_OFFSET = 40;
 
 interface WidthProp {
-  width?: number;
+  width: number;
 }
 
 export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
   role: 'dialog',
   style: {
-    width: `${width! - TIMELINE_EVENT_DETAILS_OFFSET}px`,
+    width: `${width - TIMELINE_EVENT_DETAILS_OFFSET}px`,
   },
 }))<WidthProp>``;
 
@@ -283,10 +299,10 @@ export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   'aria-colindex': `${ACTIONS_COLUMN_ARIA_COL_INDEX}`,
   className: `siemEventsTable__tdGroupActions ${className}`,
   role: 'gridcell',
-}))<{ actionsColumnWidth: number }>`
+}))<{ width: number }>`
   align-items: center;
   display: flex;
-  flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
+  flex: 0 0 ${({ width }) => `${width}px`};
   min-width: 0;
 `;
 

@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import fetch, { FetchError, Response, RequestInit } from 'node-fetch';
+import fetch, { FetchError } from 'node-fetch';
+import type { RequestInit, Response } from 'node-fetch';
 import pRetry from 'p-retry';
+
 import { streamToString } from '../streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
@@ -24,7 +28,7 @@ async function registryFetch(url: string) {
     const message = `'${status} ${statusText}' error response from package registry at ${
       resUrl || url
     }`;
-    const responseError = new RegistryResponseError(message);
+    const responseError = new RegistryResponseError(message, status);
 
     throw new pRetry.AbortError(responseError);
   }
@@ -93,7 +97,6 @@ export function getFetchOptions(targetUrl: string): RequestInit | undefined {
   logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
 
   return {
-    // @ts-expect-error The types exposed by 'HttpsProxyAgent' isn't up to date with 'Agent'
     agent: getProxyAgent({ proxyUrl, targetUrl }),
   };
 }

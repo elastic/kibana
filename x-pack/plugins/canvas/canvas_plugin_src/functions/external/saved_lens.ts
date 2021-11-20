@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { TimeRange, Filter as DataFilter } from 'src/plugins/data/public';
-import { EmbeddableInput } from 'src/plugins/embeddable/public';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
-import { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
+import { Filter as DataFilter } from '@kbn/es-query';
+import { TimeRange } from 'src/plugins/data/common';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
+import { ExpressionValueFilter, EmbeddableInput, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-
+import { SavedObjectReference } from '../../../../../../src/core/types';
 interface Arguments {
   id: string;
   title: string | null;
@@ -25,7 +26,7 @@ interface Arguments {
 }
 
 export type SavedLensInput = EmbeddableInput & {
-  id: string;
+  savedObjectId: string;
   timeRange?: TimeRange;
   filters: DataFilter[];
   palette?: PaletteOutput;
@@ -71,23 +72,48 @@ export function savedLens(): ExpressionFunctionDefinition<
       },
     },
     type: EmbeddableExpressionType,
-    fn: (input, args) => {
+    fn: (input, { id, timerange, title, palette }) => {
       const filters = input ? input.and : [];
 
       return {
         type: EmbeddableExpressionType,
         input: {
-          id: args.id,
+          id,
+          savedObjectId: id,
           filters: getQueryFilters(filters),
-          timeRange: args.timerange || defaultTimeRange,
-          title: args.title === null ? undefined : args.title,
+          timeRange: timerange || defaultTimeRange,
+          title: title === null ? undefined : title,
           disableTriggers: true,
-          palette: args.palette,
-          renderMode: 'noInteractivity',
+          palette,
         },
         embeddableType: EmbeddableTypes.lens,
         generatedAt: Date.now(),
       };
+    },
+    extract(state) {
+      const refName = 'savedLens.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'lens',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedLens.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
     },
   };
 }

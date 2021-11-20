@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { pick, isPlainObject } from 'lodash';
 import * as t from 'io-ts';
 import { ordString } from 'fp-ts/lib/Ord';
@@ -282,9 +284,8 @@ export const validateMappings = (mappings: any = {}): MappingsValidatorResponse 
 
   const { properties, dynamic_templates: dynamicTemplates, ...mappingsConfiguration } = mappings;
 
-  const { value: parsedConfiguration, errors: configurationErrors } = validateMappingsConfiguration(
-    mappingsConfiguration
-  );
+  const { value: parsedConfiguration, errors: configurationErrors } =
+    validateMappingsConfiguration(mappingsConfiguration);
   const { value: parsedProperties, errors: propertiesErrors } = validateProperties(properties);
 
   const errors = [...configurationErrors, ...propertiesErrors];

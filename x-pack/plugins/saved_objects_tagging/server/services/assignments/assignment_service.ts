@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq, difference } from 'lodash';
@@ -53,9 +54,8 @@ export class AssignmentService {
     types,
     maxResults = 100,
   }: FindAssignableObjectsOptions): Promise<AssignableObject[]> {
-    const searchedTypes = (types
-      ? types.filter((type) => taggableTypes.includes(type))
-      : taggableTypes
+    const searchedTypes = (
+      types ? types.filter((type) => taggableTypes.includes(type)) : taggableTypes
     ).filter((type) => this.typeRegistry.getType(type) !== undefined);
     const assignableTypes = await this.getAssignableTypes(searchedTypes);
 

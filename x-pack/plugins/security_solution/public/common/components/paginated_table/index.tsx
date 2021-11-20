@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -16,6 +17,7 @@ import {
   EuiLoadingContent,
   EuiPagination,
   EuiPopover,
+  EuiTableRowCellProps,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useState, useMemo, useEffect, ComponentType } from 'react';
@@ -45,6 +47,9 @@ import { useStateToaster } from '../toasters';
 import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
+import { RiskScoreColumns } from '../../../ueba/components/risk_score_table';
+import { HostRulesColumns } from '../../../ueba/components/host_rules_table';
+import { HostTacticsColumns } from '../../../ueba/components/host_tactics_table';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -73,6 +78,8 @@ declare type HostsTableColumnsTest = [
 
 declare type BasicTableColumns =
   | AuthTableColumns
+  | HostRulesColumns
+  | HostTacticsColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
@@ -81,6 +88,8 @@ declare type BasicTableColumns =
   | NetworkTopCountriesColumnsNetworkDetails
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsNetworkDetails
+  | NetworkHttpColumns
+  | RiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;
@@ -96,7 +105,8 @@ export interface BasicTableProps<T> {
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
-  headerUnit: string | React.ReactElement;
+  headerUnit?: string | React.ReactElement;
+  headerSubtitle?: string | React.ReactElement;
   id?: string;
   itemsPerRow?: ItemsPerRow[];
   isInspect?: boolean;
@@ -117,8 +127,7 @@ type Func<T> = (arg: T) => string | number;
 export interface Columns<T, U = T> {
   align?: string;
   field?: string;
-  hideForMobile?: boolean;
-  isMobileHeader?: boolean;
+  mobileOptions?: EuiTableRowCellProps['mobileOptions'];
   name: string | React.ReactNode;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;
@@ -135,6 +144,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   headerTitle,
   headerTooltip,
   headerUnit,
+  headerSubtitle,
   id,
   isInspect,
   itemsPerRow,
@@ -247,8 +257,12 @@ const PaginatedTableComponent: FC<SiemTables> = ({
         <HeaderSection
           id={id}
           subtitle={
-            !loadingInitial &&
-            `${i18n.SHOWING}: ${headerCount >= 0 ? headerCount.toLocaleString() : 0} ${headerUnit}`
+            !loadingInitial && headerSubtitle
+              ? `${i18n.SHOWING}: ${headerSubtitle}`
+              : headerUnit &&
+                `${i18n.SHOWING}: ${
+                  headerCount >= 0 ? headerCount.toLocaleString() : 0
+                } ${headerUnit}`
           }
           title={headerTitle}
           tooltip={headerTooltip}

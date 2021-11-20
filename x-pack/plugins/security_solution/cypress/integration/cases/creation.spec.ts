@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { case1 } from '../../objects/case';
+import { getCase1, TestCase } from '../../objects/case';
 
 import {
-  ALL_CASES_CLOSE_ACTION,
   ALL_CASES_CLOSED_CASES_STATS,
   ALL_CASES_COMMENTS_COUNT,
-  ALL_CASES_DELETE_ACTION,
   ALL_CASES_IN_PROGRESS_CASES_STATS,
   ALL_CASES_NAME,
   ALL_CASES_OPEN_CASES_COUNT,
@@ -26,7 +25,6 @@ import {
 import {
   CASE_DETAILS_DESCRIPTION,
   CASE_DETAILS_PAGE_TITLE,
-  // CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN,
   CASE_DETAILS_STATUS,
   CASE_DETAILS_TAGS,
   CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME,
@@ -46,6 +44,7 @@ import {
   backToCases,
   createCase,
   fillCasesMandatoryfields,
+  filterStatusOpen,
 } from '../../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
@@ -54,12 +53,12 @@ import { CASES_URL } from '../../urls/navigation';
 describe('Cases', () => {
   beforeEach(() => {
     cleanKibana();
-    createTimeline(case1.timeline).then((response) =>
+    createTimeline(getCase1().timeline).then((response) =>
       cy
         .wrap({
-          ...case1,
+          ...getCase1(),
           timeline: {
-            ...case1.timeline,
+            ...getCase1().timeline,
             id: response.body.data.persistTimeline.timeline.savedObjectId,
           },
         })
@@ -74,6 +73,7 @@ describe('Cases', () => {
     attachTimeline(this.mycase);
     createCase();
     backToCases();
+    filterStatusOpen();
 
     cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases');
     cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', 'Open cases1');
@@ -84,14 +84,12 @@ describe('Cases', () => {
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
     cy.get(ALL_CASES_REPORTER).should('have.text', this.mycase.reporter);
-    (this.mycase as typeof case1).tags.forEach((tag, index) => {
+    (this.mycase as TestCase).tags.forEach((tag, index) => {
       cy.get(ALL_CASES_TAGS(index)).should('have.text', tag);
     });
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
     cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');
     cy.get(ALL_CASES_SERVICE_NOW_INCIDENT).should('have.text', 'Not pushed');
-    cy.get(ALL_CASES_DELETE_ACTION).should('exist');
-    cy.get(ALL_CASES_CLOSE_ACTION).should('exist');
 
     goToCaseDetails();
 
@@ -107,7 +105,6 @@ describe('Cases', () => {
     cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', this.mycase.reporter);
     cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', this.mycase.reporter);
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
-    // cy.get(CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN).should('have.attr', 'disabled');
 
     openCaseTimeline();
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -43,8 +44,8 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
             <EuiTitle size="m">
               <h1>
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.selectIndexPatternOrSavedSearch"
-                  defaultMessage="Select index pattern or saved search"
+                  id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+                  defaultMessage="Select data view or saved search"
                 />
               </h1>
             </EuiTitle>
@@ -56,7 +57,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
             onChoose={onObjectSelection}
             showFilter
             noItemsMessage={i18n.translate('xpack.ml.newJob.wizard.searchSelection.notFoundLabel', {
-              defaultMessage: 'No matching indices or saved searches found.',
+              defaultMessage: 'No matching data views or saved searches found.',
             })}
             savedObjectMetaData={[
               {
@@ -73,9 +74,9 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.indexPattern',
+                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.dataView',
                   {
-                    defaultMessage: 'Index pattern',
+                    defaultMessage: 'Data view',
                   }
                 ),
               },

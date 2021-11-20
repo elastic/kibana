@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* es-lint-disable import/no-extraneous-dependencies */
@@ -14,7 +15,7 @@ import { set } from '@elastic/safer-lodash-set';
 
 // @ts-expect-error Untyped local
 import { getDefaultWorkpad } from '../../public/state/defaults';
-import { CanvasWorkpad, CanvasElement, CanvasAsset } from '../../types';
+import { CanvasWorkpad, CanvasElement, CanvasAsset, CanvasPage } from '../../types';
 
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../public/lib/elements_registry';
@@ -24,18 +25,23 @@ elementsRegistry.register(image);
 import { getInitialState, getReducer, getMiddleware, patchDispatch } from '../addon/src/state';
 export { ADDON_ID, ACTIONS_PANEL_ID } from '../addon/src/constants';
 
-interface Params {
+export interface Params {
   workpad?: CanvasWorkpad;
+  pages?: CanvasPage[];
   elements?: CanvasElement[];
   assets?: CanvasAsset[];
 }
 
 export const reduxDecorator = (params: Params = {}) => {
   const state = cloneDeep(getInitialState());
-  const { workpad, elements, assets } = params;
+  const { workpad, elements, assets, pages } = params;
 
   if (workpad) {
     set(state, 'persistent.workpad', workpad);
+  }
+
+  if (pages) {
+    set(state, 'persistent.workpad.pages', pages);
   }
 
   if (elements) {

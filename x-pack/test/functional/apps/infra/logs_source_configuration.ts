@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -23,18 +24,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Logs Source Configuration', function () {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('Allows indices configuration', () => {
       before(async () => {
-        await esArchiver.load('infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
       after(async () => {
-        await esArchiver.unload('infra/metrics_and_logs');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
 
       it('can change the log indices to a pattern that matches nothing', async () => {
@@ -59,7 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await logsUi.logStreamPage.navigateTo();
 
         await retry.try(async () => {
-          await logsUi.logStreamPage.getNoLogsIndicesPrompt();
+          await logsUi.logStreamPage.getNoDataPage();
         });
       });
 
@@ -112,7 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await logsUi.logStreamPage.getStreamEntries();
 
-        const resp = await supertest
+        const [{ stats }] = await supertest
           .post(`/api/telemetry/v2/clusters/_stats`)
           .set(COMMON_REQUEST_HEADERS)
           .set('Accept', 'application/json')
@@ -122,9 +123,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           .expect(200)
           .then((res: any) => res.body);
 
-        expect(
-          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.logs
-        ).to.be.greaterThan(0);
+        expect(stats.stack_stats.kibana.plugins.infraops.last_24_hours.hits.logs).to.be.greaterThan(
+          0
+        );
       });
 
       it('can change the log columns', async () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Papa from 'papaparse';
@@ -72,7 +73,11 @@ export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Data
           if (i === 0) {
             // first row, assume header values
             row.forEach((colName: string) =>
-              acc.columns.push({ name: colName.trim(), type: 'string' })
+              acc.columns.push({
+                id: colName.trim(),
+                name: colName.trim(),
+                meta: { type: 'string' },
+              })
             );
           } else {
             // any other row is a data row

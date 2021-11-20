@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-export { privilegesFactory, PrivilegesService } from './privileges';
-export { featurePrivilegeIterator } from './feature_privilege_iterator';
+export type { PrivilegesService } from './privileges';
+export { privilegesFactory } from './privileges';

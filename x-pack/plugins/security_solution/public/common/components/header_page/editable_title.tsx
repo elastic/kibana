@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useCallback, ChangeEvent } from 'react';
@@ -76,7 +77,7 @@ const EditableTitleComponent: React.FC<Props> = ({
       <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiButton
-            color="secondary"
+            color="success"
             data-test-subj="editable-title-submit-btn"
             fill
             iconType="save"

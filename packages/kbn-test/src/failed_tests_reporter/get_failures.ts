@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import stripAnsi from 'strip-ansi';
@@ -13,16 +13,23 @@ import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_repor
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
   likelyIrrelevant: boolean;
+  'system-out'?: string;
+  githubIssue?: string;
+  failureCount?: number;
 };
 
-const getFailureText = (failure: FailedTestCase['failure']) => {
-  const [failureNode] = failure;
-
-  if (failureNode && typeof failureNode === 'object' && typeof failureNode._ === 'string') {
-    return stripAnsi(failureNode._);
+const getText = (node?: Array<string | { _: string }>) => {
+  if (!node) {
+    return '';
   }
 
-  return stripAnsi(String(failureNode));
+  const [nodeWrapped] = node;
+
+  if (nodeWrapped && typeof nodeWrapped === 'object' && typeof nodeWrapped._ === 'string') {
+    return stripAnsi(nodeWrapped._);
+  }
+
+  return stripAnsi(String(nodeWrapped));
 };
 
 const isLikelyIrrelevant = (name: string, failure: string) => {
@@ -62,7 +69,7 @@ export function getFailures(report: TestReport) {
   const failures: TestFailure[] = [];
 
   for (const testCase of makeFailedTestCaseIter(report)) {
-    const failure = getFailureText(testCase.failure);
+    const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
 
     failures.push({
@@ -71,6 +78,7 @@ export function getFailures(report: TestReport) {
       // Strip ANSI color characters
       failure,
       likelyIrrelevant,
+      'system-out': getText(testCase['system-out']),
     });
   }
 

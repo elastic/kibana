@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -27,6 +27,8 @@ const metricAggFilter: string[] = [
   '!cumulative_sum',
   '!geo_bounds',
   '!geo_centroid',
+  '!filtered_metric',
+  '!single_percentile',
 ];
 const bucketAggFilter: string[] = [];
 
@@ -39,21 +41,20 @@ export const siblingPipelineType = i18n.translate(
 
 export const siblingPipelineAggHelper = {
   subtype: siblingPipelineType,
-  params() {
+  params(bucketFilter = bucketAggFilter) {
     return [
       {
         name: 'customBucket',
         type: 'agg',
-        allowedAggs: bucketAggFilter,
+        allowedAggs: bucketFilter,
         default: null,
         makeAgg(agg: IMetricAggConfig, state = { type: 'date_histogram' }) {
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-bucket';
           return orderAgg;
         },
-        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
-          'customBucket'
-        ),
+        modifyAggConfigOnSearchRequestStart:
+          forwardModifyAggConfigOnSearchRequestStart('customBucket'),
         write: () => {},
       },
       {
@@ -66,10 +67,10 @@ export const siblingPipelineAggHelper = {
           orderAgg.id = agg.id + '-metric';
           return orderAgg;
         },
-        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
-          'customMetric'
-        ),
-        write: siblingPipelineAggWriter,
+        modifyAggConfigOnSearchRequestStart:
+          forwardModifyAggConfigOnSearchRequestStart('customMetric'),
+        write: (agg: IMetricAggConfig, output: Record<string, any>) =>
+          siblingPipelineAggWriter(agg, output),
       },
     ] as Array<MetricAggParam<IMetricAggConfig>>;
   },

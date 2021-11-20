@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
+import type { PrivilegeCollection } from '../../../../model/privilege_collection';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
-import { PrivilegeCollection } from '../../../../model/privilege_collection';
 
 export interface EffectiveFeaturePrivileges {
   [featureId: string]: {

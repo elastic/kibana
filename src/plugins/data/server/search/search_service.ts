@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { from, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
+import moment from 'moment';
 import {
   CoreSetup,
   CoreStart,
@@ -18,10 +19,11 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { catchError, first, map } from 'rxjs/operators';
+import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import type {
+  IScopedSearchClient,
   ISearchSetup,
   ISearchStart,
   ISearchStrategy,
@@ -32,38 +34,64 @@ import type {
 
 import { AggsService } from './aggs';
 
-import { FieldFormatsStart } from '../field_formats';
-import { IndexPatternsServiceStart } from '../index_patterns';
-import { getCallMsearch, registerMsearchRoute, registerSearchRoute, shimHitsTotal } from './routes';
-import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
-import { DataPluginStart } from '../plugin';
+import { FieldFormatsStart } from '../../../field_formats/server';
+import { IndexPatternsServiceStart } from '../data_views';
+import { registerSearchRoute } from './routes';
+import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
+import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
 import {
+  existsFilterFunction,
+  fieldFunction,
   IEsSearchRequest,
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  ISearchClient,
   ISearchOptions,
+  cidrFunction,
+  dateRangeFunction,
+  extendedBoundsFunction,
+  geoBoundingBoxFunction,
+  geoPointFunction,
+  ipRangeFunction,
   kibana,
   kibanaContext,
-  kibanaContextFunction,
+  kibanaTimerangeFunction,
+  kibanaFilterFunction,
+  kqlFunction,
+  luceneFunction,
+  numericalRangeFunction,
+  queryFilterFunction,
+  rangeFilterFunction,
+  removeFilterFunction,
+  selectFilterFunction,
+  rangeFunction,
   SearchSourceDependencies,
   searchSourceRequiredUiSettings,
   SearchSourceService,
+  phraseFilterFunction,
+  esRawResponse,
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
 } from '../../common/search';
-import { getEsaggs } from './expressions';
+import { getEsaggs, getEsdsl } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
-import { SessionService, IScopedSessionService, ISessionService } from './session';
+import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
+import { registerBsearchRoute } from './routes/bsearch';
+import { getKibanaContext } from './expressions/kibana_context';
+import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
+import { eqlSearchStrategyProvider } from './strategies/eql_search';
+import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
+import { CachedUiSettingsClient } from './services';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -89,42 +117,31 @@ export interface SearchRouteDependencies {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
-  private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
-  private sessionService: ISessionService;
-  private coreStart?: CoreStart;
+  private sessionService: ISearchSessionService;
+  private asScoped!: ISearchStart['asScoped'];
+  private searchAsInternalUser!: ISearchStrategy;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
   ) {
-    this.sessionService = new SessionService();
+    this.sessionService = new SearchSessionService();
   }
 
   public setup(
-    core: CoreSetup<{}, DataPluginStart>,
+    core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
     const router = core.http.createRouter<DataRequestHandlerContext>();
-    const routeDependencies = {
-      getStartServices: core.getStartServices,
-      globalConfig$: this.initializerContext.config.legacy.globalConfig$,
-    };
     registerSearchRoute(router);
-    registerMsearchRoute(router, routeDependencies);
-
-    core.getStartServices().then(([coreStart]) => {
-      this.coreStart = coreStart;
-    });
 
     core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
       'search',
       async (context, request) => {
-        const search = this.asScopedProvider(this.coreStart!)(request);
-        const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
-        return { ...search, session };
+        return this.asScoped(request);
       }
     );
 
@@ -137,53 +154,64 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
-    bfetch.addBatchProcessingRoute<
-      { request: IKibanaSearchResponse; options?: ISearchOptions },
-      any
-    >('/internal/bsearch', (request) => {
-      const search = this.asScopedProvider(this.coreStart!)(request);
+    this.registerSearchStrategy(
+      ENHANCED_ES_SEARCH_STRATEGY,
+      enhancedEsSearchStrategyProvider(
+        this.initializerContext.config.legacy.globalConfig$,
+        this.logger,
+        usage
+      )
+    );
 
-      return {
-        onBatchItem: async ({ request: requestData, options }) => {
-          return search
-            .search(requestData, options)
-            .pipe(
-              first(),
-              map((response) => {
-                return {
-                  ...response,
-                  ...{
-                    rawResponse: shimHitsTotal(response.rawResponse),
-                  },
-                };
-              }),
-              catchError((err) => {
-                // eslint-disable-next-line no-throw-literal
-                throw {
-                  statusCode: err.statusCode || 500,
-                  body: {
-                    message: err.message,
-                    attributes: {
-                      error: err.body?.error || err.message,
-                    },
-                  },
-                };
-              })
-            )
-            .toPromise();
-        },
-      };
-    });
+    // We don't want to register this because we don't want the client to be able to access this
+    // strategy, but we do want to expose it to other server-side plugins
+    // see x-pack/plugins/security_solution/server/search_strategy/timeline/index.ts
+    // for example use case
+    this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
+      this.initializerContext.config.legacy.globalConfig$,
+      this.logger,
+      usage,
+      true
+    );
+
+    this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
+
+    registerBsearchRoute(
+      bfetch,
+      (request: KibanaRequest) => this.asScoped(request),
+      core.executionContext
+    );
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
-      registerUsageCollector(usageCollection, this.initializerContext);
+      registerUsageCollector(usageCollection, core.savedObjects.getKibanaIndex());
     }
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(cidrFunction);
+    expressions.registerFunction(dateRangeFunction);
+    expressions.registerFunction(extendedBoundsFunction);
+    expressions.registerFunction(geoBoundingBoxFunction);
+    expressions.registerFunction(geoPointFunction);
+    expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(kibana);
-    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerFunction(luceneFunction);
+    expressions.registerFunction(kqlFunction);
+    expressions.registerFunction(kibanaTimerangeFunction);
+    expressions.registerFunction(getKibanaContext({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(fieldFunction);
+    expressions.registerFunction(numericalRangeFunction);
+    expressions.registerFunction(rangeFunction);
+    expressions.registerFunction(kibanaFilterFunction);
+    expressions.registerFunction(existsFilterFunction);
+    expressions.registerFunction(queryFilterFunction);
+    expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(removeFilterFunction);
+    expressions.registerFunction(selectFilterFunction);
+    expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
+    expressions.registerType(esRawResponse);
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 
@@ -200,9 +228,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     return {
       __enhance: (enhancements: SearchEnhancements) => {
-        if (this.searchStrategies.hasOwnProperty(enhancements.defaultStrategy)) {
-          this.defaultSearchStrategyName = enhancements.defaultStrategy;
-        }
         this.sessionService = enhancements.sessionService;
       },
       aggs,
@@ -216,15 +241,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
-    const asScoped = this.asScopedProvider(core);
+    this.asScoped = this.asScopedProvider(core);
     return {
       aggs: this.aggsService.start({
         fieldFormats,
         uiSettings,
         indexPatterns,
       }),
+      searchAsInternalUser: this.searchAsInternalUser,
       getSearchStrategy: this.getSearchStrategy,
-      asScoped,
+      asScoped: this.asScoped,
       searchSource: {
         asScoped: async (request: KibanaRequest) => {
           const esClient = elasticsearch.client.asScoped(request);
@@ -243,16 +269,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
-            search: asScoped(request).search,
-            onResponse: (req, res) => shimHitsTotal(res),
-            legacy: {
-              callMsearch: getCallMsearch({
-                esClient,
-                globalConfig$: this.initializerContext.config.legacy.globalConfig$,
-                uiSettings: uiSettingsClient,
-              }),
-              loadingCount$: new BehaviorSubject(0),
-            },
+            search: this.asScoped(request).search,
+            onResponse: (req, res) => res,
           };
 
           return this.searchSourceService.start(scopedIndexPatterns, searchSourceDependencies);
@@ -267,7 +285,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private registerSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse<any> = IEsSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -276,22 +294,85 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.searchStrategies[name] = strategy;
   };
 
-  private search = <
+  private getSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    session: IScopedSessionService,
-    request: SearchStrategyRequest,
-    options: ISearchOptions,
-    deps: SearchStrategyDependencies
-  ) => {
-    const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
-      options.strategy
-    );
-    return session.search(strategy, request, options, deps);
+    name: string = ENHANCED_ES_SEARCH_STRATEGY
+  ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
+    this.logger.debug(`Get strategy ${name}`);
+    const strategy = this.searchStrategies[name];
+    if (!strategy) {
+      throw new KbnServerError(`Search strategy ${name} not found`, 404);
+    }
+    return strategy;
   };
 
-  private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
+  private search = <
+    SearchStrategyRequest extends IKibanaSearchRequest,
+    SearchStrategyResponse extends IKibanaSearchResponse
+  >(
+    deps: SearchStrategyDependencies,
+    request: SearchStrategyRequest,
+    options: ISearchOptions
+  ) => {
+    try {
+      const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
+        options.strategy
+      );
+
+      const getSearchRequest = async () => {
+        if (!options.sessionId || !options.isRestore || request.id) {
+          return request;
+        } else {
+          try {
+            const id = await deps.searchSessionsClient.getId(request, options);
+            this.logger.debug(`Found search session id for request ${id}`);
+            return {
+              ...request,
+              id,
+            };
+          } catch (e) {
+            if (e instanceof NoSearchIdInSessionError) {
+              this.logger.debug('Ignoring missing search ID');
+              return request;
+            } else {
+              throw e;
+            }
+          }
+        }
+      };
+
+      const searchRequest$ = from(getSearchRequest());
+      const search$ = searchRequest$.pipe(
+        switchMap((searchRequest) => strategy.search(searchRequest, options, deps)),
+        withLatestFrom(searchRequest$),
+        tap(([response, requestWithId]) => {
+          if (!options.sessionId || !response.id || (options.isRestore && requestWithId.id)) return;
+          // intentionally swallow tracking error, as it shouldn't fail the search
+          deps.searchSessionsClient.trackId(request, response.id, options).catch((trackErr) => {
+            this.logger.error(trackErr);
+          });
+        }),
+        map(([response, requestWithId]) => {
+          return {
+            ...response,
+            isRestored: !!requestWithId.id,
+          };
+        })
+      );
+
+      return search$;
+    } catch (e) {
+      return throwError(e);
+    }
+  };
+
+  private cancel = async (
+    deps: SearchStrategyDependencies,
+    id: string,
+    options: ISearchOptions = {}
+  ) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.cancel) {
       throw new KbnServerError(
@@ -302,11 +383,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategy.cancel(id, options, deps);
   };
 
-  private extend = (
+  private extend = async (
+    deps: SearchStrategyDependencies,
     id: string,
     keepAlive: string,
-    options: ISearchOptions,
-    deps: SearchStrategyDependencies
+    options: ISearchOptions = {}
   ) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.extend) {
@@ -315,36 +396,91 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategy.extend(id, keepAlive, options, deps);
   };
 
-  private getSearchStrategy = <
-    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-  >(
-    name: string = this.defaultSearchStrategyName
-  ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
-    this.logger.debug(`Get strategy ${name}`);
-    const strategy = this.searchStrategies[name];
-    if (!strategy) {
-      throw new KbnServerError(`Search strategy ${name} not found`, 404);
+  private cancelSessionSearches = async (deps: SearchStrategyDependencies, sessionId: string) => {
+    const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
+    await Promise.allSettled(
+      Array.from(searchIdMapping).map(([searchId, strategyName]) => {
+        const searchOptions = {
+          sessionId,
+          strategy: strategyName,
+          isStored: true,
+        };
+
+        return this.cancel(deps, searchId, searchOptions);
+      })
+    );
+  };
+
+  private cancelSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
+    const response = await deps.searchSessionsClient.cancel(sessionId);
+    await this.cancelSessionSearches(deps, sessionId);
+    return response;
+  };
+
+  private deleteSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
+    await this.cancelSessionSearches(deps, sessionId);
+    return deps.searchSessionsClient.delete(sessionId);
+  };
+
+  private extendSession = async (
+    deps: SearchStrategyDependencies,
+    sessionId: string,
+    expires: Date
+  ) => {
+    const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
+    const keepAlive = `${moment(expires).diff(moment())}ms`;
+
+    const result = await Promise.allSettled(
+      Array.from(searchIdMapping).map(([searchId, strategyName]) => {
+        const searchOptions = {
+          sessionId,
+          strategy: strategyName,
+          isStored: true,
+        };
+        return this.extend(deps, searchId, keepAlive, searchOptions);
+      })
+    );
+
+    if (result.some((extRes) => extRes.status === 'rejected')) {
+      throw new Error('Failed to extend the expiration of some searches');
     }
-    return strategy;
+
+    return deps.searchSessionsClient.extend(sessionId, expires);
   };
 
   private asScopedProvider = (core: CoreStart) => {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
-    return (request: KibanaRequest): ISearchClient => {
-      const scopedSession = getSessionAsScoped(request);
+    return (request: KibanaRequest): IScopedSearchClient => {
       const savedObjectsClient = savedObjects.getScopedClient(request);
+      const searchSessionsClient = getSessionAsScoped(request);
       const deps = {
+        searchSessionsClient,
         savedObjectsClient,
         esClient: elasticsearch.client.asScoped(request),
-        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+        uiSettingsClient: new CachedUiSettingsClient(
+          uiSettings.asScopedToClient(savedObjectsClient)
+        ),
+        request,
       };
       return {
-        search: (searchRequest, options = {}) =>
-          this.search(scopedSession, searchRequest, options, deps),
-        cancel: (id, options = {}) => this.cancel(id, options, deps),
-        extend: (id, keepAlive, options = {}) => this.extend(id, keepAlive, options, deps),
+        search: <
+          SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+          SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+        >(
+          searchRequest: SearchStrategyRequest,
+          options: ISearchOptions = {}
+        ) =>
+          this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options),
+        cancel: this.cancel.bind(this, deps),
+        extend: this.extend.bind(this, deps),
+        saveSession: searchSessionsClient.save,
+        getSession: searchSessionsClient.get,
+        findSessions: searchSessionsClient.find,
+        updateSession: searchSessionsClient.update,
+        extendSession: this.extendSession.bind(this, deps),
+        cancelSession: this.cancelSession.bind(this, deps),
+        deleteSession: this.deleteSession.bind(this, deps),
       };
     };
   };

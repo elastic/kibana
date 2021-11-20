@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -18,13 +19,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('get_annotations', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       // generate one annotation for each job
       for (let i = 0; i < testSetupJobConfigs.length; i++) {
         const job = testSetupJobConfigs[i];
         const annotationToIndex = testSetupAnnotations[i];
+        // @ts-expect-error not full interface
         await ml.api.createAnomalyDetectionJob(job);
         await ml.api.indexAnnotation(annotationToIndex);
       }

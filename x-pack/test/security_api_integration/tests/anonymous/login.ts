@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import request, { Cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -32,9 +33,9 @@ export default function ({ getService }: FtrProviderContext) {
     expect(cookie.maxAge).to.be(0);
   }
 
-  const isElasticsearchAnonymousAccessEnabled = (config.get(
-    'esTestCluster.serverArgs'
-  ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+  const isElasticsearchAnonymousAccessEnabled = (
+    config.get('esTestCluster.serverArgs') as string[]
+  ).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
 
   describe('Anonymous authentication', () => {
     if (!isElasticsearchAnonymousAccessEnabled) {
@@ -70,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
 
-      const cookie = request.cookie(cookies[0])!;
+      const cookie = parseCookie(cookies[0])!;
       checkCookieIsSet(cookie);
 
       const { body: user } = await supertest
@@ -92,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
         const { body: user } = await supertest
@@ -110,11 +111,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail if `Authorization` header is present, but not valid', async () => {
-        const response = await supertest
+        const unauthenticatedResponse = await supertest
           .get('/security/account')
           .set('Authorization', 'Basic wow')
           .expect(401);
-        expect(response.headers['set-cookie']).to.be(undefined);
+
+        expect(unauthenticatedResponse.headers['set-cookie']).to.be(undefined);
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
     });
 
@@ -127,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
       });
 
@@ -154,9 +160,15 @@ export default function ({ getService }: FtrProviderContext) {
         const apiResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('Authorization', 'Basic a3JiNTprcmI1')
+          .set('Authorization', 'Basic ZHVtbXlfaGFja2VyOnBhc3M=')
           .set('Cookie', sessionCookie.cookieString())
           .expect(401);
+
+        expect(apiResponse.body.statusCode).to.be(401);
+        expect(apiResponse.body.error).to.be('Unauthorized');
+        expect(apiResponse.body.message).to.include.string(
+          '[security_exception] Reason: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
+        );
 
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
@@ -169,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
         let cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
         // And then log user out.
@@ -180,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
+        checkCookieIsCleared(parseCookie(cookies[0])!);
 
         expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
 
@@ -194,14 +206,14 @@ export default function ({ getService }: FtrProviderContext) {
         // If Kibana detects cookie with invalid token it tries to clear it.
         cookies = apiResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
+        checkCookieIsCleared(parseCookie(cookies[0])!);
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
       });
     });
   });

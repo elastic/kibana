@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { StatusIcon } from '../../status_icon';
+import { StatusIcon, STATUS_ICON_TYPES } from '../../status_icon';
 import { i18n } from '@kbn/i18n';
 
 export function NodeStatusIcon({ isOnline, status }) {
-  const type = isOnline ? StatusIcon.TYPES.GREEN : StatusIcon.TYPES.GRAY;
+  const type = isOnline ? STATUS_ICON_TYPES.GREEN : STATUS_ICON_TYPES.GRAY;
 
   return (
     <StatusIcon

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -34,12 +34,6 @@ const instructionVariants = [
   },
 ];
 
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
-
 test('render', () => {
   const component = shallowWithIntl(
     <InstructionSet.WrappedComponent
@@ -49,6 +43,7 @@ test('render', () => {
       offset={1}
       paramValues={{}}
       replaceTemplateStrings={() => {}}
+      isCloudEnabled={false}
     />
   );
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -74,6 +69,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.FETCHING}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -90,6 +86,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.FETCHING}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -106,6 +103,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.ERROR}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -122,6 +120,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.NO_DATA}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -138,6 +137,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.HAS_DATA}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line

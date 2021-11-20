@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
-import uuid from 'uuid/v4';
 import { Dispatch } from 'redux';
 import { Feature } from 'geojson';
 import { getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
-import { FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
-import { TooltipState } from '../../common/descriptor_types';
+import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../common/constants';
+import { TooltipFeature, TooltipState } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
+import { ILayer } from '../classes/layers/layer';
+import { IVectorLayer, isVectorLayer } from '../classes/layers/vector_layer';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
@@ -35,11 +37,7 @@ export function openOnClickTooltip(tooltipState: TooltipState) {
       );
     });
 
-    openTooltips.push({
-      ...tooltipState,
-      isLocked: true,
-      id: uuid(),
-    });
+    openTooltips.push(tooltipState);
 
     dispatch({
       type: SET_OPEN_TOOLTIPS,
@@ -62,36 +60,44 @@ export function closeOnHoverTooltip() {
 export function openOnHoverTooltip(tooltipState: TooltipState) {
   return {
     type: SET_OPEN_TOOLTIPS,
-    openTooltips: [
-      {
-        ...tooltipState,
-        isLocked: false,
-        id: uuid(),
-      },
-    ],
+    openTooltips: [tooltipState],
   };
 }
 
-export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Feature[] = []) {
+export function updateTooltipStateForLayer(layer: ILayer, layerFeatures: Feature[] = []) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
-    let featuresRemoved = false;
+    if (!isVectorLayer(layer)) {
+      return;
+    }
+
     const openTooltips = getOpenTooltips(getState())
       .map((tooltipState) => {
-        const nextFeatures = tooltipState.features.filter((tooltipFeature) => {
-          if (tooltipFeature.layerId !== layerId) {
+        const nextFeatures: TooltipFeature[] = [];
+        tooltipState.features.forEach((tooltipFeature) => {
+          if (tooltipFeature.layerId !== layer.getId()) {
             // feature from another layer, keep it
-            return true;
+            nextFeatures.push(tooltipFeature);
           }
 
-          // Keep feature if it is still in layer
-          return layerFeatures.some((layerFeature) => {
-            return layerFeature.properties![FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id;
+          const updatedFeature = layerFeatures.find((layerFeature) => {
+            const isVisible =
+              layerFeature.properties![FEATURE_VISIBLE_PROPERTY_NAME] !== undefined
+                ? layerFeature.properties![FEATURE_VISIBLE_PROPERTY_NAME]
+                : true;
+            return (
+              isVisible && (layer as IVectorLayer).getFeatureId(layerFeature) === tooltipFeature.id
+            );
           });
-        });
 
-        if (tooltipState.features.length !== nextFeatures.length) {
-          featuresRemoved = true;
-        }
+          if (updatedFeature) {
+            nextFeatures.push({
+              ...tooltipFeature,
+              mbProperties: {
+                ...updatedFeature.properties,
+              },
+            });
+          }
+        });
 
         return { ...tooltipState, features: nextFeatures };
       })
@@ -99,11 +105,9 @@ export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Featur
         return tooltipState.features.length > 0;
       });
 
-    if (featuresRemoved) {
-      dispatch({
-        type: SET_OPEN_TOOLTIPS,
-        openTooltips,
-      });
-    }
+    dispatch({
+      type: SET_OPEN_TOOLTIPS,
+      openTooltips,
+    });
   };
 }

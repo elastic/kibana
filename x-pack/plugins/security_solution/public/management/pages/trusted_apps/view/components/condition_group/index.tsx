@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHideFor, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ConditionEntry, OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AndOrBadge } from '../../../../../../common/components/and_or_badge';
 import { ConditionEntryInput, ConditionEntryInputProps } from '../condition_entry_input';
+import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 
 const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
   // The positioning of the 'and-badge' is done by using the EuiButton's height and adding on to it
@@ -62,14 +64,8 @@ export const ConditionGroup = memo<ConditionGroupProps>(
     onVisited,
     'data-test-subj': dataTestSubj,
   }) => {
-    const getTestId = useCallback(
-      (suffix: string): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
-      },
-      [dataTestSubj]
-    );
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
     return (
       <ConditionGroupFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
         {entries.length > 1 && (
@@ -102,7 +98,6 @@ export const ConditionGroup = memo<ConditionGroupProps>(
           <div>
             <EuiSpacer size="s" />
             <EuiButton
-              fill
               size="s"
               iconType="plusInCircle"
               onClick={onAndClicked}

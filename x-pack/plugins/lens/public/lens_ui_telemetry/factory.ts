@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -97,6 +98,12 @@ export class LensReportManager {
         this.write();
       } catch (e) {
         // Silent error because events will be reported during the next timer
+
+        // If posting stats is forbidden for the current user, stop attempting to send them,
+        // but keep them in storage to push in case the user logs in with sufficient permissions at some point.
+        if (e.response && e.response.status === 403) {
+          this.stop();
+        }
       }
     }
   }

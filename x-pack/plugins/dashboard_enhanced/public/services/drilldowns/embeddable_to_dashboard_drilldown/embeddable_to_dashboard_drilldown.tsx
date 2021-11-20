@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { DashboardUrlGeneratorState } from '../../../../../../../src/plugins/dashboard/public';
+import type { KibanaLocation } from 'src/plugins/share/public';
+import { DashboardAppLocatorParams } from '../../../../../../../src/plugins/dashboard/public';
 import {
   ApplyGlobalFilterActionContext,
   APPLY_FILTER_TRIGGER,
@@ -22,7 +24,6 @@ import {
   AbstractDashboardDrilldownParams,
   AbstractDashboardDrilldownConfig as Config,
 } from '../abstract_dashboard_drilldown';
-import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { createExtract, createInject } from '../../../../common';
 import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
@@ -48,47 +49,44 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
 
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER];
 
-  protected async getURL(config: Config, context: Context): Promise<KibanaURL> {
-    const state: DashboardUrlGeneratorState = {
+  protected async getLocation(config: Config, context: Context): Promise<KibanaLocation> {
+    const params: DashboardAppLocatorParams = {
       dashboardId: config.dashboardId,
     };
 
     if (context.embeddable) {
       const embeddable = context.embeddable as IEmbeddable<EmbeddableQueryInput>;
       const input = embeddable.getInput();
-      if (isQuery(input.query) && config.useCurrentFilters) state.query = input.query;
+      if (isQuery(input.query) && config.useCurrentFilters) params.query = input.query;
 
       // if useCurrentDashboardDataRange is enabled, then preserve current time range
       // if undefined is passed, then destination dashboard will figure out time range itself
       // for brush event this time range would be overwritten
       if (isTimeRange(input.timeRange) && config.useCurrentDateRange)
-        state.timeRange = input.timeRange;
+        params.timeRange = input.timeRange;
 
       // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
       // otherwise preserve only pinned
       if (isFilters(input.filters))
-        state.filters = config.useCurrentFilters
+        params.filters = config.useCurrentFilters
           ? input.filters
           : input.filters?.filter((f) => esFilters.isFilterPinned(f));
     }
 
-    const {
-      restOfFilters: filtersFromEvent,
-      timeRange: timeRangeFromEvent,
-    } = esFilters.extractTimeRange(context.filters, context.timeFieldName);
+    const { restOfFilters: filtersFromEvent, timeRange: timeRangeFromEvent } =
+      esFilters.extractTimeRange(context.filters, context.timeFieldName);
 
     if (filtersFromEvent) {
-      state.filters = [...(state.filters ?? []), ...filtersFromEvent];
+      params.filters = [...(params.filters ?? []), ...filtersFromEvent];
     }
 
     if (timeRangeFromEvent) {
-      state.timeRange = timeRangeFromEvent;
+      params.timeRange = timeRangeFromEvent;
     }
 
-    const path = await this.urlGenerator.createUrl(state);
-    const url = new KibanaURL(path);
+    const location = await this.locator.getLocation(params);
 
-    return url;
+    return location;
   }
 
   public readonly inject = createInject({ drilldownId: this.id });

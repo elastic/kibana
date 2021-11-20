@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { IVectorSource } from '../../sources/vector_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
+import { TileMetaFeature } from '../../../../common/descriptor_types';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
@@ -17,13 +19,20 @@ export class CountAggField implements IESAggField {
   protected readonly _source: IESAggSource;
   private readonly _origin: FIELD_ORIGIN;
   protected readonly _label?: string;
-  private readonly _canReadFromGeoJson: boolean;
 
-  constructor({ label, source, origin, canReadFromGeoJson = true }: CountAggFieldParams) {
+  constructor({ label, source, origin }: CountAggFieldParams) {
     this._source = source;
     this._origin = origin;
     this._label = label;
-    this._canReadFromGeoJson = canReadFromGeoJson;
+  }
+
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API returns meta tiles for aggregation metrics
+    return true;
   }
 
   _getAggType(): AGG_TYPE {
@@ -40,6 +49,10 @@ export class CountAggField implements IESAggField {
 
   getName(): string {
     return this._source.getAggKey(this._getAggType(), this.getRootName());
+  }
+
+  getMbFieldName(): string {
+    return this._source.isMvt() ? '_count' : this.getName();
   }
 
   getRootName(): string {
@@ -61,15 +74,17 @@ export class CountAggField implements IESAggField {
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const indexPattern = await this._source.getIndexPattern();
     const tooltipProperty = new TooltipProperty(this.getName(), await this.getLabel(), value);
-    return new ESAggTooltipProperty(tooltipProperty, indexPattern, this, this._getAggType());
+    return new ESAggTooltipProperty(
+      tooltipProperty,
+      indexPattern,
+      this,
+      this._getAggType(),
+      this._source.getApplyGlobalQuery()
+    );
   }
 
   getValueAggDsl(indexPattern: IndexPattern): unknown | null {
     return null;
-  }
-
-  supportsFieldMeta(): boolean {
-    return false;
   }
 
   getBucketCount() {
@@ -92,15 +107,20 @@ export class CountAggField implements IESAggField {
     return null;
   }
 
-  supportsAutoDomain(): boolean {
-    return this._canReadFromGeoJson ? true : this.supportsFieldMeta();
-  }
-
-  canReadFromGeoJson(): boolean {
-    return this._canReadFromGeoJson;
-  }
-
   isEqual(field: IESAggField) {
     return field.getName() === this.getName();
+  }
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
+    const minField = `aggregations._count.min`;
+    const maxField = `aggregations._count.max`;
+    return metaFeature.properties &&
+      typeof metaFeature.properties[minField] === 'number' &&
+      typeof metaFeature.properties[maxField] === 'number'
+      ? {
+          min: metaFeature.properties[minField] as number,
+          max: metaFeature.properties[maxField] as number,
+        }
+      : null;
   }
 }

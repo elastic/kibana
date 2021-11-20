@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEvent, IEventLogger, IEventLogService } from './index';
@@ -30,9 +31,10 @@ describe('EventLogger', () => {
     service = new EventLogService({
       esContext,
       systemLogger,
-      config: { enabled: true, logEntries: true, indexEntries: true },
+      config: { logEntries: true, indexEntries: true },
       kibanaUUID: KIBANA_SERVER_UUID,
       savedObjectProviderRegistry: savedObjectProviderRegistryMock.create(),
+      kibanaVersion: '1.0.1',
     });
     eventLogger = service.getLogger({});
   });
@@ -85,6 +87,7 @@ describe('EventLogger', () => {
       },
       kibana: {
         server_uuid: '424-24-2424',
+        version: '1.0.1',
       },
     });
 
@@ -185,7 +188,7 @@ describe('EventLogger', () => {
     service.registerProviderActions('provider', ['action-a']);
     eventLogger = service.getLogger({});
 
-    eventLogger.logEvent(({ event: { PROVIDER: 'provider' } } as unknown) as IEvent);
+    eventLogger.logEvent({ event: { PROVIDER: 'provider' } } as unknown as IEvent);
     let message = await waitForLogMessage(systemLogger);
     expect(message).toMatch(/invalid event logged.*provider.*undefined.*/);
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -9,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -17,22 +19,26 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { HeightRetainer } from '../HeightRetainer';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { filterSectionsByTerm, SectionsWithRows } from './helper';
+import { filterSectionsByTerm } from './helper';
 import { Section } from './Section';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { SectionDescriptor } from './types';
 
 interface Props {
-  sections: SectionsWithRows;
+  sections: SectionDescriptor[];
+  isLoading: boolean;
 }
 
-export function MetadataTable({ sections }: Props) {
+export function MetadataTable({ sections, isLoading }: Props) {
   const history = useHistory();
   const location = useLocation();
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { searchTerm = '' } = urlParams;
+  const { docLinks } = useApmPluginContext().core;
 
   const filteredSections = filterSectionsByTerm(sections, searchTerm);
 
@@ -54,11 +60,11 @@ export function MetadataTable({ sections }: Props) {
     <React.Fragment>
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
         <EuiFlexItem grow={false}>
-          <ElasticDocsLink section="/apm/get-started" path="/metadata.html">
+          <EuiLink href={docLinks.links.apm.metaData}>
             <EuiText size="s">
               <EuiIcon type="help" /> How to add labels and other data
             </EuiText>
-          </ElasticDocsLink>
+          </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFieldSearch
@@ -74,6 +80,13 @@ export function MetadataTable({ sections }: Props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {isLoading && (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <HeightRetainer>
         {filteredSections.map((section) => (
           <div key={section.key}>
@@ -81,7 +94,7 @@ export function MetadataTable({ sections }: Props) {
               <h6>{section.label}</h6>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <Section keyValuePairs={section.rows} />
+            <Section properties={section.properties} />
             <EuiSpacer size="xl" />
           </div>
         ))}

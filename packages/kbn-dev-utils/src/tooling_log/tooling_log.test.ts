@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
@@ -12,6 +12,10 @@ import { toArray, takeUntil } from 'rxjs/operators';
 import { ToolingLog } from './tooling_log';
 import { Writer } from './writer';
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
+import { ToolingLogCollectingWriter } from './tooling_log_collecting_writer';
+import { createStripAnsiSerializer } from '../serializers/strip_ansi_serializer';
+
+expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 it('creates zero writers without a config', () => {
   const log = new ToolingLog();
@@ -66,6 +70,30 @@ describe('#indent()', () => {
     log.debug('foo');
 
     expect(write.mock.calls).toMatchSnapshot();
+  });
+
+  it('resets the indentation after block executes and promise resolves', async () => {
+    const log = new ToolingLog();
+    const writer = new ToolingLogCollectingWriter();
+    log.setWriters([writer]);
+
+    log.info('base');
+    await log.indent(2, async () => {
+      log.indent(2);
+      log.info('hello');
+      log.indent(2);
+      log.info('world');
+    });
+    log.info('back to base');
+
+    expect(writer.messages).toMatchInlineSnapshot(`
+      Array [
+        " info base",
+        "   │ info hello",
+        "     │ info world",
+        " info back to base",
+      ]
+    `);
   });
 });
 
@@ -125,5 +153,42 @@ describe('#getWritten$()', () => {
 
   it('does not emit msg if all writers return false', async () => {
     await testWrittenMsgs([{ write: jest.fn(() => false) }, { write: jest.fn(() => false) }]);
+  });
+});
+
+describe('#withType()', () => {
+  it('creates a child logger with a unique type that respects all other settings', () => {
+    const writerA = new ToolingLogCollectingWriter();
+    const writerB = new ToolingLogCollectingWriter();
+    const log = new ToolingLog();
+    log.setWriters([writerA]);
+
+    const fork = log.withType('someType');
+    log.info('hello');
+    fork.info('world');
+    fork.indent(2);
+    log.debug('indented');
+    fork.indent(-2);
+    log.debug('not-indented');
+
+    log.setWriters([writerB]);
+    fork.info('to new writer');
+    fork.indent(5);
+    log.info('also to new writer');
+
+    expect(writerA.messages).toMatchInlineSnapshot(`
+      Array [
+        " info hello",
+        " info source[someType] world",
+        " │ debg indented",
+        " debg not-indented",
+      ]
+    `);
+    expect(writerB.messages).toMatchInlineSnapshot(`
+      Array [
+        " info source[someType] to new writer",
+        "    │ info also to new writer",
+      ]
+    `);
   });
 });

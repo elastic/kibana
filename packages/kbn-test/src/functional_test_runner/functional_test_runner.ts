@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
@@ -62,7 +62,7 @@ export class FunctionalTestRunner {
       }
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
-      await this.lifecycle.beforeTests.trigger();
+      await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);
@@ -78,18 +78,33 @@ export class FunctionalTestRunner {
       // replace the function of custom service providers so that they return
       // promise-like objects which never resolve, essentially disabling them
       // allowing us to load the test files and populate the mocha suites
-      const readStubbedProviderSpec = (type: string, providers: any) =>
+      const readStubbedProviderSpec = (type: string, providers: any, skip: string[]) =>
         readProviderSpec(type, providers).map((p) => ({
           ...p,
-          fn: () => ({
-            then: () => {},
-          }),
+          fn: skip.includes(p.name)
+            ? (...args: unknown[]) => {
+                const result = p.fn(...args);
+                if ('then' in result) {
+                  throw new Error(
+                    `Provider [${p.name}] returns a promise so it can't loaded during test analysis`
+                  );
+                }
+
+                return result;
+              }
+            : () => ({
+                then: () => {},
+              }),
         }));
 
       const providers = new ProviderCollection(this.log, [
         ...coreProviders,
-        ...readStubbedProviderSpec('Service', config.get('services')),
-        ...readStubbedProviderSpec('PageObject', config.get('pageObjects')),
+        ...readStubbedProviderSpec(
+          'Service',
+          config.get('services'),
+          config.get('servicesRequiredForTestAnalysis')
+        ),
+        ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
       ]);
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);

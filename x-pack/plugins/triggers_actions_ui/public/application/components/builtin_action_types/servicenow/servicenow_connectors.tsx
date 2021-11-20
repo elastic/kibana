@@ -1,180 +1,179 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useCallback } from 'react';
 
-import {
-  EuiCallOut,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFieldPassword,
-  EuiSpacer,
-  EuiLink,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { DeprecatedCallout } from './deprecated_callout';
+import { useGetAppInfo } from './use_get_app_info';
+import { ApplicationRequiredCallout } from './application_required_callout';
+import { isRESTApiError, isDeprecatedConnector } from './helpers';
+import { InstallationCallout } from './installation_callout';
+import { UpdateConnector } from './update_connector';
+import { updateActionConnector } from '../../../lib/action_connector_api';
+import { Credentials } from './credentials';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
 
-const ServiceNowConnectorFields: React.FC<
-  ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
-  const { docLinks } = useKibana().services;
-  const { apiUrl } = action.config;
+const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowActionConnector>> =
+  ({
+    action,
+    editActionSecrets,
+    editActionConfig,
+    errors,
+    consumer,
+    readOnly,
+    setCallbacks,
+    isEdit,
+  }) => {
+    const {
+      http,
+      notifications: { toasts },
+    } = useKibana().services;
+    const { apiUrl, usesTableApi } = action.config;
+    const { username, password } = action.secrets;
+    const requiresNewApplication = !isDeprecatedConnector(action);
 
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
+    const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
-  const { username, password } = action.secrets;
+    const { fetchAppInfo, isLoading } = useGetAppInfo({
+      actionTypeId: action.actionTypeId,
+    });
 
-  const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
-  const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
+    const [showApplicationRequiredCallout, setShowApplicationRequiredCallout] =
+      useState<boolean>(false);
+    const [applicationInfoErrorMsg, setApplicationInfoErrorMsg] = useState<string | null>(null);
 
-  const handleOnChangeActionConfig = useCallback(
-    (key: string, value: string) => editActionConfig(key, value),
-    [editActionConfig]
-  );
+    const getApplicationInfo = useCallback(async () => {
+      setShowApplicationRequiredCallout(false);
+      setApplicationInfoErrorMsg(null);
 
-  const handleOnChangeSecretConfig = useCallback(
-    (key: string, value: string) => editActionSecrets(key, value),
-    [editActionSecrets]
-  );
-  return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="apiUrl"
-            fullWidth
-            error={errors.apiUrl}
-            isInvalid={isApiUrlInvalid}
-            label={i18n.API_URL_LABEL}
-            helpText={
-              <EuiLink
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/servicenow-action-type.html#configuring-servicenow`}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
-                  defaultMessage="Configure a Personal Developer Instance"
-                />
-              </EuiLink>
-            }
-          >
-            <EuiFieldText
-              fullWidth
-              isInvalid={isApiUrlInvalid}
-              name="apiUrl"
-              readOnly={readOnly}
-              value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="apiUrlFromInput"
-              onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
-              onBlur={() => {
-                if (!apiUrl) {
-                  editActionConfig('apiUrl', '');
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{i18n.AUTHENTICATION_LABEL}</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="connector-servicenow-username"
-            fullWidth
-            error={errors.username}
-            isInvalid={isUsernameInvalid}
-            label={i18n.USERNAME_LABEL}
-          >
-            <EuiFieldText
-              fullWidth
-              isInvalid={isUsernameInvalid}
-              readOnly={readOnly}
-              name="connector-servicenow-username"
-              value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="connector-servicenow-username-form-input"
-              onChange={(evt) => handleOnChangeSecretConfig('username', evt.target.value)}
-              onBlur={() => {
-                if (!username) {
-                  editActionSecrets('username', '');
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="connector-servicenow-password"
-            fullWidth
-            error={errors.password}
-            isInvalid={isPasswordInvalid}
-            label={i18n.PASSWORD_LABEL}
-          >
-            <EuiFieldPassword
-              fullWidth
-              readOnly={readOnly}
-              isInvalid={isPasswordInvalid}
-              name="connector-servicenow-password"
-              value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj="connector-servicenow-password-form-input"
-              onChange={(evt) => handleOnChangeSecretConfig('password', evt.target.value)}
-              onBlur={() => {
-                if (!password) {
-                  editActionSecrets('password', '');
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-};
+      try {
+        const res = await fetchAppInfo(action);
+        if (isRESTApiError(res)) {
+          throw new Error(res.error?.message ?? i18n.UNKNOWN);
+        }
 
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <EuiText size="s" data-test-subj="rememberValuesMessage">
-        {i18n.REMEMBER_VALUES_LABEL}
-      </EuiText>
+        return res;
+      } catch (e) {
+        setShowApplicationRequiredCallout(true);
+        setApplicationInfoErrorMsg(e.message);
+        // We need to throw here so the connector will be not be saved.
+        throw e;
+      }
+    }, [action, fetchAppInfo]);
+
+    const beforeActionConnectorSave = useCallback(async () => {
+      if (requiresNewApplication) {
+        await getApplicationInfo();
+      }
+    }, [getApplicationInfo, requiresNewApplication]);
+
+    useEffect(
+      () => setCallbacks({ beforeActionConnectorSave }),
+      [beforeActionConnectorSave, setCallbacks]
     );
-  }
-  return (
-    <EuiCallOut
-      size="s"
-      iconType="iInCircle"
-      title={i18n.REENTER_VALUES_LABEL}
-      data-test-subj="reenterValuesMessage"
-    />
-  );
-}
+
+    const onMigrateClick = useCallback(() => setShowUpdateConnector(true), []);
+    const onModalCancel = useCallback(() => setShowUpdateConnector(false), []);
+
+    const onUpdateConnectorConfirm = useCallback(async () => {
+      try {
+        await getApplicationInfo();
+
+        await updateActionConnector({
+          http,
+          connector: {
+            name: action.name,
+            config: { apiUrl, usesTableApi: false },
+            secrets: { username, password },
+          },
+          id: action.id,
+        });
+
+        editActionConfig('usesTableApi', false);
+        setShowUpdateConnector(false);
+
+        toasts.addSuccess({
+          title: i18n.UPDATE_SUCCESS_TOAST_TITLE(action.name),
+          text: i18n.UPDATE_SUCCESS_TOAST_TEXT,
+        });
+      } catch (err) {
+        /**
+         * getApplicationInfo may throw an error if the request
+         * fails or if there is a REST api error.
+         *
+         * We silent the errors as a callout will show and inform the user
+         */
+      }
+    }, [
+      getApplicationInfo,
+      http,
+      action.name,
+      action.id,
+      apiUrl,
+      username,
+      password,
+      editActionConfig,
+      toasts,
+    ]);
+
+    /**
+     * Defaults the usesTableApi attribute to false
+     * if it is not defined. The usesTableApi attribute
+     * will be undefined only at the creation of
+     * the connector.
+     */
+    useEffect(() => {
+      if (usesTableApi == null) {
+        editActionConfig('usesTableApi', false);
+      }
+    });
+
+    return (
+      <>
+        {showUpdateConnector && (
+          <UpdateConnector
+            action={action}
+            applicationInfoErrorMsg={applicationInfoErrorMsg}
+            errors={errors}
+            readOnly={readOnly}
+            isLoading={isLoading}
+            editActionSecrets={editActionSecrets}
+            editActionConfig={editActionConfig}
+            onConfirm={onUpdateConnectorConfirm}
+            onCancel={onModalCancel}
+          />
+        )}
+        {requiresNewApplication && (
+          <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''} />
+        )}
+        {!requiresNewApplication && <DeprecatedCallout onMigrate={onMigrateClick} />}
+        <Credentials
+          action={action}
+          errors={errors}
+          readOnly={readOnly}
+          isLoading={isLoading}
+          editActionSecrets={editActionSecrets}
+          editActionConfig={editActionConfig}
+        />
+        {showApplicationRequiredCallout && requiresNewApplication && (
+          <ApplicationRequiredCallout
+            message={applicationInfoErrorMsg}
+            appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''}
+          />
+        )}
+      </>
+    );
+  };
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };

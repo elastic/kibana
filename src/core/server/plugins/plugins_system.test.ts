@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
+  mockCreatePluginPrebootSetupContext,
   mockCreatePluginSetupContext,
   mockCreatePluginStartContext,
 } from './plugins_system.test.mocks';
@@ -20,12 +21,11 @@ import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
-import { PluginName } from './types';
+import { PluginName, PluginType } from './types';
 import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
 import { Logger } from '../logging';
 
-const logger = loggingSystemMock.create();
 function createPlugin(
   id: string,
   {
@@ -33,45 +33,55 @@ function createPlugin(
     optional = [],
     server = true,
     ui = true,
-  }: { required?: string[]; optional?: string[]; server?: boolean; ui?: boolean } = {}
-) {
-  return new PluginWrapper({
+    type = PluginType.standard,
+  }: {
+    required?: string[];
+    optional?: string[];
+    server?: boolean;
+    ui?: boolean;
+    type?: PluginType;
+  } = {}
+): PluginWrapper<any, any> {
+  return new PluginWrapper<any, any>({
     path: 'some-path',
     manifest: {
       id,
       version: 'some-version',
       configPath: 'path',
       kibanaVersion: '7.0.0',
+      type,
       requiredPlugins: required,
       optionalPlugins: optional,
       requiredBundles: [],
       server,
       ui,
+      owner: { name: 'foo' },
     },
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,
   });
 }
 
-let pluginsSystem: PluginsSystem;
-const configService = configServiceMock.create();
-configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
-let env: Env;
-let coreContext: CoreContext;
-
+const prebootDeps = coreMock.createInternalPreboot();
 const setupDeps = coreMock.createInternalSetup();
 const startDeps = coreMock.createInternalStart();
 
+let pluginsSystem: PluginsSystem<PluginType.standard>;
+let configService: ReturnType<typeof configServiceMock.create>;
+let logger: ReturnType<typeof loggingSystemMock.create>;
+let env: Env;
+let coreContext: CoreContext;
+
 beforeEach(() => {
+  logger = loggingSystemMock.create();
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
+
+  configService = configServiceMock.create();
+  configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
 
-  pluginsSystem = new PluginsSystem(coreContext);
-});
-
-afterEach(() => {
-  jest.clearAllMocks();
+  pluginsSystem = new PluginsSystem(coreContext, PluginType.standard);
 });
 
 test('can be setup even without plugins', async () => {
@@ -79,6 +89,26 @@ test('can be setup even without plugins', async () => {
 
   expect(pluginsSetup).toBeInstanceOf(Map);
   expect(pluginsSetup.size).toBe(0);
+});
+
+test('throws if adding plugin with incompatible type', () => {
+  const prebootPlugin = createPlugin('plugin-preboot', { type: PluginType.preboot });
+  const standardPlugin = createPlugin('plugin-standard');
+
+  const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
+  const standardPluginSystem = new PluginsSystem(coreContext, PluginType.standard);
+
+  prebootPluginSystem.addPlugin(prebootPlugin);
+  expect(() => prebootPluginSystem.addPlugin(standardPlugin)).toThrowErrorMatchingInlineSnapshot(
+    `"Cannot add plugin with type \\"standard\\" to plugin system with type \\"preboot\\"."`
+  );
+  expect(prebootPluginSystem.getPlugins()).toEqual([prebootPlugin]);
+
+  standardPluginSystem.addPlugin(standardPlugin);
+  expect(() => standardPluginSystem.addPlugin(prebootPlugin)).toThrowErrorMatchingInlineSnapshot(
+    `"Cannot add plugin with type \\"preboot\\" to plugin system with type \\"standard\\"."`
+  );
+  expect(standardPluginSystem.getPlugins()).toEqual([standardPlugin]);
 });
 
 test('getPlugins returns the list of plugins', () => {
@@ -208,7 +238,7 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
         start: { 'order-2': 'started-as-2' },
       },
     ],
-  ] as Array<[PluginWrapper, Contracts]>);
+  ] as Array<[PluginWrapper<any, any>, Contracts]>);
 
   const setupContextMap = new Map();
   const startContextMap = new Map();
@@ -291,6 +321,83 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
     expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, startDeps, plugin);
     expect(plugin.start).toHaveBeenCalledTimes(1);
     expect(plugin.start).toHaveBeenCalledWith(startContextMap.get(plugin.name), deps.start);
+  }
+});
+
+test('correctly orders preboot plugins and returns exposed values for "setup"', async () => {
+  const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
+  const plugins = new Map([
+    [
+      createPlugin('order-4', { type: PluginType.preboot, required: ['order-2'] }),
+      { 'order-2': 'added-as-2' },
+    ],
+    [createPlugin('order-0', { type: PluginType.preboot }), {}],
+    [
+      createPlugin('order-2', {
+        type: PluginType.preboot,
+        required: ['order-1'],
+        optional: ['order-0'],
+      }),
+      { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
+    ],
+    [
+      createPlugin('order-1', { type: PluginType.preboot, required: ['order-0'] }),
+      { 'order-0': 'added-as-1' },
+    ],
+    [
+      createPlugin('order-3', {
+        type: PluginType.preboot,
+        required: ['order-2'],
+        optional: ['missing-dep'],
+      }),
+      { 'order-2': 'added-as-2' },
+    ],
+  ] as Array<[PluginWrapper<any, any>, Record<PluginName, unknown>]>);
+
+  const setupContextMap = new Map();
+  [...plugins.keys()].forEach((plugin, index) => {
+    jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
+    setupContextMap.set(plugin.name, `setup-for-${plugin.name}`);
+    prebootPluginSystem.addPlugin(plugin);
+  });
+
+  mockCreatePluginPrebootSetupContext.mockImplementation((context, deps, plugin) =>
+    setupContextMap.get(plugin.name)
+  );
+
+  expect([...(await prebootPluginSystem.setupPlugins(prebootDeps))]).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "order-0",
+        "added-as-1",
+      ],
+      Array [
+        "order-1",
+        "added-as-3",
+      ],
+      Array [
+        "order-2",
+        "added-as-2",
+      ],
+      Array [
+        "order-3",
+        "added-as-4",
+      ],
+      Array [
+        "order-4",
+        "added-as-0",
+      ],
+    ]
+  `);
+
+  for (const [plugin, deps] of plugins) {
+    expect(mockCreatePluginPrebootSetupContext).toHaveBeenCalledWith(
+      coreContext,
+      prebootDeps,
+      plugin
+    );
+    expect(plugin.setup).toHaveBeenCalledTimes(1);
+    expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps);
   }
 });
 
@@ -400,6 +507,21 @@ test('can start without plugins', async () => {
   expect(pluginsStart.size).toBe(0);
 });
 
+test('cannot start preboot plugins', async () => {
+  const prebootPlugin = createPlugin('order-0', { type: PluginType.preboot });
+  jest.spyOn(prebootPlugin, 'setup').mockResolvedValue({});
+  jest.spyOn(prebootPlugin, 'start').mockResolvedValue({});
+
+  const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
+  prebootPluginSystem.addPlugin(prebootPlugin);
+  await prebootPluginSystem.setupPlugins(prebootDeps);
+
+  await expect(
+    prebootPluginSystem.startPlugins(startDeps)
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`"Preboot plugins cannot be started."`);
+  expect(prebootPlugin.start).not.toHaveBeenCalled();
+});
+
 test('`startPlugins` only starts plugins that were setup', async () => {
   const firstPluginToRun = createPlugin('order-0');
   const secondPluginNotToRun = createPlugin('order-not-run', { server: false });
@@ -434,7 +556,7 @@ describe('setup', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-  it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
+  it('throws timeout error if "setup" was not completed in 10 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-setup');
     jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise((i) => i));
     pluginsSystem.addPlugin(plugin);
@@ -444,7 +566,7 @@ describe('setup', () => {
     jest.runAllTimers();
 
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+      `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
     );
   });
 
@@ -471,8 +593,8 @@ describe('start', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-  it('throws timeout error if "start" was not completed in 30 sec.', async () => {
-    const plugin: PluginWrapper = createPlugin('timeout-start');
+  it('throws timeout error if "start" was not completed in 10 sec.', async () => {
+    const plugin = createPlugin('timeout-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
     jest.spyOn(plugin, 'start').mockImplementation(() => new Promise((i) => i));
 
@@ -485,7 +607,7 @@ describe('start', () => {
     jest.runAllTimers();
 
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+      `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
     );
   });
 
@@ -503,5 +625,164 @@ describe('start', () => {
     await pluginsSystem.startPlugins(startDeps);
     const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
+  });
+});
+
+describe('asynchronous plugins', () => {
+  const runScenario = async ({
+    production,
+    asyncSetup,
+    asyncStart,
+  }: {
+    production: boolean;
+    asyncSetup: boolean;
+    asyncStart: boolean;
+  }) => {
+    env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({
+        cliArgs: {
+          dev: !production,
+          envName: production ? 'production' : 'development',
+        },
+      })
+    );
+    coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
+    pluginsSystem = new PluginsSystem(coreContext, PluginType.standard);
+
+    const syncPlugin = createPlugin('sync-plugin');
+    jest.spyOn(syncPlugin, 'setup').mockReturnValue('setup-sync');
+    jest.spyOn(syncPlugin, 'start').mockReturnValue('start-sync');
+    pluginsSystem.addPlugin(syncPlugin);
+
+    const asyncPlugin = createPlugin('async-plugin');
+    jest
+      .spyOn(asyncPlugin, 'setup')
+      .mockReturnValue(asyncSetup ? Promise.resolve('setup-async') : 'setup-sync');
+    jest
+      .spyOn(asyncPlugin, 'start')
+      .mockReturnValue(asyncStart ? Promise.resolve('start-async') : 'start-sync');
+    pluginsSystem.addPlugin(asyncPlugin);
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
+  };
+
+  it('logs a warning if a plugin returns a promise from its setup contract in dev mode', async () => {
+    await runScenario({
+      production: false,
+      asyncSetup: true,
+      asyncStart: false,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Plugin async-plugin is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+      ]
+    `);
+  });
+
+  it('does not log warnings if a plugin returns a promise from its setup contract in prod mode', async () => {
+    await runScenario({
+      production: true,
+      asyncSetup: true,
+      asyncStart: false,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs a warning if a plugin returns a promise from its start contract in dev mode', async () => {
+    await runScenario({
+      production: false,
+      asyncSetup: false,
+      asyncStart: true,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Plugin async-plugin is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+      ]
+    `);
+  });
+
+  it('does not log warnings if a plugin returns a promise from its start contract  in prod mode', async () => {
+    await runScenario({
+      production: true,
+      asyncSetup: false,
+      asyncStart: true,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs multiple warnings if both `setup` and `start` return promises', async () => {
+    await runScenario({
+      production: false,
+      asyncSetup: true,
+      asyncStart: true,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Plugin async-plugin is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+        Array [
+          "Plugin async-plugin is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('stop', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('waits for 30 sec to finish "stop" and move on to the next plugin.', async () => {
+    const [plugin1, plugin2] = [createPlugin('timeout-stop-1'), createPlugin('timeout-stop-2')].map(
+      (plugin, index) => {
+        jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+        jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+        pluginsSystem.addPlugin(plugin);
+        return plugin;
+      }
+    );
+
+    const stopSpy1 = jest
+      .spyOn(plugin1, 'stop')
+      .mockImplementationOnce(() => new Promise((resolve) => resolve));
+    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const stopPromise = pluginsSystem.stopPlugins();
+
+    jest.runAllTimers();
+    await stopPromise;
+    expect(stopSpy1).toHaveBeenCalledTimes(1);
+    expect(stopSpy2).toHaveBeenCalledTimes(1);
+
+    expect(loggingSystemMock.collect(logger).warn.flat()).toEqual(
+      expect.arrayContaining([
+        `"timeout-stop-1" plugin didn't stop in 30sec., move on to the next.`,
+      ])
+    );
   });
 });

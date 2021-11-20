@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../plugins/ml/common/constants/field_types';
 import { MlCommonUI } from './common_ui';
@@ -16,39 +18,41 @@ export function MachineLearningDataVisualizerTableProvider(
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
+  const browser = getService('browser');
 
   return new (class DataVisualizerTable {
     public async parseDataVisualizerTable() {
-      const table = await testSubjects.find('~mlDataVisualizerTable');
+      const table = await testSubjects.find('~dataVisualizerTable');
       const $ = await table.parseDomContent();
       const rows = [];
 
-      for (const tr of $.findTestSubjects('~mlDataVisualizerRow').toArray()) {
+      for (const tr of $.findTestSubjects('~dataVisualizerRow').toArray()) {
         const $tr = $(tr);
 
         rows.push({
           type: $tr
-            .findTestSubject('mlDataVisualizerTableColumnType')
+            .findTestSubject('dataVisualizerTableColumnType')
             .find('.euiTableCellContent')
             .text()
             .trim(),
           fieldName: $tr
-            .findTestSubject('mlDataVisualizerTableColumnName')
+            .findTestSubject('dataVisualizerTableColumnName')
             .find('.euiTableCellContent')
             .text()
             .trim(),
           documentsCount: $tr
-            .findTestSubject('mlDataVisualizerTableColumnDocumentsCount')
+            .findTestSubject('dataVisualizerTableColumnDocumentsCount')
             .find('.euiTableCellContent')
             .text()
             .trim(),
           distinctValues: $tr
-            .findTestSubject('mlDataVisualizerTableColumnDistinctValues')
+            .findTestSubject('dataVisualizerTableColumnDistinctValues')
             .find('.euiTableCellContent')
             .text()
             .trim(),
           distribution: $tr
-            .findTestSubject('mlDataVisualizerTableColumnDistribution')
+            .findTestSubject('dataVisualizerTableColumnDistribution')
             .find('.euiTableCellContent')
             .text()
             .trim(),
@@ -69,7 +73,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public rowSelector(fieldName: string, subSelector?: string) {
-      const row = `~mlDataVisualizerTable > ~row-${fieldName}`;
+      const row = `~dataVisualizerTable > ~row-${fieldName}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
@@ -77,8 +81,27 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail(this.rowSelector(fieldName));
     }
 
+    public async assertRowNotExists(fieldName: string) {
+      await retry.tryForTime(1000, async () => {
+        await testSubjects.missingOrFail(this.rowSelector(fieldName));
+      });
+    }
+
+    public async assertDisplayName(fieldName: string, expectedDisplayName: string) {
+      await retry.tryForTime(10000, async () => {
+        const subj = await testSubjects.find(
+          this.rowSelector(fieldName, `dataVisualizerDisplayName-${fieldName}`)
+        );
+        const displayName = await subj.getVisibleText();
+        expect(displayName).to.eql(
+          expectedDisplayName,
+          `Expected display name of ${fieldName} to be '${expectedDisplayName}' (got '${displayName}')`
+        );
+      });
+    }
+
     public detailsSelector(fieldName: string, subSelector?: string) {
-      const row = `~mlDataVisualizerTable > ~mlDataVisualizerFieldExpandedRow-${fieldName}`;
+      const row = `~dataVisualizerTable > ~dataVisualizerFieldExpandedRow-${fieldName}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
@@ -87,11 +110,11 @@ export function MachineLearningDataVisualizerTableProvider(
         if (!(await testSubjects.exists(this.detailsSelector(fieldName)))) {
           const selector = this.rowSelector(
             fieldName,
-            `mlDataVisualizerDetailsToggle-${fieldName}-arrowDown`
+            `dataVisualizerDetailsToggle-${fieldName}-arrowRight`
           );
           await testSubjects.click(selector);
           await testSubjects.existOrFail(
-            this.rowSelector(fieldName, `mlDataVisualizerDetailsToggle-${fieldName}-arrowUp`),
+            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`),
             {
               timeout: 1000,
             }
@@ -105,10 +128,10 @@ export function MachineLearningDataVisualizerTableProvider(
       await retry.tryForTime(10000, async () => {
         if (await testSubjects.exists(this.detailsSelector(fieldName))) {
           await testSubjects.click(
-            this.rowSelector(fieldName, `mlDataVisualizerDetailsToggle-${fieldName}-arrowUp`)
+            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`)
           );
           await testSubjects.existOrFail(
-            this.rowSelector(fieldName, `mlDataVisualizerDetailsToggle-${fieldName}-arrowDown`),
+            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowRight`),
             {
               timeout: 1000,
             }
@@ -121,40 +144,154 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertFieldDocCount(fieldName: string, docCountFormatted: string) {
       const docCountFormattedSelector = this.rowSelector(
         fieldName,
-        'mlDataVisualizerTableColumnDocumentsCount'
+        'dataVisualizerTableColumnDocumentsCount'
       );
       await testSubjects.existOrFail(docCountFormattedSelector);
       const docCount = await testSubjects.getVisibleText(docCountFormattedSelector);
       expect(docCount).to.eql(
         docCountFormatted,
-        `Expected field document count to be '${docCountFormatted}' (got '${docCount}')`
+        `Expected field ${fieldName}'s document count to be '${docCountFormatted}' (got '${docCount}')`
       );
     }
 
+    public async ensureAllMenuPopoversClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
+        expect(popoverExists).to.eql(false, 'All popovers should be closed');
+      });
+    }
+
+    public async ensureActionsMenuOpen(fieldName: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.ensureAllMenuPopoversClosed();
+        await testSubjects.click(this.rowSelector(fieldName, 'euiCollapsedItemActionsButton'));
+        await find.existsByCssSelector('euiContextMenuPanel');
+      });
+    }
+
+    public async assertActionsMenuClosed(fieldName: string, action: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail(action, { timeout: 5000 });
+      });
+    }
+
+    public async assertActionMenuViewInLensEnabled(fieldName: string, expectedValue: boolean) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.ensureActionsMenuOpen(fieldName);
+        const actionMenuViewInLensButton = await find.byCssSelector(
+          '[data-test-subj="dataVisualizerActionViewInLensButton"][class="euiContextMenuItem"]'
+        );
+        const isEnabled = await actionMenuViewInLensButton.isEnabled();
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected "Explore in lens" action menu button for '${fieldName}' to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
+    }
+
+    public async assertActionMenuDeleteIndexPatternFieldButtonEnabled(
+      fieldName: string,
+      expectedValue: boolean
+    ) {
+      await this.ensureActionsMenuOpen(fieldName);
+      const actionMenuViewInLensButton = await find.byCssSelector(
+        '[data-test-subj="dataVisualizerActionDeleteIndexPatternFieldButton"][class="euiContextMenuItem"]'
+      );
+      const isEnabled = await actionMenuViewInLensButton.isEnabled();
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "Delete index pattern field" action menu button for '${fieldName}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async clickActionMenuDeleteIndexPatternFieldButton(fieldName: string) {
+      const testSubj = 'dataVisualizerActionDeleteIndexPatternFieldButton';
+      await retry.tryForTime(5000, async () => {
+        await this.ensureActionsMenuOpen(fieldName);
+
+        const button = await find.byCssSelector(
+          `[data-test-subj="${testSubj}"][class="euiContextMenuItem"]`
+        );
+        await button.click();
+        await this.assertActionsMenuClosed(fieldName, testSubj);
+        await testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+      });
+    }
+
+    public async assertViewInLensActionEnabled(fieldName: string, expectedValue: boolean) {
+      const actionButton = this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton');
+      await testSubjects.existOrFail(actionButton);
+      const isEnabled = await testSubjects.isEnabled(actionButton);
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "Explore in lens" button for '${fieldName}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertViewInLensActionNotExists(fieldName: string) {
+      const actionButton = this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton');
+      await testSubjects.missingOrFail(actionButton);
+    }
+
+    public async assertEditIndexPatternFieldButtonEnabled(
+      fieldName: string,
+      expectedValue: boolean
+    ) {
+      const selector = this.rowSelector(
+        fieldName,
+        'dataVisualizerActionEditIndexPatternFieldButton'
+      );
+      await testSubjects.existOrFail(selector);
+      const isEnabled = await testSubjects.isEnabled(selector);
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "Edit index pattern" button for '${fieldName}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async clickEditIndexPatternFieldButton(fieldName: string) {
+      await retry.tryForTime(5000, async () => {
+        await this.assertEditIndexPatternFieldButtonEnabled(fieldName, true);
+        await testSubjects.click(
+          this.rowSelector(fieldName, 'dataVisualizerActionEditIndexPatternFieldButton')
+        );
+        await testSubjects.existOrFail('indexPatternFieldEditorForm');
+      });
+    }
+
     public async assertFieldDistinctValuesExist(fieldName: string) {
-      const selector = this.rowSelector(fieldName, 'mlDataVisualizerTableColumnDistinctValues');
+      const selector = this.rowSelector(fieldName, 'dataVisualizerTableColumnDistinctValues');
       await testSubjects.existOrFail(selector);
     }
 
     public async assertFieldDistributionExist(fieldName: string) {
-      const selector = this.rowSelector(fieldName, 'mlDataVisualizerTableColumnDistribution');
+      const selector = this.rowSelector(fieldName, 'dataVisualizerTableColumnDistribution');
       await testSubjects.existOrFail(selector);
     }
 
     public async assertSearchPanelExist() {
-      await testSubjects.existOrFail(`mlDataVisualizerSearchPanel`);
+      await testSubjects.existOrFail(`dataVisualizerSearchPanel`);
     }
 
     public async assertFieldNameInputExists() {
-      await testSubjects.existOrFail('mlDataVisualizerFieldNameSelect');
+      await testSubjects.existOrFail('dataVisualizerFieldNameSelect');
     }
 
     public async assertFieldTypeInputExists() {
-      await testSubjects.existOrFail('mlDataVisualizerFieldTypeSelect');
+      await testSubjects.existOrFail('dataVisualizerFieldTypeSelect');
     }
 
     public async assertSampleSizeInputExists() {
-      await testSubjects.existOrFail('mlDataVisualizerShardSizeSelect');
+      await testSubjects.existOrFail('dataVisualizerShardSizeSelect');
     }
 
     public async setSampleSizeInputValue(
@@ -163,9 +300,9 @@ export function MachineLearningDataVisualizerTableProvider(
       docCountFormatted: string
     ) {
       await this.assertSampleSizeInputExists();
-      await testSubjects.clickWhenNotDisabled('mlDataVisualizerShardSizeSelect');
-      await testSubjects.existOrFail(`mlDataVisualizerShardSizeOption ${sampleSize}`);
-      await testSubjects.click(`mlDataVisualizerShardSizeOption ${sampleSize}`);
+      await testSubjects.clickWhenNotDisabled('dataVisualizerShardSizeSelect');
+      await testSubjects.existOrFail(`dataVisualizerShardSizeOption ${sampleSize}`);
+      await testSubjects.click(`dataVisualizerShardSizeOption ${sampleSize}`);
 
       await retry.tryForTime(5000, async () => {
         await this.assertFieldDocCount(fieldName, docCountFormatted);
@@ -174,38 +311,36 @@ export function MachineLearningDataVisualizerTableProvider(
 
     public async setFieldTypeFilter(fieldTypes: string[], expectedRowCount = 1) {
       await this.assertFieldTypeInputExists();
-      await mlCommonUI.setMultiSelectFilter('mlDataVisualizerFieldTypeSelect', fieldTypes);
+      await mlCommonUI.setMultiSelectFilter('dataVisualizerFieldTypeSelect', fieldTypes);
       await this.assertTableRowCount(expectedRowCount);
     }
 
     async removeFieldTypeFilter(fieldTypes: string[], expectedRowCount = 1) {
       await this.assertFieldTypeInputExists();
-      await mlCommonUI.removeMultiSelectFilter('mlDataVisualizerFieldTypeSelect', fieldTypes);
+      await mlCommonUI.removeMultiSelectFilter('dataVisualizerFieldTypeSelect', fieldTypes);
       await this.assertTableRowCount(expectedRowCount);
     }
 
     public async setFieldNameFilter(fieldNames: string[], expectedRowCount = 1) {
       await this.assertFieldNameInputExists();
-      await mlCommonUI.setMultiSelectFilter('mlDataVisualizerFieldNameSelect', fieldNames);
+      await mlCommonUI.setMultiSelectFilter('dataVisualizerFieldNameSelect', fieldNames);
       await this.assertTableRowCount(expectedRowCount);
     }
 
     public async removeFieldNameFilter(fieldNames: string[], expectedRowCount: number) {
       await this.assertFieldNameInputExists();
-      await mlCommonUI.removeMultiSelectFilter('mlDataVisualizerFieldNameSelect', fieldNames);
+      await mlCommonUI.removeMultiSelectFilter('dataVisualizerFieldNameSelect', fieldNames);
       await this.assertTableRowCount(expectedRowCount);
     }
 
     public async assertShowEmptyFieldsSwitchExists() {
-      await testSubjects.existOrFail('mlDataVisualizerShowEmptyFieldsSwitch');
+      await testSubjects.existOrFail('dataVisualizerShowEmptyFieldsSwitch');
     }
 
     public async assertShowEmptyFieldsCheckState(expectedCheckState: boolean) {
       const actualCheckState =
-        (await testSubjects.getAttribute(
-          'mlDataVisualizerShowEmptyFieldsSwitch',
-          'aria-checked'
-        )) === 'true';
+        (await testSubjects.getAttribute('dataVisualizerShowEmptyFieldsSwitch', 'aria-checked')) ===
+        'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Show empty fields check state should be '${expectedCheckState}' (got '${actualCheckState}')`
@@ -217,7 +352,7 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertShowEmptyFieldsSwitchExists();
       await retry.tryForTime(5000, async () => {
         if (await this.assertShowEmptyFieldsCheckState(!checkState)) {
-          await testSubjects.click('mlDataVisualizerShowEmptyFieldsSwitch');
+          await testSubjects.click('dataVisualizerShowEmptyFieldsSwitch');
         }
         await this.assertShowEmptyFieldsCheckState(checkState);
         for (const field of expectedEmptyFields) {
@@ -226,10 +361,32 @@ export function MachineLearningDataVisualizerTableProvider(
       });
     }
 
-    public async assertTopValuesContents(fieldName: string, expectedTopValuesCount: number) {
-      const selector = this.detailsSelector(fieldName, 'mlFieldDataTopValues');
+    public async assertTopValuesContent(fieldName: string, expectedTopValues: string[]) {
+      const selector = this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValuesContent');
       const topValuesElement = await testSubjects.find(selector);
-      const topValuesBars = await topValuesElement.findAllByTestSubject('mlFieldDataTopValueBar');
+      const topValuesBars = await topValuesElement.findAllByTestSubject(
+        'dataVisualizerFieldDataTopValueBar'
+      );
+
+      const topValuesBarsValues = await Promise.all(
+        topValuesBars.map(async (bar) => {
+          const visibleText = await bar.getVisibleText();
+          return visibleText ? visibleText.split('\n')[0] : undefined;
+        })
+      );
+
+      expect(topValuesBarsValues).to.eql(
+        expectedTopValues,
+        `Expected top values for field '${fieldName}' to equal '${expectedTopValues}' (got '${topValuesBarsValues}')`
+      );
+    }
+
+    public async assertTopValuesCount(fieldName: string, expectedTopValuesCount: number) {
+      const selector = this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValuesContent');
+      const topValuesElement = await testSubjects.find(selector);
+      const topValuesBars = await topValuesElement.findAllByTestSubject(
+        'dataVisualizerFieldDataTopValueBar'
+      );
       expect(topValuesBars).to.have.length(
         expectedTopValuesCount,
         `Expected top values count for field '${fieldName}' to be '${expectedTopValuesCount}' (got '${topValuesBars.length}')`
@@ -237,9 +394,11 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public async assertDistributionPreviewExist(fieldName: string) {
-      await testSubjects.existOrFail(this.rowSelector(fieldName, `mlDataGridChart-${fieldName}`));
       await testSubjects.existOrFail(
-        this.rowSelector(fieldName, `mlDataGridChart-${fieldName}-histogram`)
+        this.rowSelector(fieldName, `dataVisualizerDataGridChart-${fieldName}`)
+      );
+      await testSubjects.existOrFail(
+        this.rowSelector(fieldName, `dataVisualizerDataGridChart-${fieldName}-histogram`)
       );
     }
 
@@ -247,19 +406,34 @@ export function MachineLearningDataVisualizerTableProvider(
       fieldName: string,
       docCountFormatted: string,
       topValuesCount: number,
+      viewableInLens: boolean,
+      hasActionMenu = false,
       checkDistributionPreviewExist = true
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
 
-      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlNumberSummaryTable'));
+      await testSubjects.existOrFail(
+        this.detailsSelector(fieldName, 'dataVisualizerNumberSummaryTable')
+      );
 
-      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlTopValues'));
-      await this.assertTopValuesContents(fieldName, topValuesCount);
+      await testSubjects.existOrFail(
+        this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValues')
+      );
+      await this.assertTopValuesCount(fieldName, topValuesCount);
 
       if (checkDistributionPreviewExist) {
         await this.assertDistributionPreviewExist(fieldName);
+      }
+      if (viewableInLens) {
+        if (hasActionMenu) {
+          await this.assertActionMenuViewInLensEnabled(fieldName, true);
+        } else {
+          await this.assertViewInLensActionEnabled(fieldName, true);
+        }
+      } else {
+        await this.assertViewInLensActionNotExists(fieldName);
       }
 
       await this.ensureDetailsClosed(fieldName);
@@ -270,27 +444,36 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
 
-      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlDateSummaryTable'));
+      await testSubjects.existOrFail(
+        this.detailsSelector(fieldName, 'dataVisualizerDateSummaryTable')
+      );
       await this.ensureDetailsClosed(fieldName);
     }
 
     public async assertKeywordFieldContents(
       fieldName: string,
       docCountFormatted: string,
-      topValuesCount: number
+      topValuesCount: number,
+      exampleContent?: string[]
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
 
-      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlFieldDataTopValues'));
-      await this.assertTopValuesContents(fieldName, topValuesCount);
+      await testSubjects.existOrFail(
+        this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValuesContent')
+      );
+      await this.assertTopValuesCount(fieldName, topValuesCount);
+
+      if (exampleContent) {
+        await this.assertTopValuesContent(fieldName, exampleContent);
+      }
       await this.ensureDetailsClosed(fieldName);
     }
 
     public async assertExamplesList(fieldName: string, expectedExamplesCount: number) {
       const examplesList = await testSubjects.find(
-        this.detailsSelector(fieldName, 'mlFieldDataExamplesList')
+        this.detailsSelector(fieldName, 'dataVisualizerFieldDataExamplesList')
       );
       const examplesListItems = await examplesList.findAllByTagName('li');
       expect(examplesListItems).to.have.length(
@@ -305,6 +488,7 @@ export function MachineLearningDataVisualizerTableProvider(
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
+
       await this.ensureDetailsOpen(fieldName);
 
       await this.assertExamplesList(fieldName, expectedExamplesCount);
@@ -318,11 +502,14 @@ export function MachineLearningDataVisualizerTableProvider(
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
+
       await this.ensureDetailsOpen(fieldName);
 
       await this.assertExamplesList(fieldName, expectedExamplesCount);
 
-      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlEmbeddedMapContent'));
+      await testSubjects.existOrFail(
+        this.detailsSelector(fieldName, 'dataVisualizerEmbeddedMapContent')
+      );
 
       await this.ensureDetailsClosed(fieldName);
     }
@@ -330,9 +517,12 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertUnknownFieldContents(fieldName: string, docCountFormatted: string) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
+
       await this.ensureDetailsOpen(fieldName);
 
-      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlDVDocumentStatsContent'));
+      await testSubjects.existOrFail(
+        this.detailsSelector(fieldName, 'dataVisualizerDocumentStatsContent')
+      );
 
       await this.ensureDetailsClosed(fieldName);
     }
@@ -341,13 +531,21 @@ export function MachineLearningDataVisualizerTableProvider(
       fieldType: string,
       fieldName: string,
       docCountFormatted: string,
-      exampleCount: number
+      exampleCount: number,
+      viewableInLens: boolean,
+      hasActionMenu?: boolean,
+      exampleContent?: string[]
     ) {
       // Currently the data used in the data visualizer tests only contains these field types.
       if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
         await this.assertDateFieldContents(fieldName, docCountFormatted);
       } else if (fieldType === ML_JOB_FIELD_TYPES.KEYWORD) {
-        await this.assertKeywordFieldContents(fieldName, docCountFormatted, exampleCount);
+        await this.assertKeywordFieldContents(
+          fieldName,
+          docCountFormatted,
+          exampleCount,
+          exampleContent
+        );
       } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
         await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
       } else if (fieldType === ML_JOB_FIELD_TYPES.GEO_POINT) {
@@ -355,10 +553,20 @@ export function MachineLearningDataVisualizerTableProvider(
       } else if (fieldType === ML_JOB_FIELD_TYPES.UNKNOWN) {
         await this.assertUnknownFieldContents(fieldName, docCountFormatted);
       }
+
+      if (viewableInLens) {
+        if (hasActionMenu) {
+          await this.assertActionMenuViewInLensEnabled(fieldName, true);
+        } else {
+          await this.assertViewInLensActionEnabled(fieldName, true);
+        }
+      } else {
+        await this.assertViewInLensActionNotExists(fieldName);
+      }
     }
 
     public async ensureNumRowsPerPage(n: 10 | 25 | 50) {
-      const paginationButton = 'mlDataVisualizerTable > tablePaginationPopoverButton';
+      const paginationButton = 'dataVisualizerTable > tablePaginationPopoverButton';
       await retry.tryForTime(10000, async () => {
         await testSubjects.existOrFail(paginationButton);
         await testSubjects.click(paginationButton);

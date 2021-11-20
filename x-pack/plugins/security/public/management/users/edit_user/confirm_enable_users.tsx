@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ConfirmModal } from '../../../components/confirm_modal';
+
 import { UserAPIClient } from '..';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface ConfirmEnableUsersProps {
   usernames: string[];
@@ -50,13 +53,20 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
   }, [services.http]);
 
   return (
-    <ConfirmModal
+    <EuiConfirmModal
+      role="dialog"
       title={i18n.translate('xpack.security.management.users.confirmEnableUsers.title', {
         defaultMessage: "Activate {count, plural, one{user '{username}'} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}
       onConfirm={enableUsers}
+      cancelButtonText={i18n.translate(
+        'xpack.security.management.users.confirmEnableUsers.cancelButton',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
       confirmButtonText={i18n.translate(
         'xpack.security.management.users.confirmEnableUsers.confirmButton',
         {
@@ -66,7 +76,6 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
         }
       )}
       isLoading={state.loading}
-      ownFocus
     >
       <EuiText>
         <p>
@@ -84,6 +93,6 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
           </ul>
         )}
       </EuiText>
-    </ConfirmModal>
+    </EuiConfirmModal>
   );
 };

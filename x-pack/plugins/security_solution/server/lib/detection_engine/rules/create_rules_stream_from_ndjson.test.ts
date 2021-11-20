@@ -1,13 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { createRulesStreamFromNdJson } from './create_rules_stream_from_ndjson';
-import { BadRequestError } from '../errors/bad_request_error';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ImportRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
+import {
+  getOutputDetailsSample,
+  getSampleDetailsAsNdjson,
+} from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -200,12 +206,13 @@ describe('create_rules_stream_from_ndjson', () => {
     test('filters the export details entry from the stream', async () => {
       const sample1 = getOutputSample();
       const sample2 = getOutputSample();
+      const details = getOutputDetailsSample({ totalCount: 1, rulesCount: 1 });
       sample2.rule_id = 'rule-2';
       const ndJsonStream = new Readable({
         read() {
           this.push(getSampleAsNdjson(sample1));
           this.push(getSampleAsNdjson(sample2));
-          this.push('{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n');
+          this.push(getSampleDetailsAsNdjson(details));
           this.push(null);
         },
       });

@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { SpacesApi } from '../../../../../x-pack/plugins/spaces/public';
+import {
+  CopyToSpaceSavedObjectsManagementAction,
+  ShareToSpaceSavedObjectsManagementAction,
+} from './actions';
 import { SavedObjectsManagementAction } from './types';
 
 export interface SavedObjectsManagementActionServiceSetup {
@@ -40,10 +45,21 @@ export class SavedObjectsManagementActionService {
     };
   }
 
-  start(): SavedObjectsManagementActionServiceStart {
+  start(spacesApi?: SpacesApi): SavedObjectsManagementActionServiceStart {
+    if (spacesApi) {
+      registerSpacesApiActions(this, spacesApi);
+    }
     return {
       has: (actionId) => this.actions.has(actionId),
       getAll: () => [...this.actions.values()],
     };
   }
+}
+
+function registerSpacesApiActions(
+  service: SavedObjectsManagementActionService,
+  spacesApi: SpacesApi
+) {
+  service.setup().register(new ShareToSpaceSavedObjectsManagementAction(spacesApi.ui));
+  service.setup().register(new CopyToSpaceSavedObjectsManagementAction(spacesApi.ui));
 }

@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { produce } from 'immer';
+import { Index } from '../../../../types';
 
 const shard1 = {
   id: ['L22w_FX2SbqlQYOP5QrYDg', '.kibana_1', '0'],
@@ -45,16 +48,14 @@ const search1 = {
       time: 40061,
       relative: '68.7',
       color: '#fcc5c5',
-      tip:
-        'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+      tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
     },
     {
       key: 'create_weight',
       time: 8238,
       relative: '14.1',
       color: '#f6ebeb',
-      tip:
-        'The time taken to create the Weight object, which holds temporary information during scoring.',
+      tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
     },
     {
       key: 'next_doc',
@@ -131,8 +132,7 @@ const search1 = {
       time: 0,
       relative: '0.0',
       color: '#f5f5f5',
-      tip:
-        'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+      tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
     },
     {
       key: 'match_count',
@@ -195,8 +195,7 @@ const search1Child = {
       time: 24059,
       relative: '81.3',
       color: '#fdbcbc',
-      tip:
-        'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+      tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
     },
     {
       key: 'next_doc',
@@ -210,8 +209,7 @@ const search1Child = {
       time: 1586,
       relative: '5.4',
       color: '#f6f1f1',
-      tip:
-        'The time taken to create the Weight object, which holds temporary information during scoring.',
+      tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
     },
     {
       key: 'advance',
@@ -267,8 +265,7 @@ const search1Child = {
       time: 0,
       relative: '0.0',
       color: '#f5f5f5',
-      tip:
-        'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+      tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
     },
     {
       key: 'match_count',
@@ -334,11 +331,14 @@ const search1Child = {
 (searchRoot.treeRoot as any) = search1;
 (shard1.searches[0] as any) = searchRoot;
 
-export const processedResponseWithFirstShard = produce<any>(null, () => [
-  {
-    shards: [shard1],
-    time: 0.058419,
-    name: '.kibana_1',
-    visible: false,
-  },
-]);
+export const processedResponseWithFirstShard = produce<Index[]>(
+  [
+    {
+      shards: [shard1],
+      time: 0.058419,
+      name: '.kibana_1',
+      visible: false,
+    },
+  ],
+  () => undefined
+);

@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent } from 'react';
 import { shallow } from 'enzyme';
 
 import { FieldFormatEditor } from './field_format_editor';
-import { DefaultFormatEditor } from './editors/default';
+import type { FieldFormat } from '../../../../../../field_formats/common';
 
 class TestEditor extends PureComponent {
   render() {
@@ -26,7 +26,7 @@ const formatEditors = {
     ip: TestEditor,
     number: TestEditor,
   },
-  getById: jest.fn(() => TestEditor),
+  getById: jest.fn(() => () => Promise.resolve(TestEditor)),
 };
 
 describe('FieldFormatEditor', () => {
@@ -34,7 +34,7 @@ describe('FieldFormatEditor', () => {
     const component = shallow(
       <FieldFormatEditor
         fieldType="number"
-        fieldFormat={{} as DefaultFormatEditor}
+        fieldFormat={{} as FieldFormat}
         fieldFormatId="number"
         fieldFormatParams={{}}
         fieldFormatEditors={formatEditors}
@@ -50,7 +50,7 @@ describe('FieldFormatEditor', () => {
     const component = shallow(
       <FieldFormatEditor
         fieldType="number"
-        fieldFormat={{} as DefaultFormatEditor}
+        fieldFormat={{} as FieldFormat}
         fieldFormatId="ip"
         fieldFormatParams={{}}
         fieldFormatEditors={formatEditors}

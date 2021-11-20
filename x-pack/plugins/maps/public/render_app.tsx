@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from 'kibana/public';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -25,6 +25,7 @@ import {
 } from '../../../../src/plugins/kibana_utils/public';
 import { ListPage, MapPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
+import { APP_ID } from '../common/constants';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -60,12 +61,10 @@ function setAppChrome() {
   });
 }
 
-export async function renderApp({
-  element,
-  history,
-  onAppLeave,
-  setHeaderActionMenu,
-}: AppMountParameters) {
+export async function renderApp(
+  { element, history, onAppLeave, setHeaderActionMenu }: AppMountParameters,
+  AppUsageTracker: React.FC
+) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
     useHash: false,
@@ -73,13 +72,13 @@ export async function renderApp({
     ...withNotifyOnErrors(getToasts()),
   });
 
+  const stateTransfer = getEmbeddableService().getStateTransfer();
+
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const stateTransfer = getEmbeddableService()?.getStateTransfer();
-
     const { embeddableId, originatingApp, valueInput } =
-      stateTransfer?.getIncomingEditorState() || {};
+      stateTransfer.getIncomingEditorState(APP_ID) || {};
 
     let mapEmbeddableInput;
     if (routeProps.match.params.savedMapId) {
@@ -99,35 +98,39 @@ export async function renderApp({
         setHeaderActionMenu={setHeaderActionMenu}
         stateTransfer={stateTransfer}
         originatingApp={originatingApp}
+        history={history}
+        key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
       />
     );
   }
 
   const I18nContext = getCoreI18n().Context;
   render(
-    <I18nContext>
-      <Router history={history}>
-        <Switch>
-          <Route path={`/map/:savedMapId`} render={renderMapApp} />
-          <Route exact path={`/map`} render={renderMapApp} />
-          // Redirect other routes to list, or if hash-containing, their non-hash equivalents
-          <Route
-            path={``}
-            render={({ location: { pathname, hash } }) => {
-              if (hash) {
-                // Remove leading hash
-                const newPath = hash.substr(1);
-                return <Redirect to={newPath} />;
-              } else if (pathname === '/' || pathname === '') {
-                return <ListPage />;
-              } else {
-                return <Redirect to="/" />;
-              }
-            }}
-          />
-        </Switch>
-      </Router>
-    </I18nContext>,
+    <AppUsageTracker>
+      <I18nContext>
+        <Router history={history}>
+          <Switch>
+            <Route path={`/map/:savedMapId`} render={renderMapApp} />
+            <Route exact path={`/map`} render={renderMapApp} />
+            // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+            <Route
+              path={``}
+              render={({ location: { pathname, hash } }) => {
+                if (hash) {
+                  // Remove leading hash
+                  const newPath = hash.substr(1);
+                  return <Redirect to={newPath} />;
+                } else if (pathname === '/' || pathname === '') {
+                  return <ListPage stateTransfer={stateTransfer} />;
+                } else {
+                  return <Redirect to="/" />;
+                }
+              }}
+            />
+          </Switch>
+        </Router>
+      </I18nContext>
+    </AppUsageTracker>,
     element
   );
 

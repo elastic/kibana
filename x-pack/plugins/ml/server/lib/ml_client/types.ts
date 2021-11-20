@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElasticsearchClient } from 'kibana/server';
@@ -28,7 +29,6 @@ export type MlClientParams =
   | Parameters<MlClient['estimateModelMemory']>
   | Parameters<MlClient['evaluateDataFrame']>
   | Parameters<MlClient['explainDataFrameAnalytics']>
-  | Parameters<MlClient['findFileStructure']>
   | Parameters<MlClient['flushJob']>
   | Parameters<MlClient['forecast']>
   | Parameters<MlClient['getBuckets']>
@@ -48,6 +48,9 @@ export type MlClientParams =
   | Parameters<MlClient['getRecords']>
   | Parameters<MlClient['getTrainedModels']>
   | Parameters<MlClient['getTrainedModelsStats']>
+  | Parameters<MlClient['getTrainedModelDeploymentStats']>
+  | Parameters<MlClient['startTrainedModelDeployment']>
+  | Parameters<MlClient['stopTrainedModelDeployment']>
   | Parameters<MlClient['info']>
   | Parameters<MlClient['openJob']>
   | Parameters<MlClient['postCalendarEvents']>

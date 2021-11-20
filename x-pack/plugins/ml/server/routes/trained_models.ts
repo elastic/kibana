@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RouteInitialization } from '../types';
@@ -12,7 +13,9 @@ import {
   optionalModelIdSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
-import { InferenceConfigResponse } from '../../common/types/trained_models';
+import { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import { memoryOverviewServiceProvider } from '../models/memory_overview';
+import { mlLog } from '../lib/log';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -37,25 +40,45 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       try {
         const { modelId } = request.params;
         const { with_pipelines: withPipelines, ...query } = request.query;
-        const { body } = await mlClient.getTrainedModels<InferenceConfigResponse>({
+        const { body } = await mlClient.getTrainedModels({
+          // @ts-expect-error @elastic-elasticsearch not sure why this is an error, size is a number
           size: 1000,
           ...query,
           ...(modelId ? { model_id: modelId } : {}),
         });
-        const result = body.trained_model_configs;
+        // model_type is missing
+        // @ts-ignore
+        const result = body.trained_model_configs as TrainedModelConfigResponse[];
         try {
           if (withPipelines) {
-            const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
-              result.map(({ model_id: id }: { model_id: string }) => id)
+            const modelIdsAndAliases: string[] = Array.from(
+              new Set(
+                result
+                  .map(({ model_id: id, metadata }) => {
+                    return [id, ...(metadata?.model_aliases ?? [])];
+                  })
+                  .flat()
+              )
+            );
+
+            const pipelinesResponse = await modelsProvider(client, mlClient).getModelsPipelines(
+              modelIdsAndAliases
             );
             for (const model of result) {
-              model.pipelines = pipelinesResponse.get(model.model_id)!;
+              model.pipelines = {
+                ...(pipelinesResponse.get(model.model_id) ?? {}),
+                ...(model.metadata?.model_aliases ?? []).reduce((acc, alias) => {
+                  return {
+                    ...acc,
+                    ...(pipelinesResponse.get(alias) ?? {}),
+                  };
+                }, {}),
+              };
             }
           }
         } catch (e) {
           // the user might not have required permissions to fetch pipelines
-          // eslint-disable-next-line no-console
-          console.log(e);
+          mlLog.error(e);
         }
 
         return response.ok({
@@ -84,7 +107,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
         const { body } = await mlClient.getTrainedModelsStats({
@@ -116,10 +139,12 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
       try {
         const { modelId } = request.params;
-        const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
+        const result = await modelsProvider(client, mlClient).getModelsPipelines(
+          modelId.split(',')
+        );
         return response.ok({
           body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
         });
@@ -150,6 +175,134 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       try {
         const { modelId } = request.params;
         const { body } = await mlClient.deleteTrainedModel({
+          model_id: modelId,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /api/ml/trained_models/nodes_overview Get node overview about the models allocation
+   * @apiName GetTrainedModelsNodesOverview
+   * @apiDescription Retrieves the list of ML nodes with memory breakdown and allocated models info
+   */
+  router.get(
+    {
+      path: '/api/ml/trained_models/nodes_overview',
+      validate: {},
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const memoryOverviewService = memoryOverviewServiceProvider(mlClient);
+        const result = await modelsProvider(
+          client,
+          mlClient,
+          memoryOverviewService
+        ).getNodesOverview();
+        return response.ok({
+          body: result,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/:modelId/deployment/_start Start trained model deployment
+   * @apiName StartTrainedModelDeployment
+   * @apiDescription Starts trained model deployment.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/{modelId}/deployment/_start',
+      validate: {
+        params: modelIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const { body } = await mlClient.startTrainedModelDeployment({
+          model_id: modelId,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/:modelId/deployment/_stop Stop trained model deployment
+   * @apiName StopTrainedModelDeployment
+   * @apiDescription Stops trained model deployment.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/{modelId}/deployment/_stop',
+      validate: {
+        params: modelIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const { body } = await mlClient.stopTrainedModelDeployment({
+          model_id: modelId,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /api/ml/trained_models/:modelId/deployment/_stats Get trained model deployment stats
+   * @apiName GetTrainedModelDeploymentStats
+   * @apiDescription Gets trained model deployment stats.
+   */
+  router.get(
+    {
+      path: '/api/ml/trained_models/{modelId}/deployment/_stats',
+      validate: {
+        params: modelIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const { body } = await mlClient.getTrainedModelDeploymentStats({
           model_id: modelId,
         });
         return response.ok({

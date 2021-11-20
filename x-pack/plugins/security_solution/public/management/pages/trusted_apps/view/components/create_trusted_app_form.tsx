@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEventHandler, memo, useCallback, useEffect, useMemo, useState } from 'react';
@@ -9,24 +10,45 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiTextArea,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
+  ConditionEntryField,
+  EffectScope,
   MacosLinuxConditionEntry,
+  MaybeImmutable,
   NewTrustedApp,
   OperatingSystem,
 } from '../../../../../../common/endpoint/types';
 import {
+  isValidHash,
+  isPathValid,
+} from '../../../../../../common/endpoint/service/trusted_apps/validations';
+
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import {
+  isGlobalEffectScope,
   isMacosLinuxTrustedAppCondition,
+  isPolicyEffectScope,
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
-import { defaultConditionEntry, defaultNewTrustedApp } from '../../store/builders';
+import { defaultConditionEntry } from '../../store/builders';
 import { OS_TITLES } from '../translations';
 import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import {
+  EffectedPolicySelect,
+  EffectedPolicySelection,
+  EffectedPolicySelectProps,
+} from '../../../../components/effected_policy_select';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -37,26 +59,24 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
   isInvalid: boolean;
-  errors: string[];
-  warnings: string[];
+  errors: React.ReactNode[];
+  warnings: React.ReactNode[];
 }
 interface ValidationResult {
   /** Overall indicator if form is valid */
   isValid: boolean;
 
   /** Individual form field validations */
-  result: Partial<
-    {
-      [key in keyof NewTrustedApp]: FieldValidationState;
-    }
-  >;
+  result: Partial<{
+    [key in keyof NewTrustedApp]: FieldValidationState;
+  }>;
 }
 
 const addResultToValidation = (
   validation: ValidationResult,
   field: keyof NewTrustedApp,
   type: 'warnings' | 'errors',
-  resultValue: string
+  resultValue: React.ReactNode
 ) => {
   if (!validation.result[field]) {
     validation.result[field] = {
@@ -65,11 +85,14 @@ const addResultToValidation = (
       warnings: [],
     };
   }
-  validation.result[field]![type].push(resultValue);
+  const errorMarkup: React.ReactNode = type === 'warnings' ? <div>{resultValue}</div> : resultValue;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  validation.result[field]![type].push(errorMarkup);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]!.isInvalid = true;
 };
 
-const validateFormValues = (values: NewTrustedApp): ValidationResult => {
+const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationResult => {
   let isValid: ValidationResult['isValid'] = true;
   const validation: ValidationResult = {
     isValid,
@@ -112,7 +135,7 @@ const validateFormValues = (values: NewTrustedApp): ValidationResult => {
       })
     );
   } else {
-    values.entries.some((entry, index) => {
+    values.entries.forEach((entry, index) => {
       if (!entry.field || !entry.value.trim()) {
         isValid = false;
         addResultToValidation(
@@ -127,9 +150,30 @@ const validateFormValues = (values: NewTrustedApp): ValidationResult => {
             }
           )
         );
-        return true;
+      } else if (entry.field === ConditionEntryField.HASH && !isValidHash(entry.value)) {
+        isValid = false;
+        addResultToValidation(
+          validation,
+          'entries',
+          'errors',
+          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidHashMsg', {
+            defaultMessage: '[{row}] Invalid hash value',
+            values: { row: index + 1 },
+          })
+        );
+      } else if (
+        !isPathValid({ os: values.os, field: entry.field, type: entry.type, value: entry.value })
+      ) {
+        addResultToValidation(
+          validation,
+          'entries',
+          'warnings',
+          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidPathMsg', {
+            defaultMessage: '[{row}] Path may be formed incorrectly; verify value',
+            values: { row: index + 1 },
+          })
+        );
       }
-      return false;
     });
   }
 
@@ -146,78 +190,114 @@ export type CreateTrustedAppFormProps = Pick<
   EuiFormProps,
   'className' | 'data-test-subj' | 'isInvalid' | 'error' | 'invalidCallout'
 > & {
+  /** The trusted app values that will be passed to the form */
+  trustedApp: MaybeImmutable<NewTrustedApp>;
+  isEditMode: boolean;
+  isDirty: boolean;
+  onChange: (state: TrustedAppFormState) => void;
+  /** Setting passed on to the EffectedPolicySelect component */
+  policies: Pick<EffectedPolicySelectProps, 'options' | 'isLoading'>;
   /** if form should be shown full width of parent container */
   fullWidth?: boolean;
-  onChange: (state: TrustedAppFormState) => void;
 };
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
-  ({ fullWidth, onChange, ...formProps }) => {
+  ({
+    fullWidth,
+    isEditMode,
+    isDirty,
+    onChange,
+    trustedApp: _trustedApp,
+    policies = { options: [] },
+    ...formProps
+  }) => {
+    const trustedApp = _trustedApp as NewTrustedApp;
+
     const dataTestSubj = formProps['data-test-subj'];
+
+    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
+      'trustedAppsByPolicyEnabled'
+    );
+
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+
+    const isGlobal = useMemo(() => {
+      return isGlobalEffectScope(trustedApp.effectScope);
+    }, [trustedApp]);
+
+    const hideAssignmentSection = useMemo(() => {
+      return !isPlatinumPlus && (!isEditMode || (isGlobal && !isDirty));
+    }, [isEditMode, isGlobal, isDirty, isPlatinumPlus]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
       []
     );
 
-    const [formValues, setFormValues] = useState<NewTrustedApp>(defaultNewTrustedApp());
+    // We create local state for the list of policies because we want the selected policies to
+    // persist while the user is on the form and possibly toggling between global/non-global
+    const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
+      isGlobal,
+      selected: [],
+    });
 
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
-      validateFormValues(formValues)
+      validateFormValues(trustedApp)
     );
 
     const [wasVisited, setWasVisited] = useState<
-      Partial<
-        {
-          [key in keyof NewTrustedApp]: boolean;
-        }
-      >
+      Partial<{
+        [key in keyof NewTrustedApp]: boolean;
+      }>
     >({});
 
-    const getTestId = useCallback(
-      (suffix: string): string | undefined => {
-        if (dataTestSubj) {
-          return `${dataTestSubj}-${suffix}`;
-        }
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const notifyOfChange = useCallback(
+      (updatedFormValues: TrustedAppFormState['item']) => {
+        const updatedValidationResult = validateFormValues(updatedFormValues);
+
+        setValidationResult(updatedValidationResult);
+
+        onChange({
+          item: updatedFormValues,
+          isValid: updatedValidationResult.isValid,
+        });
       },
-      [dataTestSubj]
+      [onChange]
     );
 
     const handleAndClick = useCallback(() => {
-      setFormValues(
-        (prevState): NewTrustedApp => {
-          if (prevState.os === OperatingSystem.WINDOWS) {
-            return {
-              ...prevState,
-              entries: [...prevState.entries, defaultConditionEntry()].filter(
-                isWindowsTrustedAppCondition
-              ),
-            };
-          } else {
-            return {
-              ...prevState,
-              entries: [
-                ...prevState.entries.filter(isMacosLinuxTrustedAppCondition),
-                defaultConditionEntry(),
-              ],
-            };
-          }
-        }
-      );
-    }, [setFormValues]);
+      if (trustedApp.os === OperatingSystem.WINDOWS) {
+        notifyOfChange({
+          ...trustedApp,
+          entries: [...trustedApp.entries, defaultConditionEntry()].filter(
+            isWindowsTrustedAppCondition
+          ),
+        });
+      } else {
+        notifyOfChange({
+          ...trustedApp,
+          entries: [
+            ...trustedApp.entries.filter(isMacosLinuxTrustedAppCondition),
+            defaultConditionEntry(),
+          ],
+        });
+      }
+    }, [notifyOfChange, trustedApp]);
 
     const handleDomChangeEvents = useCallback<
       ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
-    >(({ target: { name, value } }) => {
-      setFormValues(
-        (prevState): NewTrustedApp => {
-          return {
-            ...prevState,
-            [name]: value,
-          };
-        }
-      );
-    }, []);
+    >(
+      ({ target: { name, value } }) => {
+        notifyOfChange({
+          ...trustedApp,
+          [name]: value,
+        });
+      },
+      [notifyOfChange, trustedApp]
+    );
 
+    // Handles keeping track if an input form field has been visited
     const handleDomBlurEvents = useCallback<ChangeEventHandler<HTMLInputElement>>(
       ({ target: { name } }) => {
         setWasVisited((prevState) => {
@@ -230,100 +310,156 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       []
     );
 
-    const handleOsChange = useCallback<(v: OperatingSystem) => void>((newOsValue) => {
-      setFormValues(
-        (prevState): NewTrustedApp => {
-          const updatedState: NewTrustedApp = {
-            ...prevState,
-            entries: [],
-            os: newOsValue,
-          };
-          if (updatedState.os !== OperatingSystem.WINDOWS) {
-            updatedState.entries.push(
-              ...(prevState.entries.filter((entry) =>
-                isMacosLinuxTrustedAppCondition(entry)
-              ) as MacosLinuxConditionEntry[])
-            );
-            if (updatedState.entries.length === 0) {
-              updatedState.entries.push(defaultConditionEntry());
-            }
-          } else {
-            updatedState.entries.push(...prevState.entries);
-          }
-          return updatedState;
-        }
-      );
-      setWasVisited((prevState) => {
-        return {
-          ...prevState,
-          os: true,
-        };
-      });
-    }, []);
-
-    const handleEntryRemove = useCallback((entry: NewTrustedApp['entries'][0]) => {
-      setFormValues(
-        (prevState): NewTrustedApp => {
+    const handleOsChange = useCallback<(v: OperatingSystem) => void>(
+      (newOsValue) => {
+        setWasVisited((prevState) => {
           return {
             ...prevState,
-            entries: prevState.entries.filter((item) => item !== entry),
-          } as NewTrustedApp;
+            os: true,
+          };
+        });
+
+        const updatedState: NewTrustedApp = {
+          ...trustedApp,
+          entries: [],
+          os: newOsValue,
+        };
+        if (updatedState.os !== OperatingSystem.WINDOWS) {
+          updatedState.entries.push(
+            ...(trustedApp.entries.filter((entry) =>
+              isMacosLinuxTrustedAppCondition(entry)
+            ) as MacosLinuxConditionEntry[])
+          );
+          if (updatedState.entries.length === 0) {
+            updatedState.entries.push(defaultConditionEntry());
+          }
+        } else {
+          updatedState.entries.push(...trustedApp.entries);
         }
-      );
-    }, []);
+
+        notifyOfChange(updatedState);
+      },
+      [notifyOfChange, trustedApp]
+    );
+
+    const handleEntryRemove = useCallback(
+      (entry: NewTrustedApp['entries'][0]) => {
+        notifyOfChange({
+          ...trustedApp,
+          entries: trustedApp.entries.filter((item) => item !== entry),
+        } as NewTrustedApp);
+      },
+      [notifyOfChange, trustedApp]
+    );
 
     const handleEntryChange = useCallback<LogicalConditionBuilderProps['onEntryChange']>(
       (newEntry, oldEntry) => {
-        setFormValues(
-          (prevState): NewTrustedApp => {
-            if (prevState.os === OperatingSystem.WINDOWS) {
-              return {
-                ...prevState,
-                entries: prevState.entries.map((item) => {
-                  if (item === oldEntry) {
-                    return newEntry;
-                  }
-                  return item;
-                }),
-              } as NewTrustedApp;
-            } else {
-              return {
-                ...prevState,
-                entries: prevState.entries.map((item) => {
-                  if (item === oldEntry) {
-                    return newEntry;
-                  }
-                  return item;
-                }),
-              } as NewTrustedApp;
-            }
-          }
-        );
+        if (trustedApp.os === OperatingSystem.WINDOWS) {
+          notifyOfChange({
+            ...trustedApp,
+            entries: trustedApp.entries.map((item) => {
+              if (item === oldEntry) {
+                return newEntry;
+              }
+              return item;
+            }),
+          } as NewTrustedApp);
+        } else {
+          notifyOfChange({
+            ...trustedApp,
+            entries: trustedApp.entries.map((item) => {
+              if (item === oldEntry) {
+                return newEntry;
+              }
+              return item;
+            }),
+          } as NewTrustedApp);
+        }
       },
-      []
+      [notifyOfChange, trustedApp]
     );
 
-    const handleConditionBuilderOnVisited: LogicalConditionBuilderProps['onVisited'] = useCallback(() => {
-      setWasVisited((prevState) => {
-        return {
-          ...prevState,
-          entries: true,
-        };
-      });
-    }, []);
+    const handleConditionBuilderOnVisited: LogicalConditionBuilderProps['onVisited'] =
+      useCallback(() => {
+        setWasVisited((prevState) => {
+          return {
+            ...prevState,
+            entries: true,
+          };
+        });
+      }, []);
+
+    const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
+      (selection) => {
+        setSelectedPolicies(() => selection);
+
+        let newEffectedScope: EffectScope;
+
+        if (selection.isGlobal) {
+          newEffectedScope = {
+            type: 'global',
+          };
+        } else {
+          newEffectedScope = {
+            type: 'policy',
+            policies: selection.selected.map((policy) => policy.id),
+          };
+        }
+
+        notifyOfChange({
+          ...trustedApp,
+          effectScope: newEffectedScope,
+        });
+      },
+      [notifyOfChange, trustedApp]
+    );
 
     // Anytime the form values change, re-validate
     useEffect(() => {
-      setValidationResult(validateFormValues(formValues));
-    }, [formValues]);
+      setValidationResult((prevState) => {
+        const newResults = validateFormValues(trustedApp);
 
-    // Anytime the form values change - validate and notify
-    useEffect(() => {
-      onChange({
-        isValid: validationResult.isValid,
-        item: formValues,
+        // Only notify if the overall validation result is different
+        if (newResults.isValid !== prevState.isValid) {
+          notifyOfChange(trustedApp);
+        }
+
+        return newResults;
       });
-    }, [formValues, onChange, validationResult.isValid]);
+    }, [notifyOfChange, trustedApp]);
+
+    // Anytime the TrustedApp has an effective scope of `policies`, then ensure that
+    // those polices are selected in the UI while at the same time preserving prior
+    // selections (UX requirement)
+    useEffect(() => {
+      setSelectedPolicies((currentSelection) => {
+        if (isPolicyEffectScope(trustedApp.effectScope) && policies.options.length > 0) {
+          const missingSelectedPolicies: EffectedPolicySelectProps['selected'] = [];
+
+          for (const policyId of trustedApp.effectScope.policies) {
+            if (
+              !currentSelection.selected.find(
+                (currentlySelectedPolicyItem) => currentlySelectedPolicyItem.id === policyId
+              )
+            ) {
+              const newSelectedPolicy = policies.options.find((policy) => policy.id === policyId);
+              if (newSelectedPolicy) {
+                missingSelectedPolicies.push(newSelectedPolicy);
+              }
+            }
+          }
+
+          if (missingSelectedPolicies.length) {
+            return {
+              ...currentSelection,
+              selected: [...currentSelection.selected, ...missingSelectedPolicies],
+            };
+          }
+        }
+
+        return currentSelection;
+      });
+    }, [policies.options, trustedApp.effectScope]);
 
     return (
       <EuiForm {...formProps} component="div">
@@ -338,15 +474,50 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         >
           <EuiFieldText
             name="name"
-            value={formValues.name}
+            value={trustedApp.name}
             onChange={handleDomChangeEvents}
             onBlur={handleDomBlurEvents}
             fullWidth
-            required
+            required={wasVisited?.name}
             maxLength={256}
             data-test-subj={getTestId('nameTextField')}
           />
         </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
+            defaultMessage: 'Description',
+          })}
+          fullWidth={fullWidth}
+          data-test-subj={getTestId('descriptionRow')}
+        >
+          <EuiTextArea
+            name="description"
+            value={trustedApp.description}
+            onChange={handleDomChangeEvents}
+            fullWidth
+            compressed={isTrustedAppsByPolicyEnabled}
+            maxLength={256}
+            data-test-subj={getTestId('descriptionField')}
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule />
+        <EuiText size="xs">
+          <h3>
+            {i18n.translate('xpack.securitySolution.trustedApps.conditionsSectionTitle', {
+              defaultMessage: 'Conditions',
+            })}
+          </h3>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.securitySolution.trustedApps.conditionsSectionDescription', {
+              defaultMessage:
+                'Select an operating system and add conditions. Availability of conditions may depend on your chosen OS.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
         <EuiFormRow
           label={i18n.translate('xpack.securitySolution.trustedapps.create.os', {
             defaultMessage: 'Select operating system',
@@ -359,7 +530,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           <EuiSuperSelect
             name="os"
             options={osOptions}
-            valueOfSelected={formValues.os}
+            valueOfSelected={trustedApp.os}
             onChange={handleOsChange}
             fullWidth
             data-test-subj={getTestId('osSelectField')}
@@ -370,10 +541,11 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           data-test-subj={getTestId('conditionsRow')}
           isInvalid={wasVisited?.entries && validationResult.result.entries?.isInvalid}
           error={validationResult.result.entries?.errors}
+          helpText={validationResult.result.entries?.warnings}
         >
           <LogicalConditionBuilder
-            entries={formValues.entries}
-            os={formValues.os}
+            entries={trustedApp.entries}
+            os={trustedApp.os}
             onAndClicked={handleAndClick}
             onEntryRemove={handleEntryRemove}
             onEntryChange={handleEntryChange}
@@ -381,22 +553,29 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
-            defaultMessage: 'Description',
-          })}
-          fullWidth={fullWidth}
-          data-test-subj={getTestId('descriptionRow')}
-        >
-          <EuiTextArea
-            name="description"
-            value={formValues.description}
-            onChange={handleDomChangeEvents}
-            fullWidth
-            maxLength={256}
-            data-test-subj={getTestId('descriptionField')}
-          />
-        </EuiFormRow>
+        {isTrustedAppsByPolicyEnabled && !hideAssignmentSection ? (
+          <>
+            <EuiHorizontalRule />
+            <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
+              <EffectedPolicySelect
+                isGlobal={isGlobal}
+                isPlatinumPlus={isPlatinumPlus}
+                selected={selectedPolicies.selected}
+                options={policies.options}
+                onChange={handlePolicySelectChange}
+                isLoading={policies?.isLoading}
+                description={i18n.translate(
+                  'xpack.securitySolution.trustedApps.assignmentSectionDescription',
+                  {
+                    defaultMessage:
+                      'Assign this trusted application globally across all policies, or assign it to specific policies.',
+                  }
+                )}
+                data-test-subj={getTestId('effectedPolicies')}
+              />
+            </EuiFormRow>
+          </>
+        ) : null}
       </EuiForm>
     );
   }

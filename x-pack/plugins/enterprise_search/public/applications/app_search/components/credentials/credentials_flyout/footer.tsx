@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
+
 import {
   EuiFlyoutFooter,
   EuiFlexGroup,
@@ -13,7 +16,12 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import {
+  CLOSE_BUTTON_LABEL,
+  SAVE_BUTTON_LABEL,
+  UPDATE_BUTTON_LABEL,
+} from '../../../../shared/constants';
 
 import { CredentialsLogic } from '../credentials_logic';
 
@@ -26,26 +34,18 @@ export const CredentialsFlyoutFooter: React.FC = () => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="cross" onClick={hideCredentialsForm}>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.closeText', {
-              defaultMessage: 'Close',
-            })}
+            {CLOSE_BUTTON_LABEL}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={onApiTokenChange}
-            fill={true}
-            color="secondary"
+            fill
+            color="success"
             iconType="check"
             data-test-subj="APIKeyActionButton"
           >
-            {activeApiTokenExists
-              ? i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.updateText', {
-                  defaultMessage: 'Update',
-                })
-              : i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.saveText', {
-                  defaultMessage: 'Save',
-                })}
+            {activeApiTokenExists ? UPDATE_BUTTON_LABEL : SAVE_BUTTON_LABEL}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash';
@@ -27,9 +28,9 @@ import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import { getIndexPatternIdFromName } from '../../util/index_utils';
+import { getDataViewIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
-import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 /*
  * Component for rendering the links menu inside a cell in the anomalies table.
  */
@@ -145,13 +146,9 @@ class LinksMenuUI extends Component {
 
   viewSeries = async () => {
     const {
-      services: {
-        share: {
-          urlGenerators: { getUrlGenerator },
-        },
-      },
+      services: { share },
     } = this.props.kibana;
-    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+    const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
     const record = this.props.anomaly.source;
     const bounds = this.props.bounds;
@@ -181,33 +178,35 @@ class LinksMenuUI extends Component {
       entityCondition[record.by_field_name] = record.by_field_value;
     }
 
-    const singleMetricViewerLink = await mlUrlGenerator.createUrl({
-      excludeBasePath: false,
-      page: ML_PAGES.SINGLE_METRIC_VIEWER,
-      pageState: {
-        jobIds: [record.job_id],
-        refreshInterval: {
-          display: 'Off',
-          pause: true,
-          value: 0,
-        },
-        timeRange: {
-          from: from,
-          to: to,
-          mode: 'absolute',
-        },
-        zoom: {
-          from: zoomFrom,
-          to: zoomTo,
-        },
-        detectorIndex: record.detector_index,
-        entities: entityCondition,
-        query_string: {
-          analyze_wildcard: true,
-          query: '*',
+    const singleMetricViewerLink = await mlLocator.getUrl(
+      {
+        page: ML_PAGES.SINGLE_METRIC_VIEWER,
+        pageState: {
+          jobIds: [record.job_id],
+          refreshInterval: {
+            display: 'Off',
+            pause: true,
+            value: 0,
+          },
+          timeRange: {
+            from: from,
+            to: to,
+            mode: 'absolute',
+          },
+          zoom: {
+            from: zoomFrom,
+            to: zoomTo,
+          },
+          detectorIndex: record.detector_index,
+          entities: entityCondition,
+          query_string: {
+            analyze_wildcard: true,
+            query: '*',
+          },
         },
       },
-    });
+      { absolute: true }
+    );
     window.open(singleMetricViewerLink, '_blank');
   };
 
@@ -231,6 +230,7 @@ class LinksMenuUI extends Component {
     }
     const categorizationFieldName = job.analysis_config.categorization_field_name;
     const datafeedIndices = job.datafeed_config.indices;
+
     // Find the type of the categorization field i.e. text (preferred) or keyword.
     // Uses the first matching field found in the list of indices in the datafeed_config.
     // attempt to load the field type using each index. we have to do it this way as _field_caps
@@ -258,18 +258,18 @@ class LinksMenuUI extends Component {
     };
 
     const createAndOpenUrl = (index, categorizationFieldType) => {
-      // Find the ID of the index pattern with a title attribute which matches the
-      // index configured in the datafeed. If a Kibana index pattern has not been created
-      // for this index, then the user will see a warning message on the Discover tab advising
-      // them that no matching index pattern has been configured.
-      const indexPatternId = getIndexPatternIdFromName(index) || index;
-
       // Get the definition of the category and use the terms or regex to view the
       // matching events in the Kibana Discover tab depending on whether the
       // categorization field is of mapping type text (preferred) or keyword.
       ml.results
         .getCategoryDefinition(record.job_id, categoryId)
-        .then((resp) => {
+        .then(async (resp) => {
+          // Find the ID of the data view with a title attribute which matches the
+          // index configured in the datafeed. If a Kibana data view has not been created
+          // for this index, then the user will see a warning message on the Discover tab advising
+          // them that no matching data view has been configured.
+          const dataViewId = (await getDataViewIdFromName(index)) ?? index;
+
           let query = null;
           // Build query using categorization regex (if keyword type) or terms (if text type).
           // Check for terms or regex in case categoryId represents an anomaly from the absence of the
@@ -313,7 +313,7 @@ class LinksMenuUI extends Component {
           });
 
           const appStateProps = {
-            index: indexPatternId,
+            index: dataViewId,
             filters: [],
           };
           if (query !== null) {
@@ -348,7 +348,7 @@ class LinksMenuUI extends Component {
       getFieldTypeFromMapping(index, categorizationFieldName)
         .then((resp) => {
           if (resp !== '') {
-            createAndOpenUrl(index, resp);
+            createAndOpenUrl(datafeedIndices.join(), resp);
           } else {
             i++;
             if (i < datafeedIndices.length) {
@@ -464,7 +464,7 @@ class LinksMenuUI extends Component {
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
-            defaultMessage="Configure rules"
+            defaultMessage="Configure job rules"
           />
         </EuiContextMenuItem>
       );

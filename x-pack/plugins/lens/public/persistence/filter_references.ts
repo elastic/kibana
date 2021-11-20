@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { SavedObjectReference } from 'kibana/public';
 import { PersistableFilter } from '../../common';
 
-export function extractFilterReferences(
-  filters: Filter[]
-): { persistableFilters: PersistableFilter[]; references: SavedObjectReference[] } {
+export function extractFilterReferences(filters: Filter[]): {
+  persistableFilters: PersistableFilter[];
+  references: SavedObjectReference[];
+} {
   const references: SavedObjectReference[] = [];
   const persistableFilters = filters.map((filterRow, i) => {
     if (!filterRow.meta || !filterRow.meta.index) {

@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
 import { TileLayer } from '../../layers/tile_layer/tile_layer';
-import { getKibanaTileMap } from '../../../meta';
+import { getKibanaTileMap } from '../../../util';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {

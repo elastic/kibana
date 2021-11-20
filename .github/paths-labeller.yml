@@ -10,12 +10,11 @@
     - "src/plugins/bfetch/**/*.*"
   - "Team:apm":
     - "x-pack/plugins/apm/**/*.*"
-  - "Team:Ingest Management":
+  - "Team:Fleet":
     - "x-pack/plugins/fleet/**/*.*"
     - "x-pack/test/fleet_api_integration/**/*.*"
   - "Team:uptime":
     - "x-pack/plugins/uptime/**/*.*"
-    - "x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm/*.*"
     - "x-pack/plugins/apm/public/application/csmApp.tsx"
     - "x-pack/plugins/apm/public/components/app/RumDashboard/**/*.*"
     - "x-pack/plugins/apm/public/components/app/RumDashboard/*.*"

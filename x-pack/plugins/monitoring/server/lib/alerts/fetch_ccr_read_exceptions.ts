@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
 
 export async function fetchCCRReadExceptions(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   index: string,
   startMs: number,
   endMs: number,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<CCRReadExceptionsStats[]> {
   const params = {
     index,
-    filterPath: ['aggregations.remote_clusters.buckets'],
+    filter_path: ['aggregations.remote_clusters.buckets'],
     body: {
       size: 0,
       query: {
@@ -67,8 +70,8 @@ export async function fetchCCRReadExceptions(
                     sort: [
                       {
                         timestamp: {
-                          order: 'desc',
-                          unmapped_type: 'long',
+                          order: 'desc' as const,
+                          unmapped_type: 'long' as const,
                         },
                       },
                     ],
@@ -91,11 +94,21 @@ export async function fetchCCRReadExceptions(
     },
   };
 
-  const response = await callCluster('search', params);
-  const stats: CCRReadExceptionsStats[] = [];
-  const { buckets: remoteClusterBuckets = [] } = response.aggregations.remote_clusters;
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
-  if (!remoteClusterBuckets.length) {
+  const { body: response } = await esClient.search(params);
+  const stats: CCRReadExceptionsStats[] = [];
+  // @ts-expect-error declare aggegations type explicitly
+  const { buckets: remoteClusterBuckets = [] } = response.aggregations?.remote_clusters;
+
+  if (!remoteClusterBuckets?.length) {
     return stats;
   }
 

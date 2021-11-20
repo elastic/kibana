@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -18,21 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
-
-    before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSet('flights');
-    });
-
-    after(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await listingTable.searchForItemWithName(dashboardName);
-      await listingTable.checkListingSelectAllCheckbox();
-      await listingTable.clickDeleteSelected();
-      await PageObjects.common.clickConfirmOnModal();
-    });
 
     it('dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');
@@ -60,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('add a visualization', async () => {
+      await testSubjects.setValue('savedObjectFinderSearchInput', '[Flights]');
       await testSubjects.click('savedObjectTitle[Flights]-Delay-Buckets');
       await a11y.testAppSnapshot();
     });
@@ -100,7 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add one more saved object to cancel it', async () => {
-      await testSubjects.click('savedObjectTitle[Flights]-Average-Ticket-Price');
+      await testSubjects.setValue('savedObjectFinderSearchInput', '[Flights]');
+      await testSubjects.click('savedObjectTitle[Flights]-Destination-Weather');
       await a11y.testAppSnapshot();
     });
 
@@ -110,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Exit out of edit mode', async () => {
-      await PageObjects.dashboard.clickCancelOutOfEditMode();
+      await PageObjects.dashboard.clickCancelOutOfEditMode(false);
       await a11y.testAppSnapshot();
     });
 

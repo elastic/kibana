@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { of } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
@@ -14,7 +14,7 @@ import { SearchSource } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
-  setPreferredSearchStrategyId: jest.fn(),
+  setOverwriteDataViewType: jest.fn(),
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
   removeField: jest.fn().mockReturnThis(),
@@ -27,6 +27,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   createChild: jest.fn().mockReturnThis(),
   setParent: jest.fn(),
   getParent: jest.fn().mockReturnThis(),
+  fetch$: jest.fn().mockReturnValue(of({})),
   fetch: jest.fn().mockResolvedValue({}),
   onRequestStart: jest.fn(),
   getSearchRequestBody: jest.fn(),
@@ -41,13 +42,17 @@ export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
   createEmpty: jest.fn().mockReturnValue(searchSourceInstanceMock),
 };
 
-export const createSearchSourceMock = (fields?: SearchSourceFields) =>
+export const createSearchSourceMock = (fields?: SearchSourceFields, response?: any) =>
   new SearchSource(fields, {
     getConfig: uiSettingsServiceMock.createStartContract().get,
-    search: jest.fn(),
+    search: jest.fn().mockReturnValue(
+      of(
+        response ?? {
+          rawResponse: { hits: { hits: [], total: 0 } },
+          isPartial: false,
+          isRunning: false,
+        }
+      )
+    ),
     onResponse: jest.fn().mockImplementation((req, res) => res),
-    legacy: {
-      callMsearch: jest.fn(),
-      loadingCount$: new BehaviorSubject(0),
-    },
   });

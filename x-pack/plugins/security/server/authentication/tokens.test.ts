@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { ElasticsearchClient } from 'src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { securityMock } from '../mocks';
-
-import { ElasticsearchClient } from '../../../../../src/core/server';
 import { Tokens } from './tokens';
 
 describe('Tokens', () => {
@@ -108,6 +109,9 @@ describe('Tokens', () => {
             access_token: tokenPair.accessToken,
             refresh_token: tokenPair.refreshToken,
             authentication: authenticationInfo,
+            type: 'Bearer',
+            expires_in: 1200,
+            scope: 'FULL',
           },
         })
       );
@@ -196,7 +200,14 @@ describe('Tokens', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockElasticsearchClient.security.invalidateToken.mockResolvedValue(
-        securityMock.createApiResponse({ body: { invalidated_tokens: 1 } })
+        securityMock.createApiResponse({
+          body: {
+            invalidated_tokens: 1,
+            previously_invalidated_tokens: 0,
+            error_count: 0,
+            error_details: [],
+          },
+        })
       );
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
@@ -214,7 +225,14 @@ describe('Tokens', () => {
       const tokenPair = { accessToken: 'foo' };
 
       mockElasticsearchClient.security.invalidateToken.mockResolvedValue(
-        securityMock.createApiResponse({ body: { invalidated_tokens: 1 } })
+        securityMock.createApiResponse({
+          body: {
+            invalidated_tokens: 1,
+            previously_invalidated_tokens: 0,
+            error_count: 0,
+            error_details: [],
+          },
+        })
       );
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
@@ -229,7 +247,14 @@ describe('Tokens', () => {
       const tokenPair = { refreshToken: 'foo' };
 
       mockElasticsearchClient.security.invalidateToken.mockResolvedValue(
-        securityMock.createApiResponse({ body: { invalidated_tokens: 1 } })
+        securityMock.createApiResponse({
+          body: {
+            invalidated_tokens: 1,
+            previously_invalidated_tokens: 0,
+            error_count: 0,
+            error_details: [],
+          },
+        })
       );
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
@@ -273,7 +298,14 @@ describe('Tokens', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockElasticsearchClient.security.invalidateToken.mockResolvedValue(
-        securityMock.createApiResponse({ body: { invalidated_tokens: 5 } })
+        securityMock.createApiResponse({
+          body: {
+            invalidated_tokens: 5,
+            previously_invalidated_tokens: 0,
+            error_count: 0,
+            error_details: [],
+          },
+        })
       );
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);

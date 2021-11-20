@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -24,12 +26,11 @@ import {
 
 import { Repository } from '../../../../../common/types';
 import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
-import { useServices } from '../../../app_context';
+import { useCore, useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
-import { documentationLinksService } from '../../../services/documentation';
-import { SectionLoading } from '../../';
+import { InlineLoading } from '../../';
 import { StepProps } from './';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -45,20 +46,17 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const {
     error: errorLoadingRepositories,
     isLoading: isLoadingRepositories,
-    data: { repositories, managedRepository } = {
+    data: { repositories } = {
       repositories: [],
-      managedRepository: {
-        name: undefined,
-      },
     },
     resendRequest: reloadRepositories,
   } = useLoadRepositories();
 
   const { i18n, history } = useServices();
+  const { docLinks } = useCore();
 
-  const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] = useState<boolean>(
-    false
-  );
+  const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] =
+    useState<boolean>(false);
 
   // State for touched inputs
   const [touched, setTouched] = useState({
@@ -117,16 +115,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           fullWidth
           onBlur={() => setTouched({ ...touched, name: true })}
           onChange={(e) => {
-            updatePolicy(
-              {
-                name: e.target.value,
-              },
-              {
-                managedRepository,
-                isEditing,
-                policyName: policy.name,
-              }
-            );
+            updatePolicy({
+              name: e.target.value,
+            });
           }}
           placeholder={i18n.translate(
             'xpack.snapshotRestore.policyForm.stepLogistics.namePlaceholder',
@@ -182,12 +173,12 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const renderRepositorySelect = () => {
     if (isLoadingRepositories) {
       return (
-        <SectionLoading inline={true}>
+        <InlineLoading>
           <FormattedMessage
             id="xpack.snapshotRestore.policyForm.loadingRepositoriesDescription"
             defaultMessage="Loading repositories…"
           />
-        </SectionLoading>
+        </InlineLoading>
       );
     }
 
@@ -249,16 +240,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       );
     } else {
       if (!policy.repository) {
-        updatePolicy(
-          {
-            repository: repositories[0].name,
-          },
-          {
-            managedRepository,
-            isEditing,
-            policyName: policy.name,
-          }
-        );
+        updatePolicy({
+          repository: repositories[0].name,
+        });
       }
     }
 
@@ -284,16 +268,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         value={!doesRepositoryExist ? '' : policy.repository}
         onBlur={() => setTouched({ ...touched, repository: true })}
         onChange={(e) => {
-          updatePolicy(
-            {
-              repository: e.target.value,
-            },
-            {
-              managedRepository,
-              isEditing,
-              policyName: policy.name,
-            }
-          );
+          updatePolicy({
+            repository: e.target.value,
+          });
         }}
         fullWidth
         data-test-subj="repositorySelect"
@@ -336,10 +313,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Supports date math expressions. {docLink}"
             values={{
               docLink: (
-                <EuiLink
-                  href={documentationLinksService.getDateMathIndexNamesUrl()}
-                  target="_blank"
-                >
+                <EuiLink href={docLinks.links.date.dateMathIndexNames} target="_blank">
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNameHelpTextDocLink"
                     defaultMessage="Learn more."
@@ -355,16 +329,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultValue={policy.snapshotName}
           fullWidth
           onChange={(e) => {
-            updatePolicy(
-              {
-                snapshotName: e.target.value,
-              },
-              {
-                managedRepository,
-                isEditing,
-                policyName: policy.name,
-              }
-            );
+            updatePolicy({
+              snapshotName: e.target.value,
+            });
           }}
           onBlur={() => setTouched({ ...touched, snapshotName: true })}
           placeholder={i18n.translate(
@@ -418,7 +385,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Use cron expression. {docLink}"
                 values={{
                   docLink: (
-                    <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
+                    <EuiLink href={docLinks.links.apis.cronExpressions} target="_blank">
                       <FormattedMessage
                         id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleHelpTextDocLink"
                         defaultMessage="Learn more."
@@ -434,16 +401,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               defaultValue={policy.schedule}
               fullWidth
               onChange={(e) => {
-                updatePolicy(
-                  {
-                    schedule: e.target.value,
-                  },
-                  {
-                    managedRepository,
-                    isEditing,
-                    policyName: policy.name,
-                  }
-                );
+                updatePolicy({
+                  schedule: e.target.value,
+                });
               }}
               onBlur={() => setTouched({ ...touched, schedule: true })}
               placeholder={DEFAULT_POLICY_SCHEDULE}
@@ -457,16 +417,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <EuiLink
               onClick={() => {
                 setIsAdvancedCronVisible(false);
-                updatePolicy(
-                  {
-                    schedule: simpleCron.expression,
-                  },
-                  {
-                    managedRepository,
-                    isEditing,
-                    policyName: policy.name,
-                  }
-                );
+                updatePolicy({
+                  schedule: simpleCron.expression,
+                });
               }}
               data-test-subj="showBasicCronLink"
             >
@@ -494,16 +447,9 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 frequency,
               });
               setFieldToPreferredValueMap(newFieldToPreferredValueMap);
-              updatePolicy(
-                {
-                  schedule: expression,
-                },
-                {
-                  managedRepository,
-                  isEditing,
-                  policyName: policy.name,
-                }
-              );
+              updatePolicy({
+                schedule: expression,
+              });
             }}
           />
 
@@ -546,7 +492,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getSlmUrl()}
+            href={docLinks.links.apis.putSnapshotLifecyclePolicy}
             target="_blank"
             iconType="help"
           >

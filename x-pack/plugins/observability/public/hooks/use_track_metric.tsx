@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useMemo } from 'react';
@@ -31,12 +32,13 @@ interface ServiceDeps {
 
 export type TrackMetricOptions = TrackOptions & { metric: string };
 export type UiTracker = ReturnType<typeof useUiTracker>;
+export type TrackEvent = (options: TrackMetricOptions) => void;
 
 export { METRIC_TYPE };
 
 export function useUiTracker<Services extends ServiceDeps>({
   app: defaultApp,
-}: { app?: ObservabilityApp } = {}) {
+}: { app?: ObservabilityApp } = {}): TrackEvent {
   const reportUiCounter = useKibana<Services>().services?.usageCollection?.reportUiCounter;
   const trackEvent = useMemo(() => {
     return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { InfraPluginRequestHandlerContext } from '../../../types';
@@ -12,6 +13,7 @@ import {
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export interface InfraCloudMetricsAdapterResponse {
   buckets: InfraMetadataAggregationBucket[];
@@ -25,8 +27,8 @@ export const getCloudMetricsMetadata = async (
   timeRange: { from: number; to: number }
 ): Promise<InfraCloudMetricsAdapterResponse> => {
   const metricQuery = {
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     index: sourceConfiguration.metricAlias,
     body: {
       query: {
@@ -35,7 +37,7 @@ export const getCloudMetricsMetadata = async (
             { match: { 'cloud.instance.id': instanceId } },
             {
               range: {
-                [sourceConfiguration.fields.timestamp]: {
+                [TIMESTAMP_FIELD]: {
                   gte: timeRange.from,
                   lte: timeRange.to,
                   format: 'epoch_millis',

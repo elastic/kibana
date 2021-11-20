@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus, getChecksDateRange } from './helper/make_checks';
+import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -17,9 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('when no data is present', async () => {
       it('returns a null snapshot', async () => {
-        const apiResponse = await supertest.get(
-          `/api/uptime/snapshot/count?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
-        );
+        const apiResponse = await supertest.get(API_URLS.SNAPSHOT_COUNT).query({
+          dateRangeStart,
+          dateRangeEnd,
+        });
 
         expectFixtureEql(apiResponse.body, 'snapshot_empty');
       });
@@ -33,8 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
       const scheduleEvery = 10000; // fake monitor checks every 10s
       let dateRange: { start: string; end: string };
 
-      [true, false].forEach(async (includeTimespan: boolean) => {
-        [true, false].forEach(async (includeObserver: boolean) => {
+      [true, false].forEach((includeTimespan: boolean) => {
+        [true, false].forEach((includeObserver: boolean) => {
           describe(`with timespans=${includeTimespan} and observer=${includeObserver}`, async () => {
             before(async () => {
               const promises: Array<Promise<any>> = [];
@@ -51,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
 
               const makeMonitorChecks = async (monitorId: string, status: 'up' | 'down') => {
                 return makeChecksWithStatus(
-                  getService('legacyEs'),
+                  getService('es'),
                   monitorId,
                   checksPerMonitor,
                   numIps,
@@ -74,9 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
             });
 
             it('will count all statuses correctly', async () => {
-              const apiResponse = await supertest.get(
-                `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}`
-              );
+              const apiResponse = await supertest.get(API_URLS.SNAPSHOT_COUNT).query({
+                dateRangeStart: dateRange.start,
+                dateRangeEnd: dateRange.end,
+              });
 
               expectFixtureEql(apiResponse.body, 'snapshot');
             });

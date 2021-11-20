@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiCode,
-  EuiCodeEditor,
   EuiComboBox,
   EuiDescribedFormGroup,
   EuiFlexGroup,
@@ -21,9 +22,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { RestoreSettings } from '../../../../../common/types';
+import { EuiCodeEditor } from '../../../../shared_imports';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
-import { documentationLinksService } from '../../../services/documentation';
-import { useServices } from '../../../app_context';
+import { useCore, useServices } from '../../../app_context';
 import { StepProps } from './';
 
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
@@ -33,6 +34,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
   errors,
 }) => {
   const { i18n } = useServices();
+  const { docLinks } = useCore();
   const { indexSettings, ignoreIndexSettings } = restoreSettings;
   const { dataStreams } = snapshotDetails;
 
@@ -61,7 +63,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
 
   // Index settings doc link
   const indexSettingsDocLink = (
-    <EuiLink href={documentationLinksService.getIndexSettingsUrl()} target="_blank">
+    <EuiLink href={docLinks.links.elasticsearch.indexModules} target="_blank">
       <FormattedMessage
         id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsDocLinkText"
         defaultMessage="Learn more."
@@ -88,7 +90,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getRestoreIndexSettingsUrl()}
+            href={docLinks.links.snapshotRestore.changeIndexSettings}
             target="_blank"
             iconType="help"
           >
@@ -144,6 +146,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         <EuiFormRow hasEmptyLabelSpace fullWidth>
           <Fragment>
             <EuiSwitch
+              data-test-subj="modifyIndexSettingsSwitch"
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsLabel"

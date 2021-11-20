@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { fullContentSources, contentItems } from '../../../__mocks__/content_sources.mock';
+import { meta } from '../../../__mocks__/meta.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import {
@@ -20,12 +24,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { meta } from '../../../__mocks__/meta.mock';
-import { fullContentSources, contentItems } from '../../../__mocks__/content_sources.mock';
-
 import { DEFAULT_META } from '../../../../shared/constants';
 import { ComponentLoader } from '../../../components/shared/component_loader';
-import { Loading } from '../../../../../applications/shared/loading';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 
 import { SourceContent } from './source_content';
@@ -33,7 +33,6 @@ import { SourceContent } from './source_content';
 describe('SourceContent', () => {
   const setActivePage = jest.fn();
   const searchContentSourceDocuments = jest.fn();
-  const resetSourceState = jest.fn();
   const setContentFilterValue = jest.fn();
 
   const mockValues = {
@@ -50,7 +49,6 @@ describe('SourceContent', () => {
     setMockActions({
       setActivePage,
       searchContentSourceDocuments,
-      resetSourceState,
       setContentFilterValue,
     });
     setMockValues({ ...mockValues });
@@ -60,13 +58,6 @@ describe('SourceContent', () => {
     const wrapper = shallow(<SourceContent />);
 
     expect(wrapper.find(EuiTable)).toHaveLength(1);
-  });
-
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<SourceContent />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('returns ComponentLoader when section loading', () => {

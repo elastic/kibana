@@ -1,27 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { KibanaRequest } from 'src/core/server';
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+} from '../../../common/constants';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
-import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
-
-import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { OIDCAuthenticationProvider, OIDCLogin, ProviderLoginAttempt } from './oidc';
-import { AuthenticatedUser } from '../../../common/model';
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
+import type { ProviderLoginAttempt } from './oidc';
+import { OIDCAuthenticationProvider, OIDCLogin } from './oidc';
 
 describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
-  let mockUser: AuthenticatedUser;
+  let mockUser: ReturnType<typeof mockAuthenticatedUser>;
   let mockScopedClusterClient: ReturnType<
     typeof elasticsearchServiceMock.createScopedClusterClient
   >;
@@ -346,8 +352,7 @@ describe('OIDCAuthenticationProvider', () => {
     describe('implicit flow', () => {
       defineAuthenticationFlowTests(() => ({
         request: httpServerMock.createKibanaRequest({
-          path:
-            '/api/security/oidc/callback?authenticationResponseURI=http://kibana/api/security/oidc/implicit#id_token=sometoken',
+          path: '/api/security/oidc/callback?authenticationResponseURI=http://kibana/api/security/oidc/implicit#id_token=sometoken',
         }),
         attempt: {
           type: OIDCLogin.LoginWithImplicitFlow,
@@ -374,16 +379,76 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('redirects non-AJAX request that can not be authenticated to the "capture URL" page.', async () => {
+      mockOptions.getRequestOriginalURL.mockReturnValue(
+        '/mock-server-basepath/s/foo/some-path?auth_provider_hint=oidc'
+      );
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
 
       await expect(provider.authenticate(request, null)).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path&providerType=oidc&providerName=oidc',
+          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%3Fauth_provider_hint%3Doidc',
           { state: null }
         )
       );
 
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledTimes(1);
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledWith(request, [
+        [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, 'oidc'],
+      ]);
+
       expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('initiates OIDC handshake for non-AJAX request that can not be authenticated, but includes URL hash fragment.', async () => {
+      mockOptions.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/s/foo/some-path');
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: {
+            state: 'statevalue',
+            nonce: 'noncevalue',
+            redirect:
+              'https://op-host/path/login?response_type=code' +
+              '&scope=openid%20profile%20email' +
+              '&client_id=s6BhdRkqt3' +
+              '&state=statevalue' +
+              '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+              '&login_hint=loginhint',
+          },
+        })
+      );
+
+      const request = httpServerMock.createKibanaRequest({
+        path: '/s/foo/some-path',
+        query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-fragment' },
+      });
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.redirectTo(
+          'https://op-host/path/login?response_type=code' +
+            '&scope=openid%20profile%20email' +
+            '&client_id=s6BhdRkqt3' +
+            '&state=statevalue' +
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+            '&login_hint=loginhint',
+          {
+            state: {
+              state: 'statevalue',
+              nonce: 'noncevalue',
+              redirectURL: '/mock-server-basepath/s/foo/some-path#some-fragment',
+              realm: 'oidc1',
+            },
+          }
+        )
+      );
+
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledTimes(1);
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledWith(request);
+
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/oidc/prepare',
+        body: { realm: 'oidc1' },
+      });
     });
 
     it('succeeds if state contains a valid token.', async () => {
@@ -518,6 +583,9 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('redirects non-AJAX requests to the "capture URL" page if refresh token is expired or already refreshed.', async () => {
+      mockOptions.getRequestOriginalURL.mockReturnValue(
+        '/mock-server-basepath/s/foo/some-path?auth_provider_hint=oidc'
+      );
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path', headers: {} });
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
@@ -532,10 +600,15 @@ describe('OIDCAuthenticationProvider', () => {
         provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
       ).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path&providerType=oidc&providerName=oidc',
+          '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%3Fauth_provider_hint%3Doidc',
           { state: null }
         )
       );
+
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledTimes(1);
+      expect(mockOptions.getRequestOriginalURL).toHaveBeenCalledWith(request, [
+        [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, 'oidc'],
+      ]);
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);

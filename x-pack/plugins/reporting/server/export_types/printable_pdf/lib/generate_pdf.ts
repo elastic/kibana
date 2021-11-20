@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { groupBy } from 'lodash';
@@ -10,9 +11,9 @@ import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { ScreenshotResults } from '../../../lib/screenshots';
+import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
-import { PdfMaker } from './pdf';
+import { PdfMaker } from '../../common/pdf';
 import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
@@ -28,7 +29,7 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
 export async function generatePdfObservableFactory(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const captureConfig = config.get('capture');
-  const getScreenshots = await reporting.getScreenshotsObservable();
+  const { browserDriverFactory } = await reporting.getPluginStartDeps();
 
   return function generatePdfObservable(
     logger: LevelLogger,
@@ -47,9 +48,9 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.endLayout();
 
     tracker.startScreenshots();
-    const screenshots$ = getScreenshots({
+    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
-      urls,
+      urlsOrUrlLocatorTuples: urls,
       conditionalHeaders,
       layout,
       browserTimezone,
@@ -68,12 +69,12 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
 
         results.forEach((r) => {
           r.screenshots.forEach((screenshot) => {
-            logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.base64EncodedData?.length || 0}`); // prettier-ignore
+            logger.debug(`Adding image to PDF. Image size: ${screenshot.data.byteLength}`); // prettier-ignore
             tracker.startAddImage();
             tracker.endAddImage();
-            pdfOutput.addImage(screenshot.base64EncodedData, {
-              title: screenshot.title,
-              description: screenshot.description,
+            pdfOutput.addImage(screenshot.data, {
+              title: screenshot.title ?? undefined,
+              description: screenshot.description ?? undefined,
             });
           });
         });
@@ -88,7 +89,11 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
           tracker.startGetBuffer();
           logger.debug(`Generating PDF Buffer...`);
           buffer = await pdfOutput.getBuffer();
-          logger.debug(`PDF buffer byte length: ${buffer?.byteLength || 0}`);
+
+          const byteLength = buffer?.byteLength ?? 0;
+          logger.debug(`PDF buffer byte length: ${byteLength}`);
+          tracker.setByteLength(byteLength);
+
           tracker.endGetBuffer();
         } catch (err) {
           logger.error(`Could not generate the PDF buffer!`);
@@ -102,6 +107,9 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
           warnings: results.reduce((found, current) => {
             if (current.error) {
               found.push(current.error.message);
+            }
+            if (current.renderErrors) {
+              found.push(...current.renderErrors);
             }
             return found;
           }, [] as string[]),

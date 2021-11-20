@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import React, { SetStateAction, useEffect, useState } from 'react';
 
-import { fetchQueryAlerts } from './api';
+import { fetchQueryAlerts, fetchQueryRuleRegistryAlerts } from './api';
 import { AlertSearchResponse } from './types';
 
 type Func = () => Promise<void>;
@@ -20,16 +22,25 @@ export interface ReturnQueryAlerts<Hit, Aggs> {
   refetch: Func | null;
 }
 
+interface AlertsQueryParams {
+  fetchMethod?: typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
+  query: object;
+  indexName?: string | null;
+  skip?: boolean;
+}
+
 /**
  * Hook for fetching Alerts from the Detection Engine API
  *
  * @param initialQuery query dsl object
  *
  */
-export const useQueryAlerts = <Hit, Aggs>(
-  initialQuery: object,
-  indexName?: string | null
-): ReturnQueryAlerts<Hit, Aggs> => {
+export const useQueryAlerts = <Hit, Aggs>({
+  fetchMethod = fetchQueryAlerts,
+  query: initialQuery,
+  indexName,
+  skip,
+}: AlertsQueryParams): ReturnQueryAlerts<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
   const [alerts, setAlerts] = useState<
     Pick<ReturnQueryAlerts<Hit, Aggs>, 'data' | 'setQuery' | 'response' | 'request' | 'refetch'>
@@ -40,16 +51,17 @@ export const useQueryAlerts = <Hit, Aggs>(
     setQuery,
     refetch: null,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const alertResponse = await fetchQueryAlerts<Hit, Aggs>({
+
+        const alertResponse = await fetchMethod<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
         });
@@ -77,14 +89,16 @@ export const useQueryAlerts = <Hit, Aggs>(
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
 
-    fetchData();
+    if (!isEmpty(query) && !skip) {
+      fetchData();
+    }
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query, indexName]);
+  }, [query, indexName, skip, fetchMethod]);
 
   return { loading, ...alerts };
 };

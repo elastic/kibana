@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
@@ -13,6 +14,7 @@ import { FrequencyInput } from './components/frequency';
 import { ScrollSizeInput } from './components/scroll_size';
 import { ResetQueryButton } from './components/reset_query';
 import { TimeField } from './components/time_field';
+import { ChangeDataView } from './components/data_view';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
@@ -45,6 +47,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
               <FrequencyInput />
               <ScrollSizeInput />
               <TimeField />
+              <ChangeDataView isDisabled={false} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <ResetQueryButton />

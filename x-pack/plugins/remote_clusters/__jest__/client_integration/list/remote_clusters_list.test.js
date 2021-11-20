@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { getRouter } from '../../../public/application/services';
@@ -13,6 +16,19 @@ import { PROXY_MODE } from '../../../common/constants';
 import { setupEnvironment, getRandomString, findTestSubject } from '../helpers';
 
 import { setup } from './remote_clusters_list.helpers';
+
+jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+  return {
+    EuiSearchBox: (props) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockSearchBox'}
+        onChange={(event) => {
+          props.onSearch(event.target.value);
+        }}
+      />
+    ),
+  };
+});
 
 describe('<RemoteClusterList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -62,7 +78,6 @@ describe('<RemoteClusterList />', () => {
   });
 
   describe('when there are multiple pages of remote clusters', () => {
-    let find;
     let table;
     let actions;
     let component;
@@ -86,7 +101,7 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ find, table, actions, form, component } = setup());
+        ({ table, actions, component, form } = setup());
       });
 
       component.update();
@@ -101,9 +116,8 @@ describe('<RemoteClusterList />', () => {
       expect(tableCellsValues.length).toBe(10);
     });
 
-    // Skipped until we can figure out how to get this test to work.
-    test.skip('search works', () => {
-      form.setInputValue(find('remoteClusterSearch'), 'unique');
+    test('search works', () => {
+      form.setInputValue('remoteClusterSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
       expect(tableCellsValues.length).toBe(1);
     });
@@ -165,6 +179,10 @@ describe('<RemoteClusterList />', () => {
 
     test('should have a button to create a remote cluster', () => {
       expect(exists('remoteClusterCreateButton')).toBe(true);
+    });
+
+    test('should have link to documentation', () => {
+      expect(exists('documentationLink')).toBe(true);
     });
 
     test('should list the remote clusters in the table', () => {

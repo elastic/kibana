@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,7 +17,7 @@ function StatusIcon({ status }: { status: string }) {
     case WATCH_STATES.OK:
     case ACTION_STATES.OK:
     case ACTION_STATES.ACKNOWLEDGED:
-      return <EuiIcon type="check" color="secondary" />;
+      return <EuiIcon type="check" color="success" />;
     case ACTION_STATES.THROTTLED:
       return <EuiIcon type="clock" color="warning" />;
     case WATCH_STATES.DISABLED:

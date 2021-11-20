@@ -1,0 +1,36 @@
+.ilmPhaseIcon {
+  width: $euiSizeXL;
+  height: $euiSizeXL;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background-color: $euiColorLightestShade;
+  &--disabled {
+    margin-top: $euiSizeS;
+    width: $euiSize;
+    height: $euiSize;
+  }
+  &--delete {
+    background-color: $euiColorLightShade;
+  }
+  &__inner--hot {
+    fill: $euiColorVis9_behindText;
+  }
+  &__inner--warm {
+    fill: $euiColorVis5_behindText;
+  }
+  &__inner--cold {
+    fill: $euiColorVis1_behindText;
+  }
+  &__inner--frozen {
+    fill: $euiColorVis4_behindText;
+  }
+  &__inner--delete {
+    fill: $euiColorDarkShade;
+  }
+
+  &__inner--disabled {
+    fill: $euiColorMediumShade;
+  }
+}

@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
@@ -43,13 +44,14 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
           has_reference_operator: searchOperatorSchema,
           fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filter: schema.maybe(schema.string()),
+          aggs: schema.maybe(schema.string()),
           namespaces: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, req, res) => {
       const query = req.query;
 
       const namespaces =
@@ -57,6 +59,20 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsFind({ request: req }).catch(() => {});
+
+      // manually validation to avoid using JSON.parse twice
+      let aggs;
+      if (query.aggs) {
+        try {
+          aggs = JSON.parse(query.aggs);
+        } catch (e) {
+          return res.badRequest({
+            body: {
+              message: 'invalid aggs value',
+            },
+          });
+        }
+      }
 
       const result = await context.core.savedObjects.client.find({
         perPage: query.per_page,
@@ -71,6 +87,7 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
         hasReferenceOperator: query.has_reference_operator,
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
+        aggs,
         namespaces,
       });
 

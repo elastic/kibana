@@ -1,22 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import './index.scss';
-
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  ApplicationStart,
-  SavedObjectsClientContract,
-} from '../../../core/public';
-import { TypesService, TypesSetup, TypesStart } from './vis_types';
+import type { SavedObjectsFindOptionsReference } from 'kibana/public';
 import {
   setUISettings,
   setTypes,
@@ -28,42 +18,59 @@ import {
   setUsageCollector,
   setExpressions,
   setUiActions,
-  setSavedVisualizationsLoader,
   setTimeFilter,
   setAggs,
   setChrome,
   setOverlays,
-  setSavedSearchLoader,
   setEmbeddable,
   setDocLinks,
+  setSpaces,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeEmbeddableFactory,
   createVisEmbeddableFromObject,
 } from './embeddable';
-import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
-import { range as rangeExpressionFunction } from './expression_functions/range';
-import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
-import {
-  Setup as InspectorSetup,
-  Start as InspectorStart,
-} from '../../../plugins/inspector/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
+import { TypesService } from './vis_types/types_service';
+import { range as rangeExpressionFunction } from '../common/expression_functions/range';
+import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
+import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
+
 import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
-import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
-import { SerializedVis, Vis } from './vis';
+import type { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
-import { UiActionsStart } from '../../ui_actions/public';
+
 import {
   convertFromSerializedVis,
   convertToSerializedVis,
-} from './saved_visualizations/_saved_vis';
-import { createSavedSearchesLoader } from '../../discover/public';
-import { DashboardStart } from '../../dashboard/public';
-import { SavedObjectsStart } from '../../saved_objects/public';
+  getSavedVisualization,
+  saveVisualization,
+  findListItems,
+} from './utils/saved_visualize_utils';
+
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  ApplicationStart,
+  SavedObjectsClientContract,
+} from '../../../core/public';
+import type { UsageCollectionSetup } from '../../usage_collection/public';
+import type { UiActionsStart } from '../../ui_actions/public';
+import type { SavedObjectsStart } from '../../saved_objects/public';
+import type { TypesSetup, TypesStart } from './vis_types';
+import type {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '../../../plugins/inspector/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
+import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
+import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
+import { createVisAsync } from './vis_async';
+import type { VisSavedObject, SaveVisOptions, GetVisOptions } from './types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -74,11 +81,17 @@ import { SavedObjectsStart } from '../../saved_objects/public';
 export type VisualizationsSetup = TypesSetup;
 
 export interface VisualizationsStart extends TypesStart {
-  savedVisualizationsLoader: SavedVisualizationsLoader;
   createVis: (visType: string, visState: SerializedVis) => Promise<Vis>;
   convertToSerializedVis: typeof convertToSerializedVis;
   convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
+  getSavedVisualization: (opts?: GetVisOptions | string) => Promise<VisSavedObject>;
+  saveVisualization: (savedVis: VisSavedObject, saveOptions: SaveVisOptions) => Promise<string>;
+  findListItems: (
+    searchTerm: string,
+    listingLimit: number,
+    references?: SavedObjectsFindOptionsReference[]
+  ) => Promise<{ hits: Array<Record<string, unknown>>; total: number }>;
   __LEGACY: { createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject> };
 }
 
@@ -97,10 +110,11 @@ export interface VisualizationsStartDeps {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
-  dashboard: DashboardStart;
   getAttributeService: EmbeddableStart['getAttributeService'];
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
+  spaces?: SpacesPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 /**
@@ -118,7 +132,8 @@ export class VisualizationsPlugin
       VisualizationsStart,
       VisualizationsSetupDeps,
       VisualizationsStartDeps
-    > {
+    >
+{
   private readonly types: TypesService = new TypesService();
   private getStartServicesOrDie?: StartServicesGetter<VisualizationsStartDeps, VisualizationsStart>;
 
@@ -135,6 +150,7 @@ export class VisualizationsPlugin
 
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
+    expressions.registerFunction(xyDimensionExpressionFunction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
@@ -145,7 +161,15 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, dashboard, savedObjects }: VisualizationsStartDeps
+    {
+      data,
+      expressions,
+      uiActions,
+      embeddable,
+      savedObjects,
+      spaces,
+      savedObjectsTaggingOss,
+    }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setTypes(types);
@@ -162,34 +186,45 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
-    const savedVisualizationsLoader = createSavedVisLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      savedObjects,
-      visualizationTypes: types,
-    });
-    setSavedVisualizationsLoader(savedVisualizationsLoader);
-    const savedSearchLoader = createSavedSearchesLoader({
-      savedObjectsClient: core.savedObjects.client,
-      savedObjects,
-    });
-    setSavedSearchLoader(savedSearchLoader);
+
+    if (spaces) {
+      setSpaces(spaces);
+    }
+
     return {
       ...types,
       showNewVisModal,
+      getSavedVisualization: async (opts) => {
+        return getSavedVisualization(
+          {
+            search: data.search,
+            savedObjectsClient: core.savedObjects.client,
+            dataViews: data.dataViews,
+            spaces,
+            savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+          },
+          opts
+        );
+      },
+      saveVisualization: async (savedVis, saveOptions) => {
+        return saveVisualization(savedVis, saveOptions, {
+          savedObjectsClient: core.savedObjects.client,
+          overlays: core.overlays,
+          savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+        });
+      },
+      findListItems: async (searchTerm, listingLimit, references) => {
+        return findListItems(core.savedObjects.client, types, searchTerm, listingLimit, references);
+      },
       /**
        * creates new instance of Vis
-       * @param {IIndexPattern} indexPattern - index pattern to use
+       * @param {IndexPattern} indexPattern - index pattern to use
        * @param {VisState} visState - visualization configuration
        */
-      createVis: async (visType: string, visState: SerializedVis) => {
-        const vis = new Vis(visType);
-        await vis.setState(visState);
-        return vis;
-      },
+      createVis: async (visType: string, visState: SerializedVis) =>
+        await createVisAsync(visType, visState),
       convertToSerializedVis,
       convertFromSerializedVis,
-      savedVisualizationsLoader,
       __LEGACY: {
         createVisEmbeddableFromObject: createVisEmbeddableFromObject({
           start: this.getStartServicesOrDie!,

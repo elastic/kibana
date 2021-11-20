@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
-import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   CreateEndpointListItemSchemaDecoded,
   createEndpointListItemSchema,
   exceptionListItemSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import { getExceptionListClient } from './utils/get_exception_list_client';
+import type { ListsPluginRouter } from '../types';
+
+import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 import { validateExceptionListSize } from './validate';
 
 export const createEndpointListItemRoute = (router: ListsPluginRouter): void => {

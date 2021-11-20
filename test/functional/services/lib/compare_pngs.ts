@@ -1,35 +1,65 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { parse, join } from 'path';
 import Jimp from 'jimp';
 import { ToolingLog } from '@kbn/dev-utils';
 
+interface PngDescriptor {
+  path: string;
+
+  /**
+   * If a buffer is provided this will avoid the extra step of reading from disk
+   */
+  buffer?: Buffer;
+}
+
+const toDescriptor = (imageInfo: string | PngDescriptor): PngDescriptor => {
+  if (typeof imageInfo === 'string') {
+    return { path: imageInfo };
+  }
+  return {
+    ...imageInfo,
+  };
+};
+
+/**
+ * Override Jimp types that expect to be mapped to either string or buffer even though Jimp
+ * accepts both https://www.npmjs.com/package/jimp#basic-usage.
+ */
+const toJimp = (imageInfo: string | Buffer): Promise<Jimp> => {
+  return (Jimp.read as (value: string | Buffer) => Promise<Jimp>)(imageInfo);
+};
+
 /**
  * Comparing pngs and writing result to provided directory
  *
- * @param sessionPath
- * @param baselinePath
+ * @param session
+ * @param baseline
  * @param diffPath
  * @param sessionDirectory
  * @param log
  * @returns Percent
  */
 export async function comparePngs(
-  sessionPath: string,
-  baselinePath: string,
+  sessionInfo: string | PngDescriptor,
+  baselineInfo: string | PngDescriptor,
   diffPath: string,
   sessionDirectory: string,
   log: ToolingLog
 ) {
-  log.debug(`comparePngs: ${sessionPath} vs ${baselinePath}`);
-  const session = (await Jimp.read(sessionPath)).clone();
-  const baseline = (await Jimp.read(baselinePath)).clone();
+  const sessionDescriptor = toDescriptor(sessionInfo);
+  const baselineDescriptor = toDescriptor(baselineInfo);
+
+  log.debug(`comparePngs: ${sessionDescriptor.path} vs ${baselineDescriptor.path}`);
+
+  const session = (await toJimp(sessionDescriptor.buffer ?? sessionDescriptor.path)).clone();
+  const baseline = (await toJimp(baselineDescriptor.buffer ?? baselineDescriptor.path)).clone();
 
   if (
     session.bitmap.width !== baseline.bitmap.width ||
@@ -63,8 +93,12 @@ export async function comparePngs(
     image.write(diffPath);
 
     // For debugging purposes it'll help to see the resized images and how they compare.
-    session.write(join(sessionDirectory, `${parse(sessionPath).name}-session-resized.png`));
-    baseline.write(join(sessionDirectory, `${parse(baselinePath).name}-baseline-resized.png`));
+    session.write(
+      join(sessionDirectory, `${parse(sessionDescriptor.path).name}-session-resized.png`)
+    );
+    baseline.write(
+      join(sessionDirectory, `${parse(baselineDescriptor.path).name}-baseline-resized.png`)
+    );
   }
   return percent;
 }

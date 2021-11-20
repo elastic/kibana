@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, Fragment, useState, useContext, useEffect } from 'react';
 import {
   EuiComboBox,
@@ -117,11 +119,10 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
   const eventRateField = fields.find((f) => f.id === EVENT_RATE_FIELD_ID);
 
-  const onOptionChange = (func: (p: EuiComboBoxOptionOption) => any) => (
-    selectedOptions: EuiComboBoxOptionOption[]
-  ) => {
-    func(selectedOptions[0] || emptyOption);
-  };
+  const onOptionChange =
+    (func: (p: EuiComboBoxOptionOption) => any) => (selectedOptions: EuiComboBoxOptionOption[]) => {
+      func(selectedOptions[0] || emptyOption);
+    };
 
   function getAgg(title: string) {
     return aggs.find((a) => a.id === title) || null;
@@ -169,9 +170,13 @@ export const AdvancedDetectorModal: FC<Props> = ({
       byField,
       overField,
       partitionField,
-      excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
+      excludeFrequent:
+        excludeFrequentOption.label !== ''
+          ? (excludeFrequentOption.label as estypes.MlExcludeFrequent)
+          : null,
       description: descriptionOption !== '' ? descriptionOption : null,
       customRules: null,
+      useNull: null,
     };
     setDetector(dtr);
     setDescriptionPlaceholder(dtr);
@@ -342,7 +347,9 @@ function createFieldOption(field: Field | null): EuiComboBoxOptionOption {
   };
 }
 
-function createExcludeFrequentOption(excludeFrequent: string | null): EuiComboBoxOptionOption {
+function createExcludeFrequentOption(
+  excludeFrequent: estypes.MlExcludeFrequent | null
+): EuiComboBoxOptionOption {
   if (excludeFrequent === null) {
     return emptyOption;
   }

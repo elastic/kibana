@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IFieldType, IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { TooltipProperty } from './tooltip_property';
 import { AbstractField } from '../fields/field';
 import { FIELD_ORIGIN } from '../../../common/constants';
 
 class MockField extends AbstractField {}
+
+const APPLY_GLOBAL_QUERY = true;
+const DO_NOT_APPLY_GLOBAL_QUERY = false;
 
 const indexPatternField = {
   name: 'machine.os',
@@ -21,18 +25,40 @@ const indexPatternField = {
   searchable: true,
   aggregatable: true,
   readFromDocValues: false,
-} as IFieldType;
+} as IndexPatternField;
 
 const featurePropertyField = new MockField({
   fieldName: 'machine.os',
   origin: FIELD_ORIGIN.SOURCE,
 });
 
+const nonFilterableIndexPatternField = {
+  name: 'location',
+  type: 'geo_point',
+  esTypes: ['geo_point'],
+  count: 0,
+  scripted: false,
+  searchable: true,
+  aggregatable: true,
+  readFromDocValues: false,
+} as IndexPatternField;
+
+const nonFilterableFeaturePropertyField = new MockField({
+  fieldName: 'location',
+  origin: FIELD_ORIGIN.SOURCE,
+});
+
 const indexPattern = {
   id: 'indexPatternId',
   fields: {
-    getByName: (name: string): IFieldType | null => {
-      return name === 'machine.os' ? indexPatternField : null;
+    getByName: (name: string): IndexPatternField | null => {
+      if (name === 'machine.os') {
+        return indexPatternField;
+      }
+      if (name === 'location') {
+        return nonFilterableIndexPatternField;
+      }
+      return null;
     },
   },
   title: 'my index pattern',
@@ -51,7 +77,8 @@ describe('getESFilters', () => {
         'my value'
       ),
       indexPattern,
-      notFoundFeaturePropertyField
+      notFoundFeaturePropertyField,
+      APPLY_GLOBAL_QUERY
     );
     expect(await esTooltipProperty.getESFilters()).toEqual([]);
   });
@@ -64,7 +91,8 @@ describe('getESFilters', () => {
         'my value'
       ),
       indexPattern,
-      featurePropertyField
+      featurePropertyField,
+      APPLY_GLOBAL_QUERY
     );
     expect(await esTooltipProperty.getESFilters()).toEqual([
       {
@@ -88,7 +116,8 @@ describe('getESFilters', () => {
         undefined
       ),
       indexPattern,
-      featurePropertyField
+      featurePropertyField,
+      APPLY_GLOBAL_QUERY
     );
     expect(await esTooltipProperty.getESFilters()).toEqual([
       {
@@ -96,10 +125,70 @@ describe('getESFilters', () => {
           index: 'indexPatternId',
           negate: true,
         },
-        exists: {
-          field: 'machine.os',
+        query: {
+          exists: {
+            field: 'machine.os',
+          },
         },
       },
     ]);
+  });
+
+  test('Should return empty array when applyGlobalQuery is false', async () => {
+    const esTooltipProperty = new ESTooltipProperty(
+      new TooltipProperty(
+        featurePropertyField.getName(),
+        await featurePropertyField.getLabel(),
+        'my value'
+      ),
+      indexPattern,
+      featurePropertyField,
+      DO_NOT_APPLY_GLOBAL_QUERY
+    );
+    expect(await esTooltipProperty.getESFilters()).toEqual([]);
+  });
+});
+
+describe('isFilterable', () => {
+  test('Should by true when field is filterable and apply global query is true', async () => {
+    const esTooltipProperty = new ESTooltipProperty(
+      new TooltipProperty(
+        featurePropertyField.getName(),
+        await featurePropertyField.getLabel(),
+        'my value'
+      ),
+      indexPattern,
+      featurePropertyField,
+      APPLY_GLOBAL_QUERY
+    );
+    expect(esTooltipProperty.isFilterable()).toBe(true);
+  });
+
+  test('Should by false when field is not filterable and apply global query is true', async () => {
+    const esTooltipProperty = new ESTooltipProperty(
+      new TooltipProperty(
+        nonFilterableFeaturePropertyField.getName(),
+        await nonFilterableFeaturePropertyField.getLabel(),
+        'my value'
+      ),
+      indexPattern,
+      nonFilterableFeaturePropertyField,
+      APPLY_GLOBAL_QUERY
+    );
+    expect(esTooltipProperty.isFilterable()).toBe(false);
+  });
+
+  test('Should by false when field is filterable and apply global query is false', async () => {
+    const esTooltipProperty = new ESTooltipProperty(
+      new TooltipProperty(
+        featurePropertyField.getName(),
+        await featurePropertyField.getLabel(),
+        'my value'
+      ),
+      indexPattern,
+      featurePropertyField,
+      DO_NOT_APPLY_GLOBAL_QUERY
+    );
+    expect(esTooltipProperty.isFilterable()).toBe(false);
   });
 });

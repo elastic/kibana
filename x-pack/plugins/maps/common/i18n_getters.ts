@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
-import { $Values } from '@kbn/utility-types';
 import { ES_SPATIAL_RELATIONS } from './constants';
 
 export function getAppTitle() {
@@ -33,7 +33,7 @@ export function getUrlLabel() {
   });
 }
 
-export function getEsSpatialRelationLabel(spatialRelation: $Values<typeof ES_SPATIAL_RELATIONS>) {
+export function getEsSpatialRelationLabel(spatialRelation: ES_SPATIAL_RELATIONS) {
   switch (spatialRelation) {
     case ES_SPATIAL_RELATIONS.INTERSECTS:
       return i18n.translate('xpack.maps.common.esSpatialRelation.intersectsLabel', {
@@ -55,4 +55,23 @@ export function getEsSpatialRelationLabel(spatialRelation: $Values<typeof ES_SPA
     default:
       return spatialRelation;
   }
+}
+
+export function getDataViewLabel() {
+  return i18n.translate('xpack.maps.dataView.label', {
+    defaultMessage: 'Data view',
+  });
+}
+
+export function getDataViewSelectPlaceholder() {
+  return i18n.translate('xpack.maps.dataView.selectPlacholder', {
+    defaultMessage: 'Select data view',
+  });
+}
+
+export function getDataViewNotFoundMessage(id: string) {
+  return i18n.translate('xpack.maps.dataView.notFoundMessage', {
+    defaultMessage: `Unable to find data view '{id}'`,
+    values: { id },
+  });
 }

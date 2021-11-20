@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import styled from 'styled-components';
 
 import { DraggableBadge } from '../../../common/components/draggables';
-import { ExternalLinkIcon } from '../../../common/components/external_link_icon';
 import { Ja3FingerprintLink } from '../../../common/components/links';
 
 import * as i18n from './translations';
@@ -30,21 +30,22 @@ export const Ja3Fingerprint = React.memo<{
   eventId: string;
   contextId: string;
   fieldName: string;
+  isDraggable?: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
+}>(({ contextId, eventId, fieldName, isDraggable, value }) => (
   <DraggableBadge
     contextId={contextId}
     data-test-subj="ja3-hash"
     eventId={eventId}
     field={fieldName}
     iconType="snowflake"
+    isDraggable={isDraggable}
     value={value}
   >
     <Ja3FingerprintLabel data-test-subj="ja3-fingerprint-label">
       {i18n.JA3_FINGERPRINT_LABEL}
     </Ja3FingerprintLabel>
     <Ja3FingerprintLink data-test-subj="ja3-hash-link" ja3Fingerprint={value || ''} />
-    <ExternalLinkIcon />
   </DraggableBadge>
 ));
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
@@ -28,6 +29,20 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       await retry.waitForWithTimeout('table to have data', timeout, async () => {
         const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
         if (tableData[1][0] === 'No items found') {
+          return false;
+        }
+        return true;
+      });
+    },
+
+    async waitForTableToHaveNumberOfEntries(
+      dataTestSubj: string,
+      numberOfEntries = 1,
+      timeout = 2000
+    ) {
+      await retry.waitForWithTimeout('table to have data', timeout, async () => {
+        const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
+        if (tableData[1][0] === 'No items found' || tableData.length < numberOfEntries + 1) {
           return false;
         }
         return true;

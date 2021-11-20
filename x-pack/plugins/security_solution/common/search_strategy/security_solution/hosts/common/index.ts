@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CloudEcs } from '../../../../ecs/cloud';
 import { HostEcs, OsEcs } from '../../../../ecs/host';
 import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
+import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 export enum HostsFields {
@@ -23,14 +26,25 @@ export interface EndpointFields {
   endpointPolicy?: Maybe<string>;
   sensorVersion?: Maybe<string>;
   policyStatus?: Maybe<HostPolicyResponseActionStatus>;
+  /** if the host is currently isolated */
+  isolation?: Maybe<boolean>;
+  /** A count of pending endpoint actions against the host */
+  pendingActions?: Maybe<EndpointPendingActions['pending_actions']>;
+  elasticAgentStatus?: Maybe<HostStatus>;
+  id?: Maybe<string>;
+}
+
+interface AgentFields {
+  id?: Maybe<string>;
 }
 
 export interface HostItem {
   _id?: Maybe<string>;
+  agent?: Maybe<AgentFields>;
   cloud?: Maybe<CloudEcs>;
   endpoint?: Maybe<EndpointFields>;
   host?: Maybe<HostEcs>;
-  lastSeen?: Maybe<string>;
+  lastSeen?: Maybe<string[]>;
 }
 
 export interface HostValue {
@@ -68,7 +82,9 @@ export interface HostAggEsItem {
   cloud_machine_type?: HostBuckets;
   cloud_provider?: HostBuckets;
   cloud_region?: HostBuckets;
-  firstSeen?: HostValue;
+  endpoint?: {
+    id: HostBuckets;
+  };
   host_architecture?: HostBuckets;
   host_id?: HostBuckets;
   host_ip?: HostBuckets;
@@ -78,7 +94,6 @@ export interface HostAggEsItem {
   host_os_version?: HostBuckets;
   host_type?: HostBuckets;
   key?: string;
-  lastSeen?: HostValue;
   os?: HostOsHitsItem;
 }
 

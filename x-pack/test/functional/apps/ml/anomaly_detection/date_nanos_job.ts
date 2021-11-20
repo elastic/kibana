@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -116,14 +117,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('job on data set with date_nanos time field', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/event_rate_nanos');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/event_rate_nanos');
       await ml.testResources.createIndexPatternIfNeeded(
         'ft_event_rate_gen_trend_nanos',
         '@timestamp'
       );
       await ml.testResources.setKibanaTimeZoneToUTC();
-
-      await esArchiver.loadIfNeeded('ml/event_rate_nanos');
       await ml.securityUI.loginAsMlPowerUser();
     });
 

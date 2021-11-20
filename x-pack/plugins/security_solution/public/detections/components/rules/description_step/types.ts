@@ -1,16 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ReactNode } from 'react';
-import { Threats } from '../../../../../common/detection_engine/schemas/common/schemas';
 
-import {
-  IIndexPattern,
-  Filter,
-  FilterManager,
-} from '../../../../../../../../src/plugins/data/public';
+import { ReactNode } from 'react';
+import { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DataViewBase, Filter } from '@kbn/es-query';
+import type { FilterManager } from '../../../../../../../../src/plugins/data/public';
 
 export interface ListItems {
   title: NonNullable<ReactNode>;
@@ -23,7 +21,7 @@ export interface BuildQueryBarDescription {
   filterManager: FilterManager;
   query: string;
   savedId: string;
-  indexPatterns?: IIndexPattern;
+  indexPatterns?: DataViewBase;
   queryLabel?: string;
 }
 

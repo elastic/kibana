@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
-import pkg from '../../../../package.json';
 import { Config } from './config';
 
 jest.mock('./version_info', () => ({
@@ -36,14 +35,14 @@ const setup = async ({ targetAllPlatforms = true }: { targetAllPlatforms?: boole
 describe('#getKibanaPkg()', () => {
   it('returns the parsed package.json from the Kibana repo', async () => {
     const config = await setup();
-    expect(config.getKibanaPkg()).toEqual(pkg);
+    expect(config.getKibanaPkg()).toEqual(kibanaPackageJson);
   });
 });
 
 describe('#getNodeVersion()', () => {
   it('returns the node version from the kibana package.json', async () => {
     const config = await setup();
-    expect(config.getNodeVersion()).toEqual(pkg.engines.node);
+    expect(config.getNodeVersion()).toEqual(kibanaPackageJson.engines.node);
   });
 });
 
@@ -108,6 +107,7 @@ describe('#getTargetPlatforms()', () => {
         .sort()
     ).toMatchInlineSnapshot(`
       Array [
+        "darwin-arm64",
         "darwin-x64",
         "linux-arm64",
         "linux-x64",
@@ -133,7 +133,7 @@ describe('#getNodePlatforms()', () => {
         .getTargetPlatforms()
         .map((p) => p.getNodeArch())
         .sort()
-    ).toEqual(['darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
+    ).toEqual(['darwin-arm64', 'darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
   });
 
   it('returns this platform and linux, when targetAllPlatforms = false', async () => {

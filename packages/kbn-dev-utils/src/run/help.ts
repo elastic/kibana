@@ -1,24 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
 
+import chalk from 'chalk';
 import 'core-js/features/string/repeat';
 import dedent from 'dedent';
 
 import { Command } from './run_with_commands';
+import { getLogLevelFlagsHelp } from '../tooling_log/log_levels';
 
 const DEFAULT_GLOBAL_USAGE = `node ${Path.relative(process.cwd(), process.argv[1])}`;
 export const GLOBAL_FLAGS = dedent`
-  --verbose, -v      Log verbosely
-  --debug            Log debug messages (less than verbose)
-  --quiet            Only log errors
-  --silent           Don't log anything
   --help             Show this message
 `;
 
@@ -38,12 +36,18 @@ export function getHelp({
   description,
   usage,
   flagHelp,
+  defaultLogLevel,
 }: {
   description?: string;
   usage?: string;
   flagHelp?: string;
+  defaultLogLevel?: string;
 }) {
-  const optionHelp = joinAndTrimLines(dedent(flagHelp || ''), GLOBAL_FLAGS);
+  const optionHelp = joinAndTrimLines(
+    dedent(flagHelp || ''),
+    getLogLevelFlagsHelp(defaultLogLevel),
+    GLOBAL_FLAGS
+  );
 
   return `
   ${dedent(usage || '') || DEFAULT_GLOBAL_USAGE}
@@ -116,7 +120,7 @@ export function getHelpForAllCommands({
         : '';
 
       return [
-        dedent(command.usage || '') || command.name,
+        chalk.bold.whiteBright.bgBlack(` ${dedent(command.usage || '') || command.name} `),
         `  ${indent(dedent(command.description || 'Runs a dev task'), 2)}`,
         ...([indent(options, 2)] || []),
       ].join('\n');

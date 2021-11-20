@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve, join } from 'path';
@@ -15,15 +15,14 @@ import { PackageInfo, EnvironmentMode } from './types';
 export interface EnvOptions {
   configs: string[];
   cliArgs: CliArgs;
-  isDevCliParent: boolean;
 }
 
 /** @internal */
 export interface CliArgs {
   dev: boolean;
   envName?: string;
-  quiet: boolean;
-  silent: boolean;
+  silent?: boolean;
+  verbose?: boolean;
   watch: boolean;
   basePath: boolean;
   oss: boolean;
@@ -89,12 +88,6 @@ export class Env {
   public readonly configs: readonly string[];
 
   /**
-   * Indicates that this Kibana instance is running in the parent process of the dev cli.
-   * @internal
-   */
-  public readonly isDevCliParent: boolean;
-
-  /**
    * @internal
    */
   constructor(public readonly homeDir: string, pkg: RawPackageInfo, options: EnvOptions) {
@@ -110,7 +103,6 @@ export class Env {
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);
-    this.isDevCliParent = options.isDevCliParent;
 
     const isDevMode = this.cliArgs.dev || this.cliArgs.envName === 'development';
     this.mode = Object.freeze<EnvironmentMode>({

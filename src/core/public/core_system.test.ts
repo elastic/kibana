@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -32,6 +32,8 @@ import {
   MockIntegrationsService,
   CoreAppConstructor,
   MockCoreApp,
+  MockThemeService,
+  ThemeServiceConstructor,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -46,6 +48,7 @@ const defaultCoreSystemParams = {
     csp: {
       warnLegacyBrowsers: true,
     },
+    version: 'version',
   } as any,
 };
 
@@ -76,6 +79,7 @@ describe('constructor', () => {
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
     expect(IntegrationsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
+    expect(ThemeServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -91,12 +95,12 @@ describe('constructor', () => {
     });
   });
 
-  it('passes browserSupportsCsp to ChromeService', () => {
+  it('passes browserSupportsCsp and coreContext to ChromeService', () => {
     createCoreSystem();
-
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledWith({
-      browserSupportsCsp: expect.any(Boolean),
+      browserSupportsCsp: true,
+      kibanaVersion: 'version',
     });
   });
 
@@ -181,6 +185,11 @@ describe('#setup()', () => {
     await setupCore();
     expect(MockCoreApp.setup).toHaveBeenCalledTimes(1);
   });
+
+  it('calls theme#setup()', async () => {
+    await setupCore();
+    expect(MockThemeService.setup).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('#start()', () => {
@@ -199,7 +208,7 @@ describe('#start()', () => {
     root.innerHTML = '<p>foo bar</p>';
     await startCore(root);
     expect(root.innerHTML).toMatchInlineSnapshot(
-      `"<div id=\\"kibana-body\\"></div><div></div><div></div>"`
+      `"<div id=\\"kibana-body\\" data-test-subj=\\"kibanaChrome\\"></div><div></div><div></div>"`
     );
   });
 
@@ -234,6 +243,7 @@ describe('#start()', () => {
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
       i18n: expect.any(Object),
       overlays: expect.any(Object),
+      theme: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
@@ -255,6 +265,8 @@ describe('#start()', () => {
       application: expect.any(Object),
       chrome: expect.any(Object),
       overlays: expect.any(Object),
+      i18n: expect.any(Object),
+      theme: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
@@ -267,6 +279,11 @@ describe('#start()', () => {
   it('calls coreApp#start()', async () => {
     await startCore();
     expect(MockCoreApp.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls theme#start()', async () => {
+    await startCore();
+    expect(MockThemeService.start).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -324,6 +341,14 @@ describe('#stop()', () => {
     expect(MockCoreApp.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(MockCoreApp.stop).toHaveBeenCalled();
+  });
+
+  it('calls theme.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockThemeService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockThemeService.stop).toHaveBeenCalled();
   });
 
   it('clears the rootDomElement', async () => {

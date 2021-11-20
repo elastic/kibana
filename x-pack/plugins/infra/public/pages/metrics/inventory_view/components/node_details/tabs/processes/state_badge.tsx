@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,7 +12,7 @@ import { STATE_NAMES } from './states';
 export const StateBadge = ({ state }: { state: string }) => {
   switch (state) {
     case 'running':
-      return <EuiBadge color="secondary">{STATE_NAMES.running}</EuiBadge>;
+      return <EuiBadge color="success">{STATE_NAMES.running}</EuiBadge>;
     case 'sleeping':
       return <EuiBadge color="default">{STATE_NAMES.sleeping}</EuiBadge>;
     case 'dead':

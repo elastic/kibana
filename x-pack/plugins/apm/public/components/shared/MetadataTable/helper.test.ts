@@ -1,65 +1,56 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getSectionsWithRows, filterSectionsByTerm } from './helper';
-import { LABELS, HTTP, SERVICE } from './sections';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { filterSectionsByTerm, getSectionsFromFields } from './helper';
 
 describe('MetadataTable Helper', () => {
-  const sections = [
-    { ...LABELS, required: true },
-    HTTP,
-    { ...SERVICE, properties: ['environment'] },
-  ];
-  const apmDoc = ({
-    http: {
-      headers: {
-        Connection: 'close',
-        Host: 'opbeans:3000',
-        request: { method: 'get' },
-      },
-    },
-    service: {
-      framework: { name: 'express' },
-      environment: 'production',
-    },
-  } as unknown) as Transaction;
-  const metadataItems = getSectionsWithRows(sections, apmDoc);
+  const fields = {
+    'http.headers.Connection': ['close'],
+    'http.headers.Host': ['opbeans:3000'],
+    'http.headers.request.method': ['get'],
+    'service.framework.name': ['express'],
+    'service.environment': ['production'],
+  };
 
-  it('returns flattened data and required section', () => {
+  const metadataItems = getSectionsFromFields(fields);
+
+  it('returns flattened data', () => {
     expect(metadataItems).toEqual([
-      { key: 'labels', label: 'Labels', required: true, rows: [] },
       {
         key: 'http',
-        label: 'HTTP',
-        rows: [
-          { key: 'http.headers.Connection', value: 'close' },
-          { key: 'http.headers.Host', value: 'opbeans:3000' },
-          { key: 'http.headers.request.method', value: 'get' },
+        label: 'http',
+        properties: [
+          { field: 'http.headers.Connection', value: ['close'] },
+          { field: 'http.headers.Host', value: ['opbeans:3000'] },
+          { field: 'http.headers.request.method', value: ['get'] },
         ],
       },
       {
         key: 'service',
-        label: 'Service',
-        properties: ['environment'],
-        rows: [{ key: 'service.environment', value: 'production' }],
+        label: 'service',
+        properties: [
+          { field: 'service.environment', value: ['production'] },
+          { field: 'service.framework.name', value: ['express'] },
+        ],
       },
     ]);
   });
+
   describe('filter', () => {
     it('items by key', () => {
       const filteredItems = filterSectionsByTerm(metadataItems, 'http');
       expect(filteredItems).toEqual([
         {
           key: 'http',
-          label: 'HTTP',
-          rows: [
-            { key: 'http.headers.Connection', value: 'close' },
-            { key: 'http.headers.Host', value: 'opbeans:3000' },
-            { key: 'http.headers.request.method', value: 'get' },
+          label: 'http',
+          properties: [
+            { field: 'http.headers.Connection', value: ['close'] },
+            { field: 'http.headers.Host', value: ['opbeans:3000'] },
+            { field: 'http.headers.request.method', value: ['get'] },
           ],
         },
       ]);
@@ -70,9 +61,8 @@ describe('MetadataTable Helper', () => {
       expect(filteredItems).toEqual([
         {
           key: 'service',
-          label: 'Service',
-          properties: ['environment'],
-          rows: [{ key: 'service.environment', value: 'production' }],
+          label: 'service',
+          properties: [{ field: 'service.environment', value: ['production'] }],
         },
       ]);
     });

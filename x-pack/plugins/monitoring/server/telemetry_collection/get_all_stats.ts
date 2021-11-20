@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set';
 import { get, merge } from 'lodash';
 
 import moment from 'moment';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import {
   LOGSTASH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
@@ -18,7 +19,7 @@ import {
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
 import { getKibanaStats, KibanaStats } from './get_kibana_stats';
 import { getBeatsStats, BeatsStatsByClusterUuid } from './get_beats_stats';
-import { getHighLevelStats, ClustersHighLevelStats } from './get_high_level_stats';
+import { getLogstashStats, LogstashStatsByClusterUuid } from './get_logstash_stats';
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
@@ -27,7 +28,7 @@ import { getHighLevelStats, ClustersHighLevelStats } from './get_high_level_stat
  */
 export async function getAllStats(
   clusterUuids: string[],
-  callCluster: LegacyAPICaller, // TODO: To be changed to the new ES client when the plugin migrates
+  callCluster: ElasticsearchClient,
   timestamp: number,
   maxBucketSize: number
 ) {
@@ -37,7 +38,7 @@ export async function getAllStats(
   const [esClusters, kibana, logstash, beats] = await Promise.all([
     getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
     getKibanaStats(callCluster, clusterUuids, start, end, maxBucketSize), // stack_stats.kibana
-    getHighLevelStats(callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID, maxBucketSize), // stack_stats.logstash
+    getLogstashStats(callCluster, clusterUuids), // stack_stats.logstash
     getBeatsStats(callCluster, clusterUuids, start, end), // stack_stats.beats
   ]);
 
@@ -62,7 +63,7 @@ export function handleAllStats(
     beats,
   }: {
     kibana: KibanaStats;
-    logstash: ClustersHighLevelStats;
+    logstash: LogstashStatsByClusterUuid;
     beats: BeatsStatsByClusterUuid;
   }
 ) {

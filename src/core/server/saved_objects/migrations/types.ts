@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { SavedObjectUnsanitizedDoc } from '../serialization';
-import { SavedObjectsMigrationLogger } from './core/migration_logger';
+import * as TaskEither from 'fp-ts/TaskEither';
+import type { SavedObjectUnsanitizedDoc } from '../serialization';
+import type { SavedObjectsMigrationLogger } from './core';
+import { SavedObjectsRawDoc } from '../serialization';
+import { DocumentsTransformFailed, DocumentsTransformSuccess } from './core';
 
 /**
  * A migration function for a {@link SavedObjectsType | saved object type}
@@ -56,7 +59,19 @@ export interface SavedObjectMigrationContext {
   /**
    * logger instance to be used by the migration handler
    */
-  log: SavedObjectsMigrationLogger;
+  readonly log: SavedObjectsMigrationLogger;
+  /**
+   * The migration version that this migration function is defined for
+   */
+  readonly migrationVersion: string;
+  /**
+   * The version in which this object type is being converted to a multi-namespace type
+   */
+  readonly convertToMultiNamespaceTypeVersion?: string;
+  /**
+   * Whether this is a single-namespace type or not
+   */
+  readonly isSingleNamespaceType: boolean;
 }
 
 /**
@@ -78,4 +93,24 @@ export interface SavedObjectMigrationContext {
  */
 export interface SavedObjectMigrationMap {
   [version: string]: SavedObjectMigrationFn<any, any>;
+}
+
+/** @internal */
+export type TransformRawDocs = (
+  rawDocs: SavedObjectsRawDoc[]
+) => TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>;
+
+/** @internal */
+export type MigrationLogLevel = 'error' | 'info' | 'warning';
+
+/** @internal */
+export interface MigrationLog {
+  level: MigrationLogLevel;
+  message: string;
+}
+
+/** @internal */
+export interface Progress {
+  processed: number | undefined;
+  total: number | undefined;
 }

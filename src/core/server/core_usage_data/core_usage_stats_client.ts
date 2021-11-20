@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
@@ -35,6 +35,7 @@ export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
+export const BULK_RESOLVE_STATS_PREFIX = 'apiCalls.savedObjectsBulkResolve';
 export const BULK_UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkUpdate';
 export const CREATE_STATS_PREFIX = 'apiCalls.savedObjectsCreate';
 export const DELETE_STATS_PREFIX = 'apiCalls.savedObjectsDelete';
@@ -45,10 +46,21 @@ export const UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsUpdate';
 export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
 export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';
 export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
+export const LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX = 'apiCalls.legacyDashboardImport';
+export const LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX = 'apiCalls.legacyDashboardExport';
+
+export const REPOSITORY_RESOLVE_OUTCOME_STATS = {
+  EXACT_MATCH: 'savedObjectsRepository.resolvedOutcome.exactMatch',
+  ALIAS_MATCH: 'savedObjectsRepository.resolvedOutcome.aliasMatch',
+  CONFLICT: 'savedObjectsRepository.resolvedOutcome.conflict',
+  NOT_FOUND: 'savedObjectsRepository.resolvedOutcome.notFound',
+  TOTAL: 'savedObjectsRepository.resolvedOutcome.total',
+};
 const ALL_COUNTER_FIELDS = [
   // Saved Objects Client APIs
   ...getFieldsForCounter(BULK_CREATE_STATS_PREFIX),
   ...getFieldsForCounter(BULK_GET_STATS_PREFIX),
+  ...getFieldsForCounter(BULK_RESOLVE_STATS_PREFIX),
   ...getFieldsForCounter(BULK_UPDATE_STATS_PREFIX),
   ...getFieldsForCounter(CREATE_STATS_PREFIX),
   ...getFieldsForCounter(DELETE_STATS_PREFIX),
@@ -66,8 +78,16 @@ const ALL_COUNTER_FIELDS = [
   `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
   `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
   ...getFieldsForCounter(EXPORT_STATS_PREFIX),
+  ...getFieldsForCounter(LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX),
+  ...getFieldsForCounter(LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX),
   `${EXPORT_STATS_PREFIX}.allTypesSelected.yes`,
   `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
+  // Saved Objects Repository counters; these are included here for stats collection, but are incremented in the repository itself
+  REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH,
+  REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH,
+  REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT,
+  REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND,
+  REPOSITORY_RESOLVE_OUTCOME_STATS.TOTAL,
 ];
 const SPACE_CONTEXT_REGEX = /^\/s\/([a-z0-9_\-]+)/;
 
@@ -105,6 +125,10 @@ export class CoreUsageStatsClient {
     await this.updateUsageStats([], BULK_GET_STATS_PREFIX, options);
   }
 
+  public async incrementSavedObjectsBulkResolve(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], BULK_RESOLVE_STATS_PREFIX, options);
+  }
+
   public async incrementSavedObjectsBulkUpdate(options: BaseIncrementOptions) {
     await this.updateUsageStats([], BULK_UPDATE_STATS_PREFIX, options);
   }
@@ -137,7 +161,7 @@ export class CoreUsageStatsClient {
     const { createNewCopies, overwrite } = options;
     const counterFieldNames = [
       `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
-      `overwriteEnabled.${overwrite ? 'yes' : 'no'}`,
+      ...(!createNewCopies ? [`overwriteEnabled.${overwrite ? 'yes' : 'no'}`] : []), // the overwrite option is ignored when createNewCopies is true
     ];
     await this.updateUsageStats(counterFieldNames, IMPORT_STATS_PREFIX, options);
   }
@@ -155,6 +179,14 @@ export class CoreUsageStatsClient {
     const isAllTypesSelected = !!types && supportedTypes.every((x) => types.includes(x));
     const counterFieldNames = [`allTypesSelected.${isAllTypesSelected ? 'yes' : 'no'}`];
     await this.updateUsageStats(counterFieldNames, EXPORT_STATS_PREFIX, options);
+  }
+
+  public async incrementLegacyDashboardsImport(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX, options);
+  }
+
+  public async incrementLegacyDashboardsExport(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX, options);
   }
 
   private async updateUsageStats(

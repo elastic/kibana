@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -15,24 +15,42 @@ import {
 } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
+import { ISearchSetup, ISearchStart } from './types';
 
 import { handleResponse } from './fetch';
 import {
   kibana,
   kibanaContext,
-  kibanaContextFunction,
   ISearchGeneric,
   SearchSourceDependencies,
   SearchSourceService,
+  extendedBoundsFunction,
+  ipRangeFunction,
+  kibanaTimerangeFunction,
+  luceneFunction,
+  kqlFunction,
+  fieldFunction,
+  numericalRangeFunction,
+  rangeFunction,
+  cidrFunction,
+  dateRangeFunction,
+  existsFilterFunction,
+  geoBoundingBoxFunction,
+  geoPointFunction,
+  queryFilterFunction,
+  rangeFilterFunction,
+  removeFilterFunction,
+  selectFilterFunction,
+  kibanaFilterFunction,
+  phraseFilterFunction,
+  esRawResponse,
 } from '../../common/search';
-import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
-import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { IndexPatternsContract } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { esdsl, esRawResponse, getEsaggs } from './expressions';
+import { getEsaggs, getEsdsl } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
@@ -43,6 +61,7 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { NowProviderInternalContract } from '../now_provider';
+import { getKibanaContext } from './expressions/kibana_context';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -101,10 +120,37 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       })
     );
     expressions.registerFunction(kibana);
-    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerFunction(
+      getKibanaContext({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
+    expressions.registerFunction(cidrFunction);
+    expressions.registerFunction(dateRangeFunction);
+    expressions.registerFunction(extendedBoundsFunction);
+    expressions.registerFunction(ipRangeFunction);
+    expressions.registerFunction(luceneFunction);
+    expressions.registerFunction(kqlFunction);
+    expressions.registerFunction(kibanaTimerangeFunction);
+    expressions.registerFunction(fieldFunction);
+    expressions.registerFunction(numericalRangeFunction);
+    expressions.registerFunction(geoBoundingBoxFunction);
+    expressions.registerFunction(geoPointFunction);
+    expressions.registerFunction(rangeFunction);
+    expressions.registerFunction(kibanaFilterFunction);
+    expressions.registerFunction(existsFilterFunction);
+    expressions.registerFunction(queryFilterFunction);
+    expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(removeFilterFunction);
+    expressions.registerFunction(selectFilterFunction);
+    expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
 
-    expressions.registerFunction(esdsl);
+    expressions.registerFunction(
+      getEsdsl({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
     expressions.registerType(esRawResponse);
 
     const aggs = this.aggsService.setup({
@@ -121,19 +167,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs,
       usageCollector: this.usageCollector!,
-      __enhance: (enhancements: SearchEnhancements) => {
-        this.searchInterceptor = enhancements.searchInterceptor;
-      },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
     };
   }
 
   public start(
-    { application, http, notifications, uiSettings }: CoreStart,
+    { http, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
-    const search = ((request, options) => {
+    const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
@@ -144,10 +187,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: handleResponse,
-      legacy: {
-        callMsearch: getCallMsearch({ http }),
-        loadingCount$,
-      },
     };
 
     return {
@@ -165,5 +204,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   public stop() {
     this.aggsService.stop();
     this.searchSourceService.stop();
+    this.searchInterceptor.stop();
   }
 }

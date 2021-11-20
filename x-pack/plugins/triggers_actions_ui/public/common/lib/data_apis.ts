@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { HttpSetup } from 'kibana/public';
 
 const DATA_API_ROOT = '/api/triggers_actions_ui/data';
@@ -20,9 +22,10 @@ export async function getMatchingIndices({
   if (!pattern.endsWith('*')) {
     pattern = `${pattern}*`;
   }
-  const { indices } = await http.post(`${DATA_API_ROOT}/_indices`, {
-    body: JSON.stringify({ pattern }),
-  });
+  const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(
+    `${DATA_API_ROOT}/_indices`,
+    { body: JSON.stringify({ pattern }) }
+  );
   return indices;
 }
 
@@ -41,9 +44,10 @@ export async function getESIndexFields({
     aggregatable: boolean;
   }>
 > {
-  const { fields } = await http.post(`${DATA_API_ROOT}/_fields`, {
-    body: JSON.stringify({ indexPatterns: indexes }),
-  });
+  const { fields } = await http.post<{ fields: ReturnType<typeof getESIndexFields> }>(
+    `${DATA_API_ROOT}/_fields`,
+    { body: JSON.stringify({ indexPatterns: indexes }) }
+  );
   return fields;
 }
 

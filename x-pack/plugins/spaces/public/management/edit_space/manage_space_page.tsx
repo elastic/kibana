@@ -1,28 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiPageContent,
   EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
+  hexToHsv,
+  hsvToHex,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { difference } from 'lodash';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
-import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
-import { KibanaFeature, FeaturesPluginStart } from '../../../../features/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
+
+import { SectionLoading } from '../../../../../../src/plugins/es_ui_shared/public';
+import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
-import { SpacesManager } from '../../spaces_manager';
+import { getSpacesFeatureDescription } from '../../constants';
+import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
+import type { SpacesManager } from '../../spaces_manager';
 import { UnauthorizedPrompt } from '../components';
 import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
@@ -30,7 +38,13 @@ import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal
 import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
 import { EnabledFeatures } from './enabled_features';
-import { ReservedSpaceBadge } from './reserved_space_badge';
+
+export interface FormValues extends Partial<Space> {
+  customIdentifier?: boolean;
+  avatarType?: 'initials' | 'image';
+  customAvatarInitials?: boolean;
+  customAvatarColor?: boolean;
+}
 
 interface Props {
   getFeatures: FeaturesPluginStart['getFeatures'];
@@ -40,11 +54,10 @@ interface Props {
   onLoadSpace?: (space: Space) => void;
   capabilities: Capabilities;
   history: ScopedHistory;
-  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 interface State {
-  space: Partial<Space>;
+  space: FormValues;
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
@@ -66,7 +79,9 @@ export class ManageSpacePage extends Component<Props, State> {
       isLoading: true,
       showAlteringActiveSpaceDialog: false,
       saveInProgress: false,
-      space: {},
+      space: {
+        color: getSpaceColor({}),
+      },
       features: [],
     };
   }
@@ -101,46 +116,44 @@ export class ManageSpacePage extends Component<Props, State> {
   }
 
   public render() {
-    const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
+    if (!this.props.capabilities.spaces.manage) {
+      return (
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+          <UnauthorizedPrompt />
+        </EuiPageContent>
+      );
+    }
+
+    if (this.state.isLoading) {
+      return this.getLoadingIndicator();
+    }
 
     return (
-      <Fragment>
-        <EuiPageContentBody>{content}</EuiPageContentBody>
-      </Fragment>
+      <EuiPageContentBody restrictWidth>
+        <EuiPageHeader pageTitle={this.getTitle()} description={getSpacesFeatureDescription()} />
+        <EuiSpacer size="l" />
+
+        {this.getForm()}
+      </EuiPageContentBody>
     );
   }
 
   public getLoadingIndicator = () => (
-    <div>
-      <EuiLoadingSpinner size={'xl'} />{' '}
-      <EuiTitle>
-        <h1>Loading...</h1>
-      </EuiTitle>
-    </div>
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.spaces.management.manageSpacePage.loadingMessage"
+          defaultMessage="Loading…"
+        />
+      </SectionLoading>
+    </EuiPageContent>
   );
 
   public getForm = () => {
-    if (!this.props.capabilities.spaces.manage) {
-      return <UnauthorizedPrompt />;
-    }
-
     const { showAlteringActiveSpaceDialog } = this.state;
 
     return (
       <div data-test-subj="spaces-edit-page">
-        {this.getFormHeading()}
-
-        <EuiSpacer size={'s'} />
-
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.spaces.management.manageSpacePage.manageDescription"
-            defaultMessage="Organize your saved objects into meaningful categories."
-          />
-        </EuiText>
-
-        <EuiSpacer />
-
         <CustomizeSpace
           space={this.state.space}
           onChange={this.onSpaceChange}
@@ -154,7 +167,6 @@ export class ManageSpacePage extends Component<Props, State> {
           space={this.state.space}
           features={this.state.features}
           onChange={this.onSpaceChange}
-          getUrlForApp={this.props.getUrlForApp}
         />
 
         <EuiSpacer />
@@ -173,27 +185,19 @@ export class ManageSpacePage extends Component<Props, State> {
     );
   };
 
-  public getFormHeading = () => (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="m">
-          <h1 className="eui-displayInlineBlock">{this.getTitle()}</h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ReservedSpaceBadge space={this.state.space as Space} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   public getTitle = () => {
     if (this.editingExistingSpace()) {
-      return `Edit space`;
+      return (
+        <FormattedMessage
+          id="xpack.spaces.management.manageSpacePage.editSpaceTitle"
+          defaultMessage="Edit space"
+        />
+      );
     }
     return (
       <FormattedMessage
         id="xpack.spaces.management.manageSpacePage.createSpaceTitle"
-        defaultMessage="Create a space"
+        defaultMessage="Create space"
       />
     );
   };
@@ -262,7 +266,7 @@ export class ManageSpacePage extends Component<Props, State> {
     return null;
   };
 
-  public onSpaceChange = (updatedSpace: Partial<Space>) => {
+  public onSpaceChange = (updatedSpace: FormValues) => {
     this.setState({
       space: updatedSpace,
     });
@@ -271,7 +275,9 @@ export class ManageSpacePage extends Component<Props, State> {
   public saveSpace = () => {
     this.validator.enableValidation();
 
-    const result = this.validator.validateForSave(this.state.space as Space);
+    const originalSpace: Space = this.state.originalSpace as Space;
+    const space: Space = this.state.space as Space;
+    const result = this.validator.validateForSave(space);
     if (result.isInvalid) {
       this.setState({
         formError: result,
@@ -283,15 +289,12 @@ export class ManageSpacePage extends Component<Props, State> {
     if (this.editingExistingSpace()) {
       const { spacesManager } = this.props;
 
-      const originalSpace: Space = this.state.originalSpace as Space;
-      const space: Space = this.state.space as Space;
-
       spacesManager.getActiveSpace().then((activeSpace) => {
         const editingActiveSpace = activeSpace.id === originalSpace.id;
 
         const haveDisabledFeaturesChanged =
           space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
-          _.difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
+          difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
 
         if (editingActiveSpace && haveDisabledFeaturesChanged) {
           this.setState({
@@ -321,7 +324,16 @@ export class ManageSpacePage extends Component<Props, State> {
         }
 
         this.setState({
-          space,
+          space: {
+            ...space,
+            avatarType: space.imageUrl ? 'image' : 'initials',
+            initials: space.initials || getSpaceInitials(space),
+            color: space.color || getSpaceColor(space),
+            customIdentifier: false,
+            customAvatarInitials:
+              !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
+            customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
+          },
           features,
           originalSpace: space,
           isLoading: false,
@@ -353,16 +365,17 @@ export class ManageSpacePage extends Component<Props, State> {
       color,
       disabledFeatures = [],
       imageUrl,
+      avatarType,
     } = this.state.space;
 
     const params = {
       name,
       id,
       description,
-      initials,
-      color,
+      initials: avatarType !== 'image' ? initials : '',
+      color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : color, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
       disabledFeatures,
-      imageUrl,
+      imageUrl: avatarType === 'image' ? imageUrl : '',
     };
 
     let action;

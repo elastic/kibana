@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['settings', 'common']);
 
@@ -27,11 +28,12 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Starting openControlsByName (' + fieldName + ')');
       await PageObjects.settings.openControlsByName(fieldName);
       log.debug('increasePopularity');
+      await testSubjects.click('toggleAdvancedSetting');
       await PageObjects.settings.increasePopularity();
     });
 
     afterEach(async () => {
-      await PageObjects.settings.controlChangeCancel();
+      await PageObjects.settings.closeIndexPatternFieldEditor();
       await PageObjects.settings.removeIndexPattern();
       // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
     });
@@ -44,12 +46,12 @@ export default function ({ getService, getPageObjects }) {
 
     it('should be reset on cancel', async function () {
       // Cancel saving the popularity change
-      await PageObjects.settings.controlChangeCancel();
+      await PageObjects.settings.closeIndexPatternFieldEditor();
       await PageObjects.settings.openControlsByName(fieldName);
       // check that it is 0 (previous increase was cancelled
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
-      expect(popularity).to.be('');
+      expect(popularity).to.be('0');
     });
 
     it('can be saved', async function () {

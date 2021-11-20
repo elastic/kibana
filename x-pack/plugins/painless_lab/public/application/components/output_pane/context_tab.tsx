@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
 import {
   EuiFieldText,
   EuiFormRow,
-  EuiPanel,
   EuiSpacer,
   EuiIcon,
   EuiToolTip,
@@ -139,24 +139,22 @@ export const ContextTab: FunctionComponent = () => {
           }
           fullWidth
         >
-          <EuiPanel paddingSize="s">
-            <CodeEditor
-              languageId="json"
-              height={150}
-              value={query}
-              onChange={(nextQuery) => updatePayload({ query: nextQuery })}
-              options={{
-                fontSize: 12,
-                minimap: {
-                  enabled: false,
-                },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent',
-                automaticLayout: true,
-              }}
-            />
-          </EuiPanel>
+          <CodeEditor
+            languageId="json"
+            height={150}
+            value={query}
+            onChange={(nextQuery) => updatePayload({ query: nextQuery })}
+            options={{
+              fontSize: 12,
+              minimap: {
+                enabled: false,
+              },
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              automaticLayout: true,
+            }}
+          />
         </EuiFormRow>
       )}
       {['filter', 'score'].indexOf(context) !== -1 && (
@@ -178,24 +176,22 @@ export const ContextTab: FunctionComponent = () => {
           }
           fullWidth
         >
-          <EuiPanel paddingSize="s">
-            <CodeEditor
-              languageId="json"
-              height={400}
-              value={document}
-              onChange={(nextDocument) => updatePayload({ document: nextDocument })}
-              options={{
-                fontSize: 12,
-                minimap: {
-                  enabled: false,
-                },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent',
-                automaticLayout: true,
-              }}
-            />
-          </EuiPanel>
+          <CodeEditor
+            languageId="json"
+            height={400}
+            value={document}
+            onChange={(nextDocument) => updatePayload({ document: nextDocument })}
+            options={{
+              fontSize: 12,
+              minimap: {
+                enabled: false,
+              },
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              automaticLayout: true,
+            }}
+          />
         </EuiFormRow>
       )}
     </>

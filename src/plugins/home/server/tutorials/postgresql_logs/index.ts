@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,12 +24,12 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'postgresqlLogs',
     name: i18n.translate('home.tutorials.postgresqlLogs.nameTitle', {
-      defaultMessage: 'PostgreSQL logs',
+      defaultMessage: 'PostgreSQL Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.postgresqlLogs.shortDescription', {
-      defaultMessage: 'Collect and parse error and slow logs created by PostgreSQL.',
+      defaultMessage: 'Collect and parse logs from PostgreSQL servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.postgresqlLogs.longDescription', {
       defaultMessage:
@@ -62,5 +62,6 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['datastore'],
   };
 }

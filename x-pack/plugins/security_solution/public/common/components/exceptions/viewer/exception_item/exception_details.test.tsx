@@ -1,18 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import moment from 'moment-timezone';
 
 import { ExceptionDetails } from './exception_details';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
+import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiColorLightestShade: '#ece',
+  },
+});
 
 describe('ExceptionDetails', () => {
   beforeEach(() => {
@@ -28,7 +35,7 @@ describe('ExceptionDetails', () => {
     exceptionItem.comments = [];
 
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={false}
           onCommentsClick={jest.fn()}
@@ -44,7 +51,7 @@ describe('ExceptionDetails', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={false}
           onCommentsClick={jest.fn()}
@@ -62,7 +69,7 @@ describe('ExceptionDetails', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.comments = [getCommentsArrayMock()[0]];
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={false}
           onCommentsClick={jest.fn()}
@@ -80,7 +87,7 @@ describe('ExceptionDetails', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={false}
           onCommentsClick={jest.fn()}
@@ -98,7 +105,7 @@ describe('ExceptionDetails', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={false}
           onCommentsClick={jest.fn()}
@@ -116,7 +123,7 @@ describe('ExceptionDetails', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={true}
           onCommentsClick={jest.fn()}
@@ -135,7 +142,7 @@ describe('ExceptionDetails', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={true}
           onCommentsClick={mockOnCommentsClick}
@@ -150,9 +157,9 @@ describe('ExceptionDetails', () => {
   });
 
   test('it renders the operating system if one is specified in the exception item', () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={true}
           onCommentsClick={jest.fn()}
@@ -166,9 +173,9 @@ describe('ExceptionDetails', () => {
   });
 
   test('it renders the exception item creator', () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={true}
           onCommentsClick={jest.fn()}
@@ -184,9 +191,9 @@ describe('ExceptionDetails', () => {
   });
 
   test('it renders the exception item creation timestamp', () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={true}
           onCommentsClick={jest.fn()}
@@ -200,9 +207,9 @@ describe('ExceptionDetails', () => {
   });
 
   test('it renders the description if one is included on the exception item', () => {
-    const exceptionItem = getExceptionListItemSchemaMock();
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionDetails
           showComments={true}
           onCommentsClick={jest.fn()}
@@ -213,5 +220,33 @@ describe('ExceptionDetails', () => {
 
     expect(wrapper.find('EuiDescriptionListTitle').at(3).text()).toEqual('Description');
     expect(wrapper.find('EuiDescriptionListDescription').at(3).text()).toEqual('some description');
+  });
+
+  test('it renders with Name and Modified info when showName and showModified props are true', () => {
+    const exceptionItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
+    exceptionItem.comments = [];
+
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <ExceptionDetails
+          showComments={false}
+          onCommentsClick={jest.fn()}
+          exceptionItem={exceptionItem}
+          showName={true}
+          showModified={true}
+        />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('EuiDescriptionListTitle').at(0).text()).toEqual('Name');
+    expect(wrapper.find('EuiDescriptionListDescription').at(0).text()).toEqual('some name');
+
+    expect(wrapper.find('EuiDescriptionListTitle').at(4).text()).toEqual('Date modified');
+    expect(wrapper.find('EuiDescriptionListDescription').at(4).text()).toEqual(
+      'April 20th 2020 @ 15:25:31'
+    );
+
+    expect(wrapper.find('EuiDescriptionListTitle').at(5).text()).toEqual('Modified by');
+    expect(wrapper.find('EuiDescriptionListDescription').at(5).text()).toEqual('some user');
   });
 });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import path from 'path';
@@ -31,17 +31,17 @@ interface Package {
 const packages: Package[] = [
   {
     name: 're2',
-    version: '1.15.4',
+    version: '1.16.0',
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
       'darwin-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-83.gz',
-        sha256: 'b45cd8296fd6eb2a091399c20111af43093ba30c99ed9e5d969278f5ff69ba8f',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/darwin-x64-93.gz',
+        sha256: 'a267c6202d86d08170eb4a833acf81d83660ce33e8981fcd5b7f6e0310961d56',
       },
       'linux-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-83.gz',
-        sha256: '1bbc3f90f0ba105772b37c04e3a718f69544b4df01dda00435c2b8e50b2ad0d9',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/linux-x64-93.gz',
+        sha256: 'e0ca5d6527fe7ec0fe98b6960c47b66a5bb2823c3bebb3bf4ed4d58eed3d23c5',
       },
 
       // ARM build is currently done manually as Github Actions used in upstream project
@@ -50,17 +50,21 @@ const packages: Package[] = [
       // From a AWS Graviton instance:
       // * checkout the node-re2 project,
       // * install Node using the same minor used by Kibana
+      // * git submodule update --init --recursive to download re2
       // * npm install, which will also create a build
       // * gzip -c build/Release/re2.node > linux-arm64-83.gz
       // * upload to kibana-ci-proxy-cache bucket
       'linux-arm64': {
-        url:
-          'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.15.4/linux-arm64-83.gz',
-        sha256: '4eb524ca9a79dea9c07342e487fbe91591166fdbc022ae987104840df948a4e9',
+        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/linux-arm64-93.gz',
+        sha256: '7a786e0b75985e5aafdefa9af55cad8e85e69a3326f16d8c63d21d6b5b3bff1b',
+      },
+      'darwin-arm64': {
+        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/darwin-arm64-93.gz',
+        sha256: '28b540cdddf13578f1bd28a03e29ffdc26a7f00ec859c369987b8d51ec6357c8',
       },
       'win32-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-83.gz',
-        sha256: 'efe939d3cda1d64ee3ee3e60a20613b95166d55632e702c670763ea7e69fca06',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/win32-x64-93.gz',
+        sha256: '37245ceb59a086b5e7e9de8746a3cdf148c383be9ae2580f92baea90d0d39947',
       },
     },
   },
@@ -100,7 +104,8 @@ async function patchModule(
     log,
     url: archive.url,
     destination: downloadPath,
-    sha256: archive.sha256,
+    shaChecksum: archive.sha256,
+    shaAlgorithm: 'sha256',
     retries: 3,
   });
   switch (pkg.extractMethod) {

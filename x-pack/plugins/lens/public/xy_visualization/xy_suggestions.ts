@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -15,7 +16,9 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState, visualizationTypes, LayerConfig } from './types';
+import { State, XYState, visualizationTypes } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -25,6 +28,9 @@ const columnSortOrder = {
   ip: 3,
   boolean: 4,
   number: 5,
+  histogram: 6,
+  geo_point: 7,
+  geo_shape: 8,
 };
 
 /**
@@ -485,7 +491,7 @@ function buildSuggestion({
     splitBy = xValue;
     xValue = undefined;
   }
-  const existingLayer: LayerConfig | {} = getExistingLayer(currentState, layerId) || {};
+  const existingLayer: XYLayerConfig | {} = getExistingLayer(currentState, layerId) || {};
   const accessors = yValues.map((col) => col.columnId);
   const newLayer = {
     ...existingLayer,
@@ -499,6 +505,7 @@ function buildSuggestion({
       'yConfig' in existingLayer && existingLayer.yConfig
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
+    layerType: layerTypes.DATA,
   };
 
   // Maintain consistent order for any layers that were saved
@@ -519,9 +526,15 @@ function buildSuggestion({
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction || 'None',
+    curveType: currentState?.curveType,
+    fillOpacity: currentState?.fillOpacity,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,
+    hideEndzones: currentState?.hideEndzones,
+    valuesInLegend: currentState?.valuesInLegend,
+    yLeftExtent: currentState?.yLeftExtent,
+    yRightExtent: currentState?.yRightExtent,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
       x: true,
       yLeft: true,
@@ -531,6 +544,11 @@ function buildSuggestion({
       x: true,
       yLeft: true,
       yRight: true,
+    },
+    labelsOrientation: currentState?.labelsOrientation || {
+      x: 0,
+      yLeft: 0,
+      yRight: 0,
     },
     gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
       x: true,

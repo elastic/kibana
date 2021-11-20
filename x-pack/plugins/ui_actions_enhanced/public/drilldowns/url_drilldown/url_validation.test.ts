@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { validateUrl, validateUrlTemplate } from './url_validation';
@@ -61,27 +62,37 @@ describe('validateUrl', () => {
 });
 
 describe('validateUrlTemplate', () => {
-  test('domain in variable is allowed', () => {
+  test('domain in variable is allowed', async () => {
     expect(
-      validateUrlTemplate(
-        { template: '{{kibanaUrl}}/test' },
-        { kibanaUrl: 'http://localhost:5601/app' }
+      (
+        await validateUrlTemplate(
+          { template: '{{kibanaUrl}}/test' },
+          { kibanaUrl: 'http://localhost:5601/app' }
+        )
       ).isValid
     ).toBe(true);
   });
 
-  test('unsafe domain in variable is not allowed', () => {
+  test('unsafe domain in variable is not allowed', async () => {
     expect(
-      // eslint-disable-next-line no-script-url
-      validateUrlTemplate({ template: '{{kibanaUrl}}/test' }, { kibanaUrl: 'javascript:evil()' })
-        .isValid
+      (
+        await validateUrlTemplate(
+          { template: '{{kibanaUrl}}/test' },
+          // eslint-disable-next-line no-script-url
+          { kibanaUrl: 'javascript:evil()' }
+        )
+      ).isValid
     ).toBe(false);
   });
 
-  test('if missing variable then invalid', () => {
+  test('if missing variable then invalid', async () => {
     expect(
-      validateUrlTemplate({ template: '{{url}}/test' }, { kibanaUrl: 'http://localhost:5601/app' })
-        .isValid
+      (
+        await validateUrlTemplate(
+          { template: '{{url}}/test' },
+          { kibanaUrl: 'http://localhost:5601/app' }
+        )
+      ).isValid
     ).toBe(false);
   });
 });

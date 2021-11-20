@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ApolloClient } from 'apollo-client';
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, empty, Observable } from 'rxjs';
 import { filter, mergeMap, switchMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
-import { persistTimelineNoteMutation } from '../../../timelines/containers/notes/persist.gql_query';
-import { PersistTimelineNoteMutation, ResponseNote } from '../../../graphql/types';
 import { updateNote, addError } from '../../../common/store/app/actions';
 import { NotesById } from '../../../common/store/app/model';
 import { inputsModel } from '../../../common/store/inputs';
@@ -27,14 +24,14 @@ import {
   showCallOutUnauthorizedMsg,
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { refetchQueries } from './refetch_queries';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { ActionTimeline, TimelineById } from './types';
+import { persistNote } from '../../containers/notes/api';
+import { ResponseNote } from '../../../../common/types/timeline/note';
 
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 
 export const epicPersistNote = (
-  apolloClient: ApolloClient<NormalizedCacheObject>,
   action: ActionTimeline,
   timeline: TimelineById,
   notes: NotesById,
@@ -45,22 +42,14 @@ export const epicPersistNote = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   from(
-    apolloClient.mutate<
-      PersistTimelineNoteMutation.Mutation,
-      PersistTimelineNoteMutation.Variables
-    >({
-      mutation: persistTimelineNoteMutation,
-      fetchPolicy: 'no-cache',
-      variables: {
-        noteId: null,
-        version: null,
-        note: {
-          eventId: action.payload.eventId,
-          note: getNote(action.payload.noteId, notes),
-          timelineId: myEpicTimelineId.getTimelineId(),
-        },
+    persistNote({
+      noteId: null,
+      version: null,
+      note: {
+        eventId: action.payload.eventId,
+        note: getNote(action.payload.noteId, notes),
+        timelineId: myEpicTimelineId.getTimelineId(),
       },
-      refetchQueries,
     })
   ).pipe(
     withLatestFrom(timeline$, notes$, allTimelineQuery$),
@@ -131,14 +120,16 @@ export const epicPersistNote = (
     )
   );
 
-export const createTimelineNoteEpic = <State>(): Epic<Action, Action, State> => (action$) =>
-  action$.pipe(
-    filter((action) => timelineNoteActionsType.includes(action.type)),
-    switchMap((action) => {
-      dispatcherTimelinePersistQueue.next({ action });
-      return empty();
-    })
-  );
+export const createTimelineNoteEpic =
+  <State>(): Epic<Action, Action, State> =>
+  (action$) =>
+    action$.pipe(
+      filter((action) => timelineNoteActionsType.includes(action.type)),
+      switchMap((action) => {
+        dispatcherTimelinePersistQueue.next({ action });
+        return empty();
+      })
+    );
 
 const getNote = (noteId: string | undefined | null, notes: NotesById): string => {
   if (noteId != null) {

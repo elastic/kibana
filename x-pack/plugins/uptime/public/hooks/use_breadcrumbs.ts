@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ChromeBreadcrumb } from 'kibana/public';
@@ -35,34 +36,52 @@ function handleBreadcrumbClick(
   }));
 }
 
-export const makeBaseBreadcrumb = (href: string, params?: UptimeUrlParams): EuiBreadcrumb => {
+export const makeBaseBreadcrumb = (
+  uptimePath: string,
+  observabilityPath: string,
+  params?: UptimeUrlParams
+): [EuiBreadcrumb, EuiBreadcrumb] => {
   if (params) {
     const crumbParams: Partial<UptimeUrlParams> = { ...params };
 
     delete crumbParams.statusFilter;
     const query = stringifyUrlParams(crumbParams, true);
-    href += query === EMPTY_QUERY ? '' : query;
+    uptimePath += query === EMPTY_QUERY ? '' : query;
   }
-  return {
-    text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
-      defaultMessage: 'Uptime',
-    }),
-    href,
-  };
+
+  return [
+    {
+      text: i18n.translate('xpack.uptime.breadcrumbs.observabilityText', {
+        defaultMessage: 'Observability',
+      }),
+      href: observabilityPath,
+    },
+    {
+      text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
+        defaultMessage: 'Uptime',
+      }),
+      href: uptimePath,
+    },
+  ];
 };
 
 export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const params = useUrlParams()[0]();
   const kibana = useKibana();
   const setBreadcrumbs = kibana.services.chrome?.setBreadcrumbs;
-  const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
+  const uptimePath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
+  const observabilityPath =
+    kibana.services.application?.getUrlForApp('observability-overview') ?? '';
   const navigate = kibana.services.application?.navigateToUrl;
 
   useEffect(() => {
     if (setBreadcrumbs) {
       setBreadcrumbs(
-        handleBreadcrumbClick([makeBaseBreadcrumb(appPath, params)].concat(extraCrumbs), navigate)
+        handleBreadcrumbClick(
+          makeBaseBreadcrumb(uptimePath, observabilityPath, params).concat(extraCrumbs),
+          navigate
+        )
       );
     }
-  }, [appPath, extraCrumbs, navigate, params, setBreadcrumbs]);
+  }, [uptimePath, observabilityPath, extraCrumbs, navigate, params, setBreadcrumbs]);
 };

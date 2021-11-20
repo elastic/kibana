@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -15,6 +16,19 @@ export enum Timings {
   Send = 'send',
   Wait = 'wait',
   Receive = 'receive',
+}
+
+export enum Metadata {
+  Status = 'status',
+  ResourceSize = 'resourceSize',
+  TransferSize = 'transferSize',
+  CertificateIssuer = 'certificateIssuer',
+  CertificateIssueDate = 'certificateIssueDate',
+  CertificateExpiryDate = 'certificateExpiryDate',
+  CertificateSubject = 'certificateSubject',
+  IP = 'ip',
+  MimeType = 'mimeType',
+  RequestStart = 'requestStart',
 }
 
 export const FriendlyTimingLabels = {
@@ -50,12 +64,81 @@ export const FriendlyTimingLabels = {
   ),
 };
 
+export const FriendlyFlyoutLabels = {
+  [Metadata.Status]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.status',
+    {
+      defaultMessage: 'Status',
+    }
+  ),
+  [Metadata.MimeType]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.contentType',
+    {
+      defaultMessage: 'Content type',
+    }
+  ),
+  [Metadata.RequestStart]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.requestStart',
+    {
+      defaultMessage: 'Request start',
+    }
+  ),
+  [Metadata.ResourceSize]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.resourceSize',
+    {
+      defaultMessage: 'Resource size',
+    }
+  ),
+  [Metadata.TransferSize]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.transferSize',
+    {
+      defaultMessage: 'Transfer size',
+    }
+  ),
+  [Metadata.CertificateIssuer]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssuer',
+    {
+      defaultMessage: 'Issuer',
+    }
+  ),
+  [Metadata.CertificateIssueDate]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssueDate',
+    {
+      defaultMessage: 'Valid from',
+    }
+  ),
+  [Metadata.CertificateExpiryDate]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateExpiryDate',
+    {
+      defaultMessage: 'Valid until',
+    }
+  ),
+  [Metadata.CertificateSubject]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateSubject',
+    {
+      defaultMessage: 'Common name',
+    }
+  ),
+  [Metadata.IP]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.metadata.ip', {
+    defaultMessage: 'IP',
+  }),
+};
+
 export const TIMING_ORDER = [
   Timings.Blocked,
   Timings.Dns,
   Timings.Connect,
   Timings.Ssl,
   Timings.Send,
+  Timings.Wait,
+  Timings.Receive,
+] as const;
+
+export const META_DATA_ORDER_FLYOUT = [
+  Metadata.MimeType,
+  Timings.Dns,
+  Timings.Connect,
+  Timings.Ssl,
   Timings.Wait,
   Timings.Receive,
 ] as const;
@@ -70,6 +153,7 @@ export enum MimeType {
   Stylesheet = 'stylesheet',
   Media = 'media',
   Font = 'font',
+  XHR = 'xhr',
   Other = 'other',
 }
 
@@ -98,6 +182,9 @@ export const FriendlyMimetypeLabels = {
   [MimeType.Font]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.font', {
     defaultMessage: 'Font',
   }),
+  [MimeType.XHR]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.xhr', {
+    defaultMessage: 'XHR',
+  }),
   [MimeType.Other]: i18n.translate(
     'xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.other',
     {
@@ -111,7 +198,6 @@ export const FriendlyMimetypeLabels = {
 export const MimeTypesMap: Record<string, MimeType> = {
   'text/html': MimeType.Html,
   'application/javascript': MimeType.Script,
-  'application/json': MimeType.Script,
   'text/javascript': MimeType.Script,
   'text/css': MimeType.Stylesheet,
   // Images
@@ -145,38 +231,19 @@ export const MimeTypesMap: Record<string, MimeType> = {
   'application/font-woff2': MimeType.Font,
   'application/vnd.ms-fontobject': MimeType.Font,
   'application/font-sfnt': MimeType.Font,
+
+  // XHR
+  'application/json': MimeType.XHR,
 };
 
 export type NetworkItem = NetworkEvent;
 export type NetworkItems = NetworkItem[];
 
-// NOTE: A number will always be present if the property exists, but that number might be -1, which represents no value.
-export interface PayloadTimings {
-  dns_start: number;
-  push_end: number;
-  worker_fetch_start: number;
-  worker_respond_with_settled: number;
-  proxy_end: number;
-  worker_start: number;
-  worker_ready: number;
-  send_end: number;
-  connect_end: number;
-  connect_start: number;
-  send_start: number;
-  proxy_start: number;
-  push_start: number;
-  ssl_end: number;
-  receive_headers_end: number;
-  ssl_start: number;
-  request_time: number;
-  dns_end: number;
-}
-
-export interface ExtraSeriesConfig {
-  colour: string;
-}
-
-export type SidebarItem = Pick<NetworkItem, 'url' | 'status' | 'method'>;
+export type SidebarItem = Pick<NetworkItem, 'url' | 'status' | 'method'> & {
+  isHighlighted: boolean;
+  index: number;
+  offsetIndex: number;
+};
 export type SidebarItems = SidebarItem[];
 
 export interface LegendItem {

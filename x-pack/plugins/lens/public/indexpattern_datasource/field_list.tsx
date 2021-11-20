@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './field_list.scss';
@@ -13,6 +14,7 @@ import { NoFieldsCallout } from './no_fields_callout';
 import { IndexPatternField } from './types';
 import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
 import { DatasourceDataPanelProps } from '../types';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 const PAGINATION_SIZE = 50;
 
 export type FieldGroups = Record<
@@ -40,10 +42,11 @@ function getDisplayedFieldsLength(
     .reduce((allFieldCount, [, { fields }]) => allFieldCount + fields.length, 0);
 }
 
-export function FieldList({
+export const FieldList = React.memo(function FieldList({
   exists,
   fieldGroups,
   existenceFetchFailed,
+  existenceFetchTimeout,
   fieldProps,
   hasSyncedExistingFields,
   filter,
@@ -51,12 +54,16 @@ export function FieldList({
   existFieldsInIndex,
   dropOntoWorkspace,
   hasSuggestionForField,
+  editField,
+  removeField,
+  uiActions,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
   fieldProps: FieldItemSharedProps;
   hasSyncedExistingFields: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
   filter: {
     nameFilter: string;
     typeFilter: string[];
@@ -65,6 +72,9 @@ export function FieldList({
   existFieldsInIndex: boolean;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
+  editField?: (name: string) => void;
+  removeField?: (name: string) => void;
+  uiActions: UiActionsStart;
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -135,15 +145,20 @@ export function FieldList({
           {Object.entries(fieldGroups)
             .filter(([, { showInAccordion }]) => !showInAccordion)
             .flatMap(([, { fields }]) =>
-              fields.map((field) => (
+              fields.map((field, index) => (
                 <FieldItem
                   {...fieldProps}
                   exists={exists(field)}
                   field={field}
+                  editField={editField}
+                  removeField={removeField}
                   hideDetails={true}
                   key={field.name}
+                  itemIndex={index}
+                  groupIndex={0}
                   dropOntoWorkspace={dropOntoWorkspace}
                   hasSuggestionForField={hasSuggestionForField}
+                  uiActions={uiActions}
                 />
               ))
             )}
@@ -151,7 +166,7 @@ export function FieldList({
         <EuiSpacer size="s" />
         {Object.entries(fieldGroups)
           .filter(([, { showInAccordion }]) => showInAccordion)
-          .map(([key, fieldGroup]) => (
+          .map(([key, fieldGroup], index) => (
             <Fragment key={key}>
               <FieldsAccordion
                 dropOntoWorkspace={dropOntoWorkspace}
@@ -162,12 +177,15 @@ export function FieldList({
                 label={fieldGroup.title}
                 helpTooltip={fieldGroup.helpText}
                 exists={exists}
+                editField={editField}
+                removeField={removeField}
                 hideDetails={fieldGroup.hideDetails}
                 hasLoaded={!!hasSyncedExistingFields}
                 fieldsCount={fieldGroup.fields.length}
                 isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
                 paginatedFields={paginatedFields[key]}
                 fieldProps={fieldProps}
+                groupIndex={index + 1}
                 onToggle={(open) => {
                   setAccordionState((s) => ({
                     ...s,
@@ -182,6 +200,7 @@ export function FieldList({
                   );
                 }}
                 showExistenceFetchError={existenceFetchFailed}
+                showExistenceFetchTimeout={existenceFetchTimeout}
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
@@ -191,6 +210,7 @@ export function FieldList({
                     defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
                   />
                 }
+                uiActions={uiActions}
               />
               <EuiSpacer size="m" />
             </Fragment>
@@ -198,4 +218,4 @@ export function FieldList({
       </div>
     </div>
   );
-}
+});

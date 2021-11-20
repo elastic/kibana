@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment } from 'react';
@@ -55,20 +55,6 @@ export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: F
         <Fragment>
           {prefix}
           {filter.meta.key}: {getValue(`${existsOperator.message}`)}
-        </Fragment>
-      );
-    case FILTERS.GEO_BOUNDING_BOX:
-      return (
-        <Fragment>
-          {prefix}
-          {filter.meta.key}: {getValue(valueLabel)}
-        </Fragment>
-      );
-    case FILTERS.GEO_POLYGON:
-      return (
-        <Fragment>
-          {prefix}
-          {filter.meta.key}: {getValue(valueLabel)}
         </Fragment>
       );
     case FILTERS.PHRASES:

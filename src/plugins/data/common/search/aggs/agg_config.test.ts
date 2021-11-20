@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { identity } from 'lodash';
+import type { ExpressionAstExpression } from 'src/plugins/expressions';
 
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
@@ -14,7 +15,7 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { IndexPattern, IndexPatternField, IIndexPatternFieldList } from '../../index_patterns';
+import { IndexPattern, IndexPatternField, IIndexPatternFieldList } from '../..';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
@@ -51,10 +52,10 @@ describe('AggConfig', () => {
     indexPattern = {
       id: '1234',
       title: 'logstash-*',
-      fields: ({
+      fields: {
         getByName: (name: string) => fields.find((f) => f.name === name),
         filter: () => fields,
-      } as unknown) as IndexPattern['fields'],
+      } as unknown as IndexPattern['fields'],
       getFormatterForField: (field: IndexPatternField) => ({
         toJSON: () => ({}),
       }),
@@ -141,6 +142,51 @@ describe('AggConfig', () => {
       expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
       expect(dsl.aggs[avgConfig.id].avg).toBe(football);
     });
+
+    it('merges subAggs from #write() output to the current subaggs', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'avg',
+          schema: 'metric',
+          params: {},
+        },
+        {
+          enabled: true,
+          type: 'median',
+          schema: 'metric',
+          params: {},
+        },
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: {},
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+
+      const histoConfig = ac.byName('date_histogram')[0];
+      const avgConfig = ac.byName('avg')[0];
+      const medianConfig = ac.byName('median')[0];
+      const football = {};
+
+      jest
+        .spyOn(histoConfig, 'write')
+        .mockImplementation(() => ({ params: {}, subAggs: [avgConfig] }));
+      jest.spyOn(avgConfig, 'write').mockImplementation(() => ({ params: football }));
+      jest.spyOn(medianConfig, 'write').mockImplementation(() => ({ params: football }));
+
+      (histoConfig as any).subAggs = [medianConfig];
+      const dsl = histoConfig.toDsl();
+      expect(dsl).toHaveProperty('aggs');
+      expect(dsl.aggs).toHaveProperty(avgConfig.id);
+      expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
+      expect(dsl.aggs[avgConfig.id].avg).toBe(football);
+      expect(dsl.aggs).toHaveProperty(medianConfig.id);
+      expect(dsl.aggs[medianConfig.id]).toHaveProperty('percentiles');
+      expect(dsl.aggs[medianConfig.id].percentiles).toBe(football);
+    });
   });
 
   describe('::ensureIds', () => {
@@ -201,7 +247,7 @@ describe('AggConfig', () => {
 
     it('fails when the list is not defined', () => {
       expect(() => {
-        AggConfig.nextId((undefined as unknown) as IAggConfig[]);
+        AggConfig.nextId(undefined as unknown as IAggConfig[]);
       }).toThrowError();
     });
   });
@@ -617,52 +663,115 @@ describe('AggConfig', () => {
       `);
     });
 
-    it('creates a subexpression for param types other than "agg" which have specified toExpressionAst', () => {
-      // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
-      const range = typesRegistry.get('range') as MetricAggType;
-      range.expressionName = 'aggRange';
-      const rangesParam = range.params.find((p) => p.name === 'ranges');
-      rangesParam!.toExpressionAst = (val: any) => ({
-        type: 'expression',
-        chain: [
-          {
-            type: 'function',
-            function: 'aggRanges',
-            arguments: {
-              ranges: ['oh hi there!'],
-            },
-          },
-        ],
-      });
+    describe('subexpression', () => {
+      let ac: AggConfigs;
 
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
-      const configStates = {
-        type: 'range',
-        params: {
-          field: 'bytes',
-        },
-      };
-
-      const aggConfig = ac.createAggConfig(configStates);
-      const ranges = aggConfig.toExpressionAst()!.chain[0].arguments.ranges;
-      expect(ranges).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "ranges": Array [
-                    "oh hi there!",
-                  ],
+      beforeEach(() => {
+        // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
+        const range = typesRegistry.get('range') as MetricAggType;
+        range.expressionName = 'aggRange';
+        const rangesParam = range.params.find((p) => p.name === 'ranges');
+        rangesParam!.toExpressionAst = (val: any) => {
+          const toExpression = (ranges: any): ExpressionAstExpression => ({
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'aggRanges',
+                arguments: {
+                  ranges,
                 },
-                "function": "aggRanges",
-                "type": "function",
               },
             ],
-            "type": "expression",
+          });
+
+          return Array.isArray(val) ? val.map(toExpression) : toExpression(val);
+        };
+
+        ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      });
+
+      it('creates a subexpression for param types other than "agg" which have specified toExpressionAst', () => {
+        const configStates = {
+          type: 'range',
+          params: {
+            field: 'bytes',
+            ranges: { from: 1, to: 2 },
           },
-        ]
-      `);
+        };
+
+        const aggConfig = ac.createAggConfig(configStates);
+        const ranges = aggConfig.toExpressionAst()!.chain[0].arguments.ranges;
+        expect(ranges).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "ranges": Object {
+                      "from": 1,
+                      "to": 2,
+                    },
+                  },
+                  "function": "aggRanges",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ]
+        `);
+      });
+
+      it('supports subexpressions in multi-value arguments', () => {
+        const configStates = {
+          type: 'range',
+          params: {
+            field: 'bytes',
+            ranges: [
+              { from: 1, to: 2 },
+              { from: 2, to: 3 },
+            ],
+          },
+        };
+
+        const aggConfig = ac.createAggConfig(configStates);
+        const ranges = aggConfig.toExpressionAst()!.chain[0].arguments.ranges;
+        expect(ranges).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "ranges": Object {
+                      "from": 1,
+                      "to": 2,
+                    },
+                  },
+                  "function": "aggRanges",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "ranges": Object {
+                      "from": 2,
+                      "to": 3,
+                    },
+                  },
+                  "function": "aggRanges",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ]
+        `);
+      });
     });
 
     it('stringifies any other params which are an object', () => {
@@ -686,7 +795,7 @@ describe('AggConfig', () => {
         type: 'range',
         params: {
           field: 'bytes',
-          ranges: [
+          json: [
             { from: 0, to: 1000 },
             { from: 1001, to: 2000 },
             { from: 2001, to: 3000 },
@@ -694,8 +803,8 @@ describe('AggConfig', () => {
         },
       };
       const aggConfig = ac.createAggConfig(configStates);
-      const ranges = aggConfig.toExpressionAst()?.chain[0].arguments.ranges;
-      expect(ranges).toEqual([JSON.stringify(configStates.params.ranges)]);
+      const json = aggConfig.toExpressionAst()?.chain[0].arguments.json;
+      expect(json).toEqual([JSON.stringify(configStates.params.json)]);
     });
 
     it('does not stringify arrays which are not objects', () => {
@@ -738,7 +847,7 @@ describe('AggConfig', () => {
     });
 
     it('empty label if the type is not defined', () => {
-      aggConfig.type = (undefined as unknown) as AggType;
+      aggConfig.type = undefined as unknown as AggType;
       const label = aggConfig.makeLabel();
       expect(label).toBe('');
     });

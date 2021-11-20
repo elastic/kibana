@@ -4,6 +4,11 @@
 
 ## AppMountParameters.onAppLeave property
 
+> Warning: This API is now obsolete.
+> 
+> [ScopedHistory.block](./kibana-plugin-core-public.scopedhistory.block.md) should be used instead.
+> 
+
 A function that can be used to register a handler that will be called when the user is leaving the current application, allowing to prompt a confirmation message before actually changing the page.
 
 This will be called either when the user goes to another application, or when trying to close the tab or manually changing the url.
@@ -36,6 +41,5 @@ export renderApp = ({ element, history, onAppLeave }: AppMountParameters) => {
    });
    return renderApp({ element, history });
 }
-
 ```
 

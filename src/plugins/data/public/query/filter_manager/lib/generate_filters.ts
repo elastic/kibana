@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
 import {
-  IFieldType,
-  IIndexPattern,
   Filter,
   isExistsFilter,
   isPhraseFilter,
@@ -19,7 +17,9 @@ import {
   buildFilter,
   FilterStateStore,
   FILTERS,
-} from '../../../../common';
+} from '@kbn/es-query';
+
+import { IFieldType, IIndexPattern } from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
@@ -32,7 +32,7 @@ function getExistingFilter(
     if (!filter) return;
 
     if (fieldName === '_exists_' && isExistsFilter(filter)) {
-      return filter.exists!.field === value;
+      return filter.query.exists!.field === value;
     }
 
     if (isPhraseFilter(filter)) {
@@ -40,7 +40,7 @@ function getExistingFilter(
     }
 
     if (isScriptedPhraseFilter(filter)) {
-      return filter.meta.field === fieldName && filter.script!.script.params.value === value;
+      return filter.meta.field === fieldName && filter.script.script.params?.value === value;
     }
   }) as any;
 }
@@ -71,12 +71,14 @@ export function generateFilters(
   operation: string,
   index: string
 ): Filter[] {
-  values = Array.isArray(values) ? values : [values];
-  const fieldObj = (_.isObject(field)
-    ? field
-    : {
-        name: field,
-      }) as IFieldType;
+  values = Array.isArray(values) ? _.uniq(values) : [values];
+  const fieldObj = (
+    _.isObject(field)
+      ? field
+      : {
+          name: field,
+        }
+  ) as IFieldType;
   const fieldName = fieldObj.name;
   const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();
@@ -90,6 +92,21 @@ export function generateFilters(
     if (existing) {
       updateExistingFilter(existing, negate);
       filter = existing;
+    } else if (fieldObj.type?.includes('range') && value && typeof value === 'object') {
+      // When dealing with range fields, the filter type depends on the data passed in. If it's an
+      // object we assume that it's a min/max value
+      const tmpIndexPattern = { id: index } as IIndexPattern;
+
+      filter = buildFilter(
+        tmpIndexPattern,
+        fieldObj,
+        FILTERS.RANGE_FROM_VALUE,
+        false,
+        false,
+        value,
+        null,
+        FilterStateStore.APP_STATE
+      );
     } else {
       const tmpIndexPattern = { id: index } as IIndexPattern;
       // exists filter special case:  fieldname = '_exists' and value = fieldname

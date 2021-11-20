@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -14,10 +15,13 @@ import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from './index';
 import type { IndexPattern, IndexPatternLayer } from '../../types';
+import { TermsIndexPatternColumn } from './terms';
+
+const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
@@ -26,6 +30,11 @@ const defaultProps = {
     ...createMockedIndexPattern(),
     hasRestrictions: false,
   } as IndexPattern,
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('last_value', () => {
@@ -48,7 +57,7 @@ describe('last_value', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'Last value of a',
           dataType: 'number',
@@ -58,7 +67,7 @@ describe('last_value', () => {
           params: {
             sortField: 'datefield',
           },
-        },
+        } as LastValueIndexPatternColumn,
       },
     };
   });
@@ -70,7 +79,9 @@ describe('last_value', () => {
         { ...lastValueColumn, params: { ...lastValueColumn.params } },
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -312,15 +323,15 @@ describe('last_value', () => {
   it('should return disabledStatus if indexPattern does contain date field', () => {
     const indexPattern = createMockedIndexPattern();
 
-    expect(lastValueOperation.getDisabledStatus!(indexPattern, layer)).toEqual(undefined);
+    expect(lastValueOperation.getDisabledStatus!(indexPattern, layer, 'data')).toEqual(undefined);
 
     const indexPatternWithoutTimeFieldName = {
       ...indexPattern,
       timeFieldName: undefined,
     };
-    expect(lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName, layer)).toEqual(
-      undefined
-    );
+    expect(
+      lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName, layer, 'data')
+    ).toEqual(undefined);
 
     const indexPatternWithoutTimefields = {
       ...indexPatternWithoutTimeFieldName,
@@ -329,10 +340,65 @@ describe('last_value', () => {
 
     const disabledStatus = lastValueOperation.getDisabledStatus!(
       indexPatternWithoutTimefields,
-      layer
+      layer,
+      'data'
     );
     expect(disabledStatus).toEqual(
-      'This function requires the presence of a date field in your index'
+      'This function requires the presence of a date field in your data view'
+    );
+  });
+
+  it('should pick the previous format configuration if set', () => {
+    const indexPattern = createMockedIndexPattern();
+    expect(
+      lastValueOperation.buildColumn({
+        indexPattern,
+        layer: {
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        previousColumn: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count',
+          params: {
+            format: {
+              id: 'number',
+              params: {
+                decimals: 2,
+              },
+            },
+          },
+        },
+      }).params
+    ).toEqual(
+      expect.objectContaining({
+        format: {
+          id: 'number',
+          params: {
+            decimals: 2,
+          },
+        },
+      })
     );
   });
 
@@ -402,7 +468,7 @@ describe('last_value', () => {
             params: { sortField: 'timestamp' },
             scale: 'ratio',
             sourceField: 'bytes',
-          },
+          } as LastValueIndexPatternColumn,
         },
         columnOrder: [],
         indexPatternId: '',
@@ -427,14 +493,14 @@ describe('last_value', () => {
         'Field notExisting was not found',
       ]);
     });
-    it('shows error message  if the sortField does not exist in index pattern', () => {
+    it('shows error message if the sortField does not exist in index pattern', () => {
       errorLayer = {
         ...errorLayer,
         columns: {
           col1: {
             ...errorLayer.columns.col1,
             params: {
-              ...errorLayer.columns.col1.params,
+              ...(errorLayer.columns.col1 as LastValueIndexPatternColumn).params,
               sortField: 'notExisting',
             },
           } as LastValueIndexPatternColumn,
@@ -444,6 +510,20 @@ describe('last_value', () => {
         'Field notExisting was not found',
       ]);
     });
+    it('shows error message if the sourceField is of unsupported type', () => {
+      errorLayer = {
+        ...errorLayer,
+        columns: {
+          col1: {
+            ...errorLayer.columns.col1,
+            sourceField: 'timestamp',
+          } as LastValueIndexPatternColumn,
+        },
+      };
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
+        'Field timestamp is of the wrong type',
+      ]);
+    });
     it('shows error message if the sortField is not date', () => {
       errorLayer = {
         ...errorLayer,
@@ -451,7 +531,7 @@ describe('last_value', () => {
           col1: {
             ...errorLayer.columns.col1,
             params: {
-              ...errorLayer.columns.col1.params,
+              ...(errorLayer.columns.col1 as LastValueIndexPatternColumn).params,
               sortField: 'bytes',
             },
           } as LastValueIndexPatternColumn,

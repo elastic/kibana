@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useContext } from 'react';
@@ -12,6 +13,7 @@ import { MultiMetricView } from '../../../pick_fields_step/components/multi_metr
 import { PopulationView } from '../../../pick_fields_step/components/population_view';
 import { AdvancedView } from '../../../pick_fields_step/components/advanced_view';
 import { CategorizationView } from '../../../pick_fields_step/components/categorization_view';
+import { RareView } from '../../../pick_fields_step/components/rare_view';
 
 export const DetectorChart: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
@@ -23,6 +25,7 @@ export const DetectorChart: FC = () => {
       {jobCreator.type === JOB_TYPE.POPULATION && <PopulationView isActive={false} />}
       {jobCreator.type === JOB_TYPE.ADVANCED && <AdvancedView isActive={false} />}
       {jobCreator.type === JOB_TYPE.CATEGORIZATION && <CategorizationView isActive={false} />}
+      {jobCreator.type === JOB_TYPE.RARE && <RareView isActive={false} />}
     </Fragment>
   );
 };

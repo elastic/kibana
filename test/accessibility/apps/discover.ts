@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -11,25 +11,14 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
+  const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
 
   describe('Discover a11y tests', () => {
     before(async () => {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
-      });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-    });
-
-    after(async () => {
-      await esArchiver.unload('logstash_functional');
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
     });
 
     it('Discover main page', async () => {
@@ -103,8 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.saveCurrentSavedQuery();
     });
 
-    // issue - https://github.com/elastic/kibana/issues/78488
-    it.skip('a11y test on saved queries list panel', async () => {
+    it('a11y test on saved queries list panel', async () => {
       await PageObjects.discover.clickSavedQueriesPopOver();
       await testSubjects.moveMouseTo(
         'saved-query-list-item load-saved-query-test-button saved-query-list-item-selected saved-query-list-item-selected'

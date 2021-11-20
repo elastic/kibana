@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import type { ControlStyle } from '../../presentation_util/public';
+
+export const DASHBOARD_STATE_STORAGE_KEY = '_a';
 
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',
@@ -15,10 +19,21 @@ export const DashboardConstants = {
   DASHBOARDS_ID: 'dashboards',
   DASHBOARD_ID: 'dashboard',
   SEARCH_SESSION_ID: 'searchSessionId',
+  CHANGE_CHECK_DEBOUNCE: 100,
+  CHANGE_APPLY_DEBOUNCE: 50,
 };
 
-export function createDashboardEditUrl(id: string) {
-  return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}`;
+export const getDefaultDashboardControlGroupInput = () => ({
+  controlStyle: 'oneLine' as ControlStyle,
+  panels: {},
+});
+
+export function createDashboardEditUrl(id?: string, editMode?: boolean) {
+  if (!id) {
+    return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
+  }
+  const edit = editMode ? `?${DASHBOARD_STATE_STORAGE_KEY}=(viewMode:edit)` : '';
+  return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}${edit}`;
 }
 
 export function createDashboardListingFilterUrl(filter: string | undefined) {

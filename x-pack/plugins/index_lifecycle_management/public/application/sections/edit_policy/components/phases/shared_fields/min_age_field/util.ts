@@ -1,16 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { Phases } from '../../../../../../../../common/types';
+import { PhaseWithTiming } from '../../../../../../../../common/types';
 
-type PhaseWithMinAgeAction = 'warm' | 'cold' | 'delete';
-
-export function getUnitsAriaLabelForPhase(phase: keyof Phases) {
-  // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
+export function getUnitsAriaLabelForPhase(phase: PhaseWithTiming) {
   switch (phase) {
     case 'warm':
       return i18n.translate(
@@ -28,6 +26,14 @@ export function getUnitsAriaLabelForPhase(phase: keyof Phases) {
         }
       );
 
+    case 'frozen':
+      return i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.phaseFrozen.minimumAgeUnitsAriaLabel',
+        {
+          defaultMessage: 'Units for timing of frozen phase',
+        }
+      );
+
     case 'delete':
       return i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeUnitsAriaLabel',
@@ -37,8 +43,7 @@ export function getUnitsAriaLabelForPhase(phase: keyof Phases) {
       );
   }
 }
-export function getTimingLabelForPhase(phase: PhaseWithMinAgeAction) {
-  // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
+export function getTimingLabelForPhase(phase: PhaseWithTiming) {
   switch (phase) {
     case 'warm':
       return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeLabel', {
@@ -48,6 +53,11 @@ export function getTimingLabelForPhase(phase: PhaseWithMinAgeAction) {
     case 'cold':
       return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeLabel', {
         defaultMessage: 'Timing for cold phase',
+      });
+
+    case 'frozen':
+      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseFrozen.minimumAgeLabel', {
+        defaultMessage: 'Timing for frozen phase',
       });
 
     case 'delete':

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { forkJoin, Observable, of } from 'rxjs';
@@ -25,7 +26,6 @@ import {
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
 import { GetAnnotationsResponse } from '../../../../common/types/annotations';
-import { ANNOTATION_EVENT_USER } from '../../../../common/constants/annotations';
 import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 export interface Interval {
@@ -41,7 +41,6 @@ export interface FocusData {
   focusAnnotationError?: string;
   focusAnnotationData?: any[];
   focusForecastData?: any;
-  focusAggregations?: any;
 }
 
 export function getFocusData(
@@ -97,12 +96,6 @@ export function getFocusData(
         earliestMs: searchBounds.min.valueOf(),
         latestMs: searchBounds.max.valueOf(),
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-        fields: [
-          {
-            field: 'event',
-            missing: ANNOTATION_EVENT_USER,
-          },
-        ],
         detectorIndex,
         entities: nonBlankEntities,
       })
@@ -110,7 +103,7 @@ export function getFocusData(
         catchError((resp) =>
           of({
             annotations: {},
-            aggregations: {},
+            totalCount: 0,
             error: extractErrorMessage(resp),
             success: false,
           } as GetAnnotationsResponse)
@@ -167,7 +160,6 @@ export function getFocusData(
         if (annotations.error !== undefined) {
           refreshFocusData.focusAnnotationError = annotations.error;
           refreshFocusData.focusAnnotationData = [];
-          refreshFocusData.focusAggregations = {};
         } else {
           refreshFocusData.focusAnnotationData = (annotations.annotations[selectedJob.job_id] ?? [])
             .sort((a, b) => {
@@ -177,8 +169,6 @@ export function getFocusData(
               d.key = (i + 1).toString();
               return d;
             });
-
-          refreshFocusData.focusAggregations = annotations.aggregations;
         }
       }
 

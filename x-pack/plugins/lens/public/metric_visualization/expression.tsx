@@ -1,100 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './expression.scss';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  ExpressionFunctionDefinition,
+import { IUiSettingsClient } from 'kibana/public';
+import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions/public';
-import { MetricConfig } from './types';
-import { FormatFactory, LensMultiTable } from '../types';
+import {
+  ColorMode,
+  CustomPaletteState,
+  PaletteOutput,
+} from '../../../../../src/plugins/charts/public';
 import { AutoScale } from './auto_scale';
 import { VisualizationContainer } from '../visualization_container';
-import { EmptyPlaceholder } from '../shared_components';
+import { EmptyPlaceholder, getContrastColor } from '../shared_components';
 import { LensIconChartMetric } from '../assets/chart_metric';
-
-export interface MetricChartProps {
-  data: LensMultiTable;
-  args: MetricConfig;
-}
-
-export interface MetricRender {
-  type: 'render';
-  as: 'lens_metric_chart_renderer';
-  value: MetricChartProps;
-}
-
-export const metricChart: ExpressionFunctionDefinition<
-  'lens_metric_chart',
-  LensMultiTable,
-  Omit<MetricConfig, 'layerId'>,
-  MetricRender
-> = {
-  name: 'lens_metric_chart',
-  type: 'render',
-  help: 'A metric chart',
-  args: {
-    title: {
-      types: ['string'],
-      help: 'The chart title.',
-    },
-    description: {
-      types: ['string'],
-      help: '',
-    },
-    metricTitle: {
-      types: ['string'],
-      help: 'The title of the metric shown.',
-    },
-    accessor: {
-      types: ['string'],
-      help: 'The column whose value is being displayed',
-    },
-    mode: {
-      types: ['string'],
-      options: ['reduced', 'full'],
-      default: 'full',
-      help:
-        'The display mode of the chart - reduced will only show the metric itself without min size',
-    },
-  },
-  inputTypes: ['lens_multitable'],
-  fn(data, args) {
-    return {
-      type: 'render',
-      as: 'lens_metric_chart_renderer',
-      value: {
-        data,
-        args,
-      },
-    } as MetricRender;
-  },
-};
+import type { FormatFactory } from '../../common';
+import type { MetricChartProps } from '../../common/expressions';
+export type { MetricChartProps, MetricState, MetricConfig } from '../../common/expressions';
 
 export const getMetricChartRenderer = (
-  formatFactory: Promise<FormatFactory>
+  formatFactory: FormatFactory,
+  uiSettings: IUiSettingsClient
 ): ExpressionRenderDefinition<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
   displayName: 'Metric chart',
   help: 'Metric chart renderer',
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (
-    domNode: Element,
-    config: MetricChartProps,
-    handlers: IInterpreterRenderHandlers
-  ) => {
-    const resolvedFormatFactory = await formatFactory;
+  render: (domNode: Element, config: MetricChartProps, handlers: IInterpreterRenderHandlers) => {
     ReactDOM.render(
       <I18nProvider>
-        <MetricChart {...config} formatFactory={resolvedFormatFactory} />
+        <MetricChart {...config} formatFactory={formatFactory} uiSettings={uiSettings} />
       </I18nProvider>,
       domNode,
       () => {
@@ -105,55 +50,101 @@ export const getMetricChartRenderer = (
   },
 });
 
+function getColorStyling(
+  value: number,
+  colorMode: ColorMode,
+  palette: PaletteOutput<CustomPaletteState> | undefined,
+  isDarkTheme: boolean
+) {
+  if (
+    colorMode === ColorMode.None ||
+    !palette?.params ||
+    !palette?.params.colors?.length ||
+    isNaN(value)
+  ) {
+    return {};
+  }
+
+  const { continuity = 'above', rangeMin, stops, colors } = palette.params;
+  const penultimateStop = stops[stops.length - 2];
+
+  if (continuity === 'none' && (value < rangeMin || value > penultimateStop)) {
+    return {};
+  }
+  if (continuity === 'below' && value > penultimateStop) {
+    return {};
+  }
+  if (continuity === 'above' && value < rangeMin) {
+    return {};
+  }
+  const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
+  const rawIndex = stops.findIndex((v) => v > value);
+
+  let colorIndex = rawIndex;
+  if (['all', 'below'].includes(continuity) && value < rangeMin && colorIndex < 0) {
+    colorIndex = 0;
+  }
+  if (['all', 'above'].includes(continuity) && value > penultimateStop && colorIndex < 0) {
+    colorIndex = stops.length - 1;
+  }
+
+  const color = colors[colorIndex];
+  const styling = {
+    [cssProp]: color,
+  };
+  if (colorMode === ColorMode.Background && color) {
+    styling.color = getContrastColor(color, isDarkTheme);
+  }
+  return styling;
+}
+
 export function MetricChart({
   data,
   args,
   formatFactory,
-}: MetricChartProps & { formatFactory: FormatFactory }) {
-  const { metricTitle, title, description, accessor, mode } = args;
+  uiSettings,
+}: MetricChartProps & { formatFactory: FormatFactory; uiSettings: IUiSettingsClient }) {
+  const { metricTitle, accessor, mode, colorMode, palette } = args;
   const firstTable = Object.values(data.tables)[0];
-  if (!accessor) {
-    return (
-      <VisualizationContainer
-        reportTitle={title}
-        reportDescription={description}
-        className="lnsMetricExpression__container"
-      />
-    );
+
+  const getEmptyState = () => (
+    <VisualizationContainer className="lnsMetricExpression__container">
+      <EmptyPlaceholder icon={LensIconChartMetric} />
+    </VisualizationContainer>
+  );
+
+  if (!accessor || !firstTable) {
+    return getEmptyState();
   }
 
-  if (!firstTable) {
-    return <EmptyPlaceholder icon={LensIconChartMetric} />;
-  }
-
-  const column = firstTable.columns[0];
+  const column = firstTable.columns.find(({ id }) => id === accessor);
   const row = firstTable.rows[0];
+  if (!column || !row) {
+    return getEmptyState();
+  }
+  const rawValue = row[accessor];
 
   // NOTE: Cardinality and Sum never receives "null" as value, but always 0, even for empty dataset.
   // Mind falsy values here as 0!
-  const shouldShowResults = row[accessor] != null;
-
-  if (!shouldShowResults) {
-    return <EmptyPlaceholder icon={LensIconChartMetric} />;
+  if (!['number', 'string'].includes(typeof rawValue)) {
+    return getEmptyState();
   }
 
   const value =
     column && column.meta?.params
-      ? formatFactory(column.meta?.params).convert(row[accessor])
-      : Number(Number(row[accessor]).toFixed(3)).toString();
+      ? formatFactory(column.meta?.params).convert(rawValue)
+      : Number(Number(rawValue).toFixed(3)).toString();
+
+  const color = getColorStyling(rawValue, colorMode, palette, uiSettings.get('theme:darkMode'));
 
   return (
-    <VisualizationContainer
-      reportTitle={title}
-      reportDescription={description}
-      className="lnsMetricExpression__container"
-    >
-      <AutoScale>
-        <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
+    <VisualizationContainer className="lnsMetricExpression__container">
+      <AutoScale key={value}>
+        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value" style={color}>
           {value}
         </div>
         {mode === 'full' && (
-          <div data-test-subj="lns_metric_title" style={{ fontSize: '24pt' }}>
+          <div data-test-subj="lns_metric_title" className="lnsMetricExpression__title">
             {metricTitle}
           </div>
         )}

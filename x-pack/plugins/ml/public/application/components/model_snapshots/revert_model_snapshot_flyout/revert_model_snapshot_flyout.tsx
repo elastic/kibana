@@ -1,13 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
@@ -27,7 +22,6 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiCallOut,
   EuiHorizontalRule,
   EuiSuperSelect,
@@ -48,6 +42,7 @@ import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loa
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { CreateCalendar, CalendarEvent } from './create_calendar';
 import { timeFormatter } from '../../../../../common/util/date_utils';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 
 interface Props {
   snapshot: ModelSnapshot;
@@ -145,6 +140,10 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
             })
           );
           refresh();
+        })
+        .catch((error) => {
+          const { displayErrorToast } = toastNotificationServiceProvider(toasts);
+          displayErrorToast(error);
         });
       hideRevertModal();
       closeFlyout();
@@ -373,34 +372,32 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
       </EuiFlyout>
 
       {revertModalVisible && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
-              defaultMessage: 'Apply snapshot revert',
-            })}
-            onCancel={hideRevertModal}
-            onConfirm={applyRevert}
-            cancelButtonText={i18n.translate(
-              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.cancelButton',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            confirmButtonText={i18n.translate(
-              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteButton',
-              {
-                defaultMessage: 'Apply',
-              }
-            )}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
-          >
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.modalBody"
-              defaultMessage="The snapshot revert will be carried out in the background and may take some time."
-            />
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
+            defaultMessage: 'Apply snapshot revert',
+          })}
+          onCancel={hideRevertModal}
+          onConfirm={applyRevert}
+          cancelButtonText={i18n.translate(
+            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.cancelButton',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteButton',
+            {
+              defaultMessage: 'Apply',
+            }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.modalBody"
+            defaultMessage="The snapshot revert will be carried out in the background and may take some time."
+          />
+        </EuiConfirmModal>
       )}
     </>
   );

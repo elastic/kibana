@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { POD_FIELD, HOST_FIELD, CONTAINER_FIELD } from '../constants';
 import { host } from './host';
 import { pod } from './pod';
 import { awsEC2 } from './aws_ec2';
@@ -29,31 +31,23 @@ export const findInventoryModel = (type: InventoryItemType) => {
   return model;
 };
 
-interface InventoryFields {
-  host: string;
-  pod: string;
-  container: string;
-  timestamp: string;
-  tiebreaker: string;
-}
-
 const LEGACY_TYPES = ['host', 'pod', 'container'];
 
-const getFieldByType = (type: InventoryItemType, fields: InventoryFields) => {
+export const getFieldByType = (type: InventoryItemType) => {
   switch (type) {
     case 'pod':
-      return fields.pod;
+      return POD_FIELD;
     case 'host':
-      return fields.host;
+      return HOST_FIELD;
     case 'container':
-      return fields.container;
+      return CONTAINER_FIELD;
   }
 };
 
-export const findInventoryFields = (type: InventoryItemType, fields?: InventoryFields) => {
+export const findInventoryFields = (type: InventoryItemType) => {
   const inventoryModel = findInventoryModel(type);
-  if (fields && LEGACY_TYPES.includes(type)) {
-    const id = getFieldByType(type, fields) || inventoryModel.fields.id;
+  if (LEGACY_TYPES.includes(type)) {
+    const id = getFieldByType(type) || inventoryModel.fields.id;
     return {
       ...inventoryModel.fields,
       id,

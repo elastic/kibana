@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { DOCS_PREFIX } from '../../routes';
 
 export const CREDENTIALS_TITLE = i18n.translate(
@@ -18,15 +20,21 @@ export enum ApiTokenTypes {
   Search = 'search',
 }
 
-export const CREATE_MESSAGE = i18n.translate('xpack.enterpriseSearch.appSearch.tokens.created', {
-  defaultMessage: 'Successfully created key.',
-});
-export const UPDATE_MESSAGE = i18n.translate('xpack.enterpriseSearch.appSearch.tokens.update', {
-  defaultMessage: 'Successfully updated API Key.',
-});
-export const DELETE_MESSAGE = i18n.translate('xpack.enterpriseSearch.appSearch.tokens.deleted', {
-  defaultMessage: 'Successfully deleted key.',
-});
+export const CREATE_MESSAGE = (name: string) =>
+  i18n.translate('xpack.enterpriseSearch.appSearch.tokens.created', {
+    defaultMessage: "API key '{name}' was created",
+    values: { name },
+  });
+export const UPDATE_MESSAGE = (name: string) =>
+  i18n.translate('xpack.enterpriseSearch.appSearch.tokens.update', {
+    defaultMessage: "API key '{name}' was updated",
+    values: { name },
+  });
+export const DELETE_MESSAGE = (name: string) =>
+  i18n.translate('xpack.enterpriseSearch.appSearch.tokens.deleted', {
+    defaultMessage: "API key '{name}' was deleted",
+    values: { name },
+  });
 
 export const SEARCH_DISPLAY = i18n.translate(
   'xpack.enterpriseSearch.appSearch.tokens.permissions.display.search',

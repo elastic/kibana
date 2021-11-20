@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Store } from 'redux';
-import { ReactWrapper } from 'enzyme';
+import { ReactWrapper as GenericReactWrapper } from 'enzyme';
+import { LocationDescriptor } from 'history';
 
+export type AsyncSetupFunc<T> = (props?: any) => Promise<TestBed<T>>;
+export type SyncSetupFunc<T> = (props?: any) => TestBed<T>;
 export type SetupFunc<T> = (props?: any) => TestBed<T> | Promise<TestBed<T>>;
+export type ReactWrapper = GenericReactWrapper<any>;
 
 export interface EuiTableMetaData {
   /** Array of rows of the table. Each row exposes its reactWrapper and its columns */
@@ -50,7 +54,7 @@ export interface TestBed<T = string> {
     find('myForm.nameInput');
     ```
    */
-  find: (testSubject: T, reactWrapper?: ReactWrapper) => ReactWrapper<any>;
+  find: (testSubject: T, reactWrapper?: ReactWrapper) => ReactWrapper;
   /**
    * Update the props of the mounted component
    *
@@ -121,7 +125,7 @@ export interface TestBed<T = string> {
      *
      * @param switchTestSubject The test subject of the EuiSwitch (can be a nested path. e.g. "myForm.mySwitch").
      */
-    toggleEuiSwitch: (switchTestSubject: T, isChecked?: boolean) => void;
+    toggleEuiSwitch: (switchTestSubject: T) => void;
     /**
      * The EUI ComboBox is a special input as it needs the ENTER key to be pressed
      * in order to register the value set. This helpers automatically does that.
@@ -133,7 +137,7 @@ export interface TestBed<T = string> {
     /**
      * Get a list of the form error messages that are visible in the DOM.
      */
-    getErrorsMessages: () => string[];
+    getErrorsMessages: (wrapper?: T | ReactWrapper) => string[];
   };
   table: {
     getMetaData: (tableTestSubject: T) => EuiTableMetaData;
@@ -146,26 +150,34 @@ export interface TestBed<T = string> {
   };
 }
 
-export interface TestBedConfig {
+export interface BaseTestBedConfig {
   /** The default props to pass to the mounted component. */
   defaultProps?: Record<string, any>;
   /** Configuration object for the react-router `MemoryRouter. */
   memoryRouter?: MemoryRouterConfig;
   /** An optional redux store. You can also provide a function that returns a store. */
   store?: (() => Store) | Store | null;
+}
+
+export interface AsyncTestBedConfig extends BaseTestBedConfig {
   /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
-  doMountAsync?: boolean;
+  doMountAsync: true;
+}
+
+export interface TestBedConfig extends BaseTestBedConfig {
+  /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
+  doMountAsync?: false;
 }
 
 export interface MemoryRouterConfig {
   /** Flag to add or not the `MemoryRouter`. If set to `false`, there won't be any router and the component won't be wrapped on a `<Route />`. */
   wrapComponent?: boolean;
   /** The React Router **initial entries** setting ([see documentation](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)) */
-  initialEntries?: string[];
+  initialEntries?: LocationDescriptor[];
   /** The React Router **initial index** setting ([see documentation](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)) */
   initialIndex?: number;
   /** The route **path** for the mounted component (defaults to `"/"`) */
-  componentRoutePath?: string | string[];
+  componentRoutePath?: LocationDescriptor | LocationDescriptor[];
   /** A callBack that will be called with the React Router instance once mounted  */
   onRouter?: (router: any) => void;
 }

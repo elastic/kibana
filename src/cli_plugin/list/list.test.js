@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { join } from 'path';
@@ -64,7 +64,6 @@ describe('kibana cli', function () {
           "log: plugin1@5.0.0-alpha2",
           "log: plugin2@3.2.1",
           "log: plugin3@1.2.3",
-          "log: ",
         ]
       `);
     });
@@ -91,6 +90,15 @@ describe('kibana cli', function () {
       }).toThrowErrorMatchingInlineSnapshot(
         `"Unable to read kibana.json file for plugin invalid-plugin"`
       );
+    });
+
+    it('show message if no plugins are installed', function () {
+      list(pluginDir, logger);
+      expect(logger.messages).toMatchInlineSnapshot(`
+        Array [
+          "log: No plugins installed.",
+        ]
+      `);
     });
   });
 });

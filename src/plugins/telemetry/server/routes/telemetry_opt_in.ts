@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -83,15 +83,15 @@ export function registerTelemetryOptInRoutes({
       );
 
       if (config.sendUsageFrom === 'server') {
-        const optInStatusUrl = config.optInStatusUrl;
+        const { sendUsageTo } = config;
         sendTelemetryOptInStatus(
           telemetryCollectionManager,
-          { optInStatusUrl, newOptInStatus, currentKibanaVersion },
+          { sendUsageTo, newOptInStatus, currentKibanaVersion },
           statsGetterConfig
         ).catch((err) => {
           // The server is likely behind a firewall and can't reach the remote service
           logger.warn(
-            `Failed to notify "${optInStatusUrl}" from the server about the opt-in selection. Possibly blocked by a firewall? - Error: ${err.message}`
+            `Failed to notify the telemetry endpoint about the opt-in selection. Possibly blocked by a firewall? - Error: ${err.message}`
           );
         });
       }

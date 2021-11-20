@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
@@ -17,7 +19,7 @@ import {
  * Get a list of Cluster UUIDs that exist within the specified timespan.
  */
 export async function getClusterUuids(
-  callCluster: LegacyAPICaller, // TODO: To be changed to the new ES client when the plugin migrates
+  callCluster: ElasticsearchClient,
   timestamp: number,
   maxBucketSize: number
 ) {
@@ -29,7 +31,7 @@ export async function getClusterUuids(
  * Fetch the aggregated Cluster UUIDs from the monitoring cluster.
  */
 export async function fetchClusterUuids(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   timestamp: number,
   maxBucketSize: number
 ) {
@@ -37,13 +39,13 @@ export async function fetchClusterUuids(
 
   const end = moment(timestamp).toISOString();
 
-  const params = {
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: 0,
-    ignoreUnavailable: true,
-    filterPath: 'aggregations.cluster_uuids.buckets.key',
+    ignore_unavailable: true,
+    filter_path: 'aggregations.cluster_uuids.buckets.key',
     body: {
-      query: createQuery({ type: 'cluster_stats', start, end }),
+      query: createQuery({ type: 'cluster_stats', start, end }) as estypes.QueryDslQueryContainer,
       aggs: {
         cluster_uuids: {
           terms: {
@@ -55,7 +57,8 @@ export async function fetchClusterUuids(
     },
   };
 
-  return await callCluster('search', params);
+  const { body: response } = await callCluster.search(params);
+  return response;
 }
 
 /**

@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
-import { removeLeadingSlash } from '../common';
-import {
-  createStreamingBatchedFunction,
-  StreamingBatchedFunctionParams,
-} from './batching/create_streaming_batched_function';
+import { DISABLE_BFETCH_COMPRESSION, removeLeadingSlash } from '../common';
+import { createStreamingBatchedFunction, StreamingBatchedFunctionParams } from './batching';
 import { BatchedFunc } from './batching/types';
+import { createStartServicesGetter } from '../../kibana_utils/public';
 
 // eslint-disable-next-line
 export interface BfetchPublicSetupDependencies {}
@@ -38,17 +36,25 @@ export class BfetchPublicPlugin
       BfetchPublicStart,
       BfetchPublicSetupDependencies,
       BfetchPublicStartDependencies
-    > {
+    >
+{
   private contract!: BfetchPublicContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: BfetchPublicSetupDependencies): BfetchPublicSetup {
+  public setup(
+    core: CoreSetup<any, any>,
+    plugins: BfetchPublicSetupDependencies
+  ): BfetchPublicSetup {
     const { version } = this.initializerContext.env.packageInfo;
     const basePath = core.http.basePath.get();
 
-    const fetchStreaming = this.fetchStreaming(version, basePath);
-    const batchedFunction = this.batchedFunction(fetchStreaming);
+    const startServices = createStartServicesGetter(core.getStartServices);
+    const getIsCompressionDisabled = () =>
+      startServices().core.uiSettings.get<boolean>(DISABLE_BFETCH_COMPRESSION);
+
+    const fetchStreaming = this.fetchStreaming(version, basePath, getIsCompressionDisabled);
+    const batchedFunction = this.batchedFunction(fetchStreaming, getIsCompressionDisabled);
 
     this.contract = {
       fetchStreaming,
@@ -64,25 +70,33 @@ export class BfetchPublicPlugin
 
   public stop() {}
 
-  private fetchStreaming = (
-    version: string,
-    basePath: string
-  ): BfetchPublicSetup['fetchStreaming'] => (params) =>
-    fetchStreamingStatic({
-      ...params,
-      url: `${basePath}/${removeLeadingSlash(params.url)}`,
-      headers: {
-        'Content-Type': 'application/json',
-        'kbn-version': version,
-        ...(params.headers || {}),
-      },
-    });
+  private fetchStreaming =
+    (
+      version: string,
+      basePath: string,
+      getIsCompressionDisabled: () => boolean
+    ): BfetchPublicSetup['fetchStreaming'] =>
+    (params) =>
+      fetchStreamingStatic({
+        ...params,
+        url: `${basePath}/${removeLeadingSlash(params.url)}`,
+        headers: {
+          'Content-Type': 'application/json',
+          'kbn-version': version,
+          ...(params.headers || {}),
+        },
+        getIsCompressionDisabled,
+      });
 
-  private batchedFunction = (
-    fetchStreaming: BfetchPublicContract['fetchStreaming']
-  ): BfetchPublicContract['batchedFunction'] => (params) =>
-    createStreamingBatchedFunction({
-      ...params,
-      fetchStreaming: params.fetchStreaming || fetchStreaming,
-    });
+  private batchedFunction =
+    (
+      fetchStreaming: BfetchPublicContract['fetchStreaming'],
+      getIsCompressionDisabled: () => boolean
+    ): BfetchPublicContract['batchedFunction'] =>
+    (params) =>
+      createStreamingBatchedFunction({
+        ...params,
+        getIsCompressionDisabled,
+        fetchStreaming: params.fetchStreaming || fetchStreaming,
+      });
 }

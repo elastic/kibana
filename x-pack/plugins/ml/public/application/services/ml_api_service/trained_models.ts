@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo } from 'react';
@@ -13,6 +14,8 @@ import {
   TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
+  NodesOverviewResponse,
+  TrainedModelDeploymentStatsResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -113,9 +116,45 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * @param modelId - Model ID
      */
     deleteTrainedModel(modelId: string) {
-      return httpService.http<any>({
+      return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}`,
         method: 'DELETE',
+      });
+    },
+
+    getTrainedModelDeploymentStats(modelId?: string | string[]) {
+      let model = modelId ?? '*';
+      if (Array.isArray(modelId)) {
+        model = modelId.join(',');
+      }
+
+      return httpService.http<{
+        count: number;
+        deployment_stats: TrainedModelDeploymentStatsResponse[];
+      }>({
+        path: `${apiBasePath}/trained_models/${model}/deployment/_stats`,
+        method: 'GET',
+      });
+    },
+
+    getTrainedModelsNodesOverview() {
+      return httpService.http<NodesOverviewResponse>({
+        path: `${apiBasePath}/trained_models/nodes_overview`,
+        method: 'GET',
+      });
+    },
+
+    startModelAllocation(modelId: string) {
+      return httpService.http<{ acknowledge: boolean }>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
+        method: 'POST',
+      });
+    },
+
+    stopModelAllocation(modelId: string) {
+      return httpService.http<{ acknowledge: boolean }>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_stop`,
+        method: 'POST',
       });
     },
   };

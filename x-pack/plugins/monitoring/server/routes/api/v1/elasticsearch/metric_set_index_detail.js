@@ -1,31 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const metricSet = {
   advanced: [
     {
-      keys: [
-        'index_mem_overall_1',
-        'index_mem_stored_fields',
-        'index_mem_doc_values',
-        'index_mem_norms',
-      ],
-      name: 'index_1',
-    },
-    {
-      keys: ['index_mem_overall_2', 'index_mem_terms', 'index_mem_points'],
-      name: 'index_2',
-    },
-    {
-      keys: [
-        'index_mem_overall_3',
-        'index_mem_fixed_bit_set',
-        'index_mem_term_vectors',
-        'index_mem_versions',
-      ],
+      keys: ['index_mem_fixed_bit_set', 'index_mem_versions'],
       name: 'index_3',
     },
     {
@@ -80,10 +63,6 @@ export const metricSet = {
     {
       keys: ['index_store_total_size', 'index_store_primaries_size'],
       name: 'index_size',
-    },
-    {
-      keys: ['index_mem_overall', 'index_mem_terms', 'index_mem_points'],
-      name: 'index_mem',
     },
     'index_document_count',
     {

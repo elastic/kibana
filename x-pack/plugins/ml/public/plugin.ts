@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -16,36 +17,39 @@ import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import type { ManagementSetup } from 'src/plugins/management/public';
-import type {
-  SharePluginSetup,
-  SharePluginStart,
-  UrlGeneratorContract,
-} from 'src/plugins/share/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
 import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { MlCardState } from '../../../../src/plugins/index_pattern_management/public';
 
 import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { SecurityPluginSetup } from '../../security/public';
 
 import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
-import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
 import { isFullLicense, isMlEnabled } from '../common/license';
 
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
-// Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
-import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
+import { MlLocatorDefinition, MlLocator } from './locator';
 import type { MapsStartApi } from '../../maps/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public';
+import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
+import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+import { registerManagementSection } from './application/management';
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import type {
+  FieldFormatsSetup,
+  FieldFormatsStart,
+} from '../../../../src/plugins/field_formats/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -55,26 +59,33 @@ export interface MlStartDependencies {
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  dataVisualizer: DataVisualizerPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
+
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
-  usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   kibanaVersion: string;
   share: SharePluginSetup;
-  indexPatternManagement: IndexPatternManagementSetup;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
+  alerting?: AlertingSetup;
+  usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
+
+  private locator: undefined | MlLocator;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -102,13 +113,16 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
-            usageCollection: pluginsSetup.usageCollection,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             maps: pluginsStart.maps,
             uiActions: pluginsStart.uiActions,
             kibanaVersion,
+            triggersActionsUi: pluginsStart.triggersActionsUi,
+            dataVisualizer: pluginsStart.dataVisualizer,
+            usageCollection: pluginsSetup.usageCollection,
+            fieldFormats: pluginsStart.fieldFormats,
           },
           params
         );
@@ -116,7 +130,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     if (pluginsSetup.share) {
-      this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
+      this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
+    }
+
+    if (pluginsSetup.management) {
+      registerManagementSection(pluginsSetup.management, core, {
+        usageCollection: pluginsSetup.usageCollection,
+      }).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -129,12 +149,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
-
-        // register ML for the index pattern management no data screen.
-        pluginsSetup.indexPatternManagement.environment.update({
-          ml: () =>
-            capabilities.ml.canFindFileStructure ? MlCardState.ENABLED : MlCardState.HIDDEN,
-        });
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
         this.appUpdater$.next(() => ({
@@ -144,12 +158,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       // register various ML plugin features which require a full license
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const {
-        registerEmbeddables,
-        registerManagementSection,
-        registerMlUiActions,
-        registerSearchLinks,
-      } = await import('./register_helper');
+      const { registerEmbeddables, registerMlUiActions, registerSearchLinks, registerMlAlerts } =
+        await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
       const fullLicense = isFullLicense(license);
@@ -157,31 +167,32 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerSearchLinks(this.appUpdater$, fullLicense);
 
         if (fullLicense) {
-          const canManageMLJobs =
-            capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
-          if (canManageMLJobs && pluginsSetup.management !== undefined) {
-            registerManagementSection(pluginsSetup.management, core).enable();
-          }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
+
+          const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
+          if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
+            registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+          }
         }
       }
     });
 
     return {
-      urlGenerator: this.urlGenerator,
+      locator: this.locator,
     };
   }
 
-  start(core: CoreStart, deps: any) {
+  start(core: CoreStart, deps: MlStartDependencies) {
     setDependencyCache({
       docLinks: core.docLinks!,
       basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
     });
+
     return {
-      urlGenerator: this.urlGenerator,
+      locator: this.locator,
     };
   }
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 let toggleSetupMode;
@@ -10,11 +11,8 @@ let getSetupModeState;
 let updateSetupModeData;
 let setSetupModeMenuItem;
 
-jest.mock('./ajax_error_handler', () => ({
-  ajaxErrorHandlersProvider: (err) => {
-    throw err;
-  },
-}));
+const handleErrorsMock = jest.fn();
+const callbackMock = jest.fn();
 
 jest.mock('react-dom', () => ({
   render: jest.fn(),
@@ -24,7 +22,6 @@ jest.mock('../legacy_shims', () => {
   return {
     Legacy: {
       shims: {
-        getAngularInjector: () => ({ get: () => ({ get: () => 'utc' }) }),
         toastNotifications: {
           addDanger: jest.fn(),
         },
@@ -34,41 +31,8 @@ jest.mock('../legacy_shims', () => {
   };
 });
 
-let data = {};
-
-const injectorModulesMock = {
-  globalState: {
-    save: jest.fn(),
-  },
-  Private: (module) => module,
-  $http: {
-    post: jest.fn().mockImplementation(() => {
-      return { data };
-    }),
-  },
-  $executor: {
-    run: jest.fn(),
-  },
-};
-
-const angularStateMock = {
-  injector: {
-    get: (module) => {
-      return injectorModulesMock[module] || {};
-    },
-  },
-  scope: {
-    $apply: (fn) => fn && fn(),
-    $evalAsync: (fn) => fn && fn(),
-  },
-};
-
-// We are no longer waiting for setup mode data to be fetched when enabling
-// so we need to wait for the next tick for the async action to finish
-
 function setModulesAndMocks() {
   jest.clearAllMocks().resetModules();
-  injectorModulesMock.globalState.inSetupMode = false;
 
   const setupMode = require('./setup_mode');
   toggleSetupMode = setupMode.toggleSetupMode;
@@ -88,47 +52,70 @@ describe('setup_mode', () => {
   });
 
   describe('setup', () => {
-    it('should require angular state', async () => {
-      let error;
-      try {
-        toggleSetupMode(true);
-      } catch (err) {
-        error = err;
-      }
-      expect(error.message).toEqual(
-        'Unable to interact with setup ' +
-          'mode because the angular injector was not previously set. This needs to be ' +
-          'set by calling `initSetupModeState`.'
-      );
-    });
-
     it('should enable toggle mode', async () => {
-      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      const globalState = {
+        inSetupMode: false,
+        save: jest.fn(),
+      };
+      const httpServiceMock = {
+        post: jest.fn(),
+      };
+
+      await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       toggleSetupMode(true);
-      expect(injectorModulesMock.globalState.inSetupMode).toBe(true);
+      expect(globalState.inSetupMode).toBe(true);
     });
 
     it('should disable toggle mode', async () => {
-      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      const globalState = {
+        inSetupMode: true,
+        save: jest.fn(),
+      };
+      const httpServiceMock = {
+        post: jest.fn(),
+      };
+      const handleErrorsMock = jest.fn();
+      const callbackMock = jest.fn();
+      await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       toggleSetupMode(false);
-      expect(injectorModulesMock.globalState.inSetupMode).toBe(false);
+      expect(globalState.inSetupMode).toBe(false);
     });
 
     it('should set top nav config', async () => {
+      const globalState = {
+        inSetupMode: false,
+        save: jest.fn(),
+      };
+      const httpServiceMock = {
+        post: jest.fn(),
+      };
+
       const render = require('react-dom').render;
-      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+
+      await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       setSetupModeMenuItem();
       toggleSetupMode(true);
+
       expect(render.mock.calls.length).toBe(2);
     });
   });
 
   describe('in setup mode', () => {
-    afterEach(async () => {
-      data = {};
-    });
-
     it('should not fetch data if the user does not have sufficient permissions', async () => {
+      const globalState = {
+        inSetupMode: false,
+        save: jest.fn(),
+      };
+      const httpServiceMock = {
+        post: jest.fn().mockReturnValue(
+          Promise.resolve({
+            _meta: {
+              hasPermissions: false,
+            },
+          })
+        ),
+      };
+
       const addDanger = jest.fn();
       jest.doMock('../legacy_shims', () => ({
         Legacy: {
@@ -140,13 +127,9 @@ describe('setup_mode', () => {
           },
         },
       }));
-      data = {
-        _meta: {
-          hasPermissions: false,
-        },
-      };
+
       setModulesAndMocks();
-      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       toggleSetupMode(true);
       await waitForSetupModeData();
 
@@ -159,78 +142,122 @@ describe('setup_mode', () => {
     });
 
     it('should set the newly discovered cluster uuid', async () => {
-      const clusterUuid = '1ajy';
-      data = {
-        _meta: {
-          liveClusterUuid: clusterUuid,
-          hasPermissions: true,
-        },
-        elasticsearch: {
-          byUuid: {
-            123: {
-              isPartiallyMigrated: true,
-            },
-          },
-        },
+      const globalState = {
+        inSetupMode: false,
+        cluster_uuid: undefined,
+        save: jest.fn(),
       };
-      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      const clusterUuid = '1ajy';
+      const httpServiceMock = {
+        post: jest.fn().mockReturnValue(
+          Promise.resolve({
+            _meta: {
+              liveClusterUuid: clusterUuid,
+              hasPermissions: true,
+            },
+            elasticsearch: {
+              byUuid: {
+                123: {
+                  isPartiallyMigrated: true,
+                },
+              },
+            },
+          })
+        ),
+      };
+
+      await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       toggleSetupMode(true);
       await waitForSetupModeData();
 
-      expect(injectorModulesMock.globalState.cluster_uuid).toBe(clusterUuid);
+      expect(globalState.cluster_uuid).toBe(clusterUuid);
     });
 
     it('should fetch data for a given cluster', async () => {
       const clusterUuid = '1ajy';
-      data = {
-        _meta: {
-          liveClusterUuid: clusterUuid,
-          hasPermissions: true,
-        },
-        elasticsearch: {
-          byUuid: {
-            123: {
-              isPartiallyMigrated: true,
+      const globalState = {
+        inSetupMode: false,
+        cluster_uuid: clusterUuid,
+        save: jest.fn(),
+      };
+      const httpServiceMock = {
+        post: jest.fn().mockReturnValue(
+          Promise.resolve({
+            _meta: {
+              liveClusterUuid: clusterUuid,
+              hasPermissions: true,
             },
-          },
-        },
+            elasticsearch: {
+              byUuid: {
+                123: {
+                  isPartiallyMigrated: true,
+                },
+              },
+            },
+          })
+        ),
       };
 
-      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       toggleSetupMode(true);
       await waitForSetupModeData();
 
-      expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(
+      expect(httpServiceMock.post).toHaveBeenCalledWith(
         `../api/monitoring/v1/setup/collection/cluster/${clusterUuid}`,
-        {
-          ccs: undefined,
-        }
+        { body: '{}' }
       );
     });
 
     it('should fetch data for a single node', async () => {
-      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      const clusterUuid = '1ajy';
+      const globalState = {
+        inSetupMode: false,
+        save: jest.fn(),
+      };
+      const httpServiceMock = {
+        post: jest.fn().mockReturnValue(
+          Promise.resolve({
+            _meta: {
+              liveClusterUuid: clusterUuid,
+              hasPermissions: true,
+            },
+            elasticsearch: {
+              byUuid: {
+                123: {
+                  isPartiallyMigrated: true,
+                },
+              },
+            },
+          })
+        ),
+      };
+
+      await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       toggleSetupMode(true);
       await waitForSetupModeData();
 
-      injectorModulesMock.$http.post.mockClear();
       await updateSetupModeData('45asd');
-      expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(
+      expect(httpServiceMock.post).toHaveBeenCalledWith(
         '../api/monitoring/v1/setup/collection/node/45asd',
-        {
-          ccs: undefined,
-        }
+        { body: '{}' }
       );
     });
 
     it('should fetch data without a cluster uuid', async () => {
-      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      const globalState = {
+        inSetupMode: false,
+        save: jest.fn(),
+      };
+      const httpServiceMock = {
+        post: jest.fn(),
+      };
+
+      await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       await toggleSetupMode(true);
-      injectorModulesMock.$http.post.mockClear();
       await updateSetupModeData(undefined, true);
       const url = '../api/monitoring/v1/setup/collection/cluster';
-      const args = { ccs: undefined };
-      expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(url, args);
+      const args = { body: '{}' };
+      expect(httpServiceMock.post).toHaveBeenCalledWith(url, args);
     });
   });
 });

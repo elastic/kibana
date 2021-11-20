@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-import { IIndexPattern } from 'src/plugins/data/public';
+import type { DataViewBase } from '@kbn/es-query';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import {
@@ -30,7 +31,7 @@ interface NetworkTopCountriesTableProps {
   fakeTotalCount: number;
   flowTargeted: FlowTargetSourceDest;
   id: string;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;

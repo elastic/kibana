@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -116,11 +117,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         // Alert user if last snapshot failed
         if (lastSuccess && lastFailure && lastFailure.time > lastSuccess.time) {
           return (
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              className="snapshotRestorePolicyTableSnapshotFailureContainer"
-            >
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
@@ -362,7 +359,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         key="reloadPolicies"
-        color="secondary"
+        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"
@@ -381,7 +378,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       >
         <FormattedMessage
           id="xpack.snapshotRestore.policyList.table.addPolicyButton"
-          defaultMessage="Create a policy"
+          defaultMessage="Create policy"
         />
       </EuiButton>,
     ],

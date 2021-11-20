@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -19,6 +19,7 @@ import { InternalHttpServiceSetup } from '../http';
 import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
 import {
+  InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
   UiSettingsParams,
@@ -26,6 +27,7 @@ import {
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
+import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -34,15 +36,36 @@ export interface SetupDeps {
 
 /** @internal */
 export class UiSettingsService
-  implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart> {
+  implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart>
+{
   private readonly log: Logger;
   private readonly config$: Observable<UiSettingsConfigType>;
+  private readonly isDist: boolean;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
+    this.isDist = coreContext.env.packageInfo.dist;
     this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
+  }
+
+  public async preboot(): Promise<InternalUiSettingsServicePreboot> {
+    this.log.debug('Prebooting ui settings service');
+
+    const { overrides } = await this.config$.pipe(first()).toPromise();
+    this.overrides = overrides;
+
+    this.register(getCoreSettings({ isDist: this.isDist }));
+
+    return {
+      createDefaultsClient: () =>
+        new UiSettingsDefaultsClient({
+          defaults: mapToObject(this.uiSettingsDefaults),
+          overrides: this.overrides,
+          log: this.log.get('core defaults'),
+        }),
+    };
   }
 
   public async setup({ http, savedObjects }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
@@ -50,7 +73,6 @@ export class UiSettingsService
 
     savedObjects.registerType(uiSettingsType);
     registerRoutes(http.createRouter(''));
-    this.register(getCoreSettings());
 
     const config = await this.config$.pipe(first()).toPromise();
     this.overrides = config.overrides;

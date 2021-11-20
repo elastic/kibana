@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 
 import { useAppContext } from '../contexts/app_context';
@@ -64,7 +66,10 @@ export const useRequestProfile = () => {
     }
 
     try {
-      const resp = await http.post('../api/searchprofiler/profile', {
+      const resp = await http.post<
+        | { ok: true; resp: { profile: { shards: ShardSerialized[] } } }
+        | { ok: false; err: { msg: string } }
+      >('../api/searchprofiler/profile', {
         body: JSON.stringify(payload),
         headers: { 'Content-Type': 'application/json' },
       });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getMetrics } from './get_metrics';
@@ -86,13 +87,8 @@ describe('getMetrics and getSeries', () => {
     const req = getMockReq(nonDerivMetricsBuckets);
     const metricSet = [
       {
-        name: 'index_1',
-        keys: [
-          'index_mem_overall_1',
-          'index_mem_stored_fields',
-          'index_mem_doc_values',
-          'index_mem_norms',
-        ],
+        name: 'index_3',
+        keys: ['index_mem_fixed_bit_set', 'index_mem_versions'],
       },
     ];
     const result = await getMetrics(req, indexPattern, metricSet);

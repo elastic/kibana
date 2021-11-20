@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { InspectPanelAction } from './inspect_panel_action';
@@ -126,7 +126,7 @@ test('Execute throws an error when inspector adapters are not available', async 
   );
 
   expect(error).toBeInstanceOf(Error);
-  expect(error.message).toMatchInlineSnapshot(`"Action not compatible with context"`);
+  expect((error as Error).message).toMatchInlineSnapshot(`"Action not compatible with context"`);
 });
 
 test('Returns title', async () => {

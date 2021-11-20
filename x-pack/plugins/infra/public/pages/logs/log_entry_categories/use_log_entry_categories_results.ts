@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo, useState } from 'react';
@@ -17,7 +18,8 @@ import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entr
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 type TopLogEntryCategories = GetLogEntryCategoriesSuccessResponsePayload['data']['categories'];
-type LogEntryCategoryDatasets = GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
+type LogEntryCategoryDatasets =
+  GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];
 
 export type SortOptions = CategoriesSort;
 export type ChangeSortOptions = (sortOptions: CategoriesSort) => void;
@@ -45,10 +47,8 @@ export const useLogEntryCategoriesResults = ({
   });
   const { services } = useKibanaContextForPlugin();
   const [topLogEntryCategories, setTopLogEntryCategories] = useState<TopLogEntryCategories>([]);
-  const [
-    logEntryCategoryDatasets,
-    setLogEntryCategoryDatasets,
-  ] = useState<LogEntryCategoryDatasets>([]);
+  const [logEntryCategoryDatasets, setLogEntryCategoryDatasets] =
+    useState<LogEntryCategoryDatasets>([]);
 
   const [getTopLogEntryCategoriesRequest, getTopLogEntryCategories] = useTrackedPromise(
     {

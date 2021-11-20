@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -30,7 +31,7 @@ export function toastNotificationServiceProvider(toastNotifications: ToastsStart
     toastNotifications.addSuccess(toastOrTitle, options);
   }
 
-  function displayErrorToast(error: ErrorType, title?: string) {
+  function displayErrorToast(error: ErrorType, title?: string, toastLifeTimeMs?: number) {
     const errorObj = extractErrorProperties(error);
     toastNotifications.addError(new MLRequestFailure(errorObj, error), {
       title:
@@ -38,6 +39,7 @@ export function toastNotificationServiceProvider(toastNotifications: ToastsStart
         i18n.translate('xpack.ml.toastNotificationService.errorTitle', {
           defaultMessage: 'An error has occurred',
         }),
+      ...(toastLifeTimeMs ? { toastLifeTimeMs } : {}),
     });
   }
 

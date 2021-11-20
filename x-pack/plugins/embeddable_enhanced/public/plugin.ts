@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
@@ -17,7 +18,6 @@ import {
   defaultEmbeddableFactoryProvider,
   EmbeddableContext,
   PANEL_NOTIFICATION_TRIGGER,
-  ViewMode,
 } from '../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddable } from './types';
 import {
@@ -48,7 +48,8 @@ export interface SetupContract {}
 export interface StartContract {}
 
 export class EmbeddableEnhancedPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
+{
   constructor(protected readonly context: PluginInitializerContext) {}
 
   private uiActions?: StartDependencies['uiActionsEnhanced'];
@@ -118,7 +119,6 @@ export class EmbeddableEnhancedPlugin
     const dynamicActions = new DynamicActionManager({
       isCompatible: async (context: unknown) => {
         if (!this.isEmbeddableContext(context)) return false;
-        if (context.embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
         return context.embeddable.runtimeId === embeddable.runtimeId;
       },
       storage,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReportingConfig } from '../..';
@@ -31,6 +32,8 @@ describe('Create Layout', () => {
         "selectors": Object {
           "itemsCountAttribute": "data-shared-items-count",
           "renderComplete": "[data-shared-item]",
+          "renderError": "[data-render-error]",
+          "renderErrorAttribute": "data-render-error",
           "screenshot": "[data-shared-items-container]",
           "timefilterDurationAttribute": "data-shared-timefilter-duration",
         },
@@ -62,10 +65,16 @@ describe('Create Layout', () => {
         "selectors": Object {
           "itemsCountAttribute": "data-shared-items-count",
           "renderComplete": "[data-shared-item]",
+          "renderError": "[data-render-error]",
+          "renderErrorAttribute": "data-render-error",
           "screenshot": "[data-shared-item]",
           "timefilterDurationAttribute": "data-shared-timefilter-duration",
         },
         "useReportingBranding": true,
+        "viewport": Object {
+          "height": 1200,
+          "width": 1950,
+        },
       }
     `);
   });
@@ -86,6 +95,8 @@ describe('Create Layout', () => {
         "selectors": Object {
           "itemsCountAttribute": "data-shared-items-count",
           "renderComplete": "[data-shared-item]",
+          "renderError": "[data-render-error]",
+          "renderErrorAttribute": "data-render-error",
           "screenshot": "[data-shared-items-container]",
           "timefilterDurationAttribute": "data-shared-timefilter-duration",
         },

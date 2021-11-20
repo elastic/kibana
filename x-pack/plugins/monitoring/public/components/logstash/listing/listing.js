@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent } from 'react';
@@ -65,12 +66,15 @@ export class Listing extends PureComponent {
 
           return (
             <div>
-              <div>
-                <EuiLink href={getSafeForExternalLink(`#/logstash/node/${node.logstash.uuid}`)}>
+              <div data-test-subj="name">
+                <EuiLink
+                  href={getSafeForExternalLink(`#/logstash/node/${node.logstash.uuid}`)}
+                  data-test-subj={`nodeLink-${node.logstash.uuid}`}
+                >
                   {name}
                 </EuiLink>
               </div>
-              <div>{node.logstash.http_address}</div>
+              <div data-test-subj="httpAddress">{node.logstash.http_address}</div>
               {setupModeStatus}
             </div>
           );
@@ -91,7 +95,9 @@ export class Listing extends PureComponent {
         }),
         field: 'cpu_usage',
         sortable: true,
-        render: (value) => formatPercentageUsage(value, 100),
+        render: (value) => (
+          <span data-test-subj="cpuUsage">{formatPercentageUsage(value, 100)}</span>
+        ),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.loadAverageTitle', {
@@ -99,7 +105,7 @@ export class Listing extends PureComponent {
         }),
         field: 'load_average',
         sortable: true,
-        render: (value) => formatNumber(value, '0.00'),
+        render: (value) => <span data-test-subj="loadAverage">{formatNumber(value, '0.00')}</span>,
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.jvmHeapUsedTitle', {
@@ -108,7 +114,9 @@ export class Listing extends PureComponent {
         }),
         field: 'jvm_heap_used',
         sortable: true,
-        render: (value) => formatPercentageUsage(value, 100),
+        render: (value) => (
+          <span data-test-subj="jvmHeapUsed">{formatPercentageUsage(value, 100)}</span>
+        ),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.eventsIngestedTitle', {
@@ -116,7 +124,7 @@ export class Listing extends PureComponent {
         }),
         field: 'events_out',
         sortable: true,
-        render: (value) => formatNumber(value, '0.[0]a'),
+        render: (value) => <span data-test-subj="eventsOut">{formatNumber(value, '0.[0]a')}</span>,
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.configReloadsTitle', {
@@ -125,14 +133,14 @@ export class Listing extends PureComponent {
         sortable: true,
         render: (node) => (
           <div>
-            <div>
+            <div data-test-subj="configReloadsSuccess">
               <FormattedMessage
                 id="xpack.monitoring.logstash.nodes.configReloadsSuccessCountLabel"
                 defaultMessage="{reloadsSuccesses} successes"
                 values={{ reloadsSuccesses: node.reloads.successes }}
               />
             </div>
-            <div>
+            <div data-test-subj="configReloadsFailure">
               <FormattedMessage
                 id="xpack.monitoring.logstash.nodes.configReloadsFailuresCountLabel"
                 defaultMessage="{reloadsFailures} failures"
@@ -148,7 +156,7 @@ export class Listing extends PureComponent {
         }),
         field: 'version',
         sortable: true,
-        render: (value) => formatNumber(value),
+        render: (value) => <span data-test-subj="version">{formatNumber(value)}</span>,
       },
     ];
   }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './space_selector.scss';
@@ -11,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -19,17 +21,18 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from 'src/core/public';
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
-import { SpaceCards } from './components';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { CoreStart } from 'src/core/public';
+
+import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
-import { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
+import { SpaceCards } from './components';
 
 interface Props {
   spacesManager: SpacesManager;

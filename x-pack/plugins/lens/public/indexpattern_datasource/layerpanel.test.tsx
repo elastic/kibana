@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,6 +13,7 @@ import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { getFieldByNameFactory } from './pure_helpers';
+import { TermsIndexPatternColumn } from './operations';
 
 interface IndexPatternPickerOption {
   label: string;
@@ -159,12 +161,12 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'My Op',
           dataType: 'number',
           isBucketed: false,
-          operationType: 'avg',
+          operationType: 'average',
           sourceField: 'memory',
         },
       },
@@ -214,12 +216,11 @@ describe('Layer Data Panel', () => {
   }
 
   function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
-    const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(
-      instance
-    ).map((option: IndexPatternPickerOption) =>
-      option.label === selectedLabel
-        ? { ...option, checked: 'on' }
-        : { ...option, checked: undefined }
+    const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(instance).map(
+      (option: IndexPatternPickerOption) =>
+        option.label === selectedLabel
+          ? { ...option, checked: 'on' }
+          : { ...option, checked: undefined }
     );
     return getIndexPatternPickerList(instance).prop('onChange')!(options);
   }

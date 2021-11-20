@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'reporting']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'reporting', 'timePicker']);
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
@@ -16,15 +17,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens reporting', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('lens/reporting');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/reporting');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await security.testUser.setRoles(
-        ['test_logstash_reader', 'global_dashboard_read', 'reporting_user'],
+        [
+          'test_logstash_reader',
+          'global_dashboard_read',
+          'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+        ],
         false
       );
     });
 
     after(async () => {
-      await esArchiver.unload('lens/reporting');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/reporting');
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,

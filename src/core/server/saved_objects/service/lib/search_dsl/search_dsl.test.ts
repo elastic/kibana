@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+jest.mock('./pit_params');
 jest.mock('./query_params');
 jest.mock('./sorting_params');
 
 import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
+import * as pitParamsNS from './pit_params';
 import * as queryParamsNS from './query_params';
 import { getSearchDsl } from './search_dsl';
 import * as sortParamsNS from './sorting_params';
 
+const getPitParams = pitParamsNS.getPitParams as jest.Mock;
 const getQueryParams = queryParamsNS.getQueryParams as jest.Mock;
 const getSortingParams = sortParamsNS.getSortingParams as jest.Mock;
 
@@ -83,7 +86,8 @@ describe('getSearchDsl', () => {
       const opts = {
         type: 'foo',
         sortField: 'bar',
-        sortOrder: 'baz',
+        sortOrder: 'asc' as const,
+        pit: { id: 'abc123' },
       };
 
       getSearchDsl(mappings, registry, opts);
@@ -100,6 +104,34 @@ describe('getSearchDsl', () => {
       getQueryParams.mockReturnValue({ a: 'a' });
       getSortingParams.mockReturnValue({ b: 'b' });
       expect(getSearchDsl(mappings, registry, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
+    });
+
+    it('returns searchAfter if provided', () => {
+      getQueryParams.mockReturnValue({ a: 'a' });
+      getSortingParams.mockReturnValue({ b: 'b' });
+      expect(getSearchDsl(mappings, registry, { type: 'foo', searchAfter: ['1', 'bar'] })).toEqual({
+        a: 'a',
+        b: 'b',
+        search_after: ['1', 'bar'],
+      });
+    });
+
+    it('returns pit if provided', () => {
+      getQueryParams.mockReturnValue({ a: 'a' });
+      getSortingParams.mockReturnValue({ b: 'b' });
+      getPitParams.mockReturnValue({ pit: { id: 'abc123' } });
+      expect(
+        getSearchDsl(mappings, registry, {
+          type: 'foo',
+          searchAfter: ['1', 'bar'],
+          pit: { id: 'abc123' },
+        })
+      ).toEqual({
+        a: 'a',
+        b: 'b',
+        pit: { id: 'abc123' },
+        search_after: ['1', 'bar'],
+      });
     });
   });
 });

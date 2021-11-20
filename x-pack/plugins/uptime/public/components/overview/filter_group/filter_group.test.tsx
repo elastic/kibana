@@ -1,73 +1,110 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { FilterGroupComponent } from './filter_group';
+import { FilterGroup } from './filter_group';
+import * as Hooks from '../../../../../observability/public/hooks/use_values_list';
 
-describe('FilterGroupComponent', () => {
-  const overviewFilters = {
-    locations: ['nyc', 'fairbanks'],
-    ports: [5601, 9200],
-    schemes: ['http', 'tcp'],
-    tags: ['prod', 'dev'],
-  };
+describe('FilterGroup', () => {
   it.each([
-    ['expands filter group for Location filter', 'Search for location'],
-    ['expands filter group for Port filter', 'Search for port'],
-    ['expands filter group for Scheme filter', 'Search for scheme'],
-    ['expands filter group for Tag filter', 'Search for tag'],
-  ])('handles loading', async (popoverButtonLabel, searchInputLabel) => {
-    const { getByLabelText } = render(
-      <FilterGroupComponent loading={true} overviewFilters={overviewFilters} />
-    );
+    ['expands filter group for Location filter'],
+    ['expands filter group for Port filter'],
+    ['expands filter group for Scheme filter'],
+    ['expands filter group for Tag filter'],
+  ])('handles loading', async (popoverButtonLabel) => {
+    jest.spyOn(Hooks, 'useValuesList').mockReturnValue({
+      values: [],
+      loading: true,
+    });
+    const { getByLabelText, getByText } = render(<FilterGroup />);
 
-    const popoverButton = getByLabelText(popoverButtonLabel);
-    fireEvent.click(popoverButton);
     await waitFor(() => {
-      const searchInput = getByLabelText(searchInputLabel);
-      expect(searchInput).toHaveAttribute('placeholder', 'Loading...');
+      const popoverButton = getByLabelText(popoverButtonLabel);
+      fireEvent.click(popoverButton);
+    });
+    await waitFor(() => {
+      expect(getByText('Loading options'));
     });
   });
 
   it.each([
     [
       'expands filter group for Location filter',
-      'Search for location',
-      ['Filter by Location nyc.', 'Filter by Location fairbanks.'],
+      [
+        [
+          {
+            label: 'Fairbanks',
+            count: 10,
+          },
+          {
+            label: 'NYC',
+            count: 2,
+          },
+        ],
+        [],
+        [],
+        [],
+      ],
     ],
     [
       'expands filter group for Port filter',
-      'Search for port',
-      ['Filter by Port 5601.', 'Filter by Port 9200.'],
+      [
+        [],
+        [
+          { label: '80', count: 12 },
+          { label: '443', count: 8 },
+        ],
+        [],
+        [],
+      ],
     ],
     [
       'expands filter group for Scheme filter',
-      'Search for scheme',
-      ['Filter by Scheme http.', 'Filter by Scheme tcp.'],
+      [
+        [],
+        [],
+        [
+          { label: 'HTTP', count: 15 },
+          { label: 'TCP', count: 10 },
+        ],
+        [],
+      ],
     ],
     [
       'expands filter group for Tag filter',
-      'Search for tag',
-      ['Filter by Tag prod.', 'Filter by Tag dev.'],
+      [
+        [],
+        [],
+        [],
+        [
+          { label: 'test', count: 23 },
+          { label: 'prod', count: 10 },
+        ],
+      ],
     ],
-  ])(
-    'displays filter items when clicked',
-    async (popoverButtonLabel, searchInputLabel, filterItemButtonLabels) => {
-      const { getByLabelText } = render(
-        <FilterGroupComponent loading={false} overviewFilters={overviewFilters} />
-      );
-
-      const popoverButton = getByLabelText(popoverButtonLabel);
-      fireEvent.click(popoverButton);
-      await waitFor(() => {
-        expect(getByLabelText(searchInputLabel));
-        filterItemButtonLabels.forEach((itemLabel) => expect(getByLabelText(itemLabel)));
+  ])('displays filter item counts when clicked', async (popoverButtonLabel, values) => {
+    const spy = jest.spyOn(Hooks, 'useValuesList');
+    for (let i = 0; i < 4; i++) {
+      spy.mockReturnValueOnce({
+        values: values[i],
+        loading: false,
       });
     }
-  );
+
+    const { getByLabelText, getAllByLabelText } = render(<FilterGroup />);
+
+    await waitFor(() => {
+      const popoverButton = getByLabelText(popoverButtonLabel);
+      fireEvent.click(popoverButton);
+    });
+
+    expect(getByLabelText('2 available filters'));
+    expect(getAllByLabelText('0 available filters')).toHaveLength(3);
+  });
 });

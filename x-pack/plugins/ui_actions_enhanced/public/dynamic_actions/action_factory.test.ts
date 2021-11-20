@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ActionFactory } from './action_factory';
@@ -11,17 +12,17 @@ import { PublicLicense } from '../../../licensing/public';
 
 const def: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
-  CollectConfig: {} as any,
+  CollectConfig: {},
   createConfig: () => ({}),
-  isConfigValid: (() => true) as any,
-  create: ({ name }) => ({
+  isConfigValid: () => true,
+  create: ({ name }: { name: string }) => ({
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
     enhancements: {},
   }),
   supportedTriggers: () => [],
-};
+} as unknown as ActionFactoryDefinition;
 
 const featureUsage = licensingMock.createStart().featureUsage;
 

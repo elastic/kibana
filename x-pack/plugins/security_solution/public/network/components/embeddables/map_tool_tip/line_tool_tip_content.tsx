@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -19,10 +20,10 @@ import * as i18n from '../translations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
-const FlowBadge = (styled(EuiBadge)`
+const FlowBadge = styled(EuiBadge)`
   height: 45px;
   min-width: 85px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   margin: 0 auto;

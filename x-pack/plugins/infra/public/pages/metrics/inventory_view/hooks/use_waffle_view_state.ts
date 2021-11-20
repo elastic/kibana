@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { useCallback } from 'react';
 import {
   useWaffleOptionsContext,
@@ -37,6 +39,7 @@ export const useWaffleViewState = () => {
     region,
     legend,
     sort,
+    timelineOpen,
     setWaffleOptionsState,
   } = useWaffleOptionsContext();
   const { currentTime, isAutoReloading, setWaffleTimeState } = useWaffleTimeContext();
@@ -58,6 +61,7 @@ export const useWaffleViewState = () => {
     autoReload: isAutoReloading,
     filterQuery,
     legend,
+    timelineOpen,
   };
 
   const onViewChange = useCallback(
@@ -75,7 +79,9 @@ export const useWaffleViewState = () => {
         accountId: newState.accountId,
         region: newState.region,
         legend: newState.legend,
+        timelineOpen: newState.timelineOpen,
       });
+
       if (newState.time) {
         setWaffleTimeState({
           currentTime: newState.time,

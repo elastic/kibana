@@ -1,44 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { memo, useEffect, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
   MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
-  SubscriptionSplashContent,
 } from '../../../components/logging/log_analysis_setup';
 import {
   LogAnalysisSetupFlyout,
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { SourceErrorPage } from '../../../components/source_error_page';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
-import { useInterval } from '../../../hooks/use_interval';
+import { LogsPageTemplate } from '../page_template';
+import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
-export const LogEntryRatePageContent = memo(() => {
-  const {
-    hasFailedLoadingSource,
-    isLoading,
-    isUninitialized,
-    loadSource,
-    loadSourceFailureMessage,
-  } = useLogSourceContext();
+const anomaliesTitle = i18n.translate('xpack.infra.logs.anomaliesPageTitle', {
+  defaultMessage: 'Anomalies',
+});
 
+export const LogEntryRatePageContent = memo(() => {
   const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
@@ -92,14 +89,21 @@ export const LogEntryRatePageContent = memo(() => {
     }
   }, JOB_STATUS_POLLING_INTERVAL);
 
-  if (isLoading || isUninitialized) {
-    return <SourceLoadingPage />;
-  } else if (hasFailedLoadingSource) {
-    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
-  } else if (!hasLogAnalysisCapabilites) {
-    return <SubscriptionSplashContent />;
+  if (!hasLogAnalysisCapabilites) {
+    return (
+      <SubscriptionSplashPage
+        data-test-subj="logsLogEntryRatePage"
+        pageHeader={{
+          pageTitle: anomaliesTitle,
+        }}
+      />
+    );
   } else if (!hasLogAnalysisReadCapabilities) {
-    return <MissingResultsPrivilegesPrompt />;
+    return (
+      <AnomaliesPageTemplate isEmptyState={true}>
+        <MissingResultsPrivilegesPrompt />
+      </AnomaliesPageTemplate>
+    );
   } else if (
     logEntryCategoriesSetupStatus.type === 'initializing' ||
     logEntryRateSetupStatus.type === 'initializing'
@@ -115,25 +119,58 @@ export const LogEntryRatePageContent = memo(() => {
     logEntryCategoriesSetupStatus.type === 'unknown' ||
     logEntryRateSetupStatus.type === 'unknown'
   ) {
-    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchAllJobStatuses} />;
+    return (
+      <AnomaliesPageTemplate isEmptyState={true}>
+        <LogAnalysisSetupStatusUnknownPrompt retry={fetchAllJobStatuses} />
+      </AnomaliesPageTemplate>
+    );
   } else if (
     isJobStatusWithResults(logEntryCategoriesJobStatus['log-entry-categories-count']) ||
     isJobStatusWithResults(logEntryRateJobStatus['log-entry-rate'])
   ) {
     return (
       <>
-        <LogEntryRateResultsContent />
+        <LogEntryRateResultsContent pageTitle={anomaliesTitle} />
         <LogAnalysisSetupFlyout />
       </>
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
-    return <MissingSetupPrivilegesPrompt />;
+    return (
+      <AnomaliesPageTemplate isEmptyState={true}>
+        <MissingSetupPrivilegesPrompt />;
+      </AnomaliesPageTemplate>
+    );
   } else {
     return (
       <>
-        <LogEntryRateSetupContent onOpenSetup={showModuleList} />
+        <AnomaliesPageTemplate isEmptyState={true}>
+          <LogEntryRateSetupContent onOpenSetup={showModuleList} />
+        </AnomaliesPageTemplate>
         <LogAnalysisSetupFlyout />
       </>
     );
   }
 });
+
+const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
+  children,
+  ...rest
+}) => {
+  const { sourceStatus } = useLogSourceContext();
+  return (
+    <LogsPageTemplate
+      hasData={sourceStatus?.logIndexStatus !== 'missing'}
+      data-test-subj="logsLogEntryRatePage"
+      pageHeader={
+        rest.isEmptyState
+          ? undefined
+          : {
+              pageTitle: anomaliesTitle,
+            }
+      }
+      {...rest}
+    >
+      {children}
+    </LogsPageTemplate>
+  );
+};

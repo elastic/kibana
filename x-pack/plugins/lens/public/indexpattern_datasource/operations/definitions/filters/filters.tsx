@@ -1,29 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import './filters.scss';
 
-import React, { MouseEventHandler, useState } from 'react';
+import './filters.scss';
+import React, { useState } from 'react';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
 import { updateColumnParam } from '../../layer_helpers';
-import { OperationDefinition } from '../index';
-import { BaseIndexPatternColumn } from '../column_types';
+import type { OperationDefinition } from '../index';
+import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
-import { IndexPattern } from '../../../types';
-import {
-  AggFunctionsMapping,
-  Query,
-  esKuery,
-  esQuery,
-} from '../../../../../../../../src/plugins/data/public';
+import type { IndexPattern } from '../../../types';
+import type { AggFunctionsMapping, Query } from '../../../../../../../../src/plugins/data/public';
+import { queryFilterToAst } from '../../../../../../../../src/plugins/data/common';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
+const OPERATION_NAME = 'filters';
 
 // references types from src/plugins/data/common/search/aggs/buckets/filters.ts
 export interface Filter {
@@ -54,28 +53,36 @@ const defaultFilter: Filter = {
   label: '',
 };
 
-export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
+export const validateQuery = (input: Query, indexPattern: IndexPattern) => {
+  let isValid = true;
+  let error: string | undefined;
+
   try {
     if (input.language === 'kuery') {
-      esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(input.query), indexPattern);
+      toElasticsearchQuery(fromKueryExpression(input.query), indexPattern);
     } else {
-      esQuery.luceneStringToDsl(input.query);
+      luceneStringToDsl(input.query);
     }
-    return true;
   } catch (e) {
-    return false;
+    isValid = false;
+    error = e.message;
   }
+
+  return { isValid, error };
 };
 
+export const isQueryValid = (input: Query, indexPattern: IndexPattern) =>
+  validateQuery(input, indexPattern).isValid;
+
 export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
-  operationType: 'filters';
+  operationType: typeof OPERATION_NAME;
   params: {
     filters: Filter[];
   };
 }
 
 export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'none'> = {
-  type: 'filters',
+  type: OPERATION_NAME,
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
   input: 'none',
@@ -84,7 +91,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   getDefaultLabel: () => filtersLabel,
   buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
-    if (previousColumn?.operationType === 'terms') {
+    if (previousColumn?.operationType === 'terms' && 'sourceField' in previousColumn) {
       params = {
         filters: [
           {
@@ -101,7 +108,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
     return {
       label: filtersLabel,
       dataType: 'string',
-      operationType: 'filters',
+      operationType: OPERATION_NAME,
       scale: 'ordinal',
       isBucketed: true,
       params,
@@ -124,7 +131,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       id: columnId,
       enabled: true,
       schema: 'segment',
-      filters: JSON.stringify(validFilters?.length > 0 ? validFilters : [defaultFilter]),
+      filters: (validFilters?.length > 0 ? validFilters : [defaultFilter]).map(queryFilterToAst),
     }).toAst();
   },
 
@@ -136,7 +143,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
         updateColumnParam({
           layer,
           columnId,
-          paramName: 'filters',
+          paramName: OPERATION_NAME,
           value: newFilters,
         })
       );
@@ -165,7 +172,7 @@ export const FilterList = ({
   indexPattern: IndexPattern;
   defaultQuery: Filter;
 }) => {
-  const [isOpenByCreation, setIsOpenByCreation] = useState(false);
+  const [activeFilterId, setActiveFilterId] = useState('');
   const [localFilters, setLocalFilters] = useState(() =>
     filters.map((filter) => ({ ...filter, id: generateId() }))
   );
@@ -176,14 +183,19 @@ export const FilterList = ({
     setLocalFilters(updatedFilters);
   };
 
-  const onAddFilter = () =>
+  const onAddFilter = () => {
+    const newFilterId = generateId();
+
     updateFilters([
       ...localFilters,
       {
         ...defaultQuery,
-        id: generateId(),
+        id: newFilterId,
       },
     ]);
+
+    setActiveFilterId(newFilterId);
+  };
   const onRemoveFilter = (id: string) =>
     updateFilters(localFilters.filter((filter) => filter.id !== id));
 
@@ -199,6 +211,14 @@ export const FilterList = ({
           : filter
       )
     );
+
+  const changeActiveFilter = (filterId: string) => {
+    let newActiveFilterId = filterId;
+    if (activeFilterId === filterId) {
+      newActiveFilterId = ''; // toggle off
+    }
+    setActiveFilterId(newActiveFilterId);
+  };
 
   return (
     <>
@@ -228,17 +248,18 @@ export const FilterList = ({
             >
               <FilterPopover
                 data-test-subj="indexPattern-filters-existingFilterContainer"
-                initiallyOpen={idx === localFilters.length - 1 && isOpenByCreation}
+                isOpen={filter.id === activeFilterId}
+                triggerClose={() => changeActiveFilter('')}
                 indexPattern={indexPattern}
                 filter={filter}
                 setFilter={(f: FilterValue) => {
                   onChangeValue(f.id, f.input, f.label);
                 }}
-                Button={({ onClick }: { onClick: MouseEventHandler }) => (
+                Button={() => (
                   <EuiLink
                     className="lnsFiltersOperation__popoverButton"
                     data-test-subj="indexPattern-filters-existingFilterTrigger"
-                    onClick={onClick}
+                    onClick={() => changeActiveFilter(filter.id)}
                     color={isInvalid ? 'danger' : 'text'}
                     title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
                       defaultMessage: 'Click to edit',
@@ -255,7 +276,6 @@ export const FilterList = ({
       <NewBucketButton
         onClick={() => {
           onAddFilter();
-          setIsOpenByCreation(true);
         }}
         label={i18n.translate('xpack.lens.indexPattern.filters.addaFilter', {
           defaultMessage: 'Add a filter',

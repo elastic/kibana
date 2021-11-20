@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Calendar, CalendarEvent } from '../../../../../plugins/ml/server/models/calendar';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Calendar } from '../../../../../plugins/ml/server/models/calendar';
+
+type ScheduledEvent = estypes.MlCalendarEvent;
 
 export const assertAllEventsExistInCalendar = (
-  eventsToCheck: CalendarEvent[],
+  eventsToCheck: ScheduledEvent[],
   calendar: Calendar
 ): boolean => {
-  const updatedCalendarEvents = calendar.events as CalendarEvent[];
+  const updatedCalendarEvents = calendar.events;
   let allEventsAreUpdated = true;
   for (const eventToCheck of eventsToCheck) {
     // if at least one of the events that we need to check is not in the updated events

@@ -1,33 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { map, shareReplay } from 'rxjs/operators';
-import { combineLatest } from 'rxjs';
-import { PathConfigType, config as pathConfig } from '@kbn/utils';
-import { pick, deepFreeze } from '@kbn/std';
+import { shareReplay } from 'rxjs/operators';
 import type { RequestHandlerContext } from 'src/core/server';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import {
-  PluginInitializerContext,
-  PluginManifest,
-  PluginOpaqueId,
-  SharedGlobalConfigKeys,
-} from './types';
-import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
-import {
-  ElasticsearchConfigType,
-  config as elasticsearchConfig,
-} from '../elasticsearch/elasticsearch_config';
+  PluginsServicePrebootSetupDeps,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';
+import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
 import { IRouter, RequestHandlerContextProvider } from '../http';
-import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
-import { CoreSetup, CoreStart } from '..';
+import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
+import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 export interface InstanceInfo {
   uuid: string;
@@ -62,6 +53,7 @@ export function createPluginInitializerContext(
       mode: coreContext.env.mode,
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
+      configs: coreContext.env.configs,
     },
 
     /**
@@ -78,41 +70,57 @@ export function createPluginInitializerContext(
      */
     config: {
       legacy: {
-        /**
-         * Global configuration
-         * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
-         * @deprecated
-         */
-        globalConfig$: combineLatest([
-          coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
-          coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
-          coreContext.configService.atPath<PathConfigType>(pathConfig.path),
-          coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
-        ]).pipe(
-          map(([kibana, elasticsearch, path, savedObjects]) =>
-            deepFreeze({
-              kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
-              elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
-              path: pick(path, SharedGlobalConfigKeys.path),
-              savedObjects: pick(savedObjects, SharedGlobalConfigKeys.savedObjects),
-            })
-          )
-        ),
+        globalConfig$: getGlobalConfig$(coreContext.configService),
+        get: () => getGlobalConfig(coreContext.configService),
       },
 
       /**
        * Reads the subset of the config at the `configPath` defined in the plugin
-       * manifest and validates it against the schema in the static `schema` on
-       * the given `ConfigClass`.
-       * @param ConfigClass A class (not an instance of a class) that contains a
-       * static `schema` that we validate the config at the given `path` against.
+       * manifest.
        */
       create<T>() {
         return coreContext.configService.atPath<T>(pluginManifest.configPath).pipe(shareReplay(1));
       },
-      createIfExists() {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
+      get<T>() {
+        return coreContext.configService.atPathSync<T>(pluginManifest.configPath);
       },
+    },
+  };
+}
+
+/**
+ * Provides `CorePreboot` contract that will be exposed to the `preboot` plugin `setup` method.
+ * This contract should be safe to use only within `setup` itself.
+ *
+ * This is called for each `preboot` plugin when it's set up, so each plugin gets its own
+ * version of these values.
+ *
+ * We should aim to be restrictive and specific in the APIs that we expose.
+ *
+ * @param coreContext Kibana core context
+ * @param deps Dependencies that Plugins services gets during setup.
+ * @param plugin The plugin we're building these values for.
+ * @internal
+ */
+export function createPluginPrebootSetupContext(
+  coreContext: CoreContext,
+  deps: PluginsServicePrebootSetupDeps,
+  plugin: PluginWrapper
+): CorePreboot {
+  return {
+    elasticsearch: {
+      config: deps.elasticsearch.config,
+      createClient: deps.elasticsearch.createClient,
+    },
+    http: {
+      registerRoutes: deps.http.registerRoutes,
+      basePath: deps.http.basePath,
+      getServerInfo: deps.http.getServerInfo,
+    },
+    preboot: {
+      isSetupOnHold: deps.preboot.isSetupOnHold,
+      holdSetupUntilResolved: (reason, promise) =>
+        deps.preboot.holdSetupUntilResolved(plugin.name, reason, promise),
     },
   };
 }
@@ -149,6 +157,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
     },
+    executionContext: {
+      withContext: deps.executionContext.withContext,
+    },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <
@@ -167,7 +178,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
-      auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
+      auth: {
+        get: deps.http.auth.get,
+        isAuthenticated: deps.http.auth.isAuthenticated,
+      },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
@@ -183,6 +197,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
+      getKibanaIndex: deps.savedObjects.getKibanaIndex,
     },
     status: {
       core$: deps.status.core$,
@@ -196,6 +211,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: deps.uiSettings.register,
     },
     getStartServices: () => plugin.startDependencies,
+    deprecations: deps.deprecations.getRegistry(plugin.name),
+    coreUsageData: {
+      registerUsageCounter: deps.coreUsageData.registerUsageCounter,
+    },
   };
 }
 
@@ -225,6 +244,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createClient: deps.elasticsearch.createClient,
       legacy: deps.elasticsearch.legacy,
     },
+    executionContext: deps.executionContext,
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,

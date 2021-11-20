@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -22,7 +23,7 @@ interface MonitorStatusRowProps {
 }
 
 export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProps) => {
-  const color = status === STATUS.UP ? 'secondary' : 'danger';
+  const color = status === STATUS.UP ? 'success' : 'danger';
 
   let checkListArray = [...locationNames];
   // If un-named location exists, move it to end

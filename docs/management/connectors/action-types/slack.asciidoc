@@ -1,0 +1,80 @@
+[role="xpack"]
+[[slack-action-type]]
+=== Slack connector and action
+++++
+<titleabbrev>Slack</titleabbrev>
+++++
+
+The Slack connector uses https://api.slack.com/incoming-webhooks[Slack Incoming Webhooks].
+
+[float]
+[[slack-connector-configuration]]
+==== Connector configuration
+
+Slack connectors have the following configuration properties.
+
+Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messaging/webhooks#getting_started[Slack Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+
+[float]
+[[slack-connector-networking-configuration]]
+==== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[Preconfigured-slack-configuration]]
+==== Preconfigured connector type
+
+[source,text]
+--
+ my-slack:
+   name: preconfigured-slack-connector-type
+   actionTypeId: .slack
+   secrets:
+     webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
+--
+
+Secrets defines sensitive information for the connector type.
+
+`webhookUrl`:: A string that corresponds to *Webhook URL*.
+
+[float]
+[[define-slack-ui]]
+==== Define connector in Stack Management
+
+Define Slack connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/slack-connector.png[Slack connector]
+
+Test Slack action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/slack-params-test.png[Slack params test]
+
+[float]
+[[slack-action-configuration]]
+==== Action configuration
+
+Slack actions have the following properties.
+
+Message::   The message	text, converted to the `text` field in the Webhook JSON payload. Currently only the text field is supported. Markdown, images, and other advanced formatting are not yet supported.
+
+[float]
+[[configuring-slack]]
+==== Configure a Slack account
+
+You need a https://api.slack.com/incoming-webhooks[Slack webhook URL] to 
+configure a Slack account. To create a webhook
+URL, set up an an **Incoming Webhook Integration** through the Slack console:
+
+. Log in to http://slack.com[slack.com] as a team administrator.
+. Go to https://my.slack.com/services/new/incoming-webhook.
+. Select a default channel for the integration.
++
+image::images/slack-add-webhook-integration.png[]
+. Click *Add Incoming Webhook Integration*.
+. Copy the generated webhook URL so you can paste it into your Slack connector form.
++
+image::images/slack-copy-webhook-url.png[]

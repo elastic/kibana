@@ -1,31 +1,68 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React from 'react';
+
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import { PAGE_ROUTING_PATHS } from '../../constants';
-import { Loading, Error } from '../../components';
-import { useConfig, useFleetStatus, useBreadcrumbs, useCapabilities } from '../../hooks';
+import { Router, Route, Switch, useHistory } from 'react-router-dom';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
+
+import { FLEET_ROUTING_PATHS } from '../../constants';
+import { Loading, Error, AgentEnrollmentFlyout } from '../../components';
+import {
+  useConfig,
+  useFleetStatus,
+  useBreadcrumbs,
+  useCapabilities,
+  useGetSettings,
+  useGetAgentPolicies,
+} from '../../hooks';
+import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
+
 import { AgentListPage } from './agent_list_page';
-import { SetupPage } from './setup_page';
+import { FleetServerRequirementPage, MissingESRequirementsPage } from './agent_requirements_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
-import { EnrollmentTokenListPage } from './enrollment_token_list_page';
-import { ListLayout } from './components/list_layout';
-import { WithoutHeaderLayout } from '../../layouts';
+import { FleetServerUpgradeModal } from './components/fleet_server_upgrade_modal';
 
-export const FleetApp: React.FunctionComponent = () => {
-  useBreadcrumbs('fleet');
+export const AgentsApp: React.FunctionComponent = () => {
+  useBreadcrumbs('agent_list');
+  const history = useHistory();
   const { agents } = useConfig();
   const capabilities = useCapabilities();
 
+  const agentPoliciesRequest = useGetAgentPolicies({
+    page: 1,
+    perPage: 1000,
+  });
+
+  const agentPolicies = useMemo(
+    () => agentPoliciesRequest.data?.items || [],
+    [agentPoliciesRequest.data]
+  );
+
   const fleetStatus = useFleetStatus();
 
+  const settings = useGetSettings();
+
+  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
+  const [fleetServerModalVisible, setFleetServerModalVisible] = useState(false);
+  const onCloseFleetServerModal = useCallback(() => {
+    setFleetServerModalVisible(false);
+  }, [setFleetServerModalVisible]);
+
+  useEffect(() => {
+    // if it's undefined do not show the modal
+    if (settings.data && settings.data?.item.has_seen_fleet_migration_notice === false) {
+      setFleetServerModalVisible(true);
+    }
+  }, [settings.data]);
+
   if (!agents.enabled) return null;
-  if (fleetStatus.isLoading) {
+  if (!fleetStatus.missingRequirements && fleetStatus.isLoading) {
     return <Loading />;
   }
 
@@ -45,38 +82,59 @@ export const FleetApp: React.FunctionComponent = () => {
     );
   }
 
-  if (fleetStatus.isReady === false) {
-    return (
-      <SetupPage
-        missingRequirements={fleetStatus.missingRequirements || []}
-        refresh={fleetStatus.refresh}
-      />
-    );
+  const hasOnlyFleetServerMissingRequirement =
+    fleetStatus?.missingRequirements?.length === 1 &&
+    fleetStatus.missingRequirements[0] === 'fleet_server';
+
+  if (
+    !hasOnlyFleetServerMissingRequirement &&
+    fleetStatus.missingRequirements &&
+    fleetStatus.missingRequirements.length > 0
+  ) {
+    return <MissingESRequirementsPage missingRequirements={fleetStatus.missingRequirements} />;
   }
   if (!capabilities.read) {
     return <NoAccessPage />;
   }
 
+  const rightColumn = hasOnlyFleetServerMissingRequirement ? (
+    <>
+      {isEnrollmentFlyoutOpen && (
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            defaultMode="standalone"
+            agentPolicies={agentPolicies}
+            onClose={() => setIsEnrollmentFlyoutOpen(false)}
+          />
+        </EuiPortal>
+      )}
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
+            <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  ) : undefined;
+
   return (
-    <Router>
+    <Router history={history}>
       <Switch>
-        <Route
-          path={PAGE_ROUTING_PATHS.fleet}
-          exact={true}
-          render={() => <Redirect to={PAGE_ROUTING_PATHS.fleet_agent_list} />}
-        />
-        <Route path={PAGE_ROUTING_PATHS.fleet_agent_details}>
+        <Route path={FLEET_ROUTING_PATHS.agent_details}>
           <AgentDetailsPage />
         </Route>
-        <Route path={PAGE_ROUTING_PATHS.fleet_agent_list}>
-          <ListLayout>
-            <AgentListPage />
-          </ListLayout>
-        </Route>
-        <Route path={PAGE_ROUTING_PATHS.fleet_enrollment_tokens}>
-          <ListLayout>
-            <EnrollmentTokenListPage />
-          </ListLayout>
+        <Route path={FLEET_ROUTING_PATHS.agents}>
+          <DefaultLayout section="agents" rightColumn={rightColumn}>
+            {fleetServerModalVisible && (
+              <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
+            )}
+            {hasOnlyFleetServerMissingRequirement ? (
+              <FleetServerRequirementPage />
+            ) : (
+              <AgentListPage />
+            )}
+          </DefaultLayout>
         </Route>
       </Switch>
     </Router>

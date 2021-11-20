@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const chalk = require('chalk');
@@ -29,6 +29,7 @@ exports.downloadSnapshot = async function installSnapshot({
   basePath = BASE_PATH,
   installPath = path.resolve(basePath, version),
   log = defaultLog,
+  useCached = false,
 }) {
   log.info('version: %s', chalk.bold(version));
   log.info('install path: %s', chalk.bold(installPath));
@@ -36,7 +37,7 @@ exports.downloadSnapshot = async function installSnapshot({
 
   const artifact = await Artifact.getSnapshot(license, version, log);
   const dest = path.resolve(basePath, 'cache', artifact.getFilename());
-  await artifact.download(dest);
+  await artifact.download(dest, { useCached });
 
   return {
     downloadPath: dest,
@@ -62,6 +63,7 @@ exports.installSnapshot = async function installSnapshot({
   installPath = path.resolve(basePath, version),
   log = defaultLog,
   esArgs,
+  useCached = false,
 }) {
   const { downloadPath } = await exports.downloadSnapshot({
     license,
@@ -69,6 +71,7 @@ exports.installSnapshot = async function installSnapshot({
     basePath,
     installPath,
     log,
+    useCached,
   });
 
   return await installArchive(downloadPath, {

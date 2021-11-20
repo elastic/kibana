@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common/index_patterns';
+import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -48,21 +48,28 @@ describe('ScriptedFieldsTable', () => {
   beforeEach(() => {
     indexPattern = getIndexPatternMock({
       getScriptedFields: () => [
-        { name: 'ScriptedField', lang: 'painless', script: 'x++' },
-        { name: 'JustATest', lang: 'painless', script: 'z++' },
+        { isUserEditable: true, name: 'ScriptedField', lang: 'painless', script: 'x++' },
+        {
+          isUserEditable: false,
+          name: 'JustATest',
+          lang: 'painless',
+          script: 'z++',
+        },
       ],
     }) as IndexPattern;
   });
 
   test('should render normally', async () => {
-    const component = shallow<ScriptedFieldsTable>(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
+      typeof ScriptedFieldsTable
+    >(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -73,14 +80,14 @@ describe('ScriptedFieldsTable', () => {
   });
 
   test('should filter based on the query bar', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -94,14 +101,16 @@ describe('ScriptedFieldsTable', () => {
   });
 
   test('should filter based on the lang filter', async () => {
-    const component = shallow<ScriptedFieldsTable>(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
+      typeof ScriptedFieldsTable
+    >(
       <ScriptedFieldsTable
         indexPattern={
           getIndexPatternMock({
             getScriptedFields: () => [
-              { name: 'ScriptedField', lang: 'painless', script: 'x++' },
-              { name: 'JustATest', lang: 'painless', script: 'z++' },
-              { name: 'Bad', lang: 'somethingElse', script: 'z++' },
+              { isUserEditable: true, name: 'ScriptedField', lang: 'painless', script: 'x++' },
+              { isUserEditable: true, name: 'JustATest', lang: 'painless', script: 'z++' },
+              { isUserEditable: true, name: 'Bad', lang: 'somethingElse', script: 'z++' },
             ],
           }) as IndexPattern
         }
@@ -109,7 +118,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -123,7 +132,7 @@ describe('ScriptedFieldsTable', () => {
   });
 
   test('should hide the table if there are no scripted fields', async () => {
-    const component = shallow(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
       <ScriptedFieldsTable
         indexPattern={
           getIndexPatternMock({
@@ -134,7 +143,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -145,16 +154,19 @@ describe('ScriptedFieldsTable', () => {
   });
 
   test('should show a delete modal', async () => {
-    const component = shallow<ScriptedFieldsTable>(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
+      typeof ScriptedFieldsTable
+    >(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     await component.update(); // Fire `componentWillMount()`
+    // @ts-expect-error lang is not valid
     component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
     await component.update();
 
@@ -164,24 +176,28 @@ describe('ScriptedFieldsTable', () => {
 
   test('should delete a field', async () => {
     const removeScriptedField = jest.fn();
-    const component = shallow<ScriptedFieldsTable>(
+    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
+      typeof ScriptedFieldsTable
+    >(
       <ScriptedFieldsTable
         indexPattern={
-          ({
+          {
             ...indexPattern,
             removeScriptedField,
-          } as unknown) as IndexPattern
+          } as unknown as IndexPattern
         }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
       />
-    );
+    ).dive();
 
     await component.update(); // Fire `componentWillMount()`
+    // @ts-expect-error
     component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
 
     await component.update();
+    // @ts-expect-error
     await component.instance().deleteField();
     await component.update();
 

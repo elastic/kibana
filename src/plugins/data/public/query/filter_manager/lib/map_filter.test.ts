@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mapFilter } from './map_filter';
@@ -33,7 +33,10 @@ describe('filter manager utilities', () => {
     });
 
     test('should map exists filters', async () => {
-      const before: any = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
+      const before: any = {
+        meta: { index: 'logstash-*' },
+        query: { exists: { field: '@timestamp' } },
+      };
       const after = mapFilter(before as Filter);
 
       expect(after).toHaveProperty('meta');
@@ -44,26 +47,14 @@ describe('filter manager utilities', () => {
       expect(after.meta).toHaveProperty('negate', false);
     });
 
-    test('should map missing filters', async () => {
-      const before: any = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
-      const after = mapFilter(before as Filter);
-
-      expect(after).toHaveProperty('meta');
-      expect(after.meta).toHaveProperty('key', '@timestamp');
-      expect(after.meta).toHaveProperty('value');
-      expect(getDisplayName(after)).toBe('missing');
-      expect(after.meta).toHaveProperty('disabled', false);
-      expect(after.meta).toHaveProperty('negate', false);
-    });
-
     test('should map json filter', async () => {
-      const before: any = { meta: { index: 'logstash-*' }, query: { match_all: {} } };
+      const before: any = { meta: { index: 'logstash-*' }, query: { test: {} } };
       const after = mapFilter(before as Filter);
 
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', 'query');
       expect(after.meta).toHaveProperty('value');
-      expect(getDisplayName(after)).toBe('{"match_all":{}}');
+      expect(getDisplayName(after)).toBe('{"test":{}}');
       expect(after.meta).toHaveProperty('disabled', false);
       expect(after.meta).toHaveProperty('negate', false);
     });

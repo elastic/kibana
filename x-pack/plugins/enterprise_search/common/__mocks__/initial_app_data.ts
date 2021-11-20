@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const DEFAULT_INITIAL_APP_DATA = {
   readOnlyMode: false,
-  ilmEnabled: true,
-  isFederatedAuth: false,
+  searchOAuth: {
+    clientId: 'someUID',
+    redirectUrl: 'http://localhost:3002/ws/search_callback',
+  },
   configuredLimits: {
     appSearch: {
       engine: {
@@ -21,6 +24,10 @@ export const DEFAULT_INITIAL_APP_DATA = {
         totalFields: 64,
       },
     },
+  },
+  access: {
+    hasAppSearchAccess: true,
+    hasWorkplaceSearchAccess: true,
   },
   appSearch: {
     accountId: 'some-id-string',
@@ -47,9 +54,7 @@ export const DEFAULT_INITIAL_APP_DATA = {
       id: 'some-id-string',
       groups: ['Default', 'Cats'],
       isAdmin: true,
-      canCreatePersonalSources: true,
-      canCreateInvitations: true,
-      isCurated: false,
+      canCreatePrivateSources: true,
       viewedOnboardingPage: true,
     },
   },

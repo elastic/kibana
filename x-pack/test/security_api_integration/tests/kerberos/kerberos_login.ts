@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import request, { Cookie } from 'request';
-import { delay } from 'bluebird';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -51,7 +52,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
+      await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .expect(401, { statusCode: 401, error: 'Unauthorized', message: 'Unauthorized' });
     });
 
     it('does not prevent basic login', async () => {
@@ -69,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
 
-      const cookie = request.cookie(cookies[0])!;
+      const cookie = parseCookie(cookies[0])!;
       checkCookieIsSet(cookie);
 
       const { body: user } = await supertest
@@ -90,6 +94,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
         expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
+
+        // If browser and Kibana can successfully negotiate this HTML won't rendered, but if not
+        // users will see a proper `Unauthenticated` page.
+        expect(spnegoResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(spnegoResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('AJAX requests should not initiate SPNEGO', async () => {
@@ -118,12 +129,12 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
-        const isAnonymousAccessEnabled = (config.get(
-          'esTestCluster.serverArgs'
-        ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+        const isAnonymousAccessEnabled = (config.get('esTestCluster.serverArgs') as string[]).some(
+          (setting) => setting.startsWith('xpack.security.authc.anonymous')
+        );
 
         // `superuser_anonymous` role is derived from the enabled anonymous access.
         const expectedUserRoles = isAnonymousAccessEnabled
@@ -182,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
       });
 
@@ -194,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieOne = request.cookie(apiResponseOne.headers['set-cookie'][0])!;
+        const sessionCookieOne = parseCookie(apiResponseOne.headers['set-cookie'][0])!;
 
         checkCookieIsSet(sessionCookieOne);
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
@@ -206,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieTwo = request.cookie(apiResponseTwo.headers['set-cookie'][0])!;
+        const sessionCookieTwo = parseCookie(apiResponseTwo.headers['set-cookie'][0])!;
 
         checkCookieIsSet(sessionCookieTwo);
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
@@ -246,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
         let cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
         // And then log user out.
@@ -257,7 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
+        checkCookieIsCleared(parseCookie(cookies[0])!);
 
         expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
 
@@ -272,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
         // If Kibana detects cookie with invalid token it tries to clear it.
         cookies = apiResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
+        checkCookieIsCleared(parseCookie(cookies[0])!);
 
         // Request with a session cookie that is linked to an invalidated/non-existent session is treated the same as
         // request without any session cookie at all.
@@ -283,7 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
       });
     });
 
@@ -299,7 +310,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
       });
 
@@ -308,7 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await setTimeoutAsync(20000);
 
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
@@ -321,7 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = apiResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const refreshedCookie = request.cookie(cookies[0])!;
+        const refreshedCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(refreshedCookie);
 
         // The first new cookie with fresh pair of access and refresh tokens should work.
@@ -339,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await setTimeoutAsync(20000);
 
         // This request should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
@@ -351,7 +362,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = nonAjaxResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const refreshedCookie = request.cookie(cookies[0])!;
+        const refreshedCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(refreshedCookie);
 
         // The first new cookie with fresh pair of access and refresh tokens should work.
@@ -377,7 +388,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
@@ -388,7 +399,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
       });
 
       it('AJAX call should initiate SPNEGO and clear existing cookie', async function () {
@@ -400,7 +411,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const cookies = apiResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
+        checkCookieIsCleared(parseCookie(cookies[0])!);
 
         expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
       });
@@ -413,7 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const cookies = nonAjaxResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
+        checkCookieIsCleared(parseCookie(cookies[0])!);
 
         expect(nonAjaxResponse.headers['www-authenticate']).to.be('Negotiate');
       });

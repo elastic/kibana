@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 test.skip('requires one test', () => {});
@@ -18,7 +19,6 @@ import * as kbnTestServer from '../../../../../src/test_utils/kbn_server';
 function createXPackRoot(config: {} = {}) {
   return kbnTestServer.createRoot({
     plugins: {
-      scanDirs: [],
       paths: [
         resolve(__dirname, '../../../../../x-pack/plugins/encrypted_saved_objects'),
         resolve(__dirname, '../../../../../x-pack/plugins/fleet'),
@@ -30,12 +30,13 @@ function createXPackRoot(config: {} = {}) {
   });
 }
 
-describe('ingestManager', () => {
+describe('fleet', () => {
   describe('default. manager, EPM, and Fleet all disabled', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeAll(async () => {
       root = createXPackRoot();
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -63,12 +64,13 @@ describe('ingestManager', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeAll(async () => {
-      const ingestManagerConfig = {
+      const fleetConfig = {
         enabled: true,
       };
       root = createXPackRoot({
-        ingestManager: ingestManagerConfig,
+        fleet: fleetConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -101,13 +103,14 @@ describe('ingestManager', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeAll(async () => {
-      const ingestManagerConfig = {
+      const fleetConfig = {
         enabled: true,
         epm: { enabled: true },
       };
       root = createXPackRoot({
-        ingestManager: ingestManagerConfig,
+        fleet: fleetConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -135,13 +138,14 @@ describe('ingestManager', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeAll(async () => {
-      const ingestManagerConfig = {
+      const fleetConfig = {
         enabled: true,
         fleet: { enabled: true },
       };
       root = createXPackRoot({
-        ingestManager: ingestManagerConfig,
+        fleet: fleetConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -169,14 +173,15 @@ describe('ingestManager', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeAll(async () => {
-      const ingestManagerConfig = {
+      const fleetConfig = {
         enabled: true,
         epm: { enabled: true },
         fleet: { enabled: true },
       };
       root = createXPackRoot({
-        ingestManager: ingestManagerConfig,
+        fleet: fleetConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);

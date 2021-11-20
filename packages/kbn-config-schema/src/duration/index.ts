@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Duration, duration as momentDuration, DurationInputArg2, isDuration } from 'moment';
-export { Duration, isDuration };
+export type { Duration };
+export { isDuration };
 
 const timeFormatRegex = /^(0|[1-9][0-9]*)(ms|s|m|h|d|w|M|Y)$/;
 
@@ -24,7 +25,7 @@ function stringToDuration(text: string) {
     return numberToDuration(number);
   }
 
-  const count = parseInt(result[1], 0);
+  const count = parseInt(result[1], 10);
   const unit = result[2] as DurationInputArg2;
 
   return momentDuration(count, unit);

@@ -1,22 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect, useState } from 'react';
+import { DataViewBase } from '@kbn/es-query';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
-import { esKuery, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { esKuery, QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+
+type LoadSuggestionsFn = (
+  e: string,
+  p: number,
+  m?: number,
+  transform?: (s: QuerySuggestion[]) => QuerySuggestion[]
+) => void;
+export type CurryLoadSuggestionsType = (loadSuggestions: LoadSuggestionsFn) => LoadSuggestionsFn;
 
 interface Props {
-  derivedIndexPattern: IIndexPattern;
+  derivedIndexPattern: DataViewBase;
   onSubmit: (query: string) => void;
   onChange?: (query: string) => void;
   value?: string | null;
   placeholder?: string;
+  curryLoadSuggestions?: CurryLoadSuggestionsType;
 }
 
 function validateQuery(query: string) {
@@ -34,6 +45,7 @@ export const MetricsExplorerKueryBar = ({
   onChange,
   value,
   placeholder,
+  curryLoadSuggestions = defaultCurryLoadSuggestions,
 }: Props) => {
   const [draftQuery, setDraftQuery] = useState<string>(value || '');
   const [isValid, setValidation] = useState<boolean>(true);
@@ -72,7 +84,7 @@ export const MetricsExplorerKueryBar = ({
           aria-label={placeholder}
           isLoadingSuggestions={isLoadingSuggestions}
           isValid={isValid}
-          loadSuggestions={loadSuggestions}
+          loadSuggestions={curryLoadSuggestions(loadSuggestions)}
           onChange={handleChange}
           onSubmit={onSubmit}
           placeholder={placeholder || defaultPlaceholder}
@@ -83,3 +95,8 @@ export const MetricsExplorerKueryBar = ({
     </WithKueryAutocompletion>
   );
 };
+
+const defaultCurryLoadSuggestions: CurryLoadSuggestionsType =
+  (loadSuggestions) =>
+  (...args) =>
+    loadSuggestions(...args);

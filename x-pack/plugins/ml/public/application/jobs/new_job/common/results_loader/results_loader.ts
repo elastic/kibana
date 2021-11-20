@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -254,7 +255,9 @@ export class ResultsLoader {
     if (isMultiMetricJobCreator(this._jobCreator)) {
       if (this._jobCreator.splitField !== null) {
         const fieldValues = await this._chartLoader.loadFieldExampleValues(
-          this._jobCreator.splitField
+          this._jobCreator.splitField,
+          this._jobCreator.runtimeMappings,
+          this._jobCreator.datafeedConfig.indices_options
         );
         if (fieldValues.length > 0) {
           this._detectorSplitFieldFilters = {

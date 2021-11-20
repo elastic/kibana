@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
@@ -83,12 +84,12 @@ export const RenderWithFn: FC<Props> = ({
     []
   );
 
-  const render = useCallback(() => {
+  const render = useCallback(async () => {
     if (!isEqual(handlers.current, incomingHandlers)) {
       handlers.current = incomingHandlers;
     }
 
-    renderFn(renderTarget.current!, config, handlers.current);
+    await renderFn(renderTarget.current!, config, handlers.current);
   }, [renderTarget, config, renderFn, incomingHandlers]);
 
   useEffect(() => {
@@ -100,12 +101,13 @@ export const RenderWithFn: FC<Props> = ({
       resetRenderTarget();
     }
 
-    try {
-      render();
-      firstRender.current = false;
-    } catch (err) {
-      onError(err, { title: strings.getRenderErrorMessage(functionName) });
-    }
+    render()
+      .then(() => {
+        firstRender.current = false;
+      })
+      .catch((err) => {
+        onError(err, { title: strings.getRenderErrorMessage(functionName) });
+      });
   }, [domNode, functionName, onError, render, resetRenderTarget, reuseNode]);
 
   return (

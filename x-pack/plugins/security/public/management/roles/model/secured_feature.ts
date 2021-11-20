@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaFeature, KibanaFeatureConfig } from '../../../../../features/common';
+import type { KibanaFeatureConfig } from '../../../../../features/common';
+import { KibanaFeature } from '../../../../../features/common';
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 import { SecuredSubFeature } from './secured_sub_feature';
-import { SubFeaturePrivilege } from './sub_feature_privilege';
+import type { SubFeaturePrivilege } from './sub_feature_privilege';
 
 export class SecuredFeature extends KibanaFeature {
   private readonly primaryFeaturePrivileges: PrimaryFeaturePrivilege[];
@@ -27,14 +29,10 @@ export class SecuredFeature extends KibanaFeature {
       ([id, privilege]) => new PrimaryFeaturePrivilege(id, privilege, actionMapping[id])
     );
 
-    if (this.config.subFeatures?.length ?? 0 > 0) {
-      this.minimalPrimaryFeaturePrivileges = Object.entries(this.config.privileges || {}).map(
-        ([id, privilege]) =>
-          new PrimaryFeaturePrivilege(`minimal_${id}`, privilege, actionMapping[`minimal_${id}`])
-      );
-    } else {
-      this.minimalPrimaryFeaturePrivileges = [];
-    }
+    this.minimalPrimaryFeaturePrivileges = Object.entries(this.config.privileges || {}).map(
+      ([id, privilege]) =>
+        new PrimaryFeaturePrivilege(`minimal_${id}`, privilege, actionMapping[`minimal_${id}`])
+    );
 
     this.securedSubFeatures =
       this.config.subFeatures?.map((sf) => new SecuredSubFeature(sf, actionMapping)) ?? [];

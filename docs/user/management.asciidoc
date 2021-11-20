@@ -4,7 +4,7 @@
 [partintro]
 --
 *Stack Management* is home to UIs for managing all things Elastic Stack&mdash;
-indices, clusters, licenses, UI settings, index patterns, spaces, and more.
+indices, clusters, licenses, UI settings, data views, spaces, and more.
 
 
 Access to individual features is governed by {es} and {kib} privileges.
@@ -17,17 +17,12 @@ Consult your administrator if you do not have the appropriate access.
 [cols="50, 50"]
 |===
 
-| <<ingest-node-pipelines, Ingest Node Pipelines>>
-| Create and manage {es}
-pipelines that enable you to perform common transformations and
-enrichments on your data.
+| {ref}/ingest.html[Ingest Pipelines]
+| Create and manage ingest pipelines that let you perform common transformations
+and enrichments on your data.
 
 | {logstash-ref}/logstash-centralized-pipeline-management.html[Logstash Pipelines]
 | Create, edit, and delete your Logstash pipeline configurations.
-
-| <<managing-beats, Beats Central Management>>
-| Manage your Beats configurations in a central location and
-quickly deploy configuration changes to all Beats running across your enterprise.
 
 
 |===
@@ -50,7 +45,7 @@ through the hot, warm, cold, and delete phases.
 Such policies help you control operation costs
 because you can put data in different resource tiers.
 
-| <<snapshot-repositories, Snapshot and Restore>>
+| {ref}/snapshot-restore.html[Snapshot and Restore]
 |Define a policy that creates, schedules, and automatically deletes snapshots to ensure that you
 have backups of your cluster in case something goes wrong.
 
@@ -79,17 +74,18 @@ You can add and remove remote clusters, and check their connectivity.
 [cols="50, 50"]
 |===
 
-| <<managing-alerts-and-actions, Alerts&nbsp;and Actions>>
-| Centrally manage your alerts across {kib}. Create and manage reusable
-connectors for triggering actions.
+| <<alerting-getting-started, Rules&nbsp;and Connectors>>
+| Centrally <<create-and-manage-rules, manage your rules>> across {kib}. Create and <<connector-management, manage reusable
+connectors>> for triggering actions.
 
 | <<reporting-getting-started, Reporting>>
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
 A report can contain a dashboard, visualization, saved search, or Canvas workpad.
 
-| {ml-docs}/ml-jobs.html[Machine Learning Jobs]
-| View your {anomaly-jobs} and {dfanalytics-jobs}. Open the Single Metric
-Viewer or Anomaly Explorer to see your {ml} results.
+| Machine Learning Jobs
+| View, export, and import your <<xpack-ml-anomalies,{anomaly-detect}>> and
+<<xpack-ml-dfanalytics,{dfanalytics}>> jobs. Open the Single Metric
+Viewer or Anomaly Explorer to see your {anomaly-detect} results.
 
 | <<watcher-ui, Watcher>>
 | Detect changes in your data by creating, managing, and monitoring alerts.
@@ -132,15 +128,21 @@ Kerberos, PKI, OIDC, and SAML.
 [cols="50, 50"]
 |===
 
-a| <<index-patterns, Index Patterns>>
-|Create and manage the index patterns that retrieve your data from {es}.
+a| <<data-views, Data Views>>
+|Manage the fields in the data views that retrieve your data from {es}.
 
 | <<managing-saved-objects, Saved Objects>>
 | Copy, edit, delete, import, and export your saved objects.
-These include dashboards, visualizations, maps, index patterns, Canvas workpads, and more.
+These include dashboards, visualizations, maps, data views, Canvas workpads, and more.
 
 | <<managing-tags, Tags>>
 |Create, manage, and assign tags to your saved objects.
+
+| <<search-sessions, Search Sessions>>
+| Manage your saved search sessions, groups of queries that run in the background.
+Search sessions are useful when your queries take longer than usual to process,
+for example, when you have a large volume of data or when the performance of your storage location is slow.
+
 
 | <<xpack-spaces, Spaces>>
 | Create spaces to organize your dashboards and other saved objects into categories.
@@ -177,21 +179,11 @@ next major version of {es}, and then reindex, if needed.
 
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/alerts-and-actions-intro.asciidoc[]
-
-include::{kib-repo-dir}/management/alerting/alert-management.asciidoc[]
-
-include::{kib-repo-dir}/management/alerting/alert-details.asciidoc[]
-
-include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
-
-include::{kib-repo-dir}/management/managing-beats.asciidoc[]
-
-include::{kib-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]
-
-include::{kib-repo-dir}/management/managing-fields.asciidoc[]
+include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
+
+include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
 
 include::{kib-repo-dir}/management/numeral.asciidoc[]
 
@@ -199,13 +191,11 @@ include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-tags.asciidoc[]
-
 include::security/index.asciidoc[]
 
-include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
-
 include::{kib-repo-dir}/spaces/index.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-tags.asciidoc[]
 
 include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
 

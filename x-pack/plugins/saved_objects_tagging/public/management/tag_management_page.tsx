@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
 import { Subject } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
-import { EuiPageContent, Query } from '@elastic/eui';
+import { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { EuiSpacer } from '@elastic/eui';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener } from '../components/edition_modal';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
@@ -72,10 +74,10 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     fetchTags();
   });
 
-  const createModalOpener = useMemo(() => getCreateModalOpener({ overlays, tagClient }), [
-    overlays,
-    tagClient,
-  ]);
+  const createModalOpener = useMemo(
+    () => getCreateModalOpener({ overlays, tagClient }),
+    [overlays, tagClient]
+  );
 
   const tableActions = useMemo(() => {
     return getTableActions({
@@ -191,8 +193,9 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   );
 
   return (
-    <EuiPageContent horizontalPosition="center">
+    <>
       <Header canCreate={capabilities.create} onCreate={openCreateModal} />
+      <EuiSpacer size="l" />
       <TagTable
         loading={loading}
         tags={filteredTags}
@@ -214,6 +217,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
           showTagRelations(tag);
         }}
       />
-    </EuiPageContent>
+    </>
   );
 };

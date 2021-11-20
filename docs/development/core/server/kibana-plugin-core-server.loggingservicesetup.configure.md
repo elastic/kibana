@@ -16,11 +16,11 @@ configure(config$: Observable<LoggerContextConfigInput>): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  config$ | <code>Observable&lt;LoggerContextConfigInput&gt;</code> |  |
+|  config$ | Observable&lt;LoggerContextConfigInput&gt; |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Remarks
 
@@ -34,9 +34,8 @@ Customize the configuration for the plugins.data.search context.
 core.logging.configure(
   of({
     appenders: new Map(),
-    loggers: [{ context: 'search', appenders: ['default'] }]
+    loggers: [{ name: 'search', appenders: ['default'] }]
   })
 )
-
 ```
 

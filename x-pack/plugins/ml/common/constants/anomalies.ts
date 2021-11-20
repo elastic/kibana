@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export enum ANOMALY_SEVERITY {
@@ -29,6 +30,12 @@ export const SEVERITY_COLORS = {
   LOW: '#d2e9f7',
   BLANK: '#ffffff',
 };
+
+export const ANOMALY_RESULT_TYPE = {
+  BUCKET: 'bucket',
+  RECORD: 'record',
+  INFLUENCER: 'influencer',
+} as const;
 
 export const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
 export const JOB_ID = 'job_id';

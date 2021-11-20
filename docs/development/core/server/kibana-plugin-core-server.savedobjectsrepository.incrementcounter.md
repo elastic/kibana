@@ -9,21 +9,21 @@ Increments all the specified counter fields (by one by default). Creates the doc
 <b>Signature:</b>
 
 ```typescript
-incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
+incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions<T>): Promise<SavedObject<T>>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> | The type of saved object whose fields should be incremented |
-|  id | <code>string</code> | The id of the document whose fields should be incremented |
-|  counterFields | <code>Array&lt;string &#124; SavedObjectsIncrementCounterField&gt;</code> | An array of field names to increment or an array of [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |
-|  options | <code>SavedObjectsIncrementCounterOptions</code> | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
+|  type | string | The type of saved object whose fields should be incremented |
+|  id | string | The id of the document whose fields should be incremented |
+|  counterFields | Array&lt;string \| SavedObjectsIncrementCounterField&gt; | An array of field names to increment or an array of [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |
+|  options | SavedObjectsIncrementCounterOptions&lt;T&gt; | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
 
 <b>Returns:</b>
 
-`Promise<SavedObject<T>>`
+Promise&lt;SavedObject&lt;T&gt;&gt;
 
 The saved object after the specified fields were incremented
 
@@ -31,7 +31,7 @@ The saved object after the specified fields were incremented
 
 When supplying a field name like `stats.api.counter` the field name will be used as-is to create a document like: `{attributes: {'stats.api.counter': 1}}` It will not create a nested structure like: `{attributes: {stats: {api: {counter: 1}}}}`
 
-When using incrementCounter for collecting usage data, you need to ensure that usage collection happens on a best-effort basis and doesn't negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage\_collection/README.md\#tracking-interactions-with-incrementcounter)
+When using incrementCounter for collecting usage data, you need to ensure that usage collection happens on a best-effort basis and doesn't negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/main/src/plugins/usage\_collection/README.mdx\#tracking-interactions-with-incrementcounter)
 
 ## Example
 
@@ -52,5 +52,18 @@ repository
     'stats.apiCalls',
   ])
 
+// Increment the apiCalls field counter by 4
+repository
+  .incrementCounter('dashboard_counter_type', 'counter_id', [
+    { fieldName: 'stats.apiCalls' incrementBy: 4 },
+  ])
+
+// Initialize the document with arbitrary fields if not present
+repository.incrementCounter<{ appId: string }>(
+  'dashboard_counter_type',
+  'counter_id',
+  [ 'stats.apiCalls'],
+  { upsertAttributes: { appId: 'myId' } }
+)
 ```
 

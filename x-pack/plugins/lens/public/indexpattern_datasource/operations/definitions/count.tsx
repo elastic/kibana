@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,7 +11,7 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getFilter, isColumnFormatted } from './helpers';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
@@ -37,7 +38,13 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: adjustTimeScaleLabelSuffix(field.displayName, undefined, oldColumn.timeScale),
+      label: adjustTimeScaleLabelSuffix(
+        field.displayName,
+        undefined,
+        oldColumn.timeScale,
+        undefined,
+        oldColumn.timeShift
+      ),
       sourceField: field.name,
     };
   },
@@ -50,21 +57,35 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       };
     }
   },
-  getDefaultLabel: (column) => adjustTimeScaleLabelSuffix(countLabel, undefined, column.timeScale),
-  buildColumn({ field, previousColumn }) {
+  getDefaultLabel: (column) =>
+    adjustTimeScaleLabelSuffix(
+      countLabel,
+      undefined,
+      column.timeScale,
+      undefined,
+      column.timeShift
+    ),
+  buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: adjustTimeScaleLabelSuffix(countLabel, undefined, previousColumn?.timeScale),
+      label: adjustTimeScaleLabelSuffix(
+        countLabel,
+        undefined,
+        previousColumn?.timeScale,
+        undefined,
+        previousColumn?.timeShift
+      ),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
+      filter: getFilter(previousColumn, columnParams),
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params:
         previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
+        isColumnFormatted(previousColumn) &&
+        previousColumn.params
           ? { format: previousColumn.params.format }
           : undefined,
     };
@@ -80,10 +101,29 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       id: columnId,
       enabled: true,
       schema: 'metric',
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
     }).toAst();
   },
   isTransferable: () => {
     return true;
   },
   timeScalingMode: 'optional',
+  filterable: true,
+  documentation: {
+    section: 'elasticsearch',
+    signature: '',
+    description: i18n.translate('xpack.lens.indexPattern.count.documentation.markdown', {
+      defaultMessage: `
+Calculates the number of documents.
+
+Example: Calculate the number of documents:
+\`count()\`
+
+Example: Calculate the number of documents matching a certain filter:
+\`count(kql='price > 500')\`
+      `,
+    }),
+  },
+  shiftable: true,
 };

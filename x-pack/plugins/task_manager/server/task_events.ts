@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Option } from 'fp-ts/lib/Option';
@@ -12,6 +13,13 @@ import { Result, Err } from './lib/result_type';
 import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
+import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
+
+export enum TaskPersistence {
+  Recurring = 'recurring',
+  NonRecurring = 'non_recurring',
+  Ephemeral = 'ephemeral',
+}
 
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
@@ -20,6 +28,13 @@ export enum TaskEventType {
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
+  EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY = 'EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY',
+}
+
+export enum TaskClaimErrorType {
+  CLAIMED_BY_ID_OUT_OF_CAPACITY = 'CLAIMED_BY_ID_OUT_OF_CAPACITY',
+  CLAIMED_BY_ID_NOT_RETURNED = 'CLAIMED_BY_ID_NOT_RETURNED',
+  CLAIMED_BY_ID_NOT_IN_CLAIMING_STATUS = 'CLAIMED_BY_ID_NOT_IN_CLAIMING_STATUS',
 }
 
 export interface TaskTiming {
@@ -41,19 +56,30 @@ export interface TaskEvent<OkResult, ErrorResult, ID = string> {
 }
 export interface RanTask {
   task: ConcreteTaskInstance;
+  persistence: TaskPersistence;
   result: TaskRunResult;
 }
 export type ErroredTask = RanTask & {
   error: Error;
 };
+export interface ClaimTaskErr {
+  task: Option<ConcreteTaskInstance>;
+  errorType: TaskClaimErrorType;
+}
 
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<RanTask, ErroredTask>;
-export type TaskClaim = TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>;
+export type TaskClaim = TaskEvent<ConcreteTaskInstance, ClaimTaskErr>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
+export type EphemeralTaskRejectedDueToCapacity = TaskEvent<EphemeralTaskInstanceRequest, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
 
-export type TaskManagerStats = 'load' | 'pollingDelay';
+export type TaskManagerStats =
+  | 'load'
+  | 'pollingDelay'
+  | 'claimDuration'
+  | 'queuedEphemeralTasks'
+  | 'ephemeralTaskDelay';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
@@ -91,7 +117,7 @@ export function asTaskRunEvent(
 
 export function asTaskClaimEvent(
   id: string,
-  event: Result<ConcreteTaskInstance, Option<ConcreteTaskInstance>>,
+  event: Result<ConcreteTaskInstance, ClaimTaskErr>,
   timing?: TaskTiming
 ): TaskClaim {
   return {
@@ -138,6 +164,19 @@ export function asTaskManagerStatEvent(
   };
 }
 
+export function asEphemeralTaskRejectedDueToCapacityEvent(
+  id: string,
+  event: Result<EphemeralTaskInstanceRequest, Error>,
+  timing?: TaskTiming
+): EphemeralTaskRejectedDueToCapacity {
+  return {
+    id,
+    type: TaskEventType.EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY,
+    event,
+    timing,
+  };
+}
+
 export function isTaskMarkRunningEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskMarkRunning {
@@ -163,4 +202,9 @@ export function isTaskManagerStatEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_STAT;
+}
+export function isEphemeralTaskRejectedDueToCapacityEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is EphemeralTaskRejectedDueToCapacity {
+  return taskEvent.type === TaskEventType.EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY;
 }

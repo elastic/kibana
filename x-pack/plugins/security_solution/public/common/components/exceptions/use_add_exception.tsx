@@ -1,29 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { UpdateDocumentByQueryResponse } from 'elasticsearch';
-import { HttpStart } from '../../../../../../../src/core/public';
-
-import {
-  addExceptionListItem,
-  updateExceptionListItem,
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from '../../../lists_plugin_deps';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { useApi } from '@kbn/securitysolution-list-hooks';
+import { HttpStart } from '../../../../../../../src/core/public';
+
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
-  buildAlertStatusFilter,
   buildAlertsRuleIdFilter,
+  buildAlertStatusesFilter,
+  buildAlertStatusesFilterRuleRegistry,
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
+import { useKibana } from '../../lib/kibana';
 
 /**
  * Adds exception items to the list. Also optionally closes alerts.
@@ -65,11 +67,13 @@ export const useAddOrUpdateException = ({
   onError,
   onSuccess,
 }: UseAddOrUpdateExceptionProps): ReturnUseAddOrUpdateException => {
+  const { services } = useKibana();
   const [isLoading, setIsLoading] = useState(false);
   const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
+  const { addExceptionListItem, updateExceptionListItem } = useApi(services.http);
   const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
     async (ruleId, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
-      if (addOrUpdateExceptionRef.current !== null) {
+      if (addOrUpdateExceptionRef.current != null) {
         addOrUpdateExceptionRef.current(
           ruleId,
           exceptionItemsToAddOrUpdate,
@@ -80,58 +84,44 @@ export const useAddOrUpdateException = ({
     },
     []
   );
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    const addOrUpdateItems = async (
-      exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-    ): Promise<void> => {
-      const toAdd: CreateExceptionListItemSchema[] = [];
-      const toUpdate: UpdateExceptionListItemSchema[] = [];
-      exceptionItemsToAddOrUpdate.forEach(
-        (item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
-          if ('id' in item && item.id !== undefined) {
-            toUpdate.push(formatExceptionItemForUpdate(item));
-          } else {
-            toAdd.push(item);
-          }
-        }
-      );
-
-      const promises: Array<Promise<ExceptionListItemSchema>> = [];
-      toAdd.forEach((item: CreateExceptionListItemSchema) => {
-        promises.push(
-          addExceptionListItem({
-            http,
-            listItem: item,
-            signal: abortCtrl.signal,
-          })
-        );
-      });
-      toUpdate.forEach((item: UpdateExceptionListItemSchema) => {
-        promises.push(
-          updateExceptionListItem({
-            http,
-            listItem: item,
-            signal: abortCtrl.signal,
-          })
-        );
-      });
-      await Promise.all(promises);
-    };
-
-    const addOrUpdateExceptionItems: AddOrUpdateExceptionItemsFunc = async (
+    const onUpdateExceptionItemsAndAlertStatus: AddOrUpdateExceptionItemsFunc = async (
       ruleId,
       exceptionItemsToAddOrUpdate,
       alertIdToClose,
       bulkCloseIndex
     ) => {
+      const addOrUpdateItems = async (
+        exceptionListItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+      ): Promise<void> => {
+        await Promise.all(
+          exceptionListItems.map(
+            (item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+              if ('id' in item && item.id != null) {
+                const formattedExceptionItem = formatExceptionItemForUpdate(item);
+                return updateExceptionListItem({
+                  listItem: formattedExceptionItem,
+                });
+              } else {
+                return addExceptionListItem({
+                  listItem: item,
+                });
+              }
+            }
+          )
+        );
+      };
+
       try {
         setIsLoading(true);
-        let alertIdResponse: UpdateDocumentByQueryResponse | undefined;
-        let bulkResponse: UpdateDocumentByQueryResponse | undefined;
+        let alertIdResponse: estypes.UpdateByQueryResponse | undefined;
+        let bulkResponse: estypes.UpdateByQueryResponse | undefined;
         if (alertIdToClose != null) {
           alertIdResponse = await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),
@@ -141,10 +131,15 @@ export const useAddOrUpdateException = ({
         }
 
         if (bulkCloseIndex != null) {
+          // TODO: Once we are past experimental phase this code should be removed
+          const alertStatusFilter = ruleRegistryEnabled
+            ? buildAlertStatusesFilterRuleRegistry(['open', 'acknowledged', 'in-progress'])
+            : buildAlertStatusesFilter(['open', 'acknowledged', 'in-progress']);
+
           const filter = getQueryFilter(
             '',
             'kuery',
-            [...buildAlertsRuleIdFilter(ruleId), ...buildAlertStatusFilter('open')],
+            [...buildAlertsRuleIdFilter(ruleId), ...alertStatusFilter],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
@@ -169,7 +164,6 @@ export const useAddOrUpdateException = ({
         const updated = (alertIdResponse?.updated ?? 0) + (bulkResponse?.updated ?? 0);
         const conflicts =
           alertIdResponse?.version_conflicts ?? 0 + (bulkResponse?.version_conflicts ?? 0);
-
         if (isSubscribed) {
           setIsLoading(false);
           onSuccess(updated, conflicts);
@@ -186,12 +180,19 @@ export const useAddOrUpdateException = ({
       }
     };
 
-    addOrUpdateExceptionRef.current = addOrUpdateExceptionItems;
+    addOrUpdateExceptionRef.current = onUpdateExceptionItemsAndAlertStatus;
     return (): void => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [http, onSuccess, onError]);
+  }, [
+    addExceptionListItem,
+    http,
+    onSuccess,
+    onError,
+    ruleRegistryEnabled,
+    updateExceptionListItem,
+  ]);
 
   return [{ isLoading }, addOrUpdateException];
 };

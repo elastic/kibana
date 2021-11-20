@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector } from 'reselect';
@@ -28,30 +29,26 @@ export const monitorStatusSelector = (state: AppState) => state.monitorStatus.st
 
 export const selectDynamicSettings = (state: AppState) => state.dynamicSettings;
 
-export const selectIndexPattern = ({ indexPattern }: AppState) => indexPattern;
-
 export const selectPingHistogram = ({ ping }: AppState) => ping;
 
 export const selectPingList = ({ pingList }: AppState) => pingList;
 
-export const snapshotDataSelector = ({ snapshot }: AppState) => snapshot;
-
-const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
+export const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities;
 
 export const hasMLFeatureSelector = createSelector(
   mlCapabilitiesSelector,
   (mlCapabilities) =>
-    mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace
+    mlCapabilities?.data?.isPlatinumOrTrialLicense && mlCapabilities?.data?.mlFeatureEnabledInSpace
 );
 
 export const canCreateMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  (mlCapabilities) => mlCapabilities?.capabilities.canCreateJob
+  (mlCapabilities) => mlCapabilities?.data?.capabilities?.canCreateJob
 );
 
 export const canDeleteMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  (mlCapabilities) => mlCapabilities?.capabilities.canDeleteJob
+  (mlCapabilities) => mlCapabilities?.data?.capabilities?.canDeleteJob
 );
 
 export const hasMLJobSelector = ({ ml }: AppState) => ml.mlJob;
@@ -75,17 +72,9 @@ export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppS
 
 export const selectAlertFlyoutType = ({ ui: { alertFlyoutType } }: AppState) => alertFlyoutType;
 
-export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: AppState) => ({
-  filters: ui.esKuery,
-  indexPattern: indexPattern.index_pattern,
-  locations: overviewFilters.filters.locations,
-});
-
 export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.indexStatus;
 
 export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
-
-export const overviewFiltersSelector = ({ overviewFilters }: AppState) => overviewFilters;
 
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
@@ -98,3 +87,5 @@ export const monitorIdSelector = ({ ui: { monitorId } }: AppState) => monitorId;
 export const journeySelector = ({ journeys }: AppState) => journeys;
 
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
+
+export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;

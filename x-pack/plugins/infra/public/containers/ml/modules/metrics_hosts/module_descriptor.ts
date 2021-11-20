@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -17,6 +18,7 @@ import {
   MetricsHostsJobType,
   bucketSpan,
 } from '../../../../../common/infra_ml';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import MemoryJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -66,7 +68,8 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
   const {
     start,
     end,
-    moduleSourceConfiguration: { spaceId, sourceId, indices, timestampField },
+    filter,
+    moduleSourceConfiguration: { spaceId, sourceId, indices },
     partitionField,
   } = setUpModuleArgs;
 
@@ -91,13 +94,13 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     return {
       job_id: id,
       data_description: {
-        time_field: timestampField,
+        time_field: TIMESTAMP_FIELD,
       },
       analysis_config,
       custom_settings: {
         metrics_source_config: {
           indexPattern: indexNamePattern,
-          timestampField,
+          timestampField: TIMESTAMP_FIELD,
           bucketSpan,
         },
       },
@@ -106,10 +109,23 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
 
   const datafeedOverrides = jobIds.map((id) => {
     const { datafeed: defaultDatafeedConfig } = getDefaultJobConfigs(id);
+    const config = { ...defaultDatafeedConfig };
+
+    if (filter) {
+      const query = JSON.parse(filter);
+
+      config.query.bool = {
+        ...config.query.bool,
+        ...query.bool,
+      };
+    }
 
     if (!partitionField || id === 'hosts_memory_usage') {
       // Since the host memory usage doesn't have custom aggs, we don't need to do anything to add a partition field
-      return defaultDatafeedConfig;
+      return {
+        ...config,
+        job_id: id,
+      };
     }
 
     // If we have a partition field, we need to change the aggregation to do a terms agg at the top level
@@ -125,7 +141,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     };
 
     return {
-      ...defaultDatafeedConfig,
+      ...config,
       job_id: id,
       aggregations,
     };

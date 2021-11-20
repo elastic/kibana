@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -12,7 +13,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import createContainter from 'constate';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useUrlState } from '../../../../utils/use_url_state';
-import { useSourceContext } from '../../../../containers/source';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
 
@@ -65,9 +66,10 @@ export const useWaffleFilters = () => {
     setFilterQueryDraft(filterQuery.expression);
   }, []);
 
-  const isFilterQueryDraftValid = useMemo(() => validateKuery(filterQueryDraft), [
-    filterQueryDraft,
-  ]);
+  const isFilterQueryDraftValid = useMemo(
+    () => validateKuery(filterQueryDraft),
+    [filterQueryDraft]
+  );
 
   const { inventoryPrefill } = useAlertPrefillContext();
   const prefillContext = useMemo(() => inventoryPrefill, [inventoryPrefill]); // For Jest compatibility

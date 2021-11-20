@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -58,46 +58,44 @@ export class BundleRefs {
     }
 
     return new BundleRefs(
-      spec.map(
-        (refSpec: UnknownVals<BundleRef>): BundleRef => {
-          if (typeof refSpec !== 'object' || !refSpec) {
-            throw new Error('`bundleRefs[]` must be an object');
-          }
-
-          const { bundleId } = refSpec;
-          if (typeof bundleId !== 'string') {
-            throw new Error('`bundleRefs[].bundleId` must be a string');
-          }
-
-          const { contextDir } = refSpec;
-          if (typeof contextDir !== 'string' || !Path.isAbsolute(contextDir)) {
-            throw new Error('`bundleRefs[].contextDir` must be an absolute directory');
-          }
-
-          const { contextPrefix } = refSpec;
-          if (typeof contextPrefix !== 'string' || !Path.isAbsolute(contextPrefix)) {
-            throw new Error('`bundleRefs[].contextPrefix` must be an absolute directory');
-          }
-
-          const { entry } = refSpec;
-          if (typeof entry !== 'string') {
-            throw new Error('`bundleRefs[].entry` must be a string');
-          }
-
-          const { exportId } = refSpec;
-          if (typeof exportId !== 'string') {
-            throw new Error('`bundleRefs[].exportId` must be a string');
-          }
-
-          return {
-            bundleId,
-            contextDir,
-            contextPrefix,
-            entry,
-            exportId,
-          };
+      spec.map((refSpec: UnknownVals<BundleRef>): BundleRef => {
+        if (typeof refSpec !== 'object' || !refSpec) {
+          throw new Error('`bundleRefs[]` must be an object');
         }
-      )
+
+        const { bundleId } = refSpec;
+        if (typeof bundleId !== 'string') {
+          throw new Error('`bundleRefs[].bundleId` must be a string');
+        }
+
+        const { contextDir } = refSpec;
+        if (typeof contextDir !== 'string' || !Path.isAbsolute(contextDir)) {
+          throw new Error('`bundleRefs[].contextDir` must be an absolute directory');
+        }
+
+        const { contextPrefix } = refSpec;
+        if (typeof contextPrefix !== 'string' || !Path.isAbsolute(contextPrefix)) {
+          throw new Error('`bundleRefs[].contextPrefix` must be an absolute directory');
+        }
+
+        const { entry } = refSpec;
+        if (typeof entry !== 'string') {
+          throw new Error('`bundleRefs[].entry` must be a string');
+        }
+
+        const { exportId } = refSpec;
+        if (typeof exportId !== 'string') {
+          throw new Error('`bundleRefs[].exportId` must be a string');
+        }
+
+        return {
+          bundleId,
+          contextDir,
+          contextPrefix,
+          entry,
+          exportId,
+        };
+      })
     );
   }
 

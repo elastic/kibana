@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -9,15 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerAnalyticsRoutes } from './analytics';
 
 describe('analytics routes', () => {
-  describe('GET /api/app_search/engines/{engineName}/analytics/queries', () => {
+  describe('GET /internal/app_search/engines/{engineName}/analytics/queries', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/analytics/queries',
-        payload: 'query',
+        path: '/internal/app_search/engines/{engineName}/analytics/queries',
       });
 
       registerAnalyticsRoutes({
@@ -62,15 +62,14 @@ describe('analytics routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{engineName}/analytics/queries/{query}', () => {
+  describe('GET /internal/app_search/engines/{engineName}/analytics/queries/{query}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/analytics/queries/{query}',
-        payload: 'query',
+        path: '/internal/app_search/engines/{engineName}/analytics/queries/{query}',
       });
 
       registerAnalyticsRoutes({

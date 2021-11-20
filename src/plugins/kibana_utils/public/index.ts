@@ -1,11 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { PluginInitializerContext } from 'src/core/public';
+import { KibanaUtilsPublicPlugin } from './plugin';
+
+// TODO: https://github.com/elastic/kibana/issues/109893
+/* eslint-disable @kbn/eslint/no_export_all */
+
+export type { Get, Set, UiComponent, UiComponentInstance } from '../common';
 export {
   AbortError,
   abortSignalToPromise,
@@ -14,15 +21,7 @@ export {
   Defer,
   fieldWildcardFilter,
   fieldWildcardMatcher,
-  Get,
-  getCombinedAbortSignal,
-  JsonArray,
-  JsonObject,
-  JsonValue,
   of,
-  Set,
-  UiComponent,
-  UiComponentInstance,
   url,
   createGetterSetter,
 } from '../common';
@@ -54,11 +53,7 @@ export {
   replaceUrlQuery,
   replaceUrlHashQuery,
 } from './state_management/url';
-export {
-  syncState,
-  syncStates,
-  createKbnUrlStateStorage,
-  createSessionStorageStateStorage,
+export type {
   IStateSyncConfig,
   ISyncStateRef,
   IKbnUrlStateStorage,
@@ -67,15 +62,27 @@ export {
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';
-export { Configurable, CollectConfigProps } from './ui';
-export { removeQueryParam, redirectWhenMissing, getQueryParams } from './history';
+export {
+  syncState,
+  syncStates,
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
+} from './state_sync';
+export type { Configurable, CollectConfigProps } from './ui';
+export {
+  removeQueryParam,
+  redirectWhenMissing,
+  getQueryParams,
+  createQueryParamsObservable,
+  createHistoryObservable,
+  createQueryParamObservable,
+} from './history';
 export { applyDiff } from './state_management/utils/diff_object';
-export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
+export type { StartServicesGetter } from './core/create_start_service_getter';
+export { createStartServicesGetter } from './core/create_start_service_getter';
 
-/** dummy plugin, we just want kibanaUtils to have its own bundle */
-export function plugin() {
-  return new (class KibanaUtilsPlugin {
-    setup() {}
-    start() {}
-  })();
+export type { KibanaUtilsSetup } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new KibanaUtilsPublicPlugin(initializerContext);
 }

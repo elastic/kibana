@@ -2,14 +2,7 @@
   "name": "@kbn/logging",
   "version": "1.0.0",
   "private": true,
-  "license": "SSPL-1.0 OR Elastic License",
-  "main": "./target/index.js",
-  "scripts": {
-    "build": "../../node_modules/.bin/tsc",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
-  },
-  "dependencies": {
-    "@kbn/std": "link:../kbn-std"
-  }
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "main": "./target_node/index.js",
+  "types": "./target_types/index.d.ts"
 }

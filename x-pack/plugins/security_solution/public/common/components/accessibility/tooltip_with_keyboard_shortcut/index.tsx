@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiText, EuiScreenReaderOnly } from '@elastic/eui';
@@ -9,7 +10,7 @@ import React from 'react';
 
 import * as i18n from './translations';
 
-interface Props {
+export interface TooltipWithKeyboardShortcutProps {
   additionalScreenReaderOnlyContext?: string;
   content: React.ReactNode;
   shortcut: string;
@@ -21,7 +22,7 @@ const TooltipWithKeyboardShortcutComponent = ({
   content,
   shortcut,
   showShortcut,
-}: Props) => (
+}: TooltipWithKeyboardShortcutProps) => (
   <>
     <div data-test-subj="content">{content}</div>
     {additionalScreenReaderOnlyContext !== '' && (

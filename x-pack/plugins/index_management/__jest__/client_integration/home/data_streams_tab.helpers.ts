@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
 import { EuiDescriptionListDescription } from '@elastic/eui';
-import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { DataStream } from '../../../common';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
@@ -41,7 +42,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
 }
 
 export const setup = async (overridingDependencies: any = {}): Promise<DataStreamsTabTestBed> => {
-  const testBedConfig: TestBedConfig = {
+  const testBedConfig: AsyncTestBedConfig = {
     store: () => indexManagementStore(services as any),
     memoryRouter: {
       initialEntries: [`/indices`],

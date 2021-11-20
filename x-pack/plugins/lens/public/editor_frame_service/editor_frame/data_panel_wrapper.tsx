@@ -1,60 +1,92 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './data_panel_wrapper.scss';
 
-import React, { useMemo, memo, useContext, useState } from 'react';
+import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
-import { Action } from './state_management';
-import { DragContext, Dragging } from '../../drag_drop';
-import { StateSetter, FramePublicAPI, DatasourceDataPanelProps, Datasource } from '../../types';
-import { Query, Filter } from '../../../../../../src/plugins/data/public';
+import { DragContext, DragDropIdentifier } from '../../drag_drop';
+import { StateSetter, DatasourceDataPanelProps, DatasourceMap } from '../../types';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  switchDatasource,
+  useLensDispatch,
+  updateDatasourceState,
+  useLensSelector,
+  setState,
+  selectExecutionContext,
+  selectActiveDatasourceId,
+  selectDatasourceStates,
+} from '../../state_management';
+import { initializeDatasources } from './state_helpers';
 
 interface DataPanelWrapperProps {
-  datasourceState: unknown;
-  datasourceMap: Record<string, Datasource>;
-  activeDatasource: string | null;
-  datasourceIsLoading: boolean;
-  dispatch: (action: Action) => void;
+  datasourceMap: DatasourceMap;
   showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
-  query: Query;
-  dateRange: FramePublicAPI['dateRange'];
-  filters: Filter[];
-  dropOntoWorkspace: (field: Dragging) => void;
-  hasSuggestionForField: (field: Dragging) => boolean;
+  dropOntoWorkspace: (field: DragDropIdentifier) => void;
+  hasSuggestionForField: (field: DragDropIdentifier) => boolean;
+  plugins: { uiActions: UiActionsStart };
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
-  const { dispatch, activeDatasource } = props;
-  const setDatasourceState: StateSetter<unknown> = useMemo(
-    () => (updater) => {
-      dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        updater,
-        datasourceId: activeDatasource!,
-        clearStagedPreview: true,
+  const externalContext = useLensSelector(selectExecutionContext);
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
+
+  const datasourceIsLoading = activeDatasourceId
+    ? datasourceStates[activeDatasourceId].isLoading
+    : true;
+
+  const dispatchLens = useLensDispatch();
+  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
+    return (updater) => {
+      dispatchLens(
+        updateDatasourceState({
+          updater,
+          datasourceId: activeDatasourceId!,
+          clearStagedPreview: true,
+        })
+      );
+    };
+  }, [activeDatasourceId, dispatchLens]);
+
+  useEffect(() => {
+    if (activeDatasourceId && datasourceStates[activeDatasourceId].state === null) {
+      initializeDatasources(props.datasourceMap, datasourceStates, undefined, undefined, {
+        isFullEditor: true,
+      }).then((result) => {
+        const newDatasourceStates = Object.entries(result).reduce(
+          (state, [datasourceId, datasourceState]) => ({
+            ...state,
+            [datasourceId]: {
+              ...datasourceState,
+              isLoading: false,
+            },
+          }),
+          {}
+        );
+        dispatchLens(setState({ datasourceStates: newDatasourceStates }));
       });
-    },
-    [dispatch, activeDatasource]
-  );
+    }
+  }, [datasourceStates, activeDatasourceId, props.datasourceMap, dispatchLens]);
 
   const datasourceProps: DatasourceDataPanelProps = {
+    ...externalContext,
     dragDropContext: useContext(DragContext),
-    state: props.datasourceState,
+    state: activeDatasourceId ? datasourceStates[activeDatasourceId].state : null,
     setState: setDatasourceState,
     core: props.core,
-    query: props.query,
-    dateRange: props.dateRange,
-    filters: props.filters,
     showNoDataPopover: props.showNoDataPopover,
     dropOntoWorkspace: props.dropOntoWorkspace,
     hasSuggestionForField: props.hasSuggestionForField,
+    uiActions: props.plugins.uiActions,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);
@@ -91,13 +123,10 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
               <EuiContextMenuItem
                 key={datasourceId}
                 data-test-subj={`datasource-switch-${datasourceId}`}
-                icon={props.activeDatasource === datasourceId ? 'check' : 'empty'}
+                icon={activeDatasourceId === datasourceId ? 'check' : 'empty'}
                 onClick={() => {
                   setDatasourceSwitcher(false);
-                  props.dispatch({
-                    type: 'SWITCH_DATASOURCE',
-                    newDatasourceId: datasourceId,
-                  });
+                  dispatchLens(switchDatasource({ newDatasourceId: datasourceId }));
                 }}
               >
                 {datasourceId}
@@ -106,10 +135,10 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           />
         </EuiPopover>
       )}
-      {props.activeDatasource && !props.datasourceIsLoading && (
+      {activeDatasourceId && !datasourceIsLoading && (
         <NativeRenderer
           className="lnsDataPanelWrapper"
-          render={props.datasourceMap[props.activeDatasource].renderDataPanel}
+          render={props.datasourceMap[activeDatasourceId].renderDataPanel}
           nativeProps={datasourceProps}
         />
       )}

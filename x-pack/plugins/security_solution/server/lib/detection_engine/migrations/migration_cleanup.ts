@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElasticsearchClient } from 'src/core/server';
@@ -19,7 +20,7 @@ const getPolicyExists = async ({
 }): Promise<boolean> => {
   try {
     await esClient.ilm.getLifecycle({
-      policy,
+      name: policy,
     });
     return true;
   } catch (err) {
@@ -55,7 +56,7 @@ export const ensureMigrationCleanupPolicy = async ({
   const policyExists = await getPolicyExists({ esClient, policy });
   if (!policyExists) {
     await esClient.ilm.putLifecycle({
-      policy,
+      name: policy,
       body: migrationCleanupPolicy,
     });
   }
@@ -85,10 +86,8 @@ export const applyMigrationCleanupPolicy = async ({
   await esClient.indices.putSettings({
     index,
     body: {
-      index: {
-        lifecycle: {
-          name: getMigrationCleanupPolicyName(alias),
-        },
+      lifecycle: {
+        name: getMigrationCleanupPolicyName(alias),
       },
     },
   });

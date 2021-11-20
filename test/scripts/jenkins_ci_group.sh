@@ -14,7 +14,6 @@ if [[ -z "$CODE_COVERAGE" ]]; then
   if [[ ! "$TASK_QUEUE_PROCESS_ID" && "$CI_GROUP" == "1" ]]; then
     source test/scripts/jenkins_build_kbn_sample_panel_action.sh
     ./test/scripts/test/plugin_functional.sh
-    ./test/scripts/test/example_functional.sh
     ./test/scripts/test/interpreter_functional.sh
   fi
 else
@@ -28,14 +27,6 @@ else
 
   echo " -> running tests from the clone folder"
   node scripts/functional_tests --debug --include-tag "ciGroup$CI_GROUP"  --exclude-tag "skipCoverage" || true;
-
-  if [[ -d target/kibana-coverage/functional ]]; then
-    echo " -> replacing kibana${CI_GROUP} with kibana in json files"
-    sed -i "s|kibana${CI_GROUP}|kibana|g" target/kibana-coverage/functional/*.json
-    echo " -> copying coverage to the original folder"
-    mkdir -p ../kibana/target/kibana-coverage/functional
-    mv target/kibana-coverage/functional/* ../kibana/target/kibana-coverage/functional/
-  fi
 
   echo " -> moving junit output, silently fail in case of no report"
   mkdir -p ../kibana/target/junit

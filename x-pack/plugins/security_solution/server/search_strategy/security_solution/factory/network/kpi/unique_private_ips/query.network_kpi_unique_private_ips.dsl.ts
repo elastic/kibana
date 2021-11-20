@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -83,9 +84,10 @@ export const buildUniquePrivateIpsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         ...getAggs('source'),
@@ -97,7 +99,6 @@ export const buildUniquePrivateIpsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

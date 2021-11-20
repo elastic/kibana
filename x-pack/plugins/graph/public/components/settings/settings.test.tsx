@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
-import { Settings, AngularProps } from './settings';
+import { Settings, SettingsWorkspaceProps } from './settings';
 import { act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
 import { UrlTemplateForm } from './url_template_form';
@@ -22,6 +23,18 @@ import {
 import { createMockGraphStore } from '../../state_management/mocks';
 import { Provider } from 'react-redux';
 import { UrlTemplate } from '../../types';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => String(counter++);
+    },
+  };
+});
 
 describe('settings', () => {
   let store: GraphStore;
@@ -45,7 +58,7 @@ describe('settings', () => {
     isDefault: false,
   };
 
-  const angularProps: jest.Mocked<AngularProps> = {
+  const workspaceProps: jest.Mocked<SettingsWorkspaceProps> = {
     blocklistedNodes: [
       {
         x: 0,
@@ -82,11 +95,12 @@ describe('settings', () => {
         },
       },
     ],
-    unblocklistNode: jest.fn(),
+    unblockNode: jest.fn(),
+    unblockAll: jest.fn(),
     canEditDrillDownUrls: true,
   };
 
-  let subject: Rx.BehaviorSubject<jest.Mocked<AngularProps>>;
+  let subject: Rx.BehaviorSubject<jest.Mocked<SettingsWorkspaceProps>>;
   let instance: ReactWrapper;
 
   beforeEach(() => {
@@ -136,7 +150,7 @@ describe('settings', () => {
     );
     dispatchSpy = jest.fn(store.dispatch);
     store.dispatch = dispatchSpy;
-    subject = new Rx.BehaviorSubject(angularProps);
+    subject = new Rx.BehaviorSubject(workspaceProps);
     instance = mountWithIntl(
       <Provider store={store}>
         <Settings observable={subject.asObservable()} />
@@ -216,7 +230,7 @@ describe('settings', () => {
     it('should update on new data', () => {
       act(() => {
         subject.next({
-          ...angularProps,
+          ...workspaceProps,
           blocklistedNodes: [
             {
               x: 0,
@@ -249,14 +263,13 @@ describe('settings', () => {
     it('should delete node', () => {
       instance.find(EuiListGroupItem).at(0).prop('extraAction')!.onClick!({} as any);
 
-      expect(angularProps.unblocklistNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![0]);
+      expect(workspaceProps.unblockNode).toHaveBeenCalledWith(workspaceProps.blocklistedNodes![0]);
     });
 
     it('should delete all nodes', () => {
       instance.find('[data-test-subj="graphUnblocklistAll"]').find(EuiButton).simulate('click');
 
-      expect(angularProps.unblocklistNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![0]);
-      expect(angularProps.unblocklistNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![1]);
+      expect(workspaceProps.unblockAll).toHaveBeenCalled();
     });
   });
 

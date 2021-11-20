@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -19,18 +20,24 @@ export const Bytes = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  isDraggable: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
-  <DefaultDraggable
-    id={`bytes-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-    // @ts-expect-error
-    name={name}
-    field={fieldName}
-    tooltipContent={null}
-    value={value}
-  >
+}>(({ contextId, eventId, fieldName, isDraggable, value }) =>
+  isDraggable ? (
+    <DefaultDraggable
+      id={`bytes-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+      isDraggable={isDraggable}
+      // @ts-expect-error
+      name={name}
+      field={fieldName}
+      tooltipContent={null}
+      value={value}
+    >
+      <PreferenceFormattedBytes value={`${value}`} />
+    </DefaultDraggable>
+  ) : (
     <PreferenceFormattedBytes value={`${value}`} />
-  </DefaultDraggable>
-));
+  )
+);
 
 Bytes.displayName = 'Bytes';

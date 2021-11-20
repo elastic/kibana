@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,56 +18,53 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
+import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, {
-  ChangeEvent,
-  Fragment,
-  FunctionComponent,
-  HTMLProps,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
   Capabilities,
+  DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
   IHttpFetchError,
   NotificationsStart,
+  ScopedHistory,
 } from 'src/core/public';
-import type { DocLinksStart, ScopedHistory } from 'kibana/public';
-import { FeaturesPluginStart } from '../../../../../features/public';
-import { KibanaFeature } from '../../../../../features/common';
-import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
-import { Space } from '../../../../../spaces/public';
-import {
+import type { IndexPatternsContract } from 'src/plugins/data/public';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { KibanaFeature } from '../../../../../features/common';
+import type { FeaturesPluginStart } from '../../../../../features/public';
+import type { Space, SpacesApiUi } from '../../../../../spaces/public';
+import type { SecurityLicense } from '../../../../common/licensing';
+import type {
+  BuiltinESPrivileges,
   RawKibanaPrivileges,
   Role,
-  BuiltinESPrivileges,
+  RoleIndexPrivilege,
+} from '../../../../common/model';
+import {
+  isRoleDeprecated as checkIfRoleDeprecated,
   isRoleReadOnly as checkIfRoleReadOnly,
   isRoleReserved as checkIfRoleReserved,
-  isRoleDeprecated as checkIfRoleDeprecated,
   copyRole,
-  prepareRoleClone,
-  RoleIndexPrivilege,
   getExtendedRoleDeprecationNotice,
+  prepareRoleClone,
 } from '../../../../common/model';
-import { RoleValidationResult, RoleValidator } from './validate_role';
+import type { UserAPIClient } from '../../users';
+import type { IndicesAPIClient } from '../indices_api_client';
+import { KibanaPrivileges } from '../model';
+import type { PrivilegesAPIClient } from '../privileges_api_client';
+import type { RolesAPIClient } from '../roles_api_client';
 import { DeleteRoleButton } from './delete_role_button';
 import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
-import { SecurityLicense } from '../../../../common/licensing';
-import { UserAPIClient } from '../../users';
-import { IndicesAPIClient } from '../indices_api_client';
-import { RolesAPIClient } from '../roles_api_client';
-import { PrivilegesAPIClient } from '../privileges_api_client';
-import { KibanaPrivileges } from '../model';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { RoleValidationResult } from './validate_role';
+import { RoleValidator } from './validate_role';
 
 interface Props {
   action: 'edit' | 'clone';
@@ -83,6 +82,7 @@ interface Props {
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
+  spacesApiUi?: SpacesApiUi;
 }
 
 function useRunAsUsers(
@@ -124,7 +124,7 @@ function useIndexPatternsTitles(
         fatalErrors.add(err);
         throw err;
       })
-      .then(setIndexPatternsTitles);
+      .then((titles) => setIndexPatternsTitles(titles.filter(Boolean)));
   }, [fatalErrors, indexPatterns, notifications]);
 
   return indexPatternsTitles;
@@ -184,10 +184,8 @@ function useRole(
             privileges: [],
           };
 
-          const {
-            allowRoleDocumentLevelSecurity,
-            allowRoleFieldLevelSecurity,
-          } = license.getFeatures();
+          const { allowRoleDocumentLevelSecurity, allowRoleFieldLevelSecurity } =
+            license.getFeatures();
 
           if (allowRoleFieldLevelSecurity) {
             emptyOption.field_security = {
@@ -226,7 +224,7 @@ function useRole(
 function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup) {
   const [spaces, setSpaces] = useState<{ enabled: boolean; list: Space[] } | null>(null);
   useEffect(() => {
-    http.get('/api/spaces/space').then(
+    http.get<Space[]>('/api/spaces/space').then(
       (fetchedSpaces) => setSpaces({ enabled: true, list: fetchedSpaces }),
       (err: IHttpFetchError) => {
         // Spaces plugin can be disabled and hence this endpoint can be unavailable.
@@ -255,13 +253,12 @@ function useFeatures(
         // possible that a user with `manage_security` will attempt to visit the role management page without the
         // correct Kibana privileges. If that's the case, then they receive a partial view of the role, and the UI does
         // not allow them to make changes to that role's kibana privileges. When this user visits the edit role page,
-        // this API endpoint will throw a 404, which causes view to fail completely. So we instead attempt to detect the
-        // 404 here, and respond in a way that still allows the UI to render itself.
-        const unauthorizedForFeatures = err.response?.status === 404;
+        // this API endpoint will throw a 403, which causes view to fail completely. So we instead attempt to detect the
+        // 403 here, and respond in a way that still allows the UI to render itself.
+        const unauthorizedForFeatures = err.response?.status === 403;
         if (unauthorizedForFeatures) {
           return [] as KibanaFeature[];
         }
-
         fatalErrors.add(err);
       })
       .then((retrievedFeatures) => {
@@ -288,13 +285,13 @@ export const EditRolePage: FunctionComponent<Props> = ({
   uiCapabilities,
   notifications,
   history,
+  spacesApiUi,
 }) => {
   const backToRoleList = useCallback(() => history.push('/'), [history]);
 
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
-
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
   const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors, notifications);
@@ -374,7 +371,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getRoleName = () => {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFormRow
           label={
             <FormattedMessage
@@ -439,13 +436,13 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <KibanaPrivilegesRegion
           kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
           spaces={spaces.list}
-          spacesEnabled={spaces.enabled}
           uiCapabilities={uiCapabilities}
           canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
           editable={!isRoleReadOnly}
           role={role}
           onChange={onRoleChange}
           validator={validator}
+          spacesApiUi={spacesApiUi}
         />
       </div>
     );
@@ -523,7 +520,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(null);
 
       try {
-        await rolesAPIClient.saveRole({ role, spacesEnabled: spaces.enabled });
+        await rolesAPIClient.saveRole({ role });
       } catch (error) {
         notifications.toasts.addDanger(
           error?.body?.message ??
@@ -568,24 +565,17 @@ export const EditRolePage: FunctionComponent<Props> = ({
     backToRoleList();
   };
 
-  const description = spaces.enabled ? (
-    <FormattedMessage
-      id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
-      defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.security.management.editRole.setPrivilegesToKibanaDescription"
-      defaultMessage="Set privileges on your Elasticsearch data and control access to Kibana."
-    />
-  );
-
   return (
     <div className="editRolePage">
       <EuiForm {...formError}>
         {getFormTitle()}
         <EuiSpacer />
-        <EuiText size="s">{description}</EuiText>
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
+            defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
+          />
+        </EuiText>
         {isRoleReserved && (
           <Fragment>
             <EuiSpacer size="s" />

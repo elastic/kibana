@@ -1,33 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
-  getResult,
+  getAlertMock,
+  getFindBulkResultStatus,
   getFindRequest,
+  getEmptySavedObjectsResponse,
   getFindResultWithSingleHit,
-  getFindResultStatus,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
 
-jest.mock('../../signals/rule_status_service');
-describe('find_rules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('find_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {
     server = serverMock.create();
+    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.alertsClient.get.mockResolvedValue(getResult());
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    clients.rulesClient.get.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+    clients.ruleExecutionLogClient.getCurrentStatusBulk.mockResolvedValue(
+      getFindBulkResultStatus()
+    );
 
-    findRulesRoute(server.router);
+    findRulesRoute(server.router, logger, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -37,14 +50,14 @@ describe('find_rules', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getFindRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catches error if search throws error', async () => {
-      clients.alertsClient.find.mockImplementation(async () => {
+      clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getFindRequest(), context);

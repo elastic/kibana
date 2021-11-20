@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { Logger } from 'src/core/server';
+
+import { Logger, RequestHandlerContext } from 'src/core/server';
 import { KibanaRequest, KibanaResponseFactory, RequestHandler } from 'src/core/server';
 
 import { LicensingPluginSetup } from '../../../licensing/server';
 import { LicenseType } from '../../../licensing/common/types';
-import type { RollupHandlerContext } from '../types';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -55,11 +56,11 @@ export class License {
     });
   }
 
-  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B, RollupHandlerContext>) {
+  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B>) {
     const license = this;
 
     return function licenseCheck(
-      ctx: RollupHandlerContext,
+      ctx: RequestHandlerContext,
       request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
     ) {

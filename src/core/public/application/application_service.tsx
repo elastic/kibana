@@ -1,24 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
+import type { ThemeServiceStart } from '../theme';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
   App,
+  AppDeepLink,
   AppLeaveHandler,
   AppMount,
   AppNavLinkStatus,
@@ -31,6 +33,7 @@ import {
   NavigateToAppOptions,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
+import { getUserConfirmationHandler } from './navigation_confirm';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
 interface SetupDeps {
@@ -42,6 +45,7 @@ interface SetupDeps {
 
 interface StartDeps {
   http: HttpStart;
+  theme: ThemeServiceStart;
   overlays: OverlayStart;
 }
 
@@ -52,6 +56,7 @@ function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
     )
   );
 }
+
 const findMounter = (mounters: Map<string, Mounter>, appRoute?: string) =>
   [...mounters].find(([, mounter]) => mounter.appRoute === appRoute);
 
@@ -60,6 +65,10 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
     ? `/${mounters.get(appId)!.appRoute}`
     : `/app/${appId}`;
   return appendAppPath(appBasePath, path);
+};
+
+const getAppDeepLinkPath = (mounters: Map<string, Mounter>, appId: string, deepLinkId: string) => {
+  return mounters.get(appId)?.deepLinkPaths[deepLinkId];
 };
 
 const allApplicationsFilter = '__ALL__';
@@ -91,7 +100,9 @@ export class ApplicationService {
   private registrationClosed = false;
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
+  private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
+  private overlayStart$ = new Subject<OverlayStart>();
 
   public setup({
     http: { basePath },
@@ -101,11 +112,23 @@ export class ApplicationService {
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
-    this.history = history || createBrowserHistory({ basename });
+    this.history =
+      history ||
+      createBrowserHistory({
+        basename,
+        getUserConfirmation: getUserConfirmationHandler({
+          overlayPromise: this.overlayStart$.pipe(take(1)).toPromise(),
+        }),
+      });
 
     this.navigate = (url, state, replace) => {
       // basePath not needed here because `history` is configured with basename
       return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
+    };
+
+    this.openInNewTab = (url) => {
+      // window.open shares session information if base url is same
+      return window.open(appendAppPath(basename, url), '_blank');
     };
 
     this.redirectTo = redirectTo;
@@ -151,6 +174,7 @@ export class ApplicationService {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
           navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
+          deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
@@ -158,6 +182,7 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
+          deepLinkPaths: toDeepLinkPaths(app.deepLinks),
           exactRoute: app.exactRoute ?? false,
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
@@ -168,10 +193,12 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http, overlays, theme }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
+
+    this.overlayStart$.next(overlays);
 
     const httpLoadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(httpLoadingCount$);
@@ -207,7 +234,7 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { path, state, replace = false }: NavigateToAppOptions = {}
+      { deepLinkId, path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
@@ -216,14 +243,24 @@ export class ApplicationService {
         : await this.shouldNavigate(overlays, appId);
 
       if (shouldNavigate) {
+        if (deepLinkId) {
+          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+          if (deepLinkPath) {
+            path = appendAppPath(deepLinkPath, path);
+          }
+        }
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
-        if (!navigatingToSameApp) {
-          this.appInternalStates.delete(this.currentAppId$.value!);
+        if (openInNewTab) {
+          this.openInNewTab!(getAppUrl(availableMounters, appId, path));
+        } else {
+          if (!navigatingToSameApp) {
+            this.appInternalStates.delete(this.currentAppId$.value!);
+          }
+          this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+          this.currentAppId$.next(appId);
         }
-        this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
-        this.currentAppId$.next(appId);
       }
     };
 
@@ -247,8 +284,19 @@ export class ApplicationService {
       history: this.history!,
       getUrlForApp: (
         appId,
-        { path, absolute = false }: { path?: string; absolute?: boolean } = {}
+        {
+          path,
+          absolute = false,
+          deepLinkId,
+        }: { path?: string; absolute?: boolean; deepLinkId?: string } = {}
       ) => {
+        if (deepLinkId) {
+          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+          if (deepLinkPath) {
+            path = appendAppPath(deepLinkPath, path);
+          }
+        }
+
         const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
@@ -268,6 +316,7 @@ export class ApplicationService {
         return (
           <AppRouter
             history={this.history}
+            theme$={theme.theme$}
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
@@ -360,13 +409,42 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
         ...fields,
         // status and navLinkStatus enums are ordered by reversed priority
         // if multiple updaters wants to change these fields, we will always follow the priority order.
-        status: Math.max(changes.status ?? 0, fields.status ?? 0),
-        navLinkStatus: Math.max(changes.navLinkStatus ?? 0, fields.navLinkStatus ?? 0),
+        status: Math.max(
+          changes.status ?? AppStatus.accessible,
+          fields.status ?? AppStatus.accessible
+        ),
+        navLinkStatus: Math.max(
+          changes.navLinkStatus ?? AppNavLinkStatus.default,
+          fields.navLinkStatus ?? AppNavLinkStatus.default
+        ),
+        ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
     }
   });
+
   return {
     ...app,
     ...changes,
   };
+};
+
+const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
+  if (!deepLinks) {
+    return [];
+  }
+  return deepLinks.map((deepLink) => ({
+    ...deepLink,
+    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
+    deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
+  }));
+};
+
+const toDeepLinkPaths = (deepLinks?: AppDeepLink[]): Mounter['deepLinkPaths'] => {
+  if (!deepLinks) {
+    return {};
+  }
+  return deepLinks.reduce((deepLinkPaths: Mounter['deepLinkPaths'], deepLink) => {
+    if (deepLink.path) deepLinkPaths[deepLink.id] = deepLink.path;
+    return { ...deepLinkPaths, ...toDeepLinkPaths(deepLink.deepLinks) };
+  }, {});
 };

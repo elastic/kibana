@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -38,7 +39,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-export const WaffleGroupByControls = class extends React.PureComponent<Props, State> {
+export class WaffleGroupByControls extends React.PureComponent<Props, State> {
   public static displayName = 'WaffleGroupByControls';
   public readonly state: State = initialState;
 
@@ -133,6 +134,7 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
       <DropdownButton
         label={i18n.translate('xpack.infra.waffle.groupByLabel', { defaultMessage: 'Group by' })}
         onClick={this.handleToggle}
+        data-test-subj={'waffleGroupByDropdown'}
       >
         {buttonBody}
       </DropdownButton>
@@ -146,7 +148,11 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
         panelPaddingSize="none"
         closePopover={this.handleClose}
       >
-        <StyledContextMenu initialPanelId="firstPanel" panels={panels} />
+        <StyledContextMenu
+          initialPanelId="firstPanel"
+          panels={panels}
+          data-test-subj="groupByContextMenu"
+        />
       </EuiPopover>
     );
   }
@@ -191,7 +197,7 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
     }
     this.handleClose();
   };
-};
+}
 
 const StyledContextMenu = euiStyled(EuiContextMenu)`
   width: 320px;

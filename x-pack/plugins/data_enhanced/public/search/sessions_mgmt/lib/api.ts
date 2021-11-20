@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,89 +11,125 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import { SessionsConfigSchema } from '../';
-import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
-import type { SearchSessionSavedObjectAttributes } from '../../../../common';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SerializableRecord } from '@kbn/utility-types';
+import {
+  ISessionsClient,
+  SearchUsageCollector,
+} from '../../../../../../../src/plugins/data/public';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { ACTION } from '../components/actions';
-import { UISession } from '../types';
+import {
+  PersistedSearchSessionSavedObjectAttributes,
+  UISearchSessionState,
+  UISession,
+} from '../types';
+import { SessionsConfigSchema } from '..';
 
-type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
+type LocatorsStart = SharePluginStart['url']['locators'];
 
-function getActions(status: SearchSessionStatus) {
+function getActions(status: UISearchSessionState) {
   const actions: ACTION[] = [];
-  actions.push(ACTION.RELOAD);
+  actions.push(ACTION.INSPECT);
+  actions.push(ACTION.RENAME);
   if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
     actions.push(ACTION.EXTEND);
-    actions.push(ACTION.CANCEL);
+    actions.push(ACTION.DELETE);
   }
+
+  if (status === SearchSessionStatus.EXPIRED) {
+    actions.push(ACTION.DELETE);
+  }
+
   return actions;
 }
 
-async function getUrlFromState(
-  urls: UrlGeneratorsStart,
-  urlGeneratorId: string,
-  state: Record<string, unknown>
-) {
-  let url = '/';
+/**
+ * Status we display on mgtm UI might be different from the one inside the saved object
+ * @param status
+ */
+function getUIStatus(session: PersistedSearchSessionSavedObjectAttributes): UISearchSessionState {
+  const isSessionExpired = () => {
+    const curTime = moment();
+    return curTime.diff(moment(session.expires), 'ms') > 0;
+  };
+
+  switch (session.status) {
+    case SearchSessionStatus.COMPLETE:
+    case SearchSessionStatus.IN_PROGRESS:
+      return isSessionExpired() ? SearchSessionStatus.EXPIRED : session.status;
+  }
+
+  return session.status;
+}
+
+function getUrlFromState(locators: LocatorsStart, locatorId: string, state: SerializableRecord) {
   try {
-    url = await urls.getUrlGenerator(urlGeneratorId).createUrl(state);
+    const locator = locators.get(locatorId);
+    return locator?.getRedirectUrl(state);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('Could not create URL from restoreState');
     // eslint-disable-next-line no-console
     console.error(err);
   }
-  return url;
 }
 
 // Helper: factory for a function to map server objects to UI objects
-const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) => async (
-  savedObject: SavedObject<SearchSessionSavedObjectAttributes>
-): Promise<UISession> => {
-  const {
-    name,
-    appId,
-    created,
-    expires,
-    status,
-    urlGeneratorId,
-    initialState,
-    restoreState,
-  } = savedObject.attributes;
+const mapToUISession =
+  (locators: LocatorsStart, config: SessionsConfigSchema) =>
+  async (
+    savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
+  ): Promise<UISession> => {
+    const {
+      name,
+      appId,
+      created,
+      expires,
+      locatorId,
+      initialState,
+      restoreState,
+      idMapping,
+      version,
+    } = savedObject.attributes;
 
-  const actions = getActions(status);
+    const status = getUIStatus(savedObject.attributes);
+    const actions = getActions(status);
 
-  // TODO: initialState should be saved without the searchSessionID
-  if (initialState) delete initialState.searchSessionId;
-  // derive the URL and add it in
-  const reloadUrl = await getUrlFromState(urls, urlGeneratorId, initialState);
-  const restoreUrl = await getUrlFromState(urls, urlGeneratorId, restoreState);
+    // TODO: initialState should be saved without the searchSessionID
+    if (initialState) delete initialState.searchSessionId;
+    // derive the URL and add it in
+    const reloadUrl = await getUrlFromState(locators, locatorId, initialState);
+    const restoreUrl = await getUrlFromState(locators, locatorId, restoreState);
 
-  return {
-    id: savedObject.id,
-    name,
-    appId,
-    created,
-    expires,
-    status,
-    actions,
-    restoreUrl,
-    reloadUrl,
+    return {
+      id: savedObject.id,
+      name,
+      appId,
+      created,
+      expires,
+      status,
+      actions,
+      restoreUrl: restoreUrl!,
+      reloadUrl: reloadUrl!,
+      initialState,
+      restoreState,
+      numSearches: Object.keys(idMapping).length,
+      version,
+    };
   };
-};
 
-interface SearcgSessuibManagementDeps {
-  urls: UrlGeneratorsStart;
+interface SearchSessionManagementDeps {
+  locators: LocatorsStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  usageCollector?: SearchUsageCollector;
 }
 
 export class SearchSessionsMgmtAPI {
   constructor(
     private sessionsClient: ISessionsClient,
     private config: SessionsConfigSchema,
-    private deps: SearcgSessuibManagementDeps
+    private deps: SearchSessionManagementDeps
   ) {}
 
   public async fetchTableData(): Promise<UISession[]> {
@@ -110,6 +147,8 @@ export class SearchSessionsMgmtAPI {
         perPage: mgmtConfig.maxSessions,
         sortField: 'created',
         sortOrder: 'asc',
+        searchFields: ['persisted'],
+        search: 'true',
       })
     );
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(
@@ -129,9 +168,9 @@ export class SearchSessionsMgmtAPI {
       const result = await race<FetchResult | null>(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
         const savedObjects = result.saved_objects as Array<
-          SavedObject<SearchSessionSavedObjectAttributes>
+          SavedObject<PersistedSearchSessionSavedObjectAttributes>
         >;
-        return await Promise.all(savedObjects.map(mapToUISession(this.deps.urls, this.config)));
+        return await Promise.all(savedObjects.map(mapToUISession(this.deps.locators, this.config)));
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -147,6 +186,7 @@ export class SearchSessionsMgmtAPI {
   }
 
   public reloadSearchSession(reloadUrl: string) {
+    this.deps.usageCollector?.trackSessionReloaded();
     this.deps.application.navigateToUrl(reloadUrl);
   }
 
@@ -156,32 +196,60 @@ export class SearchSessionsMgmtAPI {
 
   // Cancel and expire
   public async sendCancel(id: string): Promise<void> {
+    this.deps.usageCollector?.trackSessionDeleted();
     try {
       await this.sessionsClient.delete(id);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.data.mgmt.searchSessions.api.canceled', {
-          defaultMessage: 'The search session was canceled and expired.',
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.deleted', {
+          defaultMessage: 'The search session was deleted.',
         }),
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.data.mgmt.searchSessions.api.cancelError', {
-          defaultMessage: 'Failed to cancel the search session!',
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.deletedError', {
+          defaultMessage: 'Failed to delete the search session!',
         }),
       });
     }
   }
 
   // Extend
-  public async sendExtend(id: string, ttl: string): Promise<void> {
-    this.deps.notifications.toasts.addError(new Error('Not implemented'), {
-      title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
-        defaultMessage: 'Failed to extend the session expiration!',
-      }),
-    });
+  public async sendExtend(id: string, expires: string): Promise<void> {
+    this.deps.usageCollector?.trackSessionExtended();
+    try {
+      await this.sessionsClient.extend(id, expires);
+
+      this.deps.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.extended', {
+          defaultMessage: 'The search session was extended.',
+        }),
+      });
+    } catch (err) {
+      this.deps.notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
+          defaultMessage: 'Failed to extend the search session!',
+        }),
+      });
+    }
+  }
+
+  // Change the user-facing name of a search session
+  public async sendRename(id: string, newName: string): Promise<void> {
+    try {
+      await this.sessionsClient.rename(id, newName);
+
+      this.deps.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.rename', {
+          defaultMessage: 'The search session was renamed',
+        }),
+      });
+    } catch (err) {
+      this.deps.notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.renameError', {
+          defaultMessage: 'Failed to rename the search session',
+        }),
+      });
+    }
   }
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SPACES } from '../../common/lib/spaces';
@@ -38,7 +39,14 @@ const createTestCases = (spaceId: string) => [
   },
   { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
   { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+  {
+    ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+    ...fail404(spaceId !== DEFAULT_SPACE_ID),
+  },
+  { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
   CASES.NAMESPACE_AGNOSTIC,
+  { ...CASES.ALIAS_DELETE_INCLUSIVE, force: true },
+  { ...CASES.ALIAS_DELETE_EXCLUSIVE, force: true },
   { ...CASES.HIDDEN, ...fail404() },
   { ...CASES.DOES_NOT_EXIST, ...fail404() },
 ];
@@ -46,8 +54,9 @@ const createTestCases = (spaceId: string) => [
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
-  const { addTests, createTestDefinitions } = deleteTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = deleteTestSuiteFactory(es, esArchiver, supertest);
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);
     return createTestDefinitions(testCases, false, { spaceId });

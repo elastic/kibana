@@ -1,17 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CompleteTimeline, timeline } from './timeline';
+import { flatten } from 'lodash';
+import { CompleteTimeline, getTimeline } from './timeline';
 
-export interface TestCase {
+export interface TestCase extends TestCaseWithoutTimeline {
+  timeline: CompleteTimeline;
+}
+
+export interface TestCaseWithoutTimeline {
   name: string;
   tags: string[];
   description: string;
-  timeline: CompleteTimeline;
   reporter: string;
+  owner: string;
 }
 
 export interface Connector {
@@ -38,48 +44,66 @@ export interface IbmResilientConnectorOptions {
   incidentTypes: string[];
 }
 
-export const case1: TestCase = {
+interface ServiceNowHealthResponse {
+  result: {
+    name: string;
+    scope: string;
+    version: string;
+  };
+}
+
+export const getCase1 = (): TestCase => ({
   name: 'This is the title of the case',
   tags: ['Tag1', 'Tag2'],
   description: 'This is the case description',
-  timeline,
+  timeline: getTimeline(),
   reporter: 'elastic',
-};
+  owner: 'securitySolution',
+});
 
-export const serviceNowConnector: Connector = {
+export const getServiceNowConnector = (): Connector => ({
   connectorName: 'New connector',
   URL: 'https://www.test.service-now.com',
   username: 'Username Name',
   password: 'password',
-};
+});
 
-export const jiraConnectorOptions: JiraConnectorOptions = {
+export const getServiceNowITSMHealthResponse = (): ServiceNowHealthResponse => ({
+  result: {
+    name: 'Elastic',
+    scope: 'x_elas2_inc_int',
+    version: '1.0.0',
+  },
+});
+
+export const getJiraConnectorOptions = (): JiraConnectorOptions => ({
   issueType: '10006',
   priority: 'High',
-};
+});
 
-export const serviceNowConnectorOpions: ServiceNowconnectorOptions = {
+export const getServiceNowConnectorOptions = (): ServiceNowconnectorOptions => ({
   urgency: '2',
   severity: '1',
   impact: '3',
-};
+});
 
-export const ibmResilientConnectorOptions: IbmResilientConnectorOptions = {
+export const getIbmResilientConnectorOptions = (): IbmResilientConnectorOptions => ({
   title: 'Resilient',
   severity: 'Medium',
   incidentTypes: ['Communication error (fax; email)', 'Denial of Service'],
-};
+});
 
 export const TIMELINE_CASE_ID = '68248e00-f689-11ea-9ab2-59238b522856';
-export const connectorIds = {
+
+export const getConnectorIds = () => ({
   jira: '000e5f86-08b0-4882-adfd-6df981d45c1b',
   sn: '93a69ba3-3c31-4b4c-bf86-cc79a090f437',
   resilient: 'a6a8dd7f-7e88-48fe-9b9f-70b668da8cbc',
-};
+});
 
-export const mockConnectorsResponse = [
+export const getMockConnectorsResponse = () => [
   {
-    id: connectorIds.jira,
+    id: getConnectorIds().jira,
     actionTypeId: '.jira',
     name: 'Jira',
     config: {
@@ -90,7 +114,7 @@ export const mockConnectorsResponse = [
     referencedByCount: 0,
   },
   {
-    id: connectorIds.resilient,
+    id: getConnectorIds().resilient,
     actionTypeId: '.resilient',
     name: 'Resilient',
     config: {
@@ -101,7 +125,7 @@ export const mockConnectorsResponse = [
     referencedByCount: 0,
   },
   {
-    id: connectorIds.sn,
+    id: getConnectorIds().sn,
     actionTypeId: '.servicenow',
     name: 'ServiceNow',
     config: {
@@ -111,7 +135,91 @@ export const mockConnectorsResponse = [
     referencedByCount: 0,
   },
 ];
-export const executeResponses = {
+
+export const getExecuteResponses = () => ({
+  servicenow: {
+    choices: {
+      status: 'ok',
+      data: [
+        {
+          dependent_value: '',
+          label: 'Priviledge Escalation',
+          value: 'Priviledge Escalation',
+          element: 'category',
+        },
+        {
+          dependent_value: '',
+          label: 'Criminal activity/investigation',
+          value: 'Criminal activity/investigation',
+          element: 'category',
+        },
+        {
+          dependent_value: '',
+          label: 'Denial of Service',
+          value: 'Denial of Service',
+          element: 'category',
+        },
+        {
+          dependent_value: 'Denial of Service',
+          label: 'Inbound or outbound',
+          value: '12',
+          element: 'subcategory',
+        },
+        {
+          dependent_value: 'Denial of Service',
+          label: 'Single or distributed (DoS or DDoS)',
+          value: '26',
+          element: 'subcategory',
+        },
+        {
+          dependent_value: 'Denial of Service',
+          label: 'Inbound DDos',
+          value: 'inbound_ddos',
+          element: 'subcategory',
+        },
+        {
+          dependent_value: '',
+          label: 'Software',
+          value: 'software',
+          element: 'category',
+        },
+        {
+          dependent_value: 'software',
+          label: 'Operation System',
+          value: 'os',
+          element: 'subcategory',
+        },
+        ...flatten(
+          ['severity', 'urgency', 'impact', 'priority'].map((element) => [
+            {
+              dependent_value: '',
+              label: '1 - Critical',
+              value: '1',
+              element,
+            },
+            {
+              dependent_value: '',
+              label: '2 - High',
+              value: '2',
+              element,
+            },
+            {
+              dependent_value: '',
+              label: '3 - Moderate',
+              value: '3',
+              element,
+            },
+            {
+              dependent_value: '',
+              label: '4 - Low',
+              value: '4',
+              element,
+            },
+          ])
+        ),
+      ],
+    },
+  },
   jira: {
     issueTypes: {
       status: 'ok',
@@ -119,7 +227,7 @@ export const executeResponses = {
         { id: '10006', name: 'Task' },
         { id: '10007', name: 'Sub-task' },
       ],
-      actionId: connectorIds.jira,
+      actionId: getConnectorIds().jira,
     },
     fieldsByIssueType: {
       status: 'ok',
@@ -210,7 +318,7 @@ export const executeResponses = {
         timetracking: { allowedValues: [], defaultValue: {} },
         labels: { allowedValues: [], defaultValue: {} },
       },
-      actionId: connectorIds.jira,
+      actionId: getConnectorIds().jira,
     },
   },
   resilient: {
@@ -220,7 +328,7 @@ export const executeResponses = {
         { id: 17, name: 'Communication error (fax; email)' },
         { id: 21, name: 'Denial of Service' },
       ],
-      actionId: connectorIds.resilient,
+      actionId: getConnectorIds().resilient,
     },
     severity: {
       status: 'ok',
@@ -229,7 +337,7 @@ export const executeResponses = {
         { id: 5, name: 'Medium' },
         { id: 6, name: 'High' },
       ],
-      actionId: connectorIds.resilient,
+      actionId: getConnectorIds().resilient,
     },
   },
-};
+});

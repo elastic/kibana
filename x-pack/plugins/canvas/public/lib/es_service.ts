@@ -1,30 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+// TODO - clint: convert to service abstraction
 import { IndexPatternAttributes } from 'src/plugins/data/public';
 
 import { API_ROUTE } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 import { ErrorStrings } from '../../i18n';
-import { notifyService } from '../services';
-import { platformService } from '../services';
+import { pluginServices } from '../services';
 
 const { esService: strings } = ErrorStrings;
 
 const getApiPath = function () {
-  const basePath = platformService.getService().getBasePath();
+  const platformService = pluginServices.getServices().platform;
+  const basePath = platformService.getBasePath();
   return basePath + API_ROUTE;
 };
 
 const getSavedObjectsClient = function () {
-  return platformService.getService().getSavedObjectsClient();
+  const platformService = pluginServices.getServices().platform;
+  return platformService.getSavedObjectsClient();
 };
 
 const getAdvancedSettings = function () {
-  return platformService.getService().getUISettings();
+  const platformService = pluginServices.getServices().platform;
+  return platformService.getUISettings();
 };
 
 export const getFields = (index = '_all') => {
@@ -35,11 +39,12 @@ export const getFields = (index = '_all') => {
         .filter((field) => !field.startsWith('_')) // filters out meta fields
         .sort()
     )
-    .catch((err: Error) =>
-      notifyService.getService().error(err, {
+    .catch((err: Error) => {
+      const notifyService = pluginServices.getServices().notify;
+      notifyService.error(err, {
         title: strings.getFieldsFetchErrorMessage(index),
-      })
-    );
+      });
+    });
 };
 
 export const getIndices = () =>
@@ -55,9 +60,10 @@ export const getIndices = () =>
         return savedObject.attributes.title;
       });
     })
-    .catch((err: Error) =>
-      notifyService.getService().error(err, { title: strings.getIndicesFetchErrorMessage() })
-    );
+    .catch((err: Error) => {
+      const notifyService = pluginServices.getServices().notify;
+      notifyService.error(err, { title: strings.getIndicesFetchErrorMessage() });
+    });
 
 export const getDefaultIndex = () => {
   const defaultIndexId = getAdvancedSettings().get('defaultIndex');
@@ -66,10 +72,9 @@ export const getDefaultIndex = () => {
     ? getSavedObjectsClient()
         .get<IndexPatternAttributes>('index-pattern', defaultIndexId)
         .then((defaultIndex) => defaultIndex.attributes.title)
-        .catch((err) =>
-          notifyService
-            .getService()
-            .error(err, { title: strings.getDefaultIndexFetchErrorMessage() })
-        )
+        .catch((err) => {
+          const notifyService = pluginServices.getServices().notify;
+          notifyService.error(err, { title: strings.getDefaultIndexFetchErrorMessage() });
+        })
     : Promise.resolve('');
 };

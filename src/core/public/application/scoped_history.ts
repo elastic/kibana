@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -32,7 +32,8 @@ import {
  * @public
  */
 export class ScopedHistory<HistoryLocationState = unknown>
-  implements History<HistoryLocationState> {
+  implements History<HistoryLocationState>
+{
   /**
    * Tracks whether or not the user has left this history's scope. All methods throw errors if called after scope has
    * been left.
@@ -51,6 +52,10 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * The key of the current position of the window in the history stack.
    */
   private currentLocationKeyIndex: number = 0;
+  /**
+   * Array of the current {@link block} unregister callbacks
+   */
+  private blockUnregisterCallbacks: Set<UnregisterCallback> = new Set();
 
   constructor(private readonly parentHistory: History, private readonly basePath: string) {
     const parentPath = this.parentHistory.location.pathname;
@@ -176,18 +181,20 @@ export class ScopedHistory<HistoryLocationState = unknown>
   };
 
   /**
-   * Not supported. Use {@link AppMountParameters.onAppLeave}.
-   *
-   * @remarks
-   * We prefer that applications use the `onAppLeave` API because it supports a more graceful experience that prefers
-   * a modal when possible, falling back to a confirm dialog box in the beforeunload case.
+   * Add a block prompt requesting user confirmation when navigating away from the current page.
    */
   public block = (
     prompt?: boolean | string | TransitionPromptHook<HistoryLocationState>
   ): UnregisterCallback => {
-    throw new Error(
-      `history.block is not supported. Please use the AppMountParameters.onAppLeave API.`
-    );
+    this.verifyActive();
+
+    const unregisterCallback = this.parentHistory.block(prompt);
+    this.blockUnregisterCallbacks.add(unregisterCallback);
+
+    return () => {
+      this.blockUnregisterCallbacks.delete(unregisterCallback);
+      unregisterCallback();
+    };
   };
 
   /**
@@ -290,6 +297,12 @@ export class ScopedHistory<HistoryLocationState = unknown>
       if (!location.pathname.startsWith(this.basePath)) {
         unlisten();
         this.isActive = false;
+
+        for (const unregisterBlock of this.blockUnregisterCallbacks) {
+          unregisterBlock();
+        }
+        this.blockUnregisterCallbacks.clear();
+
         return;
       }
 

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -14,6 +16,7 @@ import {
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
@@ -23,32 +26,32 @@ import {
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
-import { SourceConfiguration } from '../../../../utils/source_configuration';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 import { useLinkProps } from '../../../../hooks/use_link_props';
 
 export interface Props {
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
-  source?: SourceConfiguration;
+  source?: MetricsSourceConfigurationProperties;
   timeRange: MetricsExplorerTimeOptions;
   uiCapabilities?: Capabilities;
   chartOptions: MetricsExplorerChartOptions;
 }
 
 const fieldToNodeType = (
-  source: SourceConfiguration,
+  source: MetricsSourceConfigurationProperties,
   groupBy: string | string[]
 ): InventoryItemType | undefined => {
   const fields = Array.isArray(groupBy) ? groupBy : [groupBy];
-  if (fields.includes(source.fields.host)) {
+  if (fields.includes(HOST_FIELD)) {
     return 'host';
   }
-  if (fields.includes(source.fields.pod)) {
+  if (fields.includes(POD_FIELD)) {
     return 'pod';
   }
-  if (fields.includes(source.fields.container)) {
+  if (fields.includes(CONTAINER_FIELD)) {
     return 'container';
   }
 };
@@ -150,20 +153,21 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       ]
     : [];
 
-  const itemPanels = [
-    ...filterByItem,
-    ...openInVisualize,
-    ...viewNodeDetail,
-    {
-      name: i18n.translate('xpack.infra.metricsExplorer.alerts.createAlertButton', {
-        defaultMessage: 'Create alert',
-      }),
-      icon: 'bell',
-      onClick() {
-        setFlyoutVisible(true);
-      },
-    },
-  ];
+  const createAlert = uiCapabilities?.infrastructure?.save
+    ? [
+        {
+          name: i18n.translate('xpack.infra.metricsExplorer.alerts.createRuleButton', {
+            defaultMessage: 'Create threshold rule',
+          }),
+          icon: 'bell',
+          onClick() {
+            setFlyoutVisible(true);
+          },
+        },
+      ]
+    : [];
+
+  const itemPanels = [...filterByItem, ...openInVisualize, ...viewNodeDetail, ...createAlert];
 
   // If there are no itemPanels then there is no reason to show the actions button.
   if (itemPanels.length === 0) return null;

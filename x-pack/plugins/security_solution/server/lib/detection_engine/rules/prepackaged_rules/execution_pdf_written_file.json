@@ -3,13 +3,15 @@
     "Elastic"
   ],
   "description": "Identifies a suspicious file that was written by a PDF reader application and subsequently executed. These processes are often launched via exploitation of PDF applications.",
-  "from": "now-9m",
+  "from": "now-120m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
+  "interval": "60m",
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Execution of File Written or Modified by PDF Reader",
   "query": "sequence with maxspan=2h\n  [file where event.type != \"deletion\" and file.extension : \"exe\" and\n     (process.name : \"AcroRd32.exe\" or\n      process.name : \"rdrcef.exe\" or\n      process.name : \"FoxitPhantomPDF.exe\" or\n      process.name : \"FoxitReader.exe\") and\n     not (file.name : \"FoxitPhantomPDF.exe\" or\n          file.name : \"FoxitPhantomPDFUpdater.exe\" or\n          file.name : \"FoxitReader.exe\" or\n          file.name : \"FoxitReaderUpdater.exe\" or\n          file.name : \"AcroRd32.exe\" or\n          file.name : \"rdrcef.exe\")\n  ] by host.id, file.path\n  [process where event.type in (\"start\", \"process_started\")] by host.id, process.executable\n",
   "risk_score": 21,
@@ -61,5 +63,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 4
 }

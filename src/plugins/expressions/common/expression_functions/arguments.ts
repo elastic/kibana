@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { KnownTypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
@@ -24,9 +24,9 @@ export type ArgumentType<T> =
  * representation of the type.
  */
 // prettier-ignore
-type ArrayTypeToArgumentString<T> = 
-  T extends Array<infer ElementType> ? TypeString<ElementType> : 
-  T extends null ? 'null' : 
+type ArrayTypeToArgumentString<T> =
+  T extends Array<infer ElementType> ? TypeString<ElementType> :
+  T extends null ? 'null' :
   never;
 
 /**
@@ -34,9 +34,9 @@ type ArrayTypeToArgumentString<T> =
  * string-based representation of the return type.
  */
 // prettier-ignore
-type UnresolvedTypeToArgumentString<T> = 
-  T extends (...args: any) => infer ElementType ? TypeString<ElementType> : 
-  T extends null ? 'null' : 
+type UnresolvedTypeToArgumentString<T> =
+  T extends (...args: any[]) => infer ElementType ? TypeString<ElementType> :
+  T extends null ? 'null' :
   never;
 
 /**
@@ -44,10 +44,10 @@ type UnresolvedTypeToArgumentString<T> =
  * string-based representation of the return type.
  */
 // prettier-ignore
-type UnresolvedArrayTypeToArgumentString<T> = 
-  T extends Array<(...args: any) => infer ElementType> ? TypeString<ElementType> :
-  T extends (...args: any) => infer ElementType ? ArrayTypeToArgumentString<ElementType> : 
-  T extends null ? 'null' : 
+type UnresolvedArrayTypeToArgumentString<T> =
+  T extends Array<(...args: any[]) => infer ElementType> ? TypeString<ElementType> :
+  T extends (...args: any[]) => infer ElementType ? ArrayTypeToArgumentString<ElementType> :
+  T extends null ? 'null' :
   never;
 
 /** A type containing properties common to all Function Arguments. */

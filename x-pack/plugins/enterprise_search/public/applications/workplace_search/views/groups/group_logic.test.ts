@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -9,30 +10,25 @@ import {
   mockKibanaValues,
   mockFlashMessageHelpers,
   mockHttpValues,
-  expectedAsyncError,
-} from '../../../__mocks__';
-
+} from '../../../__mocks__/kea_logic';
 import { groups } from '../../__mocks__/groups.mock';
 import { mockGroupValues } from './__mocks__/group_logic.mock';
-import { GroupLogic } from './group_logic';
 
+import { nextTick } from '@kbn/test/jest';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { GROUPS_PATH } from '../../routes';
+
+import { GroupLogic } from './group_logic';
 
 describe('GroupLogic', () => {
   const { mount } = new LogicMounter(GroupLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    setSuccessMessage,
-    setQueuedSuccessMessage,
-    setQueuedErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, setQueuedErrorMessage } = mockFlashMessageHelpers;
 
   const group = groups[0];
   const sourceIds = ['123', '124'];
-  const userIds = ['1z1z'];
   const sourcePriorities = { [sourceIds[0]]: 1, [sourceIds[1]]: 0.5 };
 
   beforeEach(() => {
@@ -53,7 +49,6 @@ describe('GroupLogic', () => {
         expect(GroupLogic.values.dataLoading).toEqual(false);
         expect(GroupLogic.values.groupNameInputValue).toEqual(group.name);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
-        expect(GroupLogic.values.selectedGroupUsers).toEqual(userIds);
         expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
         expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
         expect(GroupLogic.values.groupPrioritiesUnchanged).toEqual(true);
@@ -110,43 +105,15 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('addGroupUser', () => {
-      it('sets reducer', () => {
-        GroupLogic.actions.addGroupUser(sourceIds[0]);
-
-        expect(GroupLogic.values.selectedGroupUsers).toEqual([sourceIds[0]]);
-      });
-    });
-
-    describe('removeGroupUser', () => {
-      it('sets reducers', () => {
-        GroupLogic.actions.addGroupUser(sourceIds[0]);
-        GroupLogic.actions.addGroupUser(sourceIds[1]);
-        GroupLogic.actions.removeGroupUser(sourceIds[0]);
-
-        expect(GroupLogic.values.selectedGroupUsers).toEqual([sourceIds[1]]);
-      });
-    });
-
     describe('onGroupSourcesSaved', () => {
       it('sets reducers', () => {
         GroupLogic.actions.onGroupSourcesSaved(group);
 
         expect(GroupLogic.values.group).toEqual(group);
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(false);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
         expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
         expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
-      });
-    });
-
-    describe('onGroupUsersSaved', () => {
-      it('sets reducers', () => {
-        GroupLogic.actions.onGroupUsersSaved(group);
-
-        expect(GroupLogic.values.group).toEqual(group);
-        expect(GroupLogic.values.manageUsersModalVisible).toEqual(false);
-        expect(GroupLogic.values.selectedGroupUsers).toEqual(userIds);
       });
     });
 
@@ -159,22 +126,12 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('hideSharedSourcesModal', () => {
+    describe('hideOrgSourcesModal', () => {
       it('sets reducers', () => {
-        GroupLogic.actions.hideSharedSourcesModal(group);
+        GroupLogic.actions.hideOrgSourcesModal(group);
 
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(false);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
-      });
-    });
-
-    describe('hideManageUsersModal', () => {
-      it('sets reducers', () => {
-        GroupLogic.actions.hideManageUsersModal(group);
-
-        expect(GroupLogic.values.manageUsersModalVisible).toEqual(false);
-        expect(GroupLogic.values.managerModalFormErrors).toEqual([]);
-        expect(GroupLogic.values.selectedGroupUsers).toEqual(userIds);
       });
     });
 
@@ -183,14 +140,6 @@ describe('GroupLogic', () => {
         GroupLogic.actions.selectAllSources(group.contentSources);
 
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
-      });
-    });
-
-    describe('selectAllUsers', () => {
-      it('sets reducers', () => {
-        GroupLogic.actions.selectAllUsers(group.users);
-
-        expect(GroupLogic.values.selectedGroupUsers).toEqual(userIds);
       });
     });
 
@@ -229,32 +178,29 @@ describe('GroupLogic', () => {
     describe('initializeGroup', () => {
       it('calls API and sets values', async () => {
         const onInitializeGroupSpy = jest.spyOn(GroupLogic.actions, 'onInitializeGroup');
-        const promise = Promise.resolve(group);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.initializeGroup(sourceIds[0]);
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/groups/123');
-        await promise;
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/groups/123');
+        await nextTick();
         expect(onInitializeGroupSpy).toHaveBeenCalledWith(group);
       });
 
       it('handles 404 error', async () => {
-        const promise = Promise.reject({ response: { status: 404 } });
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject({ response: { status: 404 } }));
 
         GroupLogic.actions.initializeGroup(sourceIds[0]);
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(navigateToUrl).toHaveBeenCalledWith(GROUPS_PATH);
         expect(setQueuedErrorMessage).toHaveBeenCalledWith('Unable to find group with ID: "123".');
       });
 
       it('handles non-404 error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('this is an error'));
 
         GroupLogic.actions.initializeGroup(sourceIds[0]);
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(navigateToUrl).toHaveBeenCalledWith(GROUPS_PATH);
         expect(setQueuedErrorMessage).toHaveBeenCalledWith('this is an error');
@@ -266,27 +212,18 @@ describe('GroupLogic', () => {
         GroupLogic.actions.onInitializeGroup(group);
       });
       it('deletes a group', async () => {
-        const promise = Promise.resolve(true);
-        http.delete.mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.resolve(true));
 
         GroupLogic.actions.deleteGroup();
-        expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/groups/123');
+        expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/groups/123');
 
-        await promise;
+        await nextTick();
         expect(navigateToUrl).toHaveBeenCalledWith(GROUPS_PATH);
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
-          'Group "group" was successfully deleted.'
-        );
+        expect(flashSuccessToast).toHaveBeenCalledWith('Group "group" was successfully deleted.');
       });
 
-      it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.delete.mockReturnValue(promise);
-
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         GroupLogic.actions.deleteGroup();
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -297,29 +234,22 @@ describe('GroupLogic', () => {
       });
       it('updates name', async () => {
         const onGroupNameChangedSpy = jest.spyOn(GroupLogic.actions, 'onGroupNameChanged');
-        const promise = Promise.resolve(group);
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.updateGroupName();
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/groups/123', {
+        expect(http.put).toHaveBeenCalledWith('/internal/workplace_search/groups/123', {
           body: JSON.stringify({ group: { name: 'new name' } }),
         });
 
-        await promise;
+        await nextTick();
         expect(onGroupNameChangedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully renamed this group to "group".'
         );
       });
 
-      it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.put.mockReturnValue(promise);
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         GroupLogic.actions.updateGroupName();
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -330,61 +260,22 @@ describe('GroupLogic', () => {
       });
       it('updates name', async () => {
         const onGroupSourcesSavedSpy = jest.spyOn(GroupLogic.actions, 'onGroupSourcesSaved');
-        const promise = Promise.resolve(group);
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.saveGroupSources();
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/123/share', {
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/groups/123/share', {
           body: JSON.stringify({ content_source_ids: sourceIds }),
         });
 
-        await promise;
+        await nextTick();
         expect(onGroupSourcesSavedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
-          'Successfully updated shared content sources.'
+        expect(flashSuccessToast).toHaveBeenCalledWith(
+          'Successfully updated organizational content sources.'
         );
       });
 
-      it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.post.mockReturnValue(promise);
-
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         GroupLogic.actions.saveGroupSources();
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-      });
-    });
-
-    describe('saveGroupUsers', () => {
-      beforeEach(() => {
-        GroupLogic.actions.onInitializeGroup(group);
-      });
-      it('updates name', async () => {
-        const onGroupUsersSavedSpy = jest.spyOn(GroupLogic.actions, 'onGroupUsersSaved');
-        const promise = Promise.resolve(group);
-        http.post.mockReturnValue(promise);
-
-        GroupLogic.actions.saveGroupUsers();
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/123/assign', {
-          body: JSON.stringify({ user_ids: userIds }),
-        });
-
-        await promise;
-        expect(onGroupUsersSavedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
-          'Successfully updated the users of this group.'
-        );
-      });
-
-      it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.post.mockReturnValue(promise);
-
-        GroupLogic.actions.saveGroupUsers();
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -397,11 +288,10 @@ describe('GroupLogic', () => {
           GroupLogic.actions,
           'onGroupPrioritiesChanged'
         );
-        const promise = Promise.resolve(group);
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.saveGroupSourcePrioritization();
-        expect(http.put).toHaveBeenCalledWith('/api/workplace_search/groups/123/boosts', {
+        expect(http.put).toHaveBeenCalledWith('/internal/workplace_search/groups/123/boosts', {
           body: JSON.stringify({
             content_source_boosts: [
               [sourceIds[0], 1],
@@ -410,21 +300,15 @@ describe('GroupLogic', () => {
           }),
         });
 
-        await promise;
-        expect(setSuccessMessage).toHaveBeenCalledWith(
-          'Successfully updated shared source prioritization.'
+        await nextTick();
+        expect(flashSuccessToast).toHaveBeenCalledWith(
+          'Successfully updated organizational source prioritization.'
         );
         expect(onGroupPrioritiesChangedSpy).toHaveBeenCalledWith(group);
       });
 
-      it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.put.mockReturnValue(promise);
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         GroupLogic.actions.saveGroupSourcePrioritization();
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -437,20 +321,11 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('showSharedSourcesModal', () => {
+    describe('showOrgSourcesModal', () => {
       it('sets reducer and clears flash messages', () => {
-        GroupLogic.actions.showSharedSourcesModal();
+        GroupLogic.actions.showOrgSourcesModal();
 
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(true);
-        expect(clearFlashMessages).toHaveBeenCalled();
-      });
-    });
-
-    describe('showManageUsersModal', () => {
-      it('sets reducer and clears flash messages', () => {
-        GroupLogic.actions.showManageUsersModal();
-
-        expect(GroupLogic.values.manageUsersModalVisible).toEqual(true);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(true);
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });

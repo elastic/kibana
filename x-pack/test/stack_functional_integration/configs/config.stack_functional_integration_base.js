@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { resolve } from 'path';
@@ -10,6 +11,7 @@ import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { TriggersActionsPageProvider } from '../../functional_with_es_ssl/page_objects/triggers_actions_ui_page';
+import { services } from '../services';
 
 const log = new ToolingLog({
   level: 'info',
@@ -29,6 +31,7 @@ export default async ({ readConfigFile }) => {
 
   const settings = {
     ...xpackFunctionalConfig.getAll(),
+    services,
     pageObjects: {
       triggersActionsUI: TriggersActionsPageProvider,
       ...xpackFunctionalConfig.get('pageObjects'),
@@ -55,10 +58,6 @@ export default async ({ readConfigFile }) => {
     // choose where screenshots should be saved
     screenshots: {
       directory: resolve(INTEGRATION_TEST_ROOT, 'test/screenshots'),
-    },
-    // choose where esArchiver should load archives from
-    esArchiver: {
-      directory: resolve(INTEGRATION_TEST_ROOT, 'test/es_archives'),
     },
   };
   return settings;

@@ -1,30 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { Route, Switch, Router, Redirect } from 'react-router-dom';
 import { ScopedHistory, ApplicationStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageContent,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
 
 import { getFatalErrors } from './services/notifications';
-import { SectionError } from './components';
 import { routing } from './services/routing';
 // @ts-ignore
 import { loadPermissions } from './services/api';
+import { SectionLoading, PageError } from '../shared_imports';
 
 // @ts-ignore
 import {
@@ -109,57 +102,39 @@ class AppComponent extends Component<AppProps, AppState> {
   }
 
   render() {
-    const {
-      isFetchingPermissions,
-      fetchPermissionError,
-      hasPermission,
-      missingClusterPrivileges,
-    } = this.state;
+    const { isFetchingPermissions, fetchPermissionError, hasPermission, missingClusterPrivileges } =
+      this.state;
 
     if (isFetchingPermissions) {
       return (
-        <EuiPageContent horizontalPosition="center">
-          <EuiFlexGroup alignItems="center" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.app.permissionCheckTitle"
-                    defaultMessage="Checking permissions…"
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.app.permissionCheckTitle"
+              defaultMessage="Checking permissions…"
+            />
+          </SectionLoading>
         </EuiPageContent>
       );
     }
 
     if (fetchPermissionError) {
       return (
-        <Fragment>
-          <SectionError
-            title={
-              <FormattedMessage
-                id="xpack.crossClusterReplication.app.permissionCheckErrorTitle"
-                defaultMessage="Error checking permissions"
-              />
-            }
-            error={fetchPermissionError}
-          />
-
-          <EuiSpacer size="m" />
-        </Fragment>
+        <PageError
+          title={
+            <FormattedMessage
+              id="xpack.crossClusterReplication.app.permissionCheckErrorTitle"
+              defaultMessage="Error checking permissions"
+            />
+          }
+          error={fetchPermissionError}
+        />
       );
     }
 
     if (!hasPermission) {
       return (
-        <EuiPageContent horizontalPosition="center">
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
           <EuiEmptyPrompt
             iconType="securityApp"
             title={

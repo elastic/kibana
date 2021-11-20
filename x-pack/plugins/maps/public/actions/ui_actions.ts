@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AnyAction } from 'redux';
@@ -9,18 +10,20 @@ import { ThunkDispatch } from 'redux-thunk';
 import { MapStoreState } from '../reducers/store';
 import { getFlyoutDisplay } from '../selectors/ui_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { trackMapSettings } from './map_actions';
+import { setQuery, trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
+import { DRAW_MODE } from '../../common/constants';
+import { UPDATE_EDIT_STATE } from './map_action_constants';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
-export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';
-export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
 export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
+export const SET_IS_TIME_SLIDER_OPEN = 'SET_IS_TIME_SLIDER_OPEN';
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN';
 export const SET_READ_ONLY = 'SET_READ_ONLY';
 export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
+export const SET_DRAW_MODE = 'SET_DRAW_MODE';
 
 export function exitFullScreen() {
   return {
@@ -47,16 +50,6 @@ export function openMapSettings() {
     dispatch(setSelectedLayer(null));
     dispatch(trackMapSettings());
     dispatch(updateFlyout(FLYOUT_STATE.MAP_SETTINGS_PANEL));
-  };
-}
-export function closeSetView() {
-  return {
-    type: CLOSE_SET_VIEW,
-  };
-}
-export function openSetView() {
-  return {
-    type: OPEN_SET_VIEW,
   };
 }
 export function setIsLayerTOCOpen(isLayerTOCOpen: boolean) {
@@ -96,5 +89,37 @@ export function hideTOCDetails(layerId: string) {
   return {
     type: HIDE_TOC_DETAILS,
     layerId,
+  };
+}
+
+export function setDrawMode(drawMode: DRAW_MODE) {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    if (drawMode === DRAW_MODE.NONE) {
+      dispatch({
+        type: UPDATE_EDIT_STATE,
+        editState: undefined,
+      });
+    }
+    dispatch({
+      type: SET_DRAW_MODE,
+      drawMode,
+    });
+  };
+}
+
+export function openTimeslider() {
+  return {
+    type: SET_IS_TIME_SLIDER_OPEN,
+    isTimesliderOpen: true,
+  };
+}
+
+export function closeTimeslider() {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch({
+      type: SET_IS_TIME_SLIDER_OPEN,
+      isTimesliderOpen: false,
+    });
+    dispatch(setQuery({ clearTimeslice: true }));
   };
 }

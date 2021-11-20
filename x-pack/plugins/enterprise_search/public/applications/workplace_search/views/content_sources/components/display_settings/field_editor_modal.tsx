@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FormEvent, useState } from 'react';
@@ -19,18 +20,24 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSelect,
 } from '@elastic/eui';
+
+import {
+  CANCEL_BUTTON,
+  FIELD_LABEL,
+  LABEL_LABEL,
+  UPDATE_LABEL,
+  ADD_LABEL,
+} from '../../../../constants';
 
 import { DisplaySettingsLogic } from './display_settings_logic';
 
 const emptyField = { fieldName: '', label: '' };
 
 export const FieldEditorModal: React.FC = () => {
-  const { toggleFieldEditorModal, addDetailField, updateDetailField } = useActions(
-    DisplaySettingsLogic
-  );
+  const { toggleFieldEditorModal, addDetailField, updateDetailField } =
+    useActions(DisplaySettingsLogic);
 
   const {
     searchResultConfig: { detailFields },
@@ -53,49 +60,49 @@ export const FieldEditorModal: React.FC = () => {
     }
   };
 
-  const ACTION_LABEL = isEditing ? 'Update' : 'Add';
+  const ACTION_LABEL = isEditing ? UPDATE_LABEL : ADD_LABEL;
 
   return (
-    <EuiOverlayMask>
+    <EuiModal onClose={toggleFieldEditorModal} maxWidth={475}>
       <form onSubmit={handleSubmit}>
-        <EuiModal onClose={toggleFieldEditorModal} maxWidth={475}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>{ACTION_LABEL} Field</EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiForm>
-              <EuiFormRow label="Field">
-                <EuiSelect
-                  options={isEditing ? fieldOptions : availableFieldOptions}
-                  name="field"
-                  required={true}
-                  className="field-selector"
-                  hasNoInitialSelection={true}
-                  data-test-subj="AvailableFieldOptions"
-                  value={fieldName}
-                  disabled={!!isEditing}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </EuiFormRow>
-              <EuiFormRow label="Label">
-                <EuiFieldText
-                  name="label"
-                  required={true}
-                  data-test-subj="VisibleFieldName"
-                  value={label}
-                  onChange={(e) => setLabel(e.target.value)}
-                />
-              </EuiFormRow>
-            </EuiForm>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={toggleFieldEditorModal}>Cancel</EuiButtonEmpty>
-            <EuiButton data-test-subj="FieldSubmitButton" color="primary" fill={true} type="submit">
-              {ACTION_LABEL} Field
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            {ACTION_LABEL} {FIELD_LABEL}
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiForm>
+            <EuiFormRow label={FIELD_LABEL}>
+              <EuiSelect
+                options={isEditing ? fieldOptions : availableFieldOptions}
+                name="field"
+                required
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="AvailableFieldOptions"
+                value={fieldName}
+                disabled={!!isEditing}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </EuiFormRow>
+            <EuiFormRow label={LABEL_LABEL}>
+              <EuiFieldText
+                name="label"
+                required
+                data-test-subj="VisibleFieldName"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+              />
+            </EuiFormRow>
+          </EuiForm>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={toggleFieldEditorModal}>{CANCEL_BUTTON}</EuiButtonEmpty>
+          <EuiButton data-test-subj="FieldSubmitButton" color="primary" fill type="submit">
+            {ACTION_LABEL} {FIELD_LABEL}
+          </EuiButton>
+        </EuiModalFooter>
       </form>
-    </EuiOverlayMask>
+    </EuiModal>
   );
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const DATES = {
@@ -21,6 +22,8 @@ export const DATES = {
     hosts: {
       withData: '10/17/2018 7:58:03 PM',
       withoutData: '10/09/2018 10:00:00 PM',
+      min: '2018-10-17T19:42:21.208Z',
+      max: '2018-10-17T19:58:03.952Z',
     },
     stream: {
       startWithData: '2018-10-17T19:42:22.000Z',
@@ -28,3 +31,12 @@ export const DATES = {
     },
   },
 };
+
+export const ML_JOB_IDS = [
+  'kibana-metrics-ui-default-default-hosts_memory_usage',
+  'kibana-metrics-ui-default-default-hosts_network_out',
+  'kibana-metrics-ui-default-default-hosts_network_in',
+  'kibana-metrics-ui-default-default-k8s_network_out',
+  'kibana-metrics-ui-default-default-k8s_network_in',
+  'kibana-metrics-ui-default-default-k8s_memory_usage',
+];

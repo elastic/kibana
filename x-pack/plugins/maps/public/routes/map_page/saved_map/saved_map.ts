@@ -1,21 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import {
   getTimeFilters,
   getMapZoom,
   getMapCenter,
   getLayerListRaw,
-  getRefreshConfig,
   getQuery,
   getFilters,
   getMapSettings,
@@ -30,7 +30,7 @@ import {
   setHiddenLayers,
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
-import { getMapAttributeService } from '../../../map_attribute_service';
+import { getMapAttributeService, SharingSavedObjectProps } from '../../../map_attribute_service';
 import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
 import {
@@ -38,17 +38,20 @@ import {
   getToasts,
   getIsAllowByValueEmbeddables,
   getSavedObjectsTagging,
+  getTimeFilter,
 } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { copyPersistentState } from '../../../reducers/util';
+import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
+import { SerializedMapState, SerializedUiState } from './types';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
+  private _sharingSavedObjectProps: SharingSavedObjectProps | null = null;
   private readonly _defaultLayers: LayerDescriptor[];
   private readonly _embeddableId?: string;
   private _initialLayerListConfig: LayerDescriptor[] = [];
@@ -97,8 +100,11 @@ export class SavedMap {
       };
     } else {
       const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
-      const { references, ...savedObjectAttributes } = doc;
+      const { references, sharingSavedObjectProps, ...savedObjectAttributes } = doc;
       this._attributes = savedObjectAttributes;
+      if (sharingSavedObjectProps) {
+        this._sharingSavedObjectProps = sharingSavedObjectProps;
+      }
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
@@ -108,9 +114,13 @@ export class SavedMap {
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
       this._store.dispatch(setMapSettings(this._mapEmbeddableInput.mapSettings));
     } else if (this._attributes?.mapStateJSON) {
-      const mapState = JSON.parse(this._attributes.mapStateJSON);
-      if (mapState.settings) {
-        this._store.dispatch(setMapSettings(mapState.settings));
+      try {
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        if (mapState.settings) {
+          this._store.dispatch(setMapSettings(mapState.settings));
+        }
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
       }
     }
 
@@ -118,20 +128,28 @@ export class SavedMap {
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.isLayerTOCOpen !== undefined) {
       isLayerTOCOpen = this._mapEmbeddableInput.isLayerTOCOpen;
     } else if (this._attributes?.uiStateJSON) {
-      const uiState = JSON.parse(this._attributes.uiStateJSON);
-      if ('isLayerTOCOpen' in uiState) {
-        isLayerTOCOpen = uiState.isLayerTOCOpen;
+      try {
+        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
+        if ('isLayerTOCOpen' in uiState) {
+          isLayerTOCOpen = uiState.isLayerTOCOpen;
+        }
+      } catch (e) {
+        // ignore malformed uiStateJSON, not a critical error for viewing map - map will just use defaults
       }
     }
     this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
 
-    let openTOCDetails = [];
+    let openTOCDetails: string[] = [];
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.openTOCDetails !== undefined) {
       openTOCDetails = this._mapEmbeddableInput.openTOCDetails;
     } else if (this._attributes?.uiStateJSON) {
-      const uiState = JSON.parse(this._attributes.uiStateJSON);
-      if ('openTOCDetails' in uiState) {
-        openTOCDetails = uiState.openTOCDetails;
+      try {
+        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
+        if ('openTOCDetails' in uiState) {
+          openTOCDetails = uiState.openTOCDetails;
+        }
+      } catch (e) {
+        // ignore malformed uiStateJSON, not a critical error for viewing map - map will just use defaults
       }
     }
     this._store.dispatch(setOpenTOCDetails(openTOCDetails));
@@ -145,19 +163,27 @@ export class SavedMap {
         })
       );
     } else if (this._attributes?.mapStateJSON) {
-      const mapState = JSON.parse(this._attributes.mapStateJSON);
-      this._store.dispatch(
-        setGotoWithCenter({
-          lat: mapState.center.lat,
-          lon: mapState.center.lon,
-          zoom: mapState.zoom,
-        })
-      );
+      try {
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        this._store.dispatch(
+          setGotoWithCenter({
+            lat: mapState.center.lat,
+            lon: mapState.center.lon,
+            zoom: mapState.zoom,
+          })
+        );
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
     }
 
     let layerList: LayerDescriptor[] = [];
     if (this._attributes.layerListJSON) {
-      layerList = JSON.parse(this._attributes.layerListJSON);
+      try {
+        layerList = JSON.parse(this._attributes.layerListJSON) as LayerDescriptor[];
+      } catch (e) {
+        throw new Error('Malformed saved object: unable to parse layerListJSON');
+      }
     } else {
       const basemapLayerDescriptor = createBasemapLayerDescriptor();
       if (basemapLayerDescriptor) {
@@ -240,6 +266,10 @@ export class SavedMap {
     return this._originatingApp;
   }
 
+  public getOriginatingAppName(): string | undefined {
+    return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
+  }
+
   public getAppNameFromId = (appId: string): string | undefined => {
     return this._getStateTransfer().getAppNameFromId(appId);
   };
@@ -267,6 +297,10 @@ export class SavedMap {
     }
 
     return this._attributes;
+  }
+
+  public getSharingSavedObjectProps(): SharingSavedObjectProps | null {
+    return this._sharingSavedObjectProps;
   }
 
   public isByValue(): boolean {
@@ -363,7 +397,7 @@ export class SavedMap {
     this._originatingApp = undefined;
 
     // remove editor state so the connection is still broken after reload
-    this._getStateTransfer().clearEditorState();
+    this._getStateTransfer().clearEditorState(APP_ID);
 
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
@@ -393,15 +427,18 @@ export class SavedMap {
       zoom: getMapZoom(state),
       center: getMapCenter(state),
       timeFilters: getTimeFilters(state),
-      refreshConfig: getRefreshConfig(state),
-      query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
+      refreshConfig: {
+        isPaused: getTimeFilter().getRefreshInterval().pause,
+        interval: getTimeFilter().getRefreshInterval().value,
+      },
+      query: getQuery(state),
       filters: getFilters(state),
       settings: getMapSettings(state),
-    });
+    } as SerializedMapState);
 
     this._attributes!.uiStateJSON = JSON.stringify({
       isLayerTOCOpen: getIsLayerTOCOpen(state),
       openTOCDetails: getOpenTOCDetails(state),
-    });
+    } as SerializedUiState);
   }
 }

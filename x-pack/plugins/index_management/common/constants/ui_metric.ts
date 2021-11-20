@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const UIM_APP_NAME = 'index_management';
@@ -18,8 +19,6 @@ export const UIM_INDEX_FLUSH = 'index_flush';
 export const UIM_INDEX_FLUSH_MANY = 'index_flush_many';
 export const UIM_INDEX_FORCE_MERGE = 'index_force_merge';
 export const UIM_INDEX_FORCE_MERGE_MANY = 'index_force_merge_many';
-export const UIM_INDEX_FREEZE = 'index_freeze';
-export const UIM_INDEX_FREEZE_MANY = 'index_freeze_many';
 export const UIM_INDEX_OPEN = 'index_open';
 export const UIM_INDEX_OPEN_MANY = 'index_open_many';
 export const UIM_INDEX_REFRESH = 'index_refresh';

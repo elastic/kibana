@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
@@ -19,7 +20,7 @@ export class CategorizationExamplesLoader {
   private _timeFieldName: string = '';
   private _query: object = {};
 
-  constructor(jobCreator: CategorizationJobCreator, indexPattern: IndexPattern, query: object) {
+  constructor(jobCreator: CategorizationJobCreator, indexPattern: DataView, query: object) {
     this._jobCreator = jobCreator;
     this._indexPatternTitle = indexPattern.title;
     this._query = query;
@@ -49,7 +50,9 @@ export class CategorizationExamplesLoader {
       this._timeFieldName,
       this._jobCreator.start,
       this._jobCreator.end,
-      analyzer
+      analyzer,
+      this._jobCreator.runtimeMappings ?? undefined,
+      this._jobCreator.datafeedConfig.indices_options
     );
     return resp;
   }

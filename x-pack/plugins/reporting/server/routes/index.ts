@@ -1,24 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LevelLogger as Logger } from '../lib';
-import { registerJobGenerationRoutes } from './generation';
-import { registerJobInfoRoutes } from './jobs';
-import { ReportingCore } from '../core';
+import { ReportingCore } from '..';
+import { LevelLogger } from '../lib';
+import { registerDeprecationsRoutes } from './deprecations';
 import { registerDiagnosticRoutes } from './diagnostic';
+import {
+  registerGenerateCsvFromSavedObjectImmediate,
+  registerJobGenerationRoutes,
+  registerLegacy,
+} from './generate';
+import { registerJobInfoRoutes } from './management';
 
-export function registerRoutes(reporting: ReportingCore, logger: Logger) {
-  registerJobGenerationRoutes(reporting, logger);
-  registerJobInfoRoutes(reporting);
+export function registerRoutes(reporting: ReportingCore, logger: LevelLogger) {
+  registerDeprecationsRoutes(reporting, logger);
   registerDiagnosticRoutes(reporting, logger);
-}
-
-export interface ReportingRequestPre {
-  management: {
-    jobTypes: string[];
-  };
-  user: string;
+  registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
+  registerJobGenerationRoutes(reporting, logger);
+  registerLegacy(reporting, logger);
+  registerJobInfoRoutes(reporting);
 }

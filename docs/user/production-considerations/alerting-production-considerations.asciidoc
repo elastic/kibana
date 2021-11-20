@@ -1,0 +1,66 @@
+[role="xpack"]
+[[alerting-production-considerations]]
+== Alerting production considerations
+
+++++
+<titleabbrev>Alerting</titleabbrev>
+++++
+
+Alerting runs both rule checks and actions as persistent background tasks managed by the Task Manager.
+
+When relying on rules and actions as mission critical services, make sure you follow the <<task-manager-production-considerations, production considerations>> for Task Manager.
+
+[float]
+[[alerting-background-tasks]]
+=== Running background rule checks and actions
+
+{kib} uses background tasks to run rules and actions, distributed across all {kib} instances in the cluster.
+
+By default, each {kib} instance polls for work at three second intervals, and can run a maximum of ten concurrent tasks.
+These tasks are then run on the {kib} server.
+
+Rules are recurring background tasks which are rescheduled according to the <<defining-rules-general-details, check interval>> on completion.
+Actions are non-recurring background tasks which are deleted on completion.
+
+For more details on Task Manager, see <<task-manager-background-tasks>>.
+
+[IMPORTANT]
+==============================================
+Rule and action tasks can run late or at an inconsistent schedule.
+This is typically a symptom of the specific usage of the cluster in question.
+
+You can address such issues by tweaking the <<task-manager-settings,Task Manager settings>> or scaling the deployment to better suit your use case.
+
+For detailed guidance, see <<alerting-troubleshooting, Alerting Troubleshooting>>.
+==============================================
+
+[float]
+[[alerting-scaling-guidance]]
+=== Scaling guidance
+
+As rules and actions leverage background tasks to perform the majority of work, scaling Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
+
+When estimating the required task throughput, keep the following in mind:
+
+* Each rule uses a single recurring task that is scheduled to run at the cadence defined by its <<defining-rules-general-details,check interval>>.
+* Each action uses a single task. However, because <<alerting-concepts-suppressing-duplicate-notifications,actions are taken per instance>>, alerts can generate a large number of non-recurring tasks.
+
+It is difficult to predict how much throughput is needed to ensure all rules and actions are executed at consistent schedules.
+By counting rules as recurring tasks and actions as non-recurring tasks, a rough throughput <<task-manager-rough-throughput-estimation,can be estimated>> as a _tasks per minute_ measurement.
+
+Predicting the buffer required to account for actions depends heavily on the rule types you use, the amount of alerts they might detect, and the number of actions you might choose to assign to action groups. With that in mind, regularly <<task-manager-health-monitoring,monitor the health>> of your Task Manager instances.
+
+[float]
+[[event-log-ilm]]
+=== Event log index lifecycle management
+
+experimental[]
+
+Alerts and actions log activity in a set of "event log" indices.  These indices are configured with an index lifecycle management (ILM) policy, which you can customize.  The default policy rolls over the index when it reaches 50GB, or after 30 days.  Indices over 90 days old are deleted.
+
+The name of the index policy is `kibana-event-log-policy`.  {kib} creates the index policy on startup, if it doesn't already exist.  The index policy can be customized for your environment, but {kib} never modifies the index policy after creating it.
+
+Because {kib} uses the documents to display historic data, you should set the delete phase longer than you would like the historic data to be shown. For example, if you would like to see one month's worth of historic data, you should set the delete phase to at least one month.
+
+For more information on index lifecycle management, see:
+{ref}/index-lifecycle-management.html[Index Lifecycle Policies].

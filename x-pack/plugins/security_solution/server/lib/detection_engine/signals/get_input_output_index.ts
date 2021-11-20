@@ -1,23 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
+import {
+  DEFAULT_INDEX_KEY,
+  DEFAULT_INDEX_PATTERN,
+  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
+} from '../../../../common/constants';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
 
-export const getInputIndex = async (
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
-  version: string,
-  inputIndex: string[] | null | undefined
-): Promise<string[]> => {
-  if (inputIndex != null) {
-    return inputIndex;
+export interface GetInputIndex {
+  experimentalFeatures: ExperimentalFeatures;
+  index: string[] | null | undefined;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  version: string;
+}
+
+export const getInputIndex = async ({
+  experimentalFeatures,
+  index,
+  services,
+  version,
+}: GetInputIndex): Promise<string[]> => {
+  if (index != null) {
+    return index;
   } else {
     const configuration = await services.savedObjectsClient.get<{
       'securitySolution:defaultIndex': string[];
@@ -25,7 +39,9 @@ export const getInputIndex = async (
     if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];
     } else {
-      return DEFAULT_INDEX_PATTERN;
+      return experimentalFeatures.uebaEnabled
+        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
+        : DEFAULT_INDEX_PATTERN;
     }
   }
 };

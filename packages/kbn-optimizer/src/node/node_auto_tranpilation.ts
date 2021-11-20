@@ -91,7 +91,7 @@ function determineCachePrefix() {
     tsx: getBabelOptions(Path.resolve(REPO_ROOT, 'foo.tsx')),
   });
 
-  const checksum = Crypto.createHash('sha256').update(json).digest('hex');
+  const checksum = Crypto.createHash('sha256').update(json).digest('hex').slice(0, 8);
   return `${checksum}:`;
 }
 
@@ -134,7 +134,8 @@ export function registerNodeAutoTranspilation() {
   installed = true;
 
   const cache = new Cache({
-    dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache_v2', UPSTREAM_BRANCH),
+    pathRoot: REPO_ROOT,
+    dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache_v3', UPSTREAM_BRANCH),
     prefix: determineCachePrefix(),
     log: process.env.DEBUG_NODE_TRANSPILER_CACHE
       ? Fs.createWriteStream(Path.resolve(REPO_ROOT, 'node_auto_transpilation_cache.log'), {

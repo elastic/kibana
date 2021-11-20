@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential DNS Tunneling via NsLookup",
-  "query": "event.category:process and event.type:start and process.name:nslookup.exe and process.args:(-querytype=* or -qt=* or -q=* or -type=*)",
+  "query": "event.category:process and event.type:start and process.name:nslookup.exe and process.args:(-querytype=* or -qt=* or -q=* or -type=*)\n",
   "references": [
     "https://unit42.paloaltonetworks.com/dns-tunneling-in-the-wild-overview-of-oilrigs-dns-tunneling/"
   ],
@@ -37,15 +38,24 @@
         {
           "id": "T1071",
           "name": "Application Layer Protocol",
-          "reference": "https://attack.mitre.org/techniques/T1071/"
+          "reference": "https://attack.mitre.org/techniques/T1071/",
+          "subtechnique": [
+            {
+              "id": "T1071.004",
+              "name": "DNS",
+              "reference": "https://attack.mitre.org/techniques/T1071/004/"
+            }
+          ]
         }
       ]
     }
   ],
   "threshold": {
-    "field": "host.id",
+    "field": [
+      "host.id"
+    ],
     "value": 15
   },
   "type": "threshold",
-  "version": 1
+  "version": 3
 }

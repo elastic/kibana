@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
+import { convertToKibanaClient } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -19,7 +20,8 @@ const COMMON_HEADERS = {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es: Client = getService('es');
+  const es = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -27,9 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
       index: '.kibana',
     });
 
-    const {
-      body: { count },
-    } = await es.count({
+    const { count } = await es.count({
       index: '.kibana',
       q: 'type:lens-ui-telemetry',
     });
@@ -106,8 +106,8 @@ export default ({ getService }: FtrProviderContext) => {
         },
         refresh: 'wait_for',
       });
-
-      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
+      const kibanaClient = convertToKibanaClient(es);
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
 
       expect(result).to.eql({
         byDate: {},
@@ -149,8 +149,8 @@ export default ({ getService }: FtrProviderContext) => {
           getEvent('revert', date1, 'suggestion'),
         ],
       });
-
-      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
+      const kibanaClient = convertToKibanaClient(es);
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
 
       expect(result).to.eql({
         byDate: {
@@ -173,11 +173,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should collect telemetry on saved visualization types with a painless script', async () => {
-      const esArchiver = getService('esArchiver');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
 
-      await esArchiver.loadIfNeeded('lens/basic');
-
-      const results = await getVisualizationCounts(() => Promise.resolve(es), '.kibana');
+      const kibanaClient = convertToKibanaClient(es);
+      const results = await getVisualizationCounts(() => Promise.resolve(kibanaClient), '.kibana');
 
       expect(results).to.have.keys([
         'saved_overall',
@@ -195,7 +196,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
       expect(results.saved_overall_total).to.eql(3);
 
-      await esArchiver.unload('lens/basic');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
   });
 };

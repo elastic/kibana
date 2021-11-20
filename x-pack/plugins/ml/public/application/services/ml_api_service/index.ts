@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
-import { HttpStart } from 'kibana/public';
+import type { HttpStart } from 'kibana/public';
 import { HttpService } from '../http_service';
 
 import { annotations } from './annotations';
@@ -15,25 +17,33 @@ import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { savedObjectsApiProvider } from './saved_objects';
-import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
+import type {
+  MlServerDefaults,
+  MlServerLimits,
+  MlNodeCount,
+} from '../../../../common/types/ml_server_info';
 
-import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
-import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import {
+import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
+import type { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import type {
+  BucketSpanEstimatorData,
+  ResetJobsResponse,
+} from '../../../../common/types/job_service';
+import type {
   Job,
+  JobStats,
   Datafeed,
   CombinedJob,
   Detector,
   AnalysisConfig,
   ModelSnapshot,
+  IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import {
-  FieldHistogramRequestConfig,
-  FieldRequestConfig,
-} from '../../datavisualizer/index_based/common';
-import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
+import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
+import type { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
+import type { RuntimeMappings } from '../../../../common/types/fields';
+import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -44,19 +54,6 @@ export interface MlInfoResponse {
   };
   upgrade_mode: boolean;
   cloudId?: string;
-}
-
-export interface BucketSpanEstimatorData {
-  aggTypes: Array<ES_AGGREGATION | null>;
-  duration: {
-    start: number;
-    end: number;
-  };
-  fields: Array<string | null>;
-  index: string;
-  query: any;
-  splitField: string | undefined;
-  timeField: string | undefined;
 }
 
 export interface BucketSpanEstimatorResponse {
@@ -97,7 +94,7 @@ export function basePath() {
  * Temp solution to allow {@link ml} service to use http from
  * the dependency_cache.
  */
-const proxyHttpStart = new Proxy<HttpStart>(({} as unknown) as HttpStart, {
+const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
   get(obj, prop: keyof HttpStart) {
     try {
       return getHttp()[prop];
@@ -116,14 +113,14 @@ export function mlApiServicesProvider(httpService: HttpService) {
   return {
     getJobs(obj?: { jobId?: string }) {
       const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
-      return httpService.http<any>({
+      return httpService.http<{ jobs: Job[]; count: number }>({
         path: `${basePath()}/anomaly_detectors${jobId}`,
       });
     },
 
     getJobStats(obj: { jobId?: string }) {
       const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
-      return httpService.http<any>({
+      return httpService.http<{ jobs: JobStats[]; count: number }>({
         path: `${basePath()}/anomaly_detectors${jobId}/_stats`,
       });
     },
@@ -159,14 +156,14 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     deleteJob({ jobId }: { jobId: string }) {
-      return httpService.http<any>({
+      return httpService.http<estypes.MlDeleteJobResponse>({
         path: `${basePath()}/anomaly_detectors/${jobId}`,
         method: 'DELETE',
       });
     },
 
     forceDeleteJob({ jobId }: { jobId: string }) {
-      return httpService.http<any>({
+      return httpService.http<estypes.MlDeleteJobResponse>({
         path: `${basePath()}/anomaly_detectors/${jobId}?force=true`,
         method: 'DELETE',
       });
@@ -181,6 +178,13 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
+    resetJob({ jobId }: { jobId: string }) {
+      return httpService.http<ResetJobsResponse>({
+        path: `${basePath()}/anomaly_detectors/${jobId}/_reset`,
+        method: 'POST',
+      });
+    },
+
     estimateBucketSpan(obj: BucketSpanEstimatorData) {
       const body = JSON.stringify(obj);
       return httpService.http<BucketSpanEstimatorResponse>({
@@ -191,7 +195,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     validateJob(payload: {
-      job: Job;
+      job: CombinedJob;
       duration: {
         start?: number;
         end?: number;
@@ -201,6 +205,15 @@ export function mlApiServicesProvider(httpService: HttpService) {
       const body = JSON.stringify(payload);
       return httpService.http<any>({
         path: `${basePath()}/validate/job`,
+        method: 'POST',
+        body,
+      });
+    },
+
+    validateDatafeedPreview(payload: { job: CombinedJob }) {
+      const body = JSON.stringify(payload);
+      return httpService.http<DatafeedValidationResponse>({
+        path: `${basePath()}/validate/datafeed_preview`,
         method: 'POST',
         body,
       });
@@ -243,7 +256,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       datafeedConfig,
     }: {
       datafeedId: string;
-      datafeedConfig: Datafeed;
+      datafeedConfig: Partial<Datafeed>;
     }) {
       const body = JSON.stringify(datafeedConfig);
       return httpService.http<any>({
@@ -328,14 +341,22 @@ export function mlApiServicesProvider(httpService: HttpService) {
       bucketSpan,
       start,
       end,
+      overallScore,
     }: {
       jobId: string;
       topN: string;
       bucketSpan: string;
       start: number;
       end: number;
+      overallScore?: number;
     }) {
-      const body = JSON.stringify({ topN, bucketSpan, start, end });
+      const body = JSON.stringify({
+        topN,
+        bucketSpan,
+        start,
+        end,
+        ...(overallScore ? { overall_score: overallScore } : {}),
+      });
       return httpService.http<any>({
         path: `${basePath()}/anomaly_detectors/${jobId}/results/overall_buckets`,
         method: 'POST',
@@ -366,17 +387,10 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    getNotificationSettings() {
-      return httpService.http<any>({
-        path: `${basePath()}/notification_settings`,
-        method: 'GET',
-      });
-    },
+    checkIndicesExists({ indices }: { indices: string[] }) {
+      const body = JSON.stringify({ indices });
 
-    checkIndexExists({ index }: { index: string }) {
-      const body = JSON.stringify({ index });
-
-      return httpService.http<{ exists: boolean }>({
+      return httpService.http<Record<string, { exists: boolean }>>({
         path: `${basePath()}/index_exists`,
         method: 'POST',
         body,
@@ -469,100 +483,28 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    getVisualizerFieldStats({
-      indexPatternTitle,
-      query,
-      timeFieldName,
-      earliest,
-      latest,
-      samplerShardSize,
-      interval,
-      fields,
-      maxExamples,
-    }: {
-      indexPatternTitle: string;
-      query: any;
-      timeFieldName?: string;
-      earliest?: number;
-      latest?: number;
-      samplerShardSize?: number;
-      interval?: number;
-      fields?: FieldRequestConfig[];
-      maxExamples?: number;
-    }) {
-      const body = JSON.stringify({
-        query,
-        timeFieldName,
-        earliest,
-        latest,
-        samplerShardSize,
-        interval,
-        fields,
-        maxExamples,
-      });
-
-      return httpService.http<any>({
-        path: `${basePath()}/data_visualizer/get_field_stats/${indexPatternTitle}`,
-        method: 'POST',
-        body,
-      });
-    },
-
     getVisualizerFieldHistograms({
-      indexPatternTitle,
+      indexPattern,
       query,
       fields,
       samplerShardSize,
+      runtimeMappings,
     }: {
-      indexPatternTitle: string;
+      indexPattern: string;
       query: any;
       fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
+      runtimeMappings?: RuntimeMappings;
     }) {
       const body = JSON.stringify({
         query,
         fields,
         samplerShardSize,
+        runtimeMappings,
       });
 
       return httpService.http<any>({
-        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
-        method: 'POST',
-        body,
-      });
-    },
-
-    getVisualizerOverallStats({
-      indexPatternTitle,
-      query,
-      timeFieldName,
-      earliest,
-      latest,
-      samplerShardSize,
-      aggregatableFields,
-      nonAggregatableFields,
-    }: {
-      indexPatternTitle: string;
-      query: any;
-      timeFieldName?: string;
-      earliest?: number;
-      latest?: number;
-      samplerShardSize?: number;
-      aggregatableFields: string[];
-      nonAggregatableFields: string[];
-    }) {
-      const body = JSON.stringify({
-        query,
-        timeFieldName,
-        earliest,
-        latest,
-        samplerShardSize,
-        aggregatableFields,
-        nonAggregatableFields,
-      });
-
-      return httpService.http<any>({
-        path: `${basePath()}/data_visualizer/get_overall_stats/${indexPatternTitle}`,
+        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPattern}`,
         method: 'POST',
         body,
       });
@@ -614,7 +556,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     mlNodeCount() {
-      return httpService.http<{ count: number }>({
+      return httpService.http<MlNodeCount>({
         path: `${basePath()}/ml_node_count`,
         method: 'GET',
       });
@@ -696,12 +638,16 @@ export function mlApiServicesProvider(httpService: HttpService) {
       index,
       timeFieldName,
       query,
+      runtimeMappings,
+      indicesOptions,
     }: {
       index: string;
       timeFieldName?: string;
       query: any;
+      runtimeMappings?: RuntimeMappings;
+      indicesOptions?: IndicesOptions;
     }) {
-      const body = JSON.stringify({ index, timeFieldName, query });
+      const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings, indicesOptions });
 
       return httpService.http<GetTimeFieldRangeResponse>({
         path: `${basePath()}/fields_service/time_field_range`,

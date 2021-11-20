@@ -1,134 +1,149 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
+import { ALERT_REASON, ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
-import { updateState } from './common';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
+import { updateState, generateAlertMessage } from './common';
+import { TLS } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
-import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
-import { uptimeAlertWrapper } from './uptime_alert_wrapper';
-import { ActionGroupIdsOf } from '../../../../alerts/common';
+import { TlsTranslations } from '../../../common/translations';
 
-const { TLS } = ACTION_GROUP_DEFINITIONS;
+import { ActionGroupIdsOf } from '../../../../alerting/common';
+
+import { savedObjectsAdapter } from '../saved_objects';
+import { createUptimeESClient } from '../lib';
+
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
-const DEFAULT_SIZE = 20;
-
 interface TlsAlertState {
-  count: number;
-  agingCount: number;
-  agingCommonNameAndDate: string;
-  expiringCount: number;
-  expiringCommonNameAndDate: string;
-  hasAging: true | null;
-  hasExpired: true | null;
+  commonName: string;
+  issuer: string;
+  summary: string;
+  status: string;
 }
 
-const sortCerts = (a: string, b: string) => new Date(a).valueOf() - new Date(b).valueOf();
+interface TLSContent {
+  summary: string;
+  status?: string;
+}
 
 const mapCertsToSummaryString = (
-  certs: Cert[],
-  certLimitMessage: (cert: Cert) => string,
-  maxSummaryItems: number
-): string =>
-  certs
-    .slice(0, maxSummaryItems)
-    .map((cert) => `${cert.common_name}, ${certLimitMessage(cert)}`)
-    .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
+  cert: Cert,
+  certLimitMessage: (cert: Cert) => TLSContent
+): TLSContent => certLimitMessage(cert);
 
-const getValidAfter = ({ not_after: date }: Cert) => {
-  if (!date) return 'Error, missing `certificate_not_valid_after` date.';
+const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
+  if (!date) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
   const relativeDate = moment().diff(date, 'days');
+  const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0
-    ? tlsTranslations.validAfterExpiredString(date, relativeDate)
-    : tlsTranslations.validAfterExpiringString(date, Math.abs(relativeDate));
+    ? {
+        summary: tlsTranslations.validAfterExpiredString(formattedDate, relativeDate),
+        status: tlsTranslations.expiredLabel,
+      }
+    : {
+        summary: tlsTranslations.validAfterExpiringString(formattedDate, Math.abs(relativeDate)),
+        status: tlsTranslations.expiringLabel,
+      };
 };
 
-const getValidBefore = ({ not_before: date }: Cert): string => {
-  if (!date) return 'Error, missing `certificate_not_valid_before` date.';
+const getValidBefore = ({ not_before: date }: Cert): TLSContent => {
+  if (!date) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
   const relativeDate = moment().diff(date, 'days');
+  const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0
-    ? tlsTranslations.validBeforeExpiredString(date, relativeDate)
-    : tlsTranslations.validBeforeExpiringString(date, Math.abs(relativeDate));
+    ? {
+        summary: tlsTranslations.validBeforeExpiredString(formattedDate, relativeDate),
+        status: tlsTranslations.agingLabel,
+      }
+    : {
+        summary: tlsTranslations.validBeforeExpiringString(formattedDate, Math.abs(relativeDate)),
+        status: tlsTranslations.invalidLabel,
+      };
 };
 
 export const getCertSummary = (
-  certs: Cert[],
+  cert: Cert,
   expirationThreshold: number,
-  ageThreshold: number,
-  maxSummaryItems: number = 3
+  ageThreshold: number
 ): TlsAlertState => {
-  certs.sort((a, b) => sortCerts(a.not_after ?? '', b.not_after ?? ''));
-  const expiring = certs.filter(
-    (cert) => new Date(cert.not_after ?? '').valueOf() < expirationThreshold
-  );
+  const isExpiring = new Date(cert.not_after ?? '').valueOf() < expirationThreshold;
+  const isAging = new Date(cert.not_before ?? '').valueOf() < ageThreshold;
+  let content: TLSContent | null = null;
 
-  certs.sort((a, b) => sortCerts(a.not_before ?? '', b.not_before ?? ''));
-  const aging = certs.filter((cert) => new Date(cert.not_before ?? '').valueOf() < ageThreshold);
+  if (isExpiring) {
+    content = mapCertsToSummaryString(cert, getValidAfter);
+  } else if (isAging) {
+    content = mapCertsToSummaryString(cert, getValidBefore);
+  }
+
+  const { summary = '', status = '' } = content || {};
 
   return {
-    count: certs.length,
-    agingCount: aging.length,
-    agingCommonNameAndDate: mapCertsToSummaryString(aging, getValidBefore, maxSummaryItems),
-    expiringCommonNameAndDate: mapCertsToSummaryString(expiring, getValidAfter, maxSummaryItems),
-    expiringCount: expiring.length,
-    hasAging: aging.length > 0 ? true : null,
-    hasExpired: expiring.length > 0 ? true : null,
+    commonName: cert.common_name ?? '',
+    issuer: cert.issuer ?? '',
+    summary,
+    status,
   };
 };
 
-export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
-  uptimeAlertWrapper<ActionGroupIds>({
-    id: 'xpack.uptime.alerts.tls',
-    name: tlsTranslations.alertFactoryName,
-    validate: {
-      params: schema.object({}),
+export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
+  id: 'xpack.uptime.alerts.tlsCertificate',
+  producer: 'uptime',
+  name: tlsTranslations.alertFactoryName,
+  validate: {
+    params: schema.object({}),
+  },
+  defaultActionGroupId: TLS.id,
+  actionGroups: [
+    {
+      id: TLS.id,
+      name: TLS.name,
     },
-    defaultActionGroupId: TLS.id,
-    actionGroups: [
-      {
-        id: TLS.id,
-        name: TLS.name,
-      },
-    ],
-    actionVariables: {
-      context: [],
-      state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
-    },
-    minimumLicenseRequired: 'basic',
-    async executor({ options, dynamicSettings, uptimeEsClient }) {
-      const {
-        services: { alertInstanceFactory },
-        state,
-      } = options;
+  ],
+  actionVariables: {
+    context: [],
+    state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
+  },
+  isExportable: true,
+  minimumLicenseRequired: 'basic',
+  async executor({
+    services: { alertWithLifecycle, savedObjectsClient, scopedClusterClient },
+    state,
+  }) {
+    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
-      const { certs, total }: CertResult = await libs.requests.getCerts({
-        uptimeEsClient,
-        from: DEFAULT_FROM,
-        to: DEFAULT_TO,
-        index: 0,
-        size: DEFAULT_SIZE,
-        notValidAfter: `now+${
-          dynamicSettings?.certExpirationThreshold ??
-          DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
-        }d`,
-        notValidBefore: `now-${
-          dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
-        }d`,
-        sortBy: 'common_name',
-        direction: 'desc',
-      });
+    const uptimeEsClient = createUptimeESClient({
+      esClient: scopedClusterClient.asCurrentUser,
+      savedObjectsClient,
+    });
 
-      const foundCerts = total > 0;
+    const { certs, total }: CertResult = await libs.requests.getCerts({
+      uptimeEsClient,
+      pageIndex: 0,
+      size: 1000,
+      notValidAfter: `now+${
+        dynamicSettings?.certExpirationThreshold ??
+        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
+      }d`,
+      notValidBefore: `now-${
+        dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
+      }d`,
+      sortBy: 'common_name',
+      direction: 'desc',
+    });
 
-      if (foundCerts) {
+    const foundCerts = total > 0;
+
+    if (foundCerts) {
+      certs.forEach((cert) => {
         const absoluteExpirationThreshold = moment()
           .add(
             dynamicSettings.certExpirationThreshold ??
@@ -142,15 +157,28 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
             'd'
           )
           .valueOf();
-        const alertInstance = alertInstanceFactory(TLS.id);
-        const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
+        const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
+
+        const alertInstance = alertWithLifecycle({
+          id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
+          fields: {
+            'tls.server.x509.subject.common_name': cert.common_name,
+            'tls.server.x509.issuer.common_name': cert.issuer,
+            'tls.server.x509.not_after': cert.not_after,
+            'tls.server.x509.not_before': cert.not_before,
+            'tls.server.hash.sha256': cert.sha256,
+            [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING,
+            [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
+          },
+        });
         alertInstance.replaceState({
           ...updateState(state, foundCerts),
           ...summary,
         });
         alertInstance.scheduleActions(TLS.id);
-      }
+      });
+    }
 
-      return updateState(state, foundCerts);
-    },
-  });
+    return updateState(state, foundCerts);
+  },
+});

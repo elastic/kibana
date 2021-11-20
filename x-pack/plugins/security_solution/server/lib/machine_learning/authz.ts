@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server/';
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { ILicense } from '../../../../licensing/server';
 import { MlPluginSetup } from '../../../../ml/server';
 import { SetupPlugins } from '../../plugin';
@@ -15,8 +17,6 @@ import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_a
 import { isMlRule } from '../../../common/machine_learning/helpers';
 import { Validation } from './validation';
 import { cache } from './cache';
-import { Type } from '../../../common/detection_engine/schemas/common/schemas';
-
 export interface MlAuthz {
   validateRuleType: (type: Type) => Promise<Validation>;
 }

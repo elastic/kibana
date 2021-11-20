@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export interface FunctionExample {
@@ -34,8 +35,7 @@ all condition={gt 10} condition={lt 20}`,
       align="center" lHeight=48
   }
 | render`,
-      help:
-        'This sets the color of the metric text to `"red"` if the context passed into `metric` is greater than or equal to 0 and less than 0.8. Otherwise, the color is set to `"green"`.',
+      help: 'This sets the color of the metric text to `"red"` if the context passed into `metric` is greater than or equal to 0 and less than 0.8. Otherwise, the color is set to `"green"`.',
     },
   },
   alterColumn: {
@@ -47,8 +47,7 @@ alterColumn column="@timestamp" name="foo"`,
 | alterColumn "time" name="time_in_ms" type="number"
 | table
 | render`,
-      help:
-        'This renames the `time` column to `time_in_ms` and converts the type of the column’s values from `date` to `number`.',
+      help: 'This renames the `time` column to `time_in_ms` and converts the type of the column’s values from `date` to `number`.',
     },
   },
   any: {
@@ -63,8 +62,7 @@ any condition={lte 10} condition={gt 30}`,
 | pointseries color="project" size="max(price)"
 | pie
 | render`,
-      help:
-        'This filters out any rows that don’t contain `"elasticsearch"`, `"kibana"` or `"x-pack"` in the `project` field.',
+      help: 'This filters out any rows that don’t contain `"elasticsearch"`, `"kibana"` or `"x-pack"` in the `project` field.',
     },
   },
   as: {
@@ -89,8 +87,7 @@ asset id="asset-498f7429-4d56-42a2-a7e4-8bf08d98d114"`,
     usage: {
       expression: `image dataurl={asset "asset-c661a7cc-11be-45a1-a401-d7592ea7917a"} mode="contain"
 | render`,
-      help:
-        'The image asset stored with the ID `"asset-c661a7cc-11be-45a1-a401-d7592ea7917a"` is passed into the `dataurl` argument of the `image` function to display the stored asset.',
+      help: 'The image asset stored with the ID `"asset-c661a7cc-11be-45a1-a401-d7592ea7917a"` is passed into the `dataurl` argument of the `image` function to display the stored asset.',
     },
   },
   axisConfig: {
@@ -105,8 +102,7 @@ axisConfig position="right" min=0 max=10 tickSize=1`,
   xaxis={axisConfig position="top" min=0 max=400 tickSize=100}
   yaxis={axisConfig position="right"}
 | render`,
-      help:
-        'This sets the `x-axis` to display on the top of the chart and sets the range of values to `0-400` with ticks displayed at `100` intervals. The `y-axis` is configured to display on the `right`.',
+      help: 'This sets the `x-axis` to display on the top of the chart and sets the range of values to `0-400` with ticks displayed at `100` intervals. The `y-axis` is configured to display on the `right`.',
     },
   },
   case: {
@@ -130,8 +126,7 @@ case if={lte 50} then="green"`,
       default="red"
   }
 | render`,
-      help:
-        'This sets the color of the progress indicator and the color of the label to `"green"` if the value is less than or equal to `0.5`, `"orange"` if the value is greater than `0.5` and less than or equal to `0.75`, and `"red"` if `none` of the case conditions are met.',
+      help: 'This sets the color of the progress indicator and the color of the label to `"green"` if the value is less than or equal to `0.5`, `"orange"` if the value is greater than `0.5` and less than or equal to `0.75`, and `"red"` if `none` of the case conditions are met.',
     },
   },
   columns: {
@@ -143,8 +138,7 @@ columns exclude="username, country, age"`,
 | columns include="price, cost, state, project"
 | table
 | render`,
-      help:
-        'This only keeps the `price`, `cost`, `state`, and `project` columns from the `demodata` data source and removes all other columns.',
+      help: 'This only keeps the `price`, `cost`, `state`, and `project` columns from the `demodata` data source and removes all other columns.',
     },
   },
   compare: {
@@ -163,8 +157,7 @@ compare op="lte" to=100`,
 | pointseries size="size(cost)" color="project"
 | pie
 | render`,
-      help:
-        'This maps all `project` values that aren’t `"kibana"` and `"elasticsearch"` to `"other"`. Alternatively, you can use the individual comparator functions instead of compare.',
+      help: 'This maps all `project` values that aren’t `"kibana"` and `"elasticsearch"` to `"other"`. Alternatively, you can use the individual comparator functions instead of compare.',
     },
   },
   containerStyle: {
@@ -196,8 +189,7 @@ containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e9
 | formatdate "LLLL"
 | markdown "Last updated: " {context}
 | render`,
-      help:
-        'Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.',
+      help: 'Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.',
     },
   },
   csv: {
@@ -211,8 +203,7 @@ containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e9
 | pointseries color=fruit size=stock
 | pie
 | render`,
-      help:
-        'This creates a `datatable` with `fruit` and `stock` columns with two rows. This is useful for quickly mocking data.',
+      help: 'This creates a `datatable` with `fruit` and `stock` columns with two rows. This is useful for quickly mocking data.',
     },
   },
   date: {
@@ -252,8 +243,7 @@ dropdownControl valueColumn=agent filterColumn=agent.keyword filterGroup=group1`
       expression: `demodata
 | dropdownControl valueColumn=project filterColumn=project
 | render`,
-      help:
-        'This creates a dropdown filter element. It requires a data source and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for Elasticsearch data sources.',
+      help: 'This creates a dropdown filter element. It requires a data source and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for Elasticsearch data sources.',
     },
   },
   eq: {
@@ -274,8 +264,7 @@ eq "foo"`,
 | pointseries size="size(cost)" color="project"
 | pie
 | render`,
-      help:
-        'This changes all values in the project column that don’t equal `"kibana"` or `"elasticsearch"` to `"other"`.',
+      help: 'This changes all values in the project column that don’t equal `"kibana"` or `"elasticsearch"` to `"other"`.',
     },
   },
   escount: {
@@ -291,8 +280,7 @@ escount query="response:404" index="kibana_sample_data_logs"`,
   font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}
   max={filters | escount index="kibana_sample_data_flights"}
 | render`,
-      help:
-        'The first `escount` expression retrieves the number of flights that were cancelled. The second `escount` expression retrieves the total number of flights.',
+      help: 'The first `escount` expression retrieves the number of flights that were cancelled. The second `escount` expression retrieves the total number of flights.',
     },
   },
   esdocs: {
@@ -314,8 +302,7 @@ esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"`,
 | plot defaultStyle={seriesStyle lines=3}
   palette={palette "#7ECAE3" "#003A4D" gradient=true}
 | render`,
-      help:
-        'This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.',
+      help: 'This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.',
     },
   },
   essql: {
@@ -326,8 +313,7 @@ essql "SELECT * FROM \"apm*\"" count=10000`,
 | essql query="SELECT Carrier, FlightDelayMin, AvgTicketPrice FROM   \"kibana_sample_data_flights\""
 | table
 | render`,
-      help:
-        'This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the "kibana_sample_data_flights" index.',
+      help: 'This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the "kibana_sample_data_flights" index.',
     },
   },
   exactly: {
@@ -341,8 +327,7 @@ exactly column="project" value="beats"`,
 | pointseries x=project y="mean(age)"
 | plot defaultStyle={seriesStyle bars=1}
 | render`,
-      help:
-        'The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `"elasticsearch"` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.',
+      help: 'The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `"elasticsearch"` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.',
     },
   },
   filterrows: {
@@ -359,8 +344,7 @@ filterrows fn={getCell "age" | gt 50}`,
 | plot defaultStyle={seriesStyle points="2" lines="1"}
   palette={palette "#01A4A4" "#CC6666" "#D0D102" "#616161" "#00A1CB" "#32742C" "#F18D05" "#113F8C" "#61AE24" "#D70060" gradient=false}
 | render`,
-      help:
-        'This uses `filterrows` to only keep data from India (`IN`), the United States (`US`), and China (`CN`).',
+      help: 'This uses `filterrows` to only keep data from India (`IN`), the United States (`US`), and China (`CN`).',
     },
   },
   filters: {
@@ -382,8 +366,7 @@ filters group="timefilter2" group="dropdownfilter1" ungrouped=true`,
     italic=true
   }
 | render`,
-      help:
-        '`filters` sets the existing filters as context and accepts a `group` parameter to opt into specific filter groups. Setting `ungrouped` to `true` opts out of using global filters.',
+      help: '`filters` sets the existing filters as context and accepts a `group` parameter to opt into specific filter groups. Setting `ungrouped` to `true` opts out of using global filters.',
     },
   },
   font: {
@@ -422,8 +405,7 @@ formatdate "MM/DD/YYYY"`,
 | pointseries x="time" y="sum(price)" color="state"
 | plot defaultStyle={seriesStyle points=5}
 | render`,
-      help:
-        'This transforms the dates in the `time` field into strings that look like `"Jan ‘19"`, `"Feb ‘19"`, etc. using a MomentJS format.',
+      help: 'This transforms the dates in the `time` field into strings that look like `"Jan ‘19"`, `"Feb ‘19"`, etc. using a MomentJS format.',
     },
   },
   formatnumber: {
@@ -437,8 +419,7 @@ formatnumber "0.0a"`,
   label={formatnumber "0%"}
   font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align="center"}
 | render`,
-      help:
-        'The `formatnumber` subexpression receives the same `context` as the `progress` function, which is the output of the `math` function. It formats the value into a percentage.',
+      help: 'The `formatnumber` subexpression receives the same `context` as the `progress` function, which is the output of the `math` function. It formats the value into a percentage.',
     },
   },
 });

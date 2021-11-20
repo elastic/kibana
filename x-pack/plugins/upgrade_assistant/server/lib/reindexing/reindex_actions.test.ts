@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+
+import { TransportResult } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -11,14 +13,17 @@ import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mo
 import moment from 'moment';
 
 import {
-  IndexGroup,
   REINDEX_OP_TYPE,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
+import { MAJOR_VERSION } from '../../../common/constants';
+import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
+import { getMockVersionInfo } from '../__fixtures__/version';
+
+const { currentMajor, prevMajor } = getMockVersionInfo();
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
@@ -47,13 +52,16 @@ describe('ReindexActions', () => {
   });
 
   describe('createReindexOp', () => {
-    beforeEach(() => client.create.mockResolvedValue());
+    beforeEach(() => {
+      versionService.setup(MAJOR_VERSION);
+      client.create.mockResolvedValue();
+    });
 
-    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION} to new name`, async () => {
+    it(`prepends reindexed-v${currentMajor} to new name`, async () => {
       await actions.createReindexOp('myIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
-        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        newIndexName: `reindexed-v${currentMajor}-myIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -65,11 +73,11 @@ describe('ReindexActions', () => {
       });
     });
 
-    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION} to new name, preserving leading period`, async () => {
+    it(`prepends reindexed-v${currentMajor} to new name, preserving leading period`, async () => {
       await actions.createReindexOp('.internalIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: '.internalIndex',
-        newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-internalIndex`,
+        newIndexName: `.reindexed-v${currentMajor}-internalIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -81,29 +89,11 @@ describe('ReindexActions', () => {
       });
     });
 
-    // in v5.6, the upgrade assistant appended to the index name instead of prepending
-    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION}- and removes reindex appended in v5`, async () => {
-      const indexName = 'myIndex-reindexed-v5';
-      await actions.createReindexOp(indexName);
+    it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor}`, async () => {
+      await actions.createReindexOp(`reindexed-v${prevMajor}-myIndex`);
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName,
-        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
-      });
-    });
-
-    it(`replaces reindexed-v${PREV_MAJOR_VERSION} with reindexed-v${CURRENT_MAJOR_VERSION}`, async () => {
-      await actions.createReindexOp(`reindexed-v${PREV_MAJOR_VERSION}-myIndex`);
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: `reindexed-v${PREV_MAJOR_VERSION}-myIndex`,
-        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        indexName: `reindexed-v${prevMajor}-myIndex`,
+        newIndexName: `reindexed-v${currentMajor}-myIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -260,38 +250,20 @@ describe('ReindexActions', () => {
 
       // Really prettier??
       await expect(actions.findAllByStatus(ReindexStatus.completed)).resolves.toEqual([
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
       ]);
     });
   });
 
   describe('getFlatSettings', () => {
-    const asApiResponse = <T>(body: T): RequestEvent<T> =>
+    const asApiResponse = <T>(body: T): TransportResult<T> =>
       ({
         body,
-      } as RequestEvent<T>);
+      } as TransportResult<T>);
 
     it('returns flat settings', async () => {
-      clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(
+      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         asApiResponse({
           myIndex: {
             settings: { 'index.mySetting': '1' },
@@ -306,50 +278,8 @@ describe('ReindexActions', () => {
     });
 
     it('returns null if index does not exist', async () => {
-      clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(asApiResponse({}));
+      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(asApiResponse({}));
       await expect(actions.getFlatSettings('myIndex')).resolves.toBeNull();
-    });
-  });
-
-  describe('runWhileConsumerLocked', () => {
-    Object.entries(IndexGroup).forEach(([typeKey, consumerType]) => {
-      describe(`IndexConsumerType.${typeKey}`, () => {
-        it('creates the lock doc if it does not exist and executes callback', async () => {
-          expect.assertions(3);
-          client.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError()); // mock no ML doc exists yet
-          client.create.mockImplementationOnce((type: any, attributes: any, { id }: any) =>
-            Promise.resolve({
-              type,
-              id,
-              attributes,
-            })
-          );
-
-          let flip = false;
-          await actions.runWhileIndexGroupLocked(consumerType, async (mlDoc) => {
-            expect(mlDoc.id).toEqual(consumerType);
-            expect(mlDoc.attributes.runningReindexCount).toEqual(0);
-            flip = true;
-            return mlDoc;
-          });
-          expect(flip).toEqual(true);
-        });
-
-        it('fails after 10 attempts to lock', async () => {
-          client.get.mockResolvedValue({
-            type: REINDEX_OP_TYPE,
-            id: consumerType,
-            attributes: { mlReindexCount: 0 },
-          });
-
-          client.update.mockRejectedValue(new Error('NO LOCKING!'));
-
-          await expect(
-            actions.runWhileIndexGroupLocked(consumerType, async (m) => m)
-          ).rejects.toThrow('Could not acquire lock for ML jobs');
-          expect(client.update).toHaveBeenCalledTimes(10);
-        }, 20000);
-      });
     });
   });
 });

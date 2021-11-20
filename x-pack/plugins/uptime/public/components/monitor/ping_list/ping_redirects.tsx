@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -36,7 +37,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       size: 's',
       target: '_blank',
       extraAction: {
-        color: 'subdued',
+        color: 'text',
         iconType: 'popout',
         iconSize: 's',
         alwaysShow: true,
@@ -55,7 +56,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       size: 's',
       target: '_blank',
       extraAction: {
-        color: 'subdued',
+        color: 'text',
         iconType: 'popout',
         iconSize: 's',
         'aria-label': i18n.translate('xpack.uptime.monitorList.redirects.openWindow', {

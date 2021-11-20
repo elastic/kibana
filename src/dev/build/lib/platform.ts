@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export type PlatformName = 'win32' | 'darwin' | 'linux';
@@ -49,5 +49,6 @@ export const ALL_PLATFORMS = [
   new Platform('linux', 'x64', 'linux-x86_64'),
   new Platform('linux', 'arm64', 'linux-aarch64'),
   new Platform('darwin', 'x64', 'darwin-x86_64'),
+  new Platform('darwin', 'arm64', 'darwin-aarch64'),
   new Platform('win32', 'x64', 'windows-x86_64'),
 ];

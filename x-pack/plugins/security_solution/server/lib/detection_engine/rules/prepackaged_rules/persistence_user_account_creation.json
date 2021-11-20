@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "User Account Creation",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:(net.exe or net1.exe) and not process.parent.name:net.exe and process.args:(user and (/ad or /add))",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"net.exe\", \"net1.exe\") and\n  not process.parent.name : \"net.exe\" and\n  (process.args : \"user\" and process.args : (\"/ad\", \"/add\"))\n",
   "risk_score": 21,
   "rule_id": "1aa9181a-492b-4c01-8b16-fa0735786b2b",
   "severity": "low",
@@ -34,11 +35,19 @@
         {
           "id": "T1136",
           "name": "Create Account",
-          "reference": "https://attack.mitre.org/techniques/T1136/"
+          "reference": "https://attack.mitre.org/techniques/T1136/",
+          "subtechnique": [
+            {
+              "id": "T1136.001",
+              "name": "Local Account",
+              "reference": "https://attack.mitre.org/techniques/T1136/001/"
+            }
+          ]
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 5
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 9
 }

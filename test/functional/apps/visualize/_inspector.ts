@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -14,11 +14,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const testSubjects = getService('testSubjects');
+  const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
     before(async function () {
+      await PageObjects.visualize.initTests();
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
@@ -35,14 +36,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         log.debug('Add value to advanced JSON input');
         await PageObjects.visEditor.toggleAdvancedParams('2');
-        await testSubjects.setValue('codeEditorContainer', '{ "missing": 10 }');
+        await PageObjects.visEditor.inputValueInCodeEditor('{ "missing": 10 }');
         await PageObjects.visEditor.clickGo();
 
         await inspector.open();
         await inspector.openInspectorRequestsView();
         const requestTab = await inspector.getOpenRequestDetailRequestButton();
         await requestTab.click();
-        const requestJSON = JSON.parse(await inspector.getCodeEditorValue());
+        const requestJSON = JSON.parse(await monacoEditor.getCodeEditorValue(1));
 
         expect(requestJSON.aggs['2'].max).property('missing', 10);
       });

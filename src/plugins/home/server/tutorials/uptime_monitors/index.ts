@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -28,7 +28,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.uptimeMonitors.shortDescription', {
-      defaultMessage: 'Monitor services for their availability',
+      defaultMessage: 'Monitor availability of the services with Heartbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.uptimeMonitors.longDescription', {
       defaultMessage:
@@ -57,5 +57,6 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions([], context),
     elasticCloud: cloudInstructions(),
     onPremElasticCloud: onPremCloudInstructions(),
+    integrationBrowserCategories: ['web', 'security'],
   };
 }

@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Datatable } from 'src/plugins/expressions';
-import { FieldFormat } from '../../common/field_formats';
+import { FieldFormat } from '../../../field_formats/common';
 import { datatableToCSV } from './export_csv';
 
 function getDefaultOptions() {
@@ -17,6 +17,7 @@ function getDefaultOptions() {
     csvSeparator: ',',
     quoteValues: true,
     formatFactory,
+    escapeFormulaValues: false,
   };
 }
 
@@ -70,5 +71,17 @@ describe('CSV exporter', () => {
     expect(datatableToCSV(datatable, getDefaultOptions())).toMatch(
       'columnOne\r\n"Formatted_""value"""\r\n'
     );
+  });
+
+  test('should escape formulas', () => {
+    const datatable = getDataTable();
+    datatable.rows[0].col1 = '=1';
+    expect(
+      datatableToCSV(datatable, {
+        ...getDefaultOptions(),
+        escapeFormulaValues: true,
+        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+      })
+    ).toMatch('columnOne\r\n"\'=1"\r\n');
   });
 });

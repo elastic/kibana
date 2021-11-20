@@ -1,47 +1,62 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Ipv4Address } from '../../utils';
-
-const NUM_BITS = 32;
-
-function throwError(mask: string) {
-  throw Error('Invalid CIDR mask: ' + mask);
-}
+import ipaddr from 'ipaddr.js';
+import { IpAddress } from '../../utils';
 
 export class CidrMask {
-  public readonly initialAddress: Ipv4Address;
-  public readonly prefixLength: number;
+  private static getNetmask(size: number, prefix: number) {
+    return new Array(size).fill(255).map((byte, index) => {
+      const bytePrefix = 8 - Math.min(Math.max(prefix - index * 8, 0), 8);
 
-  constructor(mask: string) {
-    const splits = mask.split('/');
-    if (splits.length !== 2) {
-      throwError(mask);
-    }
-    this.initialAddress = new Ipv4Address(splits[0]);
-    this.prefixLength = Number(splits[1]);
-    if (isNaN(this.prefixLength) || this.prefixLength < 1 || this.prefixLength > NUM_BITS) {
-      throwError(mask);
+      // eslint-disable-next-line no-bitwise
+      return (byte >> bytePrefix) << bytePrefix;
+    });
+  }
+
+  private address: number[];
+  private netmask: number[];
+  private prefix: number;
+
+  constructor(cidr: string) {
+    try {
+      const [address, prefix] = ipaddr.parseCIDR(cidr);
+
+      this.address = address.toByteArray();
+      this.netmask = CidrMask.getNetmask(this.address.length, prefix);
+      this.prefix = prefix;
+    } catch {
+      throw Error('Invalid CIDR mask: ' + cidr);
     }
   }
 
-  public getRange() {
-    const variableBits = NUM_BITS - this.prefixLength;
+  private getBroadcastAddress() {
     // eslint-disable-next-line no-bitwise
-    const fromAddress = ((this.initialAddress.valueOf() >> variableBits) << variableBits) >>> 0; // >>> 0 coerces to unsigned
-    const numAddresses = Math.pow(2, variableBits);
+    const broadcast = this.address.map((byte, index) => byte | (this.netmask[index] ^ 255));
+
+    return new IpAddress(broadcast).toString();
+  }
+
+  private getNetworkAddress() {
+    // eslint-disable-next-line no-bitwise
+    const network = this.address.map((byte, index) => byte & this.netmask[index]);
+
+    return new IpAddress(network).toString();
+  }
+
+  getRange() {
     return {
-      from: new Ipv4Address(fromAddress).toString(),
-      to: new Ipv4Address(fromAddress + numAddresses - 1).toString(),
+      from: this.getNetworkAddress(),
+      to: this.getBroadcastAddress(),
     };
   }
 
-  public toString() {
-    return this.initialAddress.toString() + '/' + this.prefixLength;
+  toString() {
+    return `${new IpAddress(this.address)}/${this.prefix}`;
   }
 }

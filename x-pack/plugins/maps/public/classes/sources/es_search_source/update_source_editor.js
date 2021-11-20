@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
+import { FIELD_ORIGIN } from '../../../../common/constants';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
@@ -14,7 +17,6 @@ import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import {
   getGeoTileAggNotSupportedReason,
-  getTermsFields,
   getSourceFields,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
@@ -22,7 +24,7 @@ import { SortDirection, indexPatterns } from '../../../../../../../src/plugins/d
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ScalingForm } from './scaling_form';
+import { ScalingForm } from './util/scaling_form';
 
 export class UpdateSourceEditor extends Component {
   static propTypes = {
@@ -32,14 +34,13 @@ export class UpdateSourceEditor extends Component {
     sortField: PropTypes.string,
     sortOrder: PropTypes.string.isRequired,
     scalingType: PropTypes.string.isRequired,
-    topHitsSplitField: PropTypes.string,
-    topHitsSize: PropTypes.number.isRequired,
     source: PropTypes.object,
+    hasJoins: PropTypes.bool.isRequired,
+    clearJoins: PropTypes.func.isRequired,
   };
 
   state = {
     sourceFields: null,
-    termFields: null,
     sortFields: null,
     supportsClustering: false,
     mvtDisabledReason: null,
@@ -62,12 +63,7 @@ export class UpdateSourceEditor extends Component {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: i18n.translate('xpack.maps.source.esSearch.loadErrorMessage', {
-            defaultMessage: `Unable to find Index pattern {id}`,
-            values: {
-              id: this.props.indexPatternId,
-            },
-          }),
+          loadError: getDataViewNotFoundMessage(this.props.indexPatternId),
         });
       }
       return;
@@ -93,6 +89,7 @@ export class UpdateSourceEditor extends Component {
       return new ESDocField({
         fieldName: field.name,
         source: this.props.source,
+        origin: FIELD_ORIGIN.SOURCE,
       });
     });
 
@@ -101,7 +98,6 @@ export class UpdateSourceEditor extends Component {
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
       mvtDisabledReason: null,
       sourceFields: sourceFields,
-      termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(
         (field) => field.sortable && !indexPatterns.isNestedField(field)
       ), //todo change sort fields to use fields
@@ -211,9 +207,8 @@ export class UpdateSourceEditor extends Component {
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
-          termFields={this.state.termFields}
-          topHitsSplitField={this.props.topHitsSplitField}
-          topHitsSize={this.props.topHitsSize}
+          hasJoins={this.props.hasJoins}
+          clearJoins={this.props.clearJoins}
         />
       </EuiPanel>
     );

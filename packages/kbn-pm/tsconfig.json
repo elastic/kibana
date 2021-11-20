@@ -1,16 +1,14 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "include": [
-    "./index.d.ts",
-    "./src/**/*.ts",
-    "./dist/*.d.ts"
-  ],
-  "exclude": [],
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-pm",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
     ]
-  }
+  },
+  "include": [
+    "./index.d.ts",
+    "./src/**/*.ts"
+  ]
 }

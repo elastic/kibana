@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Action } from 'redux-actions';
@@ -18,14 +19,12 @@ export function selectedFiltersReducer(
   action: Action<any>
 ): SelectedFilters | null {
   switch (action.type) {
-    case String(getSelectedFilters):
-      return state;
     case String(setSelectedFilters):
-      if (state === null) return { ...action.payload };
+      if (action.payload === null) return null;
       return {
-        ...(state || {}),
         ...action.payload,
       };
+    case String(getSelectedFilters):
     default:
       return state;
   }

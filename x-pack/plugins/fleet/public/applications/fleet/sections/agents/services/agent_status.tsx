@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SimplifiedAgentStatus } from '../../../types';
+import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+
+import type { SimplifiedAgentStatus } from '../../../types';
 
 const visColors = euiPaletteColorBlindBehindText();
 const colorToHexMap = {
-  // TODO - replace with variable once https://github.com/elastic/eui/issues/2731 is closed
-  default: '#d3dae6',
+  // using variables as mentioned here https://elastic.github.io/eui/#/guidelines/getting-started
+  default: euiLightVars.euiColorLightShade,
   primary: visColors[1],
-  secondary: visColors[0],
+  success: visColors[0],
   accent: visColors[2],
   warning: visColors[5],
   danger: visColors[9],
+  inactive: euiLightVars.euiColorDarkShade,
 };
 
 export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
@@ -30,10 +34,11 @@ export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
 export function getColorForAgentStatus(agentStatus: SimplifiedAgentStatus): string {
   switch (agentStatus) {
     case 'healthy':
-      return colorToHexMap.secondary;
+      return colorToHexMap.success;
     case 'offline':
-    case 'inactive':
       return colorToHexMap.default;
+    case 'inactive':
+      return colorToHexMap.inactive;
     case 'unhealthy':
       return colorToHexMap.warning;
     case 'updating':

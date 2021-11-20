@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Query } from '../../../../common';
@@ -80,7 +80,96 @@ describe('Filters Agg', () => {
                   true,
                 ],
                 "filters": Array [
-                  "[{\\"label\\":\\"a\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"foo\\"}},{\\"label\\":\\"b\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:200\\"}},{\\"label\\":\\"c\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:[400 TO 499] AND (foo OR bar)\\"}}]",
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "input": Array [
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "\\"foo\\"",
+                                    ],
+                                  },
+                                  "function": "lucene",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
+                          ],
+                          "label": Array [
+                            "a",
+                          ],
+                        },
+                        "function": "queryFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "input": Array [
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "\\"status:200\\"",
+                                    ],
+                                  },
+                                  "function": "lucene",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
+                          ],
+                          "label": Array [
+                            "b",
+                          ],
+                        },
+                        "function": "queryFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "input": Array [
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "\\"status:[400 TO 499] AND (foo OR bar)\\"",
+                                    ],
+                                  },
+                                  "function": "lucene",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
+                          ],
+                          "label": Array [
+                            "c",
+                          ],
+                        },
+                        "function": "queryFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
                 ],
                 "id": Array [
                   "test",
@@ -153,7 +242,7 @@ describe('Filters Agg', () => {
                   "should": Array [
                     Object {
                       "match": Object {
-                        "field": 200,
+                        "field": "200",
                       },
                     },
                   ],
@@ -171,7 +260,7 @@ describe('Filters Agg', () => {
                           Object {
                             "range": Object {
                               "field": Object {
-                                "gt": 500,
+                                "gt": "500",
                               },
                             },
                           },

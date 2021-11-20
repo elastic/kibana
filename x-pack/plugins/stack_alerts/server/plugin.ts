@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Plugin, Logger, CoreSetup, PluginInitializerContext } from 'src/core/server';
@@ -11,17 +12,15 @@ import { registerBuiltInAlertTypes } from './alert_types';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 export class AlertingBuiltinsPlugin
-  implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps> {
+  implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps>
+{
   private readonly logger: Logger;
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
   }
 
-  public async setup(
-    core: CoreSetup<StackAlertsStartDeps>,
-    { alerts, features }: StackAlertsDeps
-  ): Promise<void> {
+  public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
 
     registerBuiltInAlertTypes({
@@ -29,10 +28,10 @@ export class AlertingBuiltinsPlugin
       data: core
         .getStartServices()
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
-      alerts,
+      alerting,
     });
   }
 
-  public async start(): Promise<void> {}
-  public async stop(): Promise<void> {}
+  public start() {}
+  public stop() {}
 }

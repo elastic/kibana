@@ -1,31 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../plugins/saved_objects/public';
+import type { SavedObjectsMigrationVersion } from 'kibana/public';
 import {
-  AggConfigOptions,
   IAggConfigs,
   SearchSourceFields,
   TimefilterContract,
+  AggConfigSerialized,
 } from '../../../plugins/data/public';
+import type { ISearchSource } from '../../data/common';
 import { ExpressionAstExpression } from '../../expressions/public';
 
-import { SerializedVis, Vis } from './vis';
-import { PersistedState } from './persisted_state';
-import { VisParams } from '../common';
+import type { SerializedVis, Vis } from './vis';
+import type { PersistedState } from './persisted_state';
+import type { VisParams } from '../common';
 
-export { Vis, SerializedVis, VisParams };
-
+export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {
   title: string;
   type: string;
   params: VisParams;
-  aggs: AggConfigOptions[];
+  aggs: AggConfigSerialized[];
 }
 
 export interface ISavedVis {
@@ -37,9 +37,39 @@ export interface ISavedVis {
   uiStateJSON?: string;
   savedSearchRefName?: string;
   savedSearchId?: string;
+  sharingSavedObjectProps?: {
+    outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+    aliasTargetId?: string;
+    errorJSON?: string;
+  };
 }
 
-export interface VisSavedObject extends SavedObject, ISavedVis {}
+export interface VisSavedObject extends ISavedVis {
+  lastSavedTitle: string;
+  getEsType: () => string;
+  getDisplayName?: () => string;
+  displayName: string;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  searchSource?: ISearchSource;
+  version?: string;
+  tags?: string[];
+}
+
+export interface SaveVisOptions {
+  confirmOverwrite?: boolean;
+  isTitleDuplicateConfirmed?: boolean;
+  onTitleDuplicate?: () => void;
+  copyOnSave?: boolean;
+}
+
+export interface GetVisOptions {
+  id?: string;
+  searchSource?: boolean;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  savedSearchId?: string;
+  type?: string;
+  indexPattern?: string;
+}
 
 export interface VisToExpressionAstParams {
   timefilter: TimefilterContract;

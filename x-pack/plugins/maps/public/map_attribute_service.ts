@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectReference } from 'src/core/types';
@@ -11,11 +12,19 @@ import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
-// @ts-expect-error
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
-type MapDoc = MapSavedObjectAttributes & { references?: SavedObjectReference[] };
+export interface SharingSavedObjectProps {
+  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+  aliasTargetId?: string;
+  sourceId?: string;
+}
+
+type MapDoc = MapSavedObjectAttributes & {
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+  references?: SavedObjectReference[];
+};
 
 export type MapAttributeService = AttributeService<MapDoc, MapByValueInput, MapByReferenceInput>;
 
@@ -58,7 +67,11 @@ export function getMapAttributeService(): MapAttributeService {
       return { id: savedObject.id };
     },
     unwrapMethod: async (savedObjectId: string): Promise<MapDoc> => {
-      const savedObject = await getSavedObjectsClient().get<MapSavedObjectAttributes>(
+      const {
+        saved_object: savedObject,
+        outcome,
+        alias_target_id: aliasTargetId,
+      } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
         MAP_SAVED_OBJECT_TYPE,
         savedObjectId
       );
@@ -68,7 +81,15 @@ export function getMapAttributeService(): MapAttributeService {
       }
 
       const { attributes } = injectReferences(savedObject);
-      return { ...attributes, references: savedObject.references };
+      return {
+        ...attributes,
+        references: savedObject.references,
+        sharingSavedObjectProps: {
+          aliasTargetId,
+          outcome,
+          sourceId: savedObjectId,
+        },
+      };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       return checkForDuplicateTitle(

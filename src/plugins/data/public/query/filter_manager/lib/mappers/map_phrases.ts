@@ -1,19 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Filter, isPhrasesFilter } from '../../../../../common';
+import { Filter, isPhrasesFilter } from '@kbn/es-query';
+
+import { FilterValueFormatter } from '../../../../../common';
+
+const getFormattedValueFn = (params: any) => {
+  return (formatter?: FilterValueFormatter) => {
+    return params
+      .map((v: any) => {
+        return formatter ? formatter.convert(v) : v;
+      })
+      .join(', ');
+  };
+};
 
 export const mapPhrases = (filter: Filter) => {
   if (!isPhrasesFilter(filter)) {
     throw filter;
   }
 
-  const { type, key, value, params } = filter.meta;
+  const { type, key, params } = filter.meta;
 
-  return { type, key, value, params };
+  return {
+    type,
+    key,
+    value: getFormattedValueFn(params),
+    params,
+  };
 };

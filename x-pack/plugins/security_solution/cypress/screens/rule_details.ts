@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const ALL_ACTIONS = '[data-test-subj="rules-details-popover-button-icon"]';
@@ -52,15 +53,18 @@ export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobS
 
 export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
 
-export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
+export const FIELDS_BROWSER_BTN =
+  '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
 
-export const RULE_ABOUT_DETAILS_HEADER_TOGGLE = '[data-test-subj="stepAboutDetailsToggle"]';
+export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
 
 export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 
 export const RISK_SCORE_DETAILS = 'Risk score';
+
+export const INDICATOR_PREFIX_OVERRIDE = 'Indicator prefix override';
 
 export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
@@ -79,8 +83,6 @@ export const RUNS_EVERY_DETAILS = 'Runs every';
 export const SCHEDULE_DETAILS =
   '[data-test-subj=schedule] [data-test-subj="listItemColumnStepRuleDescription"]';
 
-export const SCHEDULE_STEP = '[data-test-subj="schedule"]  .euiDescriptionList__description';
-
 export const SEVERITY_DETAILS = 'Severity';
 
 export const TAGS_DETAILS = 'Tags';
@@ -91,8 +93,14 @@ export const TIMELINE_TEMPLATE_DETAILS = 'Timeline template';
 
 export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
 
+export const TIMELINE_FIELD = (field: string) => {
+  return `[data-test-subj="formatted-field-${field}"]`;
+};
+
 export const getDetails = (title: string) =>
   cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
 
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
+
+export const BACK_TO_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
@@ -65,49 +65,64 @@ export const useRequest = <D = any, E = Error>(
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [path, method, queryStringified, bodyStringified]);
 
-  const resendRequest = useCallback(async () => {
-    // If we're on an interval, this allows us to reset it if the user has manually requested the
-    // data, to avoid doubled-up requests.
-    clearPollInterval();
+  const resendRequest = useCallback(
+    async (asSystemRequest?: boolean) => {
+      // If we're on an interval, this allows us to reset it if the user has manually requested the
+      // data, to avoid doubled-up requests.
+      clearPollInterval();
 
-    const requestId = ++requestCountRef.current;
+      const requestId = ++requestCountRef.current;
 
-    // We don't clear error or data, so it's up to the consumer to decide whether to display the
-    // "old" error/data or loading state when a new request is in-flight.
-    setIsLoading(true);
+      // We don't clear error or data, so it's up to the consumer to decide whether to display the
+      // "old" error/data or loading state when a new request is in-flight.
+      setIsLoading(true);
 
-    const response = await sendRequest<D, E>(httpClient, requestBody);
-    const { data: serializedResponseData, error: responseError } = response;
+      // Any requests that are sent in the background (without user interaction) should be flagged as "system requests". This should not be
+      // confused with any terminology in Elasticsearch. This is a Kibana-specific construct that allows the server to differentiate between
+      // user-initiated and requests "system"-initiated requests, for purposes like security features.
+      const requestPayload = { ...requestBody, asSystemRequest };
+      const response = await sendRequest<D, E>(httpClient, requestPayload);
+      const { data: serializedResponseData, error: responseError } = response;
 
-    const isOutdatedRequest = requestId !== requestCountRef.current;
-    const isUnmounted = isMounted.current === false;
+      const isOutdatedRequest = requestId !== requestCountRef.current;
+      const isUnmounted = isMounted.current === false;
 
-    // Ignore outdated or irrelevant data.
-    if (isOutdatedRequest || isUnmounted) {
-      return;
-    }
+      // Ignore outdated or irrelevant data.
+      if (isOutdatedRequest || isUnmounted) {
+        return;
+      }
 
-    // Surface to consumers that at least one request has resolved.
-    isInitialRequestRef.current = false;
+      // Surface to consumers that at least one request has resolved.
+      isInitialRequestRef.current = false;
 
-    setError(responseError);
-    // If there's an error, keep the data from the last request in case it's still useful to the user.
-    if (!responseError) {
-      const responseData = deserializer
-        ? deserializer(serializedResponseData)
-        : serializedResponseData;
-      setData(responseData);
-    }
-    // Setting isLoading to false also acts as a signal for scheduling the next poll request.
-    setIsLoading(false);
-  }, [requestBody, httpClient, deserializer, clearPollInterval]);
+      setError(responseError);
+      // If there's an error, keep the data from the last request in case it's still useful to the user.
+      if (!responseError) {
+        const responseData = deserializer
+          ? deserializer(serializedResponseData)
+          : serializedResponseData;
+        setData(responseData);
+      }
+      // There can be situations in which a component that consumes this hook gets unmounted when
+      // the request returns an error. So before changing the isLoading state, check if the component
+      // is still mounted.
+      if (isMounted.current === true) {
+        // Setting isLoading to false also acts as a signal for scheduling the next poll request.
+        setIsLoading(false);
+      }
+    },
+    [requestBody, httpClient, deserializer, clearPollInterval]
+  );
 
   const scheduleRequest = useCallback(() => {
     // If there's a scheduled poll request, this new one will supersede it.
     clearPollInterval();
 
     if (pollIntervalMs) {
-      pollIntervalIdRef.current = setTimeout(resendRequest, pollIntervalMs);
+      pollIntervalIdRef.current = setTimeout(
+        () => resendRequest(true), // This is happening on an interval in the background, so we flag it as a "system request".
+        pollIntervalMs
+      );
     }
   }, [pollIntervalMs, resendRequest, clearPollInterval]);
 
@@ -137,11 +152,15 @@ export const useRequest = <D = any, E = Error>(
     };
   }, [clearPollInterval]);
 
+  const resendRequestForConsumer = useCallback(() => {
+    return resendRequest();
+  }, [resendRequest]);
+
   return {
     isInitialRequest: isInitialRequestRef.current,
     isLoading,
     error,
     data,
-    resendRequest, // Gives the user the ability to manually request data
+    resendRequest: resendRequestForConsumer, // Gives the user the ability to manually request data
   };
 };

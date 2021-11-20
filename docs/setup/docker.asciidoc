@@ -11,43 +11,94 @@ A list of all published Docker images and tags is available at
 https://www.docker.elastic.co[www.docker.elastic.co]. The source code is in
 https://github.com/elastic/dockerfiles/tree/{branch}/kibana[GitHub].
 
-These images are free to use under the Elastic license. They contain open source
-and free commercial features and access to paid commercial features.
-<<managing-licenses,Start a 30-day trial>> to try out all of the
-paid commercial features. See the
-https://www.elastic.co/subscriptions[Subscriptions] page for information about
-Elastic license levels.
+These images contain both free and subscription features.
+<<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 [float]
-[[pull-image]]
-=== Pull the image
-
-Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
-against the Elastic Docker registry.
+[[run-kibana-on-docker-for-dev]]
+=== Run {kib} on Docker for development
 
 ifeval::["{release-state}"=="unreleased"]
 
-However, version {version} of Kibana has not yet been released, so no Docker
-image is currently available for this version.
+NOTE: No Docker images are currently available for {kib} {version}.
 
 endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-["source","txt",subs="attributes"]
---------------------------------------------
-docker pull {docker-repo}:{version}
---------------------------------------------
+. Start an {es} container for development or testing:
++
+[source,sh,subs="attributes"]
+----
+docker network create elastic
+docker pull {es-docker-image}
+docker run --name es-node01 --net elastic -p 9200:9200 -p 9300:9300 -t {es-docker-image}
+----
++
+When you start {es} for the first time, the following security configuration 
+occurs automatically:
++
+* {ref}/configuring-stack-security.html#stack-security-certificates[Certificates and keys] 
+are generated for the transport and HTTP layers.
+* The Transport Layer Security (TLS) configuration settings are written to
+`elasticsearch.yml`.
+* A password is generated for the `elastic` user.
+* An enrollment token is generated for {kib}.
++
+NOTE: You might need to scroll back a bit in the terminal to view the password 
+and enrollment token.
+
+. Copy the generated password and enrollment token and save them in a secure 
+location. These values are shown only when you start {es} for the first time.
+You'll use these to enroll {kib} with your {es} cluster and log in.
++
+[NOTE]
+====
+If you need to reset the password for the `elastic` user or other
+built-in users, run the {ref}/reset-password.html[`elasticsearch-reset-password`]
+tool. To generate new enrollment tokens for {kib} or {es} nodes, run the
+{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.
+These tools are available in the {es} `bin` directory of the Docker container.
+
+For example:
+
+[source,sh]
+----
+docker exec -it es-node01 /usr/share/elasticsearch/bin/reset-elastic-password
+----
+====
+
+. In a new terminal session, start {kib} and connect it to your {es} container:
++
+[source,sh,subs="attributes"]
+----
+docker pull {docker-image}
+docker run --name kib-01 --net elastic -p 5601:5601 {docker-image}
+----
++
+When you start {kib}, a unique link is output to your terminal.
+
+. To access {kib}, click the generated link in your terminal.
+
+  .. In your browser, paste the enrollment token that you copied when starting
+  {es} and click the button to connect your {kib} instance with {es}.
+
+  .. Log in to {kib} as the `elastic` user with the password that was generated
+  when you started {es}.
 
 [float]
-=== Run Kibana on Docker for development
-Kibana can be quickly started and connected to a local Elasticsearch container for development
-or testing use with the following command:
---------------------------------------------
-docker run --link YOUR_ELASTICSEARCH_CONTAINER_NAME_OR_ID:elasticsearch -p 5601:5601 {docker-repo}:{version}
---------------------------------------------
-endif::[]
+=== Remove Docker containers
 
+To remove the containers and their network, run:
+
+[source,sh]
+----
+docker network rm elastic
+docker rm es-node01
+docker rm kib-01
+----
+
+endif::[]
 [float]
 [[configuring-kibana-docker]]
 === Configure Kibana on Docker
@@ -62,7 +113,7 @@ environment variables to define settings.
 ==== Bind-mounted configuration
 
 One way to configure Kibana on Docker is to provide `kibana.yml` via bind-mounting.
-With +docker-compose+, the bind-mount can be specified like this:
+With `docker-compose`, the bind-mount can be specified like this:
 
 ["source","yaml",subs="attributes"]
 --------------------------------------------
@@ -73,6 +124,16 @@ services:
     volumes:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
 --------------------------------------------
+
+==== Persist the {kib} keystore
+
+By default, {kib] auto-generates a keystore file for secure settings at startup. To persist your {kibana-ref}/secure-settings.html[secure settings], use the `kibana-keystore` utility to bind-mount the parent directory of the keystore to the container. For example:
+
+["source","sh",subs="attributes"]
+----
+docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {docker-image} bin/kibana-keystore create
+docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {docker-image} bin/kibana-keystore add test_keystore_setting
+----
 
 [float]
 [[environment-variable-config]]
@@ -96,10 +157,11 @@ Some example translations are shown here:
 **Environment Variable**:: **Kibana Setting**
 `SERVER_NAME`:: `server.name`
 `SERVER_BASEPATH`:: `server.basePath`
-`MONITORING_ENABLED`:: `monitoring.enabled`
+`ELASTICSEARCH_HOSTS`:: `elasticsearch.hosts`
 
-In general, any setting listed in <<settings>> can be
-configured with this technique.
+In general, any setting listed in <<settings>> can be configured with this technique.
+
+Supplying array options can be tricky. The following example shows the syntax for providing an array to `ELASTICSEARCH_HOSTS`.
 
 These variables can be set with +docker-compose+ like this:
 
@@ -111,7 +173,7 @@ services:
     image: {docker-image}
     environment:
       SERVER_NAME: kibana.example.org
-      ELASTICSEARCH_HOSTS: http://elasticsearch.example.org
+      ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'
 ----------------------------------------------------------
 
 Since environment variables are translated to CLI arguments, they take
@@ -124,8 +186,8 @@ The following settings have different default values when using the Docker
 images:
 
 [horizontal]
-`server.name`:: `kibana`
 `server.host`:: `"0.0.0.0"`
+`server.shutdownTimeout`:: `"5s"`
 `elasticsearch.hosts`:: `http://elasticsearch:9200`
 `monitoring.ui.container.elasticsearch.enabled`:: `true`
 

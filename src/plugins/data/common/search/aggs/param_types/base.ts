@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
@@ -26,7 +26,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   ) => void;
   serialize: (value: any, aggConfig?: TAggConfig) => any;
   deserialize: (value: any, aggConfig?: TAggConfig) => any;
-  toExpressionAst?: (value: any) => ExpressionAstExpression | undefined;
+  toExpressionAst?: (value: any) => ExpressionAstExpression[] | ExpressionAstExpression | undefined;
   options: any[];
   valueType?: any;
 

@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { AggFunctionsMapping, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import {
+  extendedBoundsToAst,
+  numericalRangeToAst,
+} from '../../../../../../../../src/plugins/data/common';
 import {
   buildExpressionFunction,
   Range,
@@ -16,7 +21,7 @@ import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
-import { supportedFormats } from '../../../format_column';
+import { supportedFormats } from '../../../../../common/expressions/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
 import { getInvalidFieldMessage, isValidNumber } from '../helpers';
@@ -132,7 +137,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       sourceField: field.name,
     };
   },
-  toEsAggsFn: (column, columnId) => {
+  toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;
     if (params.type === MODES.Range) {
       return buildExpressionFunction<AggFunctionsMapping['aggRange']>('aggRange', {
@@ -140,8 +145,9 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         enabled: true,
         schema: 'segment',
         field: sourceField,
-        ranges: JSON.stringify(
-          params.ranges.filter(isValidRange).map<Partial<RangeType>>((range) => {
+        ranges: params.ranges
+          .filter(isValidRange)
+          .map<Partial<RangeType>>((range) => {
             if (isFullRange(range)) {
               return range;
             }
@@ -155,20 +161,22 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
             }
             return partialRange;
           })
-        ),
+          .map(numericalRangeToAst),
       }).toAst();
     }
+    const maxBarsDefaultValue =
+      (uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS) - MIN_HISTOGRAM_BARS) / 2;
+
     return buildExpressionFunction<AggFunctionsMapping['aggHistogram']>('aggHistogram', {
       id: columnId,
       enabled: true,
       schema: 'segment',
       field: sourceField,
-      // fallback to 0 in case of empty string
-      maxBars: params.maxBars === AUTO_BARS ? undefined : params.maxBars,
+      maxBars: params.maxBars === AUTO_BARS ? maxBarsDefaultValue : params.maxBars,
       interval: 'auto',
       has_extended_bounds: false,
       min_doc_count: false,
-      extended_bounds: JSON.stringify({ min: '', max: '' }),
+      extended_bounds: extendedBoundsToAst({}),
     }).toAst();
   },
   paramEditor: ({
@@ -188,7 +196,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
 
     const rangeFormatter = data.fieldFormats.deserialize({
-      ...currentColumn.params.parentFormat,
+      ...(currentColumn.params.parentFormat || { id: 'range' }),
       params: {
         ...currentColumn.params.parentFormat?.params,
         ...(numberFormat
@@ -236,7 +244,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
               format: currentColumn.params.format,
               parentFormat,
             },
-          },
+          } as RangeIndexPatternColumn,
         },
       });
     };

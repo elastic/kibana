@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { unlinkSync as unlink } from 'fs';
@@ -31,13 +31,23 @@ export const writePidFile = async ({
     if (pidConfig.exclusive) {
       throw new Error(message);
     } else {
-      logger.warn(message, { path, pid });
+      logger.warn(message, {
+        process: {
+          pid: process.pid,
+          path,
+        },
+      });
     }
   }
 
   await writeFile(path, pid);
 
-  logger.debug(`wrote pid file to ${path}`, { path, pid });
+  logger.debug(`wrote pid file to ${path}`, {
+    process: {
+      pid: process.pid,
+      path,
+    },
+  });
 
   const clean = once(() => {
     unlink(path);

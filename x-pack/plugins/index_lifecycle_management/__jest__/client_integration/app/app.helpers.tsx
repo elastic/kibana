@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 import { licensingMock } from '../../../../licensing/public/mocks';
 import { App } from '../../../public/application/app';
-import { TestSubjects } from '../helpers';
 
 const breadcrumbService = createBreadcrumbsMock();
 
@@ -29,14 +29,13 @@ const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({
   },
   defaultProps: {
     getUrlForApp: () => {},
-    navigateToApp: () => {},
   },
 });
 
 const initTestBed = (initialEntries: string[]) =>
   registerTestBed(AppWithContext, getTestBedConfig(initialEntries))();
 
-export interface AppTestBed extends TestBed<TestSubjects> {
+export interface AppTestBed extends TestBed {
   actions: {
     clickPolicyNameLink: () => void;
     clickCreatePolicyButton: () => void;

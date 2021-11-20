@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -15,13 +15,18 @@ import { CoreStart, HttpStart } from 'kibana/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
+import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 
 export class ShareMenuManager {
   private isOpen = false;
 
   private container = document.createElement('div');
 
-  start(core: CoreStart, shareRegistry: ShareMenuRegistryStart) {
+  start(
+    core: CoreStart,
+    shareRegistry: ShareMenuRegistryStart,
+    anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
+  ) {
     return {
       /**
        * Collects share menu items from registered providers and mounts the share context menu under
@@ -30,11 +35,13 @@ export class ShareMenuManager {
        */
       toggleShareContextMenu: (options: ShowShareMenuOptions) => {
         const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose: this.onClose });
+        const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
           menuItems,
           post: core.http.post,
           basePath: core.http.basePath.get(),
+          anonymousAccess,
         });
       },
     };
@@ -57,10 +64,13 @@ export class ShareMenuManager {
     post,
     basePath,
     embedUrlParamExtensions,
+    anonymousAccess,
+    showPublicUrlSwitch,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     post: HttpStart['post'];
     basePath: string;
+    anonymousAccess: AnonymousAccessServiceContract | undefined;
   }) {
     if (this.isOpen) {
       this.onClose();
@@ -92,6 +102,8 @@ export class ShareMenuManager {
             post={post}
             basePath={basePath}
             embedUrlParamExtensions={embedUrlParamExtensions}
+            anonymousAccess={anonymousAccess}
+            showPublicUrlSwitch={showPublicUrlSwitch}
           />
         </EuiWrappingPopover>
       </I18nProvider>

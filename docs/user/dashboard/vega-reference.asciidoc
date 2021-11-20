@@ -23,16 +23,8 @@ Learn more about {kib} extension, additional *Vega* resources, and examples.
 ====== Automatic sizing
 
 Most users will want their Vega visualizations to take the full available space, so unlike
-Vega examples, `width` and `height` are not required parameters in {kib}. To set the width
-or height manually, set `autosize: none`. For example, to set the height to a specific pixel value:
-
-```
-autosize: none
-width: container
-height: 200
-```
-
-The default {kib} settings which are inherited by your visualizations are:
+Vega examples, `width` and `height` are not required parameters in {kib} because your
+spec will be merged with the default {kib} settings in most cases:
 
 ```
 autosize: {
@@ -43,12 +35,36 @@ width: container
 height: container
 ```
 
-{kib} is able to merge your custom `autosize` settings with the defaults. The options `fit-x`
-and `fit-y` are supported but not recommended over the default `fit` setting.
+These default settings are *not* applied if:
+
+* <<vega-with-a-map, Your spec uses `type=map`>>
+* Your spec is Vega-Lite and contains a facet, row, column, repeat, or concat operator. In these
+cases, providing `width` and `height` will affect the child size.
+
+To set the width or height manually, set `autosize: none` and provide the exact pixel sizes, including
+padding for the title, legend and axes.
+
+```
+autosize: none
+width: 600
+height: 200
+padding: {
+  top: 20
+  bottom: 20
+  left: 55
+  right: 150
+}
+```
 
 To learn more, read about
-https://vega.github.io/vega/docs/specification/#autosize[autosize]
-in the Vega documentation.
+https://vega.github.io/vega/docs/specification/#autosize[Vega autosize]
+and https://vega.github.io/vega-lite/docs/size.html[Vega-Lite autosize].
+
+NOTE: Autosize in Vega-Lite has https://vega.github.io/vega-lite/docs/size.html#limitations[several limitations]
+which can affect the height and width of your visualization, but these limitations do not exist in Vega.
+If you need full control, convert your spec to Vega using the <<vega-browser-debugging-console, browser console>>
+`VEGA_DEBUG.vega_spec` output.
+To disable these warnings, you can <<vega-additional-configuration-options, add extra options to your spec>>.
 
 [float]
 [[vega-theme]]
@@ -85,6 +101,8 @@ Tokens include the following:
 * `"%dashboard_context-must_clause%"`: String replaced by object containing filters
 * `"%dashboard_context-filter_clause%"`: String replaced by an object containing filters
 * `"%dashboard_context-must_not_clause%"`: String replaced by an object containing filters
+
+NOTE: Vega supports the `interval` parameter, which is unsupported {es} 8.0.0 and later. To use intervals, use `fixed_interval` or `calendar_interval` instead.
 
 For example, the following query counts the number of documents in a specific index:
 
@@ -223,7 +241,7 @@ experimental[] Access the Elastic Map Service files via the same mechanism:
 ----
 url: {
   // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
+  %type%: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
@@ -251,8 +269,13 @@ experimental[] To enable *Maps*, the graph must specify `type=map` in the host c
       "longitude": -74,   // default 0
       "zoom": 7,          // default 2
 
-      // defaults to "default". Use false to disable base layer.
+      // Defaults to 'true', disables the base map layer.
       "mapStyle": false,
+
+      // When 'mapStyle' is 'undefined' or 'true', sets the EMS-layer for the map.
+      // May either be: "road_map", "road_map_desaturated", "dark_map".
+      // If 'emsTileServiceId' is 'undefined', it falls back to the auto-switch-dark-light behavior.
+      "emsTileServiceId": "road_map",
 
       // default 0
       "minZoom": 5,
@@ -261,7 +284,7 @@ experimental[] To enable *Maps*, the graph must specify `type=map` in the host c
       // or 25 when base is disabled
       "maxZoom": 13,
 
-      // defaults to true, shows +/- buttons to zoom in/out
+      // Defaults to 'true', shows +/- buttons to zoom in/out
       "zoomControl": false,
 
       // Defaults to 'false', disables mouse wheel zoom. If set to
@@ -289,7 +312,7 @@ experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[dat
 ----
 url: {
   // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
+  %type%: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
@@ -342,7 +365,7 @@ results from {es}. To troubleshoot these requests, click *Inspect*, which shows 
 In case your specification has more than one request, you can switch between the views using the *View* dropdown.
 
 [role="screenshot"]
-image::visualize/images/vega_tutorial_inspect_requests.png[]
+image::images/vega_tutorial_inspect_requests.png[]
 
 [float]
 [[vega-debugging]]
@@ -354,7 +377,7 @@ The runtime data is read from the
 https://vega.github.io/vega/docs/api/debugging/#scope[runtime scope].
 
 [role="screenshot"]
-image::visualize/images/vega_tutorial_inspect_data_sets.png[]
+image::images/vega_tutorial_inspect_data_sets.png[]
 
 To debug more complex specs, access to the `view` variable.  For more information, refer to
 the <<vega-browser-debugging-console, Vega browser debugging process>>.
@@ -368,7 +391,7 @@ Because of the dynamic nature of the data in {es}, it is hard to help you with
 then select *Spec*.
 
 [role="screenshot"]
-image::visualize/images/vega_tutorial_getting_help.png[]
+image::images/vega_tutorial_getting_help.png[]
 
 To copy the response, click *Copy to clipboard*. Paste the copied data to
 https://gist.github.com/[gist.github.com], possibly with a .json extension. Use the [raw] button,
@@ -396,7 +419,9 @@ Vega-Lite compilation.
 [[vega-expression-functions]]
 ===== (Vega only) Expression functions which can update the time range and dashboard filters
 
-{kib} has extended the Vega expression language with these functions:
+{kib} has extended the Vega expression language with these functions. 
+These functions will trigger new data to be fetched, which by default will reset Vega signals. 
+To keep signal values set `restoreSignalValuesOnRefresh: true` in the Vega config.
 
 ```js
 /**
@@ -439,6 +464,8 @@ kibanaSetTimeFilter(start, end)
       hideWarnings: true
       // Vega renderer to use: `svg` or `canvas` (default)
       renderer: canvas
+      // Defaults to 'false', restores Vega signal values on refresh
+      restoreSignalValuesOnRefresh: false
     }
   }
 }

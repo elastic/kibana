@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,11 +17,11 @@ test('<MenuItem/>', () => {
   const { getByText, queryByText } = render(
     <MenuItem
       context={{
-        embeddable: ({
+        embeddable: {
           enhancements: {
-            dynamicActions: ({ state } as unknown) as DynamicActionManager,
+            dynamicActions: { state } as unknown as DynamicActionManager,
           },
-        } as unknown) as EnhancedEmbeddable,
+        } as unknown as EnhancedEmbeddable,
         trigger: {} as any,
       }}
     />

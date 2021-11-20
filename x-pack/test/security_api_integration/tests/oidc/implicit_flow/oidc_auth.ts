@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { JSDOM } from 'jsdom';
-import request, { Cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { format as formatURL } from 'url';
 import { createTokens, getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -32,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         stateAndNonce = getStateAndNonce(handshakeResponse.body.location);
       });
 
@@ -49,8 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
             (window as Record<string, any>).__isScriptExecuted__ = new Promise<void>((resolve) => {
               Object.defineProperty(window, 'location', {
                 value: {
-                  href:
-                    'https://kibana.com/api/security/oidc/implicit#token=some_token&access_token=some_access_token',
+                  href: 'https://kibana.com/api/security/oidc/implicit#token=some_token&access_token=some_access_token',
                   replace(newLocation: string) {
                     this.href = newLocation;
                     resolve();
@@ -82,32 +82,39 @@ export default function ({ getService }: FtrProviderContext) {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
 
-        await supertest
+        const unauthenticatedResponse = await supertest
           .get(
             `/api/security/oidc/callback?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )
-          .set('kbn-xsrf', 'xxx')
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
       it('should fail if state is not matching', async () => {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=$someothervalue&token_type=bearer&access_token=${accessToken}`;
 
-        await supertest
+        const unauthenticatedResponse = await supertest
           .get(
             `/api/security/oidc/callback?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
+
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/43938
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
@@ -118,7 +125,6 @@ export default function ({ getService }: FtrProviderContext) {
               authenticationResponse
             )}`
           )
-          .set('kbn-xsrf', 'xxx')
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
 
@@ -130,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         expect(sessionCookie.key).to.be('sid');
         expect(sessionCookie.value).to.not.be.empty();
         expect(sessionCookie.path).to.be('/');

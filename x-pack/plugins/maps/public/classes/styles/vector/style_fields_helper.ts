@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -27,7 +28,7 @@ export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFi
       name: field.getName(),
       origin: field.getOrigin(),
       type: await field.getDataType(),
-      supportsAutoDomain: field.supportsAutoDomain(),
+      supportsAutoDomain: field.supportsFieldMetaFromLocalData() || field.supportsFieldMetaFromEs(),
     };
   });
   const styleFields = await Promise.all(promises);

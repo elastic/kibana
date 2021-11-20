@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { useUrlState } from '../../../../../util/url_state';
 
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
@@ -19,6 +21,7 @@ export const useRefreshInterval = (
   setBlockRefresh: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   const { services } = useMlKibana();
+  const [globalState] = useUrlState('_g');
   const { timefilter } = services.data.query.timefilter;
 
   const { refresh } = useRefreshAnalyticsList();
@@ -34,7 +37,9 @@ export const useRefreshInterval = (
     initAutoRefresh();
 
     function initAutoRefresh() {
-      const { value } = timefilter.getRefreshInterval();
+      const interval = globalState?.refreshInterval ?? timefilter.getRefreshInterval();
+      const { value } = interval;
+
       if (value === 0) {
         // the auto refresher starts in an off state
         // so switch it on and set the interval to 30s

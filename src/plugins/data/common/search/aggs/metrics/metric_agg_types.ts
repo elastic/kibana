@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export enum METRIC_TYPES {
   AVG = 'avg',
+  FILTERED_METRIC = 'filtered_metric',
   CARDINALITY = 'cardinality',
   AVG_BUCKET = 'avg_bucket',
   MAX_BUCKET = 'max_bucket',
@@ -19,6 +20,7 @@ export enum METRIC_TYPES {
   GEO_BOUNDS = 'geo_bounds',
   GEO_CENTROID = 'geo_centroid',
   MEDIAN = 'median',
+  SINGLE_PERCENTILE = 'single_percentile',
   MIN = 'min',
   MAX = 'max',
   MOVING_FN = 'moving_avg',

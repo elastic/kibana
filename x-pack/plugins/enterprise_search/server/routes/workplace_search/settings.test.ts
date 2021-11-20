@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -9,18 +10,19 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import {
   registerOrgSettingsRoute,
   registerOrgSettingsCustomizeRoute,
+  registerOrgSettingsUploadImagesRoute,
   registerOrgSettingsOauthApplicationRoute,
 } from './settings';
 
 describe('settings routes', () => {
-  describe('GET /api/workplace_search/org/settings', () => {
+  describe('GET /internal/workplace_search/org/settings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/settings',
+        path: '/internal/workplace_search/org/settings',
       });
 
       registerOrgSettingsRoute({
@@ -36,15 +38,14 @@ describe('settings routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/org/settings/customize', () => {
+  describe('PUT /internal/workplace_search/org/settings/customize', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/org/settings/customize',
-        payload: 'body',
+        path: '/internal/workplace_search/org/settings/customize',
       });
 
       registerOrgSettingsCustomizeRoute({
@@ -67,15 +68,44 @@ describe('settings routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/org/settings/oauth_application', () => {
+  describe('PUT /internal/workplace_search/org/settings/upload_images', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/org/settings/oauth_application',
-        payload: 'body',
+        path: '/internal/workplace_search/org/settings/upload_images',
+      });
+
+      registerOrgSettingsUploadImagesRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/settings/upload_images',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: { logo: 'foo', icon: null } };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('PUT /internal/workplace_search/org/settings/oauth_application', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/internal/workplace_search/org/settings/oauth_application',
       });
 
       registerOrgSettingsOauthApplicationRoute({

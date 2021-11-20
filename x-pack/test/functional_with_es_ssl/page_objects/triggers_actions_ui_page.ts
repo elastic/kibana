@@ -1,11 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { CustomCheerioStatic } from 'test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
+import {
+  CustomCheerio,
+  CustomCheerioStatic,
+} from 'test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
@@ -15,19 +19,19 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
-  function getRowItemData(row: CheerioElement, $: CustomCheerioStatic) {
+  function getRowItemData(row: CustomCheerio, $: CustomCheerioStatic) {
     return {
       name: $(row).findTestSubject('alertsTableCell-name').find('.euiTableCellContent').text(),
-      tagsText: $(row)
-        .findTestSubject('alertsTableCell-tagsText')
-        .find('.euiTableCellContent')
-        .text(),
-      alertType: $(row)
-        .findTestSubject('alertsTableCell-alertType')
+      duration: $(row)
+        .findTestSubject('alertsTableCell-duration')
         .find('.euiTableCellContent')
         .text(),
       interval: $(row)
         .findTestSubject('alertsTableCell-interval')
+        .find('.euiTableCellContent')
+        .text(),
+      tags: $(row)
+        .findTestSubject('alertsTableCell-tagsPopover')
         .find('.euiTableCellContent')
         .text(),
     };
@@ -78,7 +82,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('connectors-row')
         .toArray()
-        .map((row: CheerioElement) => {
+        .map((row) => {
           return {
             name: $(row)
               .findTestSubject('connectorsTableCell-name')
@@ -96,7 +100,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map((row: CheerioElement) => {
+        .map((row) => {
           return getRowItemData(row, $);
         });
     },
@@ -105,7 +109,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map((row: CheerioElement) => {
+        .map((row) => {
           const rowItem = getRowItemData(row, $);
           return {
             ...rowItem,
@@ -137,24 +141,59 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await this.searchAlerts(name);
       await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);
     },
-    async changeTabs(tab: 'alertsTab' | 'connectorsTab') {
+    async changeTabs(tab: 'rulesTab' | 'connectorsTab') {
       await testSubjects.click(tab);
     },
     async toggleSwitch(testSubject: string) {
       const switchBtn = await testSubjects.find(testSubject);
-      const valueBefore = await switchBtn.getAttribute('aria-checked');
       await switchBtn.click();
-      await retry.try(async () => {
-        const switchBtnAfter = await testSubjects.find(testSubject);
-        const valueAfter = await switchBtnAfter.getAttribute('aria-checked');
-        expect(valueAfter).not.to.eql(valueBefore);
-      });
     },
     async clickCreateAlertButton() {
       const createBtn = await find.byCssSelector(
         '[data-test-subj="createAlertButton"],[data-test-subj="createFirstAlertButton"]'
       );
       await createBtn.click();
+    },
+    async setAlertName(value: string) {
+      await testSubjects.setValue('alertNameInput', value);
+      await this.assertAlertName(value);
+    },
+    async assertAlertName(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute('alertNameInput', 'value');
+      expect(actualValue).to.eql(expectedValue);
+    },
+    async setAlertInterval(value: number, unit?: 's' | 'm' | 'h' | 'd') {
+      await testSubjects.setValue('intervalInput', value.toString());
+      if (unit) {
+        await testSubjects.selectValue('intervalInputUnit', unit);
+      }
+      await this.assertAlertInterval(value, unit);
+    },
+    async assertAlertInterval(expectedValue: number, expectedUnit?: 's' | 'm' | 'h' | 'd') {
+      const actualValue = await testSubjects.getAttribute('intervalInput', 'value');
+      expect(actualValue).to.eql(expectedValue);
+      if (expectedUnit) {
+        const actualUnitValue = await testSubjects.getAttribute('intervalInputUnit', 'value');
+        expect(actualUnitValue).to.eql(expectedUnit);
+      }
+    },
+    async saveAlert() {
+      await testSubjects.click('saveAlertButton');
+      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmAlertSaveModal');
+      expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
+      await testSubjects.click('confirmModalConfirmButton');
+    },
+    async ensureRuleActionToggleApplied(
+      ruleName: string,
+      switchName: string,
+      shouldBeCheckedAsString: string
+    ) {
+      await retry.tryForTime(30000, async () => {
+        await this.searchAlerts(ruleName);
+        const switchControl = await testSubjects.find(switchName);
+        const isChecked = await switchControl.getAttribute('aria-checked');
+        expect(isChecked).to.eql(shouldBeCheckedAsString);
+      });
     },
   };
 }

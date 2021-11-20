@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { AnyExpressionFunctionDefinition } from '../expression_functions/types';
@@ -32,13 +32,13 @@ import { parse } from './parse';
  * @param val Value you want to check.
  * @return boolean
  */
-export function isExpressionAstBuilder(val: any): val is ExpressionAstExpressionBuilder {
-  return val?.type === 'expression_builder';
+export function isExpressionAstBuilder(val: unknown): val is ExpressionAstExpressionBuilder {
+  return (val as Record<string, unknown> | undefined)?.type === 'expression_builder';
 }
 
 /** @internal */
-export function isExpressionAst(val: any): val is ExpressionAstExpression {
-  return val?.type === 'expression';
+export function isExpressionAst(val: unknown): val is ExpressionAstExpression {
+  return (val as Record<string, unknown> | undefined)?.type === 'expression';
 }
 
 export interface ExpressionAstExpressionBuilder {

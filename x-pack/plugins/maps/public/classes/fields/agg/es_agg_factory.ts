@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AggDescriptor } from '../../../../common/descriptor_types';
@@ -17,8 +18,7 @@ import { PercentileAggField } from './percentile_agg_field';
 export function esAggFieldsFactory(
   aggDescriptor: AggDescriptor,
   source: IESAggSource,
-  origin: FIELD_ORIGIN,
-  canReadFromGeoJson: boolean = true
+  origin: FIELD_ORIGIN
 ): IESAggField[] {
   let aggField;
   if (aggDescriptor.type === AGG_TYPE.COUNT) {
@@ -26,7 +26,6 @@ export function esAggFieldsFactory(
       label: aggDescriptor.label,
       source,
       origin,
-      canReadFromGeoJson,
     });
   } else if (aggDescriptor.type === AGG_TYPE.PERCENTILE) {
     aggField = new PercentileAggField({
@@ -41,7 +40,6 @@ export function esAggFieldsFactory(
           : DEFAULT_PERCENTILE,
       source,
       origin,
-      canReadFromGeoJson,
     });
   } else {
     aggField = new AggField({
@@ -53,14 +51,13 @@ export function esAggFieldsFactory(
       aggType: aggDescriptor.type,
       source,
       origin,
-      canReadFromGeoJson,
     });
   }
 
   const aggFields: IESAggField[] = [aggField];
 
   if ('field' in aggDescriptor && aggDescriptor.type === AGG_TYPE.TERMS) {
-    aggFields.push(new TopTermPercentageField(aggField, canReadFromGeoJson));
+    aggFields.push(new TopTermPercentageField(aggField));
   }
 
   return aggFields;

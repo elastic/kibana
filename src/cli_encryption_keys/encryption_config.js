@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import crypto from 'crypto';
@@ -23,18 +23,15 @@ export class EncryptionConfig {
   ];
   #encryptionMeta = {
     'xpack.encryptedSavedObjects.encryptionKey': {
-      docs:
-        'https://www.elastic.co/guide/en/kibana/current/xpack-security-secure-saved-objects.html#xpack-security-secure-saved-objects',
+      docs: 'https://www.elastic.co/guide/en/kibana/current/xpack-security-secure-saved-objects.html#xpack-security-secure-saved-objects',
       description: 'Used to encrypt stored objects such as dashboards and visualizations',
     },
     'xpack.reporting.encryptionKey': {
-      docs:
-        'https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html#general-reporting-settings',
+      docs: 'https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html#general-reporting-settings',
       description: 'Used to encrypt saved reports',
     },
     'xpack.security.encryptionKey': {
-      docs:
-        'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#security-session-and-cookie-settings',
+      docs: 'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#security-session-and-cookie-settings',
       description: 'Used to encrypt session information',
     },
   };

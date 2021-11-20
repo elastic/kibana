@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import ipaddr from 'ipaddr.js';
+import { sum } from 'lodash';
 import moment from 'moment';
 
 const KibanaServerSchema = schema.object({
   hostname: schema.maybe(
     schema.string({
+      hostname: true,
       validate(value) {
-        if (value === '0') {
-          return 'must not be "0" for the headless browser to correctly resolve the host';
+        if (ipaddr.isValid(value) && !sum(ipaddr.parse(value).toByteArray())) {
+          // prevent setting a hostname that fails in Chromium on Windows
+          return `cannot use '0.0.0.0' as Kibana host name, consider using the default (localhost) instead`;
         }
       },
-      hostname: true,
     })
   ),
   port: schema.maybe(schema.number()),
@@ -82,10 +86,6 @@ const CaptureSchema = schema.object({
     }),
   }),
   zoom: schema.number({ defaultValue: 2 }),
-  viewport: schema.object({
-    width: schema.number({ defaultValue: 1950 }),
-    height: schema.number({ defaultValue: 1200 }),
-  }),
   loadDelay: schema.oneOf([schema.number(), schema.duration()], {
     defaultValue: moment.duration({ seconds: 3 }),
   }),
@@ -159,21 +159,20 @@ const EncryptionKeySchema = schema.conditional(
 );
 
 const RolesSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
   allow: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
 });
-
-const IndexSchema = schema.string({ defaultValue: '.reporting' });
 
 // Browser side polling: job completion notifier, management table auto-refresh
 // NOTE: can not use schema.duration, a bug prevents it being passed to the browser correctly
 const PollSchema = schema.object({
   jobCompletionNotifier: schema.object({
     interval: schema.number({ defaultValue: 10000 }),
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // deprecated as unused since 7.10
   }),
   jobsRefresh: schema.object({
     interval: schema.number({ defaultValue: 5000 }),
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // deprecated as unused since 7.10
   }),
 });
 
@@ -185,7 +184,6 @@ export const ConfigSchema = schema.object({
   csv: CsvSchema,
   encryptionKey: EncryptionKeySchema,
   roles: RolesSchema,
-  index: IndexSchema,
   poll: PollSchema,
 });
 

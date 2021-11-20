@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as callApiExports from './rest/callApi';
 import { createCallApmApi, callApmApi } from './rest/createCallApmApi';
-import { HttpSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 
 const callApi = jest
   .spyOn(callApiExports, 'callApi')
@@ -14,7 +15,7 @@ const callApi = jest
 
 describe('callApmApi', () => {
   beforeEach(() => {
-    createCallApmApi({} as HttpSetup);
+    createCallApmApi({} as CoreStart);
   });
 
   afterEach(() => {
@@ -23,7 +24,7 @@ describe('callApmApi', () => {
 
   it('should format the pathname with the given path params', async () => {
     await callApmApi({
-      endpoint: 'GET /api/apm/{param1}/to/{param2}',
+      endpoint: 'GET /internal/apm/{param1}/to/{param2}',
       params: {
         path: {
           param1: 'foo',
@@ -35,14 +36,14 @@ describe('callApmApi', () => {
     expect(callApi).toHaveBeenCalledWith(
       {},
       expect.objectContaining({
-        pathname: '/api/apm/foo/to/bar',
+        pathname: '/internal/apm/foo/to/bar',
       })
     );
   });
 
   it('should add the query parameters to the options object', async () => {
     await callApmApi({
-      endpoint: 'GET /api/apm',
+      endpoint: 'GET /internal/apm',
       params: {
         query: {
           foo: 'bar',
@@ -54,7 +55,7 @@ describe('callApmApi', () => {
     expect(callApi).toHaveBeenCalledWith(
       {},
       expect.objectContaining({
-        pathname: '/api/apm',
+        pathname: '/internal/apm',
         query: {
           foo: 'bar',
           bar: 'foo',
@@ -65,7 +66,7 @@ describe('callApmApi', () => {
 
   it('should stringify the body and add it to the options object', async () => {
     await callApmApi({
-      endpoint: 'POST /api/apm',
+      endpoint: 'POST /internal/apm',
       params: {
         body: {
           foo: 'bar',
@@ -77,8 +78,8 @@ describe('callApmApi', () => {
     expect(callApi).toHaveBeenCalledWith(
       {},
       expect.objectContaining({
-        pathname: '/api/apm',
-        method: 'POST',
+        pathname: '/internal/apm',
+        method: 'post',
         body: {
           foo: 'bar',
           bar: 'foo',

@@ -1,57 +1,73 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pickBy, isEmpty } from 'lodash/fp';
-import {
-  DescriptionOrUndefined,
-  AnomalyThresholdOrUndefined,
-  QueryOrUndefined,
-  LanguageOrUndefined,
-  SavedIdOrUndefined,
-  TimelineIdOrUndefined,
-  TimelineTitleOrUndefined,
-  MachineLearningJobIdOrUndefined,
-  IndexOrUndefined,
-  NoteOrUndefined,
-  MetaOrUndefined,
-  VersionOrUndefined,
-  FalsePositivesOrUndefined,
+import type {
   FromOrUndefined,
-  OutputIndexOrUndefined,
-  IntervalOrUndefined,
-  MaxSignalsOrUndefined,
-  RiskScoreOrUndefined,
-  NameOrUndefined,
-  SeverityOrUndefined,
-  TagsOrUndefined,
-  ToOrUndefined,
-  ThreatsOrUndefined,
-  ThresholdOrUndefined,
-  TypeOrUndefined,
-  ReferencesOrUndefined,
-  AuthorOrUndefined,
-  BuildingBlockTypeOrUndefined,
-  LicenseOrUndefined,
+  MachineLearningJobIdOrUndefined,
   RiskScoreMappingOrUndefined,
-  RuleNameOverrideOrUndefined,
-  SeverityMappingOrUndefined,
-  TimestampOverrideOrUndefined,
-  EventCategoryOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import { PartialFilter } from '../types';
-import {
+  RiskScoreOrUndefined,
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
-  ListArrayOrUndefined,
   ThreatFiltersOrUndefined,
   ThreatIndexOrUndefined,
   ThreatLanguageOrUndefined,
   ThreatMappingOrUndefined,
   ThreatQueryOrUndefined,
-} from '../../../../common/detection_engine/schemas/types';
+  ThreatsOrUndefined,
+  TypeOrUndefined,
+  LanguageOrUndefined,
+  SeverityOrUndefined,
+  SeverityMappingOrUndefined,
+  MaxSignalsOrUndefined,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { AlertAction, AlertNotifyWhenType, SanitizedAlert } from '../../../../../alerting/common';
+import {
+  DescriptionOrUndefined,
+  AnomalyThresholdOrUndefined,
+  QueryOrUndefined,
+  SavedIdOrUndefined,
+  TimelineIdOrUndefined,
+  TimelineTitleOrUndefined,
+  IndexOrUndefined,
+  NoteOrUndefined,
+  MetaOrUndefined,
+  FalsePositivesOrUndefined,
+  OutputIndexOrUndefined,
+  IntervalOrUndefined,
+  NameOrUndefined,
+  TagsOrUndefined,
+  ToOrUndefined,
+  ThresholdOrUndefined,
+  ReferencesOrUndefined,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RuleNameOverrideOrUndefined,
+  TimestampOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
+  NamespaceOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import { PartialFilter } from '../types';
+import { RuleParams } from '../schemas/rule_schemas';
+import {
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  NOTIFICATION_THROTTLE_RULE,
+} from '../../../../common/constants';
+import { RulesClient } from '../../../../../alerting/server';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRuleActions } from '../rule_actions/legacy_types';
+import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
+import { LegacyMigrateParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -110,6 +126,7 @@ export interface UpdateProperties {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  namespace: NamespaceOrUndefined;
 }
 
 export const calculateVersion = (
@@ -165,4 +182,185 @@ export const calculateName = ({
     // some point since TypeScript allows it.
     return 'untitled';
   }
+};
+
+/**
+ * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen
+ * on their saved object.
+ * @params throttle The throttle from a "security_solution" rule
+ * @returns The correct "NotifyWhen" for a Kibana alerting.
+ */
+export const transformToNotifyWhen = (
+  throttle: string | null | undefined
+): AlertNotifyWhenType | null => {
+  if (throttle == null || throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
+  } else if (throttle === NOTIFICATION_THROTTLE_RULE) {
+    return 'onActiveAlert';
+  } else {
+    return 'onThrottleInterval';
+  }
+};
+
+/**
+ * Given a throttle from a "security_solution" rule this will transform it into an "alerting" "throttle"
+ * on their saved object.
+ * @params throttle The throttle from a "security_solution" rule
+ * @returns The "alerting" throttle
+ */
+export const transformToAlertThrottle = (throttle: string | null | undefined): string | null => {
+  if (
+    throttle == null ||
+    throttle === NOTIFICATION_THROTTLE_RULE ||
+    throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
+  ) {
+    return null;
+  } else {
+    return throttle;
+  }
+};
+
+/**
+ * Given a set of actions from an "alerting" Saved Object (SO) this will transform it into a "security_solution" alert action.
+ * If this detects any legacy rule actions it will transform it. If both are sent in which is not typical but possible due to
+ * the split nature of the API's this will prefer the usage of the non-legacy version. Eventually the "legacyRuleActions" should
+ * be removed.
+ * @param alertAction The alert action form a "alerting" Saved Object (SO).
+ * @param legacyRuleActions Legacy "side car" rule actions that if it detects it being passed it in will transform using it.
+ * @returns The actions of the FullResponseSchema
+ */
+export const transformActions = (
+  alertAction: AlertAction[] | undefined,
+  legacyRuleActions: LegacyRuleActions | null | undefined
+): FullResponseSchema['actions'] => {
+  if (alertAction != null && alertAction.length !== 0) {
+    return alertAction.map((action) => transformAlertToRuleAction(action));
+  } else if (legacyRuleActions != null) {
+    return legacyRuleActions.actions;
+  } else {
+    return [];
+  }
+};
+
+/**
+ * Given a throttle from an "alerting" Saved Object (SO) this will transform it into a "security_solution"
+ * throttle type. If given the "legacyRuleActions" but we detect that the rule for an unknown reason has actions
+ * on it to which should not be typical but possible due to the split nature of the API's, this will prefer the
+ * usage of the non-legacy version. Eventually the "legacyRuleActions" should be removed.
+ * @param throttle The throttle from a  "alerting" Saved Object (SO)
+ * @param legacyRuleActions Legacy "side car" rule actions that if it detects it being passed it in will transform using it.
+ * @returns The "security_solution" throttle
+ */
+export const transformFromAlertThrottle = (
+  rule: SanitizedAlert<RuleParams>,
+  legacyRuleActions: LegacyRuleActions | null | undefined
+): string => {
+  if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
+    if (rule.muteAll || rule.actions.length === 0) {
+      return NOTIFICATION_THROTTLE_NO_ACTIONS;
+    } else if (
+      rule.notifyWhen === 'onActiveAlert' ||
+      (rule.throttle == null && rule.notifyWhen == null)
+    ) {
+      return NOTIFICATION_THROTTLE_RULE;
+    } else if (rule.throttle == null) {
+      return NOTIFICATION_THROTTLE_NO_ACTIONS;
+    } else {
+      return rule.throttle;
+    }
+  } else {
+    return legacyRuleActions.ruleThrottle;
+  }
+};
+
+/**
+ * Mutes, unmutes, or does nothing to the alert if no changed is detected
+ * @param id The id of the alert to (un)mute
+ * @param rulesClient the rules client
+ * @param muteAll If the existing alert has all actions muted
+ * @param throttle If the existing alert has a throttle set
+ */
+export const maybeMute = async ({
+  id,
+  rulesClient,
+  muteAll,
+  throttle,
+}: {
+  id: SanitizedAlert['id'];
+  rulesClient: RulesClient;
+  muteAll: SanitizedAlert<RuleParams>['muteAll'];
+  throttle: string | null | undefined;
+}): Promise<void> => {
+  if (muteAll && throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.unmuteAll({ id });
+  } else if (!muteAll && throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.muteAll({ id });
+  } else {
+    // Do nothing, no-operation
+  }
+};
+
+/**
+ * Determines if rule needs to be migrated from legacy actions
+ * and returns necessary pieces for the updated rule
+ */
+export const legacyMigrate = async ({
+  rulesClient,
+  savedObjectsClient,
+  rule,
+}: LegacyMigrateParams): Promise<SanitizedAlert<RuleParams> | null | undefined> => {
+  if (rule == null || rule.id == null) {
+    return rule;
+  }
+  /**
+   * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
+   * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actualy value (1hr etc..)
+   * Then use the rules client to delete the siem.notification
+   * Then with the legacy Rule Actions saved object type, just delete it.
+   */
+
+  // find it using the references array, not params.ruleAlertId
+  const [siemNotification, legacyRuleActionsSO] = await Promise.all([
+    rulesClient.find({
+      options: {
+        hasReference: {
+          type: 'alert',
+          id: rule.id,
+        },
+      },
+    }),
+    savedObjectsClient.find({
+      type: legacyRuleActionsSavedObjectType,
+      hasReference: {
+        type: 'alert',
+        id: rule.id,
+      },
+    }),
+  ]);
+
+  if (siemNotification != null && siemNotification.data.length > 0) {
+    await Promise.all([
+      rulesClient.delete({ id: siemNotification.data[0].id }),
+      legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
+        ? savedObjectsClient.delete(
+            legacyRuleActionsSavedObjectType,
+            legacyRuleActionsSO.saved_objects[0].id
+          )
+        : null,
+    ]);
+
+    const { id, ...restOfRule } = rule;
+    const migratedRule = {
+      ...restOfRule,
+      actions: siemNotification.data[0].actions,
+      throttle: siemNotification.data[0].schedule.interval,
+      notifyWhen: transformToNotifyWhen(siemNotification.data[0].throttle),
+    };
+    await rulesClient.update({
+      id: rule.id,
+      data: migratedRule,
+    });
+    return { id: rule.id, ...migratedRule };
+  }
+  return rule;
 };

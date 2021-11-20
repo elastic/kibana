@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -15,6 +16,7 @@ import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../common/http_api/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
+import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 
 export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -40,6 +42,10 @@ export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBacken
         requestContext.core.savedObjects.client,
         sourceId
       );
+      const resolvedSourceConfiguration = await resolveLogSourceConfiguration(
+        sourceConfiguration.configuration,
+        await framework.getIndexPatternsServiceWithRequestContext(requestContext)
+      );
 
       try {
         assertHasInfraMlPlugins(requestContext);
@@ -51,7 +57,7 @@ export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBacken
           endTime,
           dataset,
           exampleCount,
-          sourceConfiguration,
+          resolvedSourceConfiguration,
           framework.callWithRequest,
           categoryId
         );

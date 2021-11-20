@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // a11y tests for spaces, space selection and spacce creation and feature controls
@@ -18,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Kibana roles page a11y tests', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     it('a11y test for Roles main page', async () => {

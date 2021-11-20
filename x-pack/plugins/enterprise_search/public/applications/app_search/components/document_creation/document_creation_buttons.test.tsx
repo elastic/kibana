@@ -1,15 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { setMockActions } from '../../../__mocks__/kea.mock';
+import '../../../__mocks__/react_router';
+import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockActions } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+import { useLocation } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
+
 import { EuiCard } from '@elastic/eui';
+
 import { EuiCardTo } from '../../../shared/react_router_helpers';
 
 import { DocumentCreationButtons } from './';
@@ -55,5 +62,21 @@ describe('DocumentCreationButtons', () => {
     const wrapper = shallow(<DocumentCreationButtons />);
 
     expect(wrapper.find(EuiCardTo).prop('to')).toEqual('/engines/some-engine/crawler');
+  });
+
+  it('calls openDocumentCreation("file") if ?method=json', () => {
+    const search = '?method=json';
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
+
+    shallow(<DocumentCreationButtons />);
+    expect(actions.openDocumentCreation).toHaveBeenCalledWith('file');
+  });
+
+  it('calls openDocumentCreation("api") if ?method=api', () => {
+    const search = '?method=api';
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
+
+    shallow(<DocumentCreationButtons />);
+    expect(actions.openDocumentCreation).toHaveBeenCalledWith('api');
   });
 });

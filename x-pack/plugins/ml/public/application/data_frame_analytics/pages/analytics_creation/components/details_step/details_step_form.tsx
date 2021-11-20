@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, Fragment, useRef, useEffect, useState } from 'react';
+import React, { FC, Fragment, useRef, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiFieldText,
@@ -41,7 +42,11 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   setCurrentStep,
 }) => {
   const {
-    services: { docLinks, notifications },
+    services: {
+      docLinks,
+      notifications,
+      application: { capabilities },
+    },
   } = useMlKibana();
   const createIndexLink = docLinks.links.apis.createIndex;
   const { setFormState } = actions;
@@ -70,6 +75,11 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       (cloneJob !== undefined && resultsField === DEFAULT_RESULTS_FIELD)
   );
 
+  const canCreateDataView = useMemo(
+    () =>
+      capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true,
+    [capabilities]
+  );
   const forceInput = useRef<HTMLInputElement | null>(null);
 
   const isStepInvalid =
@@ -82,8 +92,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const debouncedIndexCheck = debounce(async () => {
     try {
-      const { exists } = await ml.checkIndexExists({ index: destinationIndex });
-      setFormState({ destinationIndexNameExists: exists });
+      const resp = await ml.checkIndicesExists({ indices: [destinationIndex] });
+      setFormState({ destinationIndexNameExists: resp[destinationIndex].exists });
     } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.ml.dataframe.analytics.create.errorCheckingIndexExists', {
@@ -93,6 +103,36 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       );
     }
   }, 400);
+
+  const debouncedJobIdCheck = useMemo(
+    () =>
+      debounce(async () => {
+        try {
+          const results = await ml.dataFrameAnalytics.jobsExist([jobId], true);
+          setFormState({ jobIdExists: results[jobId].exists });
+        } catch (e) {
+          notifications.toasts.addDanger(
+            i18n.translate('xpack.ml.dataframe.analytics.create.errorCheckingJobIdExists', {
+              defaultMessage: 'The following error occurred checking if job id exists: {error}',
+              values: { error: extractErrorMessage(e) },
+            })
+          );
+        }
+      }, 400),
+    [jobId]
+  );
+
+  useEffect(() => {
+    if (jobIdValid === true) {
+      debouncedJobIdCheck();
+    } else if (typeof jobId === 'string' && jobId.trim() === '' && jobIdExists === true) {
+      setFormState({ jobIdExists: false });
+    }
+
+    return () => {
+      debouncedJobIdCheck.cancel();
+    };
+  }, [jobId]);
 
   useEffect(() => {
     if (destinationIndexNameValid === true) {
@@ -117,6 +157,12 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       setFormState({ destinationIndex: '' });
     }
   }, [destIndexSameAsId, jobId]);
+
+  useEffect(() => {
+    if (canCreateDataView === false) {
+      setFormState({ createIndexPattern: false });
+    }
+  }, [capabilities]);
 
   return (
     <Fragment>
@@ -277,7 +323,12 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
             values: { defaultValue: DEFAULT_RESULTS_FIELD },
           })}
           checked={useResultsFieldDefault === true}
-          onChange={() => setUseResultsFieldDefault(!useResultsFieldDefault)}
+          onChange={() => {
+            if (!useResultsFieldDefault === true) {
+              setFormState({ resultsField: undefined });
+            }
+            setUseResultsFieldDefault(!useResultsFieldDefault);
+          }}
           data-test-subj="mlAnalyticsCreateJobWizardUseResultsFieldDefault"
         />
       </EuiFormRow>
@@ -311,13 +362,24 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       <EuiFormRow
         fullWidth
         isInvalid={
-          (createIndexPattern && destinationIndexPatternTitleExists) || !createIndexPattern
+          (createIndexPattern && destinationIndexPatternTitleExists) ||
+          createIndexPattern === false ||
+          canCreateDataView === false
         }
         error={[
+          ...(canCreateDataView === false
+            ? [
+                <EuiText size="xs" color="warning">
+                  {i18n.translate('xpack.ml.dataframe.analytics.create.dataViewPermissionWarning', {
+                    defaultMessage: 'You need permission to create data views.',
+                  })}
+                </EuiText>,
+              ]
+            : []),
           ...(createIndexPattern && destinationIndexPatternTitleExists
             ? [
-                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternExistsError', {
-                  defaultMessage: 'An index pattern with this title already exists.',
+                i18n.translate('xpack.ml.dataframe.analytics.create.dataViewExistsError', {
+                  defaultMessage: 'A data view with this title already exists.',
                 }),
               ]
             : []),
@@ -325,10 +387,10 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
             ? [
                 <EuiText size="xs" color="warning">
                   {i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.shouldCreateIndexPatternMessage',
+                    'xpack.ml.dataframe.analytics.create.shouldCreateDataViewMessage',
                     {
                       defaultMessage:
-                        'You may not be able to view job results if an index pattern is not created for the destination index.',
+                        'You may not be able to view job results if a data view is not created for the destination index.',
                     }
                   )}
                 </EuiText>,
@@ -337,10 +399,10 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
         ]}
       >
         <EuiSwitch
-          disabled={isJobCreated}
+          disabled={isJobCreated === true || canCreateDataView === false}
           name="mlDataFrameAnalyticsCreateIndexPattern"
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
-            defaultMessage: 'Create index pattern',
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.createDataViewLabel', {
+            defaultMessage: 'Create data view',
           })}
           checked={createIndexPattern === true}
           onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
@@ -351,7 +413,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       <ContinueButton
         isDisabled={isStepInvalid}
         onClick={() => {
-          setCurrentStep(ANALYTICS_STEPS.CREATE);
+          setCurrentStep(ANALYTICS_STEPS.VALIDATION);
         }}
       />
     </Fragment>

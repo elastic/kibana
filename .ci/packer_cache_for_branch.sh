@@ -7,7 +7,7 @@ checkoutDir="$(pwd)"
 
 function cleanup()
 {
-  if [[ "$branch" != "master" ]]; then
+  if [[ "$branch" != "main" ]]; then
     rm --preserve-root -rf "$checkoutDir"
   fi
 
@@ -16,7 +16,7 @@ function cleanup()
 
 trap 'cleanup' 0
 
-if [[ "$branch" != "master" ]]; then
+if [[ "$branch" != "main" ]]; then
   checkoutDir="/tmp/kibana-$branch"
   git clone https://github.com/elastic/kibana.git --branch "$branch" --depth 1 "$checkoutDir"
   cd "$checkoutDir"
@@ -26,7 +26,6 @@ source src/dev/ci_setup/setup.sh;
 
 # download es snapshots
 node scripts/es snapshot --download-only;
-node scripts/es snapshot --license=oss --download-only;
 
 # download reporting browsers
 (cd "x-pack" && node ../node_modules/.bin/gulp downloadChromium);

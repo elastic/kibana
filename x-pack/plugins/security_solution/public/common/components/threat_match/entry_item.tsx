@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { IFieldType, IndexPattern } from '../../../../../../../src/plugins/data/common';
-import { FieldComponent } from '../autocomplete/field';
+import { FieldComponent } from '@kbn/securitysolution-autocomplete';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
 import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
 
 interface EntryItemProps {
   entry: FormattedEntry;
-  indexPattern: IndexPattern;
-  threatIndexPatterns: IndexPattern;
+  indexPattern: DataViewBase;
+  threatIndexPatterns: DataViewBase;
   showLabel: boolean;
   onChange: (arg: Entry, i: number) => void;
 }
@@ -38,7 +40,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   onChange,
 }): JSX.Element => {
   const handleFieldChange = useCallback(
-    ([newField]: IFieldType[]): void => {
+    ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },
@@ -46,7 +48,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   );
 
   const handleThreatFieldChange = useCallback(
-    ([newField]: IFieldType[]): void => {
+    ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnThreatFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },
@@ -75,7 +77,11 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         </EuiFormRow>
       );
     } else {
-      return comboBox;
+      return (
+        <EuiFormRow label={''} data-test-subj="entryItemFieldInputFormRow">
+          {comboBox}
+        </EuiFormRow>
+      );
     }
   }, [handleFieldChange, indexPattern, entry, showLabel]);
 
@@ -101,7 +107,11 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         </EuiFormRow>
       );
     } else {
-      return comboBox;
+      return (
+        <EuiFormRow label={''} data-test-subj="threatFieldInputFormRow">
+          {comboBox}
+        </EuiFormRow>
+      );
     }
   }, [handleThreatFieldChange, threatIndexPatterns, entry, showLabel]);
 

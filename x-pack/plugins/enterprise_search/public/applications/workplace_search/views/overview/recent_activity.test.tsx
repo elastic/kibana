@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mockTelemetryActions } from '../../../__mocks__';
-import './__mocks__/overview_logic.mock';
+import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 import { setMockValues } from './__mocks__';
+import './__mocks__/overview_logic.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 import { RecentActivity, RecentActivityItem } from './recent_activity';
 
@@ -25,6 +29,11 @@ const activityFeed = [
     message: 'was successfully connected',
     target: 'http://localhost:3002/ws/org/sources',
     timestamp: '2020-06-24 16:34:16',
+  },
+  {
+    id: '(foo@example.com)',
+    message: 'joined the organization',
+    timestamp: '2021-07-02 16:38:27',
   },
 ];
 
@@ -42,13 +51,14 @@ describe('RecentActivity', () => {
   it('renders an activityFeed with links', () => {
     setMockValues({ activityFeed });
     const wrapper = shallow(<RecentActivity />);
-    const activity = wrapper.find(RecentActivityItem).dive();
+    const sourceActivityItem = wrapper.find(RecentActivityItem).first().dive();
+    const newUserActivityItem = wrapper.find(RecentActivityItem).last().dive();
 
-    expect(activity).toHaveLength(1);
-
-    const link = activity.find('[data-test-subj="viewSourceDetailsLink"]');
+    const link = sourceActivityItem.find('[data-test-subj="viewSourceDetailsLink"]');
     link.simulate('click');
     expect(mockTelemetryActions.sendWorkplaceSearchTelemetry).toHaveBeenCalled();
+
+    expect(newUserActivityItem.find('[data-test-subj="newUserTextWrapper"]')).toHaveLength(1);
   });
 
   it('renders activity item error state', () => {
@@ -57,7 +67,7 @@ describe('RecentActivity', () => {
 
     expect(wrapper.find('.activity--error')).toHaveLength(1);
     expect(wrapper.find('.activity--error__label')).toHaveLength(1);
-    expect(wrapper.find(EuiLink).prop('color')).toEqual('danger');
+    expect(wrapper.find(EuiLinkTo).prop('color')).toEqual('danger');
   });
 
   it('renders recent activity message for default org name', () => {

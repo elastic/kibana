@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { HttpHandler } from 'src/core/public';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -15,7 +17,7 @@ import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload } from './api/ml_get_module';
 import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 
-export { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
+export type { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 
 export interface ModuleDescriptor<JobType extends string> {
   moduleId: string;
@@ -45,6 +47,7 @@ export interface ModuleDescriptor<JobType extends string> {
   validateSetupIndices: (
     indices: string[],
     timestampField: string,
+    runtimeMappings: estypes.MappingRuntimeFields,
     fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets: (
@@ -52,6 +55,7 @@ export interface ModuleDescriptor<JobType extends string> {
     timestampField: string,
     startTime: number,
     endTime: number,
+    runtimeMappings: estypes.MappingRuntimeFields,
     fetch: HttpHandler
   ) => Promise<ValidateLogEntryDatasetsResponsePayload>;
 }
@@ -61,4 +65,5 @@ export interface ModuleSourceConfiguration {
   sourceId: string;
   spaceId: string;
   timestampField: string;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }

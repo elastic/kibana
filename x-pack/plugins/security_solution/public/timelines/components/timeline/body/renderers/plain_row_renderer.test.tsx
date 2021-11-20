@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../common/ecs';
@@ -25,6 +24,7 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: mockDatum,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = shallow(<span>{children}</span>);
@@ -39,13 +39,10 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: mockDatum,
+      isDraggable: true,
       timelineId: 'test',
     });
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <span>{children}</span>
-      </ThemeProvider>
-    );
+    const wrapper = mount(<span>{children}</span>);
     expect(wrapper.text()).toEqual('');
   });
 });

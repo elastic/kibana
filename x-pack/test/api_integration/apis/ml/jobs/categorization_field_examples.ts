@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -63,7 +64,7 @@ const analyzer = {
   ],
 };
 const defaultRequestBody = {
-  indexPatternTitle: 'ft_categorization',
+  indexPatternTitle: 'ft_categorization_small',
   query: { bool: { must: [{ match_all: {} }] } },
   size: 5,
   timeField: '@timestamp',
@@ -285,7 +286,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Categorization example endpoint - ', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/categorization');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 

@@ -6,13 +6,14 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "max_signals": 33,
   "name": "IIS HTTP Logging Disabled",
-  "query": "event.category:process and event.type:(start or process_started) and (process.name:appcmd.exe or process.pe.original_file_name:appcmd.exe) and process.args:/dontLog\\:\\\"True\\\" and not process.parent.name:iissetup.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"appcmd.exe\" or process.pe.original_file_name == \"appcmd.exe\") and\n  process.args : \"/dontLog*:*True\" and\n  not process.parent.name : \"iissetup.exe\"\n",
   "risk_score": 73,
   "rule_id": "ebf1adea-ccf2-4943-8b96-7ab11ca173a5",
   "severity": "high",
@@ -33,13 +34,21 @@
       },
       "technique": [
         {
-          "id": "T1070",
-          "name": "Indicator Removal on Host",
-          "reference": "https://attack.mitre.org/techniques/T1070/"
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.002",
+              "name": "Disable Windows Event Logging",
+              "reference": "https://attack.mitre.org/techniques/T1562/002/"
+            }
+          ]
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 2
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 6
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable, of } from 'rxjs';
@@ -13,6 +13,7 @@ import { IStateStorage } from './types';
 import {
   createKbnUrlControls,
   getStateFromKbnUrl,
+  IKbnUrlControls,
   setStateToKbnUrl,
 } from '../../state_management/url';
 
@@ -26,7 +27,7 @@ import {
  * 3. Takes care of listening to the URL updates and notifies state about the updates.
  * 4. Takes care of batching URL updates to prevent redundant browser history records.
  *
- * {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}
+ * {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}
  * @public
  */
 export interface IKbnUrlStateStorage extends IStateStorage {
@@ -39,16 +40,14 @@ export interface IKbnUrlStateStorage extends IStateStorage {
   change$: <State = unknown>(key: string) => Observable<State | null>;
 
   /**
-   * cancels any pending url updates
+   * Cancels any pending url updates
    */
   cancel: () => void;
 
   /**
-   * Synchronously runs any pending url updates, returned boolean indicates if change occurred.
-   * @param opts: {replace? boolean} - allows to specify if push or replace should be used for flushing update
-   * @returns boolean - indicates if there was an update to flush
+   * Lower level wrapper around history library that handles batching multiple URL updates into one history change
    */
-  flush: (opts?: { replace?: boolean }) => boolean;
+  kbnUrlControls: IKbnUrlControls;
 }
 
 /**
@@ -59,16 +58,19 @@ export interface IKbnUrlStateStorage extends IStateStorage {
 export const createKbnUrlStateStorage = (
   {
     useHash = false,
+    useHashQuery = true,
     history,
     onGetError,
     onSetError,
   }: {
     useHash: boolean;
+    useHashQuery?: boolean;
     history?: History;
     onGetError?: (error: Error) => void;
     onSetError?: (error: Error) => void;
   } = {
     useHash: false,
+    useHashQuery: true,
   }
 ): IKbnUrlStateStorage => {
   const url = createKbnUrlControls(history);
@@ -81,7 +83,12 @@ export const createKbnUrlStateStorage = (
       // syncState() utils doesn't wait for this promise
       return url.updateAsync((currentUrl) => {
         try {
-          return setStateToKbnUrl(key, state, { useHash }, currentUrl);
+          return setStateToKbnUrl(
+            key,
+            state,
+            { useHash, storeInHashQuery: useHashQuery },
+            currentUrl
+          );
         } catch (error) {
           if (onSetError) onSetError(error);
         }
@@ -91,7 +98,7 @@ export const createKbnUrlStateStorage = (
       // if there is a pending url update, then state will be extracted from that pending url,
       // otherwise current url will be used to retrieve state from
       try {
-        return getStateFromKbnUrl(key, url.getPendingUrl());
+        return getStateFromKbnUrl(key, url.getPendingUrl(), { getFromHashQuery: useHashQuery });
       } catch (e) {
         if (onGetError) onGetError(e);
         return null;
@@ -107,18 +114,16 @@ export const createKbnUrlStateStorage = (
           unlisten();
         };
       }).pipe(
-        map(() => getStateFromKbnUrl<State>(key)),
+        map(() => getStateFromKbnUrl<State>(key, undefined, { getFromHashQuery: useHashQuery })),
         catchError((error) => {
           if (onGetError) onGetError(error);
           return of(null);
         }),
         share()
       ),
-    flush: ({ replace = false }: { replace?: boolean } = {}) => {
-      return !!url.flush(replace);
-    },
     cancel() {
       url.cancel();
     },
+    kbnUrlControls: url,
   };
 };

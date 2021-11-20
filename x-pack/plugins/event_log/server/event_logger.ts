@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { merge } from 'lodash';
 
+import { coerce } from 'semver';
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { EventLogService } from './event_log_service';
@@ -64,8 +66,6 @@ export class EventLogger implements IEventLogger {
 
   // non-blocking, but spawns an async task to do the work
   logEvent(eventProperties: IEvent): void {
-    if (!this.eventLogService.isEnabled()) return;
-
     const event: IEvent = {};
     const fixedProperties = {
       ecs: {
@@ -73,6 +73,7 @@ export class EventLogger implements IEventLogger {
       },
       kibana: {
         server_uuid: this.eventLogService.kibanaUUID,
+        version: coerce(this.eventLogService.kibanaVersion)?.version,
       },
     };
 
@@ -87,7 +88,7 @@ export class EventLogger implements IEventLogger {
     try {
       validatedEvent = validateEvent(this.eventLogService, event);
     } catch (err) {
-      this.systemLogger.warn(`invalid event logged: ${err.message}`);
+      this.systemLogger.warn(`invalid event logged: ${err.message}; ${JSON.stringify(event)})`);
       return;
     }
 

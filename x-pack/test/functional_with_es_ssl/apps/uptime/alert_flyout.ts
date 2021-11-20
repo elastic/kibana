@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  // FLAKY: https://github.com/elastic/kibana/issues/88177
-  describe.skip('uptime alerts', () => {
+  describe('uptime alerts', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
@@ -18,9 +20,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
+      let common: any;
 
       before(async () => {
-        alerts = getService('uptime').alerts;
+        const uptimeServices = getService('uptime');
+        alerts = uptimeServices.alerts;
+        common = uptimeServices.common;
       });
 
       it('can open alert flyout', async () => {
@@ -65,17 +70,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can select location filter', async () => {
         await alerts.clickAddFilterLocation();
-        await alerts.clickLocationExpression('mpls');
+        await common.clickFilterItems(['mpls']);
+        await common.applyFilterItems('Location');
       });
 
       it('can select port filter', async () => {
         await alerts.clickAddFilterPort();
-        await alerts.clickPortExpression('5678');
+        await common.clickFilterItems(['5678']);
+        await common.applyFilterItems('Port');
       });
 
       it('can select type/scheme filter', async () => {
         await alerts.clickAddFilterType();
-        await alerts.clickTypeExpression('http');
+        await common.clickFilterItems(['http']);
+        await common.applyFilterItems('Scheme');
       });
 
       it('can save alert', async () => {
@@ -89,12 +97,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // the previous line resolves, the API may not be done creating the alert yet, so we
         // put the fetch code in a retry block with a timeout.
         let alert: any;
-        await retry.tryForTime(15000, async () => {
+        await retry.tryForTime(60 * 1000, async () => {
+          // add a delay before next call to not overload the server
+          await setTimeoutAsync(1500);
           const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'
           );
-          expect(alertsFromThisTest).to.have.length(1);
+          expect(alertsFromThisTest.length >= 1).to.be(true);
           alert = alertsFromThisTest[0];
         });
 
@@ -123,7 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(timerangeUnit).to.be('h');
           expect(timerangeCount).to.be(1);
           expect(JSON.stringify(filters)).to.eql(
-            `{"url.port":["5678"],"observer.geo.name":["mpls"],"monitor.type":["http"],"tags":[]}`
+            `{"tags":[],"url.port":["5678"],"observer.geo.name":["mpls"],"monitor.type":["http"]}`
           );
         } finally {
           await supertest.delete(`/api/alerts/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
@@ -196,7 +206,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         } = alert;
         try {
           expect(actions).to.eql([]);
-          expect(alertTypeId).to.eql('xpack.uptime.alerts.tls');
+          expect(alertTypeId).to.eql('xpack.uptime.alerts.tlsCertificate');
           expect(consumer).to.eql('uptime');
           expect(tags).to.eql(['uptime', 'certs']);
           expect(params).to.eql({});

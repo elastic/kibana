@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import './empty_connectors_prompt.scss';
 
@@ -13,7 +14,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
   <EuiEmptyPrompt
     data-test-subj="createFirstConnectorEmptyPrompt"
     title={
-      <Fragment>
+      <>
         <EuiIcon type="logoSlack" size="xl" className="actEmptyConnectorsPrompt__logo" />
         <EuiIcon type="logoGmail" size="xl" className="actEmptyConnectorsPrompt__logo" />
         <EuiIcon type="logoWebhook" size="xl" className="actEmptyConnectorsPrompt__logo" />
@@ -21,17 +22,17 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addActionEmptyTitle"
+              id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorEmptyTitle"
               defaultMessage="Create your first connector"
             />
           </h2>
         </EuiTitle>
-      </Fragment>
+      </>
     }
     body={
       <p>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addActionEmptyBody"
+          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorEmptyBody"
           defaultMessage="Configure email, Slack, Elasticsearch, and third-party services that Kibana runs."
         />
       </p>
@@ -46,7 +47,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
         onClick={onCTAClicked}
       >
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addActionButtonLabel"
+          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorButtonLabel"
           defaultMessage="Create connector"
         />
       </EuiButton>

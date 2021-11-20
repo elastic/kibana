@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { EuiLink, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 
+import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../constants';
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 
 interface LicenseCalloutProps {
@@ -18,22 +20,17 @@ export const LicenseCallout: React.FC<LicenseCalloutProps> = ({ message }) => {
   const title = (
     <>
       {message}{' '}
-      <EuiLink
-        className="wsLicenseLink"
-        target="_blank"
-        external
-        href={ENT_SEARCH_LICENSE_MANAGEMENT}
-      >
-        <strong>Explore Platinum features</strong>
+      <EuiLink target="_blank" external href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+        <strong>{EXPLORE_PLATINUM_FEATURES_LINK}</strong>
       </EuiLink>
     </>
   );
 
   return (
-    <div className="wsLicenseCallout">
+    <div>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
-          <div className="wsLicenseIcon">
+          <div>
             <strong>&#8593;</strong>
           </div>
         </EuiFlexItem>

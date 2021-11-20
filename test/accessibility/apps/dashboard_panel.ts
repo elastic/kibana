@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -16,17 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard Panel', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-
-      await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.common.navigateToApp('dashboard');
       await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
     });
 
     it('dashboard panel open ', async () => {
-      const header = await dashboardPanelActions.getPanelHeading('[Flights] Airline Carrier');
+      const header = await dashboardPanelActions.getPanelHeading('[Flights] Flight count');
       await dashboardPanelActions.toggleContextMenu(header);
       await a11y.testAppSnapshot();
       // doing this again will close the Context Menu, so that next snapshot can start clean.
@@ -34,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('dashboard panel inspect', async () => {
-      await dashboardPanelActions.openInspectorByTitle('[Flights] Airline Carrier');
+      await dashboardPanelActions.openInspectorByTitle('[Flights] Flight count');
       await a11y.testAppSnapshot();
     });
 
@@ -61,8 +56,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('dashboard panel full screen', async () => {
-      const header = await dashboardPanelActions.getPanelHeading('[Flights] Airline Carrier');
+      const header = await dashboardPanelActions.getPanelHeading('[Flights] Flight count');
       await dashboardPanelActions.toggleContextMenu(header);
+
       await testSubjects.click('embeddablePanelAction-togglePanel');
       await a11y.testAppSnapshot();
     });

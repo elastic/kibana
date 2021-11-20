@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export enum JOB_TYPE {
@@ -10,6 +11,7 @@ export enum JOB_TYPE {
   POPULATION = 'population',
   ADVANCED = 'advanced',
   CATEGORIZATION = 'categorization',
+  RARE = 'rare',
 }
 
 export enum CREATED_BY_LABEL {
@@ -17,6 +19,7 @@ export enum CREATED_BY_LABEL {
   MULTI_METRIC = 'multi-metric-wizard',
   POPULATION = 'population-wizard',
   CATEGORIZATION = 'categorization-wizard',
+  RARE = 'rare-wizard',
   APM_TRANSACTION = 'ml-module-apm-transaction',
 }
 

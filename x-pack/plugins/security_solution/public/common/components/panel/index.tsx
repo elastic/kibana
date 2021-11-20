@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import styled from 'styled-components';
@@ -24,7 +25,7 @@ import { EuiPanel } from '@elastic/eui';
  * Ref: https://www.styled-components.com/docs/faqs#why-am-i-getting-html-attribute-warnings
  * Ref: https://reactjs.org/blog/2017/09/08/dom-attributes-in-react-16.html
  */
-export const Panel = styled(({ loading, ...props }) => <EuiPanel {...props} />)`
+export const Panel = styled(({ loading, ...props }) => <EuiPanel {...props} hasBorder />)`
   position: relative;
   ${({ loading }) =>
     loading &&

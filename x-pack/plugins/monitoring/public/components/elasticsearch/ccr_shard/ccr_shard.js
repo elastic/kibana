@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, PureComponent } from 'react';
-import { Legacy } from '../../../legacy_shims';
+import React, { Fragment } from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   EuiPage,
   EuiPageBody,
@@ -27,9 +28,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertsCallout } from '../../../alerts/callout';
 
-export class CcrShard extends PureComponent {
-  renderCharts() {
-    const { metrics } = this.props;
+export function CcrShard(props) {
+  const { services } = useKibana();
+  const timezone = services.uiSettings?.get('dateFormat:tz');
+  const { metrics, stat, timestamp, oldestStat, formattedLeader, alerts } = props;
+  const renderCharts = () => {
     const seriesToShow = [metrics.ccr_sync_lag_ops, metrics.ccr_sync_lag_time];
 
     const charts = seriesToShow.map((data, index) => (
@@ -41,10 +44,9 @@ export class CcrShard extends PureComponent {
     ));
 
     return <Fragment>{charts}</Fragment>;
-  }
+  };
 
-  renderErrors() {
-    const { stat } = this.props;
+  const renderErrors = () => {
     if (stat.read_exceptions && stat.read_exceptions.length > 0) {
       return (
         <Fragment>
@@ -90,13 +92,9 @@ export class CcrShard extends PureComponent {
       );
     }
     return null;
-  }
+  };
 
-  renderLatestStat() {
-    const { stat, timestamp } = this.props;
-    const injector = Legacy.shims.getAngularInjector();
-    const timezone = injector.get('config').get('dateFormat:tz');
-
+  const renderLatestStat = () => {
     return (
       <EuiAccordion
         id="ccrLatestStat"
@@ -121,31 +119,27 @@ export class CcrShard extends PureComponent {
         </Fragment>
       </EuiAccordion>
     );
-  }
+  };
 
-  render() {
-    const { stat, oldestStat, formattedLeader, alerts } = this.props;
-
-    return (
-      <EuiPage style={{ backgroundColor: 'white' }}>
-        <EuiPageBody>
-          <EuiPanel>
-            <Status
-              stat={stat}
-              formattedLeader={formattedLeader}
-              oldestStat={oldestStat}
-              alerts={alerts}
-            />
-          </EuiPanel>
-          <EuiSpacer size="m" />
-          <AlertsCallout alerts={alerts} />
-          <EuiSpacer size="m" />
-          {this.renderErrors()}
-          <EuiFlexGroup wrap>{this.renderCharts()}</EuiFlexGroup>
-          <EuiHorizontalRule />
-          {this.renderLatestStat()}
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPanel>
+          <Status
+            stat={stat}
+            formattedLeader={formattedLeader}
+            oldestStat={oldestStat}
+            alerts={alerts}
+          />
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <AlertsCallout alerts={alerts} />
+        <EuiSpacer size="m" />
+        {renderErrors()}
+        <EuiFlexGroup wrap>{renderCharts()}</EuiFlexGroup>
+        <EuiHorizontalRule />
+        {renderLatestStat()}
+      </EuiPageBody>
+    </EuiPage>
+  );
 }

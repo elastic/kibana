@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
@@ -13,12 +15,8 @@ import {
   getDescriptionItem,
 } from '.';
 
-import {
-  esFilters,
-  Filter,
-  FilterManager,
-  UI_SETTINGS,
-} from '../../../../../../../../src/plugins/data/public';
+import { FilterManager, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
@@ -83,7 +81,7 @@ describe('description_step', () => {
       const filters: Filter[] = [
         {
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
           meta: {
             alias: null,
@@ -103,7 +101,7 @@ describe('description_step', () => {
         },
         {
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
           meta: {
             alias: null,
@@ -126,7 +124,7 @@ describe('description_step', () => {
       const expected: Filter[] = [
         {
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
           meta: {
             alias: null,
@@ -146,7 +144,7 @@ describe('description_step', () => {
         },
         {
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
           meta: {
             alias: null,
@@ -209,7 +207,7 @@ describe('description_step', () => {
       const expected: Filter[] = [
         {
           $state: {
-            store: esFilters.FilterStateStore.APP_STATE,
+            store: FilterStateStore.APP_STATE,
           },
           meta: {
             alias: null,
@@ -229,7 +227,7 @@ describe('description_step', () => {
         },
         {
           $state: {
-            store: esFilters.FilterStateStore.APP_STATE,
+            store: FilterStateStore.APP_STATE,
           },
           meta: {
             alias: null,

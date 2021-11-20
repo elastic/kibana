@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
@@ -12,7 +13,7 @@ import { useLocation } from 'react-router-dom';
 import url from 'url';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APMQueryParams, fromQuery, toQuery } from '../url_helpers';
 
 interface Props extends EuiLinkAnchorProps {
@@ -45,7 +46,7 @@ export function useAPMHref({
   persistedFilters?: Array<keyof APMQueryParams>;
   query?: APMQueryParams;
 }) {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { basePath } = useApmPluginContext().core.http;
   const { search } = useLocation();
   const nextQuery = {
@@ -53,13 +54,13 @@ export function useAPMHref({
     ...query,
   };
 
-  return getAPMHref({ basePath, path, query: nextQuery, search });
+  return getLegacyApmHref({ basePath, path, query: nextQuery, search });
 }
 
 /**
  * Get an APM link for a path.
  */
-export function getAPMHref({
+export function getLegacyApmHref({
   basePath,
   path = '',
   search,
@@ -90,7 +91,7 @@ export function APMLink({ path = '', query, mergeQuery, ...rest }: Props) {
 
   const mergedQuery = mergeQuery ? mergeQuery(query ?? {}) : query;
 
-  const href = getAPMHref({ basePath, path, search, query: mergedQuery });
+  const href = getLegacyApmHref({ basePath, path, search, query: mergedQuery });
 
   return <EuiLink {...rest} href={href} />;
 }

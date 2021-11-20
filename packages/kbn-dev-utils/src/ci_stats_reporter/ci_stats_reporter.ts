@@ -1,96 +1,258 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { inspect } from 'util';
-
+import Os from 'os';
+import Fs from 'fs';
+import Path from 'path';
+import crypto from 'crypto';
+import execa from 'execa';
 import Axios from 'axios';
+// @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
+import httpAdapter from 'axios/lib/adapters/http';
 
 import { ToolingLog } from '../tooling_log';
+import { parseConfig, Config } from './ci_stats_config';
 
-interface Config {
-  apiUrl: string;
-  apiToken: string;
-  buildId: string;
-}
+const BASE_URL = 'https://ci-stats.kibana.dev';
 
-export type CiStatsMetrics = Array<{
+export interface CiStatsMetric {
+  /** Top-level categorization for the metric, e.g. "page load bundle size" */
   group: string;
+  /** Specific sub-set of the "group", e.g. "dashboard" */
   id: string;
+  /** integer value recorded as the value of this metric */
   value: number;
+  /** optional limit which will generate an error on PRs when the metric exceeds the limit */
   limit?: number;
+  /**
+   * path, relative to the repo, where the config file contianing limits
+   * is kept. Linked from PR comments instructing contributors how to fix
+   * their PRs.
+   */
   limitConfigPath?: string;
-}>;
-
-function parseConfig(log: ToolingLog) {
-  const configJson = process.env.KIBANA_CI_STATS_CONFIG;
-  if (!configJson) {
-    log.debug('KIBANA_CI_STATS_CONFIG environment variable not found, disabling CiStatsReporter');
-    return;
-  }
-
-  let config: unknown;
-  try {
-    config = JSON.parse(configJson);
-  } catch (_) {
-    // handled below
-  }
-
-  if (typeof config === 'object' && config !== null) {
-    return validateConfig(log, config as { [k in keyof Config]: unknown });
-  }
-
-  log.warning('KIBANA_CI_STATS_CONFIG is invalid, stats will not be reported');
-  return;
+  /** Arbitrary key-value pairs which can be used for additional filtering/reporting */
+  meta?: CiStatsMetadata;
 }
 
-function validateConfig(log: ToolingLog, config: { [k in keyof Config]: unknown }) {
-  const validApiUrl = typeof config.apiUrl === 'string' && config.apiUrl.length !== 0;
-  if (!validApiUrl) {
-    log.warning('KIBANA_CI_STATS_CONFIG is missing a valid api url, stats will not be reported');
-    return;
-  }
-
-  const validApiToken = typeof config.apiToken === 'string' && config.apiToken.length !== 0;
-  if (!validApiToken) {
-    log.warning('KIBANA_CI_STATS_CONFIG is missing a valid api token, stats will not be reported');
-    return;
-  }
-
-  const validId = typeof config.buildId === 'string' && config.buildId.length !== 0;
-  if (!validId) {
-    log.warning('KIBANA_CI_STATS_CONFIG is missing a valid build id, stats will not be reported');
-    return;
-  }
-
-  return config as Config;
+export interface CiStatsMetadata {
+  /**
+   * Arbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric
+   * objects stored in the ci-stats service
+   */
+  [key: string]: string | string[] | number | boolean | undefined;
+}
+export interface CiStatsTiming {
+  /** Top-level categorization for the timing, e.g. "scripts/foo", process type, etc. */
+  group: string;
+  /** Specific timing (witin the "group" being tracked) e.g. "total" */
+  id: string;
+  /** time in milliseconds which should be recorded */
+  ms: number;
+  /** hash of key-value pairs which will be stored with the timing for additional filtering and reporting */
+  meta?: CiStatsMetadata;
 }
 
+interface ReqOptions {
+  auth: boolean;
+  path: string;
+  body: any;
+  bodyDesc: string;
+}
+
+export interface TimingsOptions {
+  /** list of timings to record */
+  timings: CiStatsTiming[];
+  /** master, 7.x, etc, automatically detected from package.json if not specified */
+  upstreamBranch?: string;
+  /** value of data/uuid, automatically loaded if not specified */
+  kibanaUuid?: string | null;
+}
+
+export interface MetricsOptions {
+  /** Default metadata to add to each metric */
+  defaultMeta?: CiStatsMetadata;
+}
 export class CiStatsReporter {
+  /**
+   * Create a CiStatsReporter by inspecting the ENV for the necessary config
+   */
   static fromEnv(log: ToolingLog) {
     return new CiStatsReporter(parseConfig(log), log);
   }
 
   constructor(private config: Config | undefined, private log: ToolingLog) {}
 
+  /**
+   * Determine if CI_STATS is explicitly disabled by the environment. To determine
+   * if the CiStatsReporter has enough information in the environment to send metrics
+   * for builds use #hasBuildConfig().
+   */
   isEnabled() {
-    return !!this.config;
+    return process.env.CI_STATS_DISABLED !== 'true';
   }
 
-  async metrics(metrics: CiStatsMetrics) {
-    if (!this.config) {
+  /**
+   * Determines if the CiStatsReporter is disabled by the environment, or properly
+   * configured and able to send stats
+   */
+  hasBuildConfig() {
+    return this.isEnabled() && !!this.config?.apiToken && !!this.config?.buildId;
+  }
+
+  /**
+   * Report timings data to the ci-stats service. If running in CI then the reporter
+   * will include the buildId in the report with the access token, otherwise the timings
+   * data will be recorded as anonymous timing data.
+   */
+  async timings(options: TimingsOptions) {
+    if (!this.isEnabled()) {
       return;
     }
 
+    const buildId = this.config?.buildId;
+    const timings = options.timings;
+    const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
+    const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
+    let email;
+    let branch;
+
+    try {
+      const { stdout } = await execa('git', ['config', 'user.email']);
+      email = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    try {
+      const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
+      branch = stdout;
+    } catch (e) {
+      this.log.debug(e.message);
+    }
+
+    const memUsage = process.memoryUsage();
+    const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
+
+    const defaultMeta = {
+      kibanaUuid,
+      isElasticCommitter,
+      committerHash: email
+        ? crypto.createHash('sha256').update(email).digest('hex').substring(0, 20)
+        : undefined,
+      email: isElasticCommitter ? email : undefined,
+      branch: isElasticCommitter ? branch : undefined,
+      cpuCount: Os.cpus()?.length,
+      cpuModel: Os.cpus()[0]?.model,
+      cpuSpeed: Os.cpus()[0]?.speed,
+      freeMem: Os.freemem(),
+      memoryUsageRss: memUsage.rss,
+      memoryUsageHeapTotal: memUsage.heapTotal,
+      memoryUsageHeapUsed: memUsage.heapUsed,
+      memoryUsageExternal: memUsage.external,
+      memoryUsageArrayBuffers: memUsage.arrayBuffers,
+      nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
+      osArch: Os.arch(),
+      osPlatform: Os.platform(),
+      osRelease: Os.release(),
+      totalMem: Os.totalmem(),
+    };
+
+    this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
+
+    return await this.req({
+      auth: !!buildId,
+      path: '/v1/timings',
+      body: {
+        buildId,
+        upstreamBranch,
+        defaultMeta,
+        timings,
+      },
+      bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`,
+    });
+  }
+
+  /**
+   * Report metrics data to the ci-stats service. If running outside of CI this method
+   * does nothing as metrics can only be reported when associated with a specific CI build.
+   */
+  async metrics(metrics: CiStatsMetric[], options?: MetricsOptions) {
+    if (!this.hasBuildConfig()) {
+      return;
+    }
+
+    const buildId = this.config?.buildId;
+
+    if (!buildId) {
+      throw new Error(`CiStatsReporter can't be authorized without a buildId`);
+    }
+
+    return await this.req({
+      auth: true,
+      path: '/v1/metrics',
+      body: {
+        buildId,
+        defaultMeta: options?.defaultMeta,
+        metrics,
+      },
+      bodyDesc: `metrics: ${metrics
+        .map(({ group, id, value }) => `[${group}/${id}=${value}]`)
+        .join(' ')}`,
+    });
+  }
+
+  /**
+   * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
+   * in the upstreamBranch when calling the timings() method. Outside of @kbn/pm
+   * we rely on @kbn/utils to find the package.json file.
+   */
+  private getUpstreamBranch() {
+    // specify the module id in a way that will keep webpack from bundling extra code into @kbn/pm
+    const hideFromWebpack = ['@', 'kbn/utils'];
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { kibanaPackageJson } = require(hideFromWebpack.join(''));
+    return kibanaPackageJson.branch;
+  }
+
+  /**
+   * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
+   * in the kibanaUuid when calling the timings() method. Outside of @kbn/pm
+   * we rely on @kbn/utils to find the repo root.
+   */
+  private getKibanaUuid() {
+    // specify the module id in a way that will keep webpack from bundling extra code into @kbn/pm
+    const hideFromWebpack = ['@', 'kbn/utils'];
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { REPO_ROOT } = require(hideFromWebpack.join(''));
+    try {
+      return Fs.readFileSync(Path.resolve(REPO_ROOT, 'data/uuid'), 'utf-8').trim();
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return undefined;
+      }
+
+      throw error;
+    }
+  }
+
+  private async req({ auth, body, bodyDesc, path }: ReqOptions) {
     let attempt = 0;
     const maxAttempts = 5;
-    const bodySummary = metrics
-      .map(({ group, id, value }) => `[${group}/${id}=${value}]`)
-      .join(' ');
+
+    let headers;
+    if (auth && this.config) {
+      headers = {
+        Authorization: `token ${this.config.apiToken}`,
+      };
+    } else if (auth) {
+      throw new Error('this.req() shouldnt be called with auth=true if this.config is defined');
+    }
 
     while (true) {
       attempt += 1;
@@ -98,37 +260,33 @@ export class CiStatsReporter {
       try {
         await Axios.request({
           method: 'POST',
-          url: '/v1/metrics',
-          baseURL: this.config.apiUrl,
-          headers: {
-            Authorization: `token ${this.config.apiToken}`,
-          },
-          data: {
-            buildId: this.config.buildId,
-            metrics,
-          },
+          url: path,
+          baseURL: BASE_URL,
+          headers,
+          data: body,
+          adapter: httpAdapter,
         });
 
-        return;
+        return true;
       } catch (error) {
         if (!error?.request) {
           // not an axios error, must be a usage error that we should notify user about
           throw error;
         }
 
-        if (error?.response && error.response.status !== 502) {
+        if (error?.response && error.response.status < 500) {
           // error response from service was received so warn the user and move on
           this.log.warning(
-            `error recording metric [status=${error.response.status}] [resp=${inspect(
+            `error reporting ${bodyDesc} [status=${error.response.status}] [resp=${inspect(
               error.response.data
-            )}] ${bodySummary}`
+            )}]`
           );
           return;
         }
 
         if (attempt === maxAttempts) {
           this.log.warning(
-            `failed to reach kibana-ci-stats service too many times, unable to record metric ${bodySummary}`
+            `unable to report ${bodyDesc}, failed to reach ci-stats service too many times`
           );
           return;
         }
@@ -138,11 +296,12 @@ export class CiStatsReporter {
           ? `${error.response.status} response`
           : 'no response';
 
+        const seconds = attempt * 10;
         this.log.warning(
-          `failed to reach kibana-ci-stats service [reason=${reason}], retrying in ${attempt} seconds`
+          `failed to reach ci-stats service, retrying in ${seconds} seconds, [reason=${reason}], [error=${error.message}]`
         );
 
-        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
       }
     }
   }

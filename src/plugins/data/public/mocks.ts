@@ -1,24 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Plugin, IndexPatternsContract } from '.';
-import { fieldFormatsServiceMock } from './field_formats/mocks';
+import { DataPlugin, DataViewsContract } from '.';
+import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
 import { createNowProviderMock } from './now_provider/mocks';
 
-export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
+export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
+export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
 
-const automcompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
-  addQuerySuggestionProvider: jest.fn(),
+const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
   getQuerySuggestions: jest.fn(),
+  getAutocompleteSettings: jest.fn(),
 };
 
 const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
@@ -30,16 +30,28 @@ const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   return {
-    autocomplete: automcompleteSetupMock,
+    autocomplete: autocompleteSetupMock,
     search: searchServiceMock.createSetupContract(),
-    fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
-    __enhance: jest.fn(),
   };
 };
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
+  const dataViews = {
+    find: jest.fn((search) => [{ id: search, title: search }]),
+    createField: jest.fn(() => {}),
+    createFieldList: jest.fn(() => []),
+    ensureDefaultIndexPattern: jest.fn(),
+    make: () => ({
+      fieldsFetcher: {
+        fetchForWildcard: jest.fn(),
+      },
+    }),
+    get: jest.fn().mockReturnValue(Promise.resolve({})),
+    clearCache: jest.fn(),
+  } as unknown as DataViewsContract;
+
   return {
     actions: {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
@@ -53,19 +65,11 @@ const createStartContract = (): Start => {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn().mockReturnValue(null),
     },
-    indexPatterns: ({
-      find: jest.fn((search) => [{ id: search, title: search }]),
-      createField: jest.fn(() => {}),
-      createFieldList: jest.fn(() => []),
-      ensureDefaultIndexPattern: jest.fn(),
-      make: () => ({
-        fieldsFetcher: {
-          fetchForWildcard: jest.fn(),
-        },
-      }),
-      get: jest.fn().mockReturnValue(Promise.resolve({})),
-      clearCache: jest.fn(),
-    } as unknown) as IndexPatternsContract,
+    dataViews,
+    /**
+     * @deprecated Use dataViews service instead. All index pattern interfaces were renamed.
+     */
+    indexPatterns: dataViews,
     nowProvider: createNowProviderMock(),
   };
 };

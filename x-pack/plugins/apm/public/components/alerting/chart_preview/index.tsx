@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   BarSeries,
   Chart,
@@ -22,17 +23,21 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { Coordinate } from '../../../../typings/timeseries';
 import { useTheme } from '../../../hooks/use_theme';
+import { IUiSettingsClient } from '../../../../../../../src/core/public';
+import { getTimeZone } from '../../shared/charts/helper/timezone';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
   data?: Coordinate[];
   threshold: number;
+  uiSettings?: IUiSettingsClient;
 }
 
 export function ChartPreview({
   data = [],
   yTickFormat,
   threshold,
+  uiSettings,
 }: ChartPreviewProps) {
   const theme = useTheme();
   const thresholdOpacity = 0.3;
@@ -66,6 +71,8 @@ export function ChartPreview({
     },
   ];
 
+  const timeZone = getTimeZone(uiSettings);
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -73,7 +80,7 @@ export function ChartPreview({
         <Settings tooltip="none" />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}
-          domainType={AnnotationDomainTypes.YDomain}
+          domainType={AnnotationDomainType.YDomain}
           id="chart_preview_line_annotation"
           markerPosition="left"
           style={style}
@@ -95,14 +102,15 @@ export function ChartPreview({
           position={Position.Left}
           tickFormat={yTickFormat}
           ticks={5}
-          domain={{ max: yMax }}
+          domain={{ max: yMax, min: NaN }}
         />
         <BarSeries
+          timeZone={timeZone}
           color={theme.eui.euiColorVis1}
           data={data}
           id="chart_preview_bar_series"
           xAccessor="x"
-          xScaleType={ScaleType.Linear}
+          xScaleType={ScaleType.Time}
           yAccessors={['y']}
           yScaleType={ScaleType.Linear}
         />

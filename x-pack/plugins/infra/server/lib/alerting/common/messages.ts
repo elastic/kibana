@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -17,6 +18,9 @@ export const DOCUMENT_COUNT_I18N = i18n.translate(
 export const stateToAlertMessage = {
   [AlertStates.ALERT]: i18n.translate('xpack.infra.metrics.alerting.threshold.alertState', {
     defaultMessage: 'ALERT',
+  }),
+  [AlertStates.WARNING]: i18n.translate('xpack.infra.metrics.alerting.threshold.warningState', {
+    defaultMessage: 'WARNING',
   }),
   [AlertStates.NO_DATA]: i18n.translate('xpack.infra.metrics.alerting.threshold.noDataState', {
     defaultMessage: 'NO DATA',
@@ -58,9 +62,13 @@ const comparatorToI18n = (comparator: Comparator, threshold: number[], currentVa
       return ltText;
     case Comparator.GT_OR_EQ:
     case Comparator.LT_OR_EQ: {
-      if (threshold[0] === currentValue) return eqText;
-      else if (threshold[0] < currentValue) return ltText;
-      return gtText;
+      if (currentValue === threshold[0]) {
+        return eqText;
+      } else if (currentValue < threshold[0]) {
+        return ltText;
+      } else {
+        return gtText;
+      }
     }
   }
 };
@@ -101,15 +109,17 @@ const thresholdToI18n = ([a, b]: Array<number | string>) => {
 };
 
 export const buildFiredAlertReason: (alertResult: {
+  group: string;
   metric: string;
   comparator: Comparator;
   threshold: Array<number | string>;
   currentValue: number | string;
-}) => string = ({ metric, comparator, threshold, currentValue }) =>
+}) => string = ({ group, metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
-      '{metric} is {comparator} a threshold of {threshold} (current value is {currentValue})',
+      '{metric} is {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
     values: {
+      group,
       metric,
       comparator: comparatorToI18n(comparator, threshold.map(toNumber), toNumber(currentValue)),
       threshold: thresholdToI18n(threshold),
@@ -118,14 +128,15 @@ export const buildFiredAlertReason: (alertResult: {
   });
 
 export const buildRecoveredAlertReason: (alertResult: {
+  group: string;
   metric: string;
   comparator: Comparator;
   threshold: Array<number | string>;
   currentValue: number | string;
-}) => string = ({ metric, comparator, threshold, currentValue }) =>
+}) => string = ({ group, metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.recoveredAlertReason', {
     defaultMessage:
-      '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue})',
+      '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
     values: {
       metric,
       comparator: recoveredComparatorToI18n(
@@ -135,19 +146,22 @@ export const buildRecoveredAlertReason: (alertResult: {
       ),
       threshold: thresholdToI18n(threshold),
       currentValue,
+      group,
     },
   });
 
 export const buildNoDataAlertReason: (alertResult: {
+  group: string;
   metric: string;
   timeSize: number;
   timeUnit: string;
-}) => string = ({ metric, timeSize, timeUnit }) =>
+}) => string = ({ group, metric, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.noDataAlertReason', {
-    defaultMessage: '{metric} has reported no data over the past {interval}',
+    defaultMessage: '{metric} has reported no data over the past {interval} for {group}',
     values: {
       metric,
       interval: `${timeSize}${timeUnit}`,
+      group,
     },
   });
 

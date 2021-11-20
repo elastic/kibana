@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TimelineType } from '../../../../common/types/timeline';
-import { esFilters, Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import {
   DataProvider,
   DataProviderType,
@@ -28,6 +29,7 @@ describe('helpers', () => {
         {
           field: 'x',
           values: ['The nickname of the developer we all :heart:'],
+          isObjectArray: false,
           originalValue: 'The nickname of the developer we all :heart:',
         },
       ]);
@@ -39,6 +41,7 @@ describe('helpers', () => {
         {
           field: 'x',
           values: ['The nickname of the developer we all :heart:'],
+          isObjectArray: false,
           originalValue: 'The nickname of the developer we all :heart:',
         },
       ]);
@@ -50,6 +53,7 @@ describe('helpers', () => {
         {
           field: 'x',
           values: ['The nickname of the developer we all :heart:', 'We are all made of stars'],
+          isObjectArray: false,
           originalValue: 'The nickname of the developer we all :heart:',
         },
       ]);
@@ -64,6 +68,7 @@ describe('helpers', () => {
         {
           field: 'x.y.z',
           values: ['zed'],
+          isObjectArray: false,
           originalValue: 'zed',
         },
       ]);
@@ -75,6 +80,7 @@ describe('helpers', () => {
         {
           field: 'x.y.z',
           values: ['zed'],
+          isObjectArray: false,
           originalValue: 'zed',
         },
       ]);
@@ -82,54 +88,52 @@ describe('helpers', () => {
     });
 
     test('it should trace an error if the value is not a string', () => {
-      const mockConsole: Console = ({ trace: jest.fn() } as unknown) as Console;
+      const mockConsole: Console = { trace: jest.fn() } as unknown as Console;
       const value = getStringArray(
         'a',
         [
           {
             field: 'a',
-            values: (5 as unknown) as string[],
+            values: 5 as unknown as string[],
+            isObjectArray: false,
             originalValue: 'zed',
           },
         ],
         mockConsole
       );
       expect(value).toEqual([]);
-      expect(
-        mockConsole.trace
-      ).toHaveBeenCalledWith(
+      expect(mockConsole.trace).toHaveBeenCalledWith(
         'Data type that is not a string or string array detected:',
         5,
         'when trying to access field:',
         'a',
         'from data object of:',
-        [{ field: 'a', originalValue: 'zed', values: 5 }]
+        [{ field: 'a', isObjectArray: false, originalValue: 'zed', values: 5 }]
       );
     });
 
     test('it should trace an error if the value is an array of mixed values', () => {
-      const mockConsole: Console = ({ trace: jest.fn() } as unknown) as Console;
+      const mockConsole: Console = { trace: jest.fn() } as unknown as Console;
       const value = getStringArray(
         'a',
         [
           {
             field: 'a',
-            values: (['hi', 5] as unknown) as string[],
+            values: ['hi', 5] as unknown as string[],
+            isObjectArray: false,
             originalValue: 'zed',
           },
         ],
         mockConsole
       );
       expect(value).toEqual([]);
-      expect(
-        mockConsole.trace
-      ).toHaveBeenCalledWith(
+      expect(mockConsole.trace).toHaveBeenCalledWith(
         'Data type that is not a string or string array detected:',
         ['hi', 5],
         'when trying to access field:',
         'a',
         'from data object of:',
-        [{ field: 'a', originalValue: 'zed', values: ['hi', 5] }]
+        [{ field: 'a', isObjectArray: false, originalValue: 'zed', values: ['hi', 5] }]
       );
     });
   });
@@ -167,7 +171,7 @@ describe('helpers', () => {
         const dupTimelineDetails = [...mockTimelineDetails];
         dupTimelineDetails[0] = {
           ...dupTimelineDetails[0],
-          values: ('apache' as unknown) as string[],
+          values: 'apache' as unknown as string[],
         }; // very unsafe cast for this test case
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: *',
@@ -219,7 +223,7 @@ describe('helpers', () => {
         const dupTimelineDetails = [...mockTimelineDetails];
         dupTimelineDetails[0] = {
           ...dupTimelineDetails[0],
-          values: ('apache' as unknown) as string[],
+          values: 'apache' as unknown as string[],
         }; // very unsafe cast for this test case
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: *',
@@ -344,7 +348,7 @@ describe('helpers', () => {
         const dupTimelineDetails = [...mockTimelineDetails];
         dupTimelineDetails[0] = {
           ...dupTimelineDetails[0],
-          values: ('apache' as unknown) as string[],
+          values: 'apache' as unknown as string[],
         }; // very unsafe cast for this test case
         const mockDataProvider: DataProvider = mockDataProviders[0];
         mockDataProvider.queryMatch.field = 'host.name';
@@ -469,7 +473,7 @@ describe('helpers', () => {
         const dupTimelineDetails = [...mockTimelineDetails];
         dupTimelineDetails[0] = {
           ...dupTimelineDetails[0],
-          values: ('apache' as unknown) as string[],
+          values: 'apache' as unknown as string[],
         }; // very unsafe cast for this test case
         const mockDataProvider: DataProvider = mockDataProviders[0];
         mockDataProvider.queryMatch.field = 'host.name';
@@ -559,7 +563,7 @@ describe('helpers', () => {
             },
           },
           $state: {
-            store: esFilters.FilterStateStore.APP_STATE,
+            store: FilterStateStore.APP_STATE,
           },
         },
       ]);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,7 +11,6 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'maps', 'visualize']);
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
 
@@ -36,9 +36,8 @@ export default function ({ getPageObjects, getService }) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await dashboardAddPanel.clickCreateNewLink();
-        await await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-        await PageObjects.visualize.clickMapsApp();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickVisType('maps');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.maps.waitForLayersToLoad();
       });
@@ -82,12 +81,25 @@ export default function ({ getPageObjects, getService }) {
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.equal(2);
         });
+
+        it('should lose its connection to the dashboard when creating new map', async () => {
+          await PageObjects.maps.gotoMapListingPage();
+          await PageObjects.maps.openNewMap();
+          await PageObjects.maps.expectMissingSaveAndReturnButton();
+
+          // return to origin should not be present in save modal
+          await testSubjects.click('mapSaveButton');
+          const redirectToOriginCheckboxExists = await testSubjects.exists(
+            'returnToOriginModeSwitch'
+          );
+          expect(redirectToOriginCheckboxExists).to.be(false);
+        });
       });
 
       describe('save as', () => {
         it('should return to dashboard and add new panel', async () => {
           await PageObjects.maps.saveMap('Clone of map embeddable example');
-          await PageObjects.dashboard.waitForRenderComplete();
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.equal(3);
         });

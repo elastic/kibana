@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -21,30 +21,32 @@ import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
-import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
+import { getTypes, getAggs, getSearch, getSavedObjects, getSpaces } from './services';
 import {
   IAggConfigs,
   IndexPattern,
   ISearchSource,
-  AggConfigOptions,
+  AggConfigSerialized,
   SearchSourceFields,
-} from '../../../plugins/data/public';
+} from '../../data/public';
 import { BaseVisType } from './vis_types';
 import { VisParams } from '../common/types';
 
+import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '../../discover/public';
+
 export interface SerializedVisData {
   expression?: string;
-  aggs: AggConfigOptions[];
+  aggs: AggConfigSerialized[];
   searchSource: SearchSourceFields;
   savedSearchId?: string;
 }
 
-export interface SerializedVis {
+export interface SerializedVis<T = VisParams> {
   id?: string;
   title: string;
   description?: string;
   type: string;
-  params: VisParams;
+  params: T;
   uiState?: any;
   data: SerializedVisData;
 }
@@ -58,14 +60,20 @@ export interface VisData {
 }
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
-  const searchSource = inputSearchSource.createCopy();
   if (savedSearchId) {
-    const savedSearch = await getSavedSearchLoader().get(savedSearchId);
+    const savedSearch = await getSavedSearch(savedSearchId, {
+      search: getSearch(),
+      savedObjectsClient: getSavedObjects().client,
+      spaces: getSpaces(),
+    });
 
-    searchSource.setParent(savedSearch.searchSource);
+    await throwErrorOnSavedSearchUrlConflict(savedSearch);
+
+    if (savedSearch?.searchSource) {
+      inputSearchSource.setParent(savedSearch.searchSource);
+    }
   }
-  searchSource.setField('size', 0);
-  return searchSource;
+  return inputSearchSource;
 };
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
@@ -80,7 +88,7 @@ export class Vis<TVisParams = VisParams> {
 
   public readonly uiState: PersistedState;
 
-  constructor(visType: string, visState: SerializedVis = {} as any) {
+  constructor(visType: string, visState: SerializedVis<TVisParams> = {} as any) {
     this.type = this.getType(visType);
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
@@ -154,9 +162,9 @@ export class Vis<TVisParams = VisParams> {
     }
   }
 
-  clone() {
+  clone(): Vis<TVisParams> {
     const { data, ...restOfSerialized } = this.serialize();
-    const vis = new Vis(this.type.name, restOfSerialized as any);
+    const vis = new Vis<TVisParams>(this.type.name, restOfSerialized as any);
     vis.setState({ ...restOfSerialized, data: {} });
     const aggs = this.data.indexPattern
       ? getAggs().createAggConfigs(this.data.indexPattern, data.aggs)
@@ -175,7 +183,7 @@ export class Vis<TVisParams = VisParams> {
       title: this.title,
       description: this.description,
       type: this.type.name,
-      params: cloneDeep(this.params) as any,
+      params: cloneDeep(this.params),
       uiState: this.uiState.toJSON(),
       data: {
         aggs: aggs as any,
@@ -194,7 +202,7 @@ export class Vis<TVisParams = VisParams> {
     }
   }
 
-  private initializeDefaultsFromSchemas(configStates: AggConfigOptions[], schemas: any) {
+  private initializeDefaultsFromSchemas(configStates: AggConfigSerialized[], schemas: any) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
     // of defaults (not sure why a someone define more...
@@ -213,3 +221,6 @@ export class Vis<TVisParams = VisParams> {
     return newConfigs;
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default Vis;

@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import {
   fetchObservabilityOverviewPageData,
-  hasData,
+  getHasData,
 } from './apm_observability_overview_fetchers';
-import * as createCallApmApi from './createCallApmApi';
+import { getCallApmApiSpy } from './callApmApiSpy';
 
 describe('Observability dashboard data', () => {
-  const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi');
+  const callApmApiMock = getCallApmApiSpy();
   const params = {
     absoluteTime: {
       start: moment('2020-07-02T13:25:11.629Z').valueOf(),
@@ -22,7 +23,8 @@ describe('Observability dashboard data', () => {
       start: 'now-15m',
       end: 'now',
     },
-    bucketSize: '600s',
+    intervalString: '600s',
+    bucketSize: 600,
   };
   afterEach(() => {
     callApmApiMock.mockClear();
@@ -30,12 +32,12 @@ describe('Observability dashboard data', () => {
   describe('hasData', () => {
     it('returns false when no data is available', async () => {
       callApmApiMock.mockImplementation(() => Promise.resolve(false));
-      const response = await hasData();
+      const response = await getHasData();
       expect(response).toBeFalsy();
     });
     it('returns true when data is available', async () => {
-      callApmApiMock.mockImplementation(() => Promise.resolve(true));
-      const response = await hasData();
+      callApmApiMock.mockResolvedValue({ hasData: true });
+      const response = await getHasData();
       expect(response).toBeTruthy();
     });
   });
@@ -45,11 +47,14 @@ describe('Observability dashboard data', () => {
       callApmApiMock.mockImplementation(() =>
         Promise.resolve({
           serviceCount: 10,
-          transactionCoordinates: [
-            { x: 1, y: 1 },
-            { x: 2, y: 2 },
-            { x: 3, y: 3 },
-          ],
+          transactionPerMinute: {
+            value: 2,
+            timeseries: [
+              { x: 1, y: 1 },
+              { x: 2, y: 2 },
+              { x: 3, y: 3 },
+            ],
+          },
         })
       );
       const response = await fetchObservabilityOverviewPageData(params);
@@ -80,7 +85,7 @@ describe('Observability dashboard data', () => {
       callApmApiMock.mockImplementation(() =>
         Promise.resolve({
           serviceCount: 0,
-          transactionCoordinates: [],
+          transactionPerMinute: { value: null, timeseries: [] as any },
         })
       );
       const response = await fetchObservabilityOverviewPageData(params);
@@ -107,7 +112,10 @@ describe('Observability dashboard data', () => {
       callApmApiMock.mockImplementation(() =>
         Promise.resolve({
           serviceCount: 0,
-          transactionCoordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
+          transactionPerMinute: {
+            value: 0,
+            timeseries: [{ x: 1 }, { x: 2 }, { x: 3 }],
+          },
         })
       );
       const response = await fetchObservabilityOverviewPageData(params);

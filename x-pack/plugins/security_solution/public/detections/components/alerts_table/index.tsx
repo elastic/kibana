@@ -1,37 +1,51 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
+import type { Filter } from '@kbn/es-query';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
-import { HeaderSection } from '../../../common/components/header_section';
-import { combineQueries } from '../../../timelines/components/timeline/helpers';
-import { useKibana } from '../../../common/lib/kibana';
-import { inputsSelectors, State, inputsModel } from '../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-
-import { updateAlertStatusAction } from './actions';
 import {
-  requiredFieldsForActions,
-  alertsDefaultModel,
-  buildAlertStatusFilter,
-} from './default_config';
-import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
-import { AlertsUtilityBar } from './alerts_utility_bar';
+  displayErrorToast,
+  displaySuccessToast,
+  useStateToaster,
+} from '../../../common/components/toasters';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
+import { useKibana } from '../../../common/lib/kibana';
+import { inputsModel, inputsSelectors, State } from '../../../common/store';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import * as i18nCommon from '../../../common/translations';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { combineQueries } from '../../../timelines/components/timeline/helpers';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
+import { updateAlertStatusAction } from './actions';
+import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
+import {
+  alertsDefaultModel,
+  alertsDefaultModelRuleRegistry,
+  buildAlertStatusFilter,
+  buildAlertStatusFilterRuleRegistry,
+  requiredFieldsForActions,
+} from './default_config';
+import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
 import {
   SetEventsDeletedProps,
@@ -39,70 +53,68 @@ import {
   UpdateAlertsStatusCallback,
   UpdateAlertsStatusProps,
 } from './types';
-import {
-  useStateToaster,
-  displaySuccessToast,
-  displayErrorToast,
-} from '../../../common/components/toasters';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { buildTimeRangeFilter } from './helpers';
 
 interface OwnProps {
-  timelineId: TimelineIdLiteral;
   defaultFilters?: Filter[];
-  hasIndexWrite: boolean;
-  hasIndexMaintenance: boolean;
   from: string;
+  hasIndexMaintenance: boolean;
+  hasIndexWrite: boolean;
   loading: boolean;
   onRuleChange?: () => void;
-  showBuildingBlockAlerts: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
+  onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
+  showBuildingBlockAlerts: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
+  timelineId: TimelineIdLiteral;
   to: string;
+  filterGroup?: Status;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
-  timelineId,
-  clearEventsDeleted,
-  clearEventsLoading,
   clearSelected,
   defaultFilters,
   from,
   globalFilters,
   globalQuery,
-  hasIndexWrite,
   hasIndexMaintenance,
+  hasIndexWrite,
   isSelectAllChecked,
   loading,
   loadingEventIds,
   onRuleChange,
+  onShowBuildingBlockAlertsChanged,
+  onShowOnlyThreatIndicatorAlertsChanged,
   selectedEventIds,
   setEventsDeleted,
   setEventsLoading,
   showBuildingBlockAlerts,
-  onShowBuildingBlockAlertsChanged,
+  showOnlyThreatIndicatorAlerts,
+  timelineId,
   to,
+  filterGroup = 'open',
 }) => {
+  const dispatch = useDispatch();
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
-  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const {
     browserFields,
     indexPattern: indexPatterns,
     loading: indexPatternsLoading,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.detections);
+  } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
-  const { initializeTimeline, setSelectAll } = useManageTimeline();
+  // TODO: Once we are past experimental phase this code should be removed
+  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
+  const ACTION_BUTTON_COUNT = 4;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
       if (browserFields != null && indexPatterns != null) {
         return combineQueries({
-          config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+          config: getEsQueryConfig(kibana.services.uiSettings),
           dataProviders: [],
           indexPattern: indexPatterns,
           browserFields,
@@ -122,16 +134,25 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [browserFields, defaultFilters, globalFilters, globalQuery, indexPatterns, kibana, to, from]
   );
 
+  useInvalidFilterQuery({
+    id: timelineId,
+    filterQuery: getGlobalQuery([])?.filterQuery,
+    kqlError: getGlobalQuery([])?.kqlError,
+    query: globalQuery,
+    startDate: from,
+    endDate: to,
+  });
+
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      setEventsLoading!({ id: timelineId, eventIds, isLoading });
+      setEventsLoading({ id: timelineId, eventIds, isLoading });
     },
     [setEventsLoading, timelineId]
   );
 
   const setEventsDeletedCallback = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      setEventsDeleted!({ id: timelineId, eventIds, isDeleted });
+      setEventsDeleted({ id: timelineId, eventIds, isDeleted });
     },
     [setEventsDeleted, timelineId]
   );
@@ -145,7 +166,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
         });
       } else {
-        let title: string;
+        let title = '';
         switch (status) {
           case 'closed':
             title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
@@ -153,8 +174,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           case 'open':
             title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
             break;
+          case 'acknowledged':
           case 'in-progress':
-            title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+            title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
         }
         displaySuccessToast(title, dispatchToaster);
       }
@@ -164,7 +186,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const onAlertStatusUpdateFailure = useCallback(
     (status: Status, error: Error) => {
-      let title: string;
+      let title = '';
       switch (status) {
         case 'closed':
           title = i18n.CLOSED_ALERT_FAILED_TOAST;
@@ -172,8 +194,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         case 'open':
           title = i18n.OPENED_ALERT_FAILED_TOAST;
           break;
+        case 'acknowledged':
         case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+          title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
       displayErrorToast(title, [error.message], dispatchToaster);
     },
@@ -183,53 +206,52 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
   useEffect(() => {
     if (isSelectAllChecked) {
-      setSelectAll({
-        id: timelineId,
-        selectAll: false,
-      });
+      dispatch(
+        timelineActions.setTGridSelectAll({
+          id: timelineId,
+          selectAll: false,
+        })
+      );
     } else {
       setShowClearSelectionAction(false);
     }
-  }, [isSelectAllChecked, setSelectAll, timelineId]);
-
-  // Callback for when open/closed filter changes
-  const onFilterGroupChangedCallback = useCallback(
-    (newFilterGroup: Status) => {
-      clearEventsLoading!({ id: timelineId });
-      clearEventsDeleted!({ id: timelineId });
-      clearSelected!({ id: timelineId });
-      setFilterGroup(newFilterGroup);
-    },
-    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup, timelineId]
-  );
+  }, [dispatch, isSelectAllChecked, timelineId]);
 
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
-    clearSelected!({ id: timelineId });
-    setSelectAll({
-      id: timelineId,
-      selectAll: false,
-    });
+    clearSelected({ id: timelineId });
+    dispatch(
+      timelineActions.setTGridSelectAll({
+        id: timelineId,
+        selectAll: false,
+      })
+    );
     setShowClearSelectionAction(false);
-  }, [clearSelected, setSelectAll, setShowClearSelectionAction, timelineId]);
+  }, [clearSelected, dispatch, timelineId]);
 
   // Callback for selecting all events on all pages from utility bar
   // Dispatches to stateful_body's selectAll via TimelineTypeContext props
   // as scope of response data required to actually set selectedEvents
   const selectAllOnAllPagesCallback = useCallback(() => {
-    setSelectAll({
-      id: timelineId,
-      selectAll: true,
-    });
+    dispatch(
+      timelineActions.setTGridSelectAll({
+        id: timelineId,
+        selectAll: true,
+      })
+    );
     setShowClearSelectionAction(true);
-  }, [setSelectAll, setShowClearSelectionAction, timelineId]);
+  }, [dispatch, timelineId]);
 
   const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
     async (
       refetchQuery: inputsModel.Refetch,
       { status, selectedStatus }: UpdateAlertsStatusProps
     ) => {
-      const currentStatusFilter = buildAlertStatusFilter(status);
+      // TODO: Once we are past experimental phase this code should be removed
+      const currentStatusFilter = ruleRegistryEnabled
+        ? buildAlertStatusFilterRuleRegistry(status)
+        : buildAlertStatusFilter(status);
+
       await updateAlertStatusAction({
         query: showClearSelectionAction
           ? getGlobalQuery(currentStatusFilter)?.filterQuery
@@ -251,6 +273,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       showClearSelectionAction,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
+      ruleRegistryEnabled,
     ]
   );
 
@@ -261,80 +284,115 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         <AlertsUtilityBar
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
-          hasIndexWrite={hasIndexWrite}
-          hasIndexMaintenance={hasIndexMaintenance}
           currentFilter={filterGroup}
+          hasIndexMaintenance={hasIndexMaintenance}
+          hasIndexWrite={hasIndexWrite}
+          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+          onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
           selectAll={selectAllOnAllPagesCallback}
           selectedEventIds={selectedEventIds}
           showBuildingBlockAlerts={showBuildingBlockAlerts}
-          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
           showClearSelection={showClearSelectionAction}
+          showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
           totalCount={totalCount}
           updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
         />
       );
     },
     [
-      hasIndexWrite,
-      hasIndexMaintenance,
       clearSelectionCallback,
       filterGroup,
-      showBuildingBlockAlerts,
-      onShowBuildingBlockAlertsChanged,
+      hasIndexMaintenance,
+      hasIndexWrite,
       loadingEventIds.length,
+      onShowBuildingBlockAlertsChanged,
+      onShowOnlyThreatIndicatorAlertsChanged,
       selectAllOnAllPagesCallback,
       selectedEventIds,
+      showBuildingBlockAlerts,
       showClearSelectionAction,
+      showOnlyThreatIndicatorAlerts,
       updateAlertsStatusCallback,
     ]
   );
 
-  const defaultFiltersMemo = useMemo(() => {
-    if (isEmpty(defaultFilters)) {
-      return buildAlertStatusFilter(filterGroup);
-    } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
-      return [...defaultFilters, ...buildAlertStatusFilter(filterGroup)];
-    }
-  }, [defaultFilters, filterGroup]);
-  const { filterManager } = useKibana().services.data.query;
-
-  useEffect(() => {
-    initializeTimeline({
-      defaultModel: alertsDefaultModel,
-      documentType: i18n.ALERTS_DOCUMENT_TYPE,
-      filterManager,
-      footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-      id: timelineId,
-      loadingText: i18n.LOADING_ALERTS,
-      selectAll: false,
-      queryFields: requiredFieldsForActions,
-      title: '',
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const headerFilterGroup = useMemo(
-    () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
-    [onFilterGroupChangedCallback]
+  const additionalFiltersComponent = (
+    <AditionalFiltersAction
+      areEventsLoading={loadingEventIds.length > 0}
+      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+      showBuildingBlockAlerts={showBuildingBlockAlerts}
+      onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
+      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+    />
   );
 
-  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
-    return (
-      <EuiPanel>
-        <HeaderSection title="" />
-        <EuiLoadingContent data-test-subj="loading-alerts-panel" />
-      </EuiPanel>
+  const defaultFiltersMemo = useMemo(() => {
+    // TODO: Once we are past experimental phase this code should be removed
+    const alertStatusFilter = ruleRegistryEnabled
+      ? buildAlertStatusFilterRuleRegistry(filterGroup)
+      : buildAlertStatusFilter(filterGroup);
+
+    if (isEmpty(defaultFilters)) {
+      return alertStatusFilter;
+    } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
+      return [...defaultFilters, ...alertStatusFilter];
+    }
+  }, [defaultFilters, filterGroup, ruleRegistryEnabled]);
+  const { filterManager } = useKibana().services.data.query;
+
+  // TODO: Once we are past experimental phase this code should be removed
+  const defaultTimelineModel = ruleRegistryEnabled
+    ? alertsDefaultModelRuleRegistry
+    : alertsDefaultModel;
+
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+
+  useEffect(() => {
+    dispatch(
+      timelineActions.initializeTGridSettings({
+        defaultColumns: columns.map((c) =>
+          !tGridEnabled && c.initialWidth == null
+            ? {
+                ...c,
+                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+              }
+            : c
+        ),
+        documentType: i18n.ALERTS_DOCUMENT_TYPE,
+        excludedRowRendererIds: defaultTimelineModel.excludedRowRendererIds as RowRendererId[],
+        filterManager,
+        footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+        id: timelineId,
+        loadingText: i18n.LOADING_ALERTS,
+        selectAll: false,
+        queryFields: requiredFieldsForActions,
+        title: '',
+        showCheckboxes: true,
+      })
     );
+  }, [dispatch, defaultTimelineModel, filterManager, tGridEnabled, timelineId]);
+
+  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+
+  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
+    return null;
   }
 
   return (
     <StatefulEventsViewer
-      pageFilters={defaultFiltersMemo}
-      defaultModel={alertsDefaultModel}
+      additionalFilters={additionalFiltersComponent}
+      currentFilter={filterGroup}
+      defaultCellActions={defaultCellActions}
+      defaultModel={defaultTimelineModel}
       end={to}
-      headerFilterGroup={headerFilterGroup}
+      entityType="events"
+      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
       id={timelineId}
+      leadingControlColumns={leadingControlColumns}
       onRuleChange={onRuleChange}
+      pageFilters={defaultFiltersMemo}
+      renderCellValue={RenderCellValue}
+      rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
@@ -375,8 +433,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     eventIds: string[];
     isLoading: boolean;
   }) => dispatch(timelineActions.setEventsLoading({ id, eventIds, isLoading })),
-  clearEventsLoading: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsLoading({ id })),
   setEventsDeleted: ({
     id,
     eventIds,
@@ -386,8 +442,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     eventIds: string[];
     isDeleted: boolean;
   }) => dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted })),
-  clearEventsDeleted: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsDeleted({ id })),
 });
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

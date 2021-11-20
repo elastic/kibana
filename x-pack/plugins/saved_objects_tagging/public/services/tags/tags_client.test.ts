@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
@@ -155,7 +156,17 @@ describe('TagsClient', () => {
       await tagsClient.getAll();
 
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags`);
+      expect(http.get).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags`, {
+        asSystemRequest: undefined,
+      });
+    });
+    it('allows `asSystemRequest` option to be set', async () => {
+      await tagsClient.getAll({ asSystemRequest: true });
+
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags`, {
+        asSystemRequest: true,
+      });
     });
     it('returns the tag objects from the response', async () => {
       const tags = await tagsClient.getAll();

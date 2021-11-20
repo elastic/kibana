@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { render } from '@testing-library/react';
@@ -10,7 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { MetadataTable } from '.';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { expectTextsInDocument } from '../../../utils/testHelpers';
-import { SectionsWithRows } from './helper';
+import type { SectionDescriptor } from './types';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -26,21 +27,20 @@ const renderOptions = {
 
 describe('MetadataTable', () => {
   it('shows sections', () => {
-    const sectionsWithRows = ([
-      { key: 'foo', label: 'Foo', required: true },
+    const sections: SectionDescriptor[] = [
+      { key: 'foo', label: 'Foo', required: true, properties: [] },
       {
         key: 'bar',
         label: 'Bar',
         required: false,
-        properties: ['props.A', 'props.B'],
-        rows: [
-          { key: 'props.A', value: 'A' },
-          { key: 'props.B', value: 'B' },
+        properties: [
+          { field: 'props.A', value: ['A'] },
+          { field: 'props.B', value: ['B'] },
         ],
       },
-    ] as unknown) as SectionsWithRows;
+    ];
     const output = render(
-      <MetadataTable sections={sectionsWithRows} />,
+      <MetadataTable sections={sections} isLoading={false} />,
       renderOptions
     );
     expectTextsInDocument(output, [
@@ -55,15 +55,17 @@ describe('MetadataTable', () => {
   });
   describe('required sections', () => {
     it('shows "empty state message" if no data is available', () => {
-      const sectionsWithRows = ([
+      const sectionsWithRows: SectionDescriptor[] = [
         {
           key: 'foo',
           label: 'Foo',
           required: true,
+          properties: [],
         },
-      ] as unknown) as SectionsWithRows;
+      ];
+
       const output = render(
-        <MetadataTable sections={sectionsWithRows} />,
+        <MetadataTable sections={sectionsWithRows} isLoading={false} />,
         renderOptions
       );
       expectTextsInDocument(output, ['Foo', 'No data available']);

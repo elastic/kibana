@@ -45,6 +45,7 @@ exports[`render 1`] = `
             anchorClassName="homRecentlyAccessed__anchor"
             content="label0"
             delay="regular"
+            display="inlineBlock"
             position="bottom"
           >
             <EuiLink
@@ -79,6 +80,7 @@ exports[`render 1`] = `
             anchorClassName="homRecentlyAccessed__anchor"
             content="label1"
             delay="regular"
+            display="inlineBlock"
             position="bottom"
           >
             <EuiLink

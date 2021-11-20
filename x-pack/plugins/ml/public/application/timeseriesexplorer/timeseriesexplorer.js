@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -31,9 +32,8 @@ import {
   EuiAccordion,
   EuiBadge,
 } from '@elastic/eui';
-
-import { getToastNotifications } from '../util/dependency_cache';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
+import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import {
@@ -84,6 +84,7 @@ import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/times
 import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
+import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -103,7 +104,6 @@ function getTimeseriesexplorerDefaultState() {
     entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
-    focusAggregations: {},
     focusAggregationInterval: {},
     focusChartData: undefined,
     focusForecastData: undefined,
@@ -128,6 +128,7 @@ function getTimeseriesexplorerDefaultState() {
     zoomTo: undefined,
     zoomFromFocusLoaded: undefined,
     zoomToFocusLoaded: undefined,
+    chartDataError: undefined,
   };
 }
 
@@ -148,6 +149,7 @@ export class TimeSeriesExplorer extends React.Component {
     tableInterval: PropTypes.string,
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
+    toastNotificationService: PropTypes.object,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -261,12 +263,8 @@ export class TimeSeriesExplorer extends React.Component {
    * Gets focus data for the current component state/
    */
   getFocusData(selection) {
-    const {
-      selectedJobId,
-      selectedForecastId,
-      selectedDetectorIndex,
-      functionDescription,
-    } = this.props;
+    const { selectedJobId, selectedForecastId, selectedDetectorIndex, functionDescription } =
+      this.props;
     const { modelPlotEnabled } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     if (isMetricDetector(selectedJob, selectedDetectorIndex) && functionDescription === undefined) {
@@ -387,6 +385,13 @@ export class TimeSeriesExplorer extends React.Component {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
   };
 
+  displayErrorToastMessages = (error, errorMsg) => {
+    if (this.props.toastNotificationService) {
+      this.props.toastNotificationService.displayErrorToast(error, errorMsg, 2000);
+    }
+    this.setState({ loading: false, chartDataError: errorMsg });
+  };
+
   loadSingleMetricData = (fullRefresh = true) => {
     const {
       autoZoomDuration,
@@ -423,6 +428,7 @@ export class TimeSeriesExplorer extends React.Component {
         fullRefresh,
         loadCounter: currentLoadCounter + 1,
         loading: true,
+        chartDataError: undefined,
         ...(fullRefresh
           ? {
               chartDetails: undefined,
@@ -555,11 +561,11 @@ export class TimeSeriesExplorer extends React.Component {
             stateUpdate.contextChartData = fullRangeChartData;
             finish(counter);
           })
-          .catch((resp) => {
-            console.log(
-              'Time series explorer - error getting metric data from elasticsearch:',
-              resp
-            );
+          .catch((err) => {
+            const errorMsg = i18n.translate('xpack.ml.timeSeriesExplorer.metricDataErrorMessage', {
+              defaultMessage: 'Error getting metric data',
+            });
+            this.displayErrorToastMessages(err, errorMsg);
           });
 
         // Query 2 - load max record score at same granularity as context chart
@@ -578,11 +584,15 @@ export class TimeSeriesExplorer extends React.Component {
             stateUpdate.swimlaneData = fullRangeRecordScoreData;
             finish(counter);
           })
-          .catch((resp) => {
-            console.log(
-              'Time series explorer - error getting bucket anomaly scores from elasticsearch:',
-              resp
+          .catch((err) => {
+            const errorMsg = i18n.translate(
+              'xpack.ml.timeSeriesExplorer.bucketAnomalyScoresErrorMessage',
+              {
+                defaultMessage: 'Error getting bucket anomaly scores',
+              }
             );
+
+            this.displayErrorToastMessages(err, errorMsg);
           });
 
         // Query 3 - load details on the chart used in the chart title (charting function and entity(s)).
@@ -598,10 +608,12 @@ export class TimeSeriesExplorer extends React.Component {
             stateUpdate.chartDetails = resp.results;
             finish(counter);
           })
-          .catch((resp) => {
-            console.log(
-              'Time series explorer - error getting entity counts from elasticsearch:',
-              resp
+          .catch((err) => {
+            this.displayErrorToastMessages(
+              err,
+              i18n.translate('xpack.ml.timeSeriesExplorer.entityCountsErrorMessage', {
+                defaultMessage: 'Error getting entity counts',
+              })
             );
           });
 
@@ -630,10 +642,13 @@ export class TimeSeriesExplorer extends React.Component {
               stateUpdate.contextForecastData = processForecastResults(resp.results);
               finish(counter);
             })
-            .catch((resp) => {
-              console.log(
-                `Time series explorer - error loading data for forecast ID ${selectedForecastId}`,
-                resp
+            .catch((err) => {
+              this.displayErrorToastMessages(
+                err,
+                i18n.translate('xpack.ml.timeSeriesExplorer.forecastDataErrorMessage', {
+                  defaultMessage: 'Error loading forecast data for forecast ID {forecastId}',
+                  values: { forecastId: selectedForecastId },
+                })
               );
             });
         }
@@ -692,8 +707,10 @@ export class TimeSeriesExplorer extends React.Component {
           },
         }
       );
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addWarning(warningText);
+      if (this.props.toastNotificationService) {
+        this.props.toastNotificationService.displayWarningToast(warningText);
+      }
+
       detectorIndex = detectors[0].index;
     }
 
@@ -703,9 +720,7 @@ export class TimeSeriesExplorer extends React.Component {
       appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, detectorId);
     }
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-    mlFieldFormatService.populateFormats([jobId]).catch((err) => {
-      console.log('Error populating field formats:', err);
-    });
+    mlFieldFormatService.populateFormats([jobId]);
   }
 
   componentDidMount() {
@@ -713,16 +728,17 @@ export class TimeSeriesExplorer extends React.Component {
     // perhaps due to user's advanced setting using incorrect date-maths
     const { invalidTimeRangeError } = this.props;
     if (invalidTimeRangeError) {
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addWarning(
-        i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
-          defaultMessage:
-            'The time filter was changed to the full range for this job due to an invalid default time filter. Check the advanced settings for {field}.',
-          values: {
-            field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
-          },
-        })
-      );
+      if (this.props.toastNotificationService) {
+        this.props.toastNotificationService.displayWarningToast(
+          i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
+            defaultMessage:
+              'The time filter was changed to the full range for this job due to an invalid default time filter. Check the advanced settings for {field}.',
+            values: {
+              field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
+            },
+          })
+        );
+      }
     }
 
     // Required to redraw the time series chart when the container is resized.
@@ -850,7 +866,8 @@ export class TimeSeriesExplorer extends React.Component {
     if (
       previousProps === undefined ||
       !isEqual(previousProps.bounds, this.props.bounds) ||
-      !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
+      (!isEqual(previousProps.lastRefresh, this.props.lastRefresh) &&
+        previousProps.lastRefresh !== 0) ||
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
       previousProps.selectedForecastId !== this.props.selectedForecastId ||
@@ -915,7 +932,6 @@ export class TimeSeriesExplorer extends React.Component {
       focusAggregationInterval,
       focusAnnotationError,
       focusAnnotationData,
-      focusAggregations,
       focusChartData,
       focusForecastData,
       fullRefresh,
@@ -935,6 +951,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomTo,
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
+      chartDataError,
     } = this.state;
     const chartProps = {
       modelPlotEnabled,
@@ -999,7 +1016,6 @@ export class TimeSeriesExplorer extends React.Component {
                   }}
                 />
               }
-              color="warning"
               iconType="help"
               size="s"
             />
@@ -1039,10 +1055,15 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
+        {loading === false && chartDataError !== undefined && (
+          <TimeseriesexplorerChartDataError errorMsg={chartDataError} />
+        )}
+
         {arePartitioningFieldsProvided &&
           jobs.length > 0 &&
           (fullRefresh === false || loading === false) &&
-          hasResults === false && (
+          hasResults === false &&
+          chartDataError === undefined && (
             <TimeseriesexplorerNoChartData
               dataNotChartable={dataNotChartable}
               entities={entityControls}
@@ -1055,58 +1076,67 @@ export class TimeSeriesExplorer extends React.Component {
           hasResults === true && (
             <div>
               <div className="results-container">
-                <EuiTitle className="panel-title">
-                  <h2 style={{ display: 'inline' }}>
-                    <span>
-                      {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
-                        defaultMessage: 'Single time series analysis of {functionLabel}',
-                        values: { functionLabel: chartDetails.functionLabel },
-                      })}
-                    </span>
-                    &nbsp;
-                    {chartDetails.entityData.count === 1 && (
-                      <span className="entity-count-text">
-                        {chartDetails.entityData.entities.length > 0 && '('}
-                        {chartDetails.entityData.entities
-                          .map((entity) => {
-                            return `${entity.fieldName}: ${entity.fieldValue}`;
-                          })
-                          .join(', ')}
-                        {chartDetails.entityData.entities.length > 0 && ')'}
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiTitle className="panel-title">
+                    <h2 style={{ display: 'inline' }}>
+                      <span>
+                        {i18n.translate(
+                          'xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle',
+                          {
+                            defaultMessage: 'Single time series analysis of {functionLabel}',
+                            values: { functionLabel: chartDetails.functionLabel },
+                          }
+                        )}
                       </span>
-                    )}
-                    {chartDetails.entityData.count !== 1 && (
-                      <span className="entity-count-text">
-                        {chartDetails.entityData.entities.map((countData, i) => {
-                          return (
-                            <Fragment key={countData.fieldName}>
-                              {i18n.translate(
-                                'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                                {
-                                  defaultMessage:
-                                    '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                                  values: {
-                                    openBrace: i === 0 ? '(' : '',
-                                    closeBrace:
-                                      i === chartDetails.entityData.entities.length - 1 ? ')' : '',
-                                    cardinalityValue:
-                                      countData.cardinality === 0
-                                        ? allValuesLabel
-                                        : countData.cardinality,
-                                    cardinality: countData.cardinality,
-                                    fieldName: countData.fieldName,
-                                  },
-                                }
-                              )}
-                              {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                            </Fragment>
-                          );
-                        })}
-                      </span>
-                    )}
-                  </h2>
-                </EuiTitle>
-
+                      &nbsp;
+                      {chartDetails.entityData.count === 1 && (
+                        <span className="entity-count-text">
+                          {chartDetails.entityData.entities.length > 0 && '('}
+                          {chartDetails.entityData.entities
+                            .map((entity) => {
+                              return `${entity.fieldName}: ${entity.fieldValue}`;
+                            })
+                            .join(', ')}
+                          {chartDetails.entityData.entities.length > 0 && ')'}
+                        </span>
+                      )}
+                      {chartDetails.entityData.count !== 1 && (
+                        <span className="entity-count-text">
+                          {chartDetails.entityData.entities.map((countData, i) => {
+                            return (
+                              <Fragment key={countData.fieldName}>
+                                {i18n.translate(
+                                  'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
+                                  {
+                                    defaultMessage:
+                                      '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
+                                    values: {
+                                      openBrace: i === 0 ? '(' : '',
+                                      closeBrace:
+                                        i === chartDetails.entityData.entities.length - 1
+                                          ? ')'
+                                          : '',
+                                      cardinalityValue:
+                                        countData.cardinality === 0
+                                          ? allValuesLabel
+                                          : countData.cardinality,
+                                      cardinality: countData.cardinality,
+                                      fieldName: countData.fieldName,
+                                    },
+                                  }
+                                )}
+                                {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
+                              </Fragment>
+                            );
+                          })}
+                        </span>
+                      )}
+                    </h2>
+                  </EuiTitle>
+                  <EuiFlexItem grow={false}>
+                    <TimeSeriesExplorerHelpPopover />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiFlexGroup style={{ float: 'right' }}>
                   {showModelBoundsCheckbox && (
                     <EuiFlexItem grow={false}>
@@ -1138,15 +1168,20 @@ export class TimeSeriesExplorer extends React.Component {
                     <EuiFlexItem grow={false}>
                       <EuiCheckbox
                         id="toggleShowForecastCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
+                        label={
+                          <span data-test-subj={'mlForecastCheckbox'}>
+                            {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                              defaultMessage: 'show forecast',
+                            })}
+                          </span>
+                        }
                         checked={showForecast}
                         onChange={this.toggleShowForecastHandler}
                       />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
+
                 <TimeSeriesChartWithTooltips
                   chartProps={chartProps}
                   contextAggregationInterval={contextAggregationInterval}
@@ -1192,7 +1227,7 @@ export class TimeSeriesExplorer extends React.Component {
                 )}
                 {focusAnnotationData && focusAnnotationData.length > 0 && (
                   <EuiAccordion
-                    id={'EuiAccordion-blah'}
+                    id={'mlAnnotationsAccordion'}
                     buttonContent={
                       <EuiTitle className="panel-title">
                         <h2>
@@ -1222,7 +1257,6 @@ export class TimeSeriesExplorer extends React.Component {
                       detectors={detectors}
                       jobIds={[this.props.selectedJobId]}
                       annotations={focusAnnotationData}
-                      aggregations={focusAggregations}
                       isSingleMetricViewerLinkVisible={false}
                       isNumberBadgeVisible={true}
                     />
@@ -1242,29 +1276,12 @@ export class TimeSeriesExplorer extends React.Component {
                     />
                   </h2>
                 </EuiTitle>
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="l"
-                  responsive={true}
-                  className="ml-anomalies-controls"
-                >
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.severityThresholdLabel', {
-                        defaultMessage: 'Severity threshold',
-                      })}
-                    >
-                      <SelectSeverity />
-                    </EuiFormRow>
+                <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
+                  <EuiFlexItem grow={false}>
+                    <SelectSeverity />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.intervalLabel', {
-                        defaultMessage: 'Interval',
-                      })}
-                    >
-                      <SelectInterval />
-                    </EuiFormRow>
+                  <EuiFlexItem grow={false}>
+                    <SelectInterval />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -118,6 +118,13 @@ describe('Filter editor utils', () => {
     });
 
     it('does not return range for string fields', () => {
+      const [field] = stubFields.filter(({ type }) => type === 'string');
+      const operatorOptions = getOperatorOptions(field);
+      const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
+      expect(rangeOperator).toBeUndefined();
+    });
+
+    it('does not return phrase for number_range fields', () => {
       const [field] = stubFields.filter(({ type }) => type === 'string');
       const operatorOptions = getOperatorOptions(field);
       const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -31,7 +32,7 @@ describe('format_number', () => {
     });
 
     it('should format time in H:mm:ss', () => {
-      expect(formatNumber(1461868937000, 'time')).to.match(/\d\d:\d\d:\d\d/);
+      expect(formatNumber(1461868937000, 'time')).to.match(/[12]?\d:\d\d:\d\d/);
     });
 
     it('should format integers with commas', () => {

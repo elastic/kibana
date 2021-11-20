@@ -1,34 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import {
-  EuiLink,
+  EuiToolTip,
+  EuiIcon,
   EuiFormRow,
   EuiSelect,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
-  EuiText,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiSpacer,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   adjustTimeScaleLabelSuffix,
-  DEFAULT_TIME_SCALE,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { unitSuffixesLong } from '../suffix_formatter';
-import { TimeScaleUnit } from '../time_scale';
-import { IndexPatternLayer } from '../types';
+import type { TimeScaleUnit } from '../../../common/expressions';
+import { unitSuffixesLong } from '../../../common/suffix_formatter';
+import type { IndexPatternLayer } from '../types';
 
 export function setTimeScaling(
   columnId: string,
@@ -38,7 +34,13 @@ export function setTimeScaling(
   const currentColumn = layer.columns[columnId];
   const label = currentColumn.customLabel
     ? currentColumn.label
-    : adjustTimeScaleLabelSuffix(currentColumn.label, currentColumn.timeScale, timeScale);
+    : adjustTimeScaleLabelSuffix(
+        currentColumn.label,
+        currentColumn.timeScale,
+        timeScale,
+        currentColumn.timeShift,
+        currentColumn.timeShift
+      );
   return {
     ...layer,
     columns: {
@@ -58,12 +60,11 @@ export function TimeScaling({
   layer,
   updateLayer,
 }: {
-  selectedColumn: IndexPatternColumn;
+  selectedColumn: GenericIndexPatternColumn;
   columnId: string;
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
 }) {
-  const [popoverOpen, setPopoverOpen] = useState(false);
   const hasDateHistogram = layer.columnOrder.some(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   );
@@ -71,54 +72,10 @@ export function TimeScaling({
   if (
     !selectedOperation.timeScalingMode ||
     selectedOperation.timeScalingMode === 'disabled' ||
-    !hasDateHistogram
+    !hasDateHistogram ||
+    !selectedColumn.timeScale
   ) {
     return null;
-  }
-
-  if (!selectedColumn.timeScale) {
-    return (
-      <EuiText textAlign="right">
-        <EuiSpacer size="s" />
-        <EuiPopover
-          ownFocus
-          button={
-            <EuiButtonEmpty
-              size="xs"
-              iconType="arrowDown"
-              iconSide="right"
-              data-test-subj="indexPattern-time-scaling-popover"
-              onClick={() => {
-                setPopoverOpen(true);
-              }}
-            >
-              {i18n.translate('xpack.lens.indexPattern.timeScale.advancedSettings', {
-                defaultMessage: 'Add advanced options',
-              })}
-            </EuiButtonEmpty>
-          }
-          isOpen={popoverOpen}
-          closePopover={() => {
-            setPopoverOpen(false);
-          }}
-        >
-          <EuiText size="s">
-            <EuiLink
-              data-test-subj="indexPattern-time-scaling-enable"
-              color="text"
-              onClick={() => {
-                setPopoverOpen(false);
-                updateLayer(setTimeScaling(columnId, layer, DEFAULT_TIME_SCALE));
-              }}
-            >
-              {i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
-                defaultMessage: 'Normalize by unit',
-              })}
-            </EuiLink>
-          </EuiText>
-        </EuiPopover>
-      </EuiText>
-    );
   }
 
   return (

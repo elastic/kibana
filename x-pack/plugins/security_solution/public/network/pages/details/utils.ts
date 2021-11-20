@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, isEmpty } from 'lodash/fp';
@@ -14,7 +15,7 @@ import * as i18n from '../translations';
 import { NetworkRouteType } from '../navigation/types';
 import { NetworkRouteSpyState } from '../../../common/utils/route/types';
 import { GetUrlForApp } from '../../../common/components/navigation/types';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 
 export const type = networkModel.NetworkType.details;
@@ -35,7 +36,8 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.network}`, {
+      href: getUrlForApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.network,
         path: !isEmpty(search[0]) ? search[0] : '',
       }),
     },
@@ -45,7 +47,8 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: decodeIpv6(params.detailName),
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.network}`, {
+        href: getUrlForApp(APP_UI_ID, {
+          deepLinkId: SecurityPageName.network,
           path: getNetworkDetailsUrl(
             params.detailName,
             params.flowTarget,

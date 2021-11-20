@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
@@ -25,13 +26,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   const { services } = useMlKibana();
   const mlContext = useMlContext();
 
-  const {
-    jobCreator,
-    jobCreatorUpdate,
-    jobCreatorUpdated,
-    chartLoader,
-    chartInterval,
-  } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
+    useContext(JobCreatorContext);
 
   const [timeRange, setTimeRange] = useState<TimeRange>({
     start: jobCreator.start,
@@ -46,7 +42,9 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       const resp = await chartLoader.loadEventRateChart(
         jobCreator.start,
         jobCreator.end,
-        chartInterval.getInterval().asMilliseconds()
+        chartInterval.getInterval().asMilliseconds(),
+        jobCreator.runtimeMappings ?? undefined,
+        jobCreator.datafeedConfig.indices_options
       );
       setEventRateChartData(resp);
     } catch (error) {
@@ -106,7 +104,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FullTimeRangeSelector
-                indexPattern={mlContext.currentIndexPattern}
+                dataView={mlContext.currentDataView}
                 query={mlContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import {
   ML_JOB_AGGREGATION,
@@ -26,6 +28,7 @@ export interface Field {
   aggregatable?: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
+  runtimeField?: estypes.MappingRuntimeField;
 }
 
 export interface Aggregation {
@@ -45,6 +48,10 @@ export interface Aggregation {
 export interface NewJobCaps {
   fields: Field[];
   aggs: Aggregation[];
+}
+
+export interface NewJobCapsResponse {
+  [indexPattern: string]: NewJobCaps;
 }
 
 export interface AggFieldPair {
@@ -102,3 +109,7 @@ export interface ScriptAggCardinality {
 export interface AggCardinality {
   cardinality: FieldAggCardinality | ScriptAggCardinality;
 }
+
+export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
+
+export type RuntimeMappings = estypes.MappingRuntimeFields;

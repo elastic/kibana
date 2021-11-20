@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export { MonitoringNoDataProvider } from './no_data';
@@ -19,6 +20,9 @@ export { MonitoringBeatsOverviewProvider } from './beats_overview';
 export { MonitoringBeatsListingProvider } from './beats_listing';
 export { MonitoringBeatDetailProvider } from './beat_detail';
 export { MonitoringBeatsSummaryStatusProvider } from './beats_summary_status';
+export { MonitoringLogstashOverviewProvider } from './logstash_overview';
+export { MonitoringLogstashNodesProvider } from './logstash_nodes';
+export { MonitoringLogstashNodeDetailProvider } from './logstash_node_detail';
 export { MonitoringLogstashPipelinesProvider } from './logstash_pipelines';
 export { MonitoringLogstashSummaryStatusProvider } from './logstash_summary_status';
 export { MonitoringKibanaOverviewProvider } from './kibana_overview';

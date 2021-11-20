@@ -1,24 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
-import {
+import React from 'react';
+import type { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
+import type { UiActionsStart } from 'src/plugins/ui_actions/public';
+import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import type { DashboardStart } from 'src/plugins/dashboard/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type {
   AppMountParameters,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
-// @ts-ignore
-import { MapView } from './inspector/views/map_view';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { MapInspectorView } from './inspector/map_inspector_view';
 import {
   setEMSSettings,
   setKibanaCommonConfig,
@@ -28,55 +30,78 @@ import {
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import {
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import type {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../src/plugins/visualizations/public';
+import type { Plugin as ExpressionsPublicPlugin } from '../../../../src/plugins/expressions/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
-import {
-  createMapsUrlGenerator,
-  createRegionMapUrlGenerator,
-  createTileMapUrlGenerator,
-} from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
+import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
-import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
+import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
-import { MapsStartApi } from './api';
-import { createLayerDescriptors, registerLayerWizard, registerSource } from './api';
-import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { StartContract as FileUploadStartContract } from '../../maps_file_upload/public';
-import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
+import {
+  createLayerDescriptors,
+  MapsSetupApi,
+  MapsStartApi,
+  suggestEMSTermJoinConfig,
+} from './api';
+import { registerLayerWizard } from './classes/layers';
+import { registerSource } from './classes/sources/source_registry';
+import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
+import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
+import type { FileUploadPluginStart } from '../../file_upload/public';
+import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
+import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
   getIsEnterprisePlus,
   registerLicensedFeatures,
   setLicensingPluginStart,
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
-import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import {
+  MapsAppLocatorDefinition,
+  MapsAppRegionMapLocatorDefinition,
+  MapsAppTileMapLocatorDefinition,
+} from './locators';
+import {
+  createRegionMapFn,
+  regionMapRenderer,
+  regionMapVisType,
+  createTileMapFn,
+  tileMapRenderer,
+  tileMapVisType,
+} from './legacy_visualizations';
+import type { SecurityPluginStart } from '../../security/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 
 export interface MapsPluginSetupDependencies {
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
-  mapsLegacy: { config: MapsLegacyConfig };
+  mapsEms: MapsEmsPluginSetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface MapsPluginStartDependencies {
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  mapsFileUpload: FileUploadStartContract;
+  fileUpload: FileUploadPluginStart;
   inspector: InspectorStartContract;
   licensing: LicensingPluginStart;
   navigation: NavigationPublicPluginStart;
@@ -86,6 +111,9 @@ export interface MapsPluginStartDependencies {
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
+  security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -104,43 +132,46 @@ export class MapsPlugin
       MapsPluginStart,
       MapsPluginSetupDependencies,
       MapsPluginStartDependencies
-    > {
+    >
+{
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
 
   constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
-    setKibanaCommonConfig(plugins.mapsLegacy.config);
+    setKibanaCommonConfig(plugins.mapsEms.config);
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
-    const emsSettings = new EMSSettings(plugins.mapsLegacy.config, getIsEnterprisePlus);
+    const emsSettings = new EMSSettings(plugins.mapsEms.config, getIsEnterprisePlus);
     setEMSSettings(emsSettings);
 
-    // register url generators
-    const getStartServices = async () => {
-      const [coreStart] = await core.getStartServices();
-      return {
-        appBasePath: coreStart.application.getUrlForApp('maps'),
-        useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-      };
-    };
-    plugins.share.urlGenerators.registerUrlGenerator(createMapsUrlGenerator(getStartServices));
-    plugins.share.urlGenerators.registerUrlGenerator(createTileMapUrlGenerator(getStartServices));
-    plugins.share.urlGenerators.registerUrlGenerator(createRegionMapUrlGenerator(getStartServices));
+    const locator = plugins.share.url.locators.create(
+      new MapsAppLocatorDefinition({
+        useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      })
+    );
+    plugins.share.url.locators.create(
+      new MapsAppTileMapLocatorDefinition({
+        locator,
+      })
+    );
+    plugins.share.url.locators.create(
+      new MapsAppRegionMapLocatorDefinition({
+        locator,
+      })
+    );
 
-    plugins.inspector.registerView(MapView);
+    plugins.inspector.registerView(MapInspectorView);
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
-    plugins.visualizations.registerAlias(
-      getMapsVisTypeAlias(plugins.visualizations, config.showMapVisualizationTypes)
-    );
+    plugins.visualizations.registerAlias(getMapsVisTypeAlias(plugins.visualizations));
     plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 
     core.application.register({
@@ -151,10 +182,25 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
+        const UsageTracker =
+          plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(params);
+        return renderApp(params, UsageTracker);
       },
     });
+
+    // register wrapper around legacy tile_map and region_map visualizations
+    plugins.expressions.registerFunction(createRegionMapFn);
+    plugins.expressions.registerRenderer(regionMapRenderer);
+    plugins.visualizations.createBaseVisualization(regionMapVisType);
+    plugins.expressions.registerFunction(createTileMapFn);
+    plugins.expressions.registerRenderer(tileMapRenderer);
+    plugins.visualizations.createBaseVisualization(tileMapVisType);
+
+    return {
+      registerLayerWizard,
+      registerSource,
+    };
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
@@ -164,6 +210,7 @@ export class MapsPlugin
     if (core.application.capabilities.maps.show) {
       plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     }
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, filterByMapExtentAction);
 
     if (!core.application.capabilities.maps.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);
@@ -171,8 +218,7 @@ export class MapsPlugin
 
     return {
       createLayerDescriptors,
-      registerLayerWizard,
-      registerSource,
+      suggestEMSTermJoinConfig,
     };
   }
 }

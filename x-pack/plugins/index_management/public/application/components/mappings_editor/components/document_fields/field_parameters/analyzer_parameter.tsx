@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,9 +33,9 @@ interface Props {
 const ANALYZER_OPTIONS = PARAMETERS_OPTIONS.analyzer!;
 
 // token_count requires a value for "analyzer", therefore, we cannot not allow "index_default"
-const ANALYZER_OPTIONS_WITHOUT_DEFAULT = (PARAMETERS_OPTIONS.analyzer as SuperSelectOption[]).filter(
-  ({ value }) => value !== INDEX_DEFAULT
-);
+const ANALYZER_OPTIONS_WITHOUT_DEFAULT = (
+  PARAMETERS_OPTIONS.analyzer as SuperSelectOption[]
+).filter(({ value }) => value !== INDEX_DEFAULT);
 
 const getCustomAnalyzers = (indexSettings: IndexSettings): SelectOption[] | undefined => {
   const settings: IndexSettingsInterface = {}.hasOwnProperty.call(indexSettings, 'index')

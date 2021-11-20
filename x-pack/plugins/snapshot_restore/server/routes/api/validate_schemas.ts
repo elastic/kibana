@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 export const nameParameterSchema = schema.object({
@@ -22,6 +24,31 @@ const snapshotRetentionSchema = schema.object({
   expireAfterUnit: schema.maybe(schema.string()),
   maxCount: schema.maybe(schema.oneOf([schema.number(), schema.literal('')])),
   minCount: schema.maybe(schema.oneOf([schema.number(), schema.literal('')])),
+});
+
+export const snapshotListSchema = schema.object({
+  sortField: schema.oneOf([
+    schema.literal('snapshot'),
+    schema.literal('repository'),
+    schema.literal('indices'),
+    schema.literal('durationInMillis'),
+    schema.literal('startTimeInMillis'),
+    schema.literal('shards.total'),
+    schema.literal('shards.failed'),
+  ]),
+  sortDirection: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
+  pageIndex: schema.number(),
+  pageSize: schema.number(),
+  searchField: schema.maybe(
+    schema.oneOf([
+      schema.literal('snapshot'),
+      schema.literal('repository'),
+      schema.literal('policyName'),
+    ])
+  ),
+  searchValue: schema.maybe(schema.string()),
+  searchMatch: schema.maybe(schema.oneOf([schema.literal('must'), schema.literal('must_not')])),
+  searchOperator: schema.maybe(schema.oneOf([schema.literal('eq'), schema.literal('exact')])),
 });
 
 export const policySchema = schema.object({
@@ -174,4 +201,5 @@ export const restoreSettingsSchema = schema.object({
   indexSettings: schema.maybe(schema.string()),
   ignoreIndexSettings: schema.maybe(schema.arrayOf(schema.string())),
   ignoreUnavailable: schema.maybe(schema.boolean()),
+  includeAliases: schema.maybe(schema.boolean()),
 });

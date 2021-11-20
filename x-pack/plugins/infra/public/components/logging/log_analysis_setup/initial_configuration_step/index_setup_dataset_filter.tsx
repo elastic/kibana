@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -59,7 +60,13 @@ export const IndexSetupDatasetFilter: React.FC<{
   );
 
   const datasetFilterButton = (
-    <EuiFilterButton disabled={isDisabled} isSelected={isVisible} onClick={show}>
+    <EuiFilterButton
+      disabled={isDisabled}
+      isSelected={isVisible}
+      onClick={show}
+      iconType="arrowDown"
+      size="s"
+    >
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"
         defaultMessage="{includeType, select, includeAll {All datasets} includeSome {{includedDatasetCount, plural, one {# dataset} other {# datasets}}}}"

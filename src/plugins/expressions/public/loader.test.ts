@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import { first, skip, toArray } from 'rxjs/operators';
+import { TestScheduler } from 'rxjs/testing';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
 import {
@@ -14,12 +16,16 @@ import {
   IInterpreterRenderHandlers,
   RenderMode,
   AnyExpressionFunctionDefinition,
+  ExpressionsService,
+  ExecutionContract,
 } from '../common';
 
 // eslint-disable-next-line
 const { __getLastExecution, __getLastRenderMode } = require('./services');
 
-const element: HTMLElement = null as any;
+const element = null as unknown as HTMLElement;
+
+let testScheduler: TestScheduler;
 
 jest.mock('./services', () => {
   let renderMode: RenderMode | undefined;
@@ -32,8 +38,9 @@ jest.mock('./services', () => {
     },
   };
 
-  // eslint-disable-next-line
-  const service = new (require('../common/service/expressions_services').ExpressionsService as any)();
+  const service: ExpressionsService =
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    new (require('../common/service/expressions_services').ExpressionsService)();
 
   const testFn: AnyExpressionFunctionDefinition = {
     fn: () => ({ type: 'render', as: 'test' }),
@@ -43,9 +50,16 @@ jest.mock('./services', () => {
   };
   service.registerFunction(testFn);
 
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  for (const func of require('../common/test_helpers/expression_functions').functionTestSpecs) {
+    service.registerFunction(func);
+  }
+
+  service.start();
+
+  let execution: ExecutionContract;
   const moduleMock = {
-    __execution: undefined,
-    __getLastExecution: () => moduleMock.__execution,
+    __getLastExecution: () => execution,
     __getLastRenderMode: () => renderMode,
     getRenderersRegistry: () => ({
       get: (id: string) => renderers[id],
@@ -61,26 +75,31 @@ jest.mock('./services', () => {
   };
 
   const execute = service.execute;
-  service.execute = (...args: any) => {
-    const execution = execute(...args);
+
+  jest.spyOn(service, 'execute').mockImplementation((...args) => {
+    execution = execute(...args);
     jest.spyOn(execution, 'getData');
     jest.spyOn(execution, 'cancel');
-    moduleMock.__execution = execution;
+
     return execution;
-  };
+  });
 
   return moduleMock;
 });
 
 describe('execute helper function', () => {
-  it('returns ExpressionLoader instance', () => {
-    const response = loader(element, '', {});
+  it('returns ExpressionLoader instance', async () => {
+    const response = await loader(element, '', {});
     expect(response).toBeInstanceOf(ExpressionLoader);
   });
 });
 
 describe('ExpressionLoader', () => {
   const expressionString = 'demodata';
+
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));
+  });
 
   describe('constructor', () => {
     it('accepts expression string', () => {
@@ -106,8 +125,46 @@ describe('ExpressionLoader', () => {
 
   it('emits on $data when data is available', async () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', { variables: { foo: 123 } });
-    const response = await expressionLoader.data$.pipe(first()).toPromise();
-    expect(response).toBe(123);
+    const { result } = await expressionLoader.data$.pipe(first()).toPromise();
+    expect(result).toBe(123);
+  });
+
+  it('ignores partial results by default', async () => {
+    const expressionLoader = new ExpressionLoader(element, 'var foo', {
+      variables: { foo: of(1, 2) },
+    });
+    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+
+    expect(partial).toBe(false);
+    expect(result).toBe(2);
+  });
+
+  it('emits partial results if enabled', async () => {
+    const expressionLoader = new ExpressionLoader(element, 'var foo', {
+      variables: { foo: of(1, 2) },
+      partial: true,
+      throttle: 0,
+    });
+    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+
+    expect(partial).toBe(true);
+    expect(result).toBe(1);
+  });
+
+  it('throttles partial results', async () => {
+    testScheduler.run(({ cold, expectObservable }) => {
+      const expressionLoader = new ExpressionLoader(element, 'var foo', {
+        variables: { foo: cold('a 5ms b 5ms c 10ms d', { a: 1, b: 2, c: 3, d: 4 }) },
+        partial: true,
+        throttle: 20,
+      });
+
+      expectObservable(expressionLoader.data$).toBe('a 19ms c 2ms d', {
+        a: expect.objectContaining({ result: 1 }),
+        c: expect.objectContaining({ result: 3 }),
+        d: expect.objectContaining({ result: 4 }),
+      });
+    });
   });
 
   it('emits on loading$ on initial load and on updates', async () => {
@@ -144,7 +201,7 @@ describe('ExpressionLoader', () => {
   });
 
   it('cancels the previous request when the expression is updated', () => {
-    const expressionLoader = new ExpressionLoader(element, 'var foo', {});
+    const expressionLoader = new ExpressionLoader(element, 'sleep 10', {});
     const execution = __getLastExecution();
     jest.spyOn(execution, 'cancel');
 

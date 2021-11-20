@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Ast } from '@kbn/interpreter/common';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Operation, DatasourcePublicAPI } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieVisualizationState } from './types';
+import type { PieVisualizationState } from '../../common/expressions';
 
 export function toExpression(
   state: PieVisualizationState,
@@ -55,6 +56,8 @@ function expressionHelper(
           legendDisplay: [layer.legendDisplay],
           legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
+          legendMaxLines: [layer.legendMaxLines ?? 1],
+          truncateLegend: [layer.truncateLegend ?? true],
           nestedLegend: [!!layer.nestedLegend],
           ...(state.palette
             ? {

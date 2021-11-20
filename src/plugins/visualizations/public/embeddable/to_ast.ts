@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from '../../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 
 import { VisToExpressionAst } from '../types';
+import { queryToAst, filtersToAst } from '../../../data/common';
 
 /**
  * Creates an ast expression for a visualization based on kibana context (query, filters, timerange)
@@ -21,12 +22,15 @@ import { VisToExpressionAst } from '../types';
 export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
   const { savedSearchId, searchSource } = vis.data;
   const query = searchSource?.getField('query');
-  const filters = searchSource?.getField('filter');
+  let filters = searchSource?.getField('filter');
+  if (typeof filters === 'function') {
+    filters = filters();
+  }
 
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   const kibanaContext = buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
-    q: query && JSON.stringify(query),
-    filters: filters && JSON.stringify(filters),
+    q: query && queryToAst(query),
+    filters: filters && filtersToAst(filters),
     savedSearchId,
   });
 

@@ -1,19 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { Observable, BehaviorSubject } from 'rxjs';
+
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
-import { HttpSetup } from 'src/core/public';
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
-import { GetAllSpacesOptions, GetSpaceResult } from '../../common';
-import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
+
+import type {
+  HttpSetup,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from 'src/core/public';
+
+import type {
+  GetAllSpacesOptions,
+  GetSpaceResult,
+  LegacyUrlAliasTarget,
+  Space,
+} from '../../common';
+import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 interface SavedObjectTarget {
   type: string;
   id: string;
 }
+
+const TAG_TYPE = 'tag';
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
@@ -82,6 +96,12 @@ export class SpacesManager {
     await this.http.delete(`/api/spaces/space/${encodeURIComponent(space.id)}`);
   }
 
+  public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
+    await this.http.post('/api/spaces/_disable_legacy_url_aliases', {
+      body: JSON.stringify({ aliases }),
+    });
+  }
+
   public async copySavedObjects(
     objects: SavedObjectTarget[],
     spaces: string[],
@@ -120,7 +140,9 @@ export class SpacesManager {
     type: string
   ): Promise<{ shareToAllSpaces: boolean }> {
     return this.http
-      .get('/internal/security/_share_saved_object_permissions', { query: { type } })
+      .get<{ shareToAllSpaces: boolean }>('/internal/security/_share_saved_object_permissions', {
+        query: { type },
+      })
       .catch((err) => {
         const isNotFound = err?.body?.statusCode === 404;
         if (isNotFound) {
@@ -131,15 +153,33 @@ export class SpacesManager {
       });
   }
 
-  public async shareSavedObjectAdd(object: SavedObjectTarget, spaces: string[]): Promise<void> {
-    return this.http.post(`/api/spaces/_share_saved_object_add`, {
-      body: JSON.stringify({ object, spaces }),
-    });
+  public async getShareableReferences(
+    objects: SavedObjectTarget[]
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    const response = await this.http.post<SavedObjectsCollectMultiNamespaceReferencesResponse>(
+      `/api/spaces/_get_shareable_references`,
+      { body: JSON.stringify({ objects }) }
+    );
+
+    // We should exclude any child-reference tags because we don't yet support reconciling/merging duplicate tags. In other words: tags can
+    // be shared directly, but if a tag is only included as a reference of a requested object, it should not be shared.
+    const requestedObjectsSet = objects.reduce(
+      (acc, { type, id }) => acc.add(`${type}:${id}`),
+      new Set<string>()
+    );
+    const filteredObjects = response.objects.filter(
+      ({ type, id }) => type !== TAG_TYPE || requestedObjectsSet.has(`${type}:${id}`)
+    );
+    return { objects: filteredObjects };
   }
 
-  public async shareSavedObjectRemove(object: SavedObjectTarget, spaces: string[]): Promise<void> {
-    return this.http.post(`/api/spaces/_share_saved_object_remove`, {
-      body: JSON.stringify({ object, spaces }),
+  public async updateSavedObjectsSpaces(
+    objects: SavedObjectTarget[],
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ): Promise<void> {
+    return this.http.post(`/api/spaces/_update_objects_spaces`, {
+      body: JSON.stringify({ objects, spacesToAdd, spacesToRemove }),
     });
   }
 
@@ -152,7 +192,7 @@ export class SpacesManager {
     if (this.isAnonymousPath()) {
       return;
     }
-    const activeSpace = await this.http.get('/internal/spaces/_active_space');
+    const activeSpace = await this.http.get<Space>('/internal/spaces/_active_space');
     this.activeSpace$.next(activeSpace);
   }
 

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   TreeOptions,
   Tree,
@@ -47,14 +49,6 @@ interface BulkCreateHeader {
   };
 }
 
-interface BulkResponse {
-  items: Array<{
-    create: {
-      _id: string;
-    };
-  }>;
-}
-
 export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
   const client = getService('es');
 
@@ -67,12 +61,13 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
         array.push({ create: { _index: eventsIndex } }, doc);
         return array;
       }, []);
-      const bulkResp = await client.bulk<BulkResponse>({ body, refresh: true });
+      const bulkResp = await client.bulk({ body, refresh: true });
 
       const eventsInfo = events.map((event: Event, i: number) => {
-        return { event, _id: bulkResp.body.items[i].create._id };
+        return { event, _id: bulkResp.items[i].create?._id };
       });
 
+      // @ts-expect-error @elastic/elasticsearch expected BulkResponseItemBase._id: string
       return { eventsInfo, indices: [eventsIndex] };
     },
     async createTrees(

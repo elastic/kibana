@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -15,14 +15,8 @@ import cpy from 'cpy';
 import del from 'del';
 import { tap, filter } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog } from '@kbn/dev-utils';
-import {
-  runOptimizer,
-  OptimizerConfig,
-  OptimizerUpdate,
-  logOptimizerState,
-  readLimits,
-} from '@kbn/optimizer';
+import { ToolingLog, createReplaceSerializer } from '@kbn/dev-utils';
+import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '../index';
 
 import { allValuesFrom } from '../common';
 
@@ -34,6 +28,8 @@ expect.addSnapshotSerializer({
   serialize: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
   test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),
 });
+
+expect.addSnapshotSerializer(createReplaceSerializer(/\w+-fastbuild/, '<platform>-fastbuild'));
 
 const log = new ToolingLog({
   level: 'error',
@@ -68,9 +64,6 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     maxWorkerCount: 1,
     dist: false,
   });
-
-  expect(config.limits).toEqual(readLimits());
-  (config as any).limits = '<Limits>';
 
   expect(config).toMatchSnapshot('OptimizerConfig');
 
@@ -139,13 +132,13 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(foo.cache.getModuleCount()).toBe(6);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
-      <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
-      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
     ]
   `);
 
@@ -159,19 +152,19 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/node_modules/@kbn/optimizer/postcss.config.js,
       <absolute path>/node_modules/css-loader/package.json,
       <absolute path>/node_modules/style-loader/package.json,
-      <absolute path>/packages/kbn-optimizer/postcss.config.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/_other_styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7dark.scss,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7light.scss,
-      <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
-      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8dark.scss,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8light.scss,
+      <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
     ]
   `);
 
@@ -182,10 +175,10 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   expect(baz.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/public/index.ts,
-      <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
-      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
     ]
   `);
 });
@@ -234,6 +227,10 @@ it('prepares assets for distribution', async () => {
   });
 
   await allValuesFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
+
+  expect(
+    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/metrics.json'), 'utf8')
+  ).toMatchSnapshot('metrics.json');
 
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
   expectFileMatchesSnapshotWithCompression(

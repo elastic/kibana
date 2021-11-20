@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ActionInternal, Action } from '../actions';
@@ -13,12 +13,12 @@ const action1: Action = {
   id: 'action1',
   order: 1,
   type: 'type1',
-} as any;
+} as unknown as Action;
 const action2: Action = {
   id: 'action2',
   order: 2,
   type: 'type2',
-} as any;
+} as unknown as Action;
 
 test('returns actions set on trigger', () => {
   const { setup, doStart } = uiActionsPluginMock.createPlugin();
@@ -46,6 +46,6 @@ test('returns actions set on trigger', () => {
   const list2 = start.getTriggerActions('trigger');
 
   expect(list2).toHaveLength(2);
-  expect(!!list2.find(({ id }: any) => id === 'action1')).toBe(true);
-  expect(!!list2.find(({ id }: any) => id === 'action2')).toBe(true);
+  expect(!!list2.find(({ id }: { id: string }) => id === 'action1')).toBe(true);
+  expect(!!list2.find(({ id }: { id: string }) => id === 'action2')).toBe(true);
 });

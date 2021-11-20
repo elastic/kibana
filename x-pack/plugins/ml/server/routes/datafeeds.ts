@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestParams } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -14,8 +15,6 @@ import {
   deleteDatafeedQuerySchema,
 } from './schemas/datafeeds_schema';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-
-import { Datafeed, DatafeedStats } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for datafeed service
@@ -38,7 +37,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getDatafeeds<{ datafeeds: Datafeed[] }>();
+        const { body } = await mlClient.getDatafeeds();
         return response.ok({
           body,
         });
@@ -98,9 +97,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getDatafeedStats<{
-          datafeeds: DatafeedStats[];
-        }>();
+        const { body } = await mlClient.getDatafeedStats();
         return response.ok({
           body,
         });
@@ -250,7 +247,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: RequestParams.MlDeleteDatafeed = {
+        const options: estypes.MlDeleteDatafeedRequest = {
           datafeed_id: request.params.datafeedId,
         };
         const force = request.query.force;
@@ -297,8 +294,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
 
         const { body } = await mlClient.startDatafeed({
           datafeed_id: datafeedId,
-          start,
-          end,
+          body: {
+            start: start !== undefined ? String(start) : undefined,
+            end: end !== undefined ? String(end) : undefined,
+          },
         });
 
         return response.ok({

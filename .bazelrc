@@ -1,0 +1,25 @@
+# Inspired by https://raw.githubusercontent.com/bazelbuild/rules_nodejs/master/.bazelrc
+# Import shared settings first so we can override below
+import %workspace%/.bazelrc.common
+
+# Remote cache settings for local env
+# build --remote_cache=grpcs://cloud.buildbuddy.io
+# build --incompatible_remote_results_ignore_disk=true
+# build --noremote_upload_local_results
+# build --remote_timeout=30
+# build --remote_header=x-buildbuddy-api-key=3EYk49W2NefOx2n3yMze
+# build --remote_accept_cached=true
+
+# Enable this in case you want to share your build info
+# build --build_metadata=VISIBILITY=PUBLIC
+build --build_metadata=TEST_GROUPS=//packages
+
+###############################
+# Offline Support             #
+# Turn on these settings with #
+#  --config=offline           #
+###############################
+
+## Reset remote cache and backend support
+build:offline --bes_backend="" --remote_cache=""
+run:offline --bes_backend="" --remote_cache=""

@@ -1,15 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { map, truncate } from 'lodash';
 import open from 'opn';
-import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
+import puppeteer, { ElementHandle, EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
+import type { LocatorParams } from '../../../../common/types';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../../common/constants';
 import { getDisallowedOutgoingUrlError } from '../';
+import { ReportingCore } from '../../..';
+import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
 import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
@@ -52,14 +57,20 @@ interface InterceptedRequest {
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
-  private readonly page: Page;
+  private readonly page: puppeteer.Page;
   private readonly inspect: boolean;
   private readonly networkPolicy: NetworkPolicy;
 
   private listenersAttached = false;
   private interceptedCount = 0;
+  private core: ReportingCore;
 
-  constructor(page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
+  constructor(
+    core: ReportingCore,
+    page: puppeteer.Page,
+    { inspect, networkPolicy }: ChromiumDriverOptions
+  ) {
+    this.core = core;
     this.page = page;
     this.inspect = inspect;
     this.networkPolicy = networkPolicy;
@@ -85,10 +96,12 @@ export class HeadlessChromiumDriver {
       conditionalHeaders,
       waitForSelector: pageLoadSelector,
       timeout,
+      locator,
     }: {
       conditionalHeaders: ConditionalHeaders;
       waitForSelector: string;
       timeout: number;
+      locator?: LocatorParams;
     },
     logger: LevelLogger
   ): Promise<void> {
@@ -96,6 +109,27 @@ export class HeadlessChromiumDriver {
 
     // Reset intercepted request count
     this.interceptedCount = 0;
+
+    /**
+     * Integrate with the screenshot mode plugin contract by calling this function before any other
+     * scripts have run on the browser page.
+     */
+    await this.page.evaluateOnNewDocument(this.core.getEnableScreenshotMode());
+
+    if (locator) {
+      await this.page.evaluateOnNewDocument(
+        (key: string, value: unknown) => {
+          Object.defineProperty(window, key, {
+            configurable: false,
+            writable: true,
+            enumerable: true,
+            value,
+          });
+        },
+        REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+        locator
+      );
+    }
 
     await this.page.setRequestInterception(true);
 
@@ -126,7 +160,7 @@ export class HeadlessChromiumDriver {
   /*
    * Call Page.screenshot and return a base64-encoded string of the image
    */
-  public async screenshot(elementPosition: ElementPosition): Promise<string> {
+  public async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
@@ -137,7 +171,15 @@ export class HeadlessChromiumDriver {
       },
     });
 
-    return screenshot.toString('base64');
+    if (Buffer.isBuffer(screenshot)) {
+      return screenshot;
+    }
+
+    if (typeof screenshot === 'string') {
+      return Buffer.from(screenshot, 'base64');
+    }
+
+    return undefined;
   }
 
   public async evaluate(
@@ -159,40 +201,25 @@ export class HeadlessChromiumDriver {
     const { timeout } = opts;
     logger.debug(`waitForSelector ${selector}`);
     const resp = await this.page.waitForSelector(selector, { timeout }); // override default 30000ms
+
+    if (!resp) {
+      throw new Error(`Failure in waitForSelector: void response! Context: ${context.context}`);
+    }
+
     logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }
 
-  public async waitFor(
-    {
-      fn,
-      args,
-      toEqual,
-      timeout,
-    }: {
-      fn: EvaluateFn;
-      args: SerializableOrJSHandle[];
-      toEqual: number;
-      timeout: number;
-    },
-    context: EvaluateMetaOpts,
-    logger: LevelLogger
-  ): Promise<void> {
-    const startTime = Date.now();
-
-    while (true) {
-      const result = await this.evaluate({ fn, args }, context, logger);
-      if (result === toEqual) {
-        return;
-      }
-
-      if (Date.now() - startTime > timeout) {
-        throw new Error(
-          `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
-        );
-      }
-      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
-    }
+  public async waitFor({
+    fn,
+    args,
+    timeout,
+  }: {
+    fn: EvaluateFn;
+    args: SerializableOrJSHandle[];
+    timeout: number;
+  }): Promise<void> {
+    await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
   public async setViewport(
@@ -218,6 +245,7 @@ export class HeadlessChromiumDriver {
     }
 
     // @ts-ignore
+    // FIXME: retrieve the client in open() and  pass in the client
     const client = this.page._client;
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
@@ -251,6 +279,7 @@ export class HeadlessChromiumDriver {
           {
             ...interceptedRequest.request.headers,
             ...conditionalHeaders.headers,
+            [KBN_SCREENSHOT_MODE_HEADER]: 'true',
           },
           (value, name) => ({
             name,
@@ -292,7 +321,7 @@ export class HeadlessChromiumDriver {
     // Even though 3xx redirects go through our request
     // handler, we should probably inspect responses just to
     // avoid being bamboozled by some malicious request
-    this.page.on('response', (interceptedResponse: Response) => {
+    this.page.on('response', (interceptedResponse: puppeteer.HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
 
@@ -314,17 +343,16 @@ export class HeadlessChromiumDriver {
 
   private async launchDebugger() {
     // In order to pause on execution we have to reach more deeply into Chromiums Devtools Protocol,
-    // and more specifically, for the page being used. _client is per-page, and puppeteer doesn't expose
-    // a page's client in their api, so we have to reach into internals to get this behavior.
-    // Finally, in order to get the inspector running, we have to know the page's internal ID (again, private)
+    // and more specifically, for the page being used. _client is per-page.
+    // In order to get the inspector running, we have to know the page's internal ID (again, private)
     // in order to construct the final debugging URL.
 
-    // @ts-ignore
-    await this.page._client.send('Debugger.enable');
-    // @ts-ignore
-    await this.page._client.send('Debugger.pause');
-    // @ts-ignore
-    const targetId = this.page._target._targetId;
+    const target = this.page.target();
+    const client = await target.createCDPSession();
+
+    await client.send('Debugger.enable');
+    await client.send('Debugger.pause');
+    const targetId = target._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);
 

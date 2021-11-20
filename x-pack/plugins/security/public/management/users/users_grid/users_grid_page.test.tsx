@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { LocationDescriptorObject } from 'history';
-import { CoreStart, ScopedHistory } from 'kibana/public';
 
-import { User } from '../../../../common/model';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { UsersGridPage } from './users_grid_page';
-import React from 'react';
-import { ReactWrapper } from 'enzyme';
-import { userAPIClientMock } from '../index.mock';
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
-import { rolesAPIClientMock } from '../../roles/index.mock';
-import { findTestSubject } from '@kbn/test/jest';
 import { EuiBasicTable } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
+import type { LocationDescriptorObject } from 'history';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import type { CoreStart, ScopedHistory } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+
+import type { User } from '../../../../common/model';
+import { rolesAPIClientMock } from '../../roles/index.mock';
+import { userAPIClientMock } from '../index.mock';
+import { UsersGridPage } from './users_grid_page';
 
 describe('UsersGridPage', () => {
   let history: ScopedHistory;
@@ -69,6 +71,66 @@ describe('UsersGridPage', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(findTestSubject(wrapper, 'userDisabled')).toHaveLength(0);
+  });
+
+  it('renders the loading indication on the table when fetching user with data', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
+      return Promise.resolve<User[]>([
+        {
+          username: 'foo',
+          email: 'foo@bar.net',
+          full_name: 'foo bar',
+          roles: ['kibana_user'],
+          enabled: true,
+        },
+        {
+          username: 'reserved',
+          email: 'reserved@bar.net',
+          full_name: '',
+          roles: ['superuser'],
+          enabled: true,
+          metadata: {
+            _reserved: true,
+          },
+        },
+      ]);
+    });
+
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    expect(wrapper.find('.euiBasicTable-loading').exists()).toBeTruthy();
+    await waitForRender(wrapper);
+    expect(wrapper.find('.euiBasicTable-loading').exists()).toBeFalsy();
+  });
+
+  it('renders the loading indication on the table when fetching user with no data', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
+      return Promise.resolve<User[]>([]);
+    });
+
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    expect(wrapper.find('.euiBasicTable-loading').exists()).toBeTruthy();
+    await waitForRender(wrapper);
+    expect(wrapper.find('.euiBasicTable-loading').exists()).toBeFalsy();
   });
 
   it('generates valid links when usernames contain special characters', async () => {
@@ -234,26 +296,13 @@ describe('UsersGridPage', () => {
 
     await waitForRender(wrapper);
 
-    const deprecationTooltip = wrapper.find('[data-test-subj="roleDeprecationTooltip"]').props();
+    const deprecationTooltip = wrapper
+      .find('[data-test-subj="roleDeprecationTooltip"]')
+      .prop('content');
 
-    expect(deprecationTooltip).toMatchInlineSnapshot(`
-      Object {
-        "children": <div>
-          kibana_user
-           
-          <EuiIcon
-            className="eui-alignTop"
-            color="warning"
-            size="s"
-            type="alert"
-          />
-        </div>,
-        "content": "The kibana_user role is deprecated. I don't like you.",
-        "data-test-subj": "roleDeprecationTooltip",
-        "delay": "regular",
-        "position": "top",
-      }
-    `);
+    expect(deprecationTooltip).toMatchInlineSnapshot(
+      `"The kibana_user role is deprecated. I don't like you."`
+    );
   });
 
   it('hides reserved users when instructed to', async () => {

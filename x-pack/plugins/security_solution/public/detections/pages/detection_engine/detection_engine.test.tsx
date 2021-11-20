@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,7 +11,6 @@ import { useParams } from 'react-router-dom';
 import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
@@ -19,9 +19,10 @@ import {
 } from '../../../common/mock';
 import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { createStore, State } from '../../../common/store';
-import { mockHistory, Router } from '../../../cases/components/__mock__/router';
+import { mockHistory, Router } from '../../../common/mock/router';
+import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -56,24 +57,60 @@ jest.mock('../../components/alerts_info', () => ({
   useAlertInfo: jest.fn().mockReturnValue([]),
 }));
 
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useUiSetting$: jest.fn().mockReturnValue([]),
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToUrl: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        timelines: { ...mockTimelines },
+        data: {
+          query: {
+            filterManager: jest.fn().mockReturnValue({}),
+          },
+        },
+        docLinks: {
+          links: {
+            siem: {
+              privileges: 'link',
+            },
+          },
+        },
+      },
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+  };
+});
+
 const state: State = {
   ...mockGlobalState,
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  apolloClientObservable,
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
     (useParams as jest.Mock).mockReturnValue({});
-    (useUserData as jest.Mock).mockReturnValue([{}]);
-    (useSourcererScope as jest.Mock).mockReturnValue({
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        hasIndexRead: true,
+        canUserREAD: true,
+      },
+    ]);
+    (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });

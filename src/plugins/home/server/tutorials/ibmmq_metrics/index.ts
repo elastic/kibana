@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,16 +23,16 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'ibmmqMetrics',
     name: i18n.translate('home.tutorials.ibmmqMetrics.nameTitle', {
-      defaultMessage: 'IBM MQ metrics',
+      defaultMessage: 'IBM MQ Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.ibmmqMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from IBM MQ instances.',
+      defaultMessage: 'Collect metrics from IBM MQ instances with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.ibmmqMetrics.longDescription', {
       defaultMessage:
-        'The `ibmmq` Metricbeat module fetches monitoring metrics from IBM MQ instances \
+        'The `ibmmq` Metricbeat module fetches metrics from IBM MQ instances \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ibmmq.html',
@@ -57,5 +57,6 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['security'],
   };
 }

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { TIMESTAMP_FIELD } from '../../../common/constants';
 import { ProcessListAPIRequest, ProcessListAPIQueryAggregation } from '../../../common/http_api';
 import { ESSearchClient } from '../metrics/types';
 import { CMDLINE_FIELD } from './common';
@@ -12,7 +14,7 @@ const TOP_N = 10;
 
 export const getProcessList = async (
   search: ESSearchClient,
-  { hostTerm, timefield, indexPattern, to, sortBy, searchFilter }: ProcessListAPIRequest
+  { hostTerm, indexPattern, to, sortBy, searchFilter }: ProcessListAPIRequest
 ) => {
   const body = {
     size: 0,
@@ -21,9 +23,10 @@ export const getProcessList = async (
         filter: [
           {
             range: {
-              [timefield]: {
+              [TIMESTAMP_FIELD]: {
                 gte: to - 60 * 1000, // 1 minute
                 lte: to,
+                format: 'epoch_millis',
               },
             },
           },
@@ -46,7 +49,7 @@ export const getProcessList = async (
               size: 1,
               sort: [
                 {
-                  [timefield]: {
+                  [TIMESTAMP_FIELD]: {
                     order: 'desc',
                   },
                 },
@@ -92,7 +95,7 @@ export const getProcessList = async (
                   size: 1,
                   sort: [
                     {
-                      [timefield]: {
+                      [TIMESTAMP_FIELD]: {
                         order: 'desc',
                       },
                     },
@@ -128,8 +131,8 @@ export const getProcessList = async (
 
     let summary: { [p: string]: number } = {};
     if (result.aggregations!.summaryEvent.summary.hits.hits.length) {
-      summary = result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process
-        .summary;
+      summary =
+        result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process.summary;
     }
 
     return {

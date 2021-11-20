@@ -1,103 +1,83 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
-import { useRouteMatch } from 'react-router-dom';
-import { FilterPopoverProps, FilterPopover } from './filter_popover';
-import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
-import { filterLabels } from './translations';
+import { capitalize } from 'lodash';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
-import { MONITOR_ROUTE } from '../../../../common/constants';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
-
-interface Props {
-  loading: boolean;
-  overviewFilters: OverviewFilters;
-}
+import { FieldValueSuggestions, useInspectorContext } from '../../../../../observability/public';
+import { SelectedFilters } from './selected_filters';
+import { useIndexPattern } from '../../../contexts/uptime_index_pattern_context';
+import { useGetUrlParams } from '../../../hooks';
 
 const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;
 `;
 
-function isDisabled<T>(array?: T[]) {
-  return array ? array.length === 0 : true;
-}
-
-export const FilterGroupComponent: React.FC<Props> = ({ overviewFilters, loading }) => {
-  const { locations, ports, schemes, tags } = overviewFilters;
-
+export const FilterGroup = () => {
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
     fieldName: string;
     values: string[];
-  }>({ fieldName: '', values: [] });
+    notValues: string[];
+  }>({ fieldName: '', values: [], notValues: [] });
 
-  useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
+  useFilterUpdate(
+    updatedFieldValues.fieldName,
+    updatedFieldValues.values,
+    updatedFieldValues.notValues
+  );
 
-  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useSelectedFilters();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  const onFilterFieldChange = (fieldName: string, values: string[]) => {
-    setUpdatedFieldValues({ fieldName, values });
-  };
+  const { inspectorAdapters } = useInspectorContext();
 
-  const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
+  const { filtersList } = useSelectedFilters();
 
-  const filterPopoverProps: FilterPopoverProps[] = [
-    {
-      loading,
-      onFilterFieldChange,
-      fieldName: 'observer.geo.name',
-      id: 'location',
-      items: locations || [],
-      selectedItems: selectedLocations,
-      title: filterLabels.LOCATION,
+  const indexPattern = useIndexPattern();
+
+  const onFilterFieldChange = useCallback(
+    (fieldName: string, values: string[], notValues: string[]) => {
+      setUpdatedFieldValues({ fieldName, values, notValues });
     },
-    // on monitor page we only display location filter in ping list
-    ...(!isMonitorPage
-      ? [
-          {
-            loading,
-            onFilterFieldChange,
-            fieldName: 'url.port',
-            id: 'port',
-            disabled: isDisabled(ports),
-            items: ports?.map((p: number) => p.toString()) ?? [],
-            selectedItems: selectedPorts,
-            title: filterLabels.PORT,
-          },
-          {
-            loading,
-            onFilterFieldChange,
-            fieldName: 'monitor.type',
-            id: 'scheme',
-            disabled: isDisabled(schemes),
-            items: schemes ?? [],
-            selectedItems: selectedSchemes,
-            title: filterLabels.SCHEME,
-          },
-          {
-            loading,
-            onFilterFieldChange,
-            fieldName: 'tags',
-            id: 'tags',
-            disabled: isDisabled(tags),
-            items: tags ?? [],
-            selectedItems: selectedTags,
-            title: filterLabels.TAG,
-          },
-        ]
-      : []),
-  ];
+    []
+  );
 
   return (
-    <Container>
-      {filterPopoverProps.map((item) => (
-        <FilterPopover key={item.id} {...item} />
-      ))}
-    </Container>
+    <>
+      <Container>
+        {indexPattern &&
+          filtersList.map(({ field, label, selectedItems, excludedItems }) => (
+            <FieldValueSuggestions
+              key={field}
+              compressed={false}
+              indexPatternTitle={indexPattern.title}
+              sourceField={field}
+              label={label}
+              selectedValue={selectedItems}
+              excludedValue={excludedItems}
+              onChange={(values, notValues) =>
+                onFilterFieldChange(field, values ?? [], notValues ?? [])
+              }
+              asCombobox={false}
+              asFilterButton={true}
+              forceOpen={false}
+              filters={[]}
+              cardinalityField="monitor.id"
+              time={{ from: dateRangeStart, to: dateRangeEnd }}
+              inspector={{
+                adapter: inspectorAdapters.requests,
+                title: 'get' + capitalize(label) + 'FilterValues',
+              }}
+            />
+          ))}
+      </Container>
+      <SelectedFilters onChange={onFilterFieldChange} />
+    </>
   );
 };

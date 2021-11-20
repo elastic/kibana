@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../../graphql/types';
-import { sourcererSelectors } from '../../../common/store';
-import { useShallowEqualSelector, useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { TimelineId } from '../../../../common/types/timeline';
-import { useApolloClient } from '../../../common/utils/apollo_context';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { SortFieldTimeline, TimelineId } from '../../../../common/types/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import {
@@ -19,7 +17,6 @@ import {
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../../timelines/store/timeline/actions';
 
-import { deleteTimelineMutation } from '../../containers/delete/persist.gql_query';
 import { useGetAllTimeline } from '../../containers/all';
 
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
@@ -46,6 +43,10 @@ import {
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
+import { deleteTimelinesByIds } from '../../containers/api';
+import { Direction } from '../../../../common/search_strategy';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -83,7 +84,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     setImportDataModalToggle,
     title,
   }) => {
-    const apolloClient = useApolloClient();
     const dispatch = useDispatch();
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
@@ -109,16 +109,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const existingIndexNamesSelector = useMemo(
-      () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-      []
-    );
-    const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+    const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
     const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
-    const updateIsLoading = useCallback((payload) => dispatch(dispatchUpdateIsLoading(payload)), [
-      dispatch,
-    ]);
+    const updateIsLoading = useCallback(
+      (payload) => dispatch(dispatchUpdateIsLoading(payload)),
+      [dispatch]
+    );
 
     const {
       customTemplateTimelineCount,
@@ -135,15 +132,12 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       defaultTimelineCount,
       templateTimelineCount,
     });
-    const {
-      timelineStatus,
-      templateTimelineFilter,
-      installPrepackagedTimelines,
-    } = useTimelineStatus({
-      timelineType,
-      customTemplateTimelineCount,
-      elasticTemplateTimelineCount,
-    });
+    const { timelineStatus, templateTimelineFilter, installPrepackagedTimelines } =
+      useTimelineStatus({
+        timelineType,
+        customTemplateTimelineCount,
+        elasticTemplateTimelineCount,
+      });
     const refetch = useCallback(() => {
       fetchAllTimeline({
         pageInfo: {
@@ -207,23 +201,17 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultHeaders,
-              indexNames: existingIndexNames,
+              dataViewId,
+              indexNames: selectedPatterns,
               show: false,
             })
           );
         }
 
-        await apolloClient!.mutate<
-          DeleteTimelineMutation.Mutation,
-          DeleteTimelineMutation.Variables
-        >({
-          mutation: deleteTimelineMutation,
-          fetchPolicy: 'no-cache',
-          variables: { id: timelineIds },
-        });
+        await deleteTimelinesByIds(timelineIds);
         refetch();
       },
-      [apolloClient, dispatch, existingIndexNames, refetch, timelineSavedObjectId]
+      [timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -290,7 +278,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         }
 
         queryTimelineById({
-          apolloClient,
           duplicate,
           onOpenTimeline,
           timelineId,
@@ -300,7 +287,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [apolloClient, updateIsLoading, updateTimeline]
+      [updateIsLoading, updateTimeline]
     );
 
     useEffect(() => {

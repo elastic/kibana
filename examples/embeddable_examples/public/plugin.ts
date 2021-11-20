@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -49,6 +49,11 @@ import {
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { createAddBookToLibraryAction } from './book/add_book_to_library_action';
 import { createUnlinkBookFromLibraryAction } from './book/unlink_book_from_library_action';
+import {
+  SIMPLE_EMBEDDABLE,
+  SimpleEmbeddableFactory,
+  SimpleEmbeddableFactoryDefinition,
+} from './migrations';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -68,6 +73,7 @@ interface ExampleEmbeddableFactories {
   getTodoEmbeddableFactory: () => TodoEmbeddableFactory;
   getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
   getBookEmbeddableFactory: () => BookEmbeddableFactory;
+  getMigrationsEmbeddableFactory: () => SimpleEmbeddableFactory;
 }
 
 export interface EmbeddableExamplesStart {
@@ -82,60 +88,74 @@ export class EmbeddableExamplesPlugin
       EmbeddableExamplesStart,
       EmbeddableExamplesSetupDependencies,
       EmbeddableExamplesStartDependencies
-    > {
+    >
+{
   private exampleEmbeddableFactories: Partial<ExampleEmbeddableFactories> = {};
 
   public setup(
     core: CoreSetup<EmbeddableExamplesStartDependencies>,
     deps: EmbeddableExamplesSetupDependencies
   ) {
-    this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
-      HELLO_WORLD_EMBEDDABLE,
-      new HelloWorldEmbeddableFactoryDefinition()
-    );
+    this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        HELLO_WORLD_EMBEDDABLE,
+        new HelloWorldEmbeddableFactoryDefinition()
+      );
 
-    this.exampleEmbeddableFactories.getMultiTaskTodoEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
-      MULTI_TASK_TODO_EMBEDDABLE,
-      new MultiTaskTodoEmbeddableFactoryDefinition()
-    );
+    this.exampleEmbeddableFactories.getMigrationsEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        SIMPLE_EMBEDDABLE,
+        new SimpleEmbeddableFactoryDefinition()
+      );
 
-    this.exampleEmbeddableFactories.getSearchableListContainerEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
-      SEARCHABLE_LIST_CONTAINER,
-      new SearchableListContainerFactoryDefinition(async () => ({
-        embeddableServices: (await core.getStartServices())[1].embeddable,
-      }))
-    );
+    this.exampleEmbeddableFactories.getMultiTaskTodoEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        MULTI_TASK_TODO_EMBEDDABLE,
+        new MultiTaskTodoEmbeddableFactoryDefinition()
+      );
 
-    this.exampleEmbeddableFactories.getListContainerEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
-      LIST_CONTAINER,
-      new ListContainerFactoryDefinition(async () => ({
-        embeddableServices: (await core.getStartServices())[1].embeddable,
-      }))
-    );
+    this.exampleEmbeddableFactories.getSearchableListContainerEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        SEARCHABLE_LIST_CONTAINER,
+        new SearchableListContainerFactoryDefinition(async () => ({
+          embeddableServices: (await core.getStartServices())[1].embeddable,
+        }))
+      );
 
-    this.exampleEmbeddableFactories.getTodoEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
-      TODO_EMBEDDABLE,
-      new TodoEmbeddableFactoryDefinition(async () => ({
-        openModal: (await core.getStartServices())[0].overlays.openModal,
-      }))
-    );
+    this.exampleEmbeddableFactories.getListContainerEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        LIST_CONTAINER,
+        new ListContainerFactoryDefinition(async () => ({
+          embeddableServices: (await core.getStartServices())[1].embeddable,
+        }))
+      );
 
-    this.exampleEmbeddableFactories.getTodoRefEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
-      TODO_REF_EMBEDDABLE,
-      new TodoRefEmbeddableFactoryDefinition(async () => ({
-        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
-      }))
-    );
-    this.exampleEmbeddableFactories.getBookEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
-      BOOK_EMBEDDABLE,
-      new BookEmbeddableFactoryDefinition(async () => ({
-        getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
-        openModal: (await core.getStartServices())[0].overlays.openModal,
-        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-        overlays: (await core.getStartServices())[0].overlays,
-      }))
-    );
+    this.exampleEmbeddableFactories.getTodoEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        TODO_EMBEDDABLE,
+        new TodoEmbeddableFactoryDefinition(async () => ({
+          openModal: (await core.getStartServices())[0].overlays.openModal,
+        }))
+      );
+
+    this.exampleEmbeddableFactories.getTodoRefEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        TODO_REF_EMBEDDABLE,
+        new TodoRefEmbeddableFactoryDefinition(async () => ({
+          savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+          getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+        }))
+      );
+    this.exampleEmbeddableFactories.getBookEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        BOOK_EMBEDDABLE,
+        new BookEmbeddableFactoryDefinition(async () => ({
+          getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
+          openModal: (await core.getStartServices())[0].overlays.openModal,
+          savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+          overlays: (await core.getStartServices())[0].overlays,
+        }))
+      );
 
     const editBookAction = createEditBookAction(async () => ({
       getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,

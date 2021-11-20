@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { embeddablePluginMock } from '../../../../../../../src/plugins/embeddable/public/mocks';
@@ -11,6 +12,7 @@ import {
   mockAPMIndexPattern,
   mockAPMRegexIndexPattern,
   mockAPMTransactionIndexPattern,
+  mockAPMTracesDataStreamIndexPattern,
   mockAuditbeatIndexPattern,
   mockCCSGlobIndexPattern,
   mockCommaFilebeatAuditbeatCCSGlobIndexPattern,
@@ -68,6 +70,7 @@ describe('embedded_map_helpers', () => {
   describe('findMatchingIndexPatterns', () => {
     const siemDefaultIndices = [
       'apm-*-transaction*',
+      'traces-apm*',
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
@@ -101,11 +104,16 @@ describe('embedded_map_helpers', () => {
 
     test('finds exact glob-matched index patterns ', () => {
       const matchingIndexPatterns = findMatchingIndexPatterns({
-        kibanaIndexPatterns: [mockAPMTransactionIndexPattern, mockFilebeatIndexPattern],
+        kibanaIndexPatterns: [
+          mockAPMTransactionIndexPattern,
+          mockAPMTracesDataStreamIndexPattern,
+          mockFilebeatIndexPattern,
+        ],
         siemDefaultIndices,
       });
       expect(matchingIndexPatterns).toEqual([
         mockAPMTransactionIndexPattern,
+        mockAPMTracesDataStreamIndexPattern,
         mockFilebeatIndexPattern,
       ]);
     });

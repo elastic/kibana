@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RunContext, TaskInstance } from '../task';
@@ -30,8 +31,10 @@ export function addMiddlewareToChain(prev: Middleware, next: Partial<Middleware>
   };
 }
 
-const chain = <T>(prev: Mapper<T>, next: Mapper<T>): Mapper<T> => (params) =>
-  next(params).then(prev);
+const chain =
+  <T>(prev: Mapper<T>, next: Mapper<T>): Mapper<T> =>
+  (params) =>
+    next(params).then(prev);
 
 export function createInitialMiddleware(): Middleware {
   return {

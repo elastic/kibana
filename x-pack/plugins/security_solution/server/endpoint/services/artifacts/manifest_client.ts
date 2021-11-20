@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   manifestSchemaVersion,
   ManifestSchemaVersion,
 } from '../../../../common/endpoint/schema/common';
-import { validate } from '../../../../common/validate';
 import { ManifestConstants } from '../../lib/artifacts';
 import { InternalManifestSchema, InternalManifestCreateSchema } from '../../schemas/artifacts';
 
@@ -30,10 +32,7 @@ export class ManifestClient {
   ) {
     this.savedObjectsClient = savedObjectsClient;
 
-    const [validated, errors] = validate(
-      (schemaVersion as unknown) as object,
-      manifestSchemaVersion
-    );
+    const [validated, errors] = validate(schemaVersion as unknown as object, manifestSchemaVersion);
 
     if (errors != null || validated === null) {
       throw new Error(`Invalid manifest version: ${schemaVersion}`);

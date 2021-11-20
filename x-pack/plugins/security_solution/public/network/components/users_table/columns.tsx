@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FlowTarget, NetworkUsersItem } from '../../../../common/search_strategy';
@@ -27,7 +28,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     field: 'node.user.name',
     name: i18n.USER_NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (userName) =>
       getRowItemDraggable({
@@ -40,7 +41,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     field: 'node.user.id',
     name: i18n.USER_ID,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (userIds) =>
       getRowItemDraggables({
@@ -53,7 +54,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     field: 'node.user.groupName',
     name: i18n.GROUP_NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (groupNames) =>
       getRowItemDraggables({
@@ -66,7 +67,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     field: 'node.user.groupId',
     name: i18n.GROUP_ID,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (groupId) =>
       getRowItemDraggables({
@@ -80,7 +81,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     field: 'node.user.count',
     name: i18n.DOCUMENT_COUNT,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (docCount) => defaultToEmptyTag(docCount),
   },

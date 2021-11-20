@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpFetchError } from 'src/core/public';
 import { fetchSnapshotCount } from './snapshot';
 import { apiService } from './utils';
+import { API_URLS } from '../../../common/constants';
 
 describe('snapshot API', () => {
   let fetchMock: jest.SpyInstance<Partial<unknown>>;
@@ -17,6 +19,7 @@ describe('snapshot API', () => {
       get: jest.fn(),
       fetch: jest.fn(),
     } as any;
+    apiService.addInspectorRequest = jest.fn();
     fetchMock = jest.spyOn(apiService.http, 'fetch');
     mockResponse = { up: 3, down: 12, total: 15 };
   });
@@ -34,7 +37,7 @@ describe('snapshot API', () => {
     });
     expect(fetchMock).toHaveBeenCalledWith({
       asResponse: false,
-      path: '/api/uptime/snapshot/count',
+      path: API_URLS.SNAPSHOT_COUNT,
       query: {
         dateRangeEnd: 'now',
         dateRangeStart: 'now-15m',

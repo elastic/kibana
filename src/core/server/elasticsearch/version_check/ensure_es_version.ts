@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -20,6 +20,7 @@ import {
 import { Logger } from '../../logging';
 import type { ElasticsearchClient } from '../client';
 
+/** @public */
 export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;
   log: Logger;
@@ -31,7 +32,7 @@ export interface PollEsNodesVersionOptions {
 interface NodeInfo {
   version: string;
   ip: string;
-  http: {
+  http?: {
     publish_address: string;
   };
   name: string;
@@ -49,6 +50,7 @@ export interface NodesVersionCompatibility {
   incompatibleNodes: NodeInfo[];
   warningNodes: NodeInfo[];
   kibanaVersion: string;
+  nodesInfoRequestError?: Error;
 }
 
 function getHumanizedNodeName(node: NodeInfo) {
@@ -57,22 +59,28 @@ function getHumanizedNodeName(node: NodeInfo) {
 }
 
 export function mapNodesVersionCompatibility(
-  nodesInfo: NodesInfo,
+  nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error },
   kibanaVersion: string,
   ignoreVersionMismatch: boolean
 ): NodesVersionCompatibility {
-  if (Object.keys(nodesInfo.nodes ?? {}).length === 0) {
+  if (Object.keys(nodesInfoResponse.nodes ?? {}).length === 0) {
+    // Note: If the a nodesInfoRequestError is present, the message contains the nodesInfoRequestError.message as a suffix
+    let message = `Unable to retrieve version information from Elasticsearch nodes.`;
+    if (nodesInfoResponse.nodesInfoRequestError) {
+      message = message + ` ${nodesInfoResponse.nodesInfoRequestError.message}`;
+    }
     return {
       isCompatible: false,
-      message: 'Unable to retrieve version information from Elasticsearch nodes.',
+      message,
       incompatibleNodes: [],
       warningNodes: [],
       kibanaVersion,
+      nodesInfoRequestError: nodesInfoResponse.nodesInfoRequestError,
     };
   }
-  const nodes = Object.keys(nodesInfo.nodes)
+  const nodes = Object.keys(nodesInfoResponse.nodes)
     .sort() // Sorting ensures a stable node ordering for comparison
-    .map((key) => nodesInfo.nodes[key])
+    .map((key) => nodesInfoResponse.nodes[key])
     .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
 
   // Aggregate incompatible ES nodes.
@@ -112,7 +120,13 @@ export function mapNodesVersionCompatibility(
     kibanaVersion,
   };
 }
-
+// Returns true if NodesVersionCompatibility nodesInfoRequestError is the same
+function compareNodesInfoErrorMessages(
+  prev: NodesVersionCompatibility,
+  curr: NodesVersionCompatibility
+): boolean {
+  return prev.nodesInfoRequestError?.message === curr.nodesInfoRequestError?.message;
+}
 // Returns true if two NodesVersionCompatibility entries match
 function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompatibility) {
   const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
@@ -121,10 +135,12 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
     curr.incompatibleNodes.length === prev.incompatibleNodes.length &&
     curr.warningNodes.length === prev.warningNodes.length &&
     curr.incompatibleNodes.every((node, i) => nodesEqual(node, prev.incompatibleNodes[i])) &&
-    curr.warningNodes.every((node, i) => nodesEqual(node, prev.warningNodes[i]))
+    curr.warningNodes.every((node, i) => nodesEqual(node, prev.warningNodes[i])) &&
+    compareNodesInfoErrorMessages(curr, prev)
   );
 }
 
+/** @public */
 export const pollEsNodesVersion = ({
   internalClient,
   log,
@@ -141,14 +157,14 @@ export const pollEsNodesVersion = ({
         })
       ).pipe(
         map(({ body }) => body),
-        catchError((_err) => {
-          return of({ nodes: {} });
+        catchError((nodesInfoRequestError) => {
+          return of({ nodes: {}, nodesInfoRequestError });
         })
       );
     }),
-    map((nodesInfo: NodesInfo) =>
-      mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch)
+    map((nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error }) =>
+      mapNodesVersionCompatibility(nodesInfoResponse, kibanaVersion, ignoreVersionMismatch)
     ),
-    distinctUntilChanged(compareNodes) // Only emit if there are new nodes or versions
+    distinctUntilChanged(compareNodes) // Only emit if there are new nodes or versions or if we return an error and that error changes
   );
 };

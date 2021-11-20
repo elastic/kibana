@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { render } from '@testing-library/react';
@@ -24,11 +25,11 @@ describe('ApmIndices', () => {
     );
 
     expect(getByText('Indices')).toMatchInlineSnapshot(`
-      <h1
-        class="euiTitle euiTitle--large"
+      <h2
+        class="euiTitle euiTitle--small"
       >
         Indices
-      </h1>
+      </h2>
     `);
 
     expect(spy).toHaveBeenCalledTimes(2);

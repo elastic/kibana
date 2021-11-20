@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,12 +24,12 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'osqueryLogs',
     name: i18n.translate('home.tutorials.osqueryLogs.nameTitle', {
-      defaultMessage: 'Osquery logs',
+      defaultMessage: 'Osquery Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.osqueryLogs.shortDescription', {
-      defaultMessage: 'Collect osquery logs in JSON format.',
+      defaultMessage: 'Collect and parse logs from Osquery with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.osqueryLogs.longDescription', {
       defaultMessage:
@@ -62,5 +62,6 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['security', 'os_system'],
   };
 }

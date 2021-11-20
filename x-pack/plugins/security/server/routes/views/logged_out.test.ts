@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { HttpResourcesRequestHandler, RouteConfig } from '../../../../../../src/core/server';
-import { Session } from '../../session_management';
-import { defineLoggedOutRoutes } from './logged_out';
 
-import { httpServerMock, httpResourcesMock } from '../../../../../../src/core/server/mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
+import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
+
+import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineLoggedOutRoutes } from './logged_out';
 
 describe('LoggedOut view routes', () => {
   let session: jest.Mocked<PublicMethodsOf<Session>>;
@@ -23,12 +25,10 @@ describe('LoggedOut view routes', () => {
 
     defineLoggedOutRoutes(routeParamsMock);
 
-    const [
-      loggedOutRouteConfig,
-      loggedOutRouteHandler,
-    ] = routeParamsMock.httpResources.register.mock.calls.find(
-      ([{ path }]) => path === '/security/logged_out'
-    )!;
+    const [loggedOutRouteConfig, loggedOutRouteHandler] =
+      routeParamsMock.httpResources.register.mock.calls.find(
+        ([{ path }]) => path === '/security/logged_out'
+      )!;
 
     routeConfig = loggedOutRouteConfig;
     routeHandler = loggedOutRouteHandler;

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('../../layouts/layouts', () => {
@@ -12,11 +12,12 @@ jest.mock('../../layouts/layouts', () => {
   return {
     Layouts: {
       configSchema: schema.object({
-        kind: schema.literal('mock'),
+        type: schema.literal('mock'),
       }),
     },
   };
 });
 
 export const mockCreateWriteStream = jest.fn();
-jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream }));
+export const mockMkdirSync = jest.fn();
+jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream, mkdirSync: mockMkdirSync }));

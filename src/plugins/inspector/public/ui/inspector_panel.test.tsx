@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -11,12 +11,24 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
-import type { IUiSettingsClient } from 'kibana/public';
+import type { ApplicationStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
+import { SharePluginStart } from '../../../share/public';
+import { applicationServiceMock } from '../../../../core/public/mocks';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
   let views: InspectorViewDescription[];
-  const uiSettings: IUiSettingsClient = {} as IUiSettingsClient;
+  const dependencies = {
+    application: applicationServiceMock.createStartContract(),
+    http: {},
+    share: {},
+    uiSettings: {},
+  } as unknown as {
+    application: ApplicationStart;
+    http: HttpSetup;
+    share: SharePluginStart;
+    uiSettings: IUiSettingsClient;
+  };
 
   beforeEach(() => {
     adapters = {
@@ -54,14 +66,14 @@ describe('InspectorPanel', () => {
 
   it('should render as expected', () => {
     const component = mountWithIntl(
-      <InspectorPanel adapters={adapters} views={views} dependencies={{ uiSettings }} />
+      <InspectorPanel adapters={adapters} views={views} dependencies={dependencies} />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('should not allow updating adapters', () => {
     const component = mountWithIntl(
-      <InspectorPanel adapters={adapters} views={views} dependencies={{ uiSettings }} />
+      <InspectorPanel adapters={adapters} views={views} dependencies={dependencies} />
     );
     adapters.notAllowed = {};
     expect(() => component.setProps({ adapters })).toThrow();

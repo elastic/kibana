@@ -1,23 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { ISearchSource } from 'src/plugins/data/public';
-import { SerializedFieldFormat } from 'src/plugins/expressions/common';
+import { DatatableColumnType } from 'src/plugins/expressions/common';
 import type { RequestAdapter } from 'src/plugins/inspector/common';
+import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
+
+type PostFlightRequestFn<TAggConfig> = (
+  resp: estypes.SearchResponse<any>,
+  aggConfigs: IAggConfigs,
+  aggConfig: TAggConfig,
+  searchSource: ISearchSource,
+  inspectorRequestAdapter?: RequestAdapter,
+  abortSignal?: AbortSignal,
+  searchSessionId?: string
+) => Promise<estypes.SearchResponse<any>>;
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -32,21 +44,16 @@ export interface AggTypeConfig<
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
   ordered?: any;
   hasNoDsl?: boolean;
+  hasNoDslParams?: boolean;
   params?: Array<Partial<TParam>>;
+  valueType?: DatatableColumnType;
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
   json?: boolean;
   decorateAggConfig?: () => any;
-  postFlightRequest?: (
-    resp: any,
-    aggConfigs: IAggConfigs,
-    aggConfig: TAggConfig,
-    searchSource: ISearchSource,
-    inspectorRequestAdapter?: RequestAdapter,
-    abortSignal?: AbortSignal,
-    searchSessionId?: string
-  ) => Promise<any>;
+  postFlightRequest?: PostFlightRequestFn<TAggConfig>;
+  hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
@@ -92,6 +99,11 @@ export class AggType<
    */
   title: string;
   /**
+   * The type the values produced by this agg will have in the final data table.
+   * If not specified, the type of the field is used.
+   */
+  valueType?: DatatableColumnType;
+  /**
    * a function that will be called when this aggType is assigned to
    * an aggConfig, and that aggConfig is being rendered (in a form, chart, etc.).
    *
@@ -123,6 +135,12 @@ export class AggType<
    * @type {Boolean}
    */
   hasNoDsl: boolean;
+  /**
+   * Flag that prevents params from this aggregation from being included in the dsl. Sibling and parent aggs are still written.
+   *
+   * @type {Boolean}
+   */
+  hasNoDslParams: boolean;
   /**
    * The method to create a filter representation of the bucket
    * @param {object} aggConfig The instance of the aggConfig
@@ -163,6 +181,9 @@ export class AggType<
    * is created, giving the agg type a chance to modify the agg config
    */
   decorateAggConfig: () => any;
+
+  hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
+
   /**
    * A function that needs to be called after the main request has been made
    * and should return an updated response
@@ -175,15 +196,7 @@ export class AggType<
    * @param searchSessionId - searchSessionId to be used for grouping requests into a single search session
    * @return {Promise}
    */
-  postFlightRequest: (
-    resp: any,
-    aggConfigs: IAggConfigs,
-    aggConfig: TAggConfig,
-    searchSource: ISearchSource,
-    inspectorRequestAdapter?: RequestAdapter,
-    abortSignal?: AbortSignal,
-    searchSessionId?: string
-  ) => Promise<any>;
+  postFlightRequest: PostFlightRequestFn<TAggConfig>;
   /**
    * Get the serialized format for the values produced by this agg type,
    * overridden by several metrics that always output a simple number.
@@ -207,6 +220,10 @@ export class AggType<
     return agg.id;
   };
 
+  splitForTimeShift(agg: TAggConfig, aggs: IAggConfigs) {
+    return false;
+  }
+
   /**
    * Generic AggType Constructor
    *
@@ -222,9 +239,11 @@ export class AggType<
     this.dslName = config.dslName || config.name;
     this.expressionName = config.expressionName;
     this.title = config.title;
+    this.valueType = config.valueType;
     this.makeLabel = config.makeLabel || constant(this.name);
     this.ordered = config.ordered;
     this.hasNoDsl = !!config.hasNoDsl;
+    this.hasNoDslParams = !!config.hasNoDslParams;
 
     if (config.createFilter) {
       this.createFilter = config.createFilter;
@@ -268,6 +287,7 @@ export class AggType<
     this.getResponseAggs = config.getResponseAggs || (() => {});
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
+    this.hasPrecisionError = config.hasPrecisionError;
 
     this.getSerializedFormat =
       config.getSerializedFormat ||

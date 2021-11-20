@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
@@ -75,14 +75,15 @@ function DefaultEditorAggParams({
   hideCustomLabel = false,
 }: DefaultEditorAggParamsProps) {
   const schema = useMemo(() => getSchemaByName(schemas, agg.schema), [agg.schema, schemas]);
-  const aggFilter = useMemo(() => [...allowedAggs, ...(schema.aggFilter || [])], [
-    allowedAggs,
-    schema.aggFilter,
-  ]);
+  const aggFilter = useMemo(
+    () => [...allowedAggs, ...(schema.aggFilter || [])],
+    [allowedAggs, schema.aggFilter]
+  );
   const { services } = useKibana<VisDefaultEditorKibanaServices>();
-  const aggTypes = useMemo(() => services.data.search.aggs.types.getAll(), [
-    services.data.search.aggs.types,
-  ]);
+  const aggTypes = useMemo(
+    () => services.data.search.aggs.types.getAll(),
+    [services.data.search.aggs.types]
+  );
   const groupedAggTypeOptions = useMemo(
     () => getAggTypeOptions(aggTypes, agg, indexPattern, groupName, aggFilter),
     [aggTypes, agg, indexPattern, groupName, aggFilter]
@@ -96,11 +97,10 @@ function DefaultEditorAggParams({
     : '';
   const aggTypeName = agg.type?.name;
   const fieldName = agg.params?.field?.name;
-  const editorConfig = useMemo(() => getEditorConfig(indexPattern, aggTypeName, fieldName), [
-    indexPattern,
-    aggTypeName,
-    fieldName,
-  ]);
+  const editorConfig = useMemo(
+    () => getEditorConfig(indexPattern, aggTypeName, fieldName),
+    [indexPattern, aggTypeName, fieldName]
+  );
   const params = useMemo(
     () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }),
     [agg, editorConfig, metricAggs, state, schemas, hideCustomLabel]

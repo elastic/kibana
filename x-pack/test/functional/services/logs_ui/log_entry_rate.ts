@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
@@ -18,6 +19,10 @@ export function LogEntryRatePageProvider({ getPageObjects, getService }: FtrProv
 
     async getSetupScreen(): Promise<WebElementWrapper> {
       return await testSubjects.find('logEntryRateSetupPage');
+    },
+
+    async getNoDataScreen() {
+      return await testSubjects.find('noDataPage');
     },
   };
 }

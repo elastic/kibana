@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Queries Elasticsearch to obtain metric aggregation results.
@@ -21,11 +22,17 @@ import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from './index';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
+import { aggregationTypeTransform, EntityField } from '../../../../common/util/anomaly_utils';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
+import { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import { RecordForInfluencer } from './results_service';
+import { isRuntimeMappings } from '../../../../common';
+import { ErrorType } from '../../../../common/util/errors';
 
-interface ResultResponse {
+export interface ResultResponse {
   success: boolean;
+  error?: ErrorType;
 }
 
 export interface MetricData extends ResultResponse {
@@ -67,8 +74,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       index: string,
       entityFields: any[],
       query: object | undefined,
-      metricFunction: string, // ES aggregation name
-      metricFieldName: string,
+      metricFunction: string | null, // ES aggregation name
+      metricFieldName: string | undefined,
       summaryCountFieldName: string | undefined,
       timeFieldName: string,
       earliestMs: number,
@@ -136,9 +143,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           },
         },
         size: 0,
-        _source: {
-          excludes: [],
-        },
+        _source: false,
         aggs: {
           byTime: {
             date_histogram: {
@@ -148,6 +153,9 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
             },
           },
         },
+        ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
+          ? { runtime_mappings: datafeedConfig?.runtime_mappings }
+          : {}),
       };
 
       if (shouldCriteria.length > 0) {
@@ -156,7 +164,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       }
 
       body.aggs.byTime.aggs = {};
-      if (metricFieldName !== undefined && metricFieldName !== '') {
+
+      if (metricFieldName !== undefined && metricFieldName !== '' && metricFunction) {
         const metricAgg: any = {
           [metricFunction]: {},
         };
@@ -173,7 +182,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         // when the field is an aggregation field, because the field doesn't actually exist in the indices
         // we need to pass all the sub aggs from the original datafeed config
         // so that we can access the aggregated field
-        if (typeof aggFields === 'object' && Object.keys(aggFields).length > 0) {
+        if (isPopulatedObject(aggFields)) {
           // first item under aggregations can be any name, not necessarily 'buckets'
           const accessor = Object.keys(aggFields)[0];
           const tempAggs = { ...(aggFields[accessor].aggs ?? aggFields[accessor].aggregations) };
@@ -240,7 +249,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
     getModelPlotOutput(
       jobId: string,
       detectorIndex: number,
-      criteriaFields: any[],
+      criteriaFields: CriteriaField[],
       earliestMs: number,
       latestMs: number,
       intervalMs: number,
@@ -629,6 +638,136 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         earliestMs,
         latestMs
       );
+    },
+
+    // Queries Elasticsearch to obtain the record level results containing the specified influencer(s),
+    // for the specified job(s), time range, and record score threshold.
+    // influencers parameter must be an array, with each object in the array having 'fieldName'
+    // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
+    // so this returns record level results which have at least one of the influencers.
+    // Pass an empty array or ['*'] to search over all job IDs.
+    getRecordsForInfluencer$(
+      jobIds: string[],
+      influencers: EntityField[],
+      threshold: number,
+      earliestMs: number,
+      latestMs: number,
+      maxResults: number,
+      influencersFilterQuery: InfluencersFilterQuery
+    ): Observable<{ records: RecordForInfluencer[]; success: boolean }> {
+      const obj = { success: true, records: [] as RecordForInfluencer[] };
+
+      // Build the criteria to use in the bool filter part of the request.
+      // Add criteria for the time range, record score, plus any specified job IDs.
+      const boolCriteria: any[] = [
+        {
+          range: {
+            timestamp: {
+              gte: earliestMs,
+              lte: latestMs,
+              format: 'epoch_millis',
+            },
+          },
+        },
+        {
+          range: {
+            record_score: {
+              gte: threshold,
+            },
+          },
+        },
+      ];
+
+      if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
+        let jobIdFilterStr = '';
+        each(jobIds, (jobId, i) => {
+          if (i > 0) {
+            jobIdFilterStr += ' OR ';
+          }
+          jobIdFilterStr += 'job_id:';
+          jobIdFilterStr += jobId;
+        });
+        boolCriteria.push({
+          query_string: {
+            analyze_wildcard: false,
+            query: jobIdFilterStr,
+          },
+        });
+      }
+
+      if (influencersFilterQuery !== undefined) {
+        boolCriteria.push(influencersFilterQuery);
+      }
+
+      // Add a nested query to filter for each of the specified influencers.
+      if (influencers.length > 0) {
+        boolCriteria.push({
+          bool: {
+            should: influencers.map((influencer) => {
+              return {
+                nested: {
+                  path: 'influencers',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match: {
+                            'influencers.influencer_field_name': influencer.fieldName,
+                          },
+                        },
+                        {
+                          match: {
+                            'influencers.influencer_field_values': influencer.fieldValue,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              };
+            }),
+            minimum_should_match: 1,
+          },
+        });
+      }
+
+      return mlApiServices.results
+        .anomalySearch$(
+          {
+            size: maxResults !== undefined ? maxResults : 100,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:record',
+                        analyze_wildcard: false,
+                      },
+                    },
+                    {
+                      bool: {
+                        must: boolCriteria,
+                      },
+                    },
+                  ],
+                },
+              },
+              sort: [{ record_score: { order: 'desc' } }],
+            },
+          },
+          jobIds
+        )
+        .pipe(
+          map((resp) => {
+            if (resp.hits.total.value > 0) {
+              each(resp.hits.hits, (hit) => {
+                obj.records.push(hit._source);
+              });
+            }
+            return obj;
+          })
+        );
     },
   };
 }

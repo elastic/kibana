@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { duration } from 'moment';
@@ -15,7 +15,6 @@ const createConfig = (
 ): ElasticsearchClientConfig => {
   return {
     customHeaders: {},
-    logQueries: false,
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
@@ -33,6 +32,19 @@ describe('parseClientOptions', () => {
       expect.objectContaining({
         headers: {
           ...DEFAULT_HEADERS,
+        },
+      })
+    );
+  });
+
+  it('specifies `headers.maxSockets` Infinity and `keepAlive` true by default', () => {
+    const config = createConfig({});
+
+    expect(parseClientOptions(config, false)).toEqual(
+      expect.objectContaining({
+        agent: {
+          keepAlive: true,
+          maxSockets: Infinity,
         },
       })
     );
@@ -77,11 +89,21 @@ describe('parseClientOptions', () => {
       );
     });
 
-    it('`keepAlive` option', () => {
-      expect(parseClientOptions(createConfig({ keepAlive: true }), false)).toEqual(
-        expect.objectContaining({ agent: { keepAlive: true } })
-      );
-      expect(parseClientOptions(createConfig({ keepAlive: false }), false).agent).toBeUndefined();
+    describe('`keepAlive option`', () => {
+      it('`keepAlive` is true', () => {
+        const options = parseClientOptions(createConfig({ keepAlive: true }), false);
+        expect(options.agent).toHaveProperty('keepAlive', true);
+      });
+
+      it('`keepAlive` is false', () => {
+        const options = parseClientOptions(createConfig({ keepAlive: false }), false);
+        expect(options.agent).toHaveProperty('keepAlive', false);
+      });
+
+      it('`keepAlive` is undefined', () => {
+        const options = parseClientOptions(createConfig({}), false);
+        expect(options.agent).toHaveProperty('keepAlive', true);
+      });
     });
 
     it('`sniffOnStart` options', () => {
@@ -164,6 +186,12 @@ describe('parseClientOptions', () => {
               ]
           `);
     });
+
+    it('`caFingerprint` option', () => {
+      const options = parseClientOptions(createConfig({ caFingerprint: 'ab:cd:ef' }), false);
+
+      expect(options.caFingerprint).toBe('ab:cd:ef');
+    });
   });
 
   describe('authorization', () => {
@@ -205,11 +233,27 @@ describe('parseClientOptions', () => {
         );
       });
 
+      it('adds an authorization header if `serviceAccountToken` is set', () => {
+        expect(
+          parseClientOptions(
+            createConfig({
+              serviceAccountToken: 'ABC123',
+            }),
+            false
+          )
+        ).toEqual(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              authorization: `Bearer ABC123`,
+            }),
+          })
+        );
+      });
+
       it('does not add auth to the nodes', () => {
         const options = parseClientOptions(
           createConfig({
-            username: 'user',
-            password: 'pass',
+            serviceAccountToken: 'ABC123',
             hosts: ['http://node-A:9200'],
           }),
           true
@@ -253,13 +297,41 @@ describe('parseClientOptions', () => {
                   ]
               `);
       });
+
+      it('does not add the authorization header even if `serviceAccountToken` is set', () => {
+        expect(
+          parseClientOptions(
+            createConfig({
+              serviceAccountToken: 'ABC123',
+            }),
+            true
+          ).headers
+        ).not.toHaveProperty('authorization');
+      });
+
+      it('does not add auth to the nodes even if `serviceAccountToken` is set', () => {
+        const options = parseClientOptions(
+          createConfig({
+            serviceAccountToken: 'ABC123',
+            hosts: ['http://node-A:9200'],
+          }),
+          true
+        );
+        expect(options.nodes).toMatchInlineSnapshot(`
+                  Array [
+                    Object {
+                      "url": "http://node-a:9200/",
+                    },
+                  ]
+              `);
+      });
     });
   });
 
-  describe('ssl config', () => {
-    it('does not generate ssl option is ssl config is not set', () => {
-      expect(parseClientOptions(createConfig({}), false).ssl).toBeUndefined();
-      expect(parseClientOptions(createConfig({}), true).ssl).toBeUndefined();
+  describe('tls config', () => {
+    it('does not generate tls option is ssl config is not set', () => {
+      expect(parseClientOptions(createConfig({}), false).tls).toBeUndefined();
+      expect(parseClientOptions(createConfig({}), true).tls).toBeUndefined();
     });
 
     it('handles the `certificateAuthorities` option', () => {
@@ -269,7 +341,7 @@ describe('parseClientOptions', () => {
             ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
           false
-        ).ssl!.ca
+        ).tls!.ca
       ).toEqual(['content-of-ca-path']);
       expect(
         parseClientOptions(
@@ -277,7 +349,7 @@ describe('parseClientOptions', () => {
             ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
           true
-        ).ssl!.ca
+        ).tls!.ca
       ).toEqual(['content-of-ca-path']);
     });
 
@@ -291,7 +363,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -308,7 +380,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -326,7 +398,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -344,7 +416,7 @@ describe('parseClientOptions', () => {
                 },
               }),
               false
-            ).ssl
+            ).tls
         ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: unknown"`);
       });
       it('throws for undefined values', () => {
@@ -357,7 +429,7 @@ describe('parseClientOptions', () => {
                 },
               }),
               false
-            ).ssl
+            ).tls
         ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: undefined"`);
       });
     });
@@ -374,7 +446,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -394,7 +466,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -415,7 +487,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -439,7 +511,7 @@ describe('parseClientOptions', () => {
               },
             }),
             true
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -459,7 +531,7 @@ describe('parseClientOptions', () => {
               },
             }),
             true
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,

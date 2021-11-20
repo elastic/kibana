@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,21 +11,35 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const log = getService('log');
   const security = getService('security');
   const PageObjects = getPageObjects(['reporting', 'common', 'canvas']);
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/reports';
 
   describe('Canvas PDF Report Generation', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      await security.testUser.setRoles(['kibana_admin', 'reporting_user']);
-      await esArchiver.load('canvas/reports');
+      await security.role.create('test_canvas_user', {
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { canvas: ['read'] },
+          },
+        ],
+      });
+      await security.testUser.setRoles([
+        'test_canvas_user',
+        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+      ]);
+      await kibanaServer.importExport.load(archive);
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('canvas/reports');
+      await kibanaServer.importExport.unload(archive);
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -183,7 +198,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           "
         `);
 
-        expect(res.get('content-length')).to.be('20725');
+        const contentLength = parseInt(res.get('content-length'), 10);
+        expect(contentLength >= 20725 && contentLength <= 20726).to.be(true); // contentLength can be between 20725 and 20726
       });
 
       it('downloaded PDF base64 string is correct without borders and logo', async function () {

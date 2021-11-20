@@ -1,21 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Route, Switch, useParams } from 'react-router-dom';
+import { Route, Router, Switch, useParams } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor } from 'src/core/public';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
-import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
-import { PluginsStart } from '../plugin';
-import { SpacesManager } from '../spaces_manager';
-import { SpacesGridPage } from './spaces_grid';
-import { ManageSpacePage } from './edit_space';
-import { Space } from '..';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
+
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../src/plugins/kibana_react/public';
+import type { Space } from '../../common';
+import type { PluginsStart } from '../plugin';
+import type { SpacesManager } from '../spaces_manager';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
@@ -25,29 +30,29 @@ interface CreateParams {
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
   create({ getStartServices, spacesManager }: CreateParams) {
+    const title = i18n.translate('xpack.spaces.displayName', {
+      defaultMessage: 'Spaces',
+    });
+
     return {
       id: this.id,
       order: 2,
-      title: i18n.translate('xpack.spaces.displayName', {
-        defaultMessage: 'Spaces',
-      }),
+      title,
 
       async mount({ element, setBreadcrumbs, history }) {
-        const [
-          { notifications, i18n: i18nStart, application },
-          { features },
-        ] = await getStartServices();
-        const spacesBreadcrumbs = [
-          {
-            text: i18n.translate('xpack.spaces.management.breadcrumb', {
-              defaultMessage: 'Spaces',
-            }),
-            href: `/`,
-          },
-        ];
+        const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
+          await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
+
+        const spacesFirstBreadcrumb = {
+          text: title,
+          href: `/`,
+        };
+        const { notifications, i18n: i18nStart, application, chrome } = coreStart;
+
+        chrome.docTitle.change(title);
 
         const SpacesGridPageWithBreadcrumbs = () => {
-          setBreadcrumbs(spacesBreadcrumbs);
+          setBreadcrumbs([{ ...spacesFirstBreadcrumb, href: undefined }]);
           return (
             <SpacesGridPage
               capabilities={application.capabilities}
@@ -62,7 +67,7 @@ export const spacesManagementApp = Object.freeze({
 
         const CreateSpacePageWithBreadcrumbs = () => {
           setBreadcrumbs([
-            ...spacesBreadcrumbs,
+            spacesFirstBreadcrumb,
             {
               text: i18n.translate('xpack.spaces.management.createSpaceBreadcrumb', {
                 defaultMessage: 'Create',
@@ -77,7 +82,6 @@ export const spacesManagementApp = Object.freeze({
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
-              getUrlForApp={application.getUrlForApp}
             />
           );
         };
@@ -87,10 +91,9 @@ export const spacesManagementApp = Object.freeze({
 
           const onLoadSpace = (space: Space) => {
             setBreadcrumbs([
-              ...spacesBreadcrumbs,
+              spacesFirstBreadcrumb,
               {
                 text: space.name,
-                href: `/edit/${encodeURIComponent(space.id)}`,
               },
             ]);
           };
@@ -104,33 +107,35 @@ export const spacesManagementApp = Object.freeze({
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
               history={history}
-              getUrlForApp={application.getUrlForApp}
             />
           );
         };
 
         render(
-          <i18nStart.Context>
-            <RedirectAppLinks application={application}>
-              <Router history={history}>
-                <Switch>
-                  <Route path={['', '/']} exact>
-                    <SpacesGridPageWithBreadcrumbs />
-                  </Route>
-                  <Route path="/create">
-                    <CreateSpacePageWithBreadcrumbs />
-                  </Route>
-                  <Route path="/edit/:spaceId">
-                    <EditSpacePageWithBreadcrumbs />
-                  </Route>
-                </Switch>
-              </Router>
-            </RedirectAppLinks>
-          </i18nStart.Context>,
+          <KibanaContextProvider services={coreStart}>
+            <i18nStart.Context>
+              <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
+                <Router history={history}>
+                  <Switch>
+                    <Route path={['', '/']} exact>
+                      <SpacesGridPageWithBreadcrumbs />
+                    </Route>
+                    <Route path="/create">
+                      <CreateSpacePageWithBreadcrumbs />
+                    </Route>
+                    <Route path="/edit/:spaceId">
+                      <EditSpacePageWithBreadcrumbs />
+                    </Route>
+                  </Switch>
+                </Router>
+              </RedirectAppLinks>
+            </i18nStart.Context>
+          </KibanaContextProvider>,
           element
         );
 
         return () => {
+          chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

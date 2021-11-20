@@ -1,28 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { Client } from 'elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 interface DocRecord {
-  value: {
+  value: estypes.IndicesIndexState & {
     index: string;
     type: string;
-    settings: Record<string, any>;
-    mappings: Record<string, any>;
-    aliases: Record<string, any>;
   };
 }
 
@@ -30,11 +29,13 @@ export function createCreateIndexStream({
   client,
   stats,
   skipExisting = false,
+  docsOnly = false,
   log,
 }: {
   client: Client;
   stats: Stats;
   skipExisting?: boolean;
+  docsOnly?: boolean;
   log: ToolingLog;
 }) {
   const skipDocsFromIndices = new Set();
@@ -43,6 +44,7 @@ export function createCreateIndexStream({
   // previous indices are removed so we're starting w/ a clean slate for
   // migrations. This only needs to be done once per archive load operation.
   let kibanaIndexAlreadyDeleted = false;
+  let kibanaTaskManagerIndexAlreadyDeleted = false;
 
   async function handleDoc(stream: Readable, record: DocRecord) {
     if (skipDocsFromIndices.has(record.value.index)) {
@@ -54,24 +56,36 @@ export function createCreateIndexStream({
 
   async function handleIndex(record: DocRecord) {
     const { index, settings, mappings, aliases } = record.value;
-    const isKibana = index.startsWith('.kibana');
+    const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
+    const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
+
+    if (docsOnly) {
+      return;
+    }
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
         if (isKibana && !kibanaIndexAlreadyDeleted) {
-          await deleteKibanaIndices({ client, stats, log });
-          kibanaIndexAlreadyDeleted = true;
+          await deleteKibanaIndices({ client, stats, log }); // delete all .kibana* indices
+          kibanaIndexAlreadyDeleted = kibanaTaskManagerIndexAlreadyDeleted = true;
+        } else if (isKibanaTaskManager && !kibanaTaskManagerIndexAlreadyDeleted) {
+          await deleteKibanaIndices({ client, stats, onlyTaskManager: true, log }); // delete only .kibana_task_manager* indices
+          kibanaTaskManagerIndexAlreadyDeleted = true;
         }
 
-        await client.indices.create({
-          method: 'PUT',
-          index,
-          body: {
-            settings,
-            mappings,
-            aliases,
+        await client.indices.create(
+          {
+            index,
+            body: {
+              settings,
+              mappings,
+              aliases,
+            },
           },
-        });
+          {
+            headers: ES_CLIENT_HEADERS,
+          }
+        );
 
         stats.createdIndex(index, { settings });
       } catch (err) {
@@ -88,7 +102,10 @@ export function createCreateIndexStream({
           return;
         }
 
-        if (err?.body?.error?.type !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+        if (
+          err?.meta?.body?.error?.type !== 'resource_already_exists_exception' ||
+          attemptNumber >= 3
+        ) {
           throw err;
         }
 

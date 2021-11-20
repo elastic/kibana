@@ -1,27 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import { SourcererScopeById, ManageScope, KibanaIndexPatterns, SourcererScopeName } from './model';
+import {
+  SourcererDataView,
+  SourcererModel,
+  SourcererScope,
+  SourcererScopeById,
+  SourcererScopeName,
+} from './model';
 
-export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
-  sourcerer.kibanaIndexPatterns;
+export const sourcererKibanaDataViewsSelector = ({
+  sourcerer,
+}: State): SourcererModel['kibanaDataViews'] => sourcerer.kibanaDataViews;
 
 export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
   sourcerer.signalIndexName;
 
-export const sourcererConfigIndexPatternsSelector = ({ sourcerer }: State): string[] =>
-  sourcerer.configIndexPatterns;
+export const sourcererDefaultDataViewSelector = ({
+  sourcerer,
+}: State): SourcererModel['defaultDataView'] => sourcerer.defaultDataView;
+
+export const dataViewSelector = ({ sourcerer }: State, id: string): SourcererDataView =>
+  sourcerer.kibanaDataViews.find((dataView) => dataView.id === id) ?? sourcerer.defaultDataView;
 
 export const sourcererScopeIdSelector = (
   { sourcerer }: State,
   scopeId: SourcererScopeName
-): ManageScope => sourcerer.sourcererScopes[scopeId];
+): SourcererScope => sourcerer.sourcererScopes[scopeId];
 
 export const scopeIdSelector = () => createSelector(sourcererScopeIdSelector, (scope) => scope);
 
@@ -30,85 +41,43 @@ export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeByI
 
 export const scopesSelector = () => createSelector(sourcererScopesSelector, (scopes) => scopes);
 
-export const kibanaIndexPatternsSelector = () =>
-  createSelector(
-    sourcererKibanaIndexPatternsSelector,
-    (kibanaIndexPatterns) => kibanaIndexPatterns
-  );
+export const kibanaDataViewsSelector = () =>
+  createSelector(sourcererKibanaDataViewsSelector, (dataViews) => dataViews);
 
 export const signalIndexNameSelector = () =>
   createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
 
-export const configIndexPatternsSelector = () =>
-  createSelector(
-    sourcererConfigIndexPatternsSelector,
-    (configIndexPatterns) => configIndexPatterns
-  );
+export const defaultDataViewSelector = () =>
+  createSelector(sourcererDefaultDataViewSelector, (dataViews) => dataViews);
 
-export const getIndexNamesSelectedSelector = () => {
-  const getScopeSelector = scopeIdSelector();
-  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
+export const sourcererDataViewSelector = () =>
+  createSelector(dataViewSelector, (dataView) => dataView);
 
-  const mapStateToProps = (
-    state: State,
-    scopeId: SourcererScopeName
-  ): { indexNames: string[]; previousIndexNames: string } => {
-    const scope = getScopeSelector(state, scopeId);
-    const configIndexPatterns = getConfigIndexPatternsSelector(state);
-    return {
-      indexNames:
-        scope.selectedPatterns.length === 0 ? configIndexPatterns : scope.selectedPatterns,
-      previousIndexNames: scope.indexPattern.title,
-    };
-  };
-  return mapStateToProps;
-};
-
-export const getAllExistingIndexNamesSelector = () => {
-  const getSignalIndexNameSelector = signalIndexNameSelector();
-  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
-
-  const mapStateToProps = (state: State): string[] => {
-    const signalIndexName = getSignalIndexNameSelector(state);
-    const configIndexPatterns = getConfigIndexPatternsSelector(state);
-
-    return signalIndexName != null
-      ? [...configIndexPatterns, signalIndexName]
-      : configIndexPatterns;
-  };
-
-  return mapStateToProps;
-};
-
-const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
+export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererScopes'> {
+  sourcererDataView: SourcererDataView;
+  sourcererScope: SourcererScope;
+}
 
 export const getSourcererScopeSelector = () => {
-  const getScopeIdSelector = scopeIdSelector();
-  const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
-    const selectedPatterns = selectedPatternsStr.length > 0 ? selectedPatternsStr.split(',') : [];
-    return selectedPatterns.some((index) => index === 'logs-*')
-      ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
-      : selectedPatterns;
-  });
+  const getKibanaDataViewsSelector = kibanaDataViewsSelector();
+  const getDefaultDataViewSelector = defaultDataViewSelector();
+  const getSignalIndexNameSelector = signalIndexNameSelector();
+  const getSourcererDataViewSelector = sourcererDataViewSelector();
+  const getScopeSelector = scopeIdSelector();
 
-  const getIndexPattern = memoizeOne(
-    (indexPattern, title) => ({
-      ...indexPattern,
-      title,
-    }),
-    (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-  );
-
-  const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => {
-    const scope = getScopeIdSelector(state, scopeId);
-    const selectedPatterns = getSelectedPatterns(scope.selectedPatterns.sort().join());
-    const indexPattern = getIndexPattern(scope.indexPattern, selectedPatterns.join());
+  return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
+    const kibanaDataViews = getKibanaDataViewsSelector(state);
+    const defaultDataView = getDefaultDataViewSelector(state);
+    const signalIndexName = getSignalIndexNameSelector(state);
+    const scope = getScopeSelector(state, scopeId);
+    const sourcererDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
 
     return {
-      ...scope,
-      selectedPatterns,
-      indexPattern,
+      defaultDataView,
+      kibanaDataViews,
+      signalIndexName,
+      sourcererDataView,
+      sourcererScope: scope,
     };
   };
-  return mapStateToProps;
 };

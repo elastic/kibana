@@ -1,33 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { errors } from 'elasticsearch';
-import { ObjectType } from '@kbn/config-schema';
+import { errors } from '@elastic/elasticsearch';
+
+import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
-import {
-  Headers,
-  kibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '../../../../../../src/core/server';
-import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
-import { Session } from '../../session_management';
-import { defineChangeUserPasswordRoutes } from './change_password';
+import type { Headers, RequestHandler, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { sessionMock } from '../../session_management/session.mock';
-import { routeDefinitionParamsMock } from '../index.mock';
+import { AuthenticationResult } from '../../authentication';
+import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import { securityMock } from '../../mocks';
+import type { Session } from '../../session_management';
+import { sessionMock } from '../../session_management/session.mock';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { defineChangeUserPasswordRoutes } from './change_password';
 
 describe('Change password', () => {
   let router: jest.Mocked<SecurityRouter>;
-  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
+  let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
   let routeConfig: RouteConfig<any, any, any, any>;
@@ -110,9 +110,9 @@ describe('Change password', () => {
     });
 
     it('returns 403 if old password is wrong.', async () => {
-      const changePasswordFailure = new (errors.AuthenticationException as any)('Unauthorized', {
-        body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
-      });
+      const changePasswordFailure = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 401, body: {} })
+      );
       mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
         changePasswordFailure
       );

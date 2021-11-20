@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import * as Either from './either';
-import * as Maybe from './maybe';
-import { always, id, noop, pink } from './utils';
+import * as Either from './either.js';
+import * as Maybe from './maybe.js';
+import { always, id, noop, pink, pipe, ccMark } from './utils.js';
 import execa from 'execa';
 import { resolve } from 'path';
 
@@ -47,21 +47,19 @@ const mutateFalse = setTotal(false);
 const root = (urlBase) => (ts) => (testRunnerType) =>
   `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined`;
 
-const prokForTotalsIndex = (mutateTrue) => (urlRoot) => (obj) =>
-  Either.right(obj)
-    .map(mutateTrue)
-    .map(always(`${urlRoot}/index.html`))
-    .fold(noop, id);
+const prokForTotalsIndex = (mutateTrue) => (urlRoot) => (obj) => {
+  pipe(mutateTrue, always(`${urlRoot}/index.html`))(obj);
+};
 
 const prokForCoverageIndex = (root) => (mutateFalse) => (urlRoot) => (obj) => (siteUrl) =>
-  Either.right(siteUrl)
-    .map((x) => {
+  pipe(
+    (x) => {
       mutateFalse(obj);
       return x;
-    })
-    .map((x) => x.replace(root, ''))
-    .map((x) => `${urlRoot}${x}.html`)
-    .fold(noop, id);
+    },
+    (x) => x.replace(root, ''),
+    (x) => `${urlRoot}${x}.html`
+  )(siteUrl);
 
 export const staticSite = (urlBase) => (obj) => {
   const { staticSiteUrl, testRunnerType, COVERAGE_INGESTION_KIBANA_ROOT } = obj;
@@ -117,13 +115,12 @@ async function assignTeam(teamAssignmentsPath, coveredFilePath, log, obj) {
     const { stdout } = await execa('grep', params, { cwd: ROOT_DIR });
     grepResponse = stdout;
   } catch (e) {
-    log.error(`\n!!! Unknown Team for path: \n\t\t${pink(coveredFilePath)}\n`);
+    Either.fromNullable(process.env.LOG_NOT_FOUND).fold(id, () =>
+      log.error(`\n${ccMark} Unknown Team for path: \n\t\t${pink(coveredFilePath)}\n`)
+    );
   }
-
   return Either.fromNullable(grepResponse)
-    .map(last)
-    .map(findTeam)
-    .map(pluckTeam)
+    .map(pipe(last, findTeam, pluckTeam))
     .fold(
       () => ({ team: 'unknown', ...obj }),
       (team) => ({ team, ...obj })
@@ -137,10 +134,7 @@ export const ciRunUrl = (obj) =>
   }));
 
 const size = 50;
-const truncateMsg = (msg) => {
-  const res = msg.length > size ? `${msg.slice(0, 50)}...` : msg;
-  return res;
-};
+const truncateMsg = (msg) => (msg.length > size ? `${msg.slice(0, 50)}...` : msg);
 const comparePrefix = () => 'https://github.com/elastic/kibana/compare';
 export const prokPrevious = (comparePrefixF) => (currentSha) => {
   return Either.fromNullable(process.env.FETCHED_PREVIOUS).fold(
@@ -186,7 +180,7 @@ export const testRunner = (obj) => {
     }
   };
 
-  ['mocha', 'jest', 'functional'].forEach(upperTestRunnerType);
+  ['jest', 'functional'].forEach(upperTestRunnerType);
 
   return {
     testRunnerType,

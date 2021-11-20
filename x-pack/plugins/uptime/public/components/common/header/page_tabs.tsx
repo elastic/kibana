@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -9,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
+import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../../../common/constants';
 import { useGetUrlParams } from '../../../hooks';
 import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
 
@@ -27,13 +28,6 @@ const tabs = [
     name: 'Certificates',
     dataTestSubj: 'uptimeCertificatesLink',
   },
-  {
-    id: SETTINGS_ROUTE,
-    dataTestSubj: 'settings-page-link',
-    name: i18n.translate('xpack.uptime.page_header.settingsLink', {
-      defaultMessage: 'Settings',
-    }),
-  },
 ];
 
 export const PageTabs = () => {
@@ -44,7 +38,6 @@ export const PageTabs = () => {
   const params = useGetUrlParams();
 
   const isOverView = useRouteMatch(OVERVIEW_ROUTE);
-  const isSettings = useRouteMatch(SETTINGS_ROUTE);
   const isCerts = useRouteMatch(CERTIFICATES_ROUTE);
 
   useEffect(() => {
@@ -54,13 +47,10 @@ export const PageTabs = () => {
     if (isCerts) {
       setSelectedTabId(CERTIFICATES_ROUTE);
     }
-    if (isSettings) {
-      setSelectedTabId(SETTINGS_ROUTE);
-    }
-    if (!isOverView?.isExact && !isCerts && !isSettings) {
+    if (!isOverView?.isExact && !isCerts) {
       setSelectedTabId(null);
     }
-  }, [isCerts, isSettings, isOverView]);
+  }, [isCerts, isOverView]);
 
   const createHrefForTab = (id: string) => {
     if (selectedTabId === OVERVIEW_ROUTE && id === OVERVIEW_ROUTE) {

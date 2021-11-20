@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pick } from 'lodash/fp';
@@ -10,14 +11,15 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { isTab, TimelineContext } from '../../../../../timelines/public';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { isTab } from '../../../common/components/accessibility/helpers';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { CellValueElementProps } from './cell_rendering';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
-import { TimelineType, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineType, TimelineId, RowRenderer } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
@@ -25,6 +27,8 @@ import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
+import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
+import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -34,10 +38,12 @@ const TimelineTemplateBadge = styled.div`
 `;
 
 export interface Props {
-  timelineId: string;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
 }
 
-const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
+const TimelineSavingProgressComponent: React.FC<{ timelineId: TimelineId }> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const isSaving = useShallowEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isSaving
@@ -48,14 +54,26 @@ const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
 
 const TimelineSavingProgress = React.memo(TimelineSavingProgressComponent);
 
-const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
+const StatefulTimelineComponent: React.FC<Props> = ({
+  renderCellValue,
+  rowRenderers,
+  timelineId,
+}) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
-  const { graphEventId, savedObjectId, timelineType } = useDeepEqualSelector((state) =>
+  const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const {
+    dataViewId: dataViewIdCurrent,
+    indexNames: selectedPatternsCurrent,
+    graphEventId,
+    savedObjectId,
+    timelineType,
+    description,
+  } = useDeepEqualSelector((state) =>
     pick(
-      ['graphEventId', 'savedObjectId', 'timelineType'],
+      ['indexNames', 'dataViewId', 'graphEventId', 'savedObjectId', 'timelineType', 'description'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -67,10 +85,9 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
         timelineActions.createTimeline({
           id: timelineId,
           columns: defaultHeaders,
+          dataViewId,
           indexNames: selectedPatterns,
-          expandedEvent: {
-            [TimelineTabs.query]: activeTimeline.getExpandedEvent(),
-          },
+          expandedDetail: activeTimeline.getExpandedDetail(),
           show: false,
         })
       );
@@ -78,10 +95,50 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const onDataViewChange = useCallback(() => {
+    if (
+      // initial state will get set on create
+      (dataViewIdCurrent === '' && selectedPatternsCurrent.length === 0) ||
+      // don't update if no change
+      (dataViewIdCurrent === dataViewId &&
+        selectedPatternsCurrent.sort().join() === selectedPatterns.sort().join())
+    ) {
+      return;
+    }
+
+    dispatch(
+      timelineActions.updateDataView({
+        id: timelineId,
+        dataViewId,
+        indexNames: selectedPatterns,
+      })
+    );
+  }, [
+    dataViewId,
+    dataViewIdCurrent,
+    dispatch,
+    selectedPatterns,
+    selectedPatternsCurrent,
+    timelineId,
+  ]);
+
+  useEffect(() => {
+    onDataViewChange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewId, selectedPatterns]);
+
   const onSkipFocusBeforeEventsTable = useCallback(() => {
-    containerElement.current
-      ?.querySelector<HTMLButtonElement>('.globalFilterBar__addButton')
-      ?.focus();
+    const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(
+      EXIT_FULL_SCREEN_CLASS_NAME
+    );
+
+    if (exitFullScreenButton != null) {
+      exitFullScreenButton.focus();
+    } else {
+      containerElement.current
+        ?.querySelector<HTMLButtonElement>('.globalFilterBar__addButton')
+        ?.focus();
+    }
   }, [containerElement]);
 
   const onSkipFocusAfterEventsTable = useCallback(() => {
@@ -103,26 +160,41 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+  const timelineContext = useMemo(() => ({ timelineId }), [timelineId]);
+  const resolveConflictComponent = useResolveConflict();
 
   return (
-    <TimelineContainer
-      data-test-subj="timeline"
-      data-timeline-id={timelineId}
-      onKeyDown={onKeyDown}
-      ref={containerElement}
-    >
-      <TimelineSavingProgress timelineId={timelineId} />
-      {timelineType === TimelineType.template && (
-        <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
-      )}
+    <TimelineContext.Provider value={timelineContext}>
+      <TimelineContainer
+        data-test-subj="timeline"
+        data-timeline-id={timelineId}
+        onKeyDown={onKeyDown}
+        ref={containerElement}
+      >
+        <TimelineSavingProgress timelineId={timelineId} />
+        {timelineType === TimelineType.template && (
+          <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
+        )}
+        {resolveConflictComponent}
+        <HideShowContainer
+          $isVisible={!timelineFullScreen}
+          data-test-subj="timeline-hide-show-container"
+        >
+          <FlyoutHeaderPanel timelineId={timelineId} />
+          <FlyoutHeader timelineId={timelineId} />
+        </HideShowContainer>
 
-      <FlyoutHeaderPanel timelineId={timelineId} />
-      <HideShowContainer $isVisible={!timelineFullScreen}>
-        <FlyoutHeader timelineId={timelineId} />
-      </HideShowContainer>
-
-      <TabsContent graphEventId={graphEventId} timelineId={timelineId} />
-    </TimelineContainer>
+        <TabsContent
+          graphEventId={graphEventId}
+          renderCellValue={renderCellValue}
+          rowRenderers={rowRenderers}
+          timelineId={timelineId}
+          timelineType={timelineType}
+          timelineDescription={description}
+          timelineFullScreen={timelineFullScreen}
+        />
+      </TimelineContainer>
+    </TimelineContext.Provider>
   );
 };
 

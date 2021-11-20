@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,6 +11,7 @@ import {
   Direction,
   NetworkUsersFields,
   FlowTarget,
+  NetworkUsersStrategyResponse,
 } from '../../../../plugins/security_solution/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -21,16 +23,21 @@ const IP = '0.0.0.0';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
+
   describe('Users', () => {
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('auditbeat/default'));
-      after(() => esArchiver.unload('auditbeat/default'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/users')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/users')
+      );
 
       it('Ensure data is returned from auditbeat', async () => {
-        const { body: users } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const users = await bsearch.send<NetworkUsersStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkQueries.users,
             sourceId: 'default',
             timerange: {
@@ -38,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['auditbeat-users'],
             docValueFields: [],
             ip: IP,
             flowTarget: FlowTarget.destination,
@@ -50,16 +57,16 @@ export default function ({ getService }: FtrProviderContext) {
               querySize: 10,
             },
             inspect: false,
-          })
-          .expect(200);
-
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(users.edges.length).to.be(1);
         expect(users.totalCount).to.be(1);
-        expect(users.edges[0].node.user!.id).to.eql(['0']);
-        expect(users.edges[0].node.user!.name).to.be('root');
-        expect(users.edges[0].node.user!.groupId).to.eql(['0']);
-        expect(users.edges[0].node.user!.groupName).to.eql(['root']);
-        expect(users.edges[0].node.user!.count).to.be(1);
+        expect(users.edges[0].node.user?.id).to.eql(['0']);
+        expect(users.edges[0].node.user?.name).to.be('root');
+        expect(users.edges[0].node.user?.groupId).to.eql(['0']);
+        expect(users.edges[0].node.user?.groupName).to.eql(['root']);
+        expect(users.edges[0].node.user?.count).to.be(1);
       });
     });
   });

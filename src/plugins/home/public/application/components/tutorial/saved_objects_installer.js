@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint-disable no-multi-str*/
@@ -14,7 +14,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiSteps,
+  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -160,15 +160,24 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     );
   }
 
-  renderInstallStep = () => {
+  render() {
     const installMsg = this.props.installMsg
       ? this.props.installMsg
       : this.props.intl.formatMessage({
           id: 'home.tutorial.savedObject.installLabel',
           defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.',
         });
-    const installStep = (
-      <Fragment>
+
+    return (
+      <>
+        <EuiTitle size="m">
+          <h2>
+            {this.props.intl.formatMessage({
+              id: 'home.tutorial.savedObject.loadTitle',
+              defaultMessage: 'Load Kibana objects',
+            })}
+          </h2>
+        </EuiTitle>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiText>
@@ -190,22 +199,8 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
         <EuiSpacer size="s" />
 
         {this.renderInstallMessage()}
-      </Fragment>
+      </>
     );
-
-    return {
-      title: this.props.intl.formatMessage({
-        id: 'home.tutorial.savedObject.loadTitle',
-        defaultMessage: 'Load Kibana objects',
-      }),
-      status: this.state.isInstalled ? 'complete' : 'incomplete',
-      children: installStep,
-      key: 'installStep',
-    };
-  };
-
-  render() {
-    return <EuiSteps steps={[this.renderInstallStep()]} />;
   }
 }
 

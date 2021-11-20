@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC } from 'react';
@@ -36,6 +37,7 @@ interface Props {
 
 export const StepDefineSummary: FC<Props> = ({
   formState: {
+    runtimeMappings,
     searchString,
     searchQuery,
     groupByList,
@@ -56,14 +58,16 @@ export const StepDefineSummary: FC<Props> = ({
   const previewRequest = getPreviewTransformRequestBody(
     searchItems.indexPattern.title,
     pivotQuery,
-    partialPreviewRequest
+    partialPreviewRequest,
+    runtimeMappings
   );
 
   const pivotPreviewProps = usePivotData(
     searchItems.indexPattern.title,
     pivotQuery,
     validationStatus,
-    partialPreviewRequest
+    partialPreviewRequest,
+    runtimeMappings
   );
 
   const isModifiedQuery =
@@ -84,8 +88,8 @@ export const StepDefineSummary: FC<Props> = ({
         {searchItems.savedSearch === undefined && (
           <Fragment>
             <EuiFormRow
-              label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
-                defaultMessage: 'Index pattern',
+              label={i18n.translate('xpack.transform.stepDefineSummary.dataViewLabel', {
+                defaultMessage: 'Data view',
               })}
             >
               <span>{searchItems.indexPattern.title}</span>

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -20,11 +20,6 @@ interface UrlParam {
   protocol?: string;
   search?: string;
   username?: string;
-}
-
-interface App {
-  pathname?: string;
-  hash?: string;
 }
 
 /**
@@ -46,11 +41,11 @@ interface App {
  * @return {string}
  */
 
-function getUrl(config: UrlParam, app: App) {
+function getUrl(config: UrlParam, app: UrlParam) {
   return url.format(_.assign({}, config, app));
 }
 
-getUrl.noAuth = function getUrlNoAuth(config: UrlParam, app: App) {
+getUrl.noAuth = function getUrlNoAuth(config: UrlParam, app: UrlParam) {
   config = _.pickBy(config, function (val, param) {
     return param !== 'auth';
   });

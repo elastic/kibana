@@ -1,27 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import styled from 'styled-components';
+import React from 'react';
+import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
   elementOrChildrenHasFocus,
   getFocusedDataColindexCell,
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../accessibility/helpers';
+} from '../../../../../timelines/public';
 import { BrowserField, BrowserFields } from '../../containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
-import { ToStringArray } from '../../../graphql/types';
+import { FieldsData } from './types';
 
 import * as i18n from './translations';
+import { ColumnHeaderOptions } from '../../../../common';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -47,8 +51,31 @@ export interface Item {
   field: JSX.Element;
   fieldId: string;
   type: string;
-  values: ToStringArray;
+  values: string[];
 }
+
+export interface AlertSummaryRow {
+  title: string;
+  description: {
+    data: FieldsData;
+    eventId: string;
+    isDraggable?: boolean;
+    fieldFromBrowserField?: BrowserField;
+    linkValue: string | undefined;
+    timelineId: string;
+    values: string[] | null | undefined;
+  };
+}
+
+export interface ThreatDetailsRow {
+  title: string;
+  description: {
+    fieldName: string;
+    value: string;
+  };
+}
+
+export type SummaryRow = AlertSummaryRow | ThreatDetailsRow;
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -64,7 +91,7 @@ export const getColumnHeaderFromBrowserField = ({
   id: browserField.name || '',
   type: browserField.type,
   aggregatable: browserField.aggregatable,
-  width,
+  initialWidth: width,
 });
 
 /**
@@ -100,7 +127,7 @@ export const getColumnsWithTimestamp = ({
 export const getExampleText = (example: string | number | null | undefined): string =>
   !isEmpty(example) ? `Example: ${example}` : '';
 
-export const getIconFromType = (type: string | null) => {
+export const getIconFromType = (type: string | null | undefined) => {
   switch (type) {
     case 'string': // fall through
     case 'keyword':
@@ -111,6 +138,7 @@ export const getIconFromType = (type: string | null) => {
     case 'date':
       return 'clock';
     case 'ip':
+    case 'geo_point':
       return 'globe';
     case 'object':
       return 'questionInCircle';
@@ -169,4 +197,38 @@ export const onEventDetailsTabKeyPressed = ({
       skipFocus: eventFieldsTableSkipFocus,
     });
   }
+};
+
+const StyledH5 = styled.h5`
+  line-height: 1.7rem;
+`;
+
+const getTitle = (title: string) => (
+  <EuiTitle size="xxxs">
+    <StyledH5>{title}</StyledH5>
+  </EuiTitle>
+);
+getTitle.displayName = 'getTitle';
+
+export const getSummaryColumns = (
+  DescriptionComponent:
+    | React.FC<AlertSummaryRow['description']>
+    | React.FC<ThreatDetailsRow['description']>
+): Array<EuiBasicTableColumn<SummaryRow>> => {
+  return [
+    {
+      field: 'title',
+      truncateText: false,
+      render: getTitle,
+      width: '220px',
+      name: '',
+    },
+    {
+      className: 'flyoutOverviewDescription',
+      field: 'description',
+      truncateText: false,
+      render: DescriptionComponent,
+      name: '',
+    },
+  ];
 };

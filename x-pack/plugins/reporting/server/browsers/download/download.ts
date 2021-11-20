@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Axios from 'axios';
@@ -12,11 +13,12 @@ import { GenericLevelLogger } from '../../lib/level_logger';
 
 /**
  * Download a url and calculate it's checksum
- * @param  {String} url
- * @param  {String} path
- * @return {Promise<String>} checksum of the downloaded file
  */
-export async function download(url: string, path: string, logger: GenericLevelLogger) {
+export async function download(
+  url: string,
+  path: string,
+  logger: GenericLevelLogger
+): Promise<string> {
   logger.info(`Downloading ${url} to ${path}`);
 
   const hash = createHash('md5');
@@ -47,6 +49,8 @@ export async function download(url: string, path: string, logger: GenericLevelLo
           resolve();
         });
     });
+  } catch (err) {
+    throw new Error(`Unable to download ${url}: ${err}`);
   } finally {
     closeSync(handle);
   }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('moment', () => {
@@ -18,7 +18,7 @@ jest.mock('moment', () => {
   return moment;
 });
 
-import { IndexPattern } from '../../../index_patterns';
+import { IndexPattern, IndexPatternField } from '../../..';
 import { AggParamsDateHistogram } from '../buckets';
 import { inferTimeZone } from './infer_time_zone';
 
@@ -34,7 +34,7 @@ describe('inferTimeZone', () => {
     expect(
       inferTimeZone(
         { field: 'mydatefield' },
-        ({
+        {
           typeMeta: {
             aggs: {
               date_histogram: {
@@ -44,7 +44,32 @@ describe('inferTimeZone', () => {
               },
             },
           },
-        } as unknown) as IndexPattern,
+        } as unknown as IndexPattern,
+        () => false,
+        jest.fn()
+      )
+    ).toEqual('UTC');
+  });
+
+  it('reads time zone from index pattern type meta if available when the field is not a string', () => {
+    expect(
+      inferTimeZone(
+        {
+          field: {
+            name: 'mydatefield',
+          } as IndexPatternField,
+        },
+        {
+          typeMeta: {
+            aggs: {
+              date_histogram: {
+                mydatefield: {
+                  time_zone: 'UTC',
+                },
+              },
+            },
+          },
+        } as unknown as IndexPattern,
         () => false,
         jest.fn()
       )

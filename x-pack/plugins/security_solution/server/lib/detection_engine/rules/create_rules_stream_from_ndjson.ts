@@ -1,27 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Transform } from 'stream';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { createSplitStream, createMapStream, createConcatStream } from '@kbn/utils';
 
-import { formatErrors } from '../../../../common/format_errors';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { importRuleValidateTypeDependents } from '../../../../common/detection_engine/schemas/request/import_rules_type_dependents';
-import { exactCheck } from '../../../../common/exact_check';
 import {
   importRulesSchema,
   ImportRulesSchema,
   ImportRulesSchemaDecoded,
 } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { BadRequestError } from '../errors/bad_request_error';
 import {
   parseNdjsonStrings,
-  filterExportedCounts,
+  filterExceptions,
   createLimitStream,
+  filterExportedCounts,
 } from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const validateRules = (): Transform => {
@@ -59,6 +61,7 @@ export const createRulesStreamFromNdJson = (ruleLimit: number) => {
     createSplitStream('\n'),
     parseNdjsonStrings(),
     filterExportedCounts(),
+    filterExceptions(),
     validateRules(),
     createLimitStream(ruleLimit),
     createConcatStream([]),

@@ -1,23 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+jest.mock('../registry');
+
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicySOAttributes } from '../../../../common';
-import { getPackageUsageStats } from './get';
+import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
+import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common';
+
+import * as Registry from '../registry';
+
+import { createAppContextStartContractMock } from '../../../mocks';
+import { appContextService } from '../../app_context';
+
+import { getPackageInfo, getPackageUsageStats } from './get';
+
+const MockRegistry = Registry as jest.Mocked<typeof Registry>;
 
 describe('When using EPM `get` services', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-
-  beforeEach(() => {
-    soClient = savedObjectsClientMock.create();
-  });
-
   describe('and invoking getPackageUsageStats()', () => {
+    let soClient: jest.Mocked<SavedObjectsClientContract>;
+
     beforeEach(() => {
+      soClient = savedObjectsClientMock.create();
       const savedObjects: Array<SavedObjectsFindResult<PackagePolicySOAttributes>> = [
         {
           type: 'ingest-package-policies',
@@ -165,6 +176,107 @@ describe('When using EPM `get` services', () => {
         await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' })
       ).toEqual({
         agent_policy_count: 3,
+      });
+    });
+  });
+
+  describe('getPackageInfo', () => {
+    beforeEach(() => {
+      const mockContract = createAppContextStartContractMock();
+      appContextService.start(mockContract);
+      MockRegistry.fetchFindLatestPackage.mockResolvedValue({
+        name: 'my-package',
+        version: '1.0.0',
+      } as RegistryPackage);
+      MockRegistry.getRegistryPackage.mockResolvedValue({
+        paths: [],
+        packageInfo: {
+          name: 'my-package',
+          version: '1.0.0',
+        } as RegistryPackage,
+      });
+    });
+
+    describe('installation status', () => {
+      it('should be not_installed when no package SO exists', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+        expect(
+          await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).toMatchObject({
+          status: 'not_installed',
+        });
+      });
+
+      it('should be installing when package SO install_status is installing', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'installing',
+          },
+        });
+
+        expect(
+          await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).toMatchObject({
+          status: 'installing',
+        });
+      });
+
+      it('should be installed when package SO install_status is installed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'installed',
+          },
+        });
+
+        expect(
+          await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).toMatchObject({
+          status: 'installed',
+        });
+      });
+
+      it('should be install_failed when package SO install_status is install_failed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'install_failed',
+          },
+        });
+
+        expect(
+          await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).toMatchObject({
+          status: 'install_failed',
+        });
       });
     });
   });

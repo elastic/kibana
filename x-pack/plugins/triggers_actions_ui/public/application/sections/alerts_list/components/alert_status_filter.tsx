@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -16,7 +17,7 @@ import {
 import {
   AlertExecutionStatuses,
   AlertExecutionStatusValues,
-} from '../../../../../../alerts/common';
+} from '../../../../../../alerting/common';
 import { alertsStatusesTranslationsMapping } from '../translations';
 
 interface AlertStatusFilterProps {
@@ -94,14 +95,14 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
 export function getHealthColor(status: AlertExecutionStatuses) {
   switch (status) {
     case 'active':
-      return 'primary';
+      return 'success';
     case 'error':
       return 'danger';
     case 'ok':
-      return 'subdued';
+      return 'primary';
     case 'pending':
-      return 'success';
+      return 'accent';
     default:
-      return 'warning';
+      return 'subdued';
   }
 }

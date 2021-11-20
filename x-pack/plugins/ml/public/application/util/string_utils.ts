@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -73,7 +74,7 @@ export function detectorToString(dtr: Detector): string {
     txt += PARTITION_FIELD_OPTION + quoteField(dtr.partition_field_name);
   }
 
-  if (dtr.exclude_frequent !== undefined && dtr.exclude_frequent !== '') {
+  if (dtr.exclude_frequent !== undefined) {
     txt += EXCLUDE_FREQUENT_OPTION + dtr.exclude_frequent;
   }
 

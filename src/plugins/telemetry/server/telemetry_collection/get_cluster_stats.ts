@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ClusterDetailsGetter } from 'src/plugins/telemetry_collection_manager/server';
@@ -21,6 +21,8 @@ export async function getClusterStats(esClient: ElasticsearchClient) {
 
 /**
  * Get the cluster uuids from the connected cluster.
+ * @internal only used externally by the X-Pack Telemetry extension
+ * @param esClient Scoped Elasticsearch client
  */
 export const getClusterUuids: ClusterDetailsGetter = async ({ esClient }) => {
   const { body } = await esClient.cluster.stats({ timeout: TIMEOUT });

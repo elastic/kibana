@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -34,7 +35,7 @@ test('Removing custom time range from badge resets embeddable back to container 
       },
       id: '123',
     },
-    (() => null) as any
+    () => undefined
   );
 
   await container.untilEmbeddableLoaded('1');
@@ -86,7 +87,7 @@ test(`badge is not compatible with embeddable that inherits from parent`, async 
       },
       id: '123',
     },
-    (() => null) as any
+    () => undefined
   );
 
   await container.untilEmbeddableLoaded('1');
@@ -119,7 +120,7 @@ test(`badge is compatible with embeddable that has custom time range`, async () 
       },
       id: '123',
     },
-    (() => null) as any
+    () => undefined
   );
 
   await container.untilEmbeddableLoaded('1');
@@ -151,7 +152,7 @@ test('Attempting to execute on incompatible embeddable throws an error', async (
       },
       id: '123',
     },
-    (() => null) as any
+    () => undefined
   );
 
   await container.untilEmbeddableLoaded('1');

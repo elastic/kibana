@@ -1,12 +1,22 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "outDir": "target",
-    "target": "ES2019",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-plugin-generator/src",
+    "target": "ES2019",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": ["src/**/*"],
-  "exclude": ["src/template/*"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "src/template/*"
+  ],
 }

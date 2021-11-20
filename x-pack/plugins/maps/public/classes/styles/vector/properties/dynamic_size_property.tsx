@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import React from 'react';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { OrdinalLegend } from '../components/legend/ordinal_legend';
 import { makeMbClampedNumberExpression } from '../style_util';
@@ -19,7 +20,7 @@ import {
 import { FieldFormatter, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 
 export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions> {
   private readonly _isSymbolizedAsIcon: boolean;
@@ -65,7 +66,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (this._isSizeDynamicConfigComplete() && rangeFieldMeta) {
       const halfIconPixels = this.getIconPixelSize() / 2;
-      const targetName = this.getFieldName();
+      const targetName = this.getMbFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
@@ -114,7 +115,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     }
 
     return this._getMbDataDrivenSize({
-      targetName: this.getFieldName(),
+      targetName: this.getMbFieldName(),
       minSize: this._options.minSize,
       maxSize: this._options.maxSize,
       minValue: rangeFieldMeta.min,

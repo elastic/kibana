@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set/fp';
@@ -12,14 +13,9 @@ import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import {
-  FilterManager,
-  IIndexPattern,
-  TimeRange,
-  Query,
-  Filter,
-  SavedQuery,
-} from 'src/plugins/data/public';
+
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { FilterManager, TimeRange, SavedQuery } from 'src/plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
@@ -47,7 +43,8 @@ const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
 
 interface SiemSearchBarProps {
   id: InputsModelId;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
+  pollForSignalIndex?: () => void;
   timelineId?: string;
   dataTestSubj?: string;
 }
@@ -66,6 +63,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     id,
     indexPattern,
     isLoading = false,
+    pollForSignalIndex,
     queries,
     savedQuery,
     setSavedQuery,
@@ -99,6 +97,11 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
+        // if the function is there, call it to check if the signals index exists yet
+        // in order to update the index fields
+        if (pollForSignalIndex != null) {
+          pollForSignalIndex();
+        }
         const isQuickSelection =
           payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
         let updateSearchBar: UpdateReduxSearchBar = {
@@ -143,7 +146,18 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         window.setTimeout(() => updateSearch(updateSearchBar), 0);
       },
-      [id, toStr, end, fromStr, start, filterManager, filterQuery, queries, updateSearch]
+      [
+        id,
+        pollForSignalIndex,
+        toStr,
+        end,
+        fromStr,
+        start,
+        filterManager,
+        filterQuery,
+        queries,
+        updateSearch,
+      ]
     );
 
     const onRefresh = useCallback(
@@ -234,9 +248,10 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       [storage]
     );
 
-    const getAppStateFromStorage = useCallback(() => storage.get(APP_STATE_STORAGE_KEY) ?? [], [
-      storage,
-    ]);
+    const getAppStateFromStorage = useCallback(
+      () => storage.get(APP_STATE_STORAGE_KEY) ?? [],
+      [storage]
+    );
 
     useEffect(() => {
       let isSubscribed = true;
@@ -349,82 +364,84 @@ interface UpdateReduxSearchBar extends OnTimeChangeProps {
   updateTime: boolean;
 }
 
-export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
-  end,
-  filters,
-  id,
-  isQuickSelection,
-  query,
-  resetSavedQuery,
-  savedQuery,
-  start,
-  timelineId,
-  filterManager,
-  updateTime = false,
-}: UpdateReduxSearchBar): void => {
-  if (updateTime) {
-    const fromDate = formatDate(start);
-    let toDate = formatDate(end, { roundUp: true });
-    if (isQuickSelection) {
-      if (end === start) {
+export const dispatchUpdateSearch =
+  (dispatch: Dispatch) =>
+  ({
+    end,
+    filters,
+    id,
+    isQuickSelection,
+    query,
+    resetSavedQuery,
+    savedQuery,
+    start,
+    timelineId,
+    filterManager,
+    updateTime = false,
+  }: UpdateReduxSearchBar): void => {
+    if (updateTime) {
+      const fromDate = formatDate(start);
+      let toDate = formatDate(end, { roundUp: true });
+      if (isQuickSelection) {
+        if (end === start) {
+          dispatch(
+            inputsActions.setAbsoluteRangeDatePicker({
+              id,
+              fromStr: start,
+              toStr: end,
+              from: fromDate,
+              to: toDate,
+            })
+          );
+        } else {
+          dispatch(
+            inputsActions.setRelativeRangeDatePicker({
+              id,
+              fromStr: start,
+              toStr: end,
+              from: fromDate,
+              to: toDate,
+            })
+          );
+        }
+      } else {
+        toDate = formatDate(end);
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             id,
-            fromStr: start,
-            toStr: end,
-            from: fromDate,
-            to: toDate,
-          })
-        );
-      } else {
-        dispatch(
-          inputsActions.setRelativeRangeDatePicker({
-            id,
-            fromStr: start,
-            toStr: end,
-            from: fromDate,
-            to: toDate,
+            from: formatDate(start),
+            to: formatDate(end),
           })
         );
       }
-    } else {
-      toDate = formatDate(end);
+      if (timelineId != null) {
+        dispatch(
+          timelineActions.updateRange({
+            id: timelineId,
+            start: fromDate,
+            end: toDate,
+          })
+        );
+      }
+    }
+    if (query != null) {
       dispatch(
-        inputsActions.setAbsoluteRangeDatePicker({
+        inputsActions.setFilterQuery({
           id,
-          from: formatDate(start),
-          to: formatDate(end),
+          ...query,
         })
       );
     }
-    if (timelineId != null) {
-      dispatch(
-        timelineActions.updateRange({
-          id: timelineId,
-          start: fromDate,
-          end: toDate,
-        })
-      );
+    if (filters != null) {
+      filterManager.setFilters(filters);
     }
-  }
-  if (query != null) {
-    dispatch(
-      inputsActions.setFilterQuery({
-        id,
-        ...query,
-      })
-    );
-  }
-  if (filters != null) {
-    filterManager.setFilters(filters);
-  }
-  if (savedQuery != null || resetSavedQuery) {
-    dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
-  }
+    if (savedQuery != null || resetSavedQuery) {
+      dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
+    }
 
-  dispatch(hostsActions.setHostTablesActivePageToZero());
-  dispatch(networkActions.setNetworkTablesActivePageToZero());
-};
+    dispatch(hostsActions.setHostTablesActivePageToZero());
+    dispatch(networkActions.setNetworkTablesActivePageToZero());
+  };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateSearch: dispatchUpdateSearch(dispatch),

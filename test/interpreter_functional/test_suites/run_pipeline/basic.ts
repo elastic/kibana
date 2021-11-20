@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -88,7 +88,7 @@ export default function ({
         // we execute the part of expression that fetches the data and store its response
         const context = await expectExpression('partial_test', expression).getResponse();
 
-        // we reuse that response to render 3 different charts and compare screenshots with baselines
+        // we reuse that response to render 2 different charts and compare screenshots with baselines
         const tagCloudExpr = `tagcloud metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await (
           await expectExpression('partial_test_1', tagCloudExpr, context).toMatchSnapshot()
@@ -97,11 +97,6 @@ export default function ({
         const metricExpr = `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await (
           await expectExpression('partial_test_2', metricExpr, context).toMatchSnapshot()
-        ).toMatchScreenshot();
-
-        const regionMapExpr = `regionmap visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0},"legendPosition":"bottomright","addTooltip":true,"colorSchema":"Yellow to Red","isDisplayWarning":true,"wms":{},"mapZoom":2,"mapCenter":[0,0],"outlineWeight":1,"showAllShapes":true,"selectedLayer":{},"selectedJoinField":{}}'`;
-        await (
-          await expectExpression('partial_test_3', regionMapExpr, context).toMatchSnapshot()
         ).toMatchScreenshot();
       });
     });

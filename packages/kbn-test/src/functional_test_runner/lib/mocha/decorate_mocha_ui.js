@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { relative } from 'path';
@@ -12,7 +12,16 @@ import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
 
-export function decorateMochaUi(lifecycle, context) {
+function split(arr, fn) {
+  const a = [];
+  const b = [];
+  for (const i of arr) {
+    (fn(i) ? a : b).push(i);
+  }
+  return [a, b];
+}
+
+export function decorateMochaUi(log, lifecycle, context, { isDockerGroup, rootTags }) {
   // incremented at the start of each suite, decremented after
   // so that in each non-suite call we can know if we are within
   // a suite, or that when a suite is defined it is within a suite
@@ -48,21 +57,37 @@ export function decorateMochaUi(lifecycle, context) {
         }
 
         argumentsList[1] = function () {
-          before(async () => {
+          before('beforeTestSuite.trigger', async () => {
             await lifecycle.beforeTestSuite.trigger(this);
           });
 
-          this.tags = (tags) => {
-            this._tags = [].concat(this._tags || [], tags);
-          };
-
           const relativeFilePath = relative(REPO_ROOT, this.file);
-          this.tags(relativeFilePath);
+          this._tags = [
+            ...(isDockerGroup ? ['ciGroupDocker', relativeFilePath] : [relativeFilePath]),
+            // we attach the "root tags" to all the child suites of the root suite, so that if they
+            // need to be excluded they can be removed from the root suite without removing the entire
+            // root suite
+            ...(this.parent.root ? [...(rootTags ?? [])] : []),
+          ];
           this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
+          this.tags = (tags) => {
+            const newTags = Array.isArray(tags) ? tags : [tags];
+            const [tagsToAdd, tagsToIgnore] = split(newTags, (t) =>
+              !isDockerGroup ? true : !t.startsWith('ciGroup')
+            );
+
+            if (tagsToIgnore.length) {
+              log.warning(
+                `ignoring ciGroup tags because test is being run by a config using 'dockerServers', tags: ${tagsToIgnore}`
+              );
+            }
+
+            this._tags = [...this._tags, ...tagsToAdd];
+          };
 
           provider.call(this);
 
-          after(async () => {
+          after('afterTestSuite.trigger', async () => {
             await lifecycle.afterTestSuite.trigger(this);
           });
         };

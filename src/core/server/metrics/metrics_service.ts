@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ReplaySubject } from 'rxjs';
@@ -23,7 +23,8 @@ interface MetricsServiceSetupDeps {
 
 /** @internal */
 export class MetricsService
-  implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart> {
+  implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart>
+{
   private readonly logger: Logger;
   private readonly opsMetricsLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;
@@ -73,7 +74,7 @@ export class MetricsService
 
   private async refreshMetrics() {
     const metrics = await this.metricsCollector!.collect();
-    const { message, ...meta } = getEcsOpsMetricsLog(metrics);
+    const { message, meta } = getEcsOpsMetricsLog(metrics);
     this.opsMetricsLogger.debug(message!, meta);
     this.metricsCollector!.reset();
     this.metrics$.next(metrics);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,13 +10,18 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test/jest';
+import 'jest-canvas-mock';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { OperationMetadata } from '../../types';
 import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
 import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
-import { insertOrReplaceColumn } from '../operations';
+import {
+  insertOrReplaceColumn,
+  LastValueIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '../operations';
 import { FieldSelect } from './field_select';
 
 jest.mock('../operations');
@@ -49,6 +55,11 @@ describe('reference editor', () => {
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
       data: {} as DataPublicPluginStart,
+      dimensionGroups: [],
+      isFullscreen: false,
+      toggleFullscreen: jest.fn(),
+      setIsCloseable: jest.fn(),
+      layerId: '1',
     };
   }
 
@@ -116,7 +127,7 @@ describe('reference editor', () => {
               operationType: 'terms',
               sourceField: 'dest',
               params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'desc' },
-            },
+            } as TermsIndexPatternColumn,
           },
         }}
         validation={{
@@ -155,7 +166,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -190,7 +201,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -231,7 +242,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -274,7 +285,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -294,11 +305,36 @@ describe('reference editor', () => {
     expect(subFunctionSelect.prop('selectedOptions')).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          'data-test-subj': 'lns-indexPatternDimension-avg incompatible',
+          'data-test-subj': 'lns-indexPatternDimension-average incompatible',
           label: 'Average',
-          value: 'avg',
+          value: 'average',
         }),
       ])
+    );
+  });
+
+  it('should not display hidden sub-function types', () => {
+    // This may happen for saved objects after changing the type of a field
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        validation={{
+          input: ['field', 'fullReference', 'managedReference'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    const subFunctionSelect = wrapper
+      .find('[data-test-subj="indexPattern-reference-function"]')
+      .first();
+
+    expect(subFunctionSelect.prop('isInvalid')).toEqual(true);
+    expect(subFunctionSelect.prop('selectedOptions')).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ value: 'math' })])
+    );
+    expect(subFunctionSelect.prop('selectedOptions')).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ value: 'formula' })])
     );
   });
 
@@ -332,7 +368,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -350,7 +386,7 @@ describe('reference editor', () => {
     const fieldSelect = wrapper.find(FieldSelect);
     expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
     expect(fieldSelect.prop('selectedField')).toEqual('bytes');
-    expect(fieldSelect.prop('selectedOperationType')).toEqual('avg');
+    expect(fieldSelect.prop('selectedOperationType')).toEqual('average');
     expect(fieldSelect.prop('incompleteOperation')).toEqual('max');
     expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(false);
   });
@@ -367,7 +403,7 @@ describe('reference editor', () => {
               label: 'Average of bytes',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
           },
@@ -385,7 +421,7 @@ describe('reference editor', () => {
     const fieldSelect = wrapper.find(FieldSelect);
     expect(fieldSelect.prop('fieldIsInvalid')).toEqual(false);
     expect(fieldSelect.prop('selectedField')).toEqual('timestamp');
-    expect(fieldSelect.prop('selectedOperationType')).toEqual('avg');
+    expect(fieldSelect.prop('selectedOperationType')).toEqual('average');
     expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
   });
 
@@ -421,7 +457,7 @@ describe('reference editor', () => {
               label: 'Average of missing',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'missing',
             },
           },
@@ -436,7 +472,7 @@ describe('reference editor', () => {
     const fieldSelect = wrapper.find(FieldSelect);
     expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
     expect(fieldSelect.prop('selectedField')).toEqual('missing');
-    expect(fieldSelect.prop('selectedOperationType')).toEqual('avg');
+    expect(fieldSelect.prop('selectedOperationType')).toEqual('average');
     expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
     expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(false);
   });
@@ -458,7 +494,7 @@ describe('reference editor', () => {
               params: {
                 sortField: 'timestamp',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
         }}
         validation={{
@@ -490,7 +526,7 @@ describe('reference editor', () => {
               params: {
                 sortField: 'timestamp',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
           incompleteColumns: {
             ref: { operationType: 'max' },

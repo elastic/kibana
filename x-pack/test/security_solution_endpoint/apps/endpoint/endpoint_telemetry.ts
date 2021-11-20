@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,14 +12,16 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const telemetryTestResources = getService('telemetryTestResources');
 
-  describe('security solution endpoint telemetry', () => {
+  // The source of the data for these tests have changed and need to be updated
+  // There are currently tests in the security_solution application being maintained
+  describe.skip('security solution endpoint telemetry', () => {
     after(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('when no agents are connected', () => {
       before(async () => {
-        await esArchiver.load('empty_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       });
 
       it('reports no endpoints or policies', async () => {
@@ -39,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
     describe('when agents are connected with endpoint integration disabled', () => {
       before(async () => {
-        await esArchiver.load('endpoint/telemetry/agent_only');
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/telemetry/agent_only');
       });
 
       it('reports no endpoints or policies', async () => {
@@ -65,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
           'checkin_now',
           0
         );
-        await esArchiver.load('endpoint/telemetry/checkin_now');
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/telemetry/checkin_now');
         await telemetryTestResources.deleteArchive('checkin_now');
       });
 
@@ -94,7 +97,9 @@ export default function ({ getService }: FtrProviderContext) {
           'checkin_2_days_ago',
           2
         );
-        await esArchiver.load('endpoint/telemetry/checkin_2_days_ago');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/endpoint/telemetry/checkin_2_days_ago'
+        );
         await telemetryTestResources.deleteArchive('checkin_2_days_ago');
       });
 
@@ -118,7 +123,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
     describe('when agents are connected with endpoints integration malware enabled', () => {
       before(async () => {
-        await esArchiver.load('endpoint/telemetry/endpoint_malware_enabled');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/endpoint/telemetry/endpoint_malware_enabled'
+        );
       });
 
       it('reports the correct number of windows and macos endpoints under policies malware', async () => {
@@ -129,7 +136,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
     describe('when agents are connected with endpoints integration malware disabled', () => {
       before(async () => {
-        await esArchiver.load('endpoint/telemetry/endpoint_malware_disabled');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/endpoint/telemetry/endpoint_malware_disabled'
+        );
       });
       it('reports the correct number of windows and macos endpoints under policies malware', async () => {
         const endpointTelemetry = await telemetryTestResources.getEndpointTelemetry();
@@ -139,7 +148,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
     describe('when agents are connected with endpoints integration uninstalled', () => {
       before(async () => {
-        await esArchiver.load('endpoint/telemetry/endpoint_uninstalled');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/endpoint/telemetry/endpoint_uninstalled'
+        );
       });
       it('reports no endpoints or policies', async () => {
         const endpointTelemetry = await telemetryTestResources.getEndpointTelemetry();
@@ -165,7 +176,9 @@ export default function ({ getService }: FtrProviderContext) {
             'cloned_endpoint_test',
             0
           );
-          await esArchiver.load('endpoint/telemetry/cloned_endpoint_test');
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/endpoint/telemetry/cloned_endpoint_test'
+          );
           await telemetryTestResources.deleteArchive('cloned_endpoint_test');
         });
         it('reports all endpoints and policies', async () => {
@@ -210,7 +223,9 @@ export default function ({ getService }: FtrProviderContext) {
             'cloned_endpoint_test',
             0
           );
-          await esArchiver.load('endpoint/telemetry/cloned_endpoint_test');
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/endpoint/telemetry/cloned_endpoint_test'
+          );
           await telemetryTestResources.deleteArchive('cloned_endpoint_test');
         });
         it('reports all endpoints and policies', async () => {
@@ -255,7 +270,9 @@ export default function ({ getService }: FtrProviderContext) {
             'cloned_endpoint_test',
             0
           );
-          await esArchiver.load('endpoint/telemetry/cloned_endpoint_test');
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/endpoint/telemetry/cloned_endpoint_test'
+          );
           await telemetryTestResources.deleteArchive('cloned_endpoint_test');
         });
         it('reports all endpoints and policies', async () => {

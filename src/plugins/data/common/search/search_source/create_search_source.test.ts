@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createSearchSource as createSearchSourceFactory } from './create_search_source';
 import { SearchSourceDependencies } from './search_source';
-import { IIndexPattern } from '../../index_patterns';
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
-import { Filter } from '../../es_query/filters';
-import { BehaviorSubject } from 'rxjs';
+import { IIndexPattern } from '../..';
+import { IndexPatternsContract } from '../..';
+import { Filter } from '../../es_query';
 
 describe('createSearchSource', () => {
   const indexPatternMock: IIndexPattern = {} as IIndexPattern;
@@ -24,15 +23,11 @@ describe('createSearchSource', () => {
       getConfig: jest.fn(),
       search: jest.fn(),
       onResponse: (req, res) => res,
-      legacy: {
-        callMsearch: jest.fn(),
-        loadingCount$: new BehaviorSubject(0),
-      },
     };
 
-    indexPatternContractMock = ({
+    indexPatternContractMock = {
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
-    } as unknown) as jest.Mocked<IndexPatternsContract>;
+    } as unknown as jest.Mocked<IndexPatternsContract>;
 
     createSearchSource = createSearchSourceFactory(indexPatternContractMock, dependencies);
   });

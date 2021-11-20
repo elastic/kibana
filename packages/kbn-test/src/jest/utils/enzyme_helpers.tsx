@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -19,11 +19,13 @@ import React, { ReactElement, ValidationMap } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 
 // Use fake component to extract `intl` property to use in tests.
-const { intl } = (mount(
-  <I18nProvider>
-    <br />
-  </I18nProvider>
-).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>)
+const { intl } = (
+  mount(
+    <I18nProvider>
+      <br />
+    </I18nProvider>
+  ).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>
+)
   .instance()
   .getChildContext();
 
@@ -85,6 +87,7 @@ export function mountWithIntl<T>(
     childContextTypes,
     ...props
   }: {
+    attachTo?: HTMLElement;
     context?: any;
     childContextTypes?: ValidationMap<any>;
   } = {}

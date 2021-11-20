@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { dateString } from '../lib/date_string';
 import { UISession } from '../types';
 import { StatusDef as StatusAttributes, TableText } from './';
@@ -134,8 +135,8 @@ const getStatusAttributes = ({
         });
 
         return {
-          textColor: 'secondary',
-          icon: <EuiIcon color="secondary" type="checkInCircleFilled" />,
+          textColor: 'success',
+          icon: <EuiIcon color="success" type="checkInCircleFilled" />,
           label: <TableText>{getStatusText(session.status)}</TableText>,
           toolTipContent,
         };

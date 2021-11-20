@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { ISection } from '../../typings/section';
@@ -55,7 +57,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       href: core.http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
     },
     {
-      id: 'uptime',
+      id: 'synthetics',
       title: i18n.translate('xpack.observability.emptySection.apps.uptime.title', {
         defaultMessage: 'Uptime',
       }),
@@ -67,7 +69,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.uptime.link', {
         defaultMessage: 'Install Heartbeat',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
+      href: core.http.basePath.prepend('/app/integrations/detail/synthetics/overview'),
     },
     {
       id: 'ux',
@@ -95,7 +97,7 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
           'Are 503 errors stacking up? Are services responding? Is CPU and RAM utilization jumping? See warnings as they happen—not as part of the post-mortem.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
-        defaultMessage: 'Create alert',
+        defaultMessage: 'Create rule',
       }),
       href: core.http.basePath.prepend(
         '/app/management/insightsAndAlerting/triggersActions/alerts'

@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ReactElement } from 'react';
-import { CoreSetup } from 'src/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { CoreSetup, SavedObjectAttributes, SimpleSavedObject, Toast } from 'src/core/public';
 
 import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { EmbeddableFactory, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
 import { SavedObjectEmbeddableInput } from '../../../../embeddables';
+import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
 
 interface Props {
   onClose: () => void;
@@ -26,6 +28,8 @@ interface Props {
   getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
+  showCreateNewMenu?: boolean;
+  reportUiCounter?: UsageCollectionStart['reportUiCounter'];
 }
 
 interface State {
@@ -37,7 +41,7 @@ function capitalize([first, ...letters]: string) {
 }
 
 export class AddPanelFlyout extends React.Component<Props, State> {
-  private lastToast: any;
+  private lastToast?: string | Toast;
 
   public state = {
     isCreateMenuOpen: false,
@@ -83,7 +87,12 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     }
   };
 
-  public onAddPanel = async (savedObjectId: string, savedObjectType: string, name: string) => {
+  public onAddPanel = async (
+    savedObjectId: string,
+    savedObjectType: string,
+    name: string,
+    so: SimpleSavedObject<SavedObjectAttributes>
+  ) => {
     const factoryForSavedObjectType = [...this.props.getAllFactories()].find(
       (factory) =>
         factory.savedObjectMetaData && factory.savedObjectMetaData.type === savedObjectType
@@ -97,8 +106,26 @@ export class AddPanelFlyout extends React.Component<Props, State> {
       { savedObjectId }
     );
 
+    this.doTelemetryForAddEvent(this.props.container.type, factoryForSavedObjectType, so);
+
     this.showToast(name);
   };
+
+  private doTelemetryForAddEvent(
+    appName: string,
+    factoryForSavedObjectType: EmbeddableFactory,
+    so: SimpleSavedObject<SavedObjectAttributes>
+  ) {
+    const { reportUiCounter } = this.props;
+
+    if (reportUiCounter) {
+      const type = factoryForSavedObjectType.savedObjectMetaData?.getSavedObjectSubType
+        ? factoryForSavedObjectType.savedObjectMetaData.getSavedObjectSubType(so)
+        : factoryForSavedObjectType.type;
+
+      reportUiCounter(appName, METRIC_TYPE.CLICK, `${type}:add`);
+    }
+  }
 
   private getCreateMenuItems(): ReactElement[] {
     return [...this.props.getAllFactories()]
@@ -124,7 +151,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         (embeddableFactory) =>
           Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
       )
-      .map(({ savedObjectMetaData }) => savedObjectMetaData as any);
+      .map(({ savedObjectMetaData }) => savedObjectMetaData);
     const savedObjectsFinder = (
       <SavedObjectFinder
         onChoose={this.onAddPanel}
@@ -134,7 +161,9 @@ export class AddPanelFlyout extends React.Component<Props, State> {
           defaultMessage: 'No matching objects found.',
         })}
       >
-        <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+        {this.props.showCreateNewMenu ? (
+          <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
+        ) : null}
       </SavedObjectFinder>
     );
 

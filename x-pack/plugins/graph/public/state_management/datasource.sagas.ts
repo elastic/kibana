@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { takeLatest, put, call, select } from 'redux-saga/effects';
@@ -29,7 +30,7 @@ export const datasourceSaga = ({
   indexPatternProvider,
   notifications,
   createWorkspace,
-  notifyAngular,
+  notifyReact,
 }: GraphStoreDependencies) => {
   function* fetchFields(action: Action<IndexpatternDatasource>) {
     try {
@@ -38,13 +39,13 @@ export const datasourceSaga = ({
       yield put(datasourceLoaded());
       const advancedSettings = settingsSelector(yield select());
       createWorkspace(indexPattern.title, advancedSettings);
-      notifyAngular();
+      notifyReact();
     } catch (e) {
       // in case of errors, reset the datasource and show notification
       yield put(setDatasource({ type: 'none' }));
       notifications.toasts.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern "{name}" not found',
+        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+          defaultMessage: 'Data view "{name}" not found',
           values: {
             name: action.payload.title,
           },

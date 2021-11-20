@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import sinon from 'sinon';
@@ -21,7 +21,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     await createPromiseFromStreams([
       createListStream(indices),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats }),
     ]);
 
     expect(stats.getTestSummary()).toEqual({
@@ -40,12 +40,12 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     await createPromiseFromStreams([
       createListStream(['index1']),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats }),
     ]);
 
     const params = (client.indices.get as sinon.SinonSpy).args[0][0];
-    expect(params).toHaveProperty('filterPath');
-    const filters: string[] = params.filterPath;
+    expect(params).toHaveProperty('filter_path');
+    const filters: string[] = params.filter_path;
     expect(filters.some((path) => path.includes('index.creation_date'))).toBe(true);
     expect(filters.some((path) => path.includes('index.uuid'))).toBe(true);
     expect(filters.some((path) => path.includes('index.version'))).toBe(true);
@@ -58,7 +58,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     const indexRecords = await createPromiseFromStreams<any[]>([
       createListStream(['index1', 'index2', 'index3']),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats }),
       createConcatStream([]),
     ]);
 
@@ -83,7 +83,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     const indexRecords = await createPromiseFromStreams([
       createListStream(['index1']),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats }),
       createConcatStream([]),
     ]);
 
@@ -98,5 +98,52 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
         },
       },
     ]);
+  });
+
+  describe('change index names', () => {
+    it('changes .kibana* index names if keepIndexNames is not enabled', async () => {
+      const stats = createStubStats();
+      const client = createStubClient(['.kibana_7.16.0_001']);
+
+      const indexRecords = await createPromiseFromStreams([
+        createListStream(['.kibana_7.16.0_001']),
+        createGenerateIndexRecordsStream({ client, stats }),
+        createConcatStream([]),
+      ]);
+
+      expect(indexRecords).toEqual([
+        { type: 'index', value: expect.objectContaining({ index: '.kibana_1' }) },
+      ]);
+    });
+
+    it('does not change non-.kibana* index names if keepIndexNames is not enabled', async () => {
+      const stats = createStubStats();
+      const client = createStubClient(['.foo']);
+
+      const indexRecords = await createPromiseFromStreams([
+        createListStream(['.foo']),
+        createGenerateIndexRecordsStream({ client, stats }),
+        createConcatStream([]),
+      ]);
+
+      expect(indexRecords).toEqual([
+        { type: 'index', value: expect.objectContaining({ index: '.foo' }) },
+      ]);
+    });
+
+    it('does not change .kibana* index names if keepIndexNames is enabled', async () => {
+      const stats = createStubStats();
+      const client = createStubClient(['.kibana_7.16.0_001']);
+
+      const indexRecords = await createPromiseFromStreams([
+        createListStream(['.kibana_7.16.0_001']),
+        createGenerateIndexRecordsStream({ client, stats, keepIndexNames: true }),
+        createConcatStream([]),
+      ]);
+
+      expect(indexRecords).toEqual([
+        { type: 'index', value: expect.objectContaining({ index: '.kibana_7.16.0_001' }) },
+      ]);
+    });
   });
 });

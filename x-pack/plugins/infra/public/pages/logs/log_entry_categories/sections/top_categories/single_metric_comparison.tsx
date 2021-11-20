@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiIcon, EuiTextColor } from '@elastic/eui';
@@ -28,14 +29,14 @@ export const SingleMetricComparison: React.FunctionComponent<{
     return (
       <NoWrapSpan>
         <EuiIcon type="sortUp" color="success" />
-        <EuiTextColor color="secondary">{formatPercentage(changeFactor)}</EuiTextColor>
+        <EuiTextColor color="success">{formatPercentage(changeFactor)}</EuiTextColor>
       </NoWrapSpan>
     );
   } else if (changeFactor > 0 && !Number.isFinite(changeFactor)) {
     return (
       <NoWrapSpan>
         <EuiIcon type="sortUp" color="success" />
-        <EuiTextColor color="secondary">{newCategoryTrendLabel}</EuiTextColor>
+        <EuiTextColor color="success">{newCategoryTrendLabel}</EuiTextColor>
       </NoWrapSpan>
     );
   }

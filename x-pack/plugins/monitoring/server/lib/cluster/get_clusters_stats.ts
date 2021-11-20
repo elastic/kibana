@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-ignore
@@ -11,7 +12,7 @@ import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 // @ts-ignore
-import { parseCrossClusterPrefix } from '../ccs_utils';
+import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
 import { getClustersState } from './get_clusters_state';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
@@ -52,19 +53,30 @@ function fetchClusterStats(req: LegacyRequest, esIndexPattern: string, clusterUu
   const params = {
     index: esIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'),
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._source.cluster_name',
+      'hits.hits._source.elasticsearch.cluster.name',
       'hits.hits._source.version',
+      'hits.hits._source.elasticsearch.version',
+      'hits.hits._source.elasticsearch.cluster.node.version',
       'hits.hits._source.license.status', // license data only includes necessary fields to drive UI
+      'hits.hits._source.elasticsearch.cluster.stats.license.status',
       'hits.hits._source.license.type',
+      'hits.hits._source.elasticsearch.cluster.stats.license.type',
       'hits.hits._source.license.issue_date',
+      'hits.hits._source.elasticsearch.cluster.stats.license.issue_date',
       'hits.hits._source.license.expiry_date',
+      'hits.hits._source.elasticsearch.cluster.stats.license.expiry_date',
       'hits.hits._source.license.expiry_date_in_millis',
+      'hits.hits._source.elasticsearch.cluster.stats.license.expiry_date_in_millis',
       'hits.hits._source.cluster_stats',
+      'hits.hits._source.elasticsearch.cluster.stats',
       'hits.hits._source.cluster_state',
+      'hits.hits._source.elasticsearch.cluster.stats.state',
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
     ],
     body: {

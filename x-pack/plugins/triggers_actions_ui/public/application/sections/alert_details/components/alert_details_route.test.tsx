@@ -1,50 +1,131 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from 'kibana/public';
-import { AlertDetailsRoute, getAlertData } from './alert_details_route';
+import { AlertDetailsRoute, getRuleData } from './alert_details_route';
 import { Alert } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { spacesPluginMock } from '../../../../../../spaces/public/mocks';
+import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
 describe('alert_details_route', () => {
-  it('render a loader while fetching data', () => {
-    const alert = mockAlert();
-
-    expect(
-      shallow(
-        <AlertDetailsRoute {...mockRouterProps(alert)} {...mockApis()} />
-      ).containsMatchingElement(<CenterJustifiedSpinner />)
-    ).toBeTruthy();
-  });
-});
-
-describe('getAlertData useEffect handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('fetches alert', async () => {
-    const alert = mockAlert();
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+  const spacesMock = spacesPluginMock.createStartContract();
+  async function setup() {
+    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.spaces = spacesMock;
+  }
+
+  it('render a loader while fetching data', () => {
+    const rule = mockRule();
+
+    expect(
+      shallow(
+        <AlertDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />
+      ).containsMatchingElement(<CenterJustifiedSpinner />)
+    ).toBeTruthy();
+  });
+
+  it('redirects to another page if fetched rule is an aliasMatch', async () => {
+    await setup();
+    const rule = mockRule();
+    const { resolveRule } = mockApis();
+
+    resolveRule.mockImplementationOnce(async () => ({
+      ...rule,
+      id: 'new_id',
+      outcome: 'aliasMatch',
+      alias_target_id: rule.id,
+    }));
+    const wrapper = mountWithIntl(
+      <AlertDetailsRoute {...mockRouterProps(rule)} {...{ ...mockApis(), resolveRule }} />
+    );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(resolveRule).toHaveBeenCalledWith(rule.id);
+    expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith(
+      `insightsAndAlerting/triggersActions/rule/new_id`,
+      `rule`
+    );
+  });
+
+  it('shows warning callout if fetched rule is a conflict', async () => {
+    await setup();
+    const rule = mockRule();
+    const ruleType = {
+      id: rule.alertTypeId,
+      name: 'type name',
+      authorizedConsumers: ['consumer'],
+    };
+    const { loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
+
+    loadAlertTypes.mockImplementationOnce(async () => [ruleType]);
+    loadActionTypes.mockImplementation(async () => []);
+    resolveRule.mockImplementationOnce(async () => ({
+      ...rule,
+      id: 'new_id',
+      outcome: 'conflict',
+      alias_target_id: rule.id,
+    }));
+    const wrapper = mountWithIntl(
+      <AlertDetailsRoute
+        {...mockRouterProps(rule)}
+        {...{ ...mockApis(), loadAlertTypes, loadActionTypes, resolveRule }}
+      />
+    );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(resolveRule).toHaveBeenCalledWith(rule.id);
+    expect((spacesMock as any).ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
+      currentObjectId: 'new_id',
+      objectNoun: 'rule',
+      otherObjectId: rule.id,
+      otherObjectPath: `insightsAndAlerting/triggersActions/rule/${rule.id}`,
+    });
+  });
+});
+
+describe('getRuleData useEffect handler', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('fetches rule', async () => {
+    const rule = mockRule();
+    const { loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
-    loadAlert.mockImplementationOnce(async () => alert);
+    resolveRule.mockImplementationOnce(async () => rule);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
 
-    await getAlertData(
-      alert.id,
-      loadAlert,
+    await getRuleData(
+      rule.id,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -52,45 +133,45 @@ describe('getAlertData useEffect handler', () => {
       toastNotifications
     );
 
-    expect(loadAlert).toHaveBeenCalledWith(alert.id);
-    expect(setAlert).toHaveBeenCalledWith(alert);
+    expect(resolveRule).toHaveBeenCalledWith(rule.id);
+    expect(setAlert).toHaveBeenCalledWith(rule);
   });
 
-  it('fetches alert and action types', async () => {
-    const actionType = {
+  it('fetches rule and connector types', async () => {
+    const connectorType = {
       id: '.server-log',
       name: 'Server log',
       enabled: true,
     };
-    const alert = mockAlert({
+    const rule = mockRule({
       actions: [
         {
           group: '',
           id: uuid.v4(),
-          actionTypeId: actionType.id,
+          actionTypeId: connectorType.id,
           params: {},
         },
       ],
     });
-    const alertType = {
-      id: alert.alertTypeId,
+    const ruleType = {
+      id: rule.alertTypeId,
       name: 'type name',
     };
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
-    loadAlert.mockImplementation(async () => alert);
-    loadAlertTypes.mockImplementation(async () => [alertType]);
-    loadActionTypes.mockImplementation(async () => [actionType]);
+    resolveRule.mockImplementation(async () => rule);
+    loadAlertTypes.mockImplementation(async () => [ruleType]);
+    loadActionTypes.mockImplementation(async () => [connectorType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
+    } as unknown as ToastsApi;
 
-    await getAlertData(
-      alert.id,
-      loadAlert,
+    await getRuleData(
+      rule.id,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -100,42 +181,44 @@ describe('getAlertData useEffect handler', () => {
 
     expect(loadAlertTypes).toHaveBeenCalledTimes(1);
     expect(loadActionTypes).toHaveBeenCalledTimes(1);
+    expect(resolveRule).toHaveBeenCalled();
 
-    expect(setAlertType).toHaveBeenCalledWith(alertType);
-    expect(setActionTypes).toHaveBeenCalledWith([actionType]);
+    expect(setAlert).toHaveBeenCalledWith(rule);
+    expect(setAlertType).toHaveBeenCalledWith(ruleType);
+    expect(setActionTypes).toHaveBeenCalledWith([connectorType]);
   });
 
-  it('displays an error if the alert isnt found', async () => {
-    const actionType = {
+  it('displays an error if fetching the rule results in a non-404 error', async () => {
+    const connectorType = {
       id: '.server-log',
       name: 'Server log',
       enabled: true,
     };
-    const alert = mockAlert({
+    const rule = mockRule({
       actions: [
         {
           group: '',
           id: uuid.v4(),
-          actionTypeId: actionType.id,
+          actionTypeId: connectorType.id,
           params: {},
         },
       ],
     });
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
-    loadAlert.mockImplementation(async () => {
+    resolveRule.mockImplementation(async () => {
       throw new Error('OMG');
     });
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
-    await getAlertData(
-      alert.id,
-      loadAlert,
+    } as unknown as ToastsApi;
+    await getRuleData(
+      rule.id,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -144,44 +227,44 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert: OMG',
+      title: 'Unable to load rule: OMG',
     });
   });
 
-  it('displays an error if the alert type isnt loaded', async () => {
-    const actionType = {
+  it('displays an error if the rule type isnt loaded', async () => {
+    const connectorType = {
       id: '.server-log',
       name: 'Server log',
       enabled: true,
     };
-    const alert = mockAlert({
+    const rule = mockRule({
       actions: [
         {
           group: '',
           id: uuid.v4(),
-          actionTypeId: actionType.id,
+          actionTypeId: connectorType.id,
           params: {},
         },
       ],
     });
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
-    loadAlert.mockImplementation(async () => alert);
+    resolveRule.mockImplementation(async () => rule);
 
     loadAlertTypes.mockImplementation(async () => {
-      throw new Error('OMG no alert type');
+      throw new Error('OMG no rule type');
     });
-    loadActionTypes.mockImplementation(async () => [actionType]);
+    loadActionTypes.mockImplementation(async () => [connectorType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
-    await getAlertData(
-      alert.id,
-      loadAlert,
+    } as unknown as ToastsApi;
+    await getRuleData(
+      rule.id,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -190,48 +273,48 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert: OMG no alert type',
+      title: 'Unable to load rule: OMG no rule type',
     });
   });
 
-  it('displays an error if the action type isnt loaded', async () => {
-    const actionType = {
+  it('displays an error if the connector type isnt loaded', async () => {
+    const connectorType = {
       id: '.server-log',
       name: 'Server log',
       enabled: true,
     };
-    const alert = mockAlert({
+    const rule = mockRule({
       actions: [
         {
           group: '',
           id: uuid.v4(),
-          actionTypeId: actionType.id,
+          actionTypeId: connectorType.id,
           params: {},
         },
       ],
     });
-    const alertType = {
-      id: alert.alertTypeId,
+    const ruleType = {
+      id: rule.alertTypeId,
       name: 'type name',
     };
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
-    loadAlert.mockImplementation(async () => alert);
+    resolveRule.mockImplementation(async () => rule);
 
-    loadAlertTypes.mockImplementation(async () => [alertType]);
+    loadAlertTypes.mockImplementation(async () => [ruleType]);
     loadActionTypes.mockImplementation(async () => {
-      throw new Error('OMG no action type');
+      throw new Error('OMG no connector type');
     });
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
-    await getAlertData(
-      alert.id,
-      loadAlert,
+    } as unknown as ToastsApi;
+    await getRuleData(
+      rule.id,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -240,46 +323,46 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert: OMG no action type',
+      title: 'Unable to load rule: OMG no connector type',
     });
   });
 
-  it('displays an error if the alert type isnt found', async () => {
-    const actionType = {
+  it('displays an error if the rule type isnt found', async () => {
+    const connectorType = {
       id: '.server-log',
       name: 'Server log',
       enabled: true,
     };
-    const alert = mockAlert({
+    const rule = mockRule({
       actions: [
         {
           group: '',
           id: uuid.v4(),
-          actionTypeId: actionType.id,
+          actionTypeId: connectorType.id,
           params: {},
         },
       ],
     });
 
-    const alertType = {
+    const ruleType = {
       id: uuid.v4(),
       name: 'type name',
     };
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
-    loadAlert.mockImplementation(async () => alert);
-    loadAlertTypes.mockImplementation(async () => [alertType]);
-    loadActionTypes.mockImplementation(async () => [actionType]);
+    resolveRule.mockImplementation(async () => rule);
+    loadAlertTypes.mockImplementation(async () => [ruleType]);
+    loadActionTypes.mockImplementation(async () => [connectorType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
-    await getAlertData(
-      alert.id,
-      loadAlert,
+    } as unknown as ToastsApi;
+    await getRuleData(
+      rule.id,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -288,57 +371,57 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: `Unable to load alert: Invalid Alert Type: ${alert.alertTypeId}`,
+      title: `Unable to load rule: Invalid Rule Type: ${rule.alertTypeId}`,
     });
   });
 
   it('displays an error if an action type isnt found', async () => {
-    const availableActionType = {
+    const availableConnectorType = {
       id: '.server-log',
       name: 'Server log',
       enabled: true,
     };
-    const missingActionType = {
+    const missingConnectorType = {
       id: '.noop',
       name: 'No Op',
       enabled: true,
     };
-    const alert = mockAlert({
+    const rule = mockRule({
       actions: [
         {
           group: '',
           id: uuid.v4(),
-          actionTypeId: availableActionType.id,
+          actionTypeId: availableConnectorType.id,
           params: {},
         },
         {
           group: '',
           id: uuid.v4(),
-          actionTypeId: missingActionType.id,
+          actionTypeId: missingConnectorType.id,
           params: {},
         },
       ],
     });
 
-    const alertType = {
+    const ruleType = {
       id: uuid.v4(),
       name: 'type name',
     };
 
-    const { loadAlert, loadAlertTypes, loadActionTypes } = mockApis();
+    const { loadAlertTypes, loadActionTypes, resolveRule } = mockApis();
     const { setAlert, setAlertType, setActionTypes } = mockStateSetter();
 
-    loadAlert.mockImplementation(async () => alert);
-    loadAlertTypes.mockImplementation(async () => [alertType]);
-    loadActionTypes.mockImplementation(async () => [availableActionType]);
+    resolveRule.mockImplementation(async () => rule);
+    loadAlertTypes.mockImplementation(async () => [ruleType]);
+    loadActionTypes.mockImplementation(async () => [availableConnectorType]);
 
-    const toastNotifications = ({
+    const toastNotifications = {
       addDanger: jest.fn(),
-    } as unknown) as ToastsApi;
-    await getAlertData(
-      alert.id,
-      loadAlert,
+    } as unknown as ToastsApi;
+    await getRuleData(
+      rule.id,
       loadAlertTypes,
+      resolveRule,
       loadActionTypes,
       setAlert,
       setAlertType,
@@ -347,7 +430,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: `Unable to load alert: Invalid Action Type: ${missingActionType.id}`,
+      title: `Unable to load rule: Invalid Connector Type: ${missingConnectorType.id}`,
     });
   });
 });
@@ -357,6 +440,7 @@ function mockApis() {
     loadAlert: jest.fn(),
     loadAlertTypes: jest.fn(),
     loadActionTypes: jest.fn(),
+    resolveRule: jest.fn(),
   };
 }
 
@@ -368,23 +452,23 @@ function mockStateSetter() {
   };
 }
 
-function mockRouterProps(alert: Alert) {
+function mockRouterProps(rule: Alert) {
   return {
     match: {
       isExact: false,
-      path: `/alert/${alert.id}`,
+      path: `/rule/${rule.id}`,
       url: '',
-      params: { alertId: alert.id },
+      params: { ruleId: rule.id },
     },
     history: createMemoryHistory(),
-    location: createLocation(`/alert/${alert.id}`),
+    location: createLocation(`/rule/${rule.id}`),
   };
 }
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockRule(overloads: Partial<Alert> = {}): Alert {
   return {
     id: uuid.v4(),
     enabled: true,
-    name: `alert-${uuid.v4()}`,
+    name: `rule-${uuid.v4()}`,
     tags: [],
     alertTypeId: '.noop',
     consumer: 'consumer',

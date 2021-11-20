@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
@@ -76,13 +77,12 @@ describe('legacy sync sagas', () => {
 
   it('syncs templates with workspace', () => {
     env.store.dispatch(loadTemplates([]));
-    expect(env.mockedDeps.setUrlTemplates).toHaveBeenCalledWith([]);
-    expect(env.mockedDeps.notifyAngular).toHaveBeenCalled();
+    expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
   });
 
-  it('notifies angular when fields are selected', () => {
+  it('notifies react when fields are selected', () => {
     env.store.dispatch(selectField('field1'));
-    expect(env.mockedDeps.notifyAngular).toHaveBeenCalled();
+    expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
   });
 
   it('syncs field list with workspace', () => {
@@ -98,9 +98,6 @@ describe('legacy sync sagas', () => {
     const workspace = env.mockedDeps.getWorkspace()!;
     expect(workspace.options.vertex_fields![0].name).toEqual('field1');
     expect(workspace.options.vertex_fields![0].hopSize).toEqual(22);
-    expect(env.mockedDeps.setLiveResponseFields).toHaveBeenCalledWith([
-      expect.objectContaining({ hopSize: 22 }),
-    ]);
   });
 
   it('syncs styles with nodes', () => {

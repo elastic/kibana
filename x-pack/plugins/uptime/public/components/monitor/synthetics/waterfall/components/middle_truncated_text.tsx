@@ -1,44 +1,90 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
-import { EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiButtonEmpty,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+  EuiLink,
+  EuiText,
+  EuiIcon,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { WaterfallTooltipContent } from './waterfall_tooltip_content';
+import { WaterfallChartTooltip } from './styles';
 import { FIXED_AXIS_HEIGHT } from './constants';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 
-const OuterContainer = styled.div`
-  width: 100%;
-  height: 100%;
+interface Props {
+  index: number;
+  highestIndex: number;
+  ariaLabel: string;
+  text: string;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  setButtonRef?: (ref: HTMLButtonElement | HTMLAnchorElement | null) => void;
+  url: string;
+}
+
+const OuterContainer = euiStyled.span`
   position: relative;
-`;
-
-const InnerContainer = styled.span`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow: hidden;
-  display: flex;
-  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  .euiToolTipAnchor {
+    min-width: 0;
+  }
 `; // NOTE: min-width: 0 ensures flexbox and no-wrap children can co-exist
 
-const FirstChunk = styled.span`
+const InnerContainer = euiStyled.span`
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+`;
+
+const IndexNumber = euiStyled(EuiText)`
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  margin-right: ${(props) => props.theme.eui.euiSizeXS};
+  line-height: ${FIXED_AXIS_HEIGHT}px;
+  text-align: right;
+  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+`;
+
+const FirstChunk = euiStyled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
   line-height: ${FIXED_AXIS_HEIGHT}px;
-`;
+  text-align: left;
+`; // safari doesn't auto align text left in some cases
 
-const LastChunk = styled.span`
+const LastChunk = euiStyled.span`
   flex-shrink: 0;
   line-height: ${FIXED_AXIS_HEIGHT}px;
+  text-align: left;
+`; // safari doesn't auto align text left in some cases
+
+const StyledButton = euiStyled(EuiButtonEmpty)`
+  &&& {
+    border: none;
+
+    .euiButtonContent {
+      display: inline-block;
+      padding: 0;
+    }
+  }
 `;
 
-export const getChunks = (text: string) => {
+const SecureIcon = euiStyled(EuiIcon)`
+  margin-right: ${(props) => props.theme.eui.euiSizeXS};
+`;
+
+export const getChunks = (text: string = '') => {
   const END_CHARS = 12;
   const chars = text.split('');
   const splitPoint = chars.length - END_CHARS > 0 ? chars.length - END_CHARS : null;
@@ -49,24 +95,88 @@ export const getChunks = (text: string) => {
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
-export const MiddleTruncatedText = ({ text }: { text: string }) => {
+export const MiddleTruncatedText = ({
+  index,
+  ariaLabel,
+  text: fullText,
+  onClick,
+  setButtonRef,
+  url,
+  highestIndex,
+}: Props) => {
+  const secureHttps = fullText.startsWith('https://');
+  const text = fullText.replace(/https:\/\/www.|http:\/\/www.|http:\/\/|https:\/\//, '');
+
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
 
   return (
-    <>
-      <OuterContainer>
-        <EuiScreenReaderOnly>
-          <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
-        </EuiScreenReaderOnly>
-        <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
-          <InnerContainer aria-hidden={true}>
-            <FirstChunk>{chunks.first}</FirstChunk>
-            <LastChunk>{chunks.last}</LastChunk>
-          </InnerContainer>
-        </EuiToolTip>
-      </OuterContainer>
-    </>
+    <OuterContainer aria-label={ariaLabel} data-test-subj="middleTruncatedTextContainer">
+      <EuiScreenReaderOnly>
+        <span data-test-subj="middleTruncatedTextSROnly">{fullText}</span>
+      </EuiScreenReaderOnly>
+      <WaterfallChartTooltip
+        as={EuiToolTip}
+        content={
+          <WaterfallTooltipContent {...{ text: formatTooltipHeading(index, fullText), url }} />
+        }
+        data-test-subj="middleTruncatedTextToolTip"
+        delay="long"
+        position="top"
+      >
+        <>
+          {onClick ? (
+            <StyledButton
+              onClick={onClick}
+              data-test-subj={`middleTruncatedTextButton${index}`}
+              buttonRef={setButtonRef}
+              flush={'left'}
+            >
+              <InnerContainer>
+                <IndexNumber
+                  color="subdued"
+                  size="s"
+                  style={{ minWidth: String(highestIndex).length + 1 + 'ch' }}
+                >
+                  {index + '.'}
+                </IndexNumber>
+                {secureHttps && (
+                  <SecureIcon
+                    type="lock"
+                    size="s"
+                    color="success"
+                    aria-label={i18n.translate('xpack.uptime.waterfallChart.sidebar.url.https', {
+                      defaultMessage: 'https',
+                    })}
+                  />
+                )}
+                <FirstChunk>{chunks.first}</FirstChunk>
+                <LastChunk>{chunks.last}</LastChunk>
+              </InnerContainer>
+            </StyledButton>
+          ) : (
+            <InnerContainer aria-hidden={true}>
+              <FirstChunk>
+                {index}. {chunks.first}
+              </FirstChunk>
+              <LastChunk>{chunks.last}</LastChunk>
+            </InnerContainer>
+          )}
+        </>
+      </WaterfallChartTooltip>
+      <span>
+        <EuiLink href={url} external target="_blank">
+          <EuiScreenReaderOnly>
+            <span>
+              <FormattedMessage
+                id="xpack.uptime.synthetics.waterfall.resource.externalLink"
+                defaultMessage="Open resource in new tab"
+              />
+            </span>
+          </EuiScreenReaderOnly>
+        </EuiLink>
+      </span>
+    </OuterContainer>
   );
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -122,12 +123,10 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     component.update();
 
-    if (subType !== undefined) {
+    if (subType !== undefined && type === 'other') {
       await act(async () => {
-        if (type === 'other') {
-          // subType is a text input
-          form.setInputValue('createFieldForm.fieldSubType', subType);
-        }
+        // subType is a text input
+        form.setInputValue('createFieldForm.fieldSubType', subType);
       });
     }
 
@@ -275,7 +274,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 
   const updateJsonEditor = (testSubject: TestSubjects, value: object) => {
-    find(testSubject).simulate('change', { jsonContent: JSON.stringify(value) });
+    find(testSubject).simulate('change', { jsonString: JSON.stringify(value) });
   };
 
   const getJsonEditorValue = (testSubject: TestSubjects) => {

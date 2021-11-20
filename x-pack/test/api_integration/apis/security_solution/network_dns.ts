@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,6 +11,7 @@ import {
   NetworkDnsEdges,
   Direction,
   NetworkDnsFields,
+  NetworkDnsStrategyResponse,
 } from '../../../../plugins/security_solution/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -17,29 +19,25 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Network DNS', () => {
     describe('With packetbeat', () => {
-      before(() => esArchiver.load('packetbeat/dns'));
-      after(() => esArchiver.unload('packetbeat/dns'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/dns')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/dns')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
 
       it('Make sure that we get Dns data and sorting by uniqueDomains ascending', async () => {
-        const { body: networkDns } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+        const networkDns = await bsearch.send<NetworkDnsStrategyResponse>({
+          supertest,
+          options: {
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             factoryQueryType: NetworkQueries.dns,
             filterQuery:
@@ -52,8 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(networkDns.edges.length).to.be(10);
         expect(networkDns.totalCount).to.be(44);
@@ -64,12 +63,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Make sure that we get Dns data and sorting by uniqueDomains descending', async () => {
-        const { body: networkDns } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const networkDns = await bsearch.send<NetworkDnsStrategyResponse>({
+          supertest,
+          options: {
             ip: '151.205.0.17',
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.dns,
             docValueFields: [],
             inspect: false,
@@ -86,8 +84,9 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(networkDns.edges.length).to.be(10);
         expect(networkDns.totalCount).to.be(44);

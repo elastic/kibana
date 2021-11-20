@@ -1,18 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiImage, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { CanvasAsset } from '../../../types';
 
-import { ComponentStrings } from '../../../i18n';
-
-const { AssetPicker: strings } = ComponentStrings;
+const strings = {
+  getAssetAltText: () =>
+    i18n.translate('xpack.canvas.assetpicker.assetAltText', {
+      defaultMessage: 'Asset thumbnail',
+    }),
+};
 
 interface Props {
   assets: CanvasAsset[];

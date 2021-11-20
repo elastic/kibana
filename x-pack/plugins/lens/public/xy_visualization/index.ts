@@ -1,71 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CoreSetup, IUiSettingsClient } from 'kibana/public';
-import moment from 'moment-timezone';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { EditorFrameSetup, FormatFactory } from '../types';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { LensPluginStartDependencies } from '../plugin';
+import type { CoreSetup } from 'kibana/public';
+import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { EditorFrameSetup } from '../types';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import type { LensPluginStartDependencies } from '../plugin';
+import { getTimeZone } from '../utils';
+import type { FormatFactory } from '../../common';
+import { LEGACY_TIME_AXIS } from '../../../../../src/plugins/charts/common';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
 
-function getTimeZone(uiSettings: IUiSettingsClient) {
-  const configuredTimeZone = uiSettings.get('dateFormat:tz');
-  if (configuredTimeZone === 'Browser') {
-    return moment.tz.guess();
-  }
-
-  return configuredTimeZone;
-}
-
 export class XyVisualization {
-  constructor() {}
-
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
-    { expressions, formatFactory, editorFrame, charts }: XyVisualizationPluginSetupPlugins
+    { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const {
-        legendConfig,
-        yAxisConfig,
-        tickLabelsConfig,
-        gridlinesConfig,
-        axisTitlesVisibilityConfig,
-        layerConfig,
-        xyChart,
-        getXyChartRenderer,
-        getXyVisualization,
-      } = await import('../async_services');
-      const [, { data }] = await core.getStartServices();
+      const { getXyChartRenderer, getXyVisualization } = await import('../async_services');
+      const [, { charts, fieldFormats }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
-      expressions.registerFunction(() => legendConfig);
-      expressions.registerFunction(() => yAxisConfig);
-      expressions.registerFunction(() => tickLabelsConfig);
-      expressions.registerFunction(() => gridlinesConfig);
-      expressions.registerFunction(() => axisTitlesVisibilityConfig);
-      expressions.registerFunction(() => layerConfig);
-      expressions.registerFunction(() => xyChart);
-
+      const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
       expressions.registerRenderer(
         getXyChartRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          chartsActiveCursorService: charts.activeCursor,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
-          getIntervalByColumn: data.search.aggs.getDateMetaByDatatableColumn,
+          useLegacyTimeAxis,
         })
       );
-      return getXyVisualization({ paletteService: palettes, data });
+      return getXyVisualization({ paletteService: palettes, fieldFormats, useLegacyTimeAxis });
     });
   }
 }

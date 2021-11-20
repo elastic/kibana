@@ -1,17 +1,14 @@
 {
   "name": "x-pack",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",
   "scripts": {
     "github-checks-reporter": "../node_modules/.bin/github-checks-reporter",
     "kbn": "node ../scripts/kbn",
-    "kbn:bootstrap": "node plugins/canvas/scripts/storybook --clean",
     "start": "node ../scripts/kibana --dev",
-    "build": "../node_modules/.bin/gulp build",
-    "testonly": "echo 'Deprecated, use `yarn test`'",
-    "test": "../node_modules/.bin/gulp test",
+    "build": "node --preserve-symlinks ../node_modules/.bin/gulp build",
     "test:jest": "node ../scripts/jest"
   },
   "kibana": {
@@ -27,23 +24,5 @@
   },
   "engines": {
     "yarn": "^1.21.1"
-  },
-  "devDependencies": {
-    "@kbn/babel-preset": "link:../packages/kbn-babel-preset",
-    "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
-    "@kbn/es": "link:../packages/kbn-es",
-    "@kbn/expect": "link:../packages/kbn-expect",
-    "@kbn/plugin-helpers": "link:../packages/kbn-plugin-helpers",
-    "@kbn/storybook": "link:../packages/kbn-storybook",
-    "@kbn/test": "link:../packages/kbn-test",
-    "@kbn/utility-types": "link:../packages/kbn-utility-types"
-  },
-  "dependencies": {
-    "@elastic/datemath": "link:../packages/elastic-datemath",
-    "@elastic/safer-lodash-set": "link:../packages/elastic-safer-lodash-set",
-    "@kbn/config-schema": "link:../packages/kbn-config-schema",
-    "@kbn/i18n": "link:../packages/kbn-i18n",
-    "@kbn/interpreter": "link:../packages/kbn-interpreter",
-    "@kbn/ui-framework": "link:../packages/kbn-ui-framework"
   }
 }

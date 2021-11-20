@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
-import { ConfigType } from './config';
+import { RemoteClustersConfig, RemoteClustersConfig7x } from './config';
 import {
   registerGetRoute,
   registerAddRoute,
@@ -19,31 +19,36 @@ import {
   registerDeleteRoute,
 } from './routes/api';
 
+import { handleEsError } from './shared_imports';
+
 export interface RemoteClustersPluginSetup {
   isUiEnabled: boolean;
 }
 
 export class RemoteClustersServerPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, any, any> {
+  implements Plugin<RemoteClustersPluginSetup, void, any, any>
+{
   licenseStatus: LicenseStatus;
   log: Logger;
-  config$: Observable<ConfigType>;
+  config: RemoteClustersConfig | RemoteClustersConfig7x;
 
   constructor({ logger, config }: PluginInitializerContext) {
     this.log = logger.get();
-    this.config$ = config.create();
+    this.config = config.get();
     this.licenseStatus = { valid: false };
   }
 
-  async setup({ http }: CoreSetup, { features, licensing, cloud }: Dependencies) {
+  setup({ http }: CoreSetup, { features, licensing, cloud }: Dependencies) {
     const router = http.createRouter();
-    const config = await this.config$.pipe(first()).toPromise();
 
     const routeDependencies: RouteDependencies = {
       router,
       getLicenseStatus: () => this.licenseStatus,
       config: {
         isCloudEnabled: Boolean(cloud?.isCloudEnabled),
+      },
+      lib: {
+        handleEsError,
       },
     };
 
@@ -87,7 +92,7 @@ export class RemoteClustersServerPlugin
     });
 
     return {
-      isUiEnabled: config.ui.enabled,
+      isUiEnabled: this.config.ui.enabled,
     };
   }
 

@@ -2,7 +2,7 @@
 
 exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
 <ColumnHeadersComponent
-  actionsColumnWidth={120}
+  actionsColumnWidth={124}
   browserFields={
     Object {
       "agent": Object {
@@ -126,6 +126,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
               "packetbeat",
             ],
             "name": "@timestamp",
+            "readFromDocValues": true,
             "searchable": true,
             "type": "date",
           },
@@ -367,6 +368,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
             "format": "",
             "indexes": Array [
               "apm-*-transaction*",
+              "traces-apm*",
               "auditbeat-*",
               "endgame-*",
               "filebeat-*",
@@ -377,6 +379,50 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
             "name": "event.end",
             "searchable": true,
             "type": "date",
+          },
+        },
+      },
+      "nestedField": Object {
+        "fields": Object {
+          "nestedField.firstAttributes": Object {
+            "aggregatable": false,
+            "category": "nestedField",
+            "description": "",
+            "example": "",
+            "format": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "nestedField.firstAttributes",
+            "searchable": true,
+            "subType": Object {
+              "nested": Object {
+                "path": "nestedField",
+              },
+            },
+            "type": "string",
+          },
+          "nestedField.secondAttributes": Object {
+            "aggregatable": false,
+            "category": "nestedField",
+            "description": "",
+            "example": "",
+            "format": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "nestedField.secondAttributes",
+            "searchable": true,
+            "subType": Object {
+              "nested": Object {
+                "path": "nestedField",
+              },
+            },
+            "type": "string",
           },
         },
       },
@@ -421,47 +467,65 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
       Object {
         "columnHeaderType": "not-filtered",
         "id": "@timestamp",
+        "initialWidth": 190,
         "type": "number",
-        "width": 190,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "message",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "event.category",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "event.action",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "host.name",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "source.ip",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "destination.ip",
-        "width": 180,
+        "initialWidth": 180,
       },
       Object {
         "columnHeaderType": "not-filtered",
         "id": "user.name",
-        "width": 180,
+        "initialWidth": 180,
       },
     ]
   }
   isSelectAllChecked={false}
+  leadingControlColumns={
+    Array [
+      Object {
+        "headerCellRender": Object {
+          "$$typeof": Symbol(react.memo),
+          "compare": null,
+          "type": [Function],
+        },
+        "id": "default-timeline-control-column",
+        "rowCellRender": Object {
+          "$$typeof": Symbol(react.memo),
+          "compare": null,
+          "type": [Function],
+        },
+        "width": 124,
+      },
+    ]
+  }
   onSelectAll={[Function]}
   showEventsSelect={false}
   showSelectAllCheckbox={false}
@@ -476,5 +540,6 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
   }
   tabType="query"
   timelineId="test"
+  trailingControlColumns={Array []}
 />
 `;

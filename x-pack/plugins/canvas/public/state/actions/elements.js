@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createAction } from 'redux-actions';
@@ -21,7 +22,7 @@ import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
 import { runInterpreter, interpretAst } from '../../lib/run_interpreter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
-import { services } from '../../services';
+import { pluginServices } from '../../services';
 import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
 
@@ -110,7 +111,8 @@ export const fetchContext = createThunk(
         ...element.ast,
         chain: astChain,
       },
-      variables
+      variables,
+      prevContextValue
     ).then((value) => {
       dispatch(
         args.setValue({
@@ -143,7 +145,8 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
       dispatch(getAction(renderable));
     })
     .catch((err) => {
-      services.notify.getService().error(err);
+      const notifyService = pluginServices.getServices().notify;
+      notifyService.error(err);
       dispatch(getAction(err));
     });
 };
@@ -187,7 +190,8 @@ export const fetchAllRenderables = createThunk(
         return runInterpreter(ast, null, variables, { castToRender: true })
           .then((renderable) => ({ path: argumentPath, value: renderable }))
           .catch((err) => {
-            services.notify.getService().error(err);
+            const notifyService = pluginServices.getServices().notify;
+            notifyService.error(err);
             return { path: argumentPath, value: err };
           });
       });
@@ -306,7 +310,8 @@ const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRend
     const expression = toExpression(ast);
     dispatch(setExpression(expression, element.id, pageId, doRender));
   } catch (err) {
-    services.notify.getService().error(err);
+    const notifyService = pluginServices.getServices().notify;
+    notifyService.error(err);
 
     // TODO: remove this, may have been added just to cause a re-render, but why?
     dispatch(setExpression(element.expression, element.id, pageId, doRender));

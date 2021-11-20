@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { NEWS_FEED_URL_SETTING_DEFAULT } from '../../../../common/constants';
@@ -278,8 +279,7 @@ describe('helpers', () => {
           {
             title: { en: 'Got SIEM Questions?', ja: translatedTitle },
             description: {
-              en:
-                "There's an awesome community of Elastic SIEM users out there. Join the discussion about configuring, learning, and using the Elastic SIEM app, and detecting threats!",
+              en: "There's an awesome community of Elastic SIEM users out there. Join the discussion about configuring, learning, and using the Elastic SIEM app, and detecting threats!",
               ja: translatedDescription,
             },
             link_text: null,
@@ -290,8 +290,7 @@ describe('helpers', () => {
             languages: null,
             badge: { en: '7.6' },
             image_url: {
-              en:
-                'https://aws1.discourse-cdn.com/elastic/original/3X/f/8/f8c3d0b9971cfcd0be349d973aa5799f71d280cc.png?blade=securitysolutionfeed',
+              en: 'https://aws1.discourse-cdn.com/elastic/original/3X/f/8/f8c3d0b9971cfcd0be349d973aa5799f71d280cc.png?blade=securitysolutionfeed',
               ja: translatedImageUrl,
             },
             publish_on: new Date('2020-01-01T00:00:00'),

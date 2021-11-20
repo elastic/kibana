@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,7 +13,7 @@ import {
 
 /**
  * Generate a document title that generally follows our breadcrumb trails
- * https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md
+ * https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md
  */
 
 type Title = string[];

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
   GetPingsParams,
@@ -51,6 +53,13 @@ const REMOVE_NON_SUMMARY_BROWSER_CHECKS = {
   ],
 };
 
+function isStringArray(value: unknown): value is string[] {
+  if (!Array.isArray(value)) return false;
+  // are all array items strings
+  if (!value.some((s) => typeof s !== 'string')) return true;
+  throw Error('Excluded locations can only be strings');
+}
+
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
   uptimeEsClient,
   dateRange: { from, to },
@@ -60,6 +69,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   sort,
   size: sizeParam,
   locations,
+  excludedLocations,
 }) => {
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
@@ -72,15 +82,31 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
           { range: { '@timestamp': { gte: from, lte: to } } },
           ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
           ...(status ? [{ term: { 'monitor.status': status } }] : []),
-        ],
+        ] as QueryDslQueryContainer[],
         ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
       },
     },
     sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],
     ...((locations ?? []).length > 0
-      ? { post_filter: { terms: { 'observer.geo.name': locations } } }
+      ? { post_filter: { terms: { 'observer.geo.name': locations as unknown as string[] } } }
       : {}),
   };
+
+  // if there are excluded locations, add a clause to the query's filter
+  const excludedLocationsArray: unknown = excludedLocations && JSON.parse(excludedLocations);
+  if (isStringArray(excludedLocationsArray) && excludedLocationsArray.length > 0) {
+    searchBody.query.bool.filter.push({
+      bool: {
+        must_not: [
+          {
+            terms: {
+              'observer.geo.name': excludedLocationsArray,
+            },
+          },
+        ],
+      },
+    });
+  }
 
   const {
     body: {

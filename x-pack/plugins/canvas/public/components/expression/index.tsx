@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fromExpression } from '@kbn/interpreter/common';
-import { useServices } from '../../services';
+import { useExpressionsService } from '../../services';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 // @ts-expect-error
 import { setExpression, flushContext } from '../../state/actions/elements';
@@ -44,7 +45,7 @@ export const Expression: FC<ExpressionProps> = ({ done }) => {
 };
 
 const ExpressionContainer: FC<ExpressionContainerProps> = ({ done, element, pageId }) => {
-  const services = useServices();
+  const expressions = useExpressionsService();
   const dispatch = useDispatch();
   const [isCompact, setCompact] = useState<boolean>(true);
   const toggleCompactView = useCallback(() => {
@@ -113,7 +114,7 @@ const ExpressionContainer: FC<ExpressionContainerProps> = ({ done, element, page
     <Component
       done={done}
       isCompact={isCompact}
-      functionDefinitions={Object.values(services.expressions.getFunctions())}
+      functionDefinitions={Object.values(expressions.getFunctions())}
       formState={formState}
       setExpression={onSetExpression}
       toggleCompactView={toggleCompactView}

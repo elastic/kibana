@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { parse } from '@babel/parser';
@@ -28,15 +28,15 @@ description 3\` });
 
 describe('dev/i18n/extractors/i18n_call', () => {
   test('extracts "i18n" and "i18n.translate" functions call message', () => {
-    let callExpressionNode = [
-      ...traverseNodes(parse(i18nCallMessageSource).program.body),
-    ].find((node) => isCallExpression(node));
+    let callExpressionNode = [...traverseNodes(parse(i18nCallMessageSource).program.body)].find(
+      (node) => isCallExpression(node)
+    );
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
 
-    callExpressionNode = [
-      ...traverseNodes(parse(translateCallMessageSource).program.body),
-    ].find((node) => isCallExpression(node));
+    callExpressionNode = [...traverseNodes(parse(translateCallMessageSource).program.body)].find(
+      (node) => isCallExpression(node)
+    );
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
 

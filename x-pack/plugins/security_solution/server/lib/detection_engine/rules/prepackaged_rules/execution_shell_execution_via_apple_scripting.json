@@ -9,9 +9,9 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Shell Execution via Apple Scripting",
-  "query": "sequence by host.id with maxspan=5s\n [process where event.type in (\"start\", \"process_started\", \"info\") and process.name == \"osascript\"] by process.pid\n [process where event.type in (\"start\", \"process_started\") and process.name == \"sh\" and process.args == \"-c\"] by process.ppid\n",
+  "query": "sequence by host.id with maxspan=5s\n [process where event.type in (\"start\", \"process_started\", \"info\") and process.name == \"osascript\"] by process.pid\n [process where event.type in (\"start\", \"process_started\") and process.name == \"sh\" and process.args == \"-c\"] by process.parent.pid\n",
   "references": [
     "https://developer.apple.com/library/archive/technotes/tn2065/_index.html",
     "https://objectivebythesea.com/v2/talks/OBTS_v2_Thomas.pdf"
@@ -44,5 +44,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 3
 }

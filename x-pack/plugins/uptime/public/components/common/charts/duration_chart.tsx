@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useState } from 'react';
@@ -14,9 +15,10 @@ import {
   Position,
   timeFormatter,
   Settings,
-  SeriesIdentifier,
   BrushEndListener,
+  LegendItemListener,
 } from '@elastic/charts';
+import { useSelector } from 'react-redux';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
@@ -28,6 +30,9 @@ import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
 import { UptimeThemeContext } from '../../../contexts';
 import { MONITOR_CHART_HEIGHT } from '../../monitor';
+import { monitorStatusSelector } from '../../../state/selectors';
+import { microToMilli, microToSec } from '../../../lib/formatting';
+import { MS_LABEL, SECONDS_LABEL } from '../translations';
 
 interface DurationChartProps {
   /**
@@ -74,7 +79,7 @@ export const DurationChartComponent = ({
     });
   };
 
-  const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
+  const legendToggleVisibility: LegendItemListener = ([legendItem]) => {
     if (legendItem) {
       setHiddenLegends((prevState) => {
         if (prevState.includes(legendItem.specId)) {
@@ -86,9 +91,17 @@ export const DurationChartComponent = ({
     }
   };
 
+  const monitor = useSelector(monitorStatusSelector);
+
   return (
-    <ChartWrapper height={MONITOR_CHART_HEIGHT} loading={loading}>
-      {hasLines ? (
+    <ChartWrapper
+      aria-label={i18n.translate('xpack.uptime.monitorCharts.durationChart.wrapper.label', {
+        defaultMessage: `A chart displaying the monitor's ping duration, grouped by location.`,
+      })}
+      height={MONITOR_CHART_HEIGHT}
+      loading={loading}
+    >
+      {hasLines && typeof monitor?.monitor?.type === 'string' ? (
         <Chart>
           <Settings
             xDomain={{ min, max }}
@@ -106,15 +119,22 @@ export const DurationChartComponent = ({
             tickFormat={timeFormatter(getChartDateLabel(min, max))}
           />
           <Axis
-            domain={{ min: 0 }}
+            domain={{ min: 0, max: NaN, fit: false }}
             id="left"
             position={Position.Left}
             tickFormat={(d) => getTickFormat(d)}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
-              defaultMessage: 'Duration in ms',
+              defaultMessage: 'Duration in {unit}',
+              values: { unit: monitor.monitor.type === 'browser' ? SECONDS_LABEL : MS_LABEL },
             })}
+            labelFormat={(d) =>
+              monitor?.monitor.type === 'browser' ? `${microToSec(d)}` : `${microToMilli(d)}`
+            }
           />
-          <DurationLineSeriesList lines={locationDurationLines} />
+          <DurationLineSeriesList
+            lines={locationDurationLines}
+            monitorType={monitor.monitor.type}
+          />
           <DurationAnomaliesBar anomalies={anomalies} hiddenLegends={hiddenLegends} />
         </Chart>
       ) : (

@@ -1,16 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from 'kibana/server';
-// @ts-ignore untyped module
-import numeralLanguages from '@elastic/numeral/languages';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
@@ -32,15 +30,6 @@ const requestPreferenceOptionLabels = {
     defaultMessage: 'None',
   }),
 };
-
-// We add the `en` key manually here, since that's not a real numeral locale, but the
-// default fallback in case the locale is not found.
-const numeralLanguageIds = [
-  'en',
-  ...numeralLanguages.map((numeralLanguage: any) => {
-    return numeralLanguage.id;
-  }),
-];
 
 export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {
@@ -93,7 +82,27 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       type: 'json',
       schema: schema.object({
+        default_field: schema.nullable(schema.string()),
+        allow_leading_wildcard: schema.nullable(schema.boolean()),
         analyze_wildcard: schema.boolean(),
+        analyzer: schema.nullable(schema.string()),
+        auto_generate_synonyms_phrase_query: schema.nullable(schema.boolean()),
+        boost: schema.nullable(schema.number()),
+        default_operator: schema.nullable(schema.string()),
+        enable_position_increments: schema.nullable(schema.boolean()),
+        fields: schema.nullable(schema.arrayOf<string>(schema.string())),
+        fuzziness: schema.nullable(schema.string()),
+        fuzzy_max_expansions: schema.nullable(schema.number()),
+        fuzzy_prefix_length: schema.nullable(schema.number()),
+        fuzzy_transpositions: schema.nullable(schema.boolean()),
+        lenient: schema.nullable(schema.boolean()),
+        max_determinized_states: schema.nullable(schema.number()),
+        minimum_should_match: schema.nullable(schema.string()),
+        quote_analyzer: schema.nullable(schema.string()),
+        phrase_slop: schema.nullable(schema.number()),
+        quote_field_suffix: schema.nullable(schema.string()),
+        rewrite: schema.nullable(schema.string()),
+        time_zone: schema.nullable(schema.string()),
       }),
     },
     [UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS]: {
@@ -254,53 +263,46 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.number(),
     },
-    [UI_SETTINGS.COURIER_BATCH_SEARCHES]: {
-      name: i18n.translate('data.advancedSettings.courier.batchSearchesTitle', {
-        defaultMessage: 'Use legacy search',
-      }),
-      value: false,
-      type: 'boolean',
-      description: i18n.translate('data.advancedSettings.courier.batchSearchesText', {
-        defaultMessage: `Kibana uses a new search and batching infrastructure.
-           Enable this option if you prefer to fallback to the legacy synchronous behavior`,
-      }),
-      deprecation: {
-        message: i18n.translate('data.advancedSettings.courier.batchSearchesTextDeprecation', {
-          defaultMessage: 'This setting is deprecated and will be removed in Kibana 8.0.',
-        }),
-        docLinksKey: 'kibanaSearchSettings',
-      },
-      category: ['search'],
-      schema: schema.boolean(),
-    },
     [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
         target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
         might increase the search time.`,
       value: false,
+      deprecation: {
+        message: i18n.translate('data.advancedSettings.search.includeFrozenTextDeprecation', {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }),
+        docLinksKey: 'kibanaSearchSettings',
+      },
       category: ['search'],
       schema: schema.boolean(),
     },
     [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: {
       name: i18n.translate('data.advancedSettings.histogram.barTargetTitle', {
-        defaultMessage: 'Target bars',
+        defaultMessage: 'Target buckets',
       }),
       value: 50,
       description: i18n.translate('data.advancedSettings.histogram.barTargetText', {
         defaultMessage:
-          'Attempt to generate around this many bars when using "auto" interval in date histograms',
+          'Attempt to generate around this many buckets when using "auto" interval in date and numeric histograms',
       }),
       schema: schema.number(),
     },
     [UI_SETTINGS.HISTOGRAM_MAX_BARS]: {
       name: i18n.translate('data.advancedSettings.histogram.maxBarsTitle', {
-        defaultMessage: 'Maximum bars',
+        defaultMessage: 'Maximum buckets',
       }),
       value: 100,
       description: i18n.translate('data.advancedSettings.histogram.maxBarsText', {
-        defaultMessage:
-          'Never show more than this many bars in date histograms, scale values if needed',
+        defaultMessage: `
+          Limits the density of date and number histograms across Kibana
+          for better performance using a test query. If the test query would too many buckets,
+          the interval between buckets will be increased. This setting applies separately
+          to each histogram aggregation, and does not apply to other types of aggregation.
+          To find the maximum value of this setting, divide the Elasticsearch 'search.max_buckets'
+          value by the maximum number of aggregations in each visualization.
+        `,
       }),
       schema: schema.number(),
     },
@@ -314,187 +316,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'In fields that have history (e.g. query inputs), show this many recent values',
       }),
       schema: schema.number(),
-    },
-    [UI_SETTINGS.SHORT_DOTS_ENABLE]: {
-      name: i18n.translate('data.advancedSettings.shortenFieldsTitle', {
-        defaultMessage: 'Shorten fields',
-      }),
-      value: false,
-      description: i18n.translate('data.advancedSettings.shortenFieldsText', {
-        defaultMessage: 'Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz',
-      }),
-      schema: schema.boolean(),
-    },
-    [UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {
-      name: i18n.translate('data.advancedSettings.format.defaultTypeMapTitle', {
-        defaultMessage: 'Field type format name',
-      }),
-      value: `{
-  "ip": { "id": "ip", "params": {} },
-  "date": { "id": "date", "params": {} },
-  "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
-  "number": { "id": "number", "params": {} },
-  "boolean": { "id": "boolean", "params": {} },
-  "_source": { "id": "_source", "params": {} },
-  "_default_": { "id": "string", "params": {} }
-}`,
-      type: 'json',
-      description: i18n.translate('data.advancedSettings.format.defaultTypeMapText', {
-        defaultMessage:
-          'Map of the format name to use by default for each field type. ' +
-          '{defaultFormat} is used if the field type is not mentioned explicitly',
-        values: {
-          defaultFormat: '"_default_"',
-        },
-      }),
-      schema: schema.object({
-        ip: schema.object({
-          id: schema.string(),
-          params: schema.object({}),
-        }),
-        date: schema.object({
-          id: schema.string(),
-          params: schema.object({}),
-        }),
-        date_nanos: schema.object({
-          id: schema.string(),
-          params: schema.object({}),
-          es: schema.boolean(),
-        }),
-        number: schema.object({
-          id: schema.string(),
-          params: schema.object({}),
-        }),
-        boolean: schema.object({
-          id: schema.string(),
-          params: schema.object({}),
-        }),
-        _source: schema.object({
-          id: schema.string(),
-          params: schema.object({}),
-        }),
-        _default_: schema.object({
-          id: schema.string(),
-          params: schema.object({}),
-        }),
-      }),
-    },
-    [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: {
-      name: i18n.translate('data.advancedSettings.format.numberFormatTitle', {
-        defaultMessage: 'Number format',
-      }),
-      value: '0,0.[000]',
-      type: 'string',
-      description: i18n.translate('data.advancedSettings.format.numberFormatText', {
-        defaultMessage: 'Default {numeralFormatLink} for the "number" format',
-        description:
-          'Part of composite text: data.advancedSettings.format.numberFormatText + ' +
-          'data.advancedSettings.format.numberFormat.numeralFormatLinkText',
-        values: {
-          numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('data.advancedSettings.format.numberFormat.numeralFormatLinkText', {
-              defaultMessage: 'numeral format',
-            }) +
-            '</a>',
-        },
-      }),
-      schema: schema.string(),
-    },
-    [UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: {
-      name: i18n.translate('data.advancedSettings.format.percentFormatTitle', {
-        defaultMessage: 'Percent format',
-      }),
-      value: '0,0.[000]%',
-      type: 'string',
-      description: i18n.translate('data.advancedSettings.format.percentFormatText', {
-        defaultMessage: 'Default {numeralFormatLink} for the "percent" format',
-        description:
-          'Part of composite text: data.advancedSettings.format.percentFormatText + ' +
-          'data.advancedSettings.format.percentFormat.numeralFormatLinkText',
-        values: {
-          numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('data.advancedSettings.format.percentFormat.numeralFormatLinkText', {
-              defaultMessage: 'numeral format',
-            }) +
-            '</a>',
-        },
-      }),
-      schema: schema.string(),
-    },
-    [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: {
-      name: i18n.translate('data.advancedSettings.format.bytesFormatTitle', {
-        defaultMessage: 'Bytes format',
-      }),
-      value: '0,0.[0]b',
-      type: 'string',
-      description: i18n.translate('data.advancedSettings.format.bytesFormatText', {
-        defaultMessage: 'Default {numeralFormatLink} for the "bytes" format',
-        description:
-          'Part of composite text: data.advancedSettings.format.bytesFormatText + ' +
-          'data.advancedSettings.format.bytesFormat.numeralFormatLinkText',
-        values: {
-          numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('data.advancedSettings.format.bytesFormat.numeralFormatLinkText', {
-              defaultMessage: 'numeral format',
-            }) +
-            '</a>',
-        },
-      }),
-      schema: schema.string(),
-    },
-    [UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN]: {
-      name: i18n.translate('data.advancedSettings.format.currencyFormatTitle', {
-        defaultMessage: 'Currency format',
-      }),
-      value: '($0,0.[00])',
-      type: 'string',
-      description: i18n.translate('data.advancedSettings.format.currencyFormatText', {
-        defaultMessage: 'Default {numeralFormatLink} for the "currency" format',
-        description:
-          'Part of composite text: data.advancedSettings.format.currencyFormatText + ' +
-          'data.advancedSettings.format.currencyFormat.numeralFormatLinkText',
-        values: {
-          numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('data.advancedSettings.format.currencyFormat.numeralFormatLinkText', {
-              defaultMessage: 'numeral format',
-            }) +
-            '</a>',
-        },
-      }),
-      schema: schema.string(),
-    },
-    [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: {
-      name: i18n.translate('data.advancedSettings.format.formattingLocaleTitle', {
-        defaultMessage: 'Formatting locale',
-      }),
-      value: 'en',
-      type: 'select',
-      options: numeralLanguageIds,
-      optionLabels: Object.fromEntries(
-        numeralLanguages.map((language: Record<string, any>) => [language.id, language.name])
-      ),
-      description: i18n.translate('data.advancedSettings.format.formattingLocaleText', {
-        defaultMessage: `{numeralLanguageLink} locale`,
-        description:
-          'Part of composite text: data.advancedSettings.format.formattingLocale.numeralLanguageLinkText + ' +
-          'data.advancedSettings.format.formattingLocaleText',
-        values: {
-          numeralLanguageLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate(
-              'data.advancedSettings.format.formattingLocale.numeralLanguageLinkText',
-              {
-                defaultMessage: 'Numeral language',
-              }
-            ) +
-            '</a>',
-        },
-      }),
-      schema: schema.string(),
     },
     [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
       name: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
@@ -574,35 +395,35 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
             }),
           },
           {
-            from: 'now-24h',
+            from: 'now-24h/h',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last24Hours', {
               defaultMessage: 'Last 24 hours',
             }),
           },
           {
-            from: 'now-7d',
+            from: 'now-7d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last7Days', {
               defaultMessage: 'Last 7 days',
             }),
           },
           {
-            from: 'now-30d',
+            from: 'now-30d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last30Days', {
               defaultMessage: 'Last 30 days',
             }),
           },
           {
-            from: 'now-90d',
+            from: 'now-90d/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last90Days', {
               defaultMessage: 'Last 90 days',
             }),
           },
           {
-            from: 'now-1y',
+            from: 'now-1y/d',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last1Year', {
               defaultMessage: 'Last 1 year',
@@ -639,17 +460,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         })
       ),
     },
-    [UI_SETTINGS.INDEXPATTERN_PLACEHOLDER]: {
-      name: i18n.translate('data.advancedSettings.indexPatternPlaceholderTitle', {
-        defaultMessage: 'Index pattern placeholder',
-      }),
-      value: '',
-      description: i18n.translate('data.advancedSettings.indexPatternPlaceholderText', {
-        defaultMessage:
-          'The placeholder for the "Index pattern name" field in "Management > Index Patterns > Create Index Pattern".',
-      }),
-      schema: schema.string(),
-    },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {
         defaultMessage: 'Pin filters by default',
@@ -672,6 +482,30 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: {
+      name: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod', {
+        defaultMessage: 'Autocomplete value suggestion method',
+      }),
+      type: 'select',
+      value: 'terms_enum',
+      description: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodText', {
+        defaultMessage:
+          'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the ' +
+          'Elasticsearch terms enum API for improved autocomplete suggestion performance. Select terms_agg to use an ' +
+          'Elasticsearch terms aggregation. {learnMoreLink}',
+        values: {
+          learnMoreLink:
+            '<a href="https://www.elastic.co/guide/en/kibana/current/kibana-concepts-analysts.html#autocomplete-suggestions" target="_blank" rel="noopener">' +
+            i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodLink', {
+              defaultMessage: 'Learn more.',
+            }) +
+            '</a>',
+        },
+      }),
+      options: ['terms_enum', 'terms_agg'],
+      category: ['autocomplete'],
+      schema: schema.string(),
+    },
     [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
       name: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerange', {
         defaultMessage: 'Use time range',
@@ -680,9 +514,31 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       value: true,
       description: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerangeText', {
         defaultMessage:
-          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range.',
+          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. {learnMoreLink}',
+        values: {
+          learnMoreLink:
+            '<a href="https://www.elastic.co/guide/en/kibana/current/kibana-concepts-analysts.html#autocomplete-suggestions" target="_blank" rel="noopener">' +
+            i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethodLearnMoreLink', {
+              defaultMessage: 'Learn more.',
+            }) +
+            '</a>',
+        },
       }),
+      category: ['autocomplete'],
       schema: schema.boolean(),
+    },
+    [UI_SETTINGS.SEARCH_TIMEOUT]: {
+      name: i18n.translate('data.advancedSettings.searchTimeout', {
+        defaultMessage: 'Search Timeout',
+      }),
+      value: 600000,
+      description: i18n.translate('data.advancedSettings.searchTimeoutDesc', {
+        defaultMessage:
+          'Change the maximum timeout for a search session or set to 0 to disable the timeout and allow queries to run to completion.',
+      }),
+      type: 'number',
+      category: ['search'],
+      schema: schema.number(),
     },
   };
 }

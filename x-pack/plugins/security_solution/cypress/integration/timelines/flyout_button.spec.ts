@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../../screens/security_main';
 import {
   CREATE_NEW_TIMELINE,
-  TIMELINE_DATA_PROVIDERS,
   TIMELINE_FLYOUT_HEADER,
   TIMELINE_SETTINGS_ICON,
 } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-import { dragFirstHostToTimeline, waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
+import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 import { loginAndWaitForPage } from '../../tasks/login';
 import {
   closeTimelineUsingCloseButton,
@@ -59,20 +59,21 @@ describe('timeline flyout button', () => {
 
   it('the `(+)` button popover menu owns focus', () => {
     cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
-    cy.get(CREATE_NEW_TIMELINE).should('have.focus');
-    cy.get('body').type('{esc}');
+    cy.get(`${CREATE_NEW_TIMELINE}`)
+      .pipe(($el) => $el.trigger('focus'))
+      .should('have.focus');
+    cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').type('{esc}');
     cy.get(CREATE_NEW_TIMELINE).should('not.be.visible');
   });
 
-  it('sets the data providers background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers area', () => {
-    dragFirstHostToTimeline();
-
-    cy.get(TIMELINE_DATA_PROVIDERS)
-      .filter(':visible')
-      .should(
-        'have.css',
-        'background',
-        'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
-      );
+  it('should render the global search dropdown when the input is focused', () => {
+    openTimelineUsingToggle();
+    cy.get('[data-test-subj="nav-search-input"]').focus();
+    cy.get('[data-test-subj="nav-search-input"]').should('be.focused');
+    cy.get('[data-test-subj="nav-search-option"]').should('be.visible');
+    cy.get('[data-test-subj="nav-search-option"]').first().trigger('mouseenter');
+    // check that at least one item is visible in the search bar after mousing over, i.e. it's still usable.
+    cy.get('[data-test-subj="nav-search-option"]').its('length').should('be.gte', 1);
+    closeTimelineUsingCloseButton();
   });
 });

@@ -1,17 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ElasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../../src/core/server/mocks';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
-import { createUptimeESClient } from '../lib';
+import { createUptimeESClient, UptimeESClient } from '../lib';
 
 export interface MultiPageCriteria<K, T> {
   after_key?: K;
@@ -48,7 +53,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
       },
     };
     esMock.search.mockResolvedValueOnce({
-      body: mockResponse,
+      body: mockResponse as unknown as SearchResponse,
       statusCode: 200,
       headers: {},
       warnings: [],
@@ -59,7 +64,14 @@ export const setupMockEsCompositeQuery = <K, C, I>(
   return esMock;
 };
 
-export const getUptimeESMockClient = (esClientMock?: ElasticsearchClientMock) => {
+interface UptimeEsMockClient {
+  esClient: ElasticsearchClientMock;
+  uptimeEsClient: UptimeESClient;
+}
+
+export const getUptimeESMockClient = (
+  esClientMock?: ElasticsearchClientMock
+): UptimeEsMockClient => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   const savedObjectsClient = savedObjectsClientMock.create();
@@ -72,3 +84,34 @@ export const getUptimeESMockClient = (esClientMock?: ElasticsearchClientMock) =>
     }),
   };
 };
+
+export function mockSearchResult(
+  data: unknown,
+  aggregations: Record<string, AggregationsAggregate> = {}
+): UptimeESClient {
+  const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+  mockEsClient.search = jest.fn().mockResolvedValue({
+    body: {
+      took: 18,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: Array.isArray(data) ? data : [data],
+        max_score: 0.0,
+        total: {
+          value: Array.isArray(data) ? data.length : 0,
+          relation: 'gte',
+        },
+      },
+      aggregations,
+    },
+  });
+
+  return uptimeEsClient;
+}

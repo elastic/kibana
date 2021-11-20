@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
@@ -31,7 +32,8 @@ export interface SampleTaskManagerFixtureStartDeps {
 
 export class SampleTaskManagerFixturePlugin
   implements
-    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps> {
+    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
+{
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
     .pipe(first())
@@ -228,10 +230,10 @@ export class SampleTaskManagerFixturePlugin
           numberOfTasksRanOverall,
           claimAvailableTasksNoTasks,
           claimAvailableTasksNoAvailableWorkers,
-          elasticsearchApiCalls: (_.mapValues(
+          elasticsearchApiCalls: _.mapValues(
             elasticsearchApiCalls,
             avg
-          ) as unknown) as PerfResult['elasticsearchApiCalls'],
+          ) as unknown as PerfResult['elasticsearchApiCalls'],
           sleepDuration: prettyMilliseconds(stats.sum(sleepDuration)),
           activityDuration: prettyMilliseconds(stats.sum(activityDuration)),
           cycles,

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { esArchiverResetKibana } from './es_archiver';
 import { RuleEcs } from '../../common/ecs/rule';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
 
@@ -105,19 +107,7 @@ export const cleanKibana = () => {
     },
   });
 
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'cases',
-            },
-          },
-        ],
-      },
-    },
-  });
+  deleteCases();
 
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
     query: {
@@ -146,4 +136,28 @@ export const cleanKibana = () => {
   );
 
   esArchiverResetKibana();
+};
+
+export const deleteCases = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'cases',
+            },
+          },
+        ],
+      },
+    },
+  });
+};
+
+export const scrollToBottom = () => cy.scrollTo('bottom');
+
+export const waitForPageToBeLoaded = () => {
+  cy.get(LOADING_INDICATOR).should('exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
 };

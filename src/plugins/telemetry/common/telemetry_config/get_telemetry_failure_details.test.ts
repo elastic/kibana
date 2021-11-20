@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getTelemetryFailureDetails } from './get_telemetry_failure_details';
@@ -35,9 +35,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     expect(
       getTelemetryFailureDetails({
         telemetrySavedObject: {
+          // @ts-expect-error the test is intentionally testing malformed SOs
           reportFailureCount: null,
           reportFailureVersion: failureVersion,
-        } as any,
+        },
       })
     ).toStrictEqual({ failureVersion, failureCount: 0 });
     expect(
@@ -51,9 +52,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     expect(
       getTelemetryFailureDetails({
         telemetrySavedObject: {
+          // @ts-expect-error the test is intentionally testing malformed SOs
           reportFailureCount: 'not_a_number',
           reportFailureVersion: failureVersion,
-        } as any,
+        },
       })
     ).toStrictEqual({ failureVersion, failureCount: 0 });
   });
@@ -63,9 +65,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     expect(
       getTelemetryFailureDetails({
         telemetrySavedObject: {
+          // @ts-expect-error the test is intentionally testing malformed SOs
           reportFailureVersion: null,
           reportFailureCount: failureCount,
-        } as any,
+        },
       })
     ).toStrictEqual({ failureCount, failureVersion: undefined });
     expect(
@@ -76,9 +79,10 @@ describe('getTelemetryFailureDetails: get details about server usage fetcher fai
     expect(
       getTelemetryFailureDetails({
         telemetrySavedObject: {
+          // @ts-expect-error the test is intentionally testing malformed SOs
           reportFailureVersion: 123,
           reportFailureCount: failureCount,
-        } as any,
+        },
       })
     ).toStrictEqual({ failureCount, failureVersion: undefined });
   });

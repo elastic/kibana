@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
@@ -19,19 +19,23 @@ export class LifecyclePhase<Args extends readonly any[]> {
 
   public triggered = false;
 
-  private readonly beforeSubj = new Rx.Subject<void>();
-  public readonly before$ = this.beforeSubj.asObservable();
+  private readonly beforeSubj: Rx.Subject<void>;
+  public readonly before$: Rx.Observable<void>;
 
-  private readonly afterSubj = this.options.singular
-    ? new Rx.ReplaySubject<void>(1)
-    : new Rx.Subject<void>();
-  public readonly after$ = this.afterSubj.asObservable();
+  private readonly afterSubj: Rx.Subject<void>;
+  public readonly after$: Rx.Observable<void>;
 
   constructor(
     private readonly options: {
       singular?: boolean;
     } = {}
-  ) {}
+  ) {
+    this.beforeSubj = new Rx.Subject<void>();
+    this.before$ = this.beforeSubj.asObservable();
+
+    this.afterSubj = this.options.singular ? new Rx.ReplaySubject<void>(1) : new Rx.Subject<void>();
+    this.after$ = this.afterSubj.asObservable();
+  }
 
   public add(fn: (...args: Args) => Promise<void> | void) {
     this.handlers.push(fn);

@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 
-import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { DataViewField } from '../../../../../../src/plugins/data_views/common';
 
 // convert kibana types to ML Job types
 // this is needed because kibana types only have string and not text and keyword.
 // and we can't use ES_FIELD_TYPES because it has no NUMBER type
-export function kbnTypeToMLJobType(field: IFieldType) {
+export function kbnTypeToMLJobType(field: DataViewField) {
   // Return undefined if not one of the supported data visualizer field types.
   let type;
   switch (field.type) {
@@ -34,6 +36,10 @@ export function kbnTypeToMLJobType(field: IFieldType) {
     case KBN_FIELD_TYPES.GEO_POINT:
       type = ML_JOB_FIELD_TYPES.GEO_POINT;
       break;
+    case KBN_FIELD_TYPES.GEO_SHAPE:
+      type = ML_JOB_FIELD_TYPES.GEO_SHAPE;
+      break;
+
     default:
       break;
   }

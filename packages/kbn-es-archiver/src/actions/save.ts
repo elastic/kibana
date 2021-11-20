@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
-import { Client } from 'elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
+import type { Client } from '@elastic/elasticsearch';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import {
@@ -22,23 +22,23 @@ import {
 } from '../lib';
 
 export async function saveAction({
-  name,
+  outputDir,
   indices,
   client,
-  dataDir,
   log,
   raw,
+  keepIndexNames,
   query,
 }: {
-  name: string;
+  outputDir: string;
   indices: string | string[];
   client: Client;
-  dataDir: string;
   log: ToolingLog;
   raw: boolean;
+  keepIndexNames?: boolean;
   query?: Record<string, any>;
 }) {
-  const outputDir = resolve(dataDir, name);
+  const name = relative(REPO_ROOT, outputDir);
   const stats = createStats(name, log);
 
   log.info('[%s] Creating archive of %j', name, indices);
@@ -52,7 +52,7 @@ export async function saveAction({
     // export and save the matching indices to mappings.json
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats, keepIndexNames }),
       ...createFormatArchiveStreams(),
       createWriteStream(resolve(outputDir, 'mappings.json')),
     ] as [Readable, ...Writable[]]),
@@ -60,7 +60,7 @@ export async function saveAction({
     // export all documents from matching indexes into data.json.gz
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateDocRecordsStream({ client, stats, progress, query }),
+      createGenerateDocRecordsStream({ client, stats, progress, keepIndexNames, query }),
       ...createFormatArchiveStreams({ gzip: !raw }),
       createWriteStream(resolve(outputDir, `data.json${raw ? '' : '.gz'}`)),
     ] as [Readable, ...Writable[]]),

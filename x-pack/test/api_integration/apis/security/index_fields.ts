@@ -1,39 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-interface FLSMappingResponse {
-  flstest: {
-    mappings: {
-      runtime?: {
-        [fieldName: string]: {
-          type: string;
-        };
-      };
-      properties: {
-        [fieldName: string]: {
-          type: string;
-        };
-      };
-    };
-  };
-}
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('Index Fields', () => {
     before(async () => {
-      await esArchiver.load('security/flstest/data');
+      await esArchiver.load('x-pack/test/functional/es_archives/security/flstest/data');
     });
     after(async () => {
-      await esArchiver.unload('security/flstest/data');
+      await esArchiver.unload('x-pack/test/functional/es_archives/security/flstest/data');
     });
 
     describe('GET /internal/security/fields/{query}', () => {
@@ -58,7 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should not include runtime fields', async () => {
         // First, make sure the mapping actually includes a runtime field
-        const mapping = (await es.indices.getMapping({ index: 'flstest' })) as FLSMappingResponse;
+        const mapping = await es.indices.getMapping({
+          index: 'flstest',
+        });
 
         expect(Object.keys(mapping.flstest.mappings)).to.contain('runtime');
         expect(Object.keys(mapping.flstest.mappings.runtime!)).to.contain('runtime_customer_ssn');
@@ -83,6 +70,14 @@ export default function ({ getService }: FtrProviderContext) {
         expectedFields.sort();
 
         expect(actualFields).to.eql(expectedFields);
+      });
+
+      it('should return an empty result for indices that do not exist', async () => {
+        await supertest
+          .get('/internal/security/fields/this-index-name-definitely-does-not-exist-*')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200, []);
       });
     });
   });

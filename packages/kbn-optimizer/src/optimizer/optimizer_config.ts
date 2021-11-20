@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -17,6 +17,7 @@ import {
   ThemeTag,
   ThemeTags,
   parseThemeTags,
+  omit,
 } from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
@@ -38,16 +39,6 @@ function pickMaxWorkerCount(dist: boolean) {
   const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
   // ensure we always have at least two workers
   return Math.max(maxWorkers, 2);
-}
-
-function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj) as any) {
-    if (!keys.includes(key)) {
-      result[key] = value;
-    }
-  }
-  return result as Omit<T, K>;
 }
 
 interface Options {
@@ -115,6 +106,9 @@ interface Options {
    *  - "k7light"
    */
   themes?: ThemeTag | '*' | ThemeTag[];
+
+  /** path to a limits.yml file that should be used to inform ci-stats of metric limits */
+  limitsPath?: string;
 }
 
 export interface ParsedOptions {
@@ -211,6 +205,7 @@ export class OptimizerConfig {
   }
 
   static create(inputOptions: Options) {
+    const limits = inputOptions.limitsPath ? readLimits(inputOptions.limitsPath) : {};
     const options = OptimizerConfig.parseOptions(inputOptions);
     const plugins = findKibanaPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
     const bundles = [
@@ -223,14 +218,19 @@ export class OptimizerConfig {
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
+              pageLoadAssetSizeLimit: limits.pageLoadAssetSize?.core,
             }),
           ]
         : []),
-      ...getPluginBundles(plugins, options.repoRoot, options.outputRoot),
+      ...getPluginBundles(plugins, options.repoRoot, options.outputRoot, limits),
     ];
 
+    const focusedBundles = focusBundles(options.focus, bundles);
+    const filteredBundles = filterById(options.filters, focusedBundles);
+
     return new OptimizerConfig(
-      filterById(options.filters, focusBundles(options.focus, bundles)),
+      focusedBundles,
+      filteredBundles,
       options.cache,
       options.watch,
       options.inspectWorkers,
@@ -239,13 +239,13 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags,
-      readLimits()
+      options.themeTags
     );
   }
 
   constructor(
     public readonly bundles: Bundle[],
+    public readonly filteredBundles: Bundle[],
     public readonly cache: boolean,
     public readonly watch: boolean,
     public readonly inspectWorkers: boolean,
@@ -254,8 +254,7 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags,
-    public readonly limits: Limits
+    public readonly themeTags: ThemeTags
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {

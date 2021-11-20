@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('puppeteer', () => ({
   launch: () => ({
     // Fixme needs event emitters
     newPage: () => ({
+      emulateTimezone: jest.fn(),
       setDefaultTimeout: jest.fn(),
     }),
     process: jest.fn(),
@@ -17,6 +19,7 @@ jest.mock('puppeteer', () => ({
 
 import moment from 'moment';
 import * as Rx from 'rxjs';
+import { ReportingCore } from '../..';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ConditionalHeaders } from '../../export_types/common';
 import {
@@ -25,17 +28,17 @@ import {
   createMockConfigSchema,
   createMockLayoutInstance,
   createMockLevelLogger,
+  createMockReportingCore,
 } from '../../test_helpers';
-import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
-import { screenshotsObservableFactory } from './observable';
+import { getScreenshots$ } from './';
 
 /*
  * Mocks
  */
 const logger = createMockLevelLogger();
 
-const reportingConfig = {
+const mockSchema = createMockConfigSchema({
   capture: {
     loadDelay: moment.duration(2, 's'),
     timeouts: {
@@ -44,11 +47,12 @@ const reportingConfig = {
       renderComplete: moment.duration(10, 's'),
     },
   },
-};
-const mockSchema = createMockConfigSchema(reportingConfig);
+});
 const mockConfig = createMockConfig(mockSchema);
 const captureConfig = mockConfig.get('capture');
 const mockLayout = createMockLayoutInstance(captureConfig);
+
+let core: ReportingCore;
 
 /*
  * Tests
@@ -57,14 +61,14 @@ describe('Screenshot Observable Pipeline', () => {
   let mockBrowserDriverFactory: any;
 
   beforeEach(async () => {
-    mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {});
+    core = await createMockReportingCore(mockSchema);
+    mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {});
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
-    const result = await getScreenshots$({
+    const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
       logger,
-      urls: ['/welcome/home/start/index.htm'],
+      urlsOrUrlLocatorTuples: ['/welcome/home/start/index.htm'],
       conditionalHeaders: {} as ConditionalHeaders,
       layout: mockLayout,
       browserTimezone: 'UTC',
@@ -96,7 +100,21 @@ describe('Screenshot Observable Pipeline', () => {
           "error": undefined,
           "screenshots": Array [
             Object {
-              "base64EncodedData": "allyourBase64",
+              "data": Object {
+                "data": Array [
+                  115,
+                  99,
+                  114,
+                  101,
+                  101,
+                  110,
+                  115,
+                  104,
+                  111,
+                  116,
+                ],
+                "type": "Buffer",
+              },
               "description": "Default ",
               "title": "Default Mock Title",
             },
@@ -109,23 +127,22 @@ describe('Screenshot Observable Pipeline', () => {
 
   it('pipelines multiple urls into', async () => {
     // mock implementations
-    const mockScreenshot = jest.fn().mockImplementation((item: ElementsPositionAndAttribute) => {
-      return Promise.resolve(`allyourBase64 screenshots`);
-    });
-
+    const mockScreenshot = jest.fn(async () => Buffer.from('some screenshots'));
     const mockOpen = jest.fn();
 
     // mocks
-    mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+    mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
       screenshot: mockScreenshot,
       open: mockOpen,
     });
 
     // test
-    const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
-    const result = await getScreenshots$({
+    const result = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
       logger,
-      urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
+      urlsOrUrlLocatorTuples: [
+        '/welcome/home/start/index2.htm',
+        '/welcome/home/start/index.php3?page=./home.php',
+      ],
       conditionalHeaders: {} as ConditionalHeaders,
       layout: mockLayout,
       browserTimezone: 'UTC',
@@ -157,7 +174,27 @@ describe('Screenshot Observable Pipeline', () => {
           "error": undefined,
           "screenshots": Array [
             Object {
-              "base64EncodedData": "allyourBase64 screenshots",
+              "data": Object {
+                "data": Array [
+                  115,
+                  111,
+                  109,
+                  101,
+                  32,
+                  115,
+                  99,
+                  114,
+                  101,
+                  101,
+                  110,
+                  115,
+                  104,
+                  111,
+                  116,
+                  115,
+                ],
+                "type": "Buffer",
+              },
               "description": "Default ",
               "title": "Default Mock Title",
             },
@@ -188,7 +225,27 @@ describe('Screenshot Observable Pipeline', () => {
           "error": undefined,
           "screenshots": Array [
             Object {
-              "base64EncodedData": "allyourBase64 screenshots",
+              "data": Object {
+                "data": Array [
+                  115,
+                  111,
+                  109,
+                  101,
+                  32,
+                  115,
+                  99,
+                  114,
+                  101,
+                  101,
+                  110,
+                  115,
+                  104,
+                  111,
+                  116,
+                  115,
+                ],
+                "type": "Buffer",
+              },
               "description": "Default ",
               "title": "Default Mock Title",
             },
@@ -202,7 +259,7 @@ describe('Screenshot Observable Pipeline', () => {
     expect(mockOpen.mock.calls.length).toBe(2);
 
     const firstSelector = mockOpen.mock.calls[0][1].waitForSelector;
-    expect(firstSelector).toBe('.application');
+    expect(firstSelector).toBe('.kbnAppWrapper');
 
     const secondSelector = mockOpen.mock.calls[1][1].waitForSelector;
     expect(secondSelector).toBe('[data-shared-page="2"]');
@@ -216,16 +273,15 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // mocks
-      mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+      mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
         waitForSelector: mockWaitForSelector,
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
-        return await getScreenshots$({
+        return await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
           logger,
-          urls: [
+          urlsOrUrlLocatorTuples: [
             '/welcome/home/start/index2.htm',
             '/welcome/home/start/index.php3?page=./home.php3',
           ],
@@ -255,10 +311,24 @@ describe('Screenshot Observable Pipeline', () => {
                       },
                     },
                   ],
-                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
+                  "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
                   "screenshots": Array [
                     Object {
-                      "base64EncodedData": "allyourBase64",
+                      "data": Object {
+                        "data": Array [
+                          115,
+                          99,
+                          114,
+                          101,
+                          101,
+                          110,
+                          115,
+                          104,
+                          111,
+                          116,
+                        ],
+                        "type": "Buffer",
+                      },
                       "description": undefined,
                       "title": undefined,
                     },
@@ -283,10 +353,24 @@ describe('Screenshot Observable Pipeline', () => {
                       },
                     },
                   ],
-                  "error": [Error: An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. Error: Mock error!],
+                  "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
                   "screenshots": Array [
                     Object {
-                      "base64EncodedData": "allyourBase64",
+                      "data": Object {
+                        "data": Array [
+                          115,
+                          99,
+                          114,
+                          101,
+                          101,
+                          110,
+                          115,
+                          104,
+                          111,
+                          116,
+                        ],
+                        "type": "Buffer",
+                      },
                       "description": undefined,
                       "title": undefined,
                     },
@@ -310,17 +394,16 @@ describe('Screenshot Observable Pipeline', () => {
         return Rx.never().toPromise();
       });
 
-      mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+      mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
         getCreatePage: mockGetCreatePage,
         waitForSelector: mockWaitForSelector,
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
-        return await getScreenshots$({
+        return await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
           logger,
-          urls: ['/welcome/home/start/index.php3?page=./home.php3'],
+          urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
           conditionalHeaders: {} as ConditionalHeaders,
           layout: mockLayout,
           browserTimezone: 'UTC',
@@ -339,61 +422,69 @@ describe('Screenshot Observable Pipeline', () => {
 
         if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
           return Promise.resolve(null);
-        } else if (mockCall === contexts.CONTEXT_GETBROWSERDIMENSIONS) {
-          return Promise.resolve([800, 600]);
         } else {
           return Promise.resolve();
         }
       });
-      mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
+      mockBrowserDriverFactory = await createMockBrowserDriverFactory(core, logger, {
         evaluate: mockBrowserEvaluate,
       });
       mockLayout.getViewport = () => null;
 
-      // test
-      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
-      const getScreenshot = async () => {
-        return await getScreenshots$({
-          logger,
-          urls: ['/welcome/home/start/index.php3?page=./home.php3'],
-          conditionalHeaders: {} as ConditionalHeaders,
-          layout: mockLayout,
-          browserTimezone: 'UTC',
-        }).toPromise();
-      };
+      const screenshots = await getScreenshots$(captureConfig, mockBrowserDriverFactory, {
+        logger,
+        urlsOrUrlLocatorTuples: ['/welcome/home/start/index.php3?page=./home.php3'],
+        conditionalHeaders: {} as ConditionalHeaders,
+        layout: mockLayout,
+        browserTimezone: 'UTC',
+      }).toPromise();
 
-      await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "elementsPositionAndAttributes": Array [
-                    Object {
-                      "attributes": Object {},
-                      "position": Object {
-                        "boundingClientRect": Object {
-                          "height": 1200,
-                          "left": 0,
-                          "top": 0,
-                          "width": 1800,
-                        },
-                        "scroll": Object {
-                          "x": 0,
-                          "y": 0,
-                        },
-                      },
-                    },
-                  ],
-                  "error": undefined,
-                  "screenshots": Array [
-                    Object {
-                      "base64EncodedData": "allyourBase64",
-                      "description": undefined,
-                      "title": undefined,
-                    },
-                  ],
-                  "timeRange": undefined,
+      expect(screenshots).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "elementsPositionAndAttributes": Array [
+              Object {
+                "attributes": Object {},
+                "position": Object {
+                  "boundingClientRect": Object {
+                    "height": 1200,
+                    "left": 0,
+                    "top": 0,
+                    "width": 1800,
+                  },
+                  "scroll": Object {
+                    "x": 0,
+                    "y": 0,
+                  },
                 },
-              ]
-            `);
+              },
+            ],
+            "error": undefined,
+            "screenshots": Array [
+              Object {
+                "data": Object {
+                  "data": Array [
+                    115,
+                    99,
+                    114,
+                    101,
+                    101,
+                    110,
+                    115,
+                    104,
+                    111,
+                    116,
+                  ],
+                  "type": "Buffer",
+                },
+                "description": undefined,
+                "title": undefined,
+              },
+            ],
+            "timeRange": undefined,
+          },
+        ]
+      `);
     });
   });
 });

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { pluck } from 'rxjs/operators';
 import {
   EuiCodeBlock,
   EuiFlexItem,
@@ -21,12 +22,9 @@ import {
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
-import {
-  ExpressionsStart,
-  ExpressionsInspectorAdapter,
-} from '../../../src/plugins/expressions/public';
+import { ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { ExpressionEditor } from './editor/expression_editor';
-import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
+import { Adapters, Start as InspectorStart } from '../../../src/plugins/inspector/public';
 
 interface Props {
   expressions: ExpressionsStart;
@@ -34,32 +32,27 @@ interface Props {
 }
 
 export function RunExpressionsExample({ expressions, inspector }: Props) {
-  const [expression, updateExpression] = useState('markdown "## expressions explorer"');
-  const [result, updateResult] = useState({});
+  const [expression, updateExpression] = useState('markdownVis "## expressions explorer"');
+  const [result, updateResult] = useState<unknown>({});
+  const [inspectorAdapters, updateInspectorAdapters] = useState<Adapters>({});
 
   const expressionChanged = (value: string) => {
     updateExpression(value);
   };
 
-  const inspectorAdapters = useMemo(
-    () => ({
-      expression: new ExpressionsInspectorAdapter(),
-    }),
-    []
-  );
-
   useEffect(() => {
-    const runExpression = async () => {
-      const execution = expressions.execute(expression, null, {
-        debug: true,
-        inspectorAdapters,
+    const execution = expressions.execute(expression, null, {
+      debug: true,
+    });
+    const subscription = execution
+      .getData()
+      .pipe(pluck('result'))
+      .subscribe((data) => {
+        updateResult(data);
+        updateInspectorAdapters(execution.inspect());
       });
-
-      const data: any = await execution.getData();
-      updateResult(data);
-    };
-
-    runExpression();
+    execution.inspect();
+    return () => subscription.unsubscribe();
   }, [expression, expressions, inspectorAdapters]);
 
   return (

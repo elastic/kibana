@@ -1,18 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { Field, SplitField, AggFieldPair } from '../../../../../../common/types/fields';
+import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
+import {
+  Field,
+  SplitField,
+  AggFieldPair,
+  RuntimeMappings,
+} from '../../../../../../common/types/fields';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/common';
 
 type DetectorIndex = number;
 export interface LineChartPoint {
@@ -34,7 +41,7 @@ export class ChartLoader {
   private _timeFieldName: string = '';
   private _query: object = {};
 
-  constructor(indexPattern: IndexPattern, query: object) {
+  constructor(indexPattern: DataView, query: object) {
     this._indexPatternTitle = indexPattern.title;
     this._query = query;
 
@@ -49,7 +56,9 @@ export class ChartLoader {
     aggFieldPairs: AggFieldPair[],
     splitField: SplitField,
     splitFieldValue: SplitFieldValue,
-    intervalMs: number
+    intervalMs: number,
+    runtimeMappings: RuntimeMappings | null,
+    indicesOptions?: IndicesOptions
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
       if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
@@ -69,7 +78,9 @@ export class ChartLoader {
         this._query,
         aggFieldPairNames,
         splitFieldName,
-        splitFieldValue
+        splitFieldValue,
+        runtimeMappings ?? undefined,
+        indicesOptions
       );
 
       return resp.results;
@@ -82,7 +93,9 @@ export class ChartLoader {
     end: number,
     aggFieldPairs: AggFieldPair[],
     splitField: SplitField,
-    intervalMs: number
+    intervalMs: number,
+    runtimeMappings: RuntimeMappings | null,
+    indicesOptions?: IndicesOptions
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
       if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
@@ -101,7 +114,9 @@ export class ChartLoader {
         intervalMs,
         this._query,
         aggFieldPairNames,
-        splitFieldName
+        splitFieldName,
+        runtimeMappings ?? undefined,
+        indicesOptions
       );
 
       return resp.results;
@@ -112,7 +127,9 @@ export class ChartLoader {
   async loadEventRateChart(
     start: number,
     end: number,
-    intervalMs: number
+    intervalMs: number,
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ): Promise<LineChartPoint[]> {
     if (this._timeFieldName !== '') {
       const resp = await getEventRateData(
@@ -121,7 +138,9 @@ export class ChartLoader {
         this._timeFieldName,
         start,
         end,
-        intervalMs * 3
+        intervalMs * 3,
+        runtimeMappings,
+        indicesOptions
       );
       if (resp.error !== undefined) {
         throw resp.error;
@@ -135,12 +154,18 @@ export class ChartLoader {
     return [];
   }
 
-  async loadFieldExampleValues(field: Field): Promise<string[]> {
+  async loadFieldExampleValues(
+    field: Field,
+    runtimeMappings: RuntimeMappings | null,
+    indicesOptions?: IndicesOptions
+  ): Promise<string[]> {
     const { results } = await getCategoryFields(
       this._indexPatternTitle,
       field.name,
       10,
-      this._query
+      this._query,
+      runtimeMappings ?? undefined,
+      indicesOptions
     );
     return results;
   }

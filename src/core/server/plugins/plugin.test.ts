@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { join } from 'path';
@@ -15,10 +15,10 @@ import { Env } from '../config';
 import { CoreContext } from '../core_context';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { getEnvOptions, configServiceMock } from '../config/mocks';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
 
 import { PluginWrapper } from './plugin';
-import { PluginManifest } from './types';
+import { PluginManifest, PluginType } from './types';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
@@ -39,17 +39,24 @@ jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugi
   virtual: true,
 });
 
+const OSS_PLUGIN_PATH_POSIX = '/kibana/src/plugins/ossPlugin';
+const OSS_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\src\\plugins\\ossPlugin';
+const XPACK_PLUGIN_PATH_POSIX = '/kibana/x-pack/plugins/xPackPlugin';
+const XPACK_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\x-pack\\plugins\\xPackPlugin';
+
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
     id: 'some-plugin-id',
     version: 'some-version',
     configPath: 'path',
     kibanaVersion: '7.0.0',
+    type: PluginType.standard,
     requiredPlugins: ['some-required-dep'],
     optionalPlugins: ['some-optional-dep'],
     requiredBundles: [],
     server: true,
     ui: true,
+    owner: { name: 'Core' },
     ...manifestProps,
   };
 }
@@ -96,11 +103,50 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.name).toBe('some-plugin-id');
   expect(plugin.configPath).toBe('path');
   expect(plugin.path).toBe('some-plugin-path');
+  expect(plugin.source).toBe('external'); // see below for test cases for non-external sources (OSS and X-Pack)
   expect(plugin.requiredPlugins).toEqual(['some-required-dep']);
   expect(plugin.optionalPlugins).toEqual(['some-optional-dep']);
 });
 
-test('`setup` fails if `plugin` initializer is not exported', async () => {
+describe('`constructor` correctly sets non-external source', () => {
+  function createPlugin(path: string) {
+    const manifest = createPluginManifest();
+    const opaqueId = Symbol();
+    return new PluginWrapper({
+      path,
+      manifest,
+      opaqueId,
+      initializerContext: createPluginInitializerContext(
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo
+      ),
+    });
+  }
+
+  test('for OSS plugin in POSIX', () => {
+    const plugin = createPlugin(OSS_PLUGIN_PATH_POSIX);
+    expect(plugin.source).toBe('oss');
+  });
+
+  test('for OSS plugin in Windows', () => {
+    const plugin = createPlugin(OSS_PLUGIN_PATH_WINDOWS);
+    expect(plugin.source).toBe('oss');
+  });
+
+  test('for X-Pack plugin in POSIX', () => {
+    const plugin = createPlugin(XPACK_PLUGIN_PATH_POSIX);
+    expect(plugin.source).toBe('x-pack');
+  });
+
+  test('for X-Pack plugin in Windows', () => {
+    const plugin = createPlugin(XPACK_PLUGIN_PATH_WINDOWS);
+    expect(plugin.source).toBe('x-pack');
+  });
+});
+
+test('`setup` fails if `plugin` initializer is not exported', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -115,14 +161,14 @@ test('`setup` fails if `plugin` initializer is not exported', async () => {
     ),
   });
 
-  await expect(
+  expect(() =>
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Plugin "some-plugin-id" does not export "plugin" definition (plugin-without-initializer-path).]`
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Plugin \\"some-plugin-id\\" does not export \\"plugin\\" definition (plugin-without-initializer-path)."`
   );
 });
 
-test('`setup` fails if plugin initializer is not a function', async () => {
+test('`setup` fails if plugin initializer is not a function', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -137,14 +183,14 @@ test('`setup` fails if plugin initializer is not a function', async () => {
     ),
   });
 
-  await expect(
+  expect(() =>
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Definition of plugin "some-plugin-id" should be a function (plugin-with-wrong-initializer-path).]`
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Definition of plugin \\"some-plugin-id\\" should be a function (plugin-with-wrong-initializer-path)."`
   );
 });
 
-test('`setup` fails if initializer does not return object', async () => {
+test('`setup` fails if initializer does not return object', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -161,14 +207,14 @@ test('`setup` fails if initializer does not return object', async () => {
 
   mockPluginInitializer.mockReturnValue(null);
 
-  await expect(
+  expect(() =>
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Initializer for plugin "some-plugin-id" is expected to return plugin instance, but returned "null".]`
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Initializer for plugin \\"some-plugin-id\\" is expected to return plugin instance, but returned \\"null\\"."`
   );
 });
 
-test('`setup` fails if object returned from initializer does not define `setup` function', async () => {
+test('`setup` fails if object returned from initializer does not define `setup` function', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -186,10 +232,10 @@ test('`setup` fails if object returned from initializer does not define `setup` 
   const mockPluginInstance = { run: jest.fn() };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
 
-  await expect(
+  expect(() =>
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Instance of plugin "some-plugin-id" does not define "setup" function.]`
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Instance of plugin \\"some-plugin-id\\" does not define \\"setup\\" function."`
   );
 });
 
@@ -223,7 +269,7 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
   expect(mockPluginInstance.setup).toHaveBeenCalledWith(setupContext, setupDependencies);
 });
 
-test('`start` fails if setup is not called first', async () => {
+test('`start` fails if setup is not called first', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -238,8 +284,33 @@ test('`start` fails if setup is not called first', async () => {
     ),
   });
 
-  await expect(plugin.start({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
+  expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
     `"Plugin \\"some-plugin-id\\" can't be started since it isn't set up."`
+  );
+});
+
+test('`start` fails invoked for the `preboot` plugin', async () => {
+  const manifest = createPluginManifest({ type: PluginType.preboot });
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext(
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo
+    ),
+  });
+
+  const mockPluginInstance = { setup: jest.fn() };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+
+  await plugin.setup({} as any, {} as any);
+
+  expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
+    `"Plugin \\"some-plugin-id\\" is a preboot plugin and cannot be started."`
   );
 });
 

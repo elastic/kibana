@@ -1,23 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButton, EuiCheckboxProps } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
-import React from 'react';
+import type { EuiCheckboxProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
 
 import { mountWithIntl } from '@kbn/test/jest';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
+
+import { KibanaFeature } from '../../../../features/public';
+import { featuresPluginMock } from '../../../../features/public/mocks';
+import type { SpacesManager } from '../../spaces_manager';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesManager } from '../../spaces_manager';
-import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { featuresPluginMock } from '../../../../features/public/mocks';
-import { KibanaFeature } from '../../../../features/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../../../src/core/public';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712
@@ -45,7 +48,13 @@ featuresStart.getFeatures.mockResolvedValue([
 ]);
 
 describe('ManageSpacePage', () => {
-  const getUrlForApp = (appId: string) => appId;
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: { reload: jest.fn() },
+      writable: true,
+    });
+  });
+
   const history = scopedHistoryMock.create();
 
   it('allows a space to be created', async () => {
@@ -55,10 +64,9 @@ describe('ManageSpacePage', () => {
 
     const wrapper = mountWithIntl(
       <ManageSpacePage
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -88,8 +96,9 @@ describe('ManageSpacePage', () => {
       id: 'new-space-name',
       name: 'New Space Name',
       description: 'some description',
-      color: undefined,
-      initials: undefined,
+      initials: 'NS',
+      color: '#AA6556',
+      imageUrl: '',
       disabledFeatures: [],
     });
   });
@@ -115,11 +124,10 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage
         spaceId={'existing-space'}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         onLoadSpace={onLoadSpace}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -151,9 +159,73 @@ describe('ManageSpacePage', () => {
       id: 'existing-space',
       name: 'New Space Name',
       description: 'some description',
-      color: '#aabbcc',
+      color: '#AABBCC',
       initials: 'AB',
+      imageUrl: '',
       disabledFeatures: ['feature-1'],
+    });
+  });
+
+  it('sets calculated fields for existing spaces', async () => {
+    // The Spaces plugin provides functions to calculate the initials and color of a space if they have not been customized. The new space
+    // management page explicitly sets these fields when a new space is created, but it should also handle existing "legacy" spaces that do
+    // not already have these fields set.
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: undefined,
+      initials: undefined,
+      imageUrl: undefined,
+      disabledFeatures: [],
+    };
+
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.getSpace = jest.fn().mockResolvedValue({
+      ...spaceToUpdate,
+    });
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const onLoadSpace = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spaceId={'existing-space'}
+        spacesManager={spacesManager as unknown as SpacesManager}
+        onLoadSpace={onLoadSpace}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
+    });
+
+    expect(onLoadSpace).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+    });
+
+    await Promise.resolve();
+
+    wrapper.update();
+
+    // not changing anything, just clicking the "Update space" button
+    await clickSaveButton(wrapper);
+
+    expect(spacesManager.updateSpace).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+      color: '#E7664C',
+      initials: 'ES',
+      imageUrl: '',
     });
   });
 
@@ -168,10 +240,9 @@ describe('ManageSpacePage', () => {
 
     const wrapper = mountWithIntl(
       <ManageSpacePage
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -205,10 +276,9 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage
         spaceId={'my-space'}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},
@@ -266,10 +336,9 @@ describe('ManageSpacePage', () => {
     const wrapper = mountWithIntl(
       <ManageSpacePage
         spaceId={'my-space'}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
           navLinks: {},

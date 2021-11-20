@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { EuiListGroupItem, EuiConfirmModal, EuiOverlayMask, EuiIconTip } from '@elastic/eui';
+import { EuiListGroupItem, EuiConfirmModal, EuiIconTip } from '@elastic/eui';
 
 import React, { Fragment, useState } from 'react';
 import classNames from 'classnames';
@@ -114,36 +114,34 @@ export const SavedQueryListItem = ({
       />
 
       {showDeletionConfirmationModal && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate('data.search.searchBar.savedQueryPopoverConfirmDeletionTitle', {
-              defaultMessage: 'Delete "{savedQueryName}"?',
-              values: {
-                savedQueryName: savedQuery.attributes.title,
-              },
-            })}
-            confirmButtonText={i18n.translate(
-              'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            cancelButtonText={i18n.translate(
-              'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            onConfirm={() => {
-              onDelete(savedQuery);
-              setShowDeletionConfirmationModal(false);
-            }}
-            buttonColor="danger"
-            onCancel={() => {
-              setShowDeletionConfirmationModal(false);
-            }}
-          />
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={i18n.translate('data.search.searchBar.savedQueryPopoverConfirmDeletionTitle', {
+            defaultMessage: 'Delete "{savedQueryName}"?',
+            values: {
+              savedQueryName: savedQuery.attributes.title,
+            },
+          })}
+          confirmButtonText={i18n.translate(
+            'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
+          cancelButtonText={i18n.translate(
+            'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          onConfirm={() => {
+            onDelete(savedQuery);
+            setShowDeletionConfirmationModal(false);
+          }}
+          buttonColor="danger"
+          onCancel={() => {
+            setShowDeletionConfirmationModal(false);
+          }}
+        />
       )}
     </Fragment>
   );

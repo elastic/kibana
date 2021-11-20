@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { asKQL } from './kql_encoder';
@@ -11,7 +12,7 @@ describe('kql_encoder', () => {
   let workspaceMock: jest.Mocked<Workspace>;
 
   beforeEach(() => {
-    workspaceMock = ({
+    workspaceMock = {
       returnUnpackedGroupeds: (nodes: []) => nodes,
       getSelectedOrAllNodes: jest.fn(() => [
         {
@@ -33,7 +34,7 @@ describe('kql_encoder', () => {
           },
         },
       ]),
-    } as unknown) as jest.Mocked<Workspace>;
+    } as unknown as jest.Mocked<Workspace>;
   });
 
   it('should encode query as URI component', () => {

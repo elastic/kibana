@@ -1,37 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { mockKibanaValues } from '../../../../../__mocks__';
-
-import { setMockValues, setMockActions } from '../../../../../__mocks__';
-import { unmountHandler } from '../../../../../__mocks__/shallow_useeffect.mock';
-
-import { shallow } from 'enzyme';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
+import { shallow } from 'enzyme';
+
 import { EuiButton, EuiTabbedContent } from '@elastic/eui';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
-
-import { Loading } from '../../../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
+import { DisplaySettings } from './display_settings';
 import { FieldEditorModal } from './field_editor_modal';
 
-import { DisplaySettings } from './display_settings';
-
 describe('DisplaySettings', () => {
-  const { navigateToUrl } = mockKibanaValues;
   const { exampleDocuments, searchResultConfig } = exampleResult;
   const initializeDisplaySettings = jest.fn();
   const setServerData = jest.fn();
   const setColorField = jest.fn();
+  const handleSelectedTabChanged = jest.fn();
 
   const values = {
     isOrganization: true,
@@ -48,6 +44,7 @@ describe('DisplaySettings', () => {
       initializeDisplaySettings,
       setServerData,
       setColorField,
+      handleSelectedTabChanged,
     });
     setMockValues({ ...values });
   });
@@ -55,32 +52,8 @@ describe('DisplaySettings', () => {
   it('renders', () => {
     const wrapper = shallow(<DisplaySettings tabId={0} />);
 
+    expect(wrapper.find(UnsavedChangesPrompt)).toHaveLength(1);
     expect(wrapper.find('form')).toHaveLength(1);
-  });
-
-  it('returns loading when loading', () => {
-    setMockValues({ ...values, dataLoading: true });
-    const wrapper = shallow(<DisplaySettings tabId={0} />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('handles window.onbeforeunload change', () => {
-    setMockValues({ ...values, unsavedChanges: true });
-    shallow(<DisplaySettings tabId={0} />);
-
-    unmountHandler();
-
-    expect(window.onbeforeunload).toEqual(null);
-  });
-
-  it('handles window.onbeforeunload unmount', () => {
-    setMockValues({ ...values, unsavedChanges: true });
-    shallow(<DisplaySettings tabId={0} />);
-
-    expect(window.onbeforeunload!({} as any)).toEqual(
-      'Your display settings have not been saved. Are you sure you want to leave?'
-    );
   });
 
   describe('tabbed content', () => {
@@ -102,7 +75,7 @@ describe('DisplaySettings', () => {
       const tabsEl = wrapper.find(EuiTabbedContent);
       tabsEl.prop('onTabClick')!(tabs[0]);
 
-      expect(navigateToUrl).toHaveBeenCalledWith('/sources/123/display_settings/');
+      expect(handleSelectedTabChanged).toHaveBeenCalledWith('search_results');
     });
 
     it('handles second tab click', () => {
@@ -110,7 +83,7 @@ describe('DisplaySettings', () => {
       const tabsEl = wrapper.find(EuiTabbedContent);
       tabsEl.prop('onTabClick')!(tabs[1]);
 
-      expect(navigateToUrl).toHaveBeenCalledWith('/sources/123/display_settings/result_detail');
+      expect(handleSelectedTabChanged).toHaveBeenCalledWith('result_detail');
     });
   });
 

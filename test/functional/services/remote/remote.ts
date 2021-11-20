@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Fs from 'fs';
@@ -37,14 +37,21 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   };
 
   const writeCoverage = (coverageJson: string) => {
-    if (!Fs.existsSync(coverageDir)) {
-      Fs.mkdirSync(coverageDir, { recursive: true });
+    // on CI we make hard link clone and run tests from kibana${process.env.CI_GROUP} root path
+    const re = new RegExp(`kibana${process.env.CI_GROUP}`, 'g');
+    const dir = process.env.CI ? coverageDir.replace(re, 'kibana') : coverageDir;
+
+    if (!Fs.existsSync(dir)) {
+      Fs.mkdirSync(dir, { recursive: true });
     }
+
     const id = coverageCounter++;
     const timestamp = Date.now();
-    const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+    const path = resolve(dir, `${id}.${timestamp}.coverage.json`);
     log.info('writing coverage to', path);
-    Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+
+    const jsonString = process.env.CI ? coverageJson.replace(re, 'kibana') : coverageJson;
+    Fs.writeFileSync(path, JSON.stringify(JSON.parse(jsonString), null, 2));
   };
 
   const browserConfig: BrowserConfig = {
@@ -85,7 +92,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     .subscribe({
       next({ message, level }) {
         const msg = message.replace(/\\n/g, '\n');
-        log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
+        log[level === 'SEVERE' || level === 'error' ? 'warning' : 'debug'](
           `browser[${level}] ${msg}`
         );
       },

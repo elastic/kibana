@@ -1,31 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
-import { Legacy } from 'kibana';
+
 // @ts-ignore
 import { kibanaTestUser } from '@kbn/test';
-import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
-import {
-  CoreSetup,
-  SavedObjectsErrorHelpers,
-  IBasePath,
-  IRouter,
-} from '../../../../../../src/core/server';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  coreMock,
-} from '../../../../../../src/core/server/mocks';
-import * as kbnTestServer from '../../../../../../src/core/test_helpers/kbn_server';
-import { SpacesService } from '../../spaces_service';
-import { convertSavedObjectToSpace } from '../../routes/lib';
-import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
-import { KibanaFeature } from '../../../../features/server';
+import type { CoreSetup, IBasePath, IRouter } from 'src/core/server';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import type { KibanaFeature } from '../../../../features/server';
 import { featuresPluginMock } from '../../../../features/server/mocks';
+import { convertSavedObjectToSpace } from '../../routes/lib';
 import { spacesClientServiceMock } from '../../spaces_client/spaces_client_service.mock';
+import { SpacesService } from '../../spaces_service';
+import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
+import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 
 // FLAKY: https://github.com/elastic/kibana/issues/55953
 describe.skip('onPostAuthInterceptor', () => {
@@ -43,69 +38,18 @@ describe.skip('onPostAuthInterceptor', () => {
    * commented out due to hooks being called regardless of skip
    * https://github.com/facebook/jest/issues/8379
 
-  beforeEach(async () => {
+   beforeEach(async () => {
     root = kbnTestServer.createRoot();
   });
 
-  afterEach(async () => await root.shutdown());
+   afterEach(async () => await root.shutdown());
 
-  */
+   */
 
-  function initKbnServer(router: IRouter, basePath: IBasePath, routes: 'legacy' | 'new-platform') {
-    const kbnServer = kbnTestServer.getKbnServer(root);
-
-    if (routes === 'legacy') {
-      kbnServer.server.route([
-        {
-          method: 'GET',
-          path: '/foo',
-          handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: basePath.get(req) });
-          },
-        },
-        {
-          method: 'GET',
-          path: '/app/kibana',
-          handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: basePath.get(req) });
-          },
-        },
-        {
-          method: 'GET',
-          path: '/app/app-1',
-          handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: basePath.get(req) });
-          },
-        },
-        {
-          method: 'GET',
-          path: '/app/app-2',
-          handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: basePath.get(req) });
-          },
-        },
-        {
-          method: 'GET',
-          path: '/api/test/foo',
-          handler: (req: Legacy.Request) => {
-            return { path: req.path, basePath: basePath.get(req) };
-          },
-        },
-        {
-          method: 'GET',
-          path: '/some/path/s/foo/bar',
-          handler: (req: Legacy.Request, h: Legacy.ResponseToolkit) => {
-            return h.response({ path: req.path, basePath: basePath.get(req) });
-          },
-        },
-      ]);
-    }
-
-    if (routes === 'new-platform') {
-      router.get({ path: '/api/np_test/foo', validate: false }, (context, req, h) => {
-        return h.ok({ body: { path: req.url.pathname, basePath: basePath.get(req) } });
-      });
-    }
+  function initKbnServer(router: IRouter, basePath: IBasePath) {
+    router.get({ path: '/api/np_test/foo', validate: false }, (context, req, h) => {
+      return h.ok({ body: { path: req.url.pathname, basePath: basePath.get(req) } });
+    });
   }
 
   async function request(
@@ -113,15 +57,17 @@ describe.skip('onPostAuthInterceptor', () => {
     availableSpaces: any[],
     testOptions = { simulateGetSpacesFailure: false, simulateGetSingleSpaceFailure: false }
   ) {
+    await root.preboot();
     const { http, elasticsearch } = await root.setup();
 
     // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
-    elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
+    elasticsearch.esNodesCompatibility$ =
+      elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
     const loggingMock = loggingSystemMock.create().asLoggerFactory().get('xpack', 'spaces');
 
     const featuresPlugin = featuresPluginMock.createSetup();
-    featuresPlugin.getKibanaFeatures.mockReturnValue(([
+    featuresPlugin.getKibanaFeatures.mockReturnValue([
       {
         id: 'feature-1',
         name: 'feature 1',
@@ -142,7 +88,7 @@ describe.skip('onPostAuthInterceptor', () => {
         name: 'feature 4',
         app: ['kibana'],
       },
-    ] as unknown) as KibanaFeature[]);
+    ] as unknown as KibanaFeature[]);
 
     const mockRepository = jest.fn().mockImplementation(() => {
       return {
@@ -197,11 +143,11 @@ describe.skip('onPostAuthInterceptor', () => {
     // interceptor to parse out the space id and rewrite the request's URL. Rather than duplicating that logic,
     // we are including the already tested interceptor here in the test chain.
     initSpacesOnRequestInterceptor({
-      http: (http as unknown) as CoreSetup['http'],
+      http: http as unknown as CoreSetup['http'],
     });
 
     initSpacesOnPostAuthRequestInterceptor({
-      http: (http as unknown) as CoreSetup['http'],
+      http: http as unknown as CoreSetup['http'],
       log: loggingMock,
       features: featuresPlugin,
       getSpacesService: () => spacesServiceStart,
@@ -209,11 +155,9 @@ describe.skip('onPostAuthInterceptor', () => {
 
     const router = http.createRouter('/');
 
-    initKbnServer(router, http.basePath, 'new-platform');
+    initKbnServer(router, http.basePath);
 
     await root.start();
-
-    initKbnServer(router, http.basePath, 'legacy');
 
     const response = await kbnTestServer.request.get(root, path);
 
@@ -222,58 +166,6 @@ describe.skip('onPostAuthInterceptor', () => {
       spacesService: spacesServiceStart,
     };
   }
-
-  describe('requests proxied to the legacy platform', () => {
-    it('redirects to the space selector screen when accessing an app within a non-existent space', async () => {
-      const spaces = [
-        {
-          id: 'a-space',
-          type: 'space',
-          attributes: {
-            name: 'a space',
-          },
-        },
-      ];
-
-      const { response } = await request('/s/not-found/app/kibana', spaces);
-
-      expect(response.status).toEqual(302);
-      expect(response.header.location).toEqual(`/spaces/space_selector`);
-    });
-
-    it('when accessing the kibana app it always allows the request to continue', async () => {
-      const spaces = [
-        {
-          id: 'a-space',
-          type: 'space',
-          attributes: {
-            name: 'a space',
-            disabledFeatures: ['feature-1', 'feature-2', 'feature-4', 'feature-5'],
-          },
-        },
-      ];
-
-      const { response } = await request('/s/a-space/app/kibana', spaces);
-
-      expect(response.status).toEqual(200);
-    });
-
-    it('allows the request to continue when accessing an API endpoint within a non-existent space', async () => {
-      const spaces = [
-        {
-          id: 'a-space',
-          type: 'space',
-          attributes: {
-            name: 'a space',
-          },
-        },
-      ];
-
-      const { response } = await request('/s/not-found/api/test/foo', spaces);
-
-      expect(response.status).toEqual(200);
-    });
-  });
 
   describe('requests handled completely in the new platform', () => {
     it('redirects to the space selector screen when accessing an app within a non-existent space', async () => {

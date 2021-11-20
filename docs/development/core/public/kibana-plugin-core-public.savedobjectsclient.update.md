@@ -9,20 +9,20 @@ Updates an object
 <b>Signature:</b>
 
 ```typescript
-update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+update<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
-|  attributes | <code>T</code> |  |
-|  { version, migrationVersion, references } | <code>SavedObjectsUpdateOptions</code> |  |
+|  type | string |  |
+|  id | string |  |
+|  attributes | T |  |
+|  { version, references, upsert } | SavedObjectsUpdateOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SimpleSavedObject<T>>`
+Promise&lt;SimpleSavedObject&lt;T&gt;&gt;
 
 

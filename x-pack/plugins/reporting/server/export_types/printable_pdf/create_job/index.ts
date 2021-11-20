@@ -1,40 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PDF_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDF, TaskPayloadPDF } from '../types';
+import { JobParamsPDF, JobParamsPDFLegacy, TaskPayloadPDF } from '../types';
+import { compatibilityShim } from './compatibility_shim';
 
+/*
+ * Incoming job params can be `JobParamsPDF` or `JobParamsPDFLegacy` depending
+ * on the version that the POST URL was copied from.
+ */
 export const createJobFnFactory: CreateJobFnFactory<
-  CreateJobFn<JobParamsPDF, TaskPayloadPDF>
-> = function createJobFactoryFn(reporting, parentLogger) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
-  const logger = parentLogger.clone([PDF_JOB_TYPE, 'create-job']);
-
-  return async function createJob(
-    { title, relativeUrls, browserTimezone, layout, objectType },
-    context,
-    req
+  CreateJobFn<JobParamsPDF | JobParamsPDFLegacy, TaskPayloadPDF>
+> = function createJobFactoryFn(_reporting, logger) {
+  return compatibilityShim(async function createJobFn(
+    { relativeUrls, ...jobParams }: JobParamsPDF // relativeUrls does not belong in the payload of PDFV1
   ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
-
     validateUrls(relativeUrls);
 
+    // return the payload
     return {
-      headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req, logger),
-      browserTimezone,
+      ...jobParams,
       forceNow: new Date().toISOString(),
-      layout,
-      relativeUrls,
-      title,
-      objectType,
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
-  };
+  }, logger);
 };

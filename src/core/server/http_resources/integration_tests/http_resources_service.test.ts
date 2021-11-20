@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -12,14 +12,14 @@ import * as kbnTestServer from '../../../test_helpers/kbn_server';
 describe('http resources service', () => {
   describe('register', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
-    const defaultCspRules = "script-src 'self'";
+    const defaultCspRules =
+      "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'";
     beforeEach(async () => {
       root = kbnTestServer.createRoot({
-        csp: {
-          rules: [defaultCspRules],
-        },
         plugins: { initialize: false },
+        elasticsearch: { skipStartupConnectionCheck: true },
       });
+      await root.preboot();
     }, 30000);
 
     afterEach(async () => {
@@ -42,7 +42,7 @@ describe('http resources service', () => {
         expect(response.text.length).toBeGreaterThan(0);
       });
 
-      it('attaches CSP header', async () => {
+      it('applies default CSP header', async () => {
         const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');

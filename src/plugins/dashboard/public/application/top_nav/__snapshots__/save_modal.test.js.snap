@@ -2,6 +2,7 @@
 
 exports[`renders DashboardSaveModal 1`] = `
 <SavedObjectSaveModal
+  initialCopyOnSave={true}
   objectType="dashboard"
   onClose={[Function]}
   onSave={[Function]}

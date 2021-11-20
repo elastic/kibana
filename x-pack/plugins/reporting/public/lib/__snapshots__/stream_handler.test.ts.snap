@@ -82,11 +82,12 @@ Array [
       "reactNode": <React.Fragment>
         <EuiCallOut
           color="danger"
+          data-test-errorText="this is the failed report error"
           iconType="alert"
           size="m"
           title="The reporting job failed"
         >
-          this is the completed report data
+          this is the failed report error
         </EuiCallOut>
         <EuiSpacer />
         <p>

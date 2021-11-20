@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
+import type {
   HttpInterceptor,
   HttpInterceptorResponseError,
-  IHttpInterceptController,
   IAnonymousPaths,
+  IHttpInterceptController,
 } from 'src/core/public';
 
-import { SessionExpired } from './session_expired';
+import { LogoutReason } from '../../common/types';
+import type { SessionExpired } from './session_expired';
 
 export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
   constructor(private sessionExpired: SessionExpired, private anonymousPaths: IAnonymousPaths) {}
@@ -38,7 +40,7 @@ export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
     }
 
     if (response.status === 401) {
-      this.sessionExpired.logout();
+      this.sessionExpired.logout(LogoutReason.AUTHENTICATION_ERROR);
       controller.halt();
     }
   }

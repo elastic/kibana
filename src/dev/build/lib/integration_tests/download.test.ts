@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createServer, IncomingMessage, ServerResponse } from 'http';
@@ -42,10 +42,12 @@ const log = new ToolingLog({
 type Handler = (req: IncomingMessage, res: ServerResponse) => void;
 
 const FOO_SHA256 = '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae';
-const createSendHandler = (send: any): Handler => (req, res) => {
-  res.statusCode = 200;
-  res.end(send);
-};
+const createSendHandler =
+  (send: any): Handler =>
+  (req, res) => {
+    res.statusCode = 200;
+    res.end(send);
+  };
 const sendErrorHandler: Handler = (req, res) => {
   res.statusCode = 500;
   res.end();
@@ -91,7 +93,8 @@ it('downloads from URL and checks that content matches sha256', async () => {
     log,
     url: serverUrl,
     destination: TMP_DESTINATION,
-    sha256: FOO_SHA256,
+    shaChecksum: FOO_SHA256,
+    shaAlgorithm: 'sha256',
   });
   expect(readFileSync(TMP_DESTINATION, 'utf8')).toBe('foo');
 });
@@ -104,7 +107,8 @@ it('rejects and deletes destination if sha256 does not match', async () => {
       log,
       url: serverUrl,
       destination: TMP_DESTINATION,
-      sha256: 'bar',
+      shaChecksum: 'bar',
+      shaAlgorithm: 'sha256',
     });
     throw new Error('Expected download() to reject');
   } catch (error) {
@@ -139,7 +143,8 @@ describe('reties download retries: number of times', () => {
       log,
       url: serverUrl,
       destination: TMP_DESTINATION,
-      sha256: FOO_SHA256,
+      shaChecksum: FOO_SHA256,
+      shaAlgorithm: 'sha256',
       retries: 2,
     });
 
@@ -165,7 +170,8 @@ describe('reties download retries: number of times', () => {
       log,
       url: serverUrl,
       destination: TMP_DESTINATION,
-      sha256: FOO_SHA256,
+      shaChecksum: FOO_SHA256,
+      shaAlgorithm: 'sha256',
       retries: 2,
     });
   });
@@ -183,7 +189,8 @@ describe('reties download retries: number of times', () => {
         log,
         url: serverUrl,
         destination: TMP_DESTINATION,
-        sha256: FOO_SHA256,
+        shaChecksum: FOO_SHA256,
+        shaAlgorithm: 'sha256',
         retries: 5,
       });
       throw new Error('Expected download() to reject');

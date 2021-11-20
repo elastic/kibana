@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
-import { platformService } from '../services';
-import { getDefaultWorkpad } from './defaults';
+import { pluginServices } from '../services';
+import { getDefaultWorkpad, getDefaultSidebar } from './defaults';
 
 export const getInitialState = (path) => {
-  const { getHasWriteAccess } = platformService.getService();
+  const platformService = pluginServices.getServices().platform;
+  const { getHasWriteAccess } = platformService;
 
   const state = {
     app: {}, // Kibana stuff in here
@@ -38,6 +40,7 @@ export const getInitialState = (path) => {
       // In there will live an object with a status (string), value (any), and error (Error) property.
       // If the state is 'error', the error property will be the error object, the value will not change
       // See the resolved_args reducer for more information.
+      sidebar: getDefaultSidebar(),
     },
     persistent: {
       schemaVersion: 2,

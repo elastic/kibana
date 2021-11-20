@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
@@ -12,6 +14,7 @@ import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';
 import { FeatureUsageService } from './services';
+import type { PublicLicenseJSON } from '../common/types';
 
 export const licensingSessionStorageKey = 'xpack.licensing';
 
@@ -121,7 +124,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     };
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     this.coreStart = core;
     if (!this.refresh || !this.license$) {
       throw new Error('Setup has not been completed');
@@ -146,9 +149,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     }
   }
 
-  private fetchLicense = async (core: CoreSetup): Promise<ILicense> => {
+  private fetchLicense = async (core: CoreSetup): Promise<License> => {
     try {
-      const response = await core.http.get({
+      const response = await core.http.get<PublicLicenseJSON>({
         path: this.infoEndpoint,
         asSystemRequest: true,
       });

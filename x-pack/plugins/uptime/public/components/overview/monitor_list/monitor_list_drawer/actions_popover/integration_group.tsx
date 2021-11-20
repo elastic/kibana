@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -10,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IntegrationLink } from './integration_link';
 import {
-  getApmHref,
+  getLegacyApmHref,
   getInfraContainerHref,
   getInfraIpHref,
   getInfraKubernetesHref,
@@ -64,7 +65,7 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
               description:
                 'This value is shown to users when they hover over an icon that will take them to the APM app.',
             })}
-            href={getApmHref(summary, basePath, dateRangeStart, dateRangeEnd)}
+            href={getLegacyApmHref(summary, basePath, dateRangeStart, dateRangeEnd)}
             iconType="apmApp"
             message={i18n.translate('xpack.uptime.apmIntegrationAction.text', {
               defaultMessage: 'Show APM Data',

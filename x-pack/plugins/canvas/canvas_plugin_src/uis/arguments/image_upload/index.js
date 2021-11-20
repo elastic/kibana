@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,10 +10,12 @@ import PropTypes from 'prop-types';
 import { EuiSpacer, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { get } from 'lodash';
 import { AssetPicker } from '../../../../public/components/asset_picker';
-import { elasticOutline } from '../../../lib/elastic_outline';
-import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
-import { isValidHttpUrl } from '../../../../common/lib/httpurl';
-import { encode } from '../../../../common/lib/dataurl';
+import {
+  encode,
+  getElasticOutline,
+  isValidHttpUrl,
+  resolveFromArgs,
+} from '../../../../../../../src/plugins/presentation_util/public';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
 import { ArgumentStrings } from '../../../../i18n';
@@ -26,13 +29,13 @@ class ImageUpload extends React.Component {
     onValueChange: PropTypes.func.isRequired,
     typeInstance: PropTypes.object.isRequired,
     resolvedArgValue: PropTypes.string,
+    argValue: PropTypes.string,
     assets: PropTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
-
-    const url = props.resolvedArgValue || null;
+    const url = props.resolvedArgValue || props.argValue || null;
 
     let urlType = Object.keys(props.assets).length ? 'asset' : 'file';
     // if not a valid base64 string, will show as missing asset icon
@@ -140,7 +143,7 @@ class ImageUpload extends React.Component {
       file: <FileForm loading={loading} onChange={this.handleUpload} />,
       link: (
         <LinkForm
-          url={url}
+          url={selectedAsset.id ? '' : url}
           inputRef={(ref) => (this.inputRefs.srcUrlText = ref)}
           onSubmit={this.setSrcUrl}
         />
@@ -165,13 +168,16 @@ class ImageUpload extends React.Component {
   }
 }
 
-export const imageUpload = () => ({
-  name: 'imageUpload',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelp(),
-  resolveArgValue: true,
-  template: templateFromReactComponent(ImageUpload),
-  resolve({ args }) {
-    return { dataurl: resolveFromArgs(args, elasticOutline) };
-  },
-});
+export const imageUpload = () => {
+  return {
+    name: 'imageUpload',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelp(),
+    resolveArgValue: true,
+    template: templateFromReactComponent(ImageUpload),
+    resolve: async ({ args }) => {
+      const { elasticOutline } = await getElasticOutline();
+      return { dataurl: resolveFromArgs(args, elasticOutline) };
+    },
+  };
+};

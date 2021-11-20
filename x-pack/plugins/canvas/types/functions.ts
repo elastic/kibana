@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
-import { functions as externalFunctions } from '../canvas_plugin_src/functions/external';
-import { initFunctions } from '../public/functions';
+import { initFunctions as initExternalFunctions } from '../canvas_plugin_src/functions/external';
+import { initFunctions as initClientFunctions } from '../public/functions';
 
 /**
  * A `ExpressionFunctionFactory` is a powerful type used for any function that produces
@@ -71,7 +73,7 @@ import { initFunctions } from '../public/functions';
  */
 // prettier-ignore
 export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Output> = 
-  () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>;
+  () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>
 
 /**
  * `FunctionFactory` exists as a name shim between the `ExpressionFunction` type and
@@ -80,17 +82,19 @@ export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Out
  * with a shorter name).
  */
 // prettier-ignore
-export type FunctionFactory<FnFactory> = 
+export type FunctionFactory<FnFactory> =
   FnFactory extends ExpressionFunctionFactory<infer Name, infer Input, infer Arguments, infer Output> ?
-  ExpressionFunctionDefinition<Name, Input, Arguments, Output> :
+    ExpressionFunctionDefinition<Name, Input, Arguments, UnwrapPromiseOrReturn<Output>> :
     never;
 
 type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
 type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
 type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
-type ExternalFunction = FunctionFactory<typeof externalFunctions[number]>;
+type ExternalFunction = FunctionFactory<
+  ReturnType<typeof initExternalFunctions> extends Array<infer U> ? U : never
+>;
 type ClientFunctions = FunctionFactory<
-  ReturnType<typeof initFunctions> extends Array<infer U> ? U : never
+  ReturnType<typeof initClientFunctions> extends Array<infer U> ? U : never
 >;
 
 /**

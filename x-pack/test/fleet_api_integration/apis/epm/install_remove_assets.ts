@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { AssetReference } from '../../../../plugins/fleet/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -16,7 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
   const server = dockerServers.get('registry');
-  const es = getService('es');
+  const es: Client = getService('es');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const pkgKey = `${pkgName}-${pkgVersion}`;
@@ -34,8 +36,10 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('installs and uninstalls all assets', async () => {
+    skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
+
     describe('installs all assets when installing a package for the first time', async () => {
-      skipIfNoDockerRegistry(providerContext);
       before(async () => {
         if (!server.enabled) return;
         await installPackage(pkgKey);
@@ -55,7 +59,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('uninstalls all assets when uninstalling a package', async () => {
-      skipIfNoDockerRegistry(providerContext);
       before(async () => {
         if (!server.enabled) return;
         // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
@@ -71,6 +74,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resLogsTemplate.statusCode).equal(404);
@@ -82,9 +86,47 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resMetricsTemplate.statusCode).equal(404);
+      });
+      it('should have uninstalled the component templates', async function () {
+        const resMappings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}@mappings`,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+        expect(resMappings.statusCode).equal(404);
+
+        const resSettings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}@settings`,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+        expect(resSettings.statusCode).equal(404);
+
+        const resUserSettings = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_component_template/${logsTemplateName}@custom`,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+        expect(resUserSettings.statusCode).equal(404);
       });
       it('should have uninstalled the pipelines', async function () {
         const res = await es.transport.request(
@@ -94,6 +136,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(res.statusCode).equal(404);
@@ -104,6 +147,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resPipeline1.statusCode).equal(404);
@@ -114,9 +158,23 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(resPipeline2.statusCode).equal(404);
+      });
+      it('should have uninstalled the ml model', async function () {
+        const res = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_ml/trained_models/default`,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+        expect(res.statusCode).equal(404);
       });
       it('should have uninstalled the transforms', async function () {
         const res = await es.transport.request(
@@ -126,6 +184,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(res.statusCode).equal(404);
@@ -139,6 +198,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             ignore: [404],
+            meta: true,
           }
         );
         expect(res.statusCode).equal(404);
@@ -252,7 +312,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('reinstalls all assets', async () => {
-      skipIfNoDockerRegistry(providerContext);
       before(async () => {
         if (!server.enabled) return;
         await installPackage(pkgKey);
@@ -287,72 +346,99 @@ const expectAssetsInstalled = ({
   metricsTemplateName: string;
   pkgVersion: string;
   pkgName: string;
-  es: any;
+  es: Client;
   kibanaServer: any;
 }) => {
   it('should have installed the ILM policy', async function () {
-    const resPolicy = await es.transport.request({
-      method: 'GET',
-      path: `/_ilm/policy/all_assets`,
-    });
+    const resPolicy = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_ilm/policy/all_assets`,
+      },
+      { meta: true }
+    );
     expect(resPolicy.statusCode).equal(200);
   });
   it('should have installed the index templates', async function () {
-    const resLogsTemplate = await es.transport.request({
-      method: 'GET',
-      path: `/_index_template/${logsTemplateName}`,
-    });
+    const resLogsTemplate = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_index_template/${logsTemplateName}`,
+      },
+      { meta: true }
+    );
     expect(resLogsTemplate.statusCode).equal(200);
 
-    const resMetricsTemplate = await es.transport.request({
-      method: 'GET',
-      path: `/_index_template/${metricsTemplateName}`,
-    });
+    const resMetricsTemplate = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_index_template/${metricsTemplateName}`,
+      },
+      { meta: true }
+    );
     expect(resMetricsTemplate.statusCode).equal(200);
   });
   it('should have installed the pipelines', async function () {
-    const res = await es.transport.request({
-      method: 'GET',
-      path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
-    });
+    const res = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
+      },
+      { meta: true }
+    );
     expect(res.statusCode).equal(200);
-    const resPipeline1 = await es.transport.request({
-      method: 'GET',
-      path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
-    });
+    const resPipeline1 = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+      },
+      { meta: true }
+    );
     expect(resPipeline1.statusCode).equal(200);
-    const resPipeline2 = await es.transport.request({
-      method: 'GET',
-      path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
-    });
+    const resPipeline2 = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+      },
+      { meta: true }
+    );
     expect(resPipeline2.statusCode).equal(200);
   });
-  it('should have installed the template components', async function () {
-    const res = await es.transport.request({
-      method: 'GET',
-      path: `/_component_template/${logsTemplateName}-mappings`,
-    });
+  it('should have installed the ml model', async function () {
+    const res = await es.transport.request(
+      {
+        method: 'GET',
+        path: `_ml/trained_models/default`,
+      },
+      { meta: true }
+    );
     expect(res.statusCode).equal(200);
-    const resSettings = await es.transport.request({
-      method: 'GET',
-      path: `/_component_template/${logsTemplateName}-settings`,
-    });
+  });
+  it('should have installed the component templates', async function () {
+    const resMappings = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_component_template/${logsTemplateName}@mappings`,
+      },
+      { meta: true }
+    );
+    expect(resMappings.statusCode).equal(200);
+    const resSettings = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_component_template/${logsTemplateName}@settings`,
+      },
+      { meta: true }
+    );
     expect(resSettings.statusCode).equal(200);
-  });
-  it('should have installed the transform components', async function () {
-    const res = await es.transport.request({
-      method: 'GET',
-      path: `/_transform/${pkgName}.test-default-${pkgVersion}`,
-    });
-    expect(res.statusCode).equal(200);
-  });
-  it('should have created the index for the transform', async function () {
-    // the  index is defined in the transform file
-    const res = await es.transport.request({
-      method: 'GET',
-      path: `/logs-all_assets.test_log_current_default`,
-    });
-    expect(res.statusCode).equal(200);
+    const resUserSettings = await es.transport.request(
+      {
+        method: 'GET',
+        path: `/_component_template/${logsTemplateName}@custom`,
+      },
+      { meta: true }
+    );
+    expect(resUserSettings.statusCode).equal(200);
   });
   it('should have installed the kibana assets', async function () {
     // These are installed from Fleet along with every package
@@ -373,6 +459,7 @@ const expectAssetsInstalled = ({
       id: 'sample_dashboard',
     });
     expect(resDashboard.id).equal('sample_dashboard');
+    expect(resDashboard.references.map((ref: any) => ref.id).includes('sample_tag')).equal(true);
     const resDashboard2 = await kibanaServer.savedObjects.get({
       type: 'dashboard',
       id: 'sample_dashboard2',
@@ -393,6 +480,21 @@ const expectAssetsInstalled = ({
       id: 'sample_lens',
     });
     expect(resLens.id).equal('sample_lens');
+    const resMlModule = await kibanaServer.savedObjects.get({
+      type: 'ml-module',
+      id: 'sample_ml_module',
+    });
+    expect(resMlModule.id).equal('sample_ml_module');
+    const resSecurityRule = await kibanaServer.savedObjects.get({
+      type: 'security-rule',
+      id: 'sample_security_rule',
+    });
+    expect(resSecurityRule.id).equal('sample_security_rule');
+    const resTag = await kibanaServer.savedObjects.get({
+      type: 'tag',
+      id: 'sample_tag',
+    });
+    expect(resTag.id).equal('sample_tag');
     const resIndexPattern = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'test-*',
@@ -459,8 +561,20 @@ const expectAssetsInstalled = ({
           type: 'lens',
         },
         {
+          id: 'sample_ml_module',
+          type: 'ml-module',
+        },
+        {
           id: 'sample_search',
           type: 'search',
+        },
+        {
+          id: 'sample_security_rule',
+          type: 'security-rule',
+        },
+        {
+          id: 'sample_tag',
+          type: 'tag',
         },
         {
           id: 'sample_visualization',
@@ -468,6 +582,26 @@ const expectAssetsInstalled = ({
         },
       ],
       installed_es: [
+        {
+          id: 'logs-all_assets.test_logs@mappings',
+          type: 'component_template',
+        },
+        {
+          id: 'logs-all_assets.test_logs@settings',
+          type: 'component_template',
+        },
+        {
+          id: 'logs-all_assets.test_logs@custom',
+          type: 'component_template',
+        },
+        {
+          id: 'metrics-all_assets.test_metrics@settings',
+          type: 'component_template',
+        },
+        {
+          id: 'metrics-all_assets.test_metrics@custom',
+          type: 'component_template',
+        },
         {
           id: 'logs-all_assets.test_logs-all_assets',
           type: 'data_stream_ilm_policy',
@@ -497,8 +631,8 @@ const expectAssetsInstalled = ({
           type: 'ingest_pipeline',
         },
         {
-          id: 'all_assets.test-default-0.1.0',
-          type: 'transform',
+          id: 'default',
+          type: 'ml_model',
         },
       ],
       es_index_patterns: {
@@ -518,25 +652,28 @@ const expectAssetsInstalled = ({
         { id: 'f839c76e-d194-555a-90a1-3265a45789e4', type: 'epm-packages-assets' },
         { id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2', type: 'epm-packages-assets' },
         { id: '1e97a20f-9d1c-529b-8ff2-da4e8ba8bb71', type: 'epm-packages-assets' },
-        { id: '8cfe0a2b-7016-5522-87e4-6d352360d1fc', type: 'epm-packages-assets' },
+        { id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b', type: 'epm-packages-assets' },
         { id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad', type: 'epm-packages-assets' },
         { id: '0954ce3b-3165-5c1f-a4c0-56eb5f2fa487', type: 'epm-packages-assets' },
         { id: '60d6d054-57e4-590f-a580-52bf3f5e7cca', type: 'epm-packages-assets' },
         { id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43', type: 'epm-packages-assets' },
         { id: '318959c9-997b-5a14-b328-9fc7355b4b74', type: 'epm-packages-assets' },
         { id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197', type: 'epm-packages-assets' },
+        { id: '4c758d70-ecf1-56b3-b704-6d8374841b34', type: 'epm-packages-assets' },
         { id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58', type: 'epm-packages-assets' },
+        { id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2', type: 'epm-packages-assets' },
+        { id: 'b265a5e0-c00b-5eda-ac44-2ddbd36d9ad0', type: 'epm-packages-assets' },
         { id: '53c94591-aa33-591d-8200-cd524c2a0561', type: 'epm-packages-assets' },
         { id: 'b658d2d4-752e-54b8-afc2-4c76155c1466', type: 'epm-packages-assets' },
       ],
       name: 'all_assets',
       version: '0.1.0',
-      internal: false,
       removable: true,
       install_version: '0.1.0',
       install_status: 'installed',
       install_started_at: res.attributes.install_started_at,
       install_source: 'registry',
+      keep_policies_up_to_date: false,
     });
   });
 };

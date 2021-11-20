@@ -1,12 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
 import { DateRangeType } from '../common';
-import { PingErrorType } from '../monitor';
+
+// IO type for validation
+export const PingErrorType = t.intersection([
+  t.partial({
+    code: t.string,
+    id: t.string,
+    stack_trace: t.string,
+    type: t.string,
+  }),
+  t.type({
+    // this is _always_ on the error field
+    message: t.string,
+  }),
+]);
+
+// Typescript type for type checking
+export type PingError = t.TypeOf<typeof PingErrorType>;
+
+export const MonitorDetailsType = t.intersection([
+  t.type({ monitorId: t.string }),
+  t.partial({ error: PingErrorType, timestamp: t.string, alerts: t.unknown }),
+]);
+export type MonitorDetails = t.TypeOf<typeof MonitorDetailsType>;
 
 export const HttpResponseBodyType = t.partial({
   bytes: t.number,
@@ -192,10 +215,6 @@ export const PingType = t.intersection([
         name: t.string,
       }),
       type: t.string,
-      // ui-related field
-      screenshotLoading: t.boolean,
-      // ui-related field
-      screenshotExists: t.boolean,
       blob: t.string,
       blob_mime: t.string,
       payload: t.partial({
@@ -215,6 +234,7 @@ export const PingType = t.intersection([
         type: t.string,
         url: t.string,
         end: t.number,
+        text: t.string,
       }),
     }),
     tags: t.array(t.string),
@@ -239,35 +259,6 @@ export const PingType = t.intersection([
     }),
   }),
 ]);
-
-export const SyntheticsJourneyApiResponseType = t.intersection([
-  t.type({
-    checkGroup: t.string,
-    steps: t.array(PingType),
-  }),
-  t.partial({
-    details: t.union([
-      t.intersection([
-        t.type({
-          timestamp: t.string,
-        }),
-        t.partial({
-          next: t.type({
-            timestamp: t.string,
-            checkGroup: t.string,
-          }),
-          previous: t.type({
-            timestamp: t.string,
-            checkGroup: t.string,
-          }),
-        }),
-      ]),
-      t.null,
-    ]),
-  }),
-]);
-
-export type SyntheticsJourneyApiResponse = t.TypeOf<typeof SyntheticsJourneyApiResponseType>;
 
 export type Ping = t.TypeOf<typeof PingType>;
 
@@ -313,6 +304,7 @@ export const GetPingsParamsType = t.intersection([
     dateRange: DateRangeType,
   }),
   t.partial({
+    excludedLocations: t.string,
     index: t.number,
     size: t.number,
     locations: t.string,

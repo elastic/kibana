@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,12 +24,12 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'apacheLogs',
     name: i18n.translate('home.tutorials.apacheLogs.nameTitle', {
-      defaultMessage: 'Apache logs',
+      defaultMessage: 'Apache HTTP Server Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.apacheLogs.shortDescription', {
-      defaultMessage: 'Collect and parse access and error logs created by the Apache HTTP server.',
+      defaultMessage: 'Collect and parse logs from Apache HTTP servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.apacheLogs.longDescription', {
       defaultMessage:
@@ -59,5 +59,6 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['web'],
   };
 }

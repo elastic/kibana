@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-/* eslint-disable react/display-name */
 
 import React from 'react';
 import styled from 'styled-components';
 import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
-import { ListSchema } from '../../../../../lists/common/schemas/response';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import * as i18n from './translations';
 import { TableItemCallback, TableProps } from './types';
@@ -28,7 +27,7 @@ export const buildColumns = (
   {
     field: 'name',
     name: i18n.COLUMN_FILE_NAME,
-    truncateText: true,
+    truncateText: false,
   },
   {
     field: 'type',

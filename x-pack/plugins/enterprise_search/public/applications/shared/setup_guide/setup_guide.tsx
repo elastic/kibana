@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
 import {
@@ -21,9 +23,9 @@ import {
 
 import { KibanaLogic } from '../kibana';
 
-import { SetupInstructions } from './instructions';
 import { CloudSetupInstructions } from './cloud/instructions';
 import { SETUP_GUIDE_TITLE } from './constants';
+import { SetupInstructions } from './instructions';
 import './setup_guide.scss';
 
 /**
@@ -48,10 +50,10 @@ export const SetupGuideLayout: React.FC<Props> = ({
 }) => {
   const { cloud } = useValues(KibanaLogic);
   const isCloudEnabled = Boolean(cloud.isCloudEnabled);
-  const cloudDeploymentLink = cloud.cloudDeploymentUrl || '';
+  const cloudDeploymentLink = cloud.deploymentUrl || '';
 
   return (
-    <EuiPage className="setupGuide">
+    <EuiPage className="setupGuide" data-test-subj="setupGuide">
       <EuiPageSideBar className="setupGuide__sidebar">
         <EuiText color="subdued" size="s">
           <strong>{SETUP_GUIDE_TITLE}</strong>

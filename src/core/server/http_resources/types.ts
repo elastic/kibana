@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { RequestHandlerContext } from 'src/core/server';
@@ -84,9 +84,15 @@ export type HttpResourcesRequestHandler<
  * Allows to configure HTTP response parameters
  * @internal
  */
-export interface InternalHttpResourcesSetup {
+export interface InternalHttpResourcesPreboot {
   createRegistrar(router: IRouter): HttpResources;
 }
+
+/**
+ * Allows to configure HTTP response parameters
+ * @internal
+ */
+export type InternalHttpResourcesSetup = InternalHttpResourcesPreboot;
 
 /**
  * HttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.

@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
@@ -18,7 +18,7 @@ import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
-import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 import { getUiSettings } from './ui_settings';
 
 export interface DataEnhancements {
@@ -27,6 +27,9 @@ export interface DataEnhancements {
 
 export interface DataPluginSetup {
   search: ISearchSetup;
+  /**
+   * @deprecated - use "fieldFormats" plugin directly instead
+   */
   fieldFormats: FieldFormatsSetup;
   /**
    * @internal
@@ -36,18 +39,25 @@ export interface DataPluginSetup {
 
 export interface DataPluginStart {
   search: ISearchStart;
+  /**
+   * @deprecated - use "fieldFormats" plugin directly instead
+   */
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsServiceStart;
+  indexPatterns: DataViewsServerPluginStart;
 }
 
 export interface DataPluginSetupDependencies {
   bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataPluginStartDependencies {}
+export interface DataPluginStartDependencies {
+  fieldFormats: FieldFormatsStart;
+  logger: Logger;
+  dataViews: DataViewsServerPluginStart;
+}
 
 export class DataServerPlugin
   implements
@@ -56,13 +66,12 @@ export class DataServerPlugin
       DataPluginStart,
       DataPluginSetupDependencies,
       DataPluginStartDependencies
-    > {
+    >
+{
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
   private readonly autocompleteService: AutocompleteService;
-  private readonly indexPatterns = new IndexPatternsServiceProvider();
-  private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
 
@@ -76,13 +85,12 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection }: DataPluginSetupDependencies
+    { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
-    this.indexPatterns.setup(core, { expressions });
 
     core.uiSettings.register(getUiSettings());
 
@@ -97,21 +105,15 @@ export class DataServerPlugin
         searchSetup.__enhance(enhancements.search);
       },
       search: searchSetup,
-      fieldFormats: this.fieldFormats.setup(),
+      fieldFormats,
     };
   }
 
-  public start(core: CoreStart) {
-    const fieldFormats = this.fieldFormats.start();
-    const indexPatterns = this.indexPatterns.start(core, {
-      fieldFormats,
-      logger: this.logger.get('indexPatterns'),
-    });
-
+  public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
     return {
       fieldFormats,
-      indexPatterns,
-      search: this.searchService.start(core, { fieldFormats, indexPatterns }),
+      indexPatterns: dataViews,
+      search: this.searchService.start(core, { fieldFormats, indexPatterns: dataViews }),
     };
   }
 

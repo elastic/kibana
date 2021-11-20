@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getId } from '../lib/get_id';
-import { DEFAULT_WORKPAD_CSS } from '../../common/lib/constants';
+import { DEFAULT_WORKPAD_CSS, DEFAULT_GROUP_BY_FIELD } from '../../common/lib/constants';
 
 export const getDefaultElement = () => {
   return {
@@ -85,3 +86,7 @@ export const getDefaultWorkpad = () => {
     isWriteable: true,
   };
 };
+
+export const getDefaultSidebar = () => ({
+  groupFiltersByOption: DEFAULT_GROUP_BY_FIELD,
+});

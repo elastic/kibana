@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
-
+import { partitionField } from '../../../../common/log_analysis';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import { defaultRequestParameters } from './common';
-import { partitionField } from '../../../../common/log_analysis';
 
 export const createLogEntryExamplesQuery = (
   indices: string,
+  runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
@@ -19,7 +21,7 @@ export const createLogEntryExamplesQuery = (
   dataset: string,
   exampleCount: number,
   categoryQuery?: string
-) => ({
+): estypes.SearchRequest => ({
   ...defaultRequestParameters,
   body: {
     query: {
@@ -30,6 +32,7 @@ export const createLogEntryExamplesQuery = (
               [timestampField]: {
                 gte: startTime,
                 lte: endTime,
+                format: 'epoch_millis',
               },
             },
           },
@@ -60,7 +63,7 @@ export const createLogEntryExamplesQuery = (
                   match: {
                     message: {
                       query: categoryQuery,
-                      operator: 'AND',
+                      operator: 'and' as const,
                     },
                   },
                 },
@@ -69,6 +72,7 @@ export const createLogEntryExamplesQuery = (
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
     _source: false,
     fields: ['event.dataset', 'message'],

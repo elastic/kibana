@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ServiceStatusLevels, CoreStatus } from '../../../../../src/core/server';
-import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
-import { ElasticsearchService } from './elasticsearch_service';
 
-import { coreMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { licenseMock } from '../../common/licensing/index.mock';
 import { nextTick } from '@kbn/test/jest';
+import type { CoreStatus } from 'src/core/server';
+import { ServiceStatusLevels } from 'src/core/server';
+import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
+import { licenseMock } from '../../common/licensing/index.mock';
+import { ElasticsearchService } from './elasticsearch_service';
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;
@@ -35,7 +38,7 @@ describe('ElasticsearchService', () => {
     let mockStatusSubject: BehaviorSubject<CoreStatus>;
     let mockLicenseSubject: BehaviorSubject<SecurityLicenseFeatures>;
     beforeEach(() => {
-      mockLicenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
+      mockLicenseSubject = new BehaviorSubject({} as unknown as SecurityLicenseFeatures);
       mockLicense = licenseMock.create();
       mockLicense.isEnabled.mockReturnValue(false);
       mockLicense.features$ = mockLicenseSubject;
@@ -131,7 +134,7 @@ describe('ElasticsearchService', () => {
       expect(mockHandler).toHaveBeenCalledTimes(4);
 
       // New changes still trigger handler once again and reset retry timer.
-      mockLicenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
       expect(mockHandler).toHaveBeenCalledTimes(5);
 
       // Retry timer is reset.
@@ -164,7 +167,7 @@ describe('ElasticsearchService', () => {
       expect(mockHandler).toHaveBeenCalledTimes(1);
 
       // New changes should immediately call handler.
-      mockLicenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
       expect(mockHandler).toHaveBeenCalledTimes(2);
 
       // Retry timeout should have been cancelled.

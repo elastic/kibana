@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
+import { Agent, PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './actions';
 export * from './os';
 export * from './trusted_apps';
 
@@ -15,6 +17,16 @@ export * from './trusted_apps';
  * Supported React-Router state for the Policy Details page
  */
 export interface PolicyDetailsRouteState {
+  /**
+   * Override the "back link" displayed at the top-left corner of page with custom routing
+   */
+  backLink?: {
+    /** link label text */
+    label: string;
+    navigateTo: Parameters<ApplicationStart['navigateToApp']>;
+    href?: string;
+  };
+
   /**
    * Where the user should be redirected to when the `Save` button is clicked and the update was successful
    */
@@ -57,9 +69,14 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
   : ImmutableObject<T>;
 
 export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
-type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
-type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
-type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
+export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
+export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+
+/**
+ * Utility type that will return back a union of the given [T]ype and an Immutable version of it
+ */
+export type MaybeImmutable<T> = T | Immutable<T>;
 
 /**
  * Stats for related events for a particular node in a resolver graph.
@@ -160,7 +177,7 @@ export interface ResolverPaginatedEvents {
 }
 
 /**
- * Returned by the server via /api/endpoint/metadata
+ * Returned by the server via POST /api/endpoint/metadata
  */
 export interface HostResultList {
   /* the hosts restricted by the page size */
@@ -171,8 +188,6 @@ export interface HostResultList {
   request_page_size: number;
   /* the page index requested */
   request_page_index: number;
-  /* the version of the query strategy */
-  query_strategy_version: MetadataQueryStrategyVersions;
   /* policy IDs and versions */
   policy_info?: HostInfo['policy_info'];
 }
@@ -290,6 +305,46 @@ export type AlertEvent = Partial<{
       }>;
     }>;
   }>;
+  // disabling naming-convention to accommodate external field
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Memory_protection: Partial<{
+    feature: ECSField<string>;
+    self_injection: ECSField<boolean>;
+  }>;
+  destination: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  source: Partial<{
+    port: ECSField<number>;
+    ip: ECSField<string>;
+  }>;
+  registry: Partial<{
+    path: ECSField<string>;
+    value: ECSField<string>;
+    data: Partial<{
+      strings: ECSField<string>;
+    }>;
+  }>;
+  Target: Partial<{
+    process: Partial<{
+      thread: Partial<{
+        Ext: Partial<{
+          start_address_allocation_offset: ECSField<number>;
+          start_address_bytes_disasm_hash: ECSField<string>;
+          start_address_details: Partial<{
+            allocation_type: ECSField<string>;
+            allocation_size: ECSField<number>;
+            region_size: ECSField<number>;
+            region_protection: ECSField<string>;
+            memory_pe: Partial<{
+              imphash: ECSField<string>;
+            }>;
+          }>;
+        }>;
+      }>;
+    }>;
+  }>;
   process: Partial<{
     command_line: ECSField<string>;
     ppid: ECSField<number>;
@@ -323,7 +378,15 @@ export type AlertEvent = Partial<{
         >;
       }>;
       user: ECSField<string>;
+      malware_signature: Partial<{
+        all_names: ECSField<string>;
+        identifier: ECSField<string>;
+      }>;
     }>;
+  }>;
+  rule: Partial<{
+    id: ECSField<string>;
+    description: ECSField<string>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
@@ -374,12 +437,12 @@ export enum HostStatus {
    * Default state of the host when no host information is present or host information cannot
    * be retrieved. e.g. API error
    */
-  ERROR = 'error',
+  UNHEALTHY = 'unhealthy',
 
   /**
    * Host is online as indicated by its checkin status during the last checkin window
    */
-  ONLINE = 'online',
+  HEALTHY = 'healthy',
 
   /**
    * Host is offline as indicated by its checkin status during the last checkin window
@@ -387,14 +450,19 @@ export enum HostStatus {
   OFFLINE = 'offline',
 
   /**
-   * Host is unenrolling as indicated by its checkin status during the last checkin window
+   * Host is unenrolling, enrolling or updating as indicated by its checkin status during the last checkin window
    */
-  UNENROLLING = 'unenrolling',
-}
+  UPDATING = 'updating',
 
-export enum MetadataQueryStrategyVersions {
-  VERSION_1 = 'v1',
-  VERSION_2 = 'v2',
+  /**
+   * Host is inactive as indicated by its checkin status during the last checkin window
+   */
+  INACTIVE = 'inactive',
+
+  /**
+   * Host is unenrolled
+   */
+  UNENROLLED = 'unenrolled',
 }
 
 export type PolicyInfo = Immutable<{
@@ -421,17 +489,10 @@ export type HostInfo = Immutable<{
      */
     endpoint: PolicyInfo;
   };
-  /* the version of the query strategy */
-  query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
-export type HostMetadataDetails = Immutable<{
-  agent: {
-    id: string;
-  };
-  HostDetails: HostMetadata;
-}>;
-
+// HostMetadataDetails is now just HostMetadata
+// HostDetails is also just HostMetadata
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
@@ -456,10 +517,26 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        /** The endpoint integration policy revision number in kibana */
         endpoint_policy_version: number;
         version: number;
       };
     };
+    configuration?: {
+      /**
+       * Shows whether the endpoint is set up to be isolated. (e.g. a user has isolated a host,
+       * and the endpoint successfully received that action and applied the setting)
+       */
+      isolation?: boolean;
+    };
+    state?: {
+      /**
+       * Shows what the current state of the host is. This could differ from `Endpoint.configuration.isolation`
+       * in some cases, but normally they will match
+       */
+      isolation?: boolean;
+    };
+    capabilities?: string[];
   };
   agent: {
     id: string;
@@ -467,6 +544,16 @@ export type HostMetadata = Immutable<{
   };
   host: Host;
   data_stream: DataStream;
+}>;
+
+export type UnitedAgentMetadata = Immutable<{
+  agent: {
+    id: string;
+  };
+  united: {
+    endpoint: HostMetadata;
+    agent: Agent;
+  };
 }>;
 
 export interface LegacyEndpointEvent {
@@ -630,6 +717,8 @@ export type SafeEndpointEvent = Partial<{
     }>;
   }>;
   network: Partial<{
+    transport: ECSField<string>;
+    type: ECSField<string>;
     direction: ECSField<string>;
     forwarded_ip: ECSField<string>;
   }>;
@@ -781,8 +870,7 @@ type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
   [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
     P[K]
   >;
-} &
-  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
+} & { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
 
 /**
  * Takes the props of a schema.object type, and returns a version that excludes
@@ -816,12 +904,27 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: MalwareFields;
+    malware: ProtectionFields;
+    memory_protection: ProtectionFields & SupportedFields;
+    behavior_protection: ProtectionFields & SupportedFields;
+    ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
     };
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      ransomware: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
         message: string;
         enabled: boolean;
       };
@@ -837,9 +940,19 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: MalwareFields;
+    malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
         message: string;
         enabled: boolean;
       };
@@ -854,6 +967,23 @@ export interface PolicyConfig {
       file: boolean;
       process: boolean;
       network: boolean;
+    };
+    malware: ProtectionFields;
+    behavior_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+      behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
     };
     logging: {
       file: string;
@@ -870,21 +1000,39 @@ export interface UIPolicyConfig {
    */
   windows: Pick<
     PolicyConfig['windows'],
-    'events' | 'malware' | 'popup' | 'antivirus_registration' | 'advanced'
+    | 'events'
+    | 'malware'
+    | 'ransomware'
+    | 'popup'
+    | 'antivirus_registration'
+    | 'advanced'
+    | 'memory_protection'
+    | 'behavior_protection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
+  mac: Pick<
+    PolicyConfig['mac'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
+  >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
+  linux: Pick<
+    PolicyConfig['linux'],
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
+  >;
 }
 
-/** Policy: Malware protection fields */
-export interface MalwareFields {
+/** Policy:  Protection fields */
+export interface ProtectionFields {
   mode: ProtectionModes;
+}
+
+/** Policy:  Supported fields */
+export interface SupportedFields {
+  supported: boolean;
 }
 
 /** Policy protection mode options */
@@ -902,7 +1050,7 @@ export type PolicyData = PackagePolicy & NewPolicyData;
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewPackagePolicy & {
+export type NewPolicyData = UpdatePackagePolicy & {
   inputs: [
     {
       type: 'endpoint';
@@ -927,6 +1075,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 /**
@@ -964,7 +1113,8 @@ export interface HostPolicyResponseAppliedAction {
   message: string;
 }
 
-export type HostPolicyResponseConfiguration = HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
+export type HostPolicyResponseConfiguration =
+  HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
@@ -1058,4 +1208,45 @@ export interface GetAgentSummaryResponse {
     policy_id?: string;
     versions_count: { [key: string]: number };
   };
+}
+
+/**
+ * REST API response for retrieving exception summary
+ */
+export interface GetExceptionSummaryResponse {
+  total: number;
+  windows: number;
+  macos: number;
+  linux: number;
+}
+
+/**
+ * Supported React-Router state for the Generic List page
+ */
+export interface ListPageRouteState {
+  /** Where the user should be redirected to when the `Back` button is clicked */
+  onBackButtonNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
+  /** The URL for the `Back` button */
+  backButtonUrl?: string;
+  /** The label for the button */
+  backButtonLabel?: string;
+}
+
+/**
+ * REST API standard base response for list types
+ */
+export interface BaseListResponse {
+  data: unknown[];
+  page: number;
+  pageSize: number;
+  total: number;
+  sort?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+/**
+ * Returned by the server via GET /api/endpoint/metadata
+ */
+export interface MetadataListResponse extends BaseListResponse {
+  data: HostInfo[];
 }

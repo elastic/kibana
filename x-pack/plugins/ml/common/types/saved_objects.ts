@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { ErrorType } from '../util/errors';
 export type JobType = 'anomaly-detector' | 'data-frame-analytics';
 export const ML_SAVED_OBJECT_TYPE = 'ml-job';
+export const ML_MODULE_SAVED_OBJECT_TYPE = 'ml-module';
 
 export interface SavedObjectResult {
-  [jobId: string]: { success: boolean; error?: any };
+  [jobId: string]: { success: boolean; type: JobType; error?: ErrorType };
 }
 
 export interface SyncSavedObjectResponse {
@@ -31,8 +34,13 @@ export type JobsSpacesResponse = {
 
 export interface InitializeSavedObjectResponse {
   jobs: Array<{ id: string; type: JobType }>;
+  datafeeds: Array<{ id: string; type: JobType }>;
   success: boolean;
-  error?: any;
+  error?: ErrorType;
+}
+
+export interface SyncCheckResponse {
+  result: boolean;
 }
 
 export interface DeleteJobCheckResponse {

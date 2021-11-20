@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Unit } from '@elastic/datemath';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
 import * as i18n from '../translations';
-import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
+import type { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
 import { Source } from './types';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useEqlPreview } from '.';
 import { getMockEqlResponse } from './eql_search_response.mock';
+import { useAppToasts } from '../use_app_toasts';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../use_app_toasts');
 
 describe('useEqlPreview', () => {
   const params = {
@@ -27,10 +31,19 @@ describe('useEqlPreview', () => {
     from: '2020-10-04T15:00:54.368707900Z',
   };
 
-  beforeEach(() => {
-    useKibana().services.notifications.toasts.addError = jest.fn();
+  let addErrorMock: jest.Mock;
+  let addSuccessMock: jest.Mock;
+  let addWarningMock: jest.Mock;
 
-    useKibana().services.notifications.toasts.addWarning = jest.fn();
+  beforeEach(() => {
+    addErrorMock = jest.fn();
+    addSuccessMock = jest.fn();
+    addWarningMock = jest.fn();
+    (useAppToasts as jest.Mock).mockImplementation(() => ({
+      addError: addErrorMock,
+      addWarning: addWarningMock,
+      addSuccess: addSuccessMock,
+    }));
 
     (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
       of(getMockEqlResponse())
@@ -132,11 +145,8 @@ describe('useEqlPreview', () => {
 
       result.current[1](params);
 
-      const mockCalls = (useKibana().services.notifications.toasts.addWarning as jest.Mock).mock
-        .calls;
-
       expect(result.current[0]).toBeFalsy();
-      expect(mockCalls[0][0]).toEqual(i18n.EQL_PREVIEW_FETCH_FAILURE);
+      expect(addWarningMock.mock.calls[0][0]).toEqual(i18n.EQL_PREVIEW_FETCH_FAILURE);
     });
   });
 
@@ -164,7 +174,7 @@ describe('useEqlPreview', () => {
     });
   });
 
-  it('should add danger toast if search throws', async () => {
+  it('should add error toast if search throws', async () => {
     await act(async () => {
       (useKibana().services.data.search.search as jest.Mock).mockReturnValue(
         throwError('This is an error!')
@@ -176,11 +186,8 @@ describe('useEqlPreview', () => {
 
       result.current[1](params);
 
-      const mockCalls = (useKibana().services.notifications.toasts.addError as jest.Mock).mock
-        .calls;
-
       expect(result.current[0]).toBeFalsy();
-      expect(mockCalls[0][0]).toEqual('This is an error!');
+      expect(addErrorMock.mock.calls[0][0]).toEqual('This is an error!');
     });
   });
 

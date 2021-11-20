@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiText, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function WeTried() {
   return (
-    <Fragment>
+    <div data-test-subj="weTriedContainer">
       <EuiTitle size="l">
         <h2>
           <FormattedMessage
@@ -35,6 +36,6 @@ export function WeTried() {
           />
         </p>
       </EuiText>
-    </Fragment>
+    </div>
   );
 }

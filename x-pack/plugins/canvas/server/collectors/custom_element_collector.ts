@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { get } from 'lodash';
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { collectFns } from './collector_helpers';
@@ -34,13 +34,41 @@ export interface CustomElementTelemetry {
 
 export const customElementSchema: MakeSchemaFrom<CustomElementTelemetry> = {
   custom_elements: {
-    count: { type: 'long' },
-    elements: {
-      min: { type: 'long' },
-      max: { type: 'long' },
-      avg: { type: 'float' },
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of custom Canvas elements',
+      },
     },
-    functions_in_use: { type: 'array', items: { type: 'keyword' } },
+    elements: {
+      min: {
+        type: 'long',
+        _meta: {
+          description: 'The minimum number of elements used across all Canvas Custom Elements',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of elements used across all Canvas Custom Elements',
+        },
+      },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'The average number of elements used in Canvas Custom Element',
+        },
+      },
+    },
+    functions_in_use: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'The functions in use by Canvas Custom Elements',
+        },
+      },
+    },
   },
 };
 
@@ -119,17 +147,15 @@ const customElementCollector: TelemetryCollector = async function customElementC
   const customElementParams = {
     size: 10000,
     index: kibanaIndex,
-    ignoreUnavailable: true,
-    filterPath: [`hits.hits._source.${CUSTOM_ELEMENT_TYPE}.content`],
+    ignore_unavailable: true,
+    filter_path: [`hits.hits._source.${CUSTOM_ELEMENT_TYPE}.content`],
     body: { query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } } },
   };
 
-  const { body: esResponse } = await esClient.search<SearchResponse<CustomElementSearch>>(
-    customElementParams
-  );
+  const { body: esResponse } = await esClient.search<CustomElementSearch>(customElementParams);
 
   if (get(esResponse, 'hits.hits.length') > 0) {
-    const customElements = esResponse.hits.hits.map((hit) => hit._source[CUSTOM_ELEMENT_TYPE]);
+    const customElements = esResponse.hits.hits.map((hit) => hit._source![CUSTOM_ELEMENT_TYPE]);
     return summarizeCustomElements(customElements);
   }
 

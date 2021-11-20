@@ -1,15 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
+import { Logger } from '@kbn/logging';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  Plugin,
+  PluginConfigDescriptor,
+} from 'src/core/server';
+import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
+import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -30,28 +37,23 @@ import { InfraSourceStatus } from './lib/source_status';
 import { LogEntriesService } from './services/log_entries';
 import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
+import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
+import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+import { RulesService } from './services/rules';
+import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    query: schema.object({
-      partitionSize: schema.number({ defaultValue: 75 }),
-      partitionFactor: schema.number({ defaultValue: 1.2 }),
+    inventory: schema.object({
+      compositeSize: schema.number({ defaultValue: 2000 }),
     }),
     sources: schema.maybe(
       schema.object({
         default: schema.maybe(
           schema.object({
-            logAlias: schema.maybe(schema.string()),
-            metricAlias: schema.maybe(schema.string()),
             fields: schema.maybe(
               schema.object({
-                timestamp: schema.maybe(schema.string()),
                 message: schema.maybe(schema.arrayOf(schema.string())),
-                tiebreaker: schema.maybe(schema.string()),
-                host: schema.maybe(schema.string()),
-                container: schema.maybe(schema.string()),
-                pod: schema.maybe(schema.string()),
               })
             ),
           })
@@ -59,6 +61,7 @@ export const config = {
       })
     ),
   }),
+  deprecations: configDeprecations,
 };
 
 export type InfraConfig = TypeOf<typeof config.schema>;
@@ -78,22 +81,31 @@ export interface InfraPluginSetup {
   ) => void;
 }
 
-export class InfraServerPlugin {
-  private config$: Observable<InfraConfig>;
-  public config = {} as InfraConfig;
+export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
+  public config: InfraConfig;
   public libs: InfraBackendLibs | undefined;
+  public logger: Logger;
+
+  private logsRules: RulesService;
+  private metricsRules: RulesService;
 
   constructor(context: PluginInitializerContext) {
-    this.config$ = context.config.create<InfraConfig>();
+    this.config = context.config.get<InfraConfig>();
+    this.logger = context.logger.get();
+
+    this.logsRules = new RulesService(
+      LOGS_FEATURE_ID,
+      'observability.logs',
+      this.logger.get('logsRules')
+    );
+    this.metricsRules = new RulesService(
+      METRICS_FEATURE_ID,
+      'observability.metrics',
+      this.logger.get('metricsRules')
+    );
   }
 
-  async setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
-    await new Promise<void>((resolve) => {
-      this.config$.subscribe((configValue) => {
-        this.config = configValue;
-        resolve();
-      });
-    });
+  setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
@@ -130,6 +142,10 @@ export class InfraServerPlugin {
       sources,
       sourceStatus,
       ...domainLibs,
+      getLogQueryFields: createGetLogQueryFields(sources, framework),
+      handleEsError,
+      logsRules: this.logsRules.setup(core, plugins),
+      metricsRules: this.metricsRules.setup(core, plugins),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
@@ -137,14 +153,15 @@ export class InfraServerPlugin {
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: `/app/logs`,
+        sampleObject: null, // indicates that there is no sample object associated with this app link's path
+        getPath: () => `/app/logs`,
         label: logsSampleDataLinkLabel,
         icon: 'logsApp',
       },
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerts, this.libs);
+    registerAlertTypes(plugins.alerting, this.libs, plugins.ml);
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
@@ -169,6 +186,11 @@ export class InfraServerPlugin {
 
     const logEntriesService = new LogEntriesService();
     logEntriesService.setup(core, { ...plugins, sources });
+
+    // register deprecated source configuration fields
+    core.deprecations.registerDeprecations({
+      getDeprecations: getInfraDeprecationsFactory(sources),
+    });
 
     return {
       defineInternalSourceConfiguration(sourceId, sourceProperties) {

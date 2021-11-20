@@ -2,25 +2,10 @@
   "name": "@kbn/test",
   "version": "1.0.0",
   "private": true,
-  "license": "SSPL-1.0 OR Elastic License",
-  "main": "./target/index.js",
-  "scripts": {
-    "build": "node scripts/build",
-    "kbn:bootstrap": "node scripts/build --source-maps",
-    "kbn:watch": "node scripts/build --watch --source-maps"
-  },
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "main": "./target_node",
+  "types": "./target_types",
   "kibana": {
     "devOnly": true
-  },
-  "dependencies": {
-    "@kbn/es": "link:../kbn-es",
-    "@kbn/i18n": "link:../kbn-i18n",
-    "@kbn/optimizer": "link:../kbn-optimizer"
-  },
-  "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/expect": "link:../kbn-expect",
-    "@kbn/utils": "link:../kbn-utils"
   }
 }

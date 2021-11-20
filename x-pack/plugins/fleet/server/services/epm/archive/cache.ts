@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ArchiveEntry } from './index';
-import { ArchivePackage, RegistryPackage } from '../../../../common';
+
+import type { ArchivePackage, RegistryPackage } from '../../../../common';
+import { appContextService } from '../../';
+
+import type { ArchiveEntry } from './index';
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);
@@ -23,8 +27,12 @@ const archiveFilelistCache: Map<SharedKeyString, string[]> = new Map();
 export const getArchiveFilelist = (keyArgs: SharedKey) =>
   archiveFilelistCache.get(sharedKey(keyArgs));
 
-export const setArchiveFilelist = (keyArgs: SharedKey, paths: string[]) =>
-  archiveFilelistCache.set(sharedKey(keyArgs), paths);
+export const setArchiveFilelist = (keyArgs: SharedKey, paths: string[]) => {
+  const logger = appContextService.getLogger();
+  logger.debug(`setting file list to the cache for ${keyArgs.name}-${keyArgs.version}`);
+  logger.trace(JSON.stringify(paths));
+  return archiveFilelistCache.set(sharedKey(keyArgs), paths);
+};
 
 export const deleteArchiveFilelist = (keyArgs: SharedKey) =>
   archiveFilelistCache.delete(sharedKey(keyArgs));
@@ -51,8 +59,19 @@ export const setPackageInfo = ({
   version,
   packageInfo,
 }: SharedKey & { packageInfo: ArchivePackage | RegistryPackage }) => {
+  const logger = appContextService.getLogger();
   const key = sharedKey({ name, version });
+  logger.debug(`setting package info to the cache for ${name}-${version}`);
+  logger.trace(JSON.stringify(packageInfo));
   return packageInfoCache.set(key, packageInfo);
 };
 
 export const deletePackageInfo = (args: SharedKey) => packageInfoCache.delete(sharedKey(args));
+
+export const clearPackageFileCache = (args: SharedKey) => {
+  const fileList = getArchiveFilelist(args) ?? [];
+  fileList.forEach((filePath) => {
+    deleteArchiveEntry(filePath);
+  });
+  deleteArchiveFilelist(args);
+};

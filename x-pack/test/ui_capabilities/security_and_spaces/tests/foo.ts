@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -25,6 +26,7 @@ export default function fooTests({ getService }: FtrProviderContext) {
           // these users have a read/write view
           case 'superuser at everything_space':
           case 'global_all at everything_space':
+          case 'foo_all at everything_space':
           case 'dual_privileges_all at everything_space':
           case 'everything_space_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
@@ -38,6 +40,7 @@ export default function fooTests({ getService }: FtrProviderContext) {
             break;
           // these users have a read only view
           case 'global_read at everything_space':
+          case 'foo_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
@@ -54,6 +57,8 @@ export default function fooTests({ getService }: FtrProviderContext) {
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':
           case 'global_read at nothing_space':
+          case 'foo_all at nothing_space':
+          case 'foo_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':

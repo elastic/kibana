@@ -1,20 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../..';
-import { createMockReportingCore, createMockLevelLogger } from '../../test_helpers';
+import {
+  createMockReportingCore,
+  createMockLevelLogger,
+  createMockPluginSetup,
+  createMockConfigSchema,
+} from '../../test_helpers';
 import { registerDiagnoseScreenshot } from './screenshot';
 import type { ReportingRequestHandlerContext } from '../../types';
 
-jest.mock('../../export_types/png/lib/generate_png');
+jest.mock('../../export_types/common/generate_png');
 
-import { generatePngObservableFactory } from '../../export_types/png/lib/generate_png';
+import { generatePngObservableFactory } from '../../export_types/common';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -30,17 +36,10 @@ describe('POST /diagnose/screenshot', () => {
         toPromise: () => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp)),
       }),
     }));
-    (generatePngObservableFactory as any).mockResolvedValue(generateMock);
+    (generatePngObservableFactory as jest.Mock).mockResolvedValue(generateMock);
   };
 
-  const config = {
-    get: jest.fn().mockImplementation((...keys) => {
-      if (keys.join('.') === 'queue.timeout') {
-        return 120000;
-      }
-    }),
-    kbnConfig: { get: jest.fn() },
-  };
+  const config = createMockConfigSchema({ queue: { timeout: 120000 } });
   const mockLogger = createMockLevelLogger();
 
   beforeEach(async () => {
@@ -48,17 +47,16 @@ describe('POST /diagnose/screenshot', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({})
+      () => ({ usesUiCapabilities: () => false })
     );
 
-    const mockSetupDeps = ({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
-      },
-      router: httpSetup.createRouter(''),
-    } as unknown) as any;
-
-    core = await createMockReportingCore(config, mockSetupDeps);
+    core = await createMockReportingCore(
+      config,
+      createMockPluginSetup({
+        router: httpSetup.createRouter(''),
+        security: null,
+      })
+    );
   });
 
   afterEach(async () => {

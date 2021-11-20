@@ -1,47 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import { asInteger } from '../../../../../common/utils/formatters';
+import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { px, unit } from '../../../../style/variables';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
+import { OverviewTableContainer } from '../../../shared/overview_table_container';
+import { getColumns } from './get_columns';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
   serviceName: string;
 }
-
-interface ErrorGroupItem {
-  name: string;
-  last_seen: number;
-  group_id: string;
-  occurrences: {
-    value: number;
-    timeseries: Array<{ x: number; y: number }> | null;
-  };
-}
+type ErrorGroupMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
+type ErrorGroupDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
-type SortField = 'name' | 'last_seen' | 'occurrences';
+type SortField = 'name' | 'lastSeen' | 'occurrences';
 
 const PAGE_SIZE = 5;
 const DEFAULT_SORT = {
@@ -49,11 +43,25 @@ const DEFAULT_SORT = {
   field: 'occurrences' as const,
 };
 
+const INITIAL_STATE_MAIN_STATISTICS: {
+  items: ErrorGroupMainStatistics['error_groups'];
+  totalItems: number;
+  requestId?: string;
+} = {
+  items: [],
+  totalItems: 0,
+  requestId: undefined,
+};
+
+const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
+  currentPeriod: {},
+  previousPeriod: {},
+};
+
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: { start, end },
-    uiFilters,
-  } = useUrlParams();
+    urlParams: { comparisonType, comparisonEnabled },
+  } = useLegacyUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
@@ -66,130 +74,113 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     sort: DEFAULT_SORT,
   });
 
-  const columns: Array<EuiBasicTableColumn<ErrorGroupItem>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
-        defaultMessage: 'Name',
-      }),
-      render: (_, { name, group_id: errorGroupId }) => {
-        return (
-          <TruncateWithTooltip
-            text={name}
-            content={
-              <ErrorDetailLink
-                serviceName={serviceName}
-                errorGroupId={errorGroupId}
-              >
-                {name}
-              </ErrorDetailLink>
-            }
-          />
-        );
-      },
-    },
-    {
-      field: 'last_seen',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.errorsTableColumnLastSeen',
-        {
-          defaultMessage: 'Last seen',
-        }
-      ),
-      render: (_, { last_seen: lastSeen }) => {
-        return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
-      },
-      width: px(unit * 9),
-    },
-    {
-      field: 'occurrences',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.errorsTableColumnOccurrences',
-        {
-          defaultMessage: 'Occurrences',
-        }
-      ),
-      width: px(unit * 12),
-      render: (_, { occurrences }) => {
-        return (
-          <SparkPlot
-            color="euiColorVis7"
-            series={occurrences.timeseries ?? undefined}
-            valueLabel={i18n.translate(
-              'xpack.apm.serviceOveriew.errorsTableOccurrences',
-              {
-                defaultMessage: `{occurrencesCount} occ.`,
-                values: {
-                  occurrencesCount: asInteger(occurrences.value),
-                },
-              }
-            )}
-          />
-        );
-      },
-    },
-  ];
-
   const {
-    data = {
-      totalItemCount: 0,
-      items: [],
-      tableOptions: {
-        pageIndex: 0,
-        sort: DEFAULT_SORT,
-      },
-    },
-    status,
-  } = useFetcher(() => {
-    if (!start || !end || !transactionType) {
-      return;
-    }
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/overview');
 
-    return callApmApi({
-      endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
-      params: {
-        path: { serviceName },
-        query: {
-          start,
-          end,
-          uiFilters: JSON.stringify(uiFilters),
-          size: PAGE_SIZE,
-          numBuckets: 20,
-          pageIndex: tableOptions.pageIndex,
-          sortField: tableOptions.sort.field,
-          sortDirection: tableOptions.sort.direction,
-          transactionType,
-        },
-      },
-    }).then((response) => {
-      return {
-        items: response.error_groups,
-        totalItemCount: response.total_error_groups,
-        tableOptions: {
-          pageIndex: tableOptions.pageIndex,
-          sort: {
-            field: tableOptions.sort.field,
-            direction: tableOptions.sort.direction,
-          },
-        },
-      };
-    });
-  }, [
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
-    serviceName,
-    uiFilters,
-    tableOptions.pageIndex,
-    tableOptions.sort.field,
-    tableOptions.sort.direction,
-    transactionType,
-  ]);
+    comparisonType,
+    comparisonEnabled,
+  });
+
+  const { pageIndex, sort } = tableOptions;
+  const { direction, field } = sort;
+
+  const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end || !transactionType) {
+        return;
+      }
+      return callApmApi({
+        endpoint:
+          'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
+        params: {
+          path: { serviceName },
+          query: {
+            environment,
+            kuery,
+            start,
+            end,
+            transactionType,
+          },
+        },
+      }).then((response) => {
+        const currentPageErrorGroups = orderBy(
+          response.error_groups,
+          field,
+          direction
+        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+
+        return {
+          // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
+          requestId: uuid(),
+          items: currentPageErrorGroups,
+          totalItems: response.error_groups.length,
+        };
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      environment,
+      kuery,
+      start,
+      end,
+      serviceName,
+      transactionType,
+      pageIndex,
+      direction,
+      field,
+      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
+      comparisonType,
+      // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
+      comparisonEnabled,
+    ]
+  );
+
+  const { requestId, items, totalItems } = data;
 
   const {
-    items,
-    totalItemCount,
-    tableOptions: { pageIndex, sort },
-  } = data;
+    data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+  } = useFetcher(
+    (callApmApi) => {
+      if (requestId && items.length && start && end && transactionType) {
+        return callApmApi({
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              numBuckets: 20,
+              transactionType,
+              groupIds: JSON.stringify(
+                items.map(({ group_id: groupId }) => groupId).sort()
+              ),
+              comparisonStart,
+              comparisonEnd,
+            },
+          },
+        });
+      }
+    },
+    // only fetches agg results when requestId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId],
+    { preservePreviousData: false }
+  );
+
+  const columns = getColumns({
+    serviceName,
+    errorGroupDetailedStatistics,
+    comparisonEnabled,
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -214,49 +205,64 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <TableFetchWrapper status={status}>
-          <ServiceOverviewTableContainer
-            isEmptyAndLoading={
-              items.length === 0 && status === FETCH_STATUS.LOADING
+        <OverviewTableContainer
+          fixedHeight={true}
+          isEmptyAndNotInitiated={
+            totalItems === 0 && status === FETCH_STATUS.NOT_INITIATED
+          }
+        >
+          <EuiBasicTable
+            error={
+              status === FETCH_STATUS.FAILURE
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.errorsTable.errorMessage',
+                    { defaultMessage: 'Failed to fetch' }
+                  )
+                : ''
             }
-          >
-            <EuiBasicTable
-              columns={columns}
-              items={items}
-              pagination={{
-                pageIndex,
-                pageSize: PAGE_SIZE,
-                totalItemCount,
-                pageSizeOptions: [PAGE_SIZE],
-                hidePerPageOptions: true,
-              }}
-              loading={status === FETCH_STATUS.LOADING}
-              onChange={(newTableOptions: {
-                page?: {
-                  index: number;
-                };
-                sort?: { field: string; direction: SortDirection };
-              }) => {
-                setTableOptions({
-                  pageIndex: newTableOptions.page?.index ?? 0,
-                  sort: newTableOptions.sort
-                    ? {
-                        field: newTableOptions.sort.field as SortField,
-                        direction: newTableOptions.sort.direction,
-                      }
-                    : DEFAULT_SORT,
-                });
-              }}
-              sorting={{
-                enableAllColumns: true,
-                sort: {
-                  direction: sort.direction,
-                  field: sort.field,
-                },
-              }}
-            />
-          </ServiceOverviewTableContainer>
-        </TableFetchWrapper>
+            noItemsMessage={
+              status === FETCH_STATUS.LOADING
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.errorsTable.loading',
+                    { defaultMessage: 'Loading...' }
+                  )
+                : i18n.translate(
+                    'xpack.apm.serviceOverview.errorsTable.noResults',
+                    { defaultMessage: 'No errors found' }
+                  )
+            }
+            columns={columns}
+            items={items}
+            pagination={{
+              pageIndex,
+              pageSize: PAGE_SIZE,
+              totalItemCount: totalItems,
+              pageSizeOptions: [PAGE_SIZE],
+              hidePerPageOptions: true,
+            }}
+            loading={status === FETCH_STATUS.LOADING}
+            onChange={(newTableOptions: {
+              page?: {
+                index: number;
+              };
+              sort?: { field: string; direction: SortDirection };
+            }) => {
+              setTableOptions({
+                pageIndex: newTableOptions.page?.index ?? 0,
+                sort: newTableOptions.sort
+                  ? {
+                      field: newTableOptions.sort.field as SortField,
+                      direction: newTableOptions.sort.direction,
+                    }
+                  : DEFAULT_SORT,
+              });
+            }}
+            sorting={{
+              enableAllColumns: true,
+              sort,
+            }}
+          />
+        </OverviewTableContainer>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

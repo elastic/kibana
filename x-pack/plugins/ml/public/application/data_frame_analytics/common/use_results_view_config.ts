@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 
 import { extractErrorMessage } from '../../../../common/util/errors';
 
-import { getIndexPatternIdFromName } from '../../util/index_utils';
+import { getDataViewIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';
-import { newJobCapsService } from '../../services/new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../contexts/ml';
 
 import { DataFrameAnalyticsConfig } from '../common';
@@ -33,7 +34,7 @@ export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
   const trainedModelsApiService = useTrainedModelsApiService();
 
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
+  const [indexPattern, setIndexPattern] = useState<DataView | undefined>(undefined);
   const [indexPatternErrorMessage, setIndexPatternErrorMessage] = useState<undefined | string>(
     undefined
   );
@@ -51,7 +52,7 @@ export const useResultsViewConfig = (jobId: string) => {
     TotalFeatureImportance[] | undefined
   >(undefined);
 
-  // get analytics configuration, index pattern and field caps
+  // get analytics configuration, data view and field caps
   useEffect(() => {
     (async function () {
       setIsLoadingJobConfig(false);
@@ -97,41 +98,44 @@ export const useResultsViewConfig = (jobId: string) => {
             const destIndex = Array.isArray(jobConfigUpdate.dest.index)
               ? jobConfigUpdate.dest.index[0]
               : jobConfigUpdate.dest.index;
-            const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
-            let indexP: IndexPattern | undefined;
+            const destDataViewId = (await getDataViewIdFromName(destIndex)) ?? destIndex;
+            let dataView: DataView | undefined;
 
             try {
-              indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+              dataView = await mlContext.dataViewsContract.get(destDataViewId);
+
+              // Force refreshing the fields list here because a user directly coming
+              // from the job creation wizard might land on the page without the
+              // data view being fully initialized because it was created
+              // before the analytics job populated the destination index.
+              await mlContext.dataViewsContract.refreshFields(dataView);
             } catch (e) {
-              indexP = undefined;
+              dataView = undefined;
             }
 
-            if (indexP === undefined) {
+            if (dataView === undefined) {
               setNeedsDestIndexPattern(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
-              const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+              const sourceDataViewId = (await getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
               try {
-                indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+                dataView = await mlContext.dataViewsContract.get(sourceDataViewId);
               } catch (e) {
-                indexP = undefined;
+                dataView = undefined;
               }
             }
 
-            if (indexP !== undefined) {
-              await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
+            if (dataView !== undefined) {
+              await newJobCapsServiceAnalytics.initializeFromDataVIew(dataView);
               setJobConfig(analyticsConfigs.data_frame_analytics[0]);
-              setIndexPattern(indexP);
+              setIndexPattern(dataView);
               setIsInitialized(true);
               setIsLoadingJobConfig(false);
             } else {
               setIndexPatternErrorMessage(
-                i18n.translate(
-                  'xpack.ml.dataframe.analytics.results.indexPatternsMissingErrorMessage',
-                  {
-                    defaultMessage:
-                      'To view this page, a Kibana index pattern is necessary for either the destination or source index of this analytics job.',
-                  }
-                )
+                i18n.translate('xpack.ml.dataframe.analytics.results.dataViewMissingErrorMessage', {
+                  defaultMessage:
+                    'To view this page, a Kibana data view is necessary for either the destination or source index of this analytics job.',
+                })
               );
             }
           } catch (e) {

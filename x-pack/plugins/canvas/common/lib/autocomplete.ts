@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq } from 'lodash';
@@ -151,10 +152,14 @@ export function getAutocompleteSuggestions(
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
     const ast = parse(text, { addMeta: true }) as ExpressionASTWithMeta;
-    const { ast: newAst, fnIndex, argName, argIndex, parentFn, contextFn } = getFnArgAtPosition(
-      ast,
-      position
-    );
+    const {
+      ast: newAst,
+      fnIndex,
+      argName,
+      argIndex,
+      parentFn,
+      contextFn,
+    } = getFnArgAtPosition(ast, position);
     const fn = newAst.node.chain[fnIndex].node;
 
     if (parentFn && fn.function.includes(MARKER) && argName) {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MetricsExplorerRequestBody, MetricsAPIRequest } from '../../../../common/http_api';
@@ -9,7 +10,6 @@ import { convertRequestToMetricsAPIOptions } from './convert_request_to_metrics_
 
 const BASE_REQUEST: MetricsExplorerRequestBody = {
   timerange: {
-    field: '@timestamp',
     from: new Date('2020-01-01T00:00:00Z').getTime(),
     to: new Date('2020-01-01T01:00:00Z').getTime(),
     interval: '1m',
@@ -21,13 +21,12 @@ const BASE_REQUEST: MetricsExplorerRequestBody = {
 
 const BASE_METRICS_UI_OPTIONS: MetricsAPIRequest = {
   timerange: {
-    field: '@timestamp',
     from: new Date('2020-01-01T00:00:00Z').getTime(),
     to: new Date('2020-01-01T01:00:00Z').getTime(),
     interval: '1m',
   },
   limit: 9,
-  dropLastBucket: true,
+  dropPartialBuckets: true,
   indexPattern: 'metrics-*',
   metrics: [
     { id: 'metric_0', aggregations: { metric_0: { avg: { field: 'system.cpu.user.pct' } } } },

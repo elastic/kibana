@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -9,44 +10,32 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { LicensingLogic } from '../../../../applications/shared/licensing';
-
-import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
-
-import noSharedSourcesIcon from '../../assets/share_circle.svg';
-
-import { Loading } from '../../../shared/loading';
+import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { AppLogic } from '../../app_logic';
+import noOrgSourcesIcon from '../../assets/share_circle.svg';
+import { PersonalDashboardLayout } from '../../components/layout';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { NAV } from '../../constants';
+import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
+import { toSentenceSerial } from '../../utils';
 
-import { AppLogic } from '../../app_logic';
-import { SourcesView } from './sources_view';
+import {
+  PRIVATE_LINK_TITLE,
+  PRIVATE_HEADER_TITLE,
+  PRIVATE_HEADER_DESCRIPTION,
+  PRIVATE_ORG_SOURCES_TITLE,
+  PRIVATE_EMPTY_TITLE,
+  ORG_SOURCES_EMPTY_TITLE,
+  ORG_SOURCES_EMPTY_DESCRIPTION,
+  LICENSE_CALLOUT_TITLE,
+  LICENSE_CALLOUT_DESCRIPTION,
+} from './constants';
 import { SourcesLogic } from './sources_logic';
-
-// TODO: Remove this after links in Kibana sidenav
-interface SidebarLink {
-  title: string;
-  path?: string;
-  disabled?: boolean;
-  iconType?: string;
-  otherActivePath?: string;
-  dataTestSubj?: string;
-  onClick?(): void;
-}
-
-const PRIVATE_LINK_TITLE = 'Add a private content source';
-const PRIVATE_CAN_CREATE_PAGE_TITLE = 'Manage private content sources';
-const PRIVATE_VIEW_ONLY_PAGE_TITLE = 'Review Group Sources';
-const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION =
-  'Review the status of all sources shared with your Group.';
-const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION =
-  'Review the status of all connected private sources, and manage private sources for your account.';
-const PRIVATE_HEADER_TITLE = 'My private content sources';
-const PRIVATE_HEADER_DESCRIPTION = 'Private content sources are available only to you.';
-const PRIVATE_SHARED_SOURCES_TITLE = 'Shared content sources';
+import { SourcesView } from './sources_view';
 
 export const PrivateSources: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
@@ -57,26 +46,26 @@ export const PrivateSources: React.FC = () => {
     return resetSourcesState;
   }, []);
 
-  const { dataLoading, contentSources, serviceTypes, privateContentSources } = useValues(
-    SourcesLogic
-  );
+  const { dataLoading, contentSources, serviceTypes, privateContentSources } =
+    useValues(SourcesLogic);
 
   const {
-    account: { canCreatePersonalSources, groups },
+    account: { canCreatePrivateSources, groups },
   } = useValues(AppLogic);
 
-  if (dataLoading) return <Loading />;
-
-  const sidebarLinks = [] as SidebarLink[];
   const hasConfiguredConnectors = serviceTypes.some(({ configured }) => configured);
-  const canAddSources = canCreatePersonalSources && hasConfiguredConnectors;
-  if (canAddSources) {
-    sidebarLinks.push({
-      title: PRIVATE_LINK_TITLE,
-      iconType: 'plusInCircle',
-      path: getSourcesPath(ADD_SOURCE_PATH, false),
-    });
-  }
+  const canAddSources = canCreatePrivateSources && hasConfiguredConnectors;
+  const hasPrivateSources = privateContentSources?.length > 0;
+  const hasOrgSources = contentSources.length > 0;
+
+  const licenseCallout = (
+    <>
+      <EuiCallOut title={LICENSE_CALLOUT_TITLE} iconType="iInCircle">
+        <p>{LICENSE_CALLOUT_DESCRIPTION}</p>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  );
 
   const headerAction = (
     <EuiButtonTo
@@ -89,98 +78,78 @@ export const PrivateSources: React.FC = () => {
     </EuiButtonTo>
   );
 
-  const sourcesHeader = (
-    <ViewContentHeader
-      title={PRIVATE_HEADER_TITLE}
-      action={headerAction}
-      description={PRIVATE_HEADER_DESCRIPTION}
-      alignItems="flexStart"
-    />
+  const privateSourcesEmptyState = (
+    <EuiPanel hasShadow={false} color="subdued">
+      <EuiSpacer size="xxl" />
+      <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
+      <EuiSpacer size="xxl" />
+    </EuiPanel>
   );
 
   const privateSourcesTable = (
-    <ContentSection>
-      <SourcesTable
-        showDetails={true}
-        onSearchableToggle={setSourceSearchability}
-        sources={privateContentSources}
-      />
-    </ContentSection>
+    <SourcesTable
+      showDetails
+      onSearchableToggle={setSourceSearchability}
+      sources={privateContentSources}
+    />
   );
 
-  const privateSourcesEmptyState = (
-    <ContentSection className="zero-state__private-sources">
-      <EuiPanel className="euiPanel--inset">
-        <EuiSpacer size="xxl" />
-        <EuiEmptyPrompt iconType="lock" title={<h2>You have no private sources</h2>} />
-        <EuiSpacer size="xxl" />
-      </EuiPanel>
-    </ContentSection>
-  );
-
-  const sharedSourcesEmptyState = (
-    <ContentSection className="zero-state__private-sources">
-      <EuiPanel className="euiPanel--inset">
-        <EuiSpacer size="xxl" />
-        <EuiEmptyPrompt
-          iconType={noSharedSourcesIcon}
-          title={<h2>No content source available</h2>}
-          body={
-            <p>
-              Once content sources are shared with you, they will be displayed here, and available
-              via the search experience.
-            </p>
-          }
-        />
-        <EuiSpacer size="xxl" />
-      </EuiPanel>
-    </ContentSection>
-  );
-
-  const hasPrivateSources = privateContentSources?.length > 0;
-  const privateSources = hasPrivateSources ? privateSourcesTable : privateSourcesEmptyState;
-
-  const groupsSentence = `${groups.slice(0, groups.length - 1).join(', ')}, and ${groups.slice(
-    -1
-  )}`;
-
-  const sharedSources = (
+  const privateSourcesSection = (
     <ContentSection
-      title={PRIVATE_SHARED_SOURCES_TITLE}
-      description={`You have access to the following sources through the group${
-        groups.length === 1 ? '' : 's'
-      } ${groupsSentence}.`}
+      isOrganization={false}
+      title={PRIVATE_HEADER_TITLE}
+      description={PRIVATE_HEADER_DESCRIPTION}
+      action={canAddSources && headerAction}
     >
-      <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
+      {hasPrivateSources ? privateSourcesTable : privateSourcesEmptyState}
     </ContentSection>
   );
 
-  const licenseCallout = (
-    <>
-      <EuiCallOut title="Private Sources are no longer available" iconType="iInCircle">
-        <p>Contact your search experience administrator for more information.</p>
-      </EuiCallOut>
-      <EuiSpacer />
-    </>
+  const orgSourcesEmptyState = (
+    <EuiPanel hasShadow={false} color="subdued">
+      <EuiSpacer size="xxl" />
+      <EuiEmptyPrompt
+        iconType={noOrgSourcesIcon}
+        title={<h2>{ORG_SOURCES_EMPTY_TITLE}</h2>}
+        body={<p>{ORG_SOURCES_EMPTY_DESCRIPTION}</p>}
+      />
+      <EuiSpacer size="xxl" />
+    </EuiPanel>
   );
 
-  const PAGE_TITLE = canCreatePersonalSources
-    ? PRIVATE_CAN_CREATE_PAGE_TITLE
-    : PRIVATE_VIEW_ONLY_PAGE_TITLE;
-  const PAGE_DESCRIPTION = canCreatePersonalSources
-    ? PRIVATE_CAN_CREATE_PAGE_DESCRIPTION
-    : PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION;
+  const orgSourcesTable = (
+    <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
+  );
 
-  const pageHeader = <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />;
+  const orgSourcesSection = (
+    <ContentSection
+      isOrganization={false}
+      title={PRIVATE_ORG_SOURCES_TITLE}
+      description={
+        hasOrgSources && (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.workplaceSearch.sources.private.privateOrg.header.description"
+            defaultMessage="You have access to the following sources through {newline}the {groups, plural, one {group} other {groups}} {groupsSentence}."
+            values={{
+              groups: groups.length,
+              groupsSentence: toSentenceSerial(groups),
+              newline: <br />,
+            }}
+          />
+        )
+      }
+    >
+      {hasOrgSources ? orgSourcesTable : orgSourcesEmptyState}
+    </ContentSection>
+  );
 
   return (
-    <SourcesView>
-      {/* TODO: Figure out with design how to make this look better w/o 2 ViewContentHeaders */}
-      {pageHeader}
-      {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
-      {canAddSources && sourcesHeader}
-      {canCreatePersonalSources && privateSources}
-      {contentSources.length > 0 ? sharedSources : sharedSourcesEmptyState}
-    </SourcesView>
+    <PersonalDashboardLayout pageChrome={[NAV.SOURCES]} isLoading={dataLoading}>
+      <SourcesView>
+        {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
+        {canCreatePrivateSources && privateSourcesSection}
+        {orgSourcesSection}
+      </SourcesView>
+    </PersonalDashboardLayout>
   );
 };

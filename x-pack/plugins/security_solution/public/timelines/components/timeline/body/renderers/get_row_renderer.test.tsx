@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import '../../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../common/ecs';
@@ -16,14 +17,15 @@ import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
-import { rowRenderers } from '.';
+import { defaultRowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
+
+jest.mock('../../../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -47,10 +49,11 @@ describe('get_column_renderer', () => {
   });
 
   test('renders correctly against snapshot', () => {
-    const rowRenderer = getRowRenderer(nonSuricata, rowRenderers);
+    const rowRenderer = getRowRenderer(nonSuricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
+      isDraggable: true,
       timelineId: 'test',
     });
 
@@ -59,10 +62,11 @@ describe('get_column_renderer', () => {
   });
 
   test('should render plain row data when it is a non suricata row', () => {
-    const rowRenderer = getRowRenderer(nonSuricata, rowRenderers);
+    const rowRenderer = getRowRenderer(nonSuricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -74,10 +78,11 @@ describe('get_column_renderer', () => {
   });
 
   test('should render a suricata row data when it is a suricata row', () => {
-    const rowRenderer = getRowRenderer(suricata, rowRenderers);
+    const rowRenderer = getRowRenderer(suricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -92,10 +97,11 @@ describe('get_column_renderer', () => {
 
   test('should render a suricata row data if event.category is network_traffic', () => {
     suricata.event = { ...suricata.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(suricata, rowRenderers);
+    const rowRenderer = getRowRenderer(suricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -110,10 +116,11 @@ describe('get_column_renderer', () => {
 
   test('should render a zeek row data if event.category is network_traffic', () => {
     zeek.event = { ...zeek.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(zeek, rowRenderers);
+    const rowRenderer = getRowRenderer(zeek, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: zeek,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -128,10 +135,11 @@ describe('get_column_renderer', () => {
 
   test('should render a system row data if event.category is network_traffic', () => {
     system.event = { ...system.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(system, rowRenderers);
+    const rowRenderer = getRowRenderer(system, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: system,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -146,10 +154,11 @@ describe('get_column_renderer', () => {
 
   test('should render a auditd row data if event.category is network_traffic', () => {
     auditd.event = { ...auditd.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(auditd, rowRenderers);
+    const rowRenderer = getRowRenderer(auditd, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
       data: auditd,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(

@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExtendedBoundsOutput, KibanaTimerangeOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggDateHistogramFnName = 'aggDateHistogram';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.DATE_HISTOGRAM>;
 
-type Arguments = Assign<AggArgs, { timeRange?: string; extended_bounds?: string }>;
+type Arguments = Assign<
+  AggArgs,
+  { timeRange?: KibanaTimerangeOutput; extended_bounds?: ExtendedBoundsOutput }
+>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -90,7 +94,7 @@ export const aggDateHistogram = (): FunctionDefinition => ({
       }),
     },
     timeRange: {
-      types: ['string'],
+      types: ['timerange'],
       help: i18n.translate('data.search.aggs.buckets.dateHistogram.timeRange.help', {
         defaultMessage: 'Time Range to use for this aggregation',
       }),
@@ -108,7 +112,7 @@ export const aggDateHistogram = (): FunctionDefinition => ({
       }),
     },
     extended_bounds: {
-      types: ['string'],
+      types: ['extended_bounds'],
       help: i18n.translate('data.search.aggs.buckets.dateHistogram.extendedBounds.help', {
         defaultMessage:
           'With extended_bounds setting, you now can "force" the histogram aggregation to start building buckets on a specific min value and also keep on building buckets up to a max value ',
@@ -127,21 +131,19 @@ export const aggDateHistogram = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
-
+  fn: (input, { id, enabled, schema, timeRange, extended_bounds: extendedBounds, ...params }) => {
     return {
       type: 'agg_type',
       value: {
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.DATE_HISTOGRAM,
         params: {
-          ...rest,
-          timeRange: getParsedValue(args, 'timeRange'),
-          extended_bounds: getParsedValue(args, 'extended_bounds'),
+          ...params,
+          timeRange: timeRange && omit(timeRange, 'type'),
+          extended_bounds: extendedBounds && omit(extendedBounds, 'type'),
         },
+        type: BUCKET_TYPES.DATE_HISTOGRAM,
       },
     };
   },

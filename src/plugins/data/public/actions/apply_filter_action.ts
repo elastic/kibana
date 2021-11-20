@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,6 +21,9 @@ export interface ApplyGlobalFilterActionContext {
   // Need to make this unknown to prevent circular dependencies.
   // Apps using this property will need to cast to `IEmbeddable`.
   embeddable?: unknown;
+  // controlledBy is an optional key in filter.meta that identifies the owner of a filter
+  // Pass controlledBy to cleanup an existing filter(s) owned by embeddable prior to adding new filters
+  controlledBy?: string;
 }
 
 async function isCompatible(context: ApplyGlobalFilterActionContext) {
@@ -42,7 +45,7 @@ export function createFilterAction(
       });
     },
     isCompatible,
-    execute: async ({ filters, timeFieldName }: ApplyGlobalFilterActionContext) => {
+    execute: async ({ filters, timeFieldName, controlledBy }: ApplyGlobalFilterActionContext) => {
       if (!filters) {
         throw new Error('Applying a filter requires a filter');
       }
@@ -83,6 +86,15 @@ export function createFilterAction(
         });
 
         selectedFilters = await filterSelectionPromise;
+      }
+
+      // remove existing filters for control prior to adding new filtes for control
+      if (controlledBy) {
+        filterManager.getFilters().forEach((filter) => {
+          if (filter.meta.controlledBy === controlledBy) {
+            filterManager.removeFilter(filter);
+          }
+        });
       }
 
       if (timeFieldName) {

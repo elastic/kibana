@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
@@ -13,11 +14,10 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
 import { RulesTables } from './rules_tables';
 import * as i18n from '../translations';
-import { ExceptionListsTable } from './exceptions/exceptions_table';
 
 interface AllRulesProps {
   createPrePackagedRules: CreatePreBuiltRules | null;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   refetchPrePackagedRulesStatus: () => Promise<void>;
@@ -45,13 +45,7 @@ const allRulesTabs = [
     name: i18n.MONITORING_TAB,
     disabled: false,
   },
-  {
-    id: AllRulesTabs.exceptions,
-    name: i18n.EXCEPTIONS_TAB,
-    disabled: false,
-  },
 ];
-
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
  * by name, sort by enabled, and perform the following actions:
@@ -63,7 +57,7 @@ const allRulesTabs = [
 export const AllRules = React.memo<AllRulesProps>(
   ({
     createPrePackagedRules,
-    hasNoPermissions,
+    hasPermissions,
     loading,
     loadingCreatePrePackagedRules,
     refetchPrePackagedRulesStatus,
@@ -74,7 +68,7 @@ export const AllRules = React.memo<AllRulesProps>(
     setRefreshRulesData,
   }) => {
     const history = useHistory();
-    const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+    const { formatUrl } = useFormatUrl(SecurityPageName.rules);
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
 
     const tabs = useMemo(
@@ -99,35 +93,23 @@ export const AllRules = React.memo<AllRulesProps>(
 
     return (
       <>
-        <EuiSpacer />
         {tabs}
         <EuiSpacer />
-
-        {(allRulesTab === AllRulesTabs.rules || allRulesTab === AllRulesTabs.monitoring) && (
-          <RulesTables
-            history={history}
-            formatUrl={formatUrl}
-            selectedTab={allRulesTab}
-            createPrePackagedRules={createPrePackagedRules}
-            hasNoPermissions={hasNoPermissions}
-            loading={loading}
-            loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-            refetchPrePackagedRulesStatus={refetchPrePackagedRulesStatus}
-            rulesCustomInstalled={rulesCustomInstalled}
-            rulesInstalled={rulesInstalled}
-            rulesNotInstalled={rulesNotInstalled}
-            rulesNotUpdated={rulesNotUpdated}
-            setRefreshRulesData={setRefreshRulesData}
-          />
-        )}
-        {allRulesTab === AllRulesTabs.exceptions && (
-          <ExceptionListsTable
-            formatUrl={formatUrl}
-            history={history}
-            hasNoPermissions={hasNoPermissions}
-            loading={loading}
-          />
-        )}
+        <RulesTables
+          history={history}
+          formatUrl={formatUrl}
+          selectedTab={allRulesTab}
+          createPrePackagedRules={createPrePackagedRules}
+          hasPermissions={hasPermissions}
+          loading={loading}
+          loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
+          refetchPrePackagedRulesStatus={refetchPrePackagedRulesStatus}
+          rulesCustomInstalled={rulesCustomInstalled}
+          rulesInstalled={rulesInstalled}
+          rulesNotInstalled={rulesNotInstalled}
+          rulesNotUpdated={rulesNotUpdated}
+          setRefreshRulesData={setRefreshRulesData}
+        />
       </>
     );
   }

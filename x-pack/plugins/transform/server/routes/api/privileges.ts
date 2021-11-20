@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/constants';
 import { Privileges } from '../../../common/types/privileges';
 
@@ -30,8 +32,8 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
       const {
         body: { has_all_requested: hasAllPrivileges, cluster },
       } = await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
-        method: 'POST',
         body: {
+          // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
           cluster: APP_CLUSTER_PRIVILEGES,
         },
       });
@@ -43,9 +45,7 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
       // Get all index privileges the user has
       const {
         body: { indices },
-      } = await ctx.core.elasticsearch.client.asCurrentUser.security.getUserPrivileges({
-        method: 'GET',
-      });
+      } = await ctx.core.elasticsearch.client.asCurrentUser.security.getUserPrivileges();
 
       // Check if they have all the required index privileges for at least one index
       const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve, join } from 'path';
@@ -23,14 +23,14 @@ describe('getTranslationPaths', () => {
     getTranslationPaths({ cwd: '/some/cwd', nested: false });
 
     expect(globbyMock).toHaveBeenCalledTimes(1);
-    expect(globbyMock).toHaveBeenCalledWith('.i18nrc.json', { cwd: '/some/cwd' });
+    expect(globbyMock).toHaveBeenCalledWith('.i18nrc.json', { cwd: '/some/cwd', dot: true });
 
     globbyMock.mockClear();
 
     await getTranslationPaths({ cwd: '/other/cwd', nested: true });
 
     expect(globbyMock).toHaveBeenCalledTimes(1);
-    expect(globbyMock).toHaveBeenCalledWith('*/.i18nrc.json', { cwd: '/other/cwd' });
+    expect(globbyMock).toHaveBeenCalledWith('*/.i18nrc.json', { cwd: '/other/cwd', dot: true });
   });
 
   it('calls `readFile` for each entry returned by `globby`', async () => {

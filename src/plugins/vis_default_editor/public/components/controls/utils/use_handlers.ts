@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useCallback } from 'react';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import { IAggConfig, AggParamType } from 'src/plugins/data/public';
 
@@ -20,7 +21,7 @@ function useSubAggParamsHandlers(
 ) {
   const setAggParamValue = useCallback(
     (aggId, paramName, val) => {
-      const parsedParams = subAgg.toJSON();
+      const parsedParams = subAgg.serialize();
       const params = {
         ...parsedParams,
         params: {
@@ -36,10 +37,18 @@ function useSubAggParamsHandlers(
 
   const onAggTypeChange = useCallback(
     (aggId, aggType) => {
-      const parsedAgg = subAgg.toJSON();
+      const parsedAgg = subAgg.serialize();
+      const parsedAggParams = parsedAgg.params as SerializableRecord;
 
+      // we should share between aggs only field and base params: json, label, time shift.
       const params = {
         ...parsedAgg,
+        params: {
+          field: parsedAggParams.field,
+          json: parsedAggParams.json,
+          customLabel: parsedAggParams.customLabel,
+          timeShift: parsedAggParams.timeShift,
+        },
         type: aggType,
       };
 

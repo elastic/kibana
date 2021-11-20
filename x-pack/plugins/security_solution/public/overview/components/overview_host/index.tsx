@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -10,12 +11,12 @@ import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo, useCallback } from 'react';
 
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
 import { ID as OverviewHostQueryId, useHostOverview } from '../../containers/overview_host';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
-import { getHostsUrl, useFormatUrl } from '../../../common/components/link_to';
+import { getHostDetailsUrl, useFormatUrl } from '../../../common/components/link_to';
 import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { InspectButtonContainer } from '../../../common/components/inspect';
@@ -50,13 +51,15 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
     filterQuery,
     indexNames,
     startDate,
+    skip: filterQuery === undefined,
   });
 
   const goToHost = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
-        path: getHostsUrl(urlSearch),
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.hosts,
+        path: getHostDetailsUrl('allHosts', urlSearch),
       });
     },
     [navigateToApp, urlSearch]
@@ -74,7 +77,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
 
   const hostPageButton = useMemo(
     () => (
-      <LinkButton onClick={goToHost} href={formatUrl(getHostsUrl())}>
+      <LinkButton onClick={goToHost} href={formatUrl('/allHosts')}>
         <FormattedMessage
           id="xpack.securitySolution.overview.hostsAction"
           defaultMessage="View hosts"
@@ -114,8 +117,13 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
-        <EuiPanel>
-          <HeaderSection id={OverviewHostQueryId} subtitle={subtitle} title={title}>
+        <EuiPanel hasBorder>
+          <HeaderSection
+            id={OverviewHostQueryId}
+            subtitle={subtitle}
+            title={title}
+            isInspectDisabled={filterQuery === undefined}
+          >
             <>{hostPageButton}</>
           </HeaderSection>
 

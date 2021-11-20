@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useReducer } from 'react';
@@ -62,153 +63,152 @@ const createInitialState = <JobType extends string>({
   setupStatus: { type: 'initializing' },
 });
 
-const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
-  state: StatusReducerState<JobType>,
-  action: StatusReducerAction
-): StatusReducerState<JobType> => {
-  switch (action.type) {
-    case 'startedSetup': {
-      return {
-        ...state,
-        jobStatus: jobTypes.reduce(
+const createStatusReducer =
+  <JobType extends string>(jobTypes: JobType[]) =>
+  (
+    state: StatusReducerState<JobType>,
+    action: StatusReducerAction
+  ): StatusReducerState<JobType> => {
+    switch (action.type) {
+      case 'startedSetup': {
+        return {
+          ...state,
+          jobStatus: jobTypes.reduce(
+            (accumulatedJobStatus, jobType) => ({
+              ...accumulatedJobStatus,
+              [jobType]: 'initializing',
+            }),
+            {} as Record<JobType, JobStatus>
+          ),
+          setupStatus: { type: 'pending' },
+        };
+      }
+      case 'finishedSetup': {
+        const { datafeedSetupResults, jobSetupResults, jobSummaries, spaceId, sourceId } = action;
+        const nextJobStatus = jobTypes.reduce(
           (accumulatedJobStatus, jobType) => ({
             ...accumulatedJobStatus,
-            [jobType]: 'initializing',
+            [jobType]:
+              hasSuccessfullyCreatedJob(getJobId(spaceId, sourceId, jobType))(jobSetupResults) &&
+              hasSuccessfullyStartedDatafeed(getDatafeedId(spaceId, sourceId, jobType))(
+                datafeedSetupResults
+              )
+                ? 'started'
+                : 'failed',
           }),
           {} as Record<JobType, JobStatus>
-        ),
-        setupStatus: { type: 'pending' },
-      };
-    }
-    case 'finishedSetup': {
-      const { datafeedSetupResults, jobSetupResults, jobSummaries, spaceId, sourceId } = action;
-      const nextJobStatus = jobTypes.reduce(
-        (accumulatedJobStatus, jobType) => ({
-          ...accumulatedJobStatus,
-          [jobType]:
-            hasSuccessfullyCreatedJob(getJobId(spaceId, sourceId, jobType))(jobSetupResults) &&
-            hasSuccessfullyStartedDatafeed(getDatafeedId(spaceId, sourceId, jobType))(
-              datafeedSetupResults
-            )
-              ? 'started'
-              : 'failed',
-        }),
-        {} as Record<JobType, JobStatus>
-      );
-      const nextSetupStatus: SetupStatus = Object.values<JobStatus>(nextJobStatus).every(
-        (jobState) => jobState === 'started'
-      )
-        ? { type: 'succeeded' }
-        : {
-            type: 'failed',
-            reasons: [
-              ...Object.values(datafeedSetupResults)
-                .filter(hasError)
-                .map((datafeed) => datafeed.error.msg),
-              ...Object.values(jobSetupResults)
-                .filter(hasError)
-                .map((job) => job.error.msg),
-            ],
-          };
+        );
+        const nextSetupStatus: SetupStatus = Object.values<JobStatus>(nextJobStatus).every(
+          (jobState) => jobState === 'started'
+        )
+          ? { type: 'succeeded' }
+          : {
+              type: 'failed',
+              reasons: [
+                ...Object.values(datafeedSetupResults)
+                  .filter(hasError)
+                  .map((datafeed) => datafeed.error.msg),
+                ...Object.values(jobSetupResults)
+                  .filter(hasError)
+                  .map((job) => job.error.msg),
+              ],
+            };
 
-      return {
-        ...state,
-        jobStatus: nextJobStatus,
-        jobSummaries,
-        setupStatus: nextSetupStatus,
-      };
-    }
-    case 'failedSetup': {
-      return {
-        ...state,
-        jobStatus: jobTypes.reduce(
+        return {
+          ...state,
+          jobStatus: nextJobStatus,
+          jobSummaries,
+          setupStatus: nextSetupStatus,
+        };
+      }
+      case 'failedSetup': {
+        return {
+          ...state,
+          jobStatus: jobTypes.reduce(
+            (accumulatedJobStatus, jobType) => ({
+              ...accumulatedJobStatus,
+              [jobType]: 'failed',
+            }),
+            {} as Record<JobType, JobStatus>
+          ),
+          setupStatus: { type: 'failed', reasons: ['unknown'] },
+        };
+      }
+      case 'fetchingJobStatuses': {
+        return {
+          ...state,
+          setupStatus:
+            state.setupStatus.type === 'unknown' ? { type: 'initializing' } : state.setupStatus,
+        };
+      }
+      case 'fetchedJobStatuses': {
+        const { payload: jobSummaries, spaceId, sourceId } = action;
+        const { setupStatus } = state;
+        const nextJobStatus = jobTypes.reduce(
           (accumulatedJobStatus, jobType) => ({
             ...accumulatedJobStatus,
-            [jobType]: 'failed',
+            [jobType]: getJobStatus(getJobId(spaceId, sourceId, jobType))(jobSummaries),
           }),
           {} as Record<JobType, JobStatus>
-        ),
-        setupStatus: { type: 'failed', reasons: ['unknown'] },
-      };
-    }
-    case 'fetchingJobStatuses': {
-      return {
-        ...state,
-        setupStatus:
-          state.setupStatus.type === 'unknown' ? { type: 'initializing' } : state.setupStatus,
-      };
-    }
-    case 'fetchedJobStatuses': {
-      const { payload: jobSummaries, spaceId, sourceId } = action;
-      const { setupStatus } = state;
-      const nextJobStatus = jobTypes.reduce(
-        (accumulatedJobStatus, jobType) => ({
-          ...accumulatedJobStatus,
-          [jobType]: getJobStatus(getJobId(spaceId, sourceId, jobType))(jobSummaries),
-        }),
-        {} as Record<JobType, JobStatus>
-      );
-      const nextSetupStatus = getSetupStatus(nextJobStatus)(setupStatus);
+        );
+        const nextSetupStatus = getSetupStatus(nextJobStatus)(setupStatus);
 
-      return {
-        ...state,
-        jobSummaries,
-        jobStatus: nextJobStatus,
-        setupStatus: nextSetupStatus,
-      };
+        return {
+          ...state,
+          jobSummaries,
+          jobStatus: nextJobStatus,
+          setupStatus: nextSetupStatus,
+        };
+      }
+      case 'failedFetchingJobStatuses': {
+        return {
+          ...state,
+          setupStatus: { type: 'unknown' },
+          jobStatus: jobTypes.reduce(
+            (accumulatedJobStatus, jobType) => ({
+              ...accumulatedJobStatus,
+              [jobType]: 'unknown',
+            }),
+            {} as Record<JobType, JobStatus>
+          ),
+        };
+      }
+      case 'viewedResults': {
+        return {
+          ...state,
+          setupStatus: { type: 'skipped', newlyCreated: true },
+        };
+      }
+      default: {
+        return state;
+      }
     }
-    case 'failedFetchingJobStatuses': {
-      return {
-        ...state,
-        setupStatus: { type: 'unknown' },
-        jobStatus: jobTypes.reduce(
-          (accumulatedJobStatus, jobType) => ({
-            ...accumulatedJobStatus,
-            [jobType]: 'unknown',
-          }),
-          {} as Record<JobType, JobStatus>
-        ),
-      };
-    }
-    case 'viewedResults': {
-      return {
-        ...state,
-        setupStatus: { type: 'skipped', newlyCreated: true },
-      };
-    }
-    default: {
-      return state;
-    }
-  }
-};
+  };
 
-const hasSuccessfullyCreatedJob = (jobId: string) => (
-  jobSetupResponses: SetupMlModuleResponsePayload['jobs']
-) =>
-  jobSetupResponses.filter(
-    (jobSetupResponse) =>
-      jobSetupResponse.id === jobId && jobSetupResponse.success && !jobSetupResponse.error
-  ).length > 0;
+const hasSuccessfullyCreatedJob =
+  (jobId: string) => (jobSetupResponses: SetupMlModuleResponsePayload['jobs']) =>
+    jobSetupResponses.filter(
+      (jobSetupResponse) =>
+        jobSetupResponse.id === jobId && jobSetupResponse.success && !jobSetupResponse.error
+    ).length > 0;
 
-const hasSuccessfullyStartedDatafeed = (datafeedId: string) => (
-  datafeedSetupResponses: SetupMlModuleResponsePayload['datafeeds']
-) =>
-  datafeedSetupResponses.filter(
-    (datafeedSetupResponse) =>
-      datafeedSetupResponse.id === datafeedId &&
-      datafeedSetupResponse.success &&
-      datafeedSetupResponse.started &&
-      !datafeedSetupResponse.error
-  ).length > 0;
+const hasSuccessfullyStartedDatafeed =
+  (datafeedId: string) => (datafeedSetupResponses: SetupMlModuleResponsePayload['datafeeds']) =>
+    datafeedSetupResponses.filter(
+      (datafeedSetupResponse) =>
+        datafeedSetupResponse.id === datafeedId &&
+        datafeedSetupResponse.success &&
+        datafeedSetupResponse.started &&
+        !datafeedSetupResponse.error
+    ).length > 0;
 
-const getJobStatus = (jobId: string) => (
-  jobSummaries: FetchJobStatusResponsePayload
-): JobStatus => {
-  return (
-    jobSummaries
-      .filter((jobSummary) => jobSummary.id === jobId)
-      .map(
-        (jobSummary): JobStatus => {
+const getJobStatus =
+  (jobId: string) =>
+  (jobSummaries: FetchJobStatusResponsePayload): JobStatus => {
+    return (
+      jobSummaries
+        .filter((jobSummary) => jobSummary.id === jobId)
+        .map((jobSummary): JobStatus => {
           if (jobSummary.jobState === 'failed' || jobSummary.datafeedState === '') {
             return 'failed';
           } else if (
@@ -224,40 +224,47 @@ const getJobStatus = (jobId: string) => (
             jobSummary.datafeedState === 'stopped'
           ) {
             return 'stopped';
-          } else if (jobSummary.jobState === 'opening') {
+          } else if (
+            jobSummary.jobState === 'opening' &&
+            jobSummary.awaitingNodeAssignment === false
+          ) {
             return 'initializing';
-          } else if (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') {
+          } else if (
+            (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') ||
+            (jobSummary.jobState === 'opening' &&
+              jobSummary.datafeedState === 'starting' &&
+              jobSummary.awaitingNodeAssignment === true)
+          ) {
             return 'started';
           }
 
           return 'unknown';
+        })[0] || 'missing'
+    );
+  };
+
+const getSetupStatus =
+  <JobType extends string>(everyJobStatus: Record<JobType, JobStatus>) =>
+  (previousSetupStatus: SetupStatus): SetupStatus => {
+    return Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>(
+      (setupStatus, [, jobStatus]) => {
+        if (jobStatus === 'missing') {
+          return { type: 'required' };
+        } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
+          return setupStatus;
+        } else if (setupStatus.type === 'skipped' || isJobStatusWithResults(jobStatus)) {
+          return {
+            type: 'skipped',
+            // preserve newlyCreated status
+            newlyCreated: setupStatus.type === 'skipped' && setupStatus.newlyCreated,
+          };
         }
-      )[0] || 'missing'
-  );
-};
 
-const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, JobStatus>) => (
-  previousSetupStatus: SetupStatus
-): SetupStatus => {
-  return Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>(
-    (setupStatus, [, jobStatus]) => {
-      if (jobStatus === 'missing') {
-        return { type: 'required' };
-      } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
         return setupStatus;
-      } else if (setupStatus.type === 'skipped' || isJobStatusWithResults(jobStatus)) {
-        return {
-          type: 'skipped',
-          // preserve newlyCreated status
-          newlyCreated: setupStatus.type === 'skipped' && setupStatus.newlyCreated,
-        };
-      }
-
-      return setupStatus;
-    },
-    previousSetupStatus
-  );
-};
+      },
+      previousSetupStatus
+    );
+  };
 
 const hasError = <Value extends { error?: any }>(
   value: Value

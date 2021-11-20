@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
@@ -17,7 +18,7 @@ export const DetectionEngineUserUnauthenticated = React.memo(() => {
       detectionUnauthenticated: {
         icon: 'documents',
         label: i18n.GO_TO_DOCUMENTATION,
-        url: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/detections-permissions-section.html`,
+        url: `${docLinks.links.siem.detectionsReq}`,
         target: '_blank',
       },
     }),

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,18 +12,18 @@ import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { UXHasDataResponse } from '../../../../typings';
 import CoreVitals from '../../../shared/core_web_vitals';
+import { BucketSize } from '../../../../pages/overview';
 
 interface Props {
-  bucketSize: string;
+  bucketSize: BucketSize;
 }
 
 export function UXSection({ bucketSize }: Props) {
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
-  const uxHasDataResponse = (hasData.ux?.hasData as UXHasDataResponse) || {};
-  const serviceName = uxHasDataResponse.serviceName as string;
+  const uxHasDataResponse = hasDataMap.ux;
+  const serviceName = uxHasDataResponse?.serviceName as string;
 
   const { data, status } = useFetcher(
     () => {
@@ -31,7 +32,7 @@ export function UXSection({ bucketSize }: Props) {
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
           serviceName,
-          bucketSize,
+          ...bucketSize,
         });
       }
     },

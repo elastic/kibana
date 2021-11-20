@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { SerializableRecord } from '@kbn/utility-types';
+import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
   ExpressionsService,
-  ExpressionsServiceSetup,
-  ExecutionContext,
-  ExpressionsServiceStart,
-} from '../common';
-import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
-import { ReactExpressionRenderer } from './react_expression_renderer';
-import { ExpressionLoader, IExpressionLoader, loader } from './loader';
-import { render, ExpressionRenderHandler } from './render';
+  setRenderersRegistry,
+  setNotifications,
+  setExpressionsService,
+} from './services';
+import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
+import type { IExpressionLoader } from './loader';
+import type { IExpressionRenderer } from './render';
 
 /**
  * Expressions public setup contract, extends {@link ExpressionsServiceSetup}
@@ -27,11 +29,9 @@ export type ExpressionsSetup = ExpressionsServiceSetup;
  * Expressions public start contrect, extends {@link ExpressionServiceStart}
  */
 export interface ExpressionsStart extends ExpressionsServiceStart {
-  ExpressionLoader: typeof ExpressionLoader;
-  ExpressionRenderHandler: typeof ExpressionRenderHandler;
   loader: IExpressionLoader;
+  render: IExpressionRenderer;
   ReactExpressionRenderer: typeof ReactExpressionRenderer;
-  render: typeof render;
 }
 
 export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, ExpressionsStart> {
@@ -42,14 +42,8 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
   private configureExecutor(core: CoreSetup) {
     const { executor } = this.expressions;
 
-    const getSavedObject: ExecutionContext['getSavedObject'] = async (type, id) => {
-      const [start] = await core.getStartServices();
-      return start.savedObjects.client.get(type, id);
-    };
-
     executor.extendContext({
       environment: 'client',
-      getSavedObject,
     });
   }
 
@@ -62,7 +56,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     setRenderersRegistry(renderers);
     setExpressionsService(expressions);
 
-    const setup = expressions.setup();
+    const setup = expressions.setup(pick(core, 'getStartServices'));
 
     return Object.freeze(setup);
   }
@@ -71,13 +65,24 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     setNotifications(core.notifications);
 
     const { expressions } = this;
+
+    const loader: IExpressionLoader = async (element, expression, params) => {
+      const { ExpressionLoader } = await import('./loader');
+      return new ExpressionLoader(element, expression, params);
+    };
+
+    const render: IExpressionRenderer = async (element, data, options) => {
+      const { ExpressionRenderHandler } = await import('./render');
+      const handler = new ExpressionRenderHandler(element, options);
+      handler.render(data as SerializableRecord);
+      return handler;
+    };
+
     const start = {
       ...expressions.start(),
-      ExpressionLoader,
-      ExpressionRenderHandler,
       loader,
-      ReactExpressionRenderer,
       render,
+      ReactExpressionRenderer,
     };
 
     return Object.freeze(start);

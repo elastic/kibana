@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { monaco } from '@kbn/monaco';
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import {
+  euiLightVars as lightTheme,
+  euiDarkVars as darkTheme,
+} from '@kbn/ui-shared-deps-src/theme';
 
 // NOTE: For talk around where this theme information will ultimately live,
 // please see this discuss issue: https://github.com/elastic/kibana/issues/43814
 
 export function createTheme(
   euiTheme: typeof darkTheme | typeof lightTheme,
-  selectionBackgroundColor: string
+  selectionBackgroundColor: string,
+  backgroundColor?: string
 ): monaco.editor.IStandaloneThemeData {
   return {
     base: 'vs',
@@ -32,7 +35,7 @@ export function createTheme(
       { token: 'strong', fontStyle: 'bold' },
 
       { token: 'variable', foreground: euiTheme.euiColorPrimary },
-      { token: 'variable.predefined', foreground: euiTheme.euiColorSecondary },
+      { token: 'variable.predefined', foreground: euiTheme.euiColorSuccess },
       { token: 'constant', foreground: euiTheme.euiColorAccent },
       { token: 'comment', foreground: euiTheme.euiColorMediumShade },
       { token: 'number', foreground: euiTheme.euiColorAccent },
@@ -41,7 +44,7 @@ export function createTheme(
       { token: 'annotation', foreground: euiTheme.euiColorMediumShade },
       { token: 'type', foreground: euiTheme.euiColorVis0 },
 
-      { token: 'delimiter', foreground: euiTheme.euiColorDarkestShade },
+      { token: 'delimiter', foreground: euiTheme.euiTextSubduedColor },
       { token: 'delimiter.html', foreground: euiTheme.euiColorDarkShade },
       { token: 'delimiter.xml', foreground: euiTheme.euiColorPrimary },
 
@@ -49,7 +52,7 @@ export function createTheme(
       { token: 'tag.id.jade', foreground: euiTheme.euiColorPrimary },
       { token: 'tag.class.jade', foreground: euiTheme.euiColorPrimary },
       { token: 'meta.scss', foreground: euiTheme.euiColorAccent },
-      { token: 'metatag', foreground: euiTheme.euiColorSecondary },
+      { token: 'metatag', foreground: euiTheme.euiColorSuccess },
       { token: 'metatag.content.html', foreground: euiTheme.euiColorDanger },
       { token: 'metatag.html', foreground: euiTheme.euiColorMediumShade },
       { token: 'metatag.xml', foreground: euiTheme.euiColorMediumShade },
@@ -60,7 +63,7 @@ export function createTheme(
       { token: 'string.value.json', foreground: euiTheme.euiColorPrimary },
 
       { token: 'attribute.name', foreground: euiTheme.euiColorDanger },
-      { token: 'attribute.name.css', foreground: euiTheme.euiColorSecondary },
+      { token: 'attribute.name.css', foreground: euiTheme.euiColorSuccess },
       { token: 'attribute.value', foreground: euiTheme.euiColorPrimary },
       { token: 'attribute.value.number', foreground: euiTheme.euiColorWarning },
       { token: 'attribute.value.unit', foreground: euiTheme.euiColorWarning },
@@ -81,10 +84,13 @@ export function createTheme(
       { token: 'operator.sql', foreground: euiTheme.euiColorMediumShade },
       { token: 'operator.swift', foreground: euiTheme.euiColorMediumShade },
       { token: 'predefined.sql', foreground: euiTheme.euiColorMediumShade },
+
+      { token: 'text', foreground: euiTheme.euiTitleColor },
+      { token: 'label', foreground: euiTheme.euiColorVis9 },
     ],
     colors: {
       'editor.foreground': euiTheme.euiColorDarkestShade,
-      'editor.background': euiTheme.euiFormBackgroundColor,
+      'editor.background': backgroundColor ?? euiTheme.euiFormBackgroundColor,
       'editorLineNumber.foreground': euiTheme.euiColorDarkShade,
       'editorLineNumber.activeForeground': euiTheme.euiColorDarkShade,
       'editorIndentGuide.background': euiTheme.euiColorLightShade,
@@ -102,5 +108,7 @@ export function createTheme(
 
 const DARK_THEME = createTheme(darkTheme, '#343551');
 const LIGHT_THEME = createTheme(lightTheme, '#E3E4ED');
+const DARK_THEME_TRANSPARENT = createTheme(darkTheme, '#343551', '#00000000');
+const LIGHT_THEME_TRANSPARENT = createTheme(lightTheme, '#E3E4ED', '#00000000');
 
-export { DARK_THEME, LIGHT_THEME };
+export { DARK_THEME, LIGHT_THEME, DARK_THEME_TRANSPARENT, LIGHT_THEME_TRANSPARENT };

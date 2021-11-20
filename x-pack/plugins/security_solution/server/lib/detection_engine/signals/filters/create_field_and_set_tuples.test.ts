@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';
@@ -10,13 +11,13 @@ import { mockLogger, sampleDocWithSortId } from '../__mocks__/es_results';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { getSearchListItemResponseMock } from '../../../../../../lists/common/schemas/response/search_list_item_schema.mock';
-import { EntryList } from '../../../../../../lists/common';
+import type { EntryList } from '@kbn/securitysolution-io-ts-list-types';
 import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock';
 
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();
   let exceptionItem = getExceptionListItemSchemaMock();
-  let events = [sampleDocWithSortId('123', '1.1.1.1')];
+  let events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,7 +44,7 @@ describe('filterEventsAgainstList', () => {
         },
       ],
     };
-    events = [sampleDocWithSortId('123', '1.1.1.1')];
+    events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
   });
 
   afterEach(() => {
@@ -110,7 +111,7 @@ describe('filterEventsAgainstList', () => {
   });
 
   test('it returns a single matched set as a JSON.stringify() set from the "events"', async () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1')];
+    events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
     (exceptionItem.entries[0] as EntryList).field = 'source.ip';
     const [{ matchedSet }] = await createFieldAndSetTuples({
       listClient,
@@ -119,11 +120,14 @@ describe('filterEventsAgainstList', () => {
       exceptionItem,
       buildRuleMessage,
     });
-    expect([...matchedSet]).toEqual([JSON.stringify('1.1.1.1')]);
+    expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1'])]);
   });
 
   test('it returns two matched sets as a JSON.stringify() set from the "events"', async () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1'), sampleDocWithSortId('456', '2.2.2.2')];
+    events = [
+      sampleDocWithSortId('123', undefined, '1.1.1.1'),
+      sampleDocWithSortId('456', undefined, '2.2.2.2'),
+    ];
     (exceptionItem.entries[0] as EntryList).field = 'source.ip';
     const [{ matchedSet }] = await createFieldAndSetTuples({
       listClient,
@@ -132,11 +136,11 @@ describe('filterEventsAgainstList', () => {
       exceptionItem,
       buildRuleMessage,
     });
-    expect([...matchedSet]).toEqual([JSON.stringify('1.1.1.1'), JSON.stringify('2.2.2.2')]);
+    expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1']), JSON.stringify(['2.2.2.2'])]);
   });
 
   test('it returns an array as a set as a JSON.stringify() array from the "events"', async () => {
-    events = [sampleDocWithSortId('123', ['1.1.1.1', '2.2.2.2'])];
+    events = [sampleDocWithSortId('123', undefined, ['1.1.1.1', '2.2.2.2'])];
     (exceptionItem.entries[0] as EntryList).field = 'source.ip';
     const [{ matchedSet }] = await createFieldAndSetTuples({
       listClient,
@@ -149,7 +153,10 @@ describe('filterEventsAgainstList', () => {
   });
 
   test('it returns 2 fields when given two exception list items', async () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1'), sampleDocWithSortId('456', '2.2.2.2')];
+    events = [
+      sampleDocWithSortId('123', undefined, '1.1.1.1'),
+      sampleDocWithSortId('456', undefined, '2.2.2.2'),
+    ];
     exceptionItem.entries = [
       {
         field: 'source.ip',
@@ -181,7 +188,10 @@ describe('filterEventsAgainstList', () => {
   });
 
   test('it returns two matched sets from two different events, one excluded, and one included', async () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1'), sampleDocWithSortId('456', '2.2.2.2')];
+    events = [
+      sampleDocWithSortId('123', undefined, '1.1.1.1'),
+      sampleDocWithSortId('456', undefined, '2.2.2.2'),
+    ];
     exceptionItem.entries = [
       {
         field: 'source.ip',
@@ -214,7 +224,10 @@ describe('filterEventsAgainstList', () => {
   });
 
   test('it returns two fields from two different events', async () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1'), sampleDocWithSortId('456', '2.2.2.2')];
+    events = [
+      sampleDocWithSortId('123', undefined, '1.1.1.1'),
+      sampleDocWithSortId('456', undefined, '2.2.2.2'),
+    ];
     exceptionItem.entries = [
       {
         field: 'source.ip',
@@ -248,8 +261,8 @@ describe('filterEventsAgainstList', () => {
 
   test('it returns two matches from two different events', async () => {
     events = [
-      sampleDocWithSortId('123', '1.1.1.1', '3.3.3.3'),
-      sampleDocWithSortId('456', '2.2.2.2', '5.5.5.5'),
+      sampleDocWithSortId('123', undefined, '1.1.1.1', '3.3.3.3'),
+      sampleDocWithSortId('456', undefined, '2.2.2.2', '5.5.5.5'),
     ];
     exceptionItem.entries = [
       {
@@ -271,17 +284,15 @@ describe('filterEventsAgainstList', () => {
         },
       },
     ];
-    const [
-      { matchedSet: matchedSet1 },
-      { matchedSet: matchedSet2 },
-    ] = await createFieldAndSetTuples({
-      listClient,
-      logger: mockLogger,
-      events,
-      exceptionItem,
-      buildRuleMessage,
-    });
-    expect([...matchedSet1]).toEqual([JSON.stringify('1.1.1.1'), JSON.stringify('2.2.2.2')]);
-    expect([...matchedSet2]).toEqual([JSON.stringify('3.3.3.3'), JSON.stringify('5.5.5.5')]);
+    const [{ matchedSet: matchedSet1 }, { matchedSet: matchedSet2 }] =
+      await createFieldAndSetTuples({
+        listClient,
+        logger: mockLogger,
+        events,
+        exceptionItem,
+        buildRuleMessage,
+      });
+    expect([...matchedSet1]).toEqual([JSON.stringify(['1.1.1.1']), JSON.stringify(['2.2.2.2'])]);
+    expect([...matchedSet2]).toEqual([JSON.stringify(['3.3.3.3']), JSON.stringify(['5.5.5.5'])]);
   });
 });

@@ -127,6 +127,7 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
                   "packetbeat",
                 ],
                 "name": "@timestamp",
+                "readFromDocValues": true,
                 "searchable": true,
                 "type": "date",
               },
@@ -368,6 +369,7 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
                 "format": "",
                 "indexes": Array [
                   "apm-*-transaction*",
+                  "traces-apm*",
                   "auditbeat-*",
                   "endgame-*",
                   "filebeat-*",
@@ -378,6 +380,50 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
                 "name": "event.end",
                 "searchable": true,
                 "type": "date",
+              },
+            },
+          },
+          "nestedField": Object {
+            "fields": Object {
+              "nestedField.firstAttributes": Object {
+                "aggregatable": false,
+                "category": "nestedField",
+                "description": "",
+                "example": "",
+                "format": "",
+                "indexes": Array [
+                  "auditbeat",
+                  "filebeat",
+                  "packetbeat",
+                ],
+                "name": "nestedField.firstAttributes",
+                "searchable": true,
+                "subType": Object {
+                  "nested": Object {
+                    "path": "nestedField",
+                  },
+                },
+                "type": "string",
+              },
+              "nestedField.secondAttributes": Object {
+                "aggregatable": false,
+                "category": "nestedField",
+                "description": "",
+                "example": "",
+                "format": "",
+                "indexes": Array [
+                  "auditbeat",
+                  "filebeat",
+                  "packetbeat",
+                ],
+                "name": "nestedField.secondAttributes",
+                "searchable": true,
+                "subType": Object {
+                  "nested": Object {
+                    "path": "nestedField",
+                  },
+                },
+                "type": "string",
               },
             },
           },
@@ -480,6 +526,7 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
           },
         }
       }
+      isDraggable={true}
       timelineId="test"
     />
   </RowRendererContainer>

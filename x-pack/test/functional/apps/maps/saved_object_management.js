@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -81,7 +82,7 @@ export default function ({ getPageObjects, getService }) {
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
-          expect(hits).to.equal('2');
+          expect(hits).to.equal('1');
         });
 
         it('should override query stored with map when query is provided in app state', async () => {
@@ -119,7 +120,7 @@ export default function ({ getPageObjects, getService }) {
           const currentUrl = await browser.getCurrentUrl();
           const appState = currentUrl.substring(currentUrl.indexOf('_a='));
           expect(appState).to.equal(
-            '_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match:(machine.os.raw:(query:ios,type:phrase))))),query:(language:kuery,query:%27%27))'
+            '_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match_phrase:(machine.os.raw:(query:ios))))),query:(language:kuery,query:%27%27))'
           );
         });
 
@@ -129,7 +130,7 @@ export default function ({ getPageObjects, getService }) {
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
-          expect(hits).to.equal('2');
+          expect(hits).to.equal('1');
         });
       });
     });

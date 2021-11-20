@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { pageObjects } from './page_objects';
@@ -14,17 +14,17 @@ export default async function ({ readConfigFile }) {
 
   return {
     testFiles: [
+      require.resolve('./apps/status_page'),
       require.resolve('./apps/bundles'),
       require.resolve('./apps/console'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
+      require.resolve('./apps/dashboard_elements'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/getting_started'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
-      require.resolve('./apps/status_page'),
-      require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
     ],
     pageObjects,
@@ -32,15 +32,20 @@ export default async function ({ readConfigFile }) {
 
     servers: commonConfig.get('servers'),
 
-    esTestCluster: commonConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...commonConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
 
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
-        '--oss',
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
+
+        // to be re-enabled once kibana/issues/102552 is completed
+        '--xpack.reporting.enabled=false',
       ],
     },
 
@@ -48,7 +53,8 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:visualize:legacyChartsLibrary': true,
+        'visualization:visualize:legacyPieChartsLibrary': true,
+        'visualization:useLegacyTimeAxis': true,
       },
     },
 
@@ -82,9 +88,6 @@ export default async function ({ readConfigFile }) {
       settings: {
         pathname: '/app/management',
       },
-      timelion: {
-        pathname: '/app/timelion',
-      },
       console: {
         pathname: '/app/dev_tools',
         hash: '/console',
@@ -92,6 +95,15 @@ export default async function ({ readConfigFile }) {
       home: {
         pathname: '/app/home',
         hash: '/',
+      },
+      observabilityCases: {
+        pathname: '/app/observability/cases',
+      },
+      fleet: {
+        pathname: '/app/fleet',
+      },
+      integrations: {
+        pathname: '/app/integrations',
       },
     },
     junit: {
@@ -159,6 +171,20 @@ export default async function ({ readConfigFile }) {
           },
           kibana: [],
         },
+        test_field_formatters: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['field_formats_management_functional_tests*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
         //for sample data - can remove but not add sample data.( not ml)- for ml use built in role.
         kibana_sample_admin: {
           elasticsearch: {
@@ -167,6 +193,21 @@ export default async function ({ readConfigFile }) {
               {
                 names: ['kibana_sample*'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        kibana_sample_read: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['kibana_sample*'],
+                privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
             ],
@@ -220,6 +261,35 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        kibana_date_nested: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['date-nested'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        kibana_message_with_newline: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['newline-test'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_timefield: {
           elasticsearch: {
             cluster: [],
@@ -256,6 +326,21 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['long-window-logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        'test-index-unmapped-fields': {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['test-index-unmapped-fields'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

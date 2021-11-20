@@ -35,7 +35,7 @@ source ~/.zshrc
 Open your `kibana.dev.yml` file and add these lines:
 
 ```sh
-xpack.security_solution.signalsIndex: .siem-signals-${your user id}
+xpack.securitySolution.signalsIndex: .siem-signals-${your user id}
 ```
 
 Restart Kibana and ensure that you are using `--no-base-path` as changing the base path is a feature but will
@@ -152,8 +152,8 @@ logging.events:
 ```
 
 See these two README.md's pages for more references on the alerting and actions API:
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/alerts/README.md
-https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions
+https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/README.md
+https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions
 
 ### Signals API
 

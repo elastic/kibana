@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Direct Outbound SMB Connection",
   "query": "sequence by process.entity_id\n  [process where event.type == \"start\" and process.pid != 4]\n  [network where destination.port == 445 and process.pid != 4 and\n     not cidrmatch(destination.ip, \"127.0.0.1\", \"::1\")]\n",
   "risk_score": 47,
@@ -32,13 +33,20 @@
       },
       "technique": [
         {
-          "id": "T1210",
-          "name": "Exploitation of Remote Services",
-          "reference": "https://attack.mitre.org/techniques/T1210/"
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/",
+          "subtechnique": [
+            {
+              "id": "T1021.002",
+              "name": "SMB/Windows Admin Shares",
+              "reference": "https://attack.mitre.org/techniques/T1021/002/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 7
 }

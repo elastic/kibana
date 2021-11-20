@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
 import dedent from 'dedent';
+import { kea, MakeLogicType } from 'kea';
 import { isPlainObject, chunk, uniq } from 'lodash';
 
 import { HttpLogic } from '../../../shared/http';
@@ -180,7 +181,10 @@ export const DocumentCreationLogic = kea<
 
       const promises = chunk(documents, CHUNK_SIZE).map((documentsChunk) => {
         const body = JSON.stringify({ documents: documentsChunk });
-        return http.post(`/api/app_search/engines/${engineName}/documents`, { body });
+        return http.post<DocumentCreationSummary>(
+          `/internal/app_search/engines/${engineName}/documents`,
+          { body }
+        );
       });
 
       try {

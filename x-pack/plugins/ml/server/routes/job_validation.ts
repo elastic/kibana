@@ -1,35 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
+import type { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   estimateBucketSpanSchema,
   modelMemoryLimitSchema,
   validateCardinalitySchema,
   validateJobSchema,
+  validateDatafeedPreviewSchema,
 } from './schemas/job_validation_schema';
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
-import { validateJob, validateCardinality } from '../models/job_validation';
+import {
+  validateJob,
+  validateCardinality,
+  validateDatafeedPreview,
+} from '../models/job_validation';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
+import { CombinedJob } from '../../common/types/anomaly_detection_jobs';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 
 /**
  * Routes for job validation
  */
-export function jobValidationRoutes(
-  { router, mlLicense, routeGuard }: RouteInitialization,
-  version: string
-) {
+export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInitialization) {
   function calculateModelMemoryLimit(
     client: IScopedClusterClient,
     mlClient: MlClient,
@@ -82,8 +87,7 @@ export function jobValidationRoutes(
         const resp = await estimateBucketSpanFactory(client)(request.body)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
-          // this doesn't return a HTTP error but an object with an error message
-          // which the client is then handling. triggering a HTTP error would be
+          // this doesn't return a HTTP error but an object with an error message a HTTP error would be
           // too severe for this case.
           .catch((error: any) => {
             errorResp = {
@@ -158,6 +162,7 @@ export function jobValidationRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
+        // @ts-expect-error datafeed config is incorrect
         const resp = await validateCardinality(client, request.body);
 
         return response.ok({
@@ -190,13 +195,48 @@ export function jobValidationRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        // version corresponds to the version used in documentation links.
         const resp = await validateJob(
           client,
           mlClient,
           request.body,
-          version,
+          getAuthorizationHeader(request),
           mlLicense.isSecurityEnabled() === false
+        );
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFeedPreviewValidation
+   *
+   * @api {post} /api/ml/validate/datafeed_preview Validates datafeed preview
+   * @apiName ValidateDataFeedPreview
+   * @apiDescription Validates that the datafeed preview runs successfully and produces results
+   *
+   * @apiSchema (body) validateDatafeedPreviewSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/validate/datafeed_preview',
+      validate: {
+        body: validateDatafeedPreviewSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const resp = await validateDatafeedPreview(
+          mlClient,
+          getAuthorizationHeader(request),
+          request.body.job as CombinedJob
         );
 
         return response.ok({

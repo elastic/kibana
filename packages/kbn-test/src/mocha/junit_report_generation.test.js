@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
+import { promisify } from 'util';
 
-import { fromNode as fcb } from 'bluebird';
 import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
@@ -21,6 +21,8 @@ const PROJECT_DIR = resolve(__dirname, '__fixtures__/project');
 const DURATION_REGEX = /^\d+\.\d{3}$/;
 const ISO_DATE_SEC_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
 const XML_PATH = getUniqueJunitReportPath(PROJECT_DIR, 'test');
+
+const parseStringAsync = promisify(parseString);
 
 describe('dev/mocha/junit report generation', () => {
   afterEach(() => {
@@ -39,7 +41,7 @@ describe('dev/mocha/junit report generation', () => {
 
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise((resolve) => mocha.run(resolve));
-    const report = await fcb((cb) => parseString(readFileSync(XML_PATH), cb));
+    const report = await parseStringAsync(await readFile(XML_PATH));
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).toEqual({

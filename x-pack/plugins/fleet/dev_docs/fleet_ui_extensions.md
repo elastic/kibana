@@ -44,7 +44,7 @@ export class Plugin {
 
 > The code above lives in `x-pack/plugins/security_solution/public/plugin.tsx`
 
-For a list of supported Fleet UI extensions, see the `UIExtensionPoint` and associated Union types defined here: `x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts`.
+For a list of supported Fleet UI extensions, see the `UIExtensionPoint` and associated Union types defined here: `x-pack/plugins/fleet/public/types/ui_extensions.ts`.
 
 
 
@@ -81,4 +81,4 @@ const LinkToAgentEnroll = () => {
 }
 ```
 
-For a list of supported Fleet pages, see the type `AnyIntraAppRouteState` and its associated Union types in `x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts`
+For a list of supported Fleet pages, see the type `AnyIntraAppRouteState` and its associated Union types in `x-pack/plugins/fleet/public/types/intra_app_route_state.ts`

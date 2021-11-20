@@ -28,6 +28,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
         securityJobs={
           Array [
             Object {
+              "awaitingNodeAssignment": false,
               "datafeedId": "datafeed-linux_anomalous_network_activity_ecs",
               "datafeedIndices": Array [
                 "auditbeat-*",
@@ -48,6 +49,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
               "isInstalled": true,
               "isSingleMetricViewerJob": true,
               "jobState": "closed",
+              "jobTags": Object {},
               "latestResultsTimestampMs": 1571022900000,
               "latestTimestampMs": 1571022859393,
               "memory_status": "ok",
@@ -55,6 +57,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
               "processed_record_count": 32010,
             },
             Object {
+              "awaitingNodeAssignment": false,
               "datafeedId": "datafeed-rare_process_by_host_linux_ecs",
               "datafeedIndices": Array [
                 "auditbeat-*",
@@ -74,11 +77,13 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
               "isInstalled": true,
               "isSingleMetricViewerJob": true,
               "jobState": "closed",
+              "jobTags": Object {},
               "memory_status": "ok",
               "moduleId": "siem_auditbeat",
               "processed_record_count": 0,
             },
             Object {
+              "awaitingNodeAssignment": false,
               "datafeedId": "",
               "datafeedIndices": Array [],
               "datafeedState": "",
@@ -96,6 +101,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
               "isInstalled": false,
               "isSingleMetricViewerJob": false,
               "jobState": "",
+              "jobTags": Object {},
               "memory_status": "",
               "moduleId": "siem_winlogbeat",
               "processed_record_count": 0,

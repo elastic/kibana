@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
@@ -14,15 +14,26 @@ import {
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
+  getJobActionString,
+  JOB_ACTION_TASK,
+  JOB_ACTION_TASKS,
+  JOB_ACTION,
+  JobAction,
+} from '../../../common/constants/job_actions';
+import {
   MlSummaryJob,
   AuditMessage,
   DatafeedWithStats,
   CombinedJobWithStats,
+  Datafeed,
+  Job,
 } from '../../../common/types/anomaly_detection_jobs';
 import {
   MlJobsResponse,
   MlJobsStatsResponse,
   JobsExistResponse,
+  BulkCreateResults,
+  ResetJobsResponse,
 } from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
@@ -36,6 +47,11 @@ import {
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
+import { isPopulatedObject } from '../../../common/util/object_utils';
+import type { RulesClient } from '../../../../alerting/server';
+import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
+import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
+import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 interface Results {
   [id: string]: {
@@ -44,10 +60,17 @@ interface Results {
   };
 }
 
-export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
+export function jobsProvider(
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  rulesClient?: RulesClient
+) {
   const { asInternalUser } = client;
 
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId, getDatafeedByJobId } = datafeedsProvider(
+    client,
+    mlClient
+  );
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(mlClient);
   const calMngr = new CalendarManager(mlClient);
@@ -129,6 +152,29 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     return results;
   }
 
+  async function resetJobs(jobIds: string[]) {
+    const results: ResetJobsResponse = {};
+    for (const jobId of jobIds) {
+      try {
+        const {
+          // @ts-expect-error @elastic-elasticsearch resetJob response incorrect, missing task
+          body: { task },
+        } = await mlClient.resetJob({
+          job_id: jobId,
+          wait_for_completion: false,
+        });
+        results[jobId] = { reset: true, task };
+      } catch (error) {
+        if (isRequestTimeout(error)) {
+          return fillResultsWithTimeouts(results, jobId, jobIds, JOB_ACTION.RESET);
+        } else {
+          results[jobId] = { reset: false, error: error.body };
+        }
+      }
+    }
+    return results;
+  }
+
   async function forceStopAndCloseJob(jobId: string) {
     const datafeedIds = await getDatafeedIdsByJobId();
     const datafeedId = datafeedIds[jobId];
@@ -136,7 +182,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
-    const { body } = await mlClient.stopDatafeed({ datafeed_id: datafeedId, force: true });
+    const { body } = await mlClient.stopDatafeed({
+      datafeed_id: datafeedId,
+      body: { force: true },
+    });
     if (body.stopped !== true) {
       return { success: false };
     }
@@ -162,13 +211,8 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       // fail silently
     }
 
-    const deletingStr = i18n.translate('xpack.ml.models.jobService.deletingJob', {
-      defaultMessage: 'deleting',
-    });
-
     const jobs = fullJobsList.map((job) => {
-      const hasDatafeed =
-        typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+      const hasDatafeed = isPopulatedObject(job.datafeed_config);
       const dataCounts = job.data_counts;
       const errorMessage = getSingleMetricViewerJobErrorMessage(job);
 
@@ -183,7 +227,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
           parseTimeIntervalForJob(job.analysis_config?.bucket_span)
         ),
         memory_status: job.model_size_stats ? job.model_size_stats.memory_status : '',
-        jobState: job.deleting === true ? deletingStr : job.state,
+        jobState: job.blocked === undefined ? job.state : getJobActionString(job.blocked.reason),
         hasDatafeed,
         datafeedId:
           hasDatafeed && job.datafeed_config.datafeed_id ? job.datafeed_config.datafeed_id : '',
@@ -199,8 +243,12 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         isSingleMetricViewerJob: errorMessage === undefined,
         isNotSingleMetricViewerJobMessage: errorMessage,
         nodeName: job.node ? job.node.name : undefined,
-        deleting: job.deleting || undefined,
+        blocked: job.blocked ?? undefined,
+        awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
+        alertingRules: job.alerting_rules,
+        jobTags: job.custom_settings?.job_tags ?? {},
       };
+
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
       }
@@ -227,8 +275,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
 
     const jobs = fullJobsList.map((job) => {
       jobsMap[job.job_id] = job.groups || [];
-      const hasDatafeed =
-        typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+      const hasDatafeed = isPopulatedObject(job.datafeed_config);
       const timeRange: { to?: number; from?: number } = {};
 
       const dataCounts = job.data_counts;
@@ -257,6 +304,25 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     return { jobs, jobsMap };
   }
 
+  async function getJobForCloning(jobId: string) {
+    const [{ body: jobResults }, datafeedResult] = await Promise.all([
+      mlClient.getJobs<MlJobsResponse>({ job_id: jobId, exclude_generated: true }),
+      getDatafeedByJobId(jobId, true),
+    ]);
+    const result: { datafeed?: Datafeed; job?: Job } = { job: undefined, datafeed: undefined };
+    if (datafeedResult && datafeedResult.job_id === jobId) {
+      result.datafeed = datafeedResult;
+    }
+
+    if (jobResults && jobResults.jobs) {
+      const job = jobResults.jobs.find((j) => j.job_id === jobId);
+      if (job) {
+        result.job = job;
+      }
+    }
+    return result;
+  }
+
   async function createFullJobsList(jobIds: string[] = []) {
     const jobs: CombinedJobWithStats[] = [];
     const groups: { [jobId: string]: string[] } = {};
@@ -265,6 +331,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     const globalCalendars: string[] = [];
 
     const jobIdsString = jobIds.join();
+
     const [
       { body: jobResults },
       { body: jobStatsResults },
@@ -382,32 +449,79 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
 
         jobs.push(tempJob);
       });
+
+      if (rulesClient) {
+        const mlAlertingRules = await rulesClient.find<MlAnomalyDetectionAlertParams>({
+          options: {
+            filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}`,
+            perPage: 1000,
+          },
+        });
+
+        mlAlertingRules.data.forEach((curr) => {
+          const {
+            params: {
+              jobSelection: { jobIds: ruleJobIds, groupIds: ruleGroupIds },
+            },
+          } = curr;
+
+          jobs.forEach((j) => {
+            const isIncluded =
+              (Array.isArray(ruleJobIds) && ruleJobIds.includes(j.job_id)) ||
+              (Array.isArray(ruleGroupIds) &&
+                Array.isArray(j.groups) &&
+                j.groups.some((g) => ruleGroupIds.includes(g)));
+
+            if (isIncluded) {
+              if (Array.isArray(j.alerting_rules)) {
+                j.alerting_rules.push(curr);
+              } else {
+                j.alerting_rules = [curr];
+              }
+            }
+          });
+        });
+      }
     }
     return jobs;
   }
 
-  async function deletingJobTasks() {
-    const actions = ['cluster:admin/xpack/ml/job/delete'];
-    const detailed = true;
-    const jobIds: string[] = [];
+  async function blockingJobTasks() {
+    const jobs: Array<Record<string, JobAction>> = [];
     try {
-      const { body } = await asInternalUser.tasks.list({ actions, detailed });
-      Object.keys(body.nodes).forEach((nodeId) => {
-        const tasks = body.nodes[nodeId].tasks;
-        Object.keys(tasks).forEach((taskId) => {
-          jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
-        });
+      const { body } = await asInternalUser.tasks.list({
+        actions: JOB_ACTION_TASKS,
+        detailed: true,
       });
+
+      if (body.nodes !== undefined) {
+        Object.values(body.nodes).forEach(({ tasks }) => {
+          Object.values(tasks).forEach(({ action, description }) => {
+            if (description === undefined) {
+              return;
+            }
+            if (JOB_ACTION_TASK[action] === JOB_ACTION.DELETE) {
+              jobs.push({ [description.replace(/^delete-job-/, '')]: JOB_ACTION.DELETE });
+            } else {
+              jobs.push({ [description]: JOB_ACTION_TASK[action] });
+            }
+          });
+        });
+      }
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
       const {
-        body: { jobs },
-      } = await mlClient.getJobs<MlJobsResponse>();
+        body: { jobs: tempJobs },
+      } = await mlClient.getJobs();
 
-      jobIds.push(...jobs.filter((j) => j.deleting === true).map((j) => j.job_id));
+      jobs.push(
+        ...tempJobs
+          .filter((j) => j.blocked !== undefined)
+          .map((j) => ({ [j.job_id]: j.blocked!.reason }))
+      );
     }
-    return { jobIds };
+    return { jobs };
   }
 
   // Checks if each of the jobs in the specified list of IDs exist.
@@ -495,17 +609,55 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     return false;
   }
 
+  function isJobAwaitingNodeAssignment(job: CombinedJobWithStats) {
+    return job.node === undefined && job.state === JOB_STATE.OPENING;
+  }
+
+  async function bulkCreate(
+    jobs: Array<{ job: Job; datafeed: Datafeed }>,
+    authHeader: AuthorizationHeader
+  ) {
+    const results: BulkCreateResults = {};
+    await Promise.all(
+      jobs.map(async ({ job, datafeed }) => {
+        results[job.job_id] = { job: { success: false }, datafeed: { success: false } };
+
+        try {
+          await mlClient.putJob({ job_id: job.job_id, body: job });
+          results[job.job_id].job = { success: true };
+        } catch (error) {
+          results[job.job_id].job = { success: false, error: error.body ?? error };
+        }
+
+        try {
+          await mlClient.putDatafeed(
+            { datafeed_id: datafeed.datafeed_id, body: datafeed },
+            authHeader
+          );
+          results[job.job_id].datafeed = { success: true };
+        } catch (error) {
+          results[job.job_id].datafeed = { success: false, error: error.body ?? error };
+        }
+      })
+    );
+
+    return results;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
     closeJobs,
+    resetJobs,
     forceStopAndCloseJob,
     jobsSummary,
     jobsWithTimerange,
+    getJobForCloning,
     createFullJobsList,
-    deletingJobTasks,
+    blockingJobTasks,
     jobsExist,
     getAllJobAndGroupIds,
     getLookBackProgress,
+    bulkCreate,
   };
 }

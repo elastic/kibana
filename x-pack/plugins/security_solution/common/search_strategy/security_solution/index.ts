@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   HostDetailsStrategyResponse,
@@ -14,7 +15,6 @@ import {
   HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
   HostFirstLastSeenStrategyResponse,
-  HostFirstLastSeenRequestOptions,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
@@ -27,6 +27,9 @@ import {
   HostsKpiHostsRequestOptions,
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
+  HostFirstLastSeenRequestOptions,
+  HostsRiskScoreStrategyResponse,
+  HostsRiskScoreRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -60,33 +63,48 @@ import {
 } from './network';
 import {
   MatrixHistogramQuery,
+  MatrixHistogramQueryEntities,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
+import { TimerangeInput, SortField, PaginationInput, PaginationInputPaginated } from '../common';
 import {
-  DocValueFields,
-  TimerangeInput,
-  SortField,
-  PaginationInput,
-  PaginationInputPaginated,
-} from '../common';
+  CtiEventEnrichmentRequestOptions,
+  CtiEventEnrichmentStrategyResponse,
+  CtiQueries,
+} from './cti';
+import {
+  HostRulesRequestOptions,
+  HostRulesStrategyResponse,
+  HostTacticsRequestOptions,
+  HostTacticsStrategyResponse,
+  RiskScoreRequestOptions,
+  RiskScoreStrategyResponse,
+  UebaQueries,
+  UserRulesRequestOptions,
+  UserRulesStrategyResponse,
+} from './ueba';
 
 export * from './hosts';
 export * from './matrix_histogram';
 export * from './network';
+export * from './ueba';
 
 export type FactoryQueryTypes =
   | HostsQueries
   | HostsKpiQueries
+  | UebaQueries
   | NetworkQueries
   | NetworkKpiQueries
-  | typeof MatrixHistogramQuery;
+  | CtiQueries
+  | typeof MatrixHistogramQuery
+  | typeof MatrixHistogramQueryEntities;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: DocValueFields[];
+  docValueFields?: estypes.SearchDocValueField[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
@@ -106,11 +124,21 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
+  : T extends UebaQueries.riskScore
+  ? RiskScoreStrategyResponse
+  : T extends HostsQueries.hostsRiskScore
+  ? HostsRiskScoreStrategyResponse
+  : T extends UebaQueries.hostRules
+  ? HostRulesStrategyResponse
+  : T extends UebaQueries.userRules
+  ? UserRulesStrategyResponse
+  : T extends UebaQueries.hostTactics
+  ? HostTacticsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications
   ? HostAuthenticationsStrategyResponse
-  : T extends HostsQueries.firstLastSeen
+  : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
@@ -148,17 +176,21 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkKpiUniquePrivateIpsStrategyResponse
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramStrategyResponse
+  : T extends CtiQueries.eventEnrichment
+  ? CtiEventEnrichmentStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
+  : T extends HostsQueries.hostsRiskScore
+  ? HostsRiskScoreRequestOptions
   : T extends HostsQueries.details
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
   : T extends HostsQueries.authentications
   ? HostAuthenticationsRequestOptions
-  : T extends HostsQueries.firstLastSeen
+  : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesRequestOptions
@@ -194,6 +226,22 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkKpiUniqueFlowsRequestOptions
   : T extends NetworkKpiQueries.uniquePrivateIps
   ? NetworkKpiUniquePrivateIpsRequestOptions
+  : T extends UebaQueries.riskScore
+  ? RiskScoreRequestOptions
+  : T extends UebaQueries.hostRules
+  ? HostRulesRequestOptions
+  : T extends UebaQueries.userRules
+  ? UserRulesRequestOptions
+  : T extends UebaQueries.hostTactics
+  ? HostTacticsRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
+  : T extends CtiQueries.eventEnrichment
+  ? CtiEventEnrichmentRequestOptions
   : never;
+
+export interface DocValueFieldsInput {
+  field: string;
+
+  format: string;
+}

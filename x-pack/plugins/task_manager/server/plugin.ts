@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { first, map, distinctUntilChanged } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs/operators';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -14,37 +17,50 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '../../../../src/core/server';
-import { TaskDefinition } from './task';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects } from './saved_objects';
-import { TaskTypeDictionary } from './task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import { EphemeralTask } from './task';
+import { registerTaskManagerUsageCollector } from './usage';
+import { TASK_MANAGER_INDEX } from './constants';
 
-export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
-  TaskTypeDictionary,
-  'registerTaskDefinitions'
->;
+export interface TaskManagerSetupContract {
+  /**
+   * @deprecated
+   */
+  index: string;
+  addMiddleware: (middleware: Middleware) => void;
+  /**
+   * Method for allowing consumers to register task definitions into the system.
+   * @param taskDefinitions - The Kibana task definitions dictionary
+   */
+  registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+}
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
-  'schedule' | 'runNow' | 'ensureScheduled'
+  'schedule' | 'runNow' | 'ephemeralRunNow' | 'ensureScheduled'
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
-  };
+  } & { supportsEphemeralTasks: () => boolean };
 
 export class TaskManagerPlugin
-  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
+  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
+{
   private taskPollingLifecycle?: TaskPollingLifecycle;
+  private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;
-  private config?: TaskManagerConfig;
+  private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
@@ -54,15 +70,14 @@ export class TaskManagerPlugin
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
+    this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
-  public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
-    this.config = await this.initContext.config
-      .create<TaskManagerConfig>()
-      .pipe(first())
-      .toPromise();
-
+  public setup(
+    core: CoreSetup,
+    plugins: { usageCollection?: UsageCollectionSetup }
+  ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
     setupSavedObjects(core.savedObjects, this.config);
@@ -79,7 +94,7 @@ export class TaskManagerPlugin
 
     // Routes
     const router = core.http.createRouter();
-    const serviceStatus$ = healthRoute(
+    const { serviceStatus$, monitoredHealth$ } = healthRoute(
       router,
       this.monitoringStats$,
       this.logger,
@@ -87,37 +102,65 @@ export class TaskManagerPlugin
       this.config!
     );
 
-    core.getStartServices().then(async () => {
-      core.status.set(
-        combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
-          map(([derivedStatus, serviceStatus]) =>
-            serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
-          )
+    core.status.derivedStatus$.subscribe((status) =>
+      this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
+    );
+    serviceStatus$.subscribe((status) =>
+      this.logger.debug(`status serviceStatus now set to ${status.level}`)
+    );
+
+    // here is where the system status is updated
+    core.status.set(
+      combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
+        map(([derivedStatus, serviceStatus]) =>
+          serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
         )
+      )
+    );
+
+    const usageCollection = plugins.usageCollection;
+    if (usageCollection) {
+      registerTaskManagerUsageCollector(
+        usageCollection,
+        monitoredHealth$,
+        this.config.ephemeral_tasks.enabled,
+        this.config.ephemeral_tasks.request_capacity,
+        this.config.unsafe.exclude_task_types
       );
-    });
+    }
+
+    if (this.config.unsafe.exclude_task_types.length) {
+      this.logger.warn(
+        `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
+      );
+    }
 
     return {
+      index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
-      registerTaskDefinitions: (taskDefinition: Record<string, TaskDefinition>) => {
+      registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.assertStillInSetup('register task definitions');
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
     };
   }
 
-  public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
+  public start({
+    savedObjects,
+    elasticsearch,
+    executionContext,
+  }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
+    const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
-      serializer: savedObjects.createSerializer(),
+      serializer,
       savedObjectsRepository,
-      esClient: elasticsearch.createClient('taskManager').asInternalUser,
-      index: this.config!.index,
-      maxAttempts: this.config!.max_attempts,
+      esClient: elasticsearch.client.asInternalUser,
+      index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });
@@ -133,14 +176,27 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       taskStore,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       ...managedConfiguration,
     });
 
+    this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
+      config: this.config!,
+      definitions: this.definitions,
+      logger: this.logger,
+      executionContext,
+      middleware: this.middleware,
+      elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+      pool: this.taskPollingLifecycle.pool,
+      lifecycleEvent: this.taskPollingLifecycle.events,
+    });
+
     createMonitoringStats(
       this.taskPollingLifecycle,
+      this.ephemeralTaskLifecycle,
       taskStore,
       this.elasticsearchAndSOAvailability$!,
       this.config!,
@@ -153,6 +209,9 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
+      definitions: this.definitions,
+      taskManagerId: taskStore.taskManagerId,
     });
 
     return {
@@ -163,6 +222,8 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
+      ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
+      supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled,
     };
   }
 

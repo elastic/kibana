@@ -1,35 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LogicMounter } from '../../../../../__mocks__/kea.mock';
-
 import {
+  LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
-  expectedAsyncError,
-} from '../../../../../__mocks__';
+  mockKibanaValues,
+} from '../../../../../__mocks__/kea_logic';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+
+import { nextTick } from '@kbn/test/jest';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
   SourceLogic: { values: { contentSource } },
 }));
 
-import { AppLogic } from '../../../../app_logic';
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
+import { AppLogic } from '../../../../app_logic';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 import { LEAVE_UNASSIGNED_FIELD } from './constants';
-
 import { DisplaySettingsLogic, defaultSearchResultConfig } from './display_settings_logic';
 
 describe('DisplaySettingsLogic', () => {
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { navigateToUrl } = mockKibanaValues;
+  const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(DisplaySettingsLogic);
 
   const { searchResultConfig, exampleDocuments } = exampleResult;
@@ -44,11 +48,16 @@ describe('DisplaySettingsLogic', () => {
     serverRoute: '',
     editFieldIndex: null,
     dataLoading: true,
+    navigatingBetweenTabs: false,
     addFieldModalVisible: false,
     titleFieldHover: false,
     urlFieldHover: false,
     subtitleFieldHover: false,
     descriptionFieldHover: false,
+    typeFieldHover: false,
+    mediaTypeFieldHover: false,
+    createdByFieldHover: false,
+    updatedByFieldHover: false,
     fieldOptions: [],
     optionalFieldOptions: [
       {
@@ -103,7 +112,7 @@ describe('DisplaySettingsLogic', () => {
         serverProps.searchResultConfig
       );
 
-      expect(setSuccessMessage).toHaveBeenCalled();
+      expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('handles empty color', () => {
@@ -179,6 +188,50 @@ describe('DisplaySettingsLogic', () => {
       });
     });
 
+    it('setTypeField', () => {
+      const TYPE = 'new type';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setTypeField(TYPE);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        typeField: TYPE,
+      });
+    });
+
+    it('setMediaTypeField', () => {
+      const MEDIA_TYPE = 'new media type';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setMediaTypeField(MEDIA_TYPE);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        mediaTypeField: MEDIA_TYPE,
+      });
+    });
+
+    it('setCreatedByField', () => {
+      const CREATED_BY = 'new created by';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setCreatedByField(CREATED_BY);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        createdByField: CREATED_BY,
+      });
+    });
+
+    it('setUpdatedByField', () => {
+      const UPDATED_BY = 'new updated by';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setUpdatedByField(UPDATED_BY);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        updatedByField: UPDATED_BY,
+      });
+    });
+
     it('setDetailFields', () => {
       const result = {
         destination: {
@@ -205,6 +258,12 @@ describe('DisplaySettingsLogic', () => {
         ...searchResultConfig,
         detailFields: [searchResultConfig.detailFields[1]],
       });
+    });
+
+    it('setNavigatingBetweenTabs', () => {
+      DisplaySettingsLogic.actions.setNavigatingBetweenTabs(true);
+
+      expect(DisplaySettingsLogic.values.navigatingBetweenTabs).toEqual(true);
     });
 
     it('addDetailField', () => {
@@ -277,6 +336,36 @@ describe('DisplaySettingsLogic', () => {
 
       expect(DisplaySettingsLogic.values.urlFieldHover).toEqual(!defaultValues.urlFieldHover);
     });
+
+    it('toggleTypeFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleTypeFieldHover();
+
+      expect(DisplaySettingsLogic.values.typeFieldHover).toEqual(!defaultValues.typeFieldHover);
+    });
+
+    it('toggleMediaTypeFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleMediaTypeFieldHover();
+
+      expect(DisplaySettingsLogic.values.mediaTypeFieldHover).toEqual(
+        !defaultValues.mediaTypeFieldHover
+      );
+    });
+
+    it('toggleCreatedByFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleCreatedByFieldHover();
+
+      expect(DisplaySettingsLogic.values.createdByFieldHover).toEqual(
+        !defaultValues.createdByFieldHover
+      );
+    });
+
+    it('toggleUpdatedByFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleUpdatedByFieldHover();
+
+      expect(DisplaySettingsLogic.values.updatedByFieldHover).toEqual(
+        !defaultValues.updatedByFieldHover
+      );
+    });
   });
 
   describe('listeners', () => {
@@ -286,14 +375,13 @@ describe('DisplaySettingsLogic', () => {
           DisplaySettingsLogic.actions,
           'onInitializeDisplaySettings'
         );
-        const promise = Promise.resolve(serverProps);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(serverProps));
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/display_settings/config'
+          '/internal/workplace_search/org/sources/source123/display_settings/config'
         );
-        await promise;
+        await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({
           ...serverProps,
           isOrganization: true,
@@ -307,27 +395,21 @@ describe('DisplaySettingsLogic', () => {
           DisplaySettingsLogic.actions,
           'onInitializeDisplaySettings'
         );
-        const promise = Promise.resolve(serverProps);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(serverProps));
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/display_settings/config'
+          '/internal/workplace_search/account/sources/source123/display_settings/config'
         );
-        await promise;
+        await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({
           ...serverProps,
           isOrganization: false,
         });
       });
 
-      it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.get.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         DisplaySettingsLogic.actions.initializeDisplaySettings();
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -337,27 +419,46 @@ describe('DisplaySettingsLogic', () => {
           DisplaySettingsLogic.actions,
           'setServerResponseData'
         );
-        const promise = Promise.resolve(serverProps);
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.resolve(serverProps));
         DisplaySettingsLogic.actions.onInitializeDisplaySettings(serverProps);
         DisplaySettingsLogic.actions.setServerData();
 
         expect(http.post).toHaveBeenCalledWith(serverProps.serverRoute, {
           body: JSON.stringify({ ...searchResultConfig }),
         });
-        await promise;
+        await nextTick();
         expect(setServerResponseDataSpy).toHaveBeenCalledWith({
           ...serverProps,
         });
       });
 
-      it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.post.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         DisplaySettingsLogic.actions.setServerData();
-        await expectedAsyncError(promise);
+      });
+    });
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+    describe('handleSelectedTabChanged', () => {
+      beforeEach(() => {
+        DisplaySettingsLogic.actions.onInitializeDisplaySettings(serverProps);
+      });
+
+      it('calls sets navigatingBetweenTabs', async () => {
+        const setNavigatingBetweenTabsSpy = jest.spyOn(
+          DisplaySettingsLogic.actions,
+          'setNavigatingBetweenTabs'
+        );
+        DisplaySettingsLogic.actions.handleSelectedTabChanged('search_results');
+        await nextTick();
+
+        expect(setNavigatingBetweenTabsSpy).toHaveBeenCalledWith(true);
+        expect(navigateToUrl).toHaveBeenCalledWith('/p/sources/123/display_settings/');
+      });
+
+      it('calls calls correct route for "result_detail"', async () => {
+        DisplaySettingsLogic.actions.handleSelectedTabChanged('result_detail');
+        await nextTick();
+
+        expect(navigateToUrl).toHaveBeenCalledWith('/p/sources/123/display_settings/result_detail');
       });
     });
   });

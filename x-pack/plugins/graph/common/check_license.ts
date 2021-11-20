@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -16,7 +17,7 @@ export function assertNever(x: never): never {
 export interface GraphLicenseInformation {
   showAppLink: boolean;
   enableAppLink: boolean;
-  message: string;
+  message?: string;
 }
 
 export function checkLicense(license: ILicense | undefined): GraphLicenseInformation {
@@ -52,20 +53,19 @@ export function checkLicense(license: ILicense | undefined): GraphLicenseInforma
       return {
         showAppLink: true,
         enableAppLink: false,
-        message: check.message || '',
+        message: check.message,
       };
     case 'invalid':
     case 'unavailable':
       return {
         showAppLink: false,
         enableAppLink: false,
-        message: check.message || '',
+        message: check.message,
       };
     case 'valid':
       return {
         showAppLink: true,
         enableAppLink: true,
-        message: '',
       };
     default:
       return assertNever(check.state);

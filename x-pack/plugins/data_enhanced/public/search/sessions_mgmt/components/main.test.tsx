@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockedKeys } from '@kbn/utility-types/jest';
@@ -12,14 +13,20 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SessionsConfigSchema } from '..';
+import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
-import { LocaleWrapper, mockUrls } from '../__mocks__';
+import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { managementPluginMock } from '../../../../../../../src/plugins/management/public/mocks';
+import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
+import { sharePluginMock } from '../../../../../../../src/plugins/share/public/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
+let mockShareStart: jest.Mocked<SharePluginStart>;
+let mockPluginsSetup: IManagementSectionsPluginsSetup;
 let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
 let api: SearchSessionsMgmtAPI;
@@ -28,6 +35,11 @@ describe('Background Search Session Management Main', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    mockShareStart = sharePluginMock.createStartContract();
+    mockPluginsSetup = {
+      data: dataPluginMock.createSetupContract(),
+      management: managementPluginMock.createSetupContract(),
+    };
     mockConfig = {
       defaultExpiration: moment.duration('7d'),
       management: {
@@ -41,7 +53,7 @@ describe('Background Search Session Management Main', () => {
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
     api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-      urls: mockUrls,
+      locators: mockShareStart.url.locators,
       notifications: mockCoreStart.notifications,
       application: mockCoreStart.application,
     });
@@ -49,9 +61,11 @@ describe('Background Search Session Management Main', () => {
 
   describe('renders', () => {
     const docLinks: DocLinksStart = {
-      ELASTIC_WEBSITE_URL: 'boo/',
-      DOC_LINK_VERSION: '#foo',
-      links: {} as any,
+      ELASTIC_WEBSITE_URL: `boo/`,
+      DOC_LINK_VERSION: `#foo`,
+      links: {
+        search: { sessions: `mock-url` } as any,
+      } as any,
     };
 
     let main: ReactWrapper;
@@ -66,11 +80,13 @@ describe('Background Search Session Management Main', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtMain
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               http={mockCoreSetup.http}
               timezone="UTC"
               documentation={new AsyncSearchIntroDocumentation(docLinks)}
               config={mockConfig}
+              kibanaVersion={'8.0.0'}
             />
           </LocaleWrapper>
         );
@@ -84,9 +100,7 @@ describe('Background Search Session Management Main', () => {
     test('documentation link', () => {
       const docLink = main.find('a[href]').first();
       expect(docLink.text()).toBe('Documentation');
-      expect(docLink.prop('href')).toBe(
-        'boo/guide/en/elasticsearch/reference/#foo/async-search-intro.html'
-      );
+      expect(docLink.prop('href')).toBe('mock-url');
     });
 
     test('table is present', () => {

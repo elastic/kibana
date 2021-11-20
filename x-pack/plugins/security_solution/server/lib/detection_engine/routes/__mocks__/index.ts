@@ -1,33 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../../../../../common/constants';
-import { requestContextMock } from './request_context';
-import { serverMock } from './server';
-import { requestMock } from './request';
-import { responseMock } from './response_factory';
-
-export { requestMock, requestContextMock, responseMock, serverMock };
-
-export const createMockConfig = () => ({
-  enabled: true,
-  [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
-  maxRuleImportExportSize: 10000,
-  maxRuleImportPayloadBytes: 10485760,
-  maxTimelineImportExportSize: 10000,
-  maxTimelineImportPayloadBytes: 10485760,
-  endpointResultListDefaultFirstPageIndex: 0,
-  endpointResultListDefaultPageSize: 10,
-  alertResultListDefaultDateRange: {
-    from: 'now-15m',
-    to: 'now',
-  },
-  packagerTaskInterval: '60s',
-  validateArtifactDownloads: true,
-});
+export { requestContextMock } from './request_context';
+export { requestMock } from './request';
+export { responseMock } from './response_factory';
+export { serverMock } from './server';
+export { configMock, createMockConfig } from '../../../../config.mock';
 
 export const mockGetCurrentUser = {
   user: {

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
 import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
@@ -19,7 +20,7 @@ export const mockQueryBar: FieldValueQueryBar = {
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,
@@ -93,7 +94,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,
@@ -140,8 +141,14 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   type: 'saved_query',
   threat: getThreatMock(),
   threshold: {
-    field: 'host.name',
+    field: ['host.name'],
     value: 50,
+    cardinality: [
+      {
+        field: 'process.name',
+        value: 2,
+      },
+    ],
   },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
@@ -178,7 +185,7 @@ export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({
 export const mockDefineStepRule = (): DefineStepRule => ({
   ruleType: 'query',
   anomalyThreshold: 50,
-  machineLearningJobId: '',
+  machineLearningJobId: [],
   index: ['filebeat-'],
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
@@ -189,8 +196,12 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   },
   threatIndex: [],
   threshold: {
-    field: [''],
+    field: [],
     value: '100',
+    cardinality: {
+      field: ['process.name'],
+      value: '2',
+    },
   },
 });
 

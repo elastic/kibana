@@ -1,30 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
-import React from 'react';
-import { shallow } from 'enzyme';
+jest.mock('../../../../shared/layout', () => ({
+  generateNavLink: jest.fn(({ to }) => ({ href: to })),
+}));
 
-import { GroupSubNav } from './group_sub_nav';
+import { useGroupSubNav } from './group_sub_nav';
 
-import { SideNavLink } from '../../../../shared/layout';
-
-describe('GroupSubNav', () => {
-  it('renders empty when no group id present', () => {
-    setMockValues({ group: {} });
-    const wrapper = shallow(<GroupSubNav />);
-
-    expect(wrapper.find(SideNavLink)).toHaveLength(0);
-  });
-
+describe('useGroupSubNav', () => {
   it('renders nav items', () => {
     setMockValues({ group: { id: '1' } });
-    const wrapper = shallow(<GroupSubNav />);
 
-    expect(wrapper.find(SideNavLink)).toHaveLength(2);
+    expect(useGroupSubNav()).toEqual([
+      {
+        id: 'groupOverview',
+        name: 'Overview',
+        href: '/groups/1',
+      },
+      {
+        id: 'groupSourcePrioritization',
+        name: 'Source Prioritization',
+        href: '/groups/1/source_prioritization',
+      },
+    ]);
+  });
+
+  it('returns undefined when no group id is present', () => {
+    setMockValues({ group: {} });
+
+    expect(useGroupSubNav()).toEqual(undefined);
   });
 });

@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { findTestSubject } from '@kbn/test/jest';
-import { RoleMapping } from '../../../../../common/model';
-import { DeleteProvider } from '.';
+import React from 'react';
 
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import type { RoleMapping } from '../../../../../common/model';
 import { roleMappingsAPIClientMock } from '../../index.mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { DeleteProvider } from './delete_provider';
 
 describe('DeleteProvider', () => {
   beforeEach(() => {

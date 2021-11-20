@@ -4,6 +4,7 @@ exports[`Transform: Transform List Actions <StartAction /> Minimal initializatio
 <EuiToolTip
   content="You do not have permission to start or stop transforms. Please contact your administrator."
   delay="regular"
+  display="inlineBlock"
   position="top"
 >
   Start

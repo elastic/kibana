@@ -1,149 +1,121 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import moment from 'moment';
+
 import { loggingSystemMock } from 'src/core/server/mocks';
-
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { TaskStatus } from '../../../../task_manager/server';
+import { SuccessfulRunResult } from '../../../../task_manager/server/task';
+import { SecurityTelemetryTask } from './task';
+import {
+  createMockTaskInstance,
+  createMockTelemetryEventsSender,
+  createMockTelemetryReceiver,
+  createMockSecurityTelemetryTask,
+} from './__mocks__';
 
-import { TelemetryDiagTask, TelemetryDiagTaskConstants } from './task';
-import { createMockTelemetryEventsSender, MockTelemetryDiagnosticTask } from './mocks';
-
-describe('test', () => {
+describe('test security telemetry task', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
   });
 
-  describe('basic diagnostic alert telemetry sanity checks', () => {
-    test('task can register', () => {
-      const telemetryDiagTask = new TelemetryDiagTask(
-        logger,
-        taskManagerMock.createSetup(),
-        createMockTelemetryEventsSender(true)
-      );
-
-      expect(telemetryDiagTask).toBeInstanceOf(TelemetryDiagTask);
-    });
-  });
-
-  test('diagnostic task should be registered', () => {
-    const mockTaskManager = taskManagerMock.createSetup();
-    new TelemetryDiagTask(logger, mockTaskManager, createMockTelemetryEventsSender(true));
-
-    expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalled();
-  });
-
-  test('task should be scheduled', async () => {
-    const mockTaskManagerSetup = taskManagerMock.createSetup();
-    const telemetryDiagTask = new TelemetryDiagTask(
+  test('telemetry task should be constructed', () => {
+    const telemetryTask = new SecurityTelemetryTask(
+      createMockSecurityTelemetryTask(),
       logger,
-      mockTaskManagerSetup,
-      createMockTelemetryEventsSender(true)
+      createMockTelemetryEventsSender(true),
+      createMockTelemetryReceiver()
     );
 
+    expect(telemetryTask).toBeInstanceOf(SecurityTelemetryTask);
+  });
+
+  test('telemetry task should be registered and scheduled', async () => {
+    const mockTaskManagerSetup = taskManagerMock.createSetup();
     const mockTaskManagerStart = taskManagerMock.createStart();
-    await telemetryDiagTask.start(mockTaskManagerStart);
+    const telemetryTask = new SecurityTelemetryTask(
+      createMockSecurityTelemetryTask(),
+      logger,
+      createMockTelemetryEventsSender(true),
+      createMockTelemetryReceiver()
+    );
+    telemetryTask.register(mockTaskManagerSetup);
+    await telemetryTask.start(mockTaskManagerStart);
+
+    expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalled();
     expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalled();
   });
 
-  test('task should run', async () => {
-    const mockContext = createMockTelemetryEventsSender(true);
-    const mockTaskManager = taskManagerMock.createSetup();
-    const telemetryDiagTask = new MockTelemetryDiagnosticTask(logger, mockTaskManager, mockContext);
+  test('telemetry task should run if opted in', async () => {
+    const {
+      testLastTimestamp,
+      testResult,
+      telemetryTask,
+      mockTelemetryTaskConfig,
+      mockTelemetryEventsSender,
+      mockTelemetryReceiver,
+    } = await testTelemetryTaskRun(true);
 
-    const mockTaskInstance = {
-      id: TelemetryDiagTaskConstants.TYPE,
-      runAt: new Date(),
-      attempts: 0,
-      ownerId: '',
-      status: TaskStatus.Running,
-      startedAt: new Date(),
-      scheduledAt: new Date(),
-      retryAt: new Date(),
-      params: {},
-      state: {},
-      taskType: TelemetryDiagTaskConstants.TYPE,
-    };
+    expect(mockTelemetryTaskConfig.runTask).toHaveBeenCalledWith(
+      telemetryTask.getTaskId(),
+      logger,
+      mockTelemetryReceiver,
+      mockTelemetryEventsSender,
+      {
+        last: testLastTimestamp,
+        current: testResult.state.lastExecutionTimestamp,
+      }
+    );
+  });
+
+  test('telemetry task should not run if opted out', async () => {
+    const { mockTelemetryTaskConfig } = await testTelemetryTaskRun(false);
+
+    expect(mockTelemetryTaskConfig.runTask).not.toHaveBeenCalled();
+  });
+
+  async function testTelemetryTaskRun(optedIn: boolean) {
+    const now = new Date();
+    const testType = 'security:test-task';
+    const testLastTimestamp = now.toISOString();
+    const mockTaskManagerSetup = taskManagerMock.createSetup();
+    const mockTelemetryTaskConfig = createMockSecurityTelemetryTask(testType, testLastTimestamp);
+    const mockTelemetryEventsSender = createMockTelemetryEventsSender(optedIn);
+    const mockTelemetryReceiver = createMockTelemetryReceiver();
+    const telemetryTask = new SecurityTelemetryTask(
+      mockTelemetryTaskConfig,
+      logger,
+      mockTelemetryEventsSender,
+      mockTelemetryReceiver
+    );
+    const mockTaskInstance = createMockTaskInstance(telemetryTask.getTaskId(), testType);
+
+    telemetryTask.register(mockTaskManagerSetup);
+    expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalled();
+
     const createTaskRunner =
-      mockTaskManager.registerTaskDefinitions.mock.calls[0][0][TelemetryDiagTaskConstants.TYPE]
-        .createTaskRunner;
+      mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][testType].createTaskRunner;
+
     const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
-    await taskRunner.run();
-    expect(telemetryDiagTask.runTask).toHaveBeenCalled();
-  });
+    const testResult = (await taskRunner.run()) as SuccessfulRunResult;
 
-  test('task should not query elastic if telemetry is not opted in', async () => {
-    const mockSender = createMockTelemetryEventsSender(false);
-    const mockTaskManager = taskManagerMock.createSetup();
-    new MockTelemetryDiagnosticTask(logger, mockTaskManager, mockSender);
+    expect(mockTelemetryTaskConfig.getLastExecutionTime).toHaveBeenCalled();
+    expect(mockTelemetryEventsSender.isTelemetryOptedIn).toHaveBeenCalled();
 
-    const mockTaskInstance = {
-      id: TelemetryDiagTaskConstants.TYPE,
-      runAt: new Date(),
-      attempts: 0,
-      ownerId: '',
-      status: TaskStatus.Running,
-      startedAt: new Date(),
-      scheduledAt: new Date(),
-      retryAt: new Date(),
-      params: {},
-      state: {},
-      taskType: TelemetryDiagTaskConstants.TYPE,
+    expect(testResult).not.toBeNull();
+    expect(testResult).toHaveProperty('state.lastExecutionTimestamp');
+
+    return {
+      testLastTimestamp,
+      testResult,
+      telemetryTask,
+      mockTelemetryTaskConfig,
+      mockTelemetryEventsSender,
+      mockTelemetryReceiver,
     };
-    const createTaskRunner =
-      mockTaskManager.registerTaskDefinitions.mock.calls[0][0][TelemetryDiagTaskConstants.TYPE]
-        .createTaskRunner;
-    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
-    await taskRunner.run();
-    expect(mockSender.fetchDiagnosticAlerts).not.toHaveBeenCalled();
-  });
-
-  test('test -5 mins is returned when there is no previous task run', async () => {
-    const telemetryDiagTask = new TelemetryDiagTask(
-      logger,
-      taskManagerMock.createSetup(),
-      createMockTelemetryEventsSender(true)
-    );
-
-    const executeTo = moment().utc().toISOString();
-    const executeFrom = undefined;
-    const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
-
-    expect(newExecuteFrom).toEqual(moment(executeTo).subtract(5, 'minutes').toISOString());
-  });
-
-  test('test -6 mins is returned when there was a previous task run', async () => {
-    const telemetryDiagTask = new TelemetryDiagTask(
-      logger,
-      taskManagerMock.createSetup(),
-      createMockTelemetryEventsSender(true)
-    );
-
-    const executeTo = moment().utc().toISOString();
-    const executeFrom = moment(executeTo).subtract(6, 'minutes').toISOString();
-    const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
-
-    expect(newExecuteFrom).toEqual(executeFrom);
-  });
-
-  // it's possible if Kibana is down for a prolonged period the stored lastRun would have drifted
-  // if that is the case we will just roll it back to a 10 min search window
-  test('test 10 mins is returned when previous task run took longer than 10 minutes', async () => {
-    const telemetryDiagTask = new TelemetryDiagTask(
-      logger,
-      taskManagerMock.createSetup(),
-      createMockTelemetryEventsSender(true)
-    );
-
-    const executeTo = moment().utc().toISOString();
-    const executeFrom = moment(executeTo).subtract(142, 'minutes').toISOString();
-    const newExecuteFrom = telemetryDiagTask.getLastExecutionTimestamp(executeTo, executeFrom);
-
-    expect(newExecuteFrom).toEqual(moment(executeTo).subtract(10, 'minutes').toISOString());
-  });
+  }
 });

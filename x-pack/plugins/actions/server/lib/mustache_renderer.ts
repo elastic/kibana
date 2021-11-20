@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Mustache from 'mustache';
@@ -39,7 +40,7 @@ export function renderMustacheObject<Params>(params: Params, variables: Variable
   // The return type signature for `cloneDeep()` ends up taking the return
   // type signature for the customizer, but rather than pollute the customizer
   // with casts, seemed better to just do it in one place, here.
-  return (result as unknown) as Params;
+  return result as unknown as Params;
 }
 
 // return variables cloned, with a toString() added to objects

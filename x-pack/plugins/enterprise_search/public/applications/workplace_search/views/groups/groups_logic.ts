@@ -1,25 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-
+import { JSON_HEADER as headers } from '../../../../../common/constants';
+import { Meta } from '../../../../../common/types';
+import { DEFAULT_META } from '../../../shared/constants';
 import {
   clearFlashMessages,
   flashAPIErrors,
-  setSuccessMessage,
+  flashSuccessToast,
 } from '../../../shared/flash_messages';
-
+import { HttpLogic } from '../../../shared/http';
 import { ContentSource, Group, User } from '../../types';
-
-import { JSON_HEADER as headers } from '../../../../../common/constants';
-import { DEFAULT_META } from '../../../shared/constants';
-import { Meta } from '../../../../../common/types';
 
 export const MAX_NAME_LENGTH = 40;
 
@@ -256,7 +255,9 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
   listeners: ({ actions, values }) => ({
     initializeGroups: async () => {
       try {
-        const response = await HttpLogic.values.http.get('/api/workplace_search/groups');
+        const response = await HttpLogic.values.http.get<GroupsServerData>(
+          '/internal/workplace_search/groups'
+        );
         actions.onInitializeGroups(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -289,13 +290,16 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       };
 
       try {
-        const response = await HttpLogic.values.http.post('/api/workplace_search/groups/search', {
-          body: JSON.stringify({
-            page,
-            search,
-          }),
-          headers,
-        });
+        const response = await HttpLogic.values.http.post<GroupsSearchResponse>(
+          '/internal/workplace_search/groups/search',
+          {
+            body: JSON.stringify({
+              page,
+              search,
+            }),
+            headers,
+          }
+        );
 
         actions.setSearchResults(response);
       } catch (e) {
@@ -305,8 +309,8 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     fetchGroupUsers: async ({ groupId }) => {
       actions.setAllGroupLoading(true);
       try {
-        const response = await HttpLogic.values.http.get(
-          `/api/workplace_search/groups/${groupId}/group_users`
+        const response = await HttpLogic.values.http.get<User[]>(
+          `/internal/workplace_search/groups/${groupId}/group_users`
         );
         actions.setGroupUsers(response);
       } catch (e) {
@@ -315,10 +319,13 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     },
     saveNewGroup: async () => {
       try {
-        const response = await HttpLogic.values.http.post('/api/workplace_search/groups', {
-          body: JSON.stringify({ group_name: values.newGroupName }),
-          headers,
-        });
+        const response = await HttpLogic.values.http.post<Group>(
+          '/internal/workplace_search/groups',
+          {
+            body: JSON.stringify({ group_name: values.newGroupName }),
+            headers,
+          }
+        );
         actions.getSearchResults(true);
 
         const SUCCESS_MESSAGE = i18n.translate(
@@ -329,7 +336,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
           }
         );
 
-        setSuccessMessage(SUCCESS_MESSAGE);
+        flashSuccessToast(SUCCESS_MESSAGE);
         actions.setNewGroup(response);
       } catch (e) {
         flashAPIErrors(e);

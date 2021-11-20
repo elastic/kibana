@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
@@ -16,7 +17,7 @@ import {
   EuiCommentProps,
   EuiText,
 } from '@elastic/eui';
-import { Comment } from '../../../shared_imports';
+import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
 import { useCurrentUser } from '../../lib/kibana';
 import { getFormattedComments } from './helpers';
@@ -105,7 +106,7 @@ export const AddExceptionComments = memo(function AddExceptionComments({
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem grow={false}>
           <MyAvatar
-            name={currentUser !== null ? currentUser.username.toUpperCase() ?? '' : ''}
+            name={currentUser != null ? currentUser.username.toUpperCase() ?? '' : ''}
             size="l"
           />
         </EuiFlexItem>

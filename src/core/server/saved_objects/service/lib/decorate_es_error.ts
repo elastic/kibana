@@ -1,25 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
+import { ElasticsearchErrorDetails } from '../../../elasticsearch';
 
 const responseErrors = {
-  isServiceUnavailable: (statusCode: number) => statusCode === 503,
-  isConflict: (statusCode: number) => statusCode === 409,
-  isNotAuthorized: (statusCode: number) => statusCode === 401,
-  isForbidden: (statusCode: number) => statusCode === 403,
-  isRequestEntityTooLarge: (statusCode: number) => statusCode === 413,
-  isNotFound: (statusCode: number) => statusCode === 404,
-  isBadRequest: (statusCode: number) => statusCode === 400,
-  isTooManyRequests: (statusCode: number) => statusCode === 429,
+  isServiceUnavailable: (statusCode?: number) => statusCode === 503,
+  isConflict: (statusCode?: number) => statusCode === 409,
+  isNotAuthorized: (statusCode?: number) => statusCode === 401,
+  isForbidden: (statusCode?: number) => statusCode === 403,
+  isRequestEntityTooLarge: (statusCode?: number) => statusCode === 413,
+  isNotFound: (statusCode?: number) => statusCode === 404,
+  isBadRequest: (statusCode?: number) => statusCode === 400,
+  isTooManyRequests: (statusCode?: number) => statusCode === 429,
 };
-const { ConnectionError, NoLivingConnectionsError, TimeoutError } = esErrors;
+const { ConnectionError, NoLivingConnectionsError, TimeoutError, ProductNotSupportedError } =
+  esErrors;
 const SCRIPT_CONTEXT_DISABLED_REGEX = /(?:cannot execute scripts using \[)([a-z]*)(?:\] context)/;
 const INLINE_SCRIPTS_DISABLED_MESSAGE = 'cannot execute [inline] scripts';
 
@@ -29,6 +31,7 @@ type EsErrors =
   | esErrors.ConnectionError
   | esErrors.NoLivingConnectionsError
   | esErrors.TimeoutError
+  | esErrors.ProductNotSupportedError
   | esErrors.ResponseError;
 
 export function decorateEsError(error: EsErrors) {
@@ -41,6 +44,7 @@ export function decorateEsError(error: EsErrors) {
     error instanceof ConnectionError ||
     error instanceof NoLivingConnectionsError ||
     error instanceof TimeoutError ||
+    error instanceof ProductNotSupportedError ||
     responseErrors.isServiceUnavailable(error.statusCode)
   ) {
     return SavedObjectsErrorHelpers.decorateEsUnavailableError(error, reason);
@@ -63,6 +67,12 @@ export function decorateEsError(error: EsErrors) {
   }
 
   if (responseErrors.isNotFound(error.statusCode)) {
+    const match = (error?.meta?.body as ElasticsearchErrorDetails)?.error?.reason?.match(
+      /no such index \[(.+)\] and \[require_alias\] request flag is \[true\] and \[.+\] is not an alias/
+    );
+    if (match && match.length > 0) {
+      return SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError(error, match[1]);
+    }
     return SavedObjectsErrorHelpers.createGenericNotFoundError();
   }
 

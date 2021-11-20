@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ChangeEventHandler, FocusEventHandler, ReactEventHandler, useState } from 'react';
-import { get, set, cloneDeep, cloneDeepWith } from 'lodash';
+import { cloneDeep, cloneDeepWith, get, set } from 'lodash';
+import type { ChangeEventHandler, FocusEventHandler, ReactEventHandler } from 'react';
+import { useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 export type FormReturnTuple<Values, Result> = [FormState<Values, Result>, FormProps];

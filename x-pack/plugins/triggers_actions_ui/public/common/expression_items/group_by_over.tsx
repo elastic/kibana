@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -21,7 +22,7 @@ import { GroupByType } from '../types';
 import { ClosablePopoverTitle } from './components';
 import { IErrorObject } from '../../types';
 
-interface GroupByExpressionProps {
+export interface GroupByExpressionProps {
   groupBy: string;
   errors: IErrorObject;
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
@@ -95,6 +96,7 @@ export const GroupByExpression = ({
                   }
                 )
           }`}
+          data-test-subj="groupByExpression"
           value={`${groupByTypes[groupBy].text} ${
             groupByTypes[groupBy].sizeRequired
               ? `${termSize} ${termField ? `'${termField}'` : ''}`
@@ -149,7 +151,7 @@ export const GroupByExpression = ({
           </EuiFlexItem>
 
           {groupByTypes[groupBy].sizeRequired ? (
-            <Fragment>
+            <>
               <EuiFlexItem grow={false}>
                 <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
@@ -199,10 +201,13 @@ export const GroupByExpression = ({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-            </Fragment>
+            </>
           ) : null}
         </EuiFlexGroup>
       </div>
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { GroupByExpression as default };

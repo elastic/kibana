@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,11 +12,12 @@ import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
-  describe('telemetry collectors', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/111240
+  describe.skip('telemetry collectors heartbeat', () => {
     before('generating data', async () => {
-      await getService('esArchiver').load('uptime/blank');
+      await getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank');
 
       const observer = {
         geo: {
@@ -81,7 +83,9 @@ export default function ({ getService }: FtrProviderContext) {
       await es.indices.refresh();
     });
 
-    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
+    after('unload heartbeat index', () => {
+      getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/blank');
+    });
 
     beforeEach(async () => {
       await es.indices.refresh();
@@ -115,6 +119,13 @@ export default function ({ getService }: FtrProviderContext) {
         dateRangeEnd: ['now/d'],
         autoRefreshEnabled: true,
         autorefreshInterval: [100],
+        fleet_monitor_frequency: [],
+        fleet_monitor_name_stats: {
+          avg_length: 0,
+          max_length: 0,
+          min_length: 0,
+        },
+        fleet_no_of_unique_monitors: 0,
       });
     });
 

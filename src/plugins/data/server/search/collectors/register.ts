@@ -1,30 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { fetchProvider } from './fetch';
 
-export interface Usage {
+export interface CollectedUsage {
+  successCount: number;
+  errorCount: number;
+  totalDuration: number;
+}
+
+export interface ReportedUsage {
   successCount: number;
   errorCount: number;
   averageDuration: number | null;
 }
 
-export async function registerUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  context: PluginInitializerContext
-) {
+export function registerUsageCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
   try {
-    const collector = usageCollection.makeUsageCollector<Usage>({
+    const collector = usageCollection.makeUsageCollector<ReportedUsage>({
       type: 'search',
       isReady: () => true,
-      fetch: fetchProvider(context.config.legacy.globalConfig$),
+      fetch: fetchProvider(kibanaIndex),
       schema: {
         successCount: { type: 'long' },
         errorCount: { type: 'long' },

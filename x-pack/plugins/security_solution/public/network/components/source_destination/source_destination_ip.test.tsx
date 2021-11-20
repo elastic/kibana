@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { removeExternalLinkText } from '../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
-import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
+import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
 import * as i18n from '../../../timelines/components/timeline/body/renderers/translations';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
@@ -36,6 +37,8 @@ import {
   SOURCE_GEO_COUNTRY_NAME_FIELD_NAME,
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from './geo_fields';
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../common/components/link_to');
 
@@ -955,6 +958,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -976,7 +980,6 @@ describe('SourceDestinationIp', () => {
         />
       </TestProviders>
     );
-
     expect(
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
@@ -1008,6 +1011,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1061,6 +1065,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1115,6 +1120,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={undefined}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1268,6 +1274,7 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
+          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}

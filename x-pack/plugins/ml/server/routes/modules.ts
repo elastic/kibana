@@ -1,22 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
-import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { DatafeedOverride, JobOverride } from '../../common/types/modules';
+import type {
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'kibana/server';
+import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
+import type { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
-import { DataRecognizer } from '../models/data_recognizer';
+import { dataRecognizerFactory } from '../models/data_recognizer';
 import {
   moduleIdParamSchema,
   optionalModuleIdParamSchema,
   modulesIndexPatternTitleSchema,
   setupModuleBodySchema,
 } from './schemas/modules';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import type { MlClient } from '../lib/ml_client';
 import type { JobSavedObjectService } from '../saved_objects';
 
@@ -24,14 +30,16 @@ function recognize(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
+  dataViewsService: DataViewsService,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   indexPatternTitle: string
 ) {
-  const dr = new DataRecognizer(
+  const dr = dataRecognizerFactory(
     client,
     mlClient,
     savedObjectsClient,
+    dataViewsService,
     jobSavedObjectService,
     request
   );
@@ -42,14 +50,16 @@ function getModule(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
+  dataViewsService: DataViewsService,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
-  moduleId: string
+  moduleId?: string
 ) {
-  const dr = new DataRecognizer(
+  const dr = dataRecognizerFactory(
     client,
     mlClient,
     savedObjectsClient,
+    dataViewsService,
     jobSavedObjectService,
     request
   );
@@ -64,6 +74,7 @@ function setup(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
+  dataViewsService: DataViewsService,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   moduleId: string,
@@ -80,10 +91,11 @@ function setup(
   estimateModelMemory?: boolean,
   applyToAllSpaces?: boolean
 ) {
-  const dr = new DataRecognizer(
+  const dr = dataRecognizerFactory(
     client,
     mlClient,
     savedObjectsClient,
+    dataViewsService,
     jobSavedObjectService,
     request
   );
@@ -108,14 +120,16 @@ function dataRecognizerJobsExist(
   client: IScopedClusterClient,
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
+  dataViewsService: DataViewsService,
   jobSavedObjectService: JobSavedObjectService,
   request: KibanaRequest,
   moduleId: string
 ) {
-  const dr = new DataRecognizer(
+  const dr = dataRecognizerFactory(
     client,
     mlClient,
     savedObjectsClient,
+    dataViewsService,
     jobSavedObjectService,
     request
   );
@@ -165,13 +179,23 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, context, jobSavedObjectService }) => {
+      async ({
+        client,
+        mlClient,
+        request,
+        response,
+        context,
+        jobSavedObjectService,
+        getDataViewsService,
+      }) => {
         try {
           const { indexPatternTitle } = request.params;
+          const dataViewService = await getDataViewsService();
           const results = await recognize(
             client,
             mlClient,
             context.core.savedObjects.client,
+            dataViewService,
             jobSavedObjectService,
             request,
             indexPatternTitle
@@ -304,7 +328,15 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, context, jobSavedObjectService }) => {
+      async ({
+        client,
+        mlClient,
+        request,
+        response,
+        context,
+        jobSavedObjectService,
+        getDataViewsService,
+      }) => {
         try {
           let { moduleId } = request.params;
           if (moduleId === '') {
@@ -312,10 +344,12 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
             // the moduleId will be an empty string.
             moduleId = undefined;
           }
+          const dataViewService = await getDataViewsService();
           const results = await getModule(
             client,
             mlClient,
             context.core.savedObjects.client,
+            dataViewService,
             jobSavedObjectService,
             request,
             moduleId
@@ -481,7 +515,15 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, context, jobSavedObjectService }) => {
+      async ({
+        client,
+        mlClient,
+        request,
+        response,
+        context,
+        jobSavedObjectService,
+        getDataViewsService,
+      }) => {
         try {
           const { moduleId } = request.params;
 
@@ -500,10 +542,13 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
             applyToAllSpaces,
           } = request.body as TypeOf<typeof setupModuleBodySchema>;
 
+          const dataViewService = await getDataViewsService();
+
           const result = await setup(
             client,
             mlClient,
             context.core.savedObjects.client,
+            dataViewService,
             jobSavedObjectService,
             request,
             moduleId,
@@ -532,7 +577,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup Modules
    *
-   * @api {post} /api/ml/modules/jobs_exist/:moduleId Check if module jobs exist
+   * @api {get} /api/ml/modules/jobs_exist/:moduleId Check if module jobs exist
    * @apiName CheckExistingModuleJobs
    * @apiDescription Check whether the jobs in the module with the specified ID exist in the
    *      current list of jobs. The check runs a test to see if any of the jobs in existence
@@ -592,13 +637,23 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, context, jobSavedObjectService }) => {
+      async ({
+        client,
+        mlClient,
+        request,
+        response,
+        context,
+        jobSavedObjectService,
+        getDataViewsService,
+      }) => {
         try {
           const { moduleId } = request.params;
+          const dataViewService = await getDataViewsService();
           const result = await dataRecognizerJobsExist(
             client,
             mlClient,
             context.core.savedObjects.client,
+            dataViewService,
             jobSavedObjectService,
             request,
             moduleId

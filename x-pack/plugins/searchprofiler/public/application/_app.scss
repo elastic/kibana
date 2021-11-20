@@ -1,3 +1,5 @@
+@import '../../../../../src/core/public/mixins';
+
 .prfDevTool__page {
   flex: 1 1 auto;
 
@@ -28,11 +30,11 @@
   }
 }
 
-// This value is calculated to static value using SCSS because calc in calc has issues in IE11
-$headerHeightOffset: $euiHeaderHeightCompensation * 3;
+// adding dev tool top bar to the body offset
+$bodyOffset: $euiHeaderHeightCompensation;
 
 .appRoot {
-  height: calc(100vh - #{$headerHeightOffset});
+  @include kibanaFullBodyHeight($bodyOffset);
   overflow: hidden;
   flex-shrink: 1;
 }

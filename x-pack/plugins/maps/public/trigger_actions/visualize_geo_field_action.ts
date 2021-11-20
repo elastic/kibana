@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
+import type { SerializableRecord } from '@kbn/utility-types';
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
@@ -16,10 +18,11 @@ import {
   getIndexPatternService,
   getData,
   getShareService,
-  getNavigateToApp,
+  getCore,
 } from '../kibana_services';
-import { MAPS_APP_URL_GENERATOR, MapsUrlGeneratorState } from '../url_generator';
-import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES, APP_ID, MAP_PATH } from '../../common/constants';
+import { MapsAppLocator, MAPS_APP_LOCATOR } from '../locators';
+import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
+import { LayerDescriptor } from '../../common/descriptor_types';
 
 export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
   id: ACTION_VISUALIZE_GEO_FIELD,
@@ -30,15 +33,19 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     }),
   isCompatible: async () => !!getVisualizeCapabilities().show,
   getHref: async (context) => {
-    const url = await getMapsLink(context);
-    return url;
+    const { app, path } = await getMapsLink(context);
+
+    return getCore().application.getUrlForApp(app, {
+      path,
+      absolute: false,
+    });
   },
   execute: async (context) => {
-    const url = await getMapsLink(context);
-    const hash = url.split('#')[1];
+    const { app, path, state } = await getMapsLink(context);
 
-    getNavigateToApp()(APP_ID, {
-      path: `${MAP_PATH}/#${hash}`,
+    getCore().application.navigateToApp(app, {
+      path,
+      state,
     });
   },
 });
@@ -67,12 +74,13 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
     },
   ];
 
-  const generator = getShareService().urlGenerators.getUrlGenerator(MAPS_APP_URL_GENERATOR);
-  const urlState: MapsUrlGeneratorState = {
+  const locator = getShareService().url.locators.get(MAPS_APP_LOCATOR) as MapsAppLocator;
+  const location = await locator.getLocation({
     filters: getData().query.filterManager.getFilters(),
     query: getData().query.queryString.getQuery(),
-    initialLayers,
+    initialLayers: initialLayers as unknown as LayerDescriptor[] & SerializableRecord,
     timeRange: getData().query.timefilter.timefilter.getTime(),
-  };
-  return generator.createUrl(urlState);
+  });
+
+  return location;
 };

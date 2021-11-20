@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -10,13 +11,16 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiAccordion, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { StepDetailsExposedState } from './step_details_form';
+import { StepDetailsExposedState } from './common';
 
 export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
   const {
     continuousModeDateField,
     createIndexPattern,
     isContinuousModeEnabled,
+    isRetentionPolicyEnabled,
+    retentionPolicyDateField,
+    retentionPolicyMaxAge,
     transformId,
     transformDescription,
     transformFrequency,
@@ -31,8 +35,8 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
   }
 
   const destinationIndexHelpText = createIndexPattern
-    ? i18n.translate('xpack.transform.stepDetailsSummary.createIndexPatternMessage', {
-        defaultMessage: 'A Kibana index pattern will be created for this transform.',
+    ? i18n.translate('xpack.transform.stepDetailsSummary.createDataViewMessage', {
+        defaultMessage: 'A Kibana data view will be created for this transform.',
       })
     : '';
 
@@ -66,8 +70,8 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
       </EuiFormRow>
       {createIndexPattern && indexPatternTimeField !== undefined && indexPatternTimeField !== '' && (
         <EuiFormRow
-          label={i18n.translate('xpack.transform.stepDetailsSummary.indexPatternTimeFieldLabel', {
-            defaultMessage: 'Kibana index pattern time field',
+          label={i18n.translate('xpack.transform.stepDetailsSummary.dataViewTimeFieldLabel', {
+            defaultMessage: 'Kibana data view time field',
           })}
         >
           <span>{indexPatternTimeField}</span>
@@ -82,6 +86,28 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
         >
           <span>{continuousModeDateField}</span>
         </EuiFormRow>
+      )}
+
+      {isRetentionPolicyEnabled && (
+        <>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.transform.stepDetailsSummary.retentionPolicyDateFieldLabel',
+              {
+                defaultMessage: 'Retention policy date field',
+              }
+            )}
+          >
+            <span>{retentionPolicyDateField}</span>
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('xpack.transform.stepDetailsSummary.retentionPolicyMaxAgeLabel', {
+              defaultMessage: 'Retention policy max age',
+            })}
+          >
+            <span>{retentionPolicyMaxAge}</span>
+          </EuiFormRow>
+        </>
       )}
 
       <EuiSpacer size="l" />

@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
+import type { Filter } from '@kbn/es-query';
 
-import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { KueryFilterQuery } from '../../../../common/store';
+import type { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
+import { KueryFilterQuery } from '../../../../../common/types/timeline';
 import { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
@@ -59,7 +61,7 @@ interface Props {
 }
 
 const SearchOrFilterContainer = styled.div`
-  margin: 5px 0 10px 0;
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXS};`}
   user-select: none;
   .globalQueryBar {
     padding: 0px;

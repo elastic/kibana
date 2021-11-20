@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -10,18 +11,18 @@ import {
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
   VectorStyleDescriptor,
-} from '../../../../../../maps/common/descriptor_types';
-import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
+  LAYER_TYPE,
+  SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-} from '../../../../../../maps/common/constants';
+} from '../../../../../../maps/common';
 
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -29,7 +30,7 @@ import {
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 
 const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
-  type: 'ES_TERM_SOURCE',
+  type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
   indexPatternTitle: 'apm-*',
   term: 'client.geo.country_iso_code',
@@ -43,10 +44,11 @@ const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
   applyGlobalTime: true,
+  applyForceRefresh: true,
 };
 
 const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
-  type: 'ES_TERM_SOURCE',
+  type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
   indexPatternTitle: 'apm-*',
   term: 'client.geo.region_iso_code',
@@ -58,6 +60,7 @@ const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
   applyGlobalTime: true,
+  applyForceRefresh: true,
 };
 
 const getWhereQuery = (serviceName: string) => {
@@ -81,7 +84,7 @@ interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
 }
 
 export function useLayerList() {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const { serviceName } = urlParams;
 
@@ -152,7 +155,7 @@ export function useLayerList() {
     maxZoom: 24,
     alpha: 0.75,
     visible: true,
-    type: 'VECTOR',
+    type: LAYER_TYPE.VECTOR,
   };
 
   ES_TERM_SOURCE_REGION.whereQuery = getWhereQuery(serviceName!);
@@ -176,7 +179,7 @@ export function useLayerList() {
     maxZoom: 24,
     alpha: 0.75,
     visible: true,
-    type: 'VECTOR',
+    type: LAYER_TYPE.VECTOR,
   };
 
   return [

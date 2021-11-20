@@ -1,36 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPageContent,
+  EuiPageHeader,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
+import React, { Component, lazy, Suspense } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
-import { KibanaFeature, FeaturesPluginStart } from '../../../../features/public';
+import type {
+  ApplicationStart,
+  Capabilities,
+  NotificationsStart,
+  ScopedHistory,
+} from 'src/core/public';
+
+import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
+import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { SpaceAvatar } from '../../space_avatar';
 import { getSpacesFeatureDescription } from '../../constants';
-import { SpacesManager } from '../../spaces_manager';
+import { getSpaceAvatarComponent } from '../../space_avatar';
+import type { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 import { getEnabledFeatures } from '../lib/feature_utils';
-import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   spacesManager: SpacesManager;
@@ -70,7 +81,19 @@ export class SpacesGridPage extends Component<Props, State> {
   public render() {
     return (
       <div className="spcGridPage" data-test-subj="spaces-grid-page">
-        <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.spaces.management.spacesGridPage.spacesTitle"
+              defaultMessage="Spaces"
+            />
+          }
+          description={getSpacesFeatureDescription()}
+          rightSideItems={[this.getPrimaryActionButton()]}
+        />
+        <EuiSpacer size="l" />
+        {this.getPageContent()}
         {this.getConfirmDeleteModal()}
       </div>
     );
@@ -78,61 +101,45 @@ export class SpacesGridPage extends Component<Props, State> {
 
   public getPageContent() {
     if (!this.props.capabilities.spaces.manage) {
-      return <UnauthorizedPrompt />;
+      return (
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+          <UnauthorizedPrompt />
+        </EuiPageContent>
+      );
     }
 
     return (
-      <Fragment>
-        <EuiFlexGroup justifyContent={'spaceBetween'}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h1>
-                <FormattedMessage
-                  id="xpack.spaces.management.spacesGridPage.spacesTitle"
-                  defaultMessage="Spaces"
-                />
-              </h1>
-            </EuiTitle>
-            <EuiText color="subdued" size="s">
-              <p>{getSpacesFeatureDescription()}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-
-        <EuiInMemoryTable
-          itemId={'id'}
-          items={this.state.spaces}
-          tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
-            defaultMessage: 'Kibana spaces',
-          })}
-          rowHeader="name"
-          columns={this.getColumnConfig()}
-          hasActions
-          pagination={true}
-          sorting={true}
-          search={{
-            box: {
-              placeholder: i18n.translate(
-                'xpack.spaces.management.spacesGridPage.searchPlaceholder',
-                {
-                  defaultMessage: 'Search',
-                }
-              ),
-            },
-          }}
-          loading={this.state.loading}
-          message={
-            this.state.loading ? (
-              <FormattedMessage
-                id="xpack.spaces.management.spacesGridPage.loadingTitle"
-                defaultMessage="loading…"
-              />
-            ) : undefined
-          }
-        />
-      </Fragment>
+      <EuiInMemoryTable
+        itemId={'id'}
+        items={this.state.spaces}
+        tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
+          defaultMessage: 'Kibana spaces',
+        })}
+        rowHeader="name"
+        columns={this.getColumnConfig()}
+        hasActions
+        pagination={true}
+        sorting={true}
+        search={{
+          box: {
+            placeholder: i18n.translate(
+              'xpack.spaces.management.spacesGridPage.searchPlaceholder',
+              {
+                defaultMessage: 'Search',
+              }
+            ),
+          },
+        }}
+        loading={this.state.loading}
+        message={
+          this.state.loading ? (
+            <FormattedMessage
+              id="xpack.spaces.management.spacesGridPage.loadingTitle"
+              defaultMessage="loading…"
+            />
+          ) : undefined
+        }
+      />
     );
   }
 
@@ -140,12 +147,13 @@ export class SpacesGridPage extends Component<Props, State> {
     return (
       <EuiButton
         fill
+        iconType="plusInCircleFilled"
         {...reactRouterNavigate(this.props.history, '/create')}
         data-test-subj="createSpace"
       >
         <FormattedMessage
           id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
-          defaultMessage="Create a space"
+          defaultMessage="Create space"
         />
       </EuiButton>
     );
@@ -167,51 +175,14 @@ export class SpacesGridPage extends Component<Props, State> {
             showConfirmDeleteModal: false,
           });
         }}
-        onConfirm={this.deleteSpace}
+        onSuccess={() => {
+          this.setState({
+            showConfirmDeleteModal: false,
+          });
+          this.loadGrid();
+        }}
       />
     );
-  };
-
-  public deleteSpace = async () => {
-    const { spacesManager } = this.props;
-
-    const space = this.state.selectedSpace;
-
-    if (!space) {
-      return;
-    }
-
-    this.setState({
-      showConfirmDeleteModal: false,
-    });
-
-    try {
-      await spacesManager.deleteSpace(space);
-    } catch (error) {
-      const { message: errorMessage = '' } = error.data || error.body || {};
-
-      this.props.notifications.toasts.addDanger(
-        i18n.translate('xpack.spaces.management.spacesGridPage.errorDeletingSpaceErrorMessage', {
-          defaultMessage: 'Error deleting space: {errorMessage}',
-          values: {
-            errorMessage,
-          },
-        })
-      );
-      return;
-    }
-
-    this.loadGrid();
-
-    const message = i18n.translate(
-      'xpack.spaces.management.spacesGridPage.spaceSuccessfullyDeletedNotificationMessage',
-      {
-        defaultMessage: 'Deleted "{spaceName}" space.',
-        values: { spaceName: space.name },
-      }
-    );
-
-    this.props.notifications.toasts.addSuccess(message);
   };
 
   public loadGrid = async () => {
@@ -250,11 +221,15 @@ export class SpacesGridPage extends Component<Props, State> {
         field: 'initials',
         name: '',
         width: '50px',
-        render: (value: string, record: Space) => (
-          <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
-            <SpaceAvatar space={record} size="s" />
-          </EuiLink>
-        ),
+        render: (value: string, record: Space) => {
+          return (
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
+                <LazySpaceAvatar space={record} size="s" />
+              </EuiLink>
+            </Suspense>
+          );
+        },
       },
       {
         field: 'name',

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { first } from 'rxjs/operators';
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
@@ -65,26 +66,23 @@ describe('ExecutionContract', () => {
     });
   });
 
-  test('can get error result of the expression execution', async () => {
+  test('can get error result of the expression execution', () => {
     const execution = createExecution('foo bar=123');
     const contract = new ExecutionContract(execution);
     execution.start();
 
-    const result = await contract.getData();
-
-    expect(result).toMatchObject({
-      type: 'error',
-    });
+    expect(contract.getData().toPromise()).resolves.toHaveProperty(
+      'result',
+      expect.objectContaining({ type: 'error' })
+    );
   });
 
-  test('can get result of the expression execution', async () => {
+  test('can get result of the expression execution', () => {
     const execution = createExecution('var_set name="foo" value="bar" | var name="foo"');
     const contract = new ExecutionContract(execution);
     execution.start();
 
-    const result = await contract.getData();
-
-    expect(result).toBe('bar');
+    expect(contract.getData().toPromise()).resolves.toHaveProperty('result', 'bar');
   });
 
   describe('isPending', () => {
@@ -108,7 +106,7 @@ describe('ExecutionContract', () => {
       const contract = new ExecutionContract(execution);
 
       execution.start();
-      await execution.result;
+      await execution.result.pipe(first()).toPromise();
 
       expect(contract.isPending).toBe(false);
       expect(execution.state.get().state).toBe('result');
@@ -119,7 +117,7 @@ describe('ExecutionContract', () => {
       const contract = new ExecutionContract(execution);
 
       execution.start();
-      await execution.result;
+      await execution.result.pipe(first()).toPromise();
       execution.state.get().state = 'error';
 
       expect(contract.isPending).toBe(false);

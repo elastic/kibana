@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PluginOpaqueId } from '../../server';
-import { IContextContainer, ContextContainer, HandlerFunction } from './container';
+import { IContextContainer, ContextContainer } from './container';
 import { CoreContext } from '../core_context';
+
+type PrebootDeps = SetupDeps;
 
 interface SetupDeps {
   pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
@@ -18,14 +20,27 @@ interface SetupDeps {
 export class ContextService {
   constructor(private readonly core: CoreContext) {}
 
+  public preboot({ pluginDependencies }: PrebootDeps): InternalContextPreboot {
+    return this.getContextContainerFactory(pluginDependencies);
+  }
+
   public setup({ pluginDependencies }: SetupDeps): ContextSetup {
+    return this.getContextContainerFactory(pluginDependencies);
+  }
+
+  private getContextContainerFactory(
+    pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>
+  ) {
     return {
-      createContextContainer: <THandler extends HandlerFunction<any>>() => {
-        return new ContextContainer<THandler>(pluginDependencies, this.core.coreId);
+      createContextContainer: () => {
+        return new ContextContainer(pluginDependencies, this.core.coreId);
       },
     };
   }
 }
+
+/** @internal */
+export type InternalContextPreboot = ContextSetup;
 
 /**
  * {@inheritdoc IContextContainer}
@@ -93,5 +108,5 @@ export interface ContextSetup {
   /**
    * Creates a new {@link IContextContainer} for a service owner.
    */
-  createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
+  createContextContainer(): IContextContainer;
 }

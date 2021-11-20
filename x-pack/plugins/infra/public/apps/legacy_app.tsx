@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -10,7 +11,6 @@ import { AppMountParameters } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, RouteProps, Router, Switch } from 'react-router-dom';
-import url from 'url';
 
 // This exists purely to facilitate legacy app/infra URL redirects.
 // It will be removed in 8.0.0.
@@ -78,11 +78,10 @@ const LegacyApp: React.FunctionComponent<{ history: History<unknown> }> = ({ his
               nextPath = nextPathParts[0];
               nextSearch = nextPathParts[1] ? nextPathParts[1] : undefined;
 
-              let nextUrl = url.format({
-                pathname: `${nextBasePath}/${nextPath}`,
-                hash: undefined,
-                search: nextSearch,
-              });
+              const builtPathname = `${nextBasePath}/${nextPath}`;
+              const builtSearch = nextSearch ? `?${nextSearch}` : '';
+
+              let nextUrl = `${builtPathname}${builtSearch}`;
 
               nextUrl = nextUrl.replace('//', '/');
 

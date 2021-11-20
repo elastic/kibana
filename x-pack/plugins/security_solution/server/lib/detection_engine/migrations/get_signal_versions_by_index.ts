@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElasticsearchClient } from 'src/core/server';
@@ -49,7 +50,7 @@ export const getSignalVersionsByIndex = async ({
   esClient: ElasticsearchClient;
   index: string[];
 }): Promise<SignalVersionsByIndex> => {
-  const { body } = await esClient.search<SignalVersionsAggResponse>({
+  const response = await esClient.search({
     index,
     size: 0,
     body: {
@@ -70,7 +71,9 @@ export const getSignalVersionsByIndex = async ({
       },
     },
   });
-  const indexBuckets = body.aggregations.signals_indices.buckets;
+
+  const aggs = response.body.aggregations as SignalVersionsAggResponse['aggregations'];
+  const indexBuckets = aggs.signals_indices.buckets;
 
   return index.reduce<SignalVersionsByIndex>((agg, _index) => {
     const bucket = indexBuckets.find((ib) => ib.key === _index);

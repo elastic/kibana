@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable no-continue */
@@ -59,7 +60,7 @@ export const EventDetail = memo(function EventDetail({
   const event = useSelector(selectors.currentRelatedEventData);
 
   return isLoading ? (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelLoading />
     </StyledPanel>
   ) : event ? (
@@ -70,7 +71,7 @@ export const EventDetail = memo(function EventDetail({
       eventType={eventType}
     />
   ) : (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelContentError translatedErrorMessage={eventDetailRequestError} />
     </StyledPanel>
   );
@@ -104,7 +105,7 @@ const EventDetailContents = memo(function ({
   const nodeName = processEvent ? eventModel.processNameSafeVersion(processEvent) : null;
 
   return (
-    <StyledPanel data-test-subj="resolver:panel:event-detail">
+    <StyledPanel hasBorder data-test-subj="resolver:panel:event-detail">
       <EventDetailBreadcrumbs
         nodeID={nodeID}
         nodeName={nodeName}

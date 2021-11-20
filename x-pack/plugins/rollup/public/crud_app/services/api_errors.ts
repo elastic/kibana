@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IHttpFetchError } from 'src/core/public';
 import { getNotifications, getFatalErrors } from '../../kibana_services';
 
-function createToastConfig(error: IHttpFetchError, errorTitle: string) {
+function createToastConfig(
+  error: IHttpFetchError<{
+    statusCode: number;
+    message: string;
+    error: string;
+  }>,
+  errorTitle: string
+) {
   if (error && error.body) {
     // Error body shape is defined by the API.
     const { error: errorString, statusCode, message } = error.body;
@@ -19,7 +27,14 @@ function createToastConfig(error: IHttpFetchError, errorTitle: string) {
   }
 }
 
-export function showApiWarning(error: IHttpFetchError, errorTitle: string) {
+export function showApiWarning(
+  error: IHttpFetchError<{
+    statusCode: number;
+    message: string;
+    error: string;
+  }>,
+  errorTitle: string
+) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {
@@ -31,7 +46,14 @@ export function showApiWarning(error: IHttpFetchError, errorTitle: string) {
   return getFatalErrors().add(error, errorTitle);
 }
 
-export function showApiError(error: IHttpFetchError, errorTitle: string) {
+export function showApiError(
+  error: IHttpFetchError<{
+    statusCode: number;
+    message: string;
+    error: string;
+  }>,
+  errorTitle: string
+) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {

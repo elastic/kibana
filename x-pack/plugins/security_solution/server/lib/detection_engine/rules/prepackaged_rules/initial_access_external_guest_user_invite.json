@@ -12,10 +12,10 @@
     "logs-azure*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Azure External Guest User Invitation",
-  "note": "The Azure Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Invite external user\" and azure.auditlogs.properties.target_resources.*.display_name:guest and event.outcome:(Success or success)",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Invite external user\" and azure.auditlogs.properties.target_resources.*.display_name:guest and event.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/governance/policy/samples/cis-azure-1-1-0"
   ],
@@ -62,6 +62,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 5
 }

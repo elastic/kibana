@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { createContext, useEffect, useRef, useContext, FunctionComponent } from 'react';
-import { EuiBreadcrumb } from '@elastic/eui';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
+
+import type { ChromeStart } from 'src/core/public';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface BreadcrumbsContext {
@@ -75,11 +80,17 @@ export const BreadcrumbsProvider: FunctionComponent<BreadcrumbsProviderProps> = 
   const breadcrumbsRef = useRef<BreadcrumbProps[]>([]);
 
   const handleChange = (breadcrumbs: BreadcrumbProps[]) => {
+    const newBreadcrumbs = breadcrumbs.map((item, index) => {
+      if (index === breadcrumbs.length - 1) {
+        return { ...item, href: undefined };
+      }
+      return item;
+    });
     if (onChange) {
-      onChange(breadcrumbs);
+      onChange(newBreadcrumbs);
     } else if (services.chrome) {
-      services.chrome.setBreadcrumbs(breadcrumbs);
-      services.chrome.docTitle.change(getDocTitle(breadcrumbs));
+      const setBreadcrumbs = createBreadcrumbsChangeHandler(services.chrome);
+      setBreadcrumbs(newBreadcrumbs);
     }
   };
 
@@ -134,4 +145,18 @@ export function getDocTitle(breadcrumbs: BreadcrumbProps[], maxBreadcrumbs = 2) 
     .slice(0, maxBreadcrumbs)
     .reverse()
     .map(({ text }) => text);
+}
+
+export function createBreadcrumbsChangeHandler(
+  chrome: Pick<ChromeStart, 'docTitle' | 'setBreadcrumbs'>,
+  setBreadcrumbs = chrome.setBreadcrumbs
+) {
+  return (breadcrumbs: BreadcrumbProps[]) => {
+    setBreadcrumbs(breadcrumbs);
+    if (breadcrumbs.length === 0) {
+      chrome.docTitle.reset();
+    } else {
+      chrome.docTitle.change(getDocTitle(breadcrumbs));
+    }
+  };
 }

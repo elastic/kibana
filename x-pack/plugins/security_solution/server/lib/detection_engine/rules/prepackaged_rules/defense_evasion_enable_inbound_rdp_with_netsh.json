@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Remote Desktop Enabled in Windows Firewall",
   "query": "process where event.type in (\"start\", \"process_started\") and\n (process.name : \"netsh.exe\" or process.pe.original_file_name == \"netsh.exe\") and\n process.args : (\"localport=3389\", \"RemoteDesktop\", \"group=\\\"remote desktop\\\"\") and\n process.args : (\"action=allow\", \"enable=Yes\", \"enable\")\n",
   "risk_score": 47,
@@ -37,15 +38,16 @@
           "reference": "https://attack.mitre.org/techniques/T1562/",
           "subtechnique": [
             {
-              "id": "T1562.001",
-              "name": "Disable or Modify Tools",
-              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+              "id": "T1562.004",
+              "name": "Disable or Modify System Firewall",
+              "reference": "https://attack.mitre.org/techniques/T1562/004/"
             }
           ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 4
 }

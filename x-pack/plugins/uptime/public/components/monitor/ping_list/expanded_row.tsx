@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-ignore formatNumber
@@ -20,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 import { PingRedirects } from './ping_redirects';
-import { BrowserExpandedRow } from '../synthetics/browser_expanded_row';
 import { PingHeaders } from './headers';
 
 interface Props {
@@ -55,24 +55,6 @@ const BodyExcerpt = ({ content }: { content: string }) =>
 
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];
-
-  if (ping.monitor.type === 'browser') {
-    return (
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiCallOut
-            iconType="beaker"
-            title={i18n.translate('xpack.uptime.synthetics.experimentalCallout.title', {
-              defaultMessage: 'Experimental feature',
-            })}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <BrowserExpandedRow checkGroup={ping.monitor.check_group} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
 
   // Show the error block
   if (ping.error) {

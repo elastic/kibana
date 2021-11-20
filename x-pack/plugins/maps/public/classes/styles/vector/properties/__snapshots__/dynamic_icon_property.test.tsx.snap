@@ -12,6 +12,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
       <EuiToolTip
         content="foobar_label"
         delay="regular"
+        display="inlineBlock"
         position="top"
         title="Icon"
       >
@@ -70,7 +71,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
         isPointsOnly={true}
         label={
           <EuiTextColor
-            color="secondary"
+            color="success"
           >
             Other
           </EuiTextColor>

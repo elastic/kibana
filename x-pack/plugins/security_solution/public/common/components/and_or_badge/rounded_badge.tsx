@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBadge } from '@elastic/eui';
@@ -11,7 +12,7 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 import { AndOr } from '.';
 
-const RoundBadge = (styled(EuiBadge)`
+const RoundBadge = styled(EuiBadge)`
   align-items: center;
   border-radius: 100%;
   display: inline-flex;
@@ -29,7 +30,7 @@ const RoundBadge = (styled(EuiBadge)`
   .euiBadge__text {
     text-overflow: clip;
   }
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 RoundBadge.displayName = 'RoundBadge';
 

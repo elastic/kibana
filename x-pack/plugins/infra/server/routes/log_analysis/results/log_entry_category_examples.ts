@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -15,6 +16,7 @@ import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLogEntryCategoryExamples } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
+import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 
 export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -39,6 +41,10 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: Inf
         requestContext.core.savedObjects.client,
         sourceId
       );
+      const resolvedSourceConfiguration = await resolveLogSourceConfiguration(
+        sourceConfiguration.configuration,
+        await framework.getIndexPatternsServiceWithRequestContext(requestContext)
+      );
 
       try {
         assertHasInfraMlPlugins(requestContext);
@@ -50,7 +56,7 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: Inf
           endTime,
           categoryId,
           exampleCount,
-          sourceConfiguration
+          resolvedSourceConfiguration
         );
 
         return response.ok({

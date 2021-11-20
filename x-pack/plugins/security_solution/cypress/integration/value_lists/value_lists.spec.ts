@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ROLES } from '../../../common/test';
 import { deleteRoleAndUser, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 import {
   waitForAlertsPanelToBeLoaded,
   waitForAlertsIndexToBeCreated,
@@ -34,7 +35,7 @@ import {
 describe('value lists', () => {
   describe('management modal', () => {
     beforeEach(() => {
-      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+      loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       waitForAlertsPanelToBeLoaded();
       waitForAlertsIndexToBeCreated();
       waitForListsIndexToBeCreated();
@@ -173,8 +174,8 @@ describe('value lists', () => {
         cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
-            expect(response!.body).to.contain(lineOne);
-            expect(response!.body).to.contain(lineTwo);
+            expect(response?.body).to.contain(lineOne);
+            expect(response?.body).to.contain(lineTwo);
           });
         });
       });
@@ -188,8 +189,8 @@ describe('value lists', () => {
         cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
-            expect(response!.body).to.contain(lineOne);
-            expect(response!.body).to.contain(lineTwo);
+            expect(response?.body).to.contain(lineOne);
+            expect(response?.body).to.contain(lineTwo);
           });
         });
       });
@@ -203,8 +204,8 @@ describe('value lists', () => {
         cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
-            expect(response!.body).to.contain(lineOne);
-            expect(response!.body).to.contain(lineTwo);
+            expect(response?.body).to.contain(lineOne);
+            expect(response?.body).to.contain(lineTwo);
           });
         });
       });
@@ -218,7 +219,7 @@ describe('value lists', () => {
         cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne] = list.split('\n');
-            expect(response!.body).to.contain(lineOne);
+            expect(response?.body).to.contain(lineOne);
           });
         });
       });
@@ -227,7 +228,7 @@ describe('value lists', () => {
 
   describe('user with restricted access role', () => {
     beforeEach(() => {
-      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.t1_analyst);
+      loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.t1_analyst);
       goToManageAlertsDetectionRules();
     });
 

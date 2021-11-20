@@ -1,39 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { SavedObjectTypeRegistry } from 'src/core/server';
-import { SpacesClient } from '../spaces_client';
-import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import Boom from '@hapi/boom';
 
-const typeRegistry = new SavedObjectTypeRegistry();
-typeRegistry.registerType({
-  name: 'foo',
-  namespaceType: 'single',
-  hidden: false,
-  mappings: { properties: {} },
-});
+import type { SavedObject, SavedObjectsType } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
 
-typeRegistry.registerType({
-  name: 'bar',
-  namespaceType: 'single',
-  hidden: false,
-  mappings: { properties: {} },
-});
-
-typeRegistry.registerType({
-  name: 'space',
-  namespaceType: 'agnostic',
-  hidden: true,
-  mappings: { properties: {} },
-});
+import { DEFAULT_SPACE_ID } from '../../common/constants';
+import { spacesClientMock } from '../spaces_client/spaces_client.mock';
+import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
+import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 
 const createMockRequest = () => ({});
 
@@ -65,6 +46,15 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       const request = createMockRequest();
       const baseClient = createMockClient();
       const spacesService = createSpacesService(currentSpace.id);
+      const spacesClient = spacesClientMock.create();
+      spacesService.createSpacesClient.mockReturnValue(spacesClient);
+      const typeRegistry = savedObjectsTypeRegistryMock.create();
+      typeRegistry.getAllTypes.mockReturnValue([
+        // for test purposes we only need the names of the object types
+        { name: 'foo' },
+        { name: 'bar' },
+        { name: 'space' },
+      ] as unknown as SavedObjectsType[]);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -72,7 +62,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         getSpacesService: () => spacesService,
         typeRegistry,
       });
-      return { client, baseClient, spacesService };
+      return { client, baseClient, spacesClient, typeRegistry };
     };
 
     describe('#get', () => {
@@ -97,6 +87,32 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.get).toHaveBeenCalledWith(type, id, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
+    describe('#bulkResolve', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.bulkResolve([], { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { resolved_objects: [] };
+        baseClient.bulkResolve.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.bulkResolve([], options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.bulkResolve).toHaveBeenCalledWith([], {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });
@@ -144,7 +160,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`supplements options with the current namespace`, async () => {
-        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = { saved_objects: [createMockResponse()] };
         baseClient.bulkGet.mockReturnValue(Promise.resolve(expectedReturnValue));
 
@@ -153,11 +169,94 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         // @ts-expect-error
         const actualReturnValue = await client.bulkGet(objects, options);
 
-        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(actualReturnValue).toEqual(expectedReturnValue);
         expect(baseClient.bulkGet).toHaveBeenCalledWith(objects, {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });
+        expect(spacesClient.getAll).not.toHaveBeenCalled();
+      });
+
+      test(`replaces object namespaces '*' with available spaces`, async () => {
+        const { client, baseClient, spacesClient, typeRegistry } = createSpacesSavedObjectsClient();
+        spacesClient.getAll.mockResolvedValue([
+          { id: 'available-space-a', name: 'a', disabledFeatures: [] },
+          { id: 'available-space-b', name: 'b', disabledFeatures: [] },
+        ]);
+        typeRegistry.isNamespaceAgnostic.mockImplementation((type) => type === 'foo');
+        typeRegistry.isShareable.mockImplementation((type) => type === 'bar');
+        // 'baz' is neither agnostic nor shareable, so it is isolated (namespaceType: 'single' or namespaceType: 'multiple-isolated')
+        baseClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { type: 'foo', id: '1', key: 'val' },
+            { type: 'bar', id: '2', key: 'val' },
+            { type: 'baz', id: '3', key: 'val' }, // this should be replaced with a 400 error
+            { type: 'foo', id: '4', key: 'val' },
+            { type: 'bar', id: '5', key: 'val' },
+            { type: 'baz', id: '6', key: 'val' }, // this should not be replaced with a 400 error because the user did not search for it in '*' all spaces
+          ] as unknown as SavedObject[],
+        });
+
+        const objects = [
+          { type: 'foo', id: '1', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'bar', id: '2', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'baz', id: '3', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'foo', id: '4', namespaces: ['another-space'] },
+          { type: 'bar', id: '5', namespaces: ['another-space'] },
+          { type: 'baz', id: '6', namespaces: ['another-space'] },
+        ];
+        const result = await client.bulkGet(objects);
+
+        expect(result.saved_objects).toEqual([
+          { type: 'foo', id: '1', key: 'val' },
+          { type: 'bar', id: '2', key: 'val' },
+          {
+            type: 'baz',
+            id: '3',
+            error: SavedObjectsErrorHelpers.createBadRequestError(
+              '"namespaces" can only specify a single space when used with space-isolated types'
+            ).output.payload,
+          },
+          { type: 'foo', id: '4', key: 'val' },
+          { type: 'bar', id: '5', key: 'val' },
+          { type: 'baz', id: '6', key: 'val' },
+        ]);
+        expect(baseClient.bulkGet).toHaveBeenCalledWith(
+          [
+            { type: 'foo', id: '1', namespaces: ['available-space-a', 'available-space-b'] },
+            { type: 'bar', id: '2', namespaces: ['available-space-a', 'available-space-b'] },
+            { type: 'baz', id: '3', namespaces: ['available-space-a', 'available-space-b'] },
+            // even if another space doesn't exist, it can be specified explicitly
+            { type: 'foo', id: '4', namespaces: ['another-space'] },
+            { type: 'bar', id: '5', namespaces: ['another-space'] },
+            { type: 'baz', id: '6', namespaces: ['another-space'] },
+          ],
+          { namespace: currentSpace.expectedNamespace }
+        );
+        expect(spacesClient.getAll).toHaveBeenCalledTimes(1);
+      });
+
+      test(`replaces object namespaces '*' with an empty array when the user doesn't have access to any spaces`, async () => {
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+        spacesClient.getAll.mockRejectedValue(Boom.forbidden());
+        baseClient.bulkGet.mockResolvedValue({ saved_objects: [] }); // doesn't matter for this test
+
+        const objects = [
+          { type: 'foo', id: '1', namespaces: ['*'] },
+          { type: 'bar', id: '2', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'baz', id: '3', namespaces: ['another-space'] },
+        ];
+        await client.bulkGet(objects);
+
+        expect(baseClient.bulkGet).toHaveBeenCalledWith(
+          [
+            { type: 'foo', id: '1', namespaces: [] },
+            { type: 'bar', id: '2', namespaces: [] },
+            { type: 'baz', id: '3', namespaces: ['another-space'] }, // even if another space doesn't exist, it can be specified explicitly
+          ],
+          { namespace: currentSpace.expectedNamespace }
+        );
+        expect(spacesClient.getAll).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -165,10 +264,8 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       const EMPTY_RESPONSE = { saved_objects: [], total: 0, per_page: 20, page: 1 };
 
       test(`returns empty result if user is unauthorized in this space`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
-        const spacesClient = spacesClientMock.create();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         spacesClient.getAll.mockResolvedValue([]);
-        spacesService.createSpacesClient.mockReturnValue(spacesClient);
 
         const options = Object.freeze({ type: 'foo', namespaces: ['some-ns'] });
         const actualReturnValue = await client.find(options);
@@ -178,10 +275,8 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`returns empty result if user is unauthorized in any space`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
-        const spacesClient = spacesClientMock.create();
-        spacesClient.getAll.mockRejectedValue(Boom.unauthorized());
-        spacesService.createSpacesClient.mockReturnValue(spacesClient);
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+        spacesClient.getAll.mockRejectedValue(Boom.forbidden());
 
         const options = Object.freeze({ type: 'foo', namespaces: ['some-ns'] });
         const actualReturnValue = await client.find(options);
@@ -231,7 +326,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`passes options.namespaces along`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = {
           saved_objects: [createMockResponse()],
           total: 1,
@@ -240,9 +335,6 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         };
         baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(
-          null as any
-        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
@@ -262,7 +354,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`filters options.namespaces based on authorization`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = {
           saved_objects: [createMockResponse()],
           total: 1,
@@ -271,9 +363,6 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         };
         baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(
-          null as any
-        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
@@ -293,7 +382,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`translates options.namespace: ['*']`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = {
           saved_objects: [createMockResponse()],
           total: 1,
@@ -302,9 +391,6 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         };
         baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(
-          null as any
-        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
@@ -500,66 +586,6 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
     });
 
-    describe('#addToNamespaces', () => {
-      test(`throws error if options.namespace is specified`, async () => {
-        const { client } = createSpacesSavedObjectsClient();
-
-        await expect(
-          // @ts-expect-error
-          client.addToNamespaces(null, null, null, { namespace: 'bar' })
-        ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
-      });
-
-      test(`supplements options with the current namespace`, async () => {
-        const { client, baseClient } = createSpacesSavedObjectsClient();
-        const expectedReturnValue = { namespaces: ['foo', 'bar'] };
-        baseClient.addToNamespaces.mockReturnValue(Promise.resolve(expectedReturnValue));
-
-        const type = Symbol();
-        const id = Symbol();
-        const namespaces = Symbol();
-        const options = Object.freeze({ foo: 'bar' });
-        // @ts-expect-error
-        const actualReturnValue = await client.addToNamespaces(type, id, namespaces, options);
-
-        expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.addToNamespaces).toHaveBeenCalledWith(type, id, namespaces, {
-          foo: 'bar',
-          namespace: currentSpace.expectedNamespace,
-        });
-      });
-    });
-
-    describe('#deleteFromNamespaces', () => {
-      test(`throws error if options.namespace is specified`, async () => {
-        const { client } = createSpacesSavedObjectsClient();
-
-        await expect(
-          // @ts-expect-error
-          client.deleteFromNamespaces(null, null, null, { namespace: 'bar' })
-        ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
-      });
-
-      test(`supplements options with the current namespace`, async () => {
-        const { client, baseClient } = createSpacesSavedObjectsClient();
-        const expectedReturnValue = { namespaces: ['foo', 'bar'] };
-        baseClient.deleteFromNamespaces.mockReturnValue(Promise.resolve(expectedReturnValue));
-
-        const type = Symbol();
-        const id = Symbol();
-        const namespaces = Symbol();
-        const options = Object.freeze({ foo: 'bar' });
-        // @ts-expect-error
-        const actualReturnValue = await client.deleteFromNamespaces(type, id, namespaces, options);
-
-        expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.deleteFromNamespaces).toHaveBeenCalledWith(type, id, namespaces, {
-          foo: 'bar',
-          namespace: currentSpace.expectedNamespace,
-        });
-      });
-    });
-
     describe('#removeReferencesTo', () => {
       test(`throws error if options.namespace is specified`, async () => {
         const { client } = createSpacesSavedObjectsClient();
@@ -586,6 +612,218 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });
+      });
+    });
+
+    describe('#openPointInTimeForType', () => {
+      test(`throws error if if user is unauthorized in this space`, async () => {
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+        spacesClient.getAll.mockResolvedValue([]);
+
+        await expect(
+          client.openPointInTimeForType('foo', { namespaces: ['bar'] })
+        ).rejects.toThrowError('Bad Request');
+
+        expect(baseClient.openPointInTimeForType).not.toHaveBeenCalled();
+      });
+
+      test(`throws error if if user is unauthorized in any space`, async () => {
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+        spacesClient.getAll.mockRejectedValue(Boom.forbidden());
+
+        await expect(
+          client.openPointInTimeForType('foo', { namespaces: ['bar'] })
+        ).rejects.toThrowError('Bad Request');
+
+        expect(baseClient.openPointInTimeForType).not.toHaveBeenCalled();
+      });
+
+      test(`filters options.namespaces based on authorization`, async () => {
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { id: 'abc123' };
+        baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        spacesClient.getAll.mockImplementation(() =>
+          Promise.resolve([
+            { id: 'ns-1', name: '', disabledFeatures: [] },
+            { id: 'ns-2', name: '', disabledFeatures: [] },
+          ])
+        );
+
+        const options = Object.freeze({ namespaces: ['ns-1', 'ns-3'] });
+        const actualReturnValue = await client.openPointInTimeForType(['foo', 'bar'], options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.openPointInTimeForType).toHaveBeenCalledWith(['foo', 'bar'], {
+          namespaces: ['ns-1'],
+        });
+        expect(spacesClient.getAll).toHaveBeenCalledWith({ purpose: 'findSavedObjects' });
+      });
+
+      test(`translates options.namespaces: ['*']`, async () => {
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { id: 'abc123' };
+        baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        spacesClient.getAll.mockImplementation(() =>
+          Promise.resolve([
+            { id: 'ns-1', name: '', disabledFeatures: [] },
+            { id: 'ns-2', name: '', disabledFeatures: [] },
+          ])
+        );
+
+        const options = Object.freeze({ namespaces: ['*'] });
+        const actualReturnValue = await client.openPointInTimeForType(['foo', 'bar'], options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.openPointInTimeForType).toHaveBeenCalledWith(['foo', 'bar'], {
+          namespaces: ['ns-1', 'ns-2'],
+        });
+        expect(spacesClient.getAll).toHaveBeenCalledWith({ purpose: 'findSavedObjects' });
+      });
+
+      test(`supplements options with the current namespace if unspecified`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { id: 'abc123' };
+        baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const options = Object.freeze({ keepAlive: '2m' });
+        const actualReturnValue = await client.openPointInTimeForType('foo', options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.openPointInTimeForType).toHaveBeenCalledWith('foo', {
+          keepAlive: '2m',
+          namespaces: [currentSpace.expectedNamespace ?? DEFAULT_SPACE_ID],
+        });
+      });
+    });
+
+    describe('#closePointInTime', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.closePointInTime('foo', { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { succeeded: true, num_freed: 1 };
+        baseClient.closePointInTime.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.closePointInTime('foo', options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.closePointInTime).toHaveBeenCalledWith('foo', {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
+    describe('#createPointInTimeFinder', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        const options = { type: ['a', 'b'], search: 'query', namespace: 'oops' };
+        expect(() => client.createPointInTimeFinder(options)).toThrow(ERROR_NAMESPACE_SPECIFIED);
+      });
+
+      it('redirects request to underlying base client with default dependencies', () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+
+        const options = { type: ['a', 'b'], search: 'query' };
+        client.createPointInTimeFinder(options);
+
+        expect(baseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+        expect(baseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, {
+          client,
+        });
+      });
+
+      it('redirects request to underlying base client with custom dependencies', () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+
+        const options = { type: ['a', 'b'], search: 'query' };
+        const dependencies = {
+          client: {
+            find: jest.fn(),
+            openPointInTimeForType: jest.fn(),
+            closePointInTime: jest.fn(),
+          },
+        };
+        client.createPointInTimeFinder(options, dependencies);
+
+        expect(baseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+        expect(baseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, dependencies);
+      });
+    });
+
+    describe('#collectMultiNamespaceReferences', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(
+          client.collectMultiNamespaceReferences([], { namespace: 'bar' })
+        ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { objects: [] };
+        baseClient.collectMultiNamespaceReferences.mockReturnValue(
+          Promise.resolve(expectedReturnValue)
+        );
+
+        const objects = [{ type: 'foo', id: 'bar' }];
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.collectMultiNamespaceReferences(objects, options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
+    describe('#updateObjectsSpaces', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.updateObjectsSpaces([], [], [], { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { objects: [] };
+        baseClient.updateObjectsSpaces.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const objects = [{ type: 'foo', id: 'bar' }];
+        const spacesToAdd = ['space-x'];
+        const spacesToRemove = ['space-y'];
+        const options = Object.freeze({ foo: 'bar' });
+        const actualReturnValue = await client.updateObjectsSpaces(
+          objects,
+          spacesToAdd,
+          spacesToRemove,
+          // @ts-expect-error
+          options
+        );
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.updateObjectsSpaces).toHaveBeenCalledWith(
+          objects,
+          spacesToAdd,
+          spacesToRemove,
+          { foo: 'bar', namespace: currentSpace.expectedNamespace }
+        );
       });
     });
   });

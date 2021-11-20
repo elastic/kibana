@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { safeLoad } from 'js-yaml';
-import { InstallablePackage } from '../../../types';
+
+import type { InstallablePackage } from '../../../types';
 import { getAssetsData } from '../packages/assets';
 
 // This should become a copy of https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/mapping/field.go#L39
@@ -13,6 +15,7 @@ export interface Field {
   name: string;
   type?: string;
   description?: string;
+  value?: string;
   format?: string;
   fields?: Fields;
   enabled?: boolean;
@@ -31,6 +34,10 @@ export interface Field {
   dynamic?: 'strict' | boolean;
   include_in_parent?: boolean;
   include_in_root?: boolean;
+
+  // Meta fields
+  metric_type?: string;
+  unit?: string;
 
   // Kibana specific
   analyzed?: boolean;

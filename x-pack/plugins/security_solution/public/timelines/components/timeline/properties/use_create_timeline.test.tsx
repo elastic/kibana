@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -20,13 +22,6 @@ jest.mock('react-redux', () => {
   return {
     ...actual,
     useDispatch: () => mockDispatch,
-    useSelector: () => ({
-      kind: 'relative',
-      fromStr: 'now-24h',
-      toStr: 'now',
-      from: '2020-07-07T08:20:18.966Z',
-      to: '2020-07-08T08:20:18.966Z',
-    }),
   };
 });
 
@@ -133,7 +128,7 @@ describe('useCreateTimelineButton', () => {
         wrapper.find('[data-test-subj="timeline-new"]').first().simulate('click');
 
         expect(mockDispatch.mock.calls[0][0].type).toEqual(
-          'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS'
+          'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW'
         );
         expect(mockDispatch.mock.calls[1][0].type).toEqual(
           'x-pack/security_solution/local/timeline/CREATE_TIMELINE'

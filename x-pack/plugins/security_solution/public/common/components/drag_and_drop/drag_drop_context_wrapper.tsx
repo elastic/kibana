@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop, pick } from 'lodash/fp';
@@ -10,6 +11,7 @@ import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
+import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
@@ -22,22 +24,24 @@ import {
   ADDED_TO_TIMELINE_MESSAGE,
   ADDED_TO_TIMELINE_TEMPLATE_MESSAGE,
 } from '../../hooks/translations';
-import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
 import { displaySuccessToast, useStateToaster } from '../toasters';
 import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import {
-  addFieldToTimelineColumns,
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
-  IS_DRAGGING_CLASS_NAME,
   IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
   draggableIsField,
   userIsReArrangingProviders,
 } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { useKibana } from '../../lib/kibana';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import {
+  addFieldToTimelineColumns,
+  getTimelineIdFromColumnDroppableId,
+} from '../../../../../timelines/public';
+import { alertsHeaders } from '../alerts_viewer/default_headers';
 
 // @ts-expect-error
 window['__react-beautiful-dnd-disable-dev-warnings'] = true;
@@ -84,14 +88,13 @@ const onDragEndHandler = ({
   } else if (fieldWasDroppedOnTimelineColumns(result)) {
     addFieldToTimelineColumns({
       browserFields,
+      defaultsHeader: alertsHeaders,
       dispatch,
       result,
       timelineId: getTimelineIdFromColumnDroppableId(result.destination?.droppableId ?? ''),
     });
   }
 };
-
-const sensors = [useAddToTimelineSensor];
 
 /**
  * DragDropContextWrapperComponent handles all drag end events
@@ -100,15 +103,14 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const getDataProviders = useMemo(() => dragAndDropSelectors.getDataProvidersSelector(), []);
-
-  const {
-    dataProviders: activeTimelineDataProviders,
-    timelineType,
-  } = useDeepEqualSelector((state) =>
-    pick(
-      ['dataProviders', 'timelineType'],
-      getTimeline(state, TimelineId.active) ?? timelineDefaults
-    )
+  const { timelines } = useKibana().services;
+  const sensors = [timelines.getUseAddToTimelineSensor()];
+  const { dataProviders: activeTimelineDataProviders, timelineType } = useDeepEqualSelector(
+    (state) =>
+      pick(
+        ['dataProviders', 'timelineType'],
+        getTimeline(state, TimelineId.active) ?? timelineDefaults
+      )
   );
   const dataProviders = useDeepEqualSelector(getDataProviders);
 

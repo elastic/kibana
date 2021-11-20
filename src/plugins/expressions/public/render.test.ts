@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionRenderHandler, render } from './render';
 import { Observable } from 'rxjs';
+import { SerializableRecord } from '@kbn/utility-types';
 import { ExpressionRenderError } from './types';
 import { getRenderersRegistry } from './services';
 import { first, take, toArray } from 'rxjs/operators';
@@ -52,8 +53,8 @@ const getHandledError = () => {
 };
 
 describe('render helper function', () => {
-  it('returns ExpressionRenderHandler instance', () => {
-    const response = render(element, {});
+  it('returns ExpressionRenderHandler instance', async () => {
+    const response = await render(element, {});
     expect(response).toBeInstanceOf(ExpressionRenderHandler);
   });
 });
@@ -79,11 +80,11 @@ describe('ExpressionRenderHandler', () => {
 
     it('in case of error render$ should emit when error renderer is finished', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      expressionRenderHandler.render(false);
+      expressionRenderHandler.render(false as unknown as SerializableRecord);
       const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
       await expect(promise1).resolves.toEqual(1);
 
-      expressionRenderHandler.render(false);
+      expressionRenderHandler.render(false as unknown as SerializableRecord);
       const promise2 = expressionRenderHandler.render$.pipe(first()).toPromise();
       await expect(promise2).resolves.toEqual(2);
     });
@@ -92,7 +93,7 @@ describe('ExpressionRenderHandler', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element, {
         onRenderError: mockMockErrorRenderFunction,
       });
-      await expressionRenderHandler.render(false);
+      await expressionRenderHandler.render(false as unknown as SerializableRecord);
       expect(getHandledError()!.message).toEqual(
         `invalid data provided to the expression renderer`
       );
@@ -122,7 +123,8 @@ describe('ExpressionRenderHandler', () => {
         get: () => ({
           render: (domNode: HTMLElement, config: unknown, handlers: IInterpreterRenderHandlers) => {
             handlers.hasCompatibleActions!({
-              foo: 'bar',
+              name: 'something',
+              data: 'bar',
             });
           },
         }),
@@ -136,7 +138,8 @@ describe('ExpressionRenderHandler', () => {
       await expressionRenderHandler.render({ type: 'render', as: 'something' });
       expect(hasCompatibleActions).toHaveBeenCalledTimes(1);
       expect(hasCompatibleActions.mock.calls[0][0]).toEqual({
-        foo: 'bar',
+        name: 'something',
+        data: 'bar',
       });
     });
 
@@ -156,7 +159,7 @@ describe('ExpressionRenderHandler', () => {
     it('default renderer should use notification service', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
       const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
-      expressionRenderHandler.render(false);
+      expressionRenderHandler.render(false as unknown as SerializableRecord);
       await expect(promise1).resolves.toEqual(1);
       expect(mockNotificationService.toasts.addError).toBeCalledWith(
         expect.objectContaining({
@@ -175,7 +178,7 @@ describe('ExpressionRenderHandler', () => {
       const expressionRenderHandler1 = new ExpressionRenderHandler(element, {
         onRenderError: mockMockErrorRenderFunction,
       });
-      expressionRenderHandler1.render(false);
+      expressionRenderHandler1.render(false as unknown as SerializableRecord);
       const renderPromiseAfterRender = expressionRenderHandler1.render$.pipe(first()).toPromise();
       await expect(renderPromiseAfterRender).resolves.toEqual(1);
       expect(getHandledError()!.message).toEqual(
@@ -188,7 +191,7 @@ describe('ExpressionRenderHandler', () => {
         onRenderError: mockMockErrorRenderFunction,
       });
       const renderPromiseBeforeRender = expressionRenderHandler2.render$.pipe(first()).toPromise();
-      expressionRenderHandler2.render(false);
+      expressionRenderHandler2.render(false as unknown as SerializableRecord);
       await expect(renderPromiseBeforeRender).resolves.toEqual(1);
       expect(getHandledError()!.message).toEqual(
         'invalid data provided to the expression renderer'
@@ -199,9 +202,9 @@ describe('ExpressionRenderHandler', () => {
     // that observables will emit previous result if subscription happens after render
     it('should emit previous render and error results', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      expressionRenderHandler.render(false);
+      expressionRenderHandler.render(false as unknown as SerializableRecord);
       const renderPromise = expressionRenderHandler.render$.pipe(take(2), toArray()).toPromise();
-      expressionRenderHandler.render(false);
+      expressionRenderHandler.render(false as unknown as SerializableRecord);
       await expect(renderPromise).resolves.toEqual([1, 2]);
     });
   });

@@ -24,14 +24,6 @@ APM agents will use local defaults until they're able to update the configuratio
 For this reason, it is still essential to set custom default configurations locally in each of your agents.
 
 [float]
-==== APM Server setup
-
-This feature requires {apm-server-ref}/setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
-
-APM Server acts as a proxy between the agents and Kibana.
-Kibana communicates any changed settings to APM Server so that your agents only need to poll APM Server to determine which settings have changed.
-
-[float]
 ==== Supported configurations
 
 Each Agent has a list of supported configurations.
@@ -43,9 +35,11 @@ Supported configurations are also tagged with the image:./images/dynamic-config.
 
 [horizontal]
 Go Agent:: {apm-go-ref}/configuration.html[Configuration reference]
+iOS agent:: _Not yet supported_
 Java Agent:: {apm-java-ref}/configuration.html[Configuration reference]
 .NET Agent:: {apm-dotnet-ref}/configuration.html[Configuration reference]
 Node.js Agent:: {apm-node-ref}/configuration.html[Configuration reference]
+PHP Agent:: {apm-php-ref}/configuration.html[Configuration reference]
 Python Agent:: {apm-py-ref}/configuration.html[Configuration reference]
 Ruby Agent:: {apm-ruby-ref}/configuration.html[Configuration reference]
 Real User Monitoring (RUM) Agent:: {apm-rum-ref}/configuration.html[Configuration reference]

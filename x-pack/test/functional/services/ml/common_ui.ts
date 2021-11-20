@@ -1,21 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-interface SetValueOptions {
+import type { CanvasElementColorStats } from '../canvas_element';
+
+export interface SetValueOptions {
   clearWithKeyboard?: boolean;
   typeCharByChar?: boolean;
 }
 
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;
 
-export function MachineLearningCommonUIProvider({ getService }: FtrProviderContext) {
+export function MachineLearningCommonUIProvider({
+  getPageObjects,
+  getService,
+}: FtrProviderContext) {
+  const PageObjects = getPageObjects(['spaceSelector']);
+
+  const canvasElement = getService('canvasElement');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -93,14 +103,6 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       });
     },
 
-    async assertKibanaHomeFileDataVisLinkExists() {
-      await testSubjects.existOrFail('homeSynopsisLinkml_file_data_visualizer');
-    },
-
-    async assertKibanaHomeFileDataVisLinkNotExists() {
-      await testSubjects.missingOrFail('homeSynopsisLinkml_file_data_visualizer');
-    },
-
     async assertRadioGroupValue(testSubject: string, expectedValue: string) {
       const assertRadioGroupValue = await testSubjects.find(testSubject);
       const input = await assertRadioGroupValue.findByCssSelector(':checked');
@@ -116,6 +118,25 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
       await label.click();
       await this.assertRadioGroupValue(testSubject, value);
+    },
+
+    async assertSelectSelectedOptionVisibleText(testSubject: string, visibleText: string) {
+      // Need to validate the selected option text, as the option value may be different to the visible text.
+      const selectControl = await testSubjects.find(testSubject);
+      const selectedValue = await selectControl.getAttribute('value');
+      const selectedOption = await selectControl.findByCssSelector(`[value="${selectedValue}"]`);
+      const selectedOptionText = await selectedOption.getVisibleText();
+      expect(selectedOptionText).to.eql(
+        visibleText,
+        `Expected selected option visible text to be '${visibleText}' (got '${selectedOptionText}')`
+      );
+    },
+
+    async selectSelectValueByVisibleText(testSubject: string, visibleText: string) {
+      // Cannot use await testSubjects.selectValue as the option value may be different to the text.
+      const selectControl = await testSubjects.find(testSubject);
+      await selectControl.type(visibleText);
+      await this.assertSelectSelectedOptionVisibleText(testSubject, visibleText);
     },
 
     async setMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
@@ -160,6 +181,133 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
 
       // escape popover
       await browser.pressKeys(browser.keys.ESCAPE);
+    },
+
+    async setSliderValue(testDataSubj: string, value: number) {
+      const slider = await testSubjects.find(testDataSubj);
+
+      await retry.tryForTime(60 * 1000, async () => {
+        const currentValue = await slider.getAttribute('value');
+        const currentDiff = +currentValue - +value;
+
+        if (currentDiff === 0) {
+          return true;
+        } else {
+          if (currentDiff > 0) {
+            if (Math.abs(currentDiff) >= 10) {
+              slider.type(browser.keys.PAGE_DOWN);
+            } else {
+              slider.type(browser.keys.ARROW_LEFT);
+            }
+          } else {
+            if (Math.abs(currentDiff) >= 10) {
+              slider.type(browser.keys.PAGE_UP);
+            } else {
+              slider.type(browser.keys.ARROW_RIGHT);
+            }
+          }
+          await retry.tryForTime(1000, async () => {
+            const newValue = await slider.getAttribute('value');
+            if (newValue === currentValue) {
+              throw new Error(`slider value should have changed, but is still ${currentValue}`);
+            }
+          });
+          await this.assertSliderValue(testDataSubj, value);
+        }
+      });
+    },
+
+    async assertSliderValue(testDataSubj: string, expectedValue: number) {
+      const actualValue = await testSubjects.getAttribute(testDataSubj, 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `${testDataSubj} slider value should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async disableAntiAliasing() {
+      await canvasElement.disableAntiAliasing();
+    },
+
+    async resetAntiAliasing() {
+      await canvasElement.resetAntiAliasing();
+    },
+
+    async assertColorsInCanvasElement(
+      dataTestSubj: string,
+      expectedColorStats: CanvasElementColorStats,
+      exclude?: string[],
+      percentageThreshold = 0,
+      channelTolerance = 10,
+      valueTolerance = 10
+    ) {
+      if (process.env.TEST_CLOUD) {
+        log.warning('Not running color assertions in cloud');
+        return;
+      }
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail(dataTestSubj);
+
+        const actualColorStatsWithTolerance = await canvasElement.getColorStatsWithColorTolerance(
+          `[data-test-subj="${dataTestSubj}"] canvas`,
+          expectedColorStats,
+          exclude,
+          percentageThreshold,
+          channelTolerance,
+          valueTolerance
+        );
+
+        expect(actualColorStatsWithTolerance.every((d) => d.withinTolerance)).to.eql(
+          true,
+          `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
+            expectedColorStats
+          )}' (got '${JSON.stringify(actualColorStatsWithTolerance)}')`
+        );
+      });
+    },
+
+    async assertRowsNumberPerPage(testSubj: string, rowsNumber: 10 | 25 | 100) {
+      const textContent = await testSubjects.getVisibleText(
+        `${testSubj} > tablePaginationPopoverButton`
+      );
+      expect(textContent).to.be(`Rows per page: ${rowsNumber}`);
+    },
+
+    async ensurePagePopupOpen(testSubj: string) {
+      await retry.tryForTime(5000, async () => {
+        const isOpen = await testSubjects.exists('tablePagination-10-rows');
+        if (!isOpen) {
+          await testSubjects.click(`${testSubj} > tablePaginationPopoverButton`);
+          await testSubjects.existOrFail('tablePagination-10-rows');
+        }
+      });
+    },
+
+    async setRowsNumberPerPage(testSubj: string, rowsNumber: 10 | 25 | 100) {
+      await this.ensurePagePopupOpen(testSubj);
+      await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
+      await this.assertRowsNumberPerPage(testSubj, rowsNumber);
+    },
+
+    async getEuiDescriptionListDescriptionFromTitle(testSubj: string, title: string) {
+      const subj = await testSubjects.find(testSubj);
+      const titles = await subj.findAllByTagName('dt');
+      const descriptions = await subj.findAllByTagName('dd');
+
+      for (let i = 0; i < titles.length; i++) {
+        const titleText = (await titles[i].parseDomContent()).html();
+        if (titleText === title) {
+          return (await descriptions[i].parseDomContent()).html();
+        }
+      }
+      return null;
+    },
+
+    async changeToSpace(spaceId: string) {
+      await PageObjects.spaceSelector.openSpacesNav();
+      await PageObjects.spaceSelector.goToSpecificSpace(spaceId);
+      await PageObjects.spaceSelector.expectHomePage(spaceId);
     },
   };
 }

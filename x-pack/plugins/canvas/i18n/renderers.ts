@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -54,26 +55,6 @@ export const RendererStrings = {
         defaultMessage: 'Renders an embeddable Saved Object from other parts of Kibana',
       }),
   },
-  error: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.error.displayName', {
-        defaultMessage: 'Error information',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.error.helpDescription', {
-        defaultMessage: 'Render error data in a way that is helpful to users',
-      }),
-  },
-  image: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.image.displayName', {
-        defaultMessage: 'Image',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.image.helpDescription', {
-        defaultMessage: 'Render an image',
-      }),
-  },
   markdown: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.markdown.displayName', {
@@ -86,16 +67,6 @@ export const RendererStrings = {
           HTML,
           MARKDOWN,
         },
-      }),
-  },
-  metric: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.metric.displayName', {
-        defaultMessage: 'Metric',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.metric.helpDescription', {
-        defaultMessage: 'Render a number over a label',
       }),
   },
   pie: {
@@ -116,46 +87,6 @@ export const RendererStrings = {
     getHelpDescription: () =>
       i18n.translate('xpack.canvas.renderer.plot.helpDescription', {
         defaultMessage: 'Render an XY plot from your data',
-      }),
-  },
-  progress: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.progress.displayName', {
-        defaultMessage: 'Progress indicator',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.progress.helpDescription', {
-        defaultMessage: 'Render a progress indicator that reveals a percentage of an element',
-      }),
-  },
-  repeatImage: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.repeatImage.displayName', {
-        defaultMessage: 'Image repeat',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.repeatImage.helpDescription', {
-        defaultMessage: 'Repeat an image a given number of times',
-      }),
-  },
-  revealImage: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.revealImage.displayName', {
-        defaultMessage: 'Image reveal',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.revealImage.helpDescription', {
-        defaultMessage: 'Reveal a percentage of an image to make a custom gauge-style chart',
-      }),
-  },
-  shape: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.renderer.shape.displayName', {
-        defaultMessage: 'Shape',
-      }),
-    getHelpDescription: () =>
-      i18n.translate('xpack.canvas.renderer.shape.helpDescription', {
-        defaultMessage: 'Render a basic shape',
       }),
   },
   table: {

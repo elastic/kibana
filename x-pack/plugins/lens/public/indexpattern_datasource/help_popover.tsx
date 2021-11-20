@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import {
   EuiIcon,
   EuiLink,
@@ -14,6 +15,7 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
+import { trackUiEvent } from '../lens_ui_telemetry';
 import './help_popover.scss';
 
 export const HelpPopoverButton = ({
@@ -49,6 +51,11 @@ export const HelpPopover = ({
   isOpen: EuiPopoverProps['isOpen'];
   title?: string;
 }) => {
+  useEffect(() => {
+    if (isOpen) {
+      trackUiEvent('open_help_popover');
+    }
+  }, [isOpen]);
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
@@ -60,7 +67,7 @@ export const HelpPopover = ({
       panelClassName="lnsHelpPopover__panel"
       panelPaddingSize="none"
     >
-      {title && <EuiPopoverTitle>{title}</EuiPopoverTitle>}
+      {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
 
       <EuiText className="lnsHelpPopover__content" size="s">
         {children}

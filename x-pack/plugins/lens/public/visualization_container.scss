@@ -1,6 +1,7 @@
 .lnsVisualizationContainer {
   @include euiScrollBar;
-  overflow: auto;
+  overflow: auto hidden;
+  user-select: text;
 }
 
 .lnsExpressionRenderer {
@@ -14,4 +15,16 @@
   .lnsExpressionRenderer__component {
     position: static; // Let the progress indicator position itself against the outer parent
   }
+}
+
+.lnsEmbeddedError {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+.lnsSelectableErrorMessage {
+  user-select: text;
 }

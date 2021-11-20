@@ -11,11 +11,11 @@ def getSkippablePaths() {
     /^.ci\/.+\.yml$/,
     /^.ci\/es-snapshots\//,
     /^.ci\/pipeline-library\//,
-    /^.ci\/teamcity\//,
     /^.ci\/Jenkinsfile_[^\/]+$/,
     /^\.github\//,
-    /^\.teamcity\//,
     /\.md$/,
+    /^\.backportrc\.json$/,
+    /^\.buildkite\//,
   ]
 }
 

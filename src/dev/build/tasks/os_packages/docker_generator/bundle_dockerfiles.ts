@@ -1,25 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
+import { readFileSync } from 'fs';
+import { copyFile } from 'fs/promises';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import Mustache from 'mustache';
 
 import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';
 import { dockerfileTemplate } from './templates';
 import { TemplateContext } from './template_context';
 
 export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: TemplateContext) {
-  log.info(
-    `Generating kibana${scope.imageFlavor}${scope.ubiImageFlavor} docker build context bundle`
-  );
-
-  const dockerFilesDirName = `kibana${scope.imageFlavor}${scope.ubiImageFlavor}-${scope.version}-docker-build-context`;
+  log.info(`Generating kibana${scope.imageFlavor} docker build context bundle`);
+  const dockerFilesDirName = `kibana${scope.imageFlavor}-${scope.version}-docker-build-context`;
   const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
   const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);
 
@@ -39,6 +39,18 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   // dockerfiles folder
   await copyAll(resolve(scope.dockerBuildDir, 'bin'), resolve(dockerFilesBuildDir, 'bin'));
   await copyAll(resolve(scope.dockerBuildDir, 'config'), resolve(dockerFilesBuildDir, 'config'));
+  if (scope.ironbank) {
+    await copyFile(
+      resolve(REPO_ROOT, 'licenses/ELASTIC-LICENSE-2.0.txt'),
+      resolve(dockerFilesBuildDir, 'LICENSE')
+    );
+    const templates = ['hardening_manifest.yaml', 'README.md'];
+    for (const template of templates) {
+      const file = readFileSync(resolve(__dirname, 'templates/ironbank', template));
+      const output = Mustache.render(file.toString(), scope);
+      await write(resolve(dockerFilesBuildDir, template), output);
+    }
+  }
 
   // Compress dockerfiles dir created inside
   // docker build dir as output it as a target

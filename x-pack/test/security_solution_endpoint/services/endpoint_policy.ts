@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import uuid from 'uuid';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   CreateAgentPolicyRequest,
@@ -16,11 +19,12 @@ import {
   GetFullAgentPolicyResponse,
   GetPackagesResponse,
 } from '../../../plugins/fleet/common';
-import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
+import { policyFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
-import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public/applications/fleet/services/pkg_key_from_package_info';
+import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public/services/pkg_key_from_package_info';
+import { EndpointError } from '../../../plugins/security_solution/server';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
@@ -118,6 +122,19 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     },
 
     /**
+     * Retrieves the currently installed endpoint package
+     */
+    async getEndpointPackage(): Promise<Immutable<GetPackagesResponse['response'][0]>> {
+      const endpointPackage = await retrieveEndpointPackageInfo();
+
+      if (!endpointPackage) {
+        throw new EndpointError(`endpoint package not instealled`);
+      }
+
+      return endpointPackage;
+    },
+
+    /**
      * Retrieves the full Agent policy, which mirrors what the Elastic Agent would get
      * once they checkin.
      */
@@ -145,7 +162,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let agentPolicy: CreateAgentPolicyResponse['item'];
       try {
         const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-          name: 'East Coast',
+          name: `East Coast ${uuid.v4()}`,
           description: 'East Coast call center',
           namespace: 'default',
         };
@@ -166,7 +183,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let packagePolicy: CreatePackagePolicyResponse['item'];
       try {
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-          name: 'Protect East Coast',
+          name: `Protect East Coast ${uuid.v4()}`,
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,
@@ -178,7 +195,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               streams: [],
               config: {
                 policy: {
-                  value: policyConfigFactory(),
+                  value: policyFactory(),
                 },
               },
             },
@@ -190,9 +207,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             version: endpointPackageInfo?.version ?? '',
           },
         };
-        const {
-          body: createResponse,
-        }: { body: CreatePackagePolicyResponse } = await supertest
+        const { body: createResponse }: { body: CreatePackagePolicyResponse } = await supertest
           .post(INGEST_API_PACKAGE_POLICIES)
           .set('kbn-xsrf', 'xxx')
           .send(newPackagePolicyData)
@@ -245,14 +260,13 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     async deletePolicyByName(name: string) {
       let packagePolicyList: GetPackagePoliciesResponse['items'];
       try {
-        const {
-          body: packagePoliciesResponse,
-        }: { body: GetPackagePoliciesResponse } = await supertest
-          .get(INGEST_API_PACKAGE_POLICIES)
-          .set('kbn-xsrf', 'xxx')
-          .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
-          .send()
-          .expect(200);
+        const { body: packagePoliciesResponse }: { body: GetPackagePoliciesResponse } =
+          await supertest
+            .get(INGEST_API_PACKAGE_POLICIES)
+            .set('kbn-xsrf', 'xxx')
+            .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
+            .send()
+            .expect(200);
         packagePolicyList = packagePoliciesResponse.items;
       } catch (error) {
         return logSupertestApiErrorAndThrow(

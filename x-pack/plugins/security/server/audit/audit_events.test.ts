@@ -1,29 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { URL } from 'url';
+
+import { httpServerMock } from 'src/core/server/mocks';
+
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { AuthenticationResult } from '../authentication';
 import {
-  EventOutcome,
+  httpRequestEvent,
   SavedObjectAction,
   savedObjectEvent,
-  userLoginEvent,
-  httpRequestEvent,
-  spaceAuditEvent,
   SpaceAuditAction,
+  spaceAuditEvent,
+  userLoginEvent,
 } from './audit_events';
-import { AuthenticationResult } from '../authentication';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { httpServerMock } from 'src/core/server/mocks';
 
 describe('#savedObjectEvent', () => {
   test('creates event with `unknown` outcome', () => {
     expect(
       savedObjectEvent({
         action: SavedObjectAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
       })
     ).toMatchInlineSnapshot(`
@@ -31,9 +33,13 @@ describe('#savedObjectEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "saved_object_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "unknown",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -59,9 +65,13 @@ describe('#savedObjectEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "saved_object_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -91,9 +101,13 @@ describe('#savedObjectEvent', () => {
         },
         "event": Object {
           "action": "saved_object_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "failure",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -194,9 +208,13 @@ describe('#savedObjectEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "saved_object_remove_references",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "change",
+          "type": Array [
+            "change",
+          ],
         },
         "kibana": Object {
           "add_to_spaces": undefined,
@@ -225,7 +243,9 @@ describe('#userLoginEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "user_login",
-          "category": "authentication",
+          "category": Array [
+            "authentication",
+          ],
           "outcome": "success",
         },
         "kibana": Object {
@@ -261,7 +281,9 @@ describe('#userLoginEvent', () => {
         },
         "event": Object {
           "action": "user_login",
-          "category": "authentication",
+          "category": Array [
+            "authentication",
+          ],
           "outcome": "failure",
         },
         "kibana": Object {
@@ -288,7 +310,9 @@ describe('#httpRequestEvent', () => {
       Object {
         "event": Object {
           "action": "http_request",
-          "category": "web",
+          "category": Array [
+            "web",
+          ],
           "outcome": "unknown",
         },
         "http": Object {
@@ -325,7 +349,9 @@ describe('#httpRequestEvent', () => {
       Object {
         "event": Object {
           "action": "http_request",
-          "category": "web",
+          "category": Array [
+            "web",
+          ],
           "outcome": "unknown",
         },
         "http": Object {
@@ -351,7 +377,7 @@ describe('#spaceAuditEvent', () => {
     expect(
       spaceAuditEvent({
         action: SpaceAuditAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'space', id: 'SPACE_ID' },
       })
     ).toMatchInlineSnapshot(`
@@ -359,9 +385,13 @@ describe('#spaceAuditEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "space_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "unknown",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {
@@ -385,9 +415,13 @@ describe('#spaceAuditEvent', () => {
         "error": undefined,
         "event": Object {
           "action": "space_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "success",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {
@@ -415,9 +449,13 @@ describe('#spaceAuditEvent', () => {
         },
         "event": Object {
           "action": "space_create",
-          "category": "database",
+          "category": Array [
+            "database",
+          ],
           "outcome": "failure",
-          "type": "creation",
+          "type": Array [
+            "creation",
+          ],
         },
         "kibana": Object {
           "saved_object": Object {

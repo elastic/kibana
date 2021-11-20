@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,11 +16,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('GET /api/saved_objects_tagging/tags/{id}', () => {
     before(async () => {
-      await esArchiver.load('rbac_tags');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('rbac_tags');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     const responses: Record<string, ExpectedResponse> = {

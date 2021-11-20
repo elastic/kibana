@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -19,12 +20,11 @@ import {
 } from '@elastic/eui';
 
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
-import { Loading } from '../../../../shared/loading';
-import { SourceIcon } from '../../../components/shared/source_icon';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { LicenseCallout } from '../../../components/shared/license_callout';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
+import { SourceIcon } from '../../../components/shared/source_icon';
 import {
+  NAV,
   CONFIGURE_BUTTON,
   CONNECTORS_HEADER_TITLE,
   CONNECTORS_HEADER_DESCRIPTION,
@@ -35,9 +35,7 @@ import {
 } from '../../../constants';
 import { getSourcesPath } from '../../../routes';
 import { SourceDataItem } from '../../../types';
-
 import { staticSourceData } from '../../content_sources/source_data';
-
 import { SettingsLogic } from '../settings_logic';
 
 export const Connectors: React.FC = () => {
@@ -47,8 +45,6 @@ export const Connectors: React.FC = () => {
   useEffect(() => {
     initializeConnectors();
   }, []);
-
-  if (dataLoading) return <Loading />;
 
   const availableConnectors = reject(
     connectors,
@@ -96,18 +92,15 @@ export const Connectors: React.FC = () => {
               <EuiFlexItem grow={1}>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <SourceIcon
-                      serviceType={serviceType}
-                      name={name}
-                      className="source-row__icon"
-                    />
+                    <SourceIcon serviceType={serviceType} name={name} />
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <span className="source-row__name">
-                      {name}
-                      &nbsp;&nbsp;
-                      {accountContextOnly && <EuiBadge color="hollow">{PRIVATE_SOURCE}</EuiBadge>}
-                    </span>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        {accountContextOnly && <EuiBadge color="hollow">{PRIVATE_SOURCE}</EuiBadge>}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -130,12 +123,15 @@ export const Connectors: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader
-        title={CONNECTORS_HEADER_TITLE}
-        description={CONNECTORS_HEADER_DESCRIPTION}
-      />
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.SETTINGS, NAV.SETTINGS_SOURCE_PRIORITIZATION]}
+      pageHeader={{
+        pageTitle: CONNECTORS_HEADER_TITLE,
+        description: CONNECTORS_HEADER_DESCRIPTION,
+      }}
+      isLoading={dataLoading}
+    >
       {connectorsList}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

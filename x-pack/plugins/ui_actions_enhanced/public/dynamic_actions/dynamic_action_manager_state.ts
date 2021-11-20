@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SerializedEvent } from './types';
 
 /**
- * This interface represents the state of @type {DynamicActionManager} at any
+ * This interface represents the state of @type {DynamicActionManager} at every
  * point in time.
  */
 export interface State {
@@ -65,12 +66,14 @@ export const transitions: Transitions = {
     events,
   }),
 
-  failFetching: (state) => ({ message }) => ({
-    ...state,
-    isFetchingEvents: false,
-    fetchCount: state.fetchCount + 1,
-    fetchError: { message },
-  }),
+  failFetching:
+    (state) =>
+    ({ message }) => ({
+      ...state,
+      isFetchingEvents: false,
+      fetchCount: state.fetchCount + 1,
+      fetchError: { message },
+    }),
 
   addEvent: (state) => (event: SerializedEvent) => ({
     ...state,

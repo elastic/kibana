@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { normalizeTimeRange } from './normalize_time_range';
@@ -12,23 +13,12 @@ import {
   RelativeTimeRange,
   isRelativeTimeRange,
 } from '../../store/inputs/model';
-
+import DateMath from '@elastic/datemath';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
 
 const getTimeRangeSettingsMock = getTimeRangeSettings as jest.Mock;
 
 jest.mock('../../utils/default_date_settings');
-jest.mock('@elastic/datemath', () => ({
-  parse: (date: string) => {
-    if (date === 'now') {
-      return { toISOString: () => '2020-07-08T08:20:18.966Z' };
-    }
-
-    if (date === 'now-24h') {
-      return { toISOString: () => '2020-07-07T08:20:18.966Z' };
-    }
-  },
-}));
 
 getTimeRangeSettingsMock.mockImplementation(() => ({
   from: '2020-07-04T08:20:18.966Z',
@@ -38,6 +28,19 @@ getTimeRangeSettingsMock.mockImplementation(() => ({
 }));
 
 describe('#normalizeTimeRange', () => {
+  let dateMathSpy: jest.SpyInstance;
+  beforeAll(() => {
+    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy.mockImplementation((date: string) =>
+      date === 'now'
+        ? { toISOString: () => new Date('2020-07-08T08:20:18.966Z') }
+        : { toISOString: () => new Date('2020-07-07T08:20:18.966Z') }
+    );
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   test('Absolute time range returns defaults for empty strings', () => {
     const dateTimeRange: URLTimeRange = {
       kind: 'absolute',

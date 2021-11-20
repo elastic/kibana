@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
@@ -25,7 +26,7 @@ describe('delete_list_item', () => {
   });
 
   test('Delete returns a null if "getListItem" returns a null', async () => {
-    ((getListItem as unknown) as jest.Mock).mockResolvedValueOnce(null);
+    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getDeleteListItemOptionsMock();
     const deletedListItem = await deleteListItem(options);
     expect(deletedListItem).toEqual(null);
@@ -33,7 +34,7 @@ describe('delete_list_item', () => {
 
   test('Delete returns the same list item if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
-    ((getListItem as unknown) as jest.Mock).mockResolvedValueOnce(listItem);
+    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
     const options = getDeleteListItemOptionsMock();
     const deletedListItem = await deleteListItem(options);
     expect(deletedListItem).toEqual(listItem);
@@ -41,7 +42,7 @@ describe('delete_list_item', () => {
 
   test('Delete calls "delete" if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
-    ((getListItem as unknown) as jest.Mock).mockResolvedValueOnce(listItem);
+    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
     const options = getDeleteListItemOptionsMock();
     await deleteListItem(options);
     const deleteQuery = {
@@ -49,6 +50,6 @@ describe('delete_list_item', () => {
       index: LIST_ITEM_INDEX,
       refresh: 'wait_for',
     };
-    expect(options.callCluster).toBeCalledWith('delete', deleteQuery);
+    expect(options.esClient.delete).toBeCalledWith(deleteQuery);
   });
 });

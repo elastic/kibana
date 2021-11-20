@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
 export interface HasPrivilegesResponseApplication {
   [resource: string]: {
@@ -26,6 +27,18 @@ export interface HasPrivilegesResponse {
       [privilegeName: string]: boolean;
     };
   };
+}
+
+/**
+ * Options to influce the privilege checks.
+ */
+export interface CheckPrivilegesOptions {
+  /**
+   * Whether or not the `login` action should be required (default: true).
+   * Setting this to false is not advised except for special circumstances, when you do not require
+   * the request to belong to a user capable of logging into Kibana.
+   */
+  requireLoginAction?: boolean;
 }
 
 export interface CheckPrivilegesResponse {
@@ -58,12 +71,20 @@ export interface CheckPrivilegesResponse {
 export type CheckPrivilegesWithRequest = (request: KibanaRequest) => CheckPrivileges;
 
 export interface CheckPrivileges {
-  atSpace(spaceId: string, privileges: CheckPrivilegesPayload): Promise<CheckPrivilegesResponse>;
+  atSpace(
+    spaceId: string,
+    privileges: CheckPrivilegesPayload,
+    options?: CheckPrivilegesOptions
+  ): Promise<CheckPrivilegesResponse>;
   atSpaces(
     spaceIds: string[],
-    privileges: CheckPrivilegesPayload
+    privileges: CheckPrivilegesPayload,
+    options?: CheckPrivilegesOptions
   ): Promise<CheckPrivilegesResponse>;
-  globally(privileges: CheckPrivilegesPayload): Promise<CheckPrivilegesResponse>;
+  globally(
+    privileges: CheckPrivilegesPayload,
+    options?: CheckPrivilegesOptions
+  ): Promise<CheckPrivilegesResponse>;
 }
 
 export interface CheckPrivilegesPayload {

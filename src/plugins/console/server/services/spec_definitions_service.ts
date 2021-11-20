@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _, { merge } from 'lodash';
@@ -15,6 +15,15 @@ import { jsSpecLoaders } from '../lib';
 
 const PATH_TO_OSS_JSON_SPEC = resolve(__dirname, '../lib/spec_definitions/json');
 
+interface EndpointDescription {
+  methods?: string[];
+  patterns?: string | string[];
+  url_params?: Record<string, unknown>;
+  data_autocomplete_rules?: Record<string, unknown>;
+  url_components?: Record<string, unknown>;
+  priority?: number;
+}
+
 export class SpecDefinitionsService {
   private readonly name = 'es';
 
@@ -24,16 +33,23 @@ export class SpecDefinitionsService {
 
   private hasLoadedSpec = false;
 
-  public addGlobalAutocompleteRules(parentNode: string, rules: any) {
+  public addGlobalAutocompleteRules(parentNode: string, rules: unknown) {
     this.globalRules[parentNode] = rules;
   }
 
-  public addEndpointDescription(endpoint: string, description: any = {}) {
-    let copiedDescription: any = {};
+  public addEndpointDescription(endpoint: string, description: EndpointDescription = {}) {
+    let copiedDescription: { patterns?: string; url_params?: Record<string, unknown> } = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
     }
-    let urlParamsDef: any;
+    let urlParamsDef:
+      | {
+          ignore_unavailable?: string;
+          allow_no_indices?: string;
+          expand_wildcards?: string[];
+        }
+      | undefined;
+
     _.each(description.patterns || [], function (p) {
       if (p.indexOf('{indices}') >= 0) {
         urlParamsDef = urlParamsDef || {};
@@ -70,7 +86,7 @@ export class SpecDefinitionsService {
     this.extensionSpecFilePaths.push(path);
   }
 
-  public addProcessorDefinition(processor: any) {
+  public addProcessorDefinition(processor: unknown) {
     if (!this.hasLoadedSpec) {
       throw new Error(
         'Cannot add a processor definition because spec definitions have not loaded!'
@@ -104,11 +120,13 @@ export class SpecDefinitionsService {
 
     return generatedFiles.reduce((acc, file) => {
       const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
-      const loadedSpec = JSON.parse(readFileSync(file, 'utf8'));
+      const loadedSpec: Record<string, EndpointDescription> = JSON.parse(
+        readFileSync(file, 'utf8')
+      );
       if (overrideFile) {
         merge(loadedSpec, JSON.parse(readFileSync(overrideFile, 'utf8')));
       }
-      const spec: any = {};
+      const spec: Record<string, EndpointDescription> = {};
       Object.entries(loadedSpec).forEach(([key, value]) => {
         if (acc[key]) {
           // add time to remove key collision
@@ -119,7 +137,7 @@ export class SpecDefinitionsService {
       });
 
       return { ...acc, ...spec };
-    }, {} as any);
+    }, {} as Record<string, EndpointDescription>);
   }
 
   private loadJsonSpec() {

@@ -1,56 +1,91 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { memo, useMemo } from 'react';
+
+import React, { memo, useMemo, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
 import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { ViewType } from '../state';
 import {
   checkingIfEntriesExist,
   entriesExist,
   getCurrentLocation,
   getListTotalItemsCount,
+  listOfPolicies,
+  prevEntriesExist,
 } from '../store/selectors';
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { CreateTrustedAppFlyout } from './components/create_trusted_app_flyout';
-import { ControlPanel } from './components/control_panel';
 import { TrustedAppsGrid } from './components/trusted_apps_grid';
-import { TrustedAppsList } from './components/trusted_apps_list';
 import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
-import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
-import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { ABOUT_TRUSTED_APPS } from './translations';
+import { AppAction } from '../../../../common/store/actions';
+import { ABOUT_TRUSTED_APPS, SEARCH_TRUSTED_APP_PLACEHOLDER } from './translations';
 import { EmptyState } from './components/empty_state';
+import { SearchExceptions } from '../../../components/search_exceptions';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { ListPageRouteState } from '../../../../../common/endpoint/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const TrustedAppsPage = memo(() => {
-  const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
+  const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
+    'trustedAppsByPolicyEnabled'
+  );
+  const dispatch = useDispatch<Dispatch<AppAction>>();
+  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
-  const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
-  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({ show: 'create' }));
-  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
-  const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
-    view_type: viewType,
+  const policyList = useTrustedAppsSelector(listOfPolicies);
+  const doEntriesExist = useTrustedAppsSelector(entriesExist);
+  const didEntriesExist = useTrustedAppsSelector(prevEntriesExist);
+  const navigationCallbackQuery = useTrustedAppsNavigateCallback(
+    (query: string, includedPolicies?: string, excludedPolicies?: string) => ({
+      filter: query,
+      included_policies: includedPolicies,
+      excluded_policies: excludedPolicies,
+    })
+  );
+
+  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
+    show: 'create',
+    id: undefined,
+  }));
+  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({
+    show: undefined,
+    id: undefined,
   }));
 
-  const showCreateFlyout = location.show === 'create';
+  const handleOnSearch = useCallback(
+    (query: string, includedPolicies?: string, excludedPolicies?: string) => {
+      dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: true } });
+      navigationCallbackQuery(query, includedPolicies, excludedPolicies);
+    },
+    [dispatch, navigationCallbackQuery]
+  );
+
+  const showCreateFlyout = !!location.show;
+
+  const canDisplayContent = useCallback(
+    () => doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist),
+    [didEntriesExist, doEntriesExist, isCheckingIfEntriesExists]
+  );
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
@@ -69,7 +104,7 @@ export const TrustedAppsPage = memo(() => {
     >
       <FormattedMessage
         id="xpack.securitySolution.trustedapps.list.addButton"
-        defaultMessage="Add Trusted Application"
+        defaultMessage="Add trusted application"
       />
     </EuiButton>
   );
@@ -86,28 +121,39 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
-      {doEntriesExist ? (
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          data-test-subj="trustedAppsListPageContent"
-        >
-          <EuiFlexItem grow={false}>
-            <ControlPanel
-              totalItemCount={totalItemsCount}
-              currentViewType={location.view_type}
-              onViewTypeChange={handleViewTypeChange}
-            />
-
+      {canDisplayContent() ? (
+        <>
+          <SearchExceptions
+            defaultValue={location.filter}
+            onSearch={handleOnSearch}
+            placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
+            hasPolicyFilter={isTrustedAppsByPolicyEnabled}
+            policyList={policyList}
+            defaultExcludedPolicies={location.excluded_policies}
+            defaultIncludedPolicies={location.included_policies}
+          />
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            data-test-subj="trustedAppsListPageContent"
+          >
             <EuiSpacer size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="none" />
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs" data-test-subj="trustedAppsListViewCountLabel">
+                {i18n.translate('xpack.securitySolution.trustedapps.list.totalCount', {
+                  defaultMessage:
+                    'Showing {totalItemsCount, plural, one {# trusted application} other {# trusted applications}}',
+                  values: { totalItemsCount },
+                })}
+              </EuiText>
 
-            {location.view_type === 'grid' && <TrustedAppsGrid />}
-            {location.view_type === 'list' && <TrustedAppsList />}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <TrustedAppsGrid />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       ) : (
         <EmptyState onAdd={handleAddButtonClick} isAddDisabled={showCreateFlyout} />
       )}
@@ -117,20 +163,20 @@ export const TrustedAppsPage = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="trustedAppsListPage"
-      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.list.pageTitle"
-          defaultMessage="Trusted Applications"
+          defaultMessage="Trusted applications"
         />
       }
       headerBackComponent={backButton}
       subtitle={ABOUT_TRUSTED_APPS}
-      actions={doEntriesExist ? addButton : <></>}
+      actions={addButton}
+      hideHeader={!canDisplayContent()}
     >
       <TrustedAppsNotifications />
 
-      {isCheckingIfEntriesExists ? (
+      {isCheckingIfEntriesExists && !didEntriesExist ? (
         <EuiEmptyPrompt
           data-test-subj="trustedAppsListLoader"
           body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />}
@@ -143,43 +189,3 @@ export const TrustedAppsPage = memo(() => {
 });
 
 TrustedAppsPage.displayName = 'TrustedAppsPage';
-
-const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
-
-  .euiIcon {
-    width: ${({ theme }) => theme.eui.euiIconSizes.small};
-    height: ${({ theme }) => theme.eui.euiIconSizes.small};
-  }
-
-  .text {
-    font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  }
-`;
-
-const BackToExternalAppButton = memo<TrustedAppsListPageRouteState>(
-  ({ backButtonLabel, backButtonUrl, onBackButtonNavigateTo }) => {
-    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo!);
-
-    return (
-      <EuiButtonEmptyStyled
-        flush="left"
-        size="xs"
-        iconType="arrowLeft"
-        href={backButtonUrl!}
-        onClick={handleBackOnClick}
-        textProps={{ className: 'text' }}
-        data-test-subj="backToOrigin"
-      >
-        {backButtonLabel || (
-          <FormattedMessage
-            id="xpack.securitySolution.trustedapps.list.backButton"
-            defaultMessage="Back"
-          />
-        )}
-      </EuiButtonEmptyStyled>
-    );
-  }
-);
-
-BackToExternalAppButton.displayName = 'BackToExternalAppButton';

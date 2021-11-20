@@ -1,24 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
+import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
 
-import { ExpressionTypeDefinition } from '../types';
+import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
-import { SerializedFieldFormat } from '../../types';
-
-type State = string | number | boolean | null | undefined | SerializableState;
-
-/** @internal **/
-export interface SerializableState {
-  [key: string]: State | State[];
-}
 
 const name = 'datatable';
 
@@ -27,7 +21,7 @@ const name = 'datatable';
  * @param datatable
  */
 export const isDatatable = (datatable: unknown): datatable is Datatable =>
-  !!datatable && typeof datatable === 'object' && (datatable as any).type === 'datatable';
+  (datatable as ExpressionValueBoxed | undefined)?.type === 'datatable';
 
 /**
  * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
@@ -54,6 +48,7 @@ export type DatatableColumnType =
 /**
  * This type represents a row in a `Datatable`.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type DatatableRow = Record<string, any>;
 
 /**
@@ -70,6 +65,10 @@ export interface DatatableColumnMeta {
    */
   index?: string;
   /**
+   * names the domain this column represents
+   */
+  dimensionName?: string;
+  /**
    * serialized field format
    */
   params?: SerializedFieldFormat;
@@ -80,7 +79,7 @@ export interface DatatableColumnMeta {
   /**
    * any extra parameters for the source that produced this column
    */
-  sourceParams?: SerializableState;
+  sourceParams?: SerializableRecord;
 }
 
 /**
@@ -114,7 +113,7 @@ interface RenderedDatatable {
 
 export const datatable: ExpressionTypeDefinition<typeof name, Datatable, SerializedDatatable> = {
   name,
-  validate: (table) => {
+  validate: (table: Record<string, unknown>) => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
     if (!table.columns) {
       throw new Error('datatable must have a columns array, even if it is empty');

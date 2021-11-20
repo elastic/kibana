@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import { mockDeleteKibanaIndices } from './create_index_stream.test.mock';
 
 import sinon from 'sinon';
 import Chance from 'chance';
@@ -23,6 +25,10 @@ import {
 const chance = new Chance();
 
 const log = createStubLogger();
+
+beforeEach(() => {
+  mockDeleteKibanaIndices.mockClear();
+});
 
 describe('esArchiver: createCreateIndexStream()', () => {
   describe('defaults', () => {
@@ -56,15 +62,44 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createCreateIndexStream({ client, stats, log }),
       ]);
 
-      expect((client.indices.getAlias as sinon.SinonSpy).calledOnce).toBe(true);
-      expect((client.indices.getAlias as sinon.SinonSpy).args[0][0]).toEqual({
-        name: 'existing-index',
-        ignore: [404],
-      });
-      expect((client.indices.delete as sinon.SinonSpy).calledOnce).toBe(true);
-      expect((client.indices.delete as sinon.SinonSpy).args[0][0]).toEqual({
-        index: ['actual-index'],
-      });
+      expect((client.indices.getAlias as sinon.SinonSpy).args).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "name": Array [
+                "existing-index",
+              ],
+            },
+            Object {
+              "headers": Object {
+                "x-elastic-product-origin": "kibana",
+              },
+              "ignore": Array [
+                404,
+              ],
+              "meta": true,
+            },
+          ],
+        ]
+      `);
+
+      expect((client.indices.delete as sinon.SinonSpy).args).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "index": Array [
+                "actual-index",
+              ],
+            },
+            Object {
+              "headers": Object {
+                "x-elastic-product-origin": "kibana",
+              },
+            },
+          ],
+        ]
+      `);
+
       sinon.assert.callCount(client.indices.create as sinon.SinonSpy, 3); // one failed create because of existing
     });
 
@@ -97,7 +132,6 @@ describe('esArchiver: createCreateIndexStream()', () => {
       ]);
 
       sinon.assert.calledWith(client.indices.create as sinon.SinonSpy, {
-        method: 'PUT',
         index: 'index',
         body: {
           settings: undefined,
@@ -136,6 +170,73 @@ describe('esArchiver: createCreateIndexStream()', () => {
       ]);
 
       expect(output).toEqual(nonRecordValues);
+    });
+  });
+
+  describe('deleteKibanaIndices', () => {
+    function doTest(...indices: string[]) {
+      return createPromiseFromStreams([
+        createListStream(indices.map((index) => createStubIndexRecord(index))),
+        createCreateIndexStream({ client: createStubClient(), stats: createStubStats(), log }),
+        createConcatStream([]),
+      ]);
+    }
+
+    it('does not delete Kibana indices for indexes that do not start with .kibana', async () => {
+      await doTest('.foo');
+
+      expect(mockDeleteKibanaIndices).not.toHaveBeenCalled();
+    });
+
+    it('deletes Kibana indices at most once for indices that start with .kibana', async () => {
+      // If we are loading the main Kibana index, we should delete all Kibana indices for backwards compatibility reasons.
+      await doTest('.kibana_7.16.0_001', '.kibana_task_manager_7.16.0_001');
+
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(1);
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledWith(
+        expect.not.objectContaining({ onlyTaskManager: true })
+      );
+    });
+
+    it('deletes Kibana task manager index at most once, using onlyTaskManager: true', async () => {
+      // If we are loading the Kibana task manager index, we should only delete that index, not any other Kibana indices.
+      await doTest('.kibana_task_manager_7.16.0_001', '.kibana_task_manager_7.16.0_002');
+
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(1);
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledWith(
+        expect.objectContaining({ onlyTaskManager: true })
+      );
+    });
+
+    it('deletes Kibana task manager index AND deletes all Kibana indices', async () => {
+      // Because we are reading from a stream, we can't look ahead to see if we'll eventually wind up deleting all Kibana indices.
+      // So, we first delete only the Kibana task manager indices, then we wind up deleting all Kibana indices.
+      await doTest('.kibana_task_manager_7.16.0_001', '.kibana_7.16.0_001');
+
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(2);
+      expect(mockDeleteKibanaIndices).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ onlyTaskManager: true })
+      );
+      expect(mockDeleteKibanaIndices).toHaveBeenNthCalledWith(
+        2,
+        expect.not.objectContaining({ onlyTaskManager: true })
+      );
+    });
+  });
+
+  describe('docsOnly = true', () => {
+    it('passes through "hit" records without attempting to create indices', async () => {
+      const client = createStubClient();
+      const stats = createStubStats();
+      const output = await createPromiseFromStreams([
+        createListStream([createStubIndexRecord('index'), createStubDocRecord('index', 1)]),
+        createCreateIndexStream({ client, stats, log, docsOnly: true }),
+        createConcatStream([]),
+      ]);
+
+      sinon.assert.notCalled(client.indices.create as sinon.SinonSpy);
+      expect(output).toEqual([createStubDocRecord('index', 1)]);
     });
   });
 

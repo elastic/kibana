@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
+import type { DataViewBase } from '@kbn/es-query';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { NetworkType } from '../../store/model';
@@ -20,7 +21,7 @@ export interface OwnProps {
   type: NetworkType;
   startDate: string;
   endDate: string;
-  filterQuery: string | ESTermQuery;
+  filterQuery?: string | ESTermQuery;
   ip: string;
   indexNames: string[];
   skip: boolean;
@@ -37,5 +38,5 @@ export type TlsQueryTableComponentProps = OwnProps & {
 
 export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
   flowTarget: FlowTargetSourceDest;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
 };

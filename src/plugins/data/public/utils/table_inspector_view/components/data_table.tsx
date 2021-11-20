@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
@@ -13,20 +13,17 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
   EuiInMemoryTable,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { DataDownloadOptions } from './download_options';
 import { DataViewRow, DataViewColumn } from '../types';
 import { IUiSettingsClient } from '../../../../../../core/public';
 import { Datatable, DatatableColumn } from '../../../../../expressions/public';
-import { FieldFormatsStart } from '../../../field_formats';
+import { FieldFormatsStart } from '../../../../../field_formats/public';
 import { UiActionsStart } from '../../../../../ui_actions/public';
 
 interface DataTableFormatState {
@@ -36,7 +33,6 @@ interface DataTableFormatState {
 
 interface DataTableFormatProps {
   data: Datatable;
-  exportTitle: string;
   uiSettings: IUiSettingsClient;
   fieldFormats: FieldFormatsStart;
   uiActions: UiActionsStart;
@@ -55,7 +51,6 @@ interface RenderCellArguments {
 export class DataTableFormat extends Component<DataTableFormatProps, DataTableFormatState> {
   static propTypes = {
     data: PropTypes.object.isRequired,
-    exportTitle: PropTypes.string.isRequired,
     uiSettings: PropTypes.object.isRequired,
     fieldFormats: PropTypes.object.isRequired,
     uiActions: PropTypes.object.isRequired,
@@ -166,7 +161,6 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
       const fieldFormatter = fieldFormats.deserialize(formatParams);
       const filterable = isFilterable(dataColumn);
       return {
-        originalColumn: () => dataColumn,
         name: dataColumn.name,
         field: dataColumn.id,
         sortable: true,
@@ -197,30 +191,14 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
     };
 
     return (
-      <>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={true} />
-          <EuiFlexItem grow={false}>
-            <DataDownloadOptions
-              title={this.props.exportTitle}
-              csvSeparator={this.csvSeparator}
-              quoteValues={this.quoteValues}
-              columns={columns}
-              rows={rows}
-              fieldFormats={this.props.fieldFormats}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiInMemoryTable
-          className="insDataTableFormat__table"
-          data-test-subj="inspectorTable"
-          columns={columns}
-          items={rows}
-          sorting={true}
-          pagination={pagination}
-        />
-      </>
+      <EuiInMemoryTable
+        className="insDataTableFormat__table"
+        data-test-subj="inspectorTable"
+        columns={columns}
+        items={rows}
+        sorting={true}
+        pagination={pagination}
+      />
     );
   }
 }

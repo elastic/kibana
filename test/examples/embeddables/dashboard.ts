@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
@@ -95,20 +95,28 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const pieChart = getService('pieChart');
-  const browser = getService('browser');
   const dashboardExpect = getService('dashboardExpect');
-  const PageObjects = getPageObjects(['common']);
+  const elasticChart = getService('elasticChart');
+  const PageObjects = getPageObjects(['common', 'visChart', 'dashboard']);
+  const monacoEditor = getService('monacoEditor');
 
   describe('dashboard container', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/data');
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      );
       await PageObjects.common.navigateToApp('dashboardEmbeddableExamples');
       await testSubjects.click('dashboardEmbeddableByValue');
+      await PageObjects.dashboard.waitForRenderComplete();
+
       await updateInput(JSON.stringify(testDashboardInput, null, 4));
     });
 
     it('pie charts', async () => {
+      if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+      }
       await pieChart.expectPieSliceCount(5);
     });
 
@@ -117,22 +125,12 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('saved search', async () => {
-      await dashboardExpect.savedSearchRowCount(50);
+      await dashboardExpect.savedSearchRowCount(10);
     });
   });
 
   async function updateInput(input: string) {
-    const editorWrapper = await (
-      await testSubjects.find('dashboardEmbeddableByValueInputEditor')
-    ).findByClassName('ace_editor');
-    const editorId = await editorWrapper.getAttribute('id');
-    await browser.execute(
-      (_editorId: string, _input: string) => {
-        return (window as any).ace.edit(_editorId).setValue(_input);
-      },
-      editorId,
-      input
-    );
+    await monacoEditor.setCodeEditorValue(input);
     await testSubjects.click('dashboardEmbeddableByValueInputSubmit');
   }
 }

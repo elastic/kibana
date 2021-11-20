@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreRouteHandlerContext } from './core_route_handler_context';
@@ -42,43 +42,6 @@ describe('#elasticsearch', () => {
       const mockResult = coreStart.elasticsearch.client.asScoped.mock.results[0].value;
       expect(client1).toBe(mockResult);
       expect(client2).toBe(mockResult);
-    });
-  });
-
-  describe('#legacy', () => {
-    describe('#client', () => {
-      test('returns the results of coreStart.elasticsearch.legacy.client.asScoped', () => {
-        const request = httpServerMock.createKibanaRequest();
-        const coreStart = coreMock.createInternalStart();
-        const context = new CoreRouteHandlerContext(coreStart, request);
-
-        const client = context.elasticsearch.legacy.client;
-        expect(client).toBe(coreStart.elasticsearch.legacy.client.asScoped.mock.results[0].value);
-      });
-
-      test('lazily created', () => {
-        const request = httpServerMock.createKibanaRequest();
-        const coreStart = coreMock.createInternalStart();
-        const context = new CoreRouteHandlerContext(coreStart, request);
-
-        expect(coreStart.elasticsearch.legacy.client.asScoped).not.toHaveBeenCalled();
-        const client = context.elasticsearch.legacy.client;
-        expect(coreStart.elasticsearch.legacy.client.asScoped).toHaveBeenCalled();
-        expect(client).toBeDefined();
-      });
-
-      test('only creates one instance', () => {
-        const request = httpServerMock.createKibanaRequest();
-        const coreStart = coreMock.createInternalStart();
-        const context = new CoreRouteHandlerContext(coreStart, request);
-
-        const client1 = context.elasticsearch.legacy.client;
-        const client2 = context.elasticsearch.legacy.client;
-        expect(coreStart.elasticsearch.legacy.client.asScoped.mock.calls.length).toBe(1);
-        const mockResult = coreStart.elasticsearch.legacy.client.asScoped.mock.results[0].value;
-        expect(client1).toBe(mockResult);
-        expect(client2).toBe(mockResult);
-      });
     });
   });
 });
@@ -187,6 +150,43 @@ describe('#uiSettings', () => {
       const client2 = context.uiSettings.client;
       expect(coreStart.uiSettings.asScopedToClient.mock.calls.length).toBe(1);
       const mockResult = coreStart.uiSettings.asScopedToClient.mock.results[0].value;
+      expect(client1).toBe(mockResult);
+      expect(client2).toBe(mockResult);
+    });
+  });
+});
+
+describe('#deprecations', () => {
+  describe('#client', () => {
+    test('returns the results of coreStart.deprecations.asScopedToClient', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createInternalStart();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const client = context.deprecations.client;
+      expect(client).toBe(coreStart.deprecations.asScopedToClient.mock.results[0].value);
+    });
+
+    test('lazily created', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createInternalStart();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      expect(coreStart.deprecations.asScopedToClient).not.toHaveBeenCalled();
+      const client = context.deprecations.client;
+      expect(coreStart.deprecations.asScopedToClient).toHaveBeenCalled();
+      expect(client).toBeDefined();
+    });
+
+    test('only creates one instance', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = coreMock.createInternalStart();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const client1 = context.deprecations.client;
+      const client2 = context.deprecations.client;
+      expect(coreStart.deprecations.asScopedToClient.mock.calls.length).toBe(1);
+      const mockResult = coreStart.deprecations.asScopedToClient.mock.results[0].value;
       expect(client1).toBe(mockResult);
       expect(client2).toBe(mockResult);
     });

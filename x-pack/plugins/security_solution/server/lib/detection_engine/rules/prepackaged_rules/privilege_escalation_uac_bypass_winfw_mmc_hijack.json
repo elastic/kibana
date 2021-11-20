@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "UAC Bypass via Windows Firewall Snap-In Hijack",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name == \"mmc.exe\" and\n /* process.Ext.token.integrity_level_name == \"high\" can be added in future for tuning */\n /* args of the Windows Firewall SnapIn */\n  process.parent.args == \"WF.msc\" and process.name != \"WerFault.exe\"\n",
   "references": [
@@ -41,7 +42,7 @@
           "subtechnique": [
             {
               "id": "T1548.002",
-              "name": "Bypass User Access Control",
+              "name": "Bypass User Account Control",
               "reference": "https://attack.mitre.org/techniques/T1548/002/"
             }
           ]
@@ -49,6 +50,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 4
 }

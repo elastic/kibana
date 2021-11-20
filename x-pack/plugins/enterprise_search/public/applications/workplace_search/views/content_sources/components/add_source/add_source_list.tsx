@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, ChangeEvent } from 'react';
@@ -17,15 +18,21 @@ import {
   EuiPanel,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import noSharedSourcesIcon from '../../../../assets/share_circle.svg';
 
 import { AppLogic } from '../../../../app_logic';
+import noOrgSourcesIcon from '../../../../assets/share_circle.svg';
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
 import { ContentSection } from '../../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-import { Loading } from '../../../../../../applications/shared/loading';
-import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { SourceDataItem } from '../../../../types';
+import { SourcesLogic } from '../../sources_logic';
 
+import { AvailableSourcesList } from './available_sources_list';
+import { ConfiguredSourcesList } from './configured_sources_list';
 import {
   ADD_SOURCE_NEW_SOURCE_DESCRIPTION,
   ADD_SOURCE_ORG_SOURCE_DESCRIPTION,
@@ -38,14 +45,9 @@ import {
   ADD_SOURCE_EMPTY_BODY,
 } from './constants';
 
-import { SourcesLogic } from '../../sources_logic';
-import { AvailableSourcesList } from './available_sources_list';
-import { ConfiguredSourcesList } from './configured_sources_list';
-
 export const AddSourceList: React.FC = () => {
-  const { contentSources, dataLoading, availableSources, configuredSources } = useValues(
-    SourcesLogic
-  );
+  const { contentSources, dataLoading, availableSources, configuredSources } =
+    useValues(SourcesLogic);
 
   const { initializeSources, resetSourcesState } = useActions(SourcesLogic);
 
@@ -57,8 +59,6 @@ export const AddSourceList: React.FC = () => {
     initializeSources();
     return resetSourcesState;
   }, []);
-
-  if (dataLoading) return <Loading />;
 
   const hasSources = contentSources.length > 0;
   const showConfiguredSourcesList = configuredSources.find(
@@ -97,18 +97,30 @@ export const AddSourceList: React.FC = () => {
     filterConfiguredSources
   ) as SourceDataItem[];
 
+  const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
+
   return (
-    <>
-      <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+    <Layout
+      pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE]}
+      pageViewTelemetry="add_source"
+      pageHeader={
+        dataLoading ? undefined : { pageTitle: PAGE_TITLE, description: PAGE_DESCRIPTION }
+      }
+      isLoading={dataLoading}
+    >
+      {!isOrganization && (
+        <div>
+          <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+        </div>
+      )}
       {showConfiguredSourcesList || isOrganization ? (
         <ContentSection>
-          <EuiSpacer size="m" />
           <EuiFormRow>
             <EuiFieldSearch
               data-test-subj="FilterSourcesInput"
               value={filterValue}
               onChange={handleFilterChange}
-              fullWidth={true}
+              fullWidth
               placeholder={ADD_SOURCE_PLACEHOLDER}
             />
           </EuiFormRow>
@@ -126,11 +138,11 @@ export const AddSourceList: React.FC = () => {
           <EuiFlexGroup justifyContent="center" alignItems="stretch">
             <EuiFlexItem>
               <EuiSpacer size="xl" />
-              <EuiPanel className="euiPanel euiPanel--inset">
+              <EuiPanel hasShadow={false} color="subdued">
                 <EuiSpacer size="s" />
                 <EuiSpacer size="xxl" />
                 <EuiEmptyPrompt
-                  iconType={noSharedSourcesIcon}
+                  iconType={noOrgSourcesIcon}
                   title={<h2>{ADD_SOURCE_EMPTY_TITLE}</h2>}
                   body={<p>{ADD_SOURCE_EMPTY_BODY}</p>}
                 />
@@ -142,6 +154,6 @@ export const AddSourceList: React.FC = () => {
           </EuiFlexGroup>
         </ContentSection>
       )}
-    </>
+    </Layout>
   );
 };

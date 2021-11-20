@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsType } from 'kibana/server';
@@ -19,16 +19,14 @@ export const createDashboardSavedObjectType = ({
 }): SavedObjectsType => ({
   name: 'dashboard',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'dashboardApp',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
       return obj.attributes.title;
-    },
-    getEditUrl(obj) {
-      return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
@@ -54,6 +52,12 @@ export const createDashboardSavedObjectType = ({
           value: { type: 'integer', index: false, doc_values: false },
         },
       },
+      controlGroupInput: {
+        properties: {
+          controlStyle: { type: 'keyword', index: false, doc_values: false },
+          panelsJSON: { type: 'text', index: false },
+        },
+      },
       timeFrom: { type: 'keyword', index: false, doc_values: false },
       timeRestore: { type: 'boolean', index: false, doc_values: false },
       timeTo: { type: 'keyword', index: false, doc_values: false },
@@ -61,5 +65,5 @@ export const createDashboardSavedObjectType = ({
       version: { type: 'integer' },
     },
   },
-  migrations: createDashboardSavedObjectTypeMigrations(migrationDeps),
+  migrations: () => createDashboardSavedObjectTypeMigrations(migrationDeps),
 });

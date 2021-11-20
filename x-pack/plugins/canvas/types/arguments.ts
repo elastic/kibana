@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 type GenericCallback = (callback: () => void) => void;
@@ -18,6 +19,10 @@ export interface ArgumentHandlers {
   onDestroy: GenericCallback;
 }
 
+export interface UpdatePropsRef<Props extends {} = {}> {
+  updateProps: (newProps: Props) => void;
+}
+
 export interface ArgumentSpec<ArgumentConfig = {}> {
   /** The argument type */
   name: string;
@@ -32,13 +37,19 @@ export interface ArgumentSpec<ArgumentConfig = {}> {
   simpleTemplate?: (
     domNode: HTMLElement,
     config: ArgumentConfig,
-    handlers: ArgumentHandlers
+    handlers: ArgumentHandlers,
+    onMount: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
   ) => void;
   /**
    * A function that renders a complex/large argument
    * This is nested in an accordian so it can be expanded/collapsed
    */
-  template?: (domNode: HTMLElement, config: ArgumentConfig, handlers: ArgumentHandlers) => void;
+  template?: (
+    domNode: HTMLElement,
+    config: ArgumentConfig,
+    handlers: ArgumentHandlers,
+    onMount: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
+  ) => void;
 }
 
 export type ArgumentFactory<ArgumentConfig = {}> = () => ArgumentSpec<ArgumentConfig>;

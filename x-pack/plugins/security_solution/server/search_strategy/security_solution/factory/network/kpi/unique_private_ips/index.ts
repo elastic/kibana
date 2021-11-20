@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 import {
   NetworkKpiQueries,
   NetworkKpiUniquePrivateIpsStrategyResponse,
@@ -16,46 +17,94 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { formatHistogramData } from '../common';
 import { buildUniquePrivateIpsQuery } from './query.network_kpi_unique_private_ips.dsl';
+import { buildUniquePrivateIpsQueryEntities } from './query.network_kpi_unique_private_ips_entities.dsl';
 
-export const networkKpiUniquePrivateIps: SecuritySolutionFactory<NetworkKpiQueries.uniquePrivateIps> = {
-  buildDsl: (options: NetworkKpiUniquePrivateIpsRequestOptions) =>
-    buildUniquePrivateIpsQuery(options),
-  parse: async (
-    options: NetworkKpiUniquePrivateIpsRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<NetworkKpiUniquePrivateIpsStrategyResponse> => {
-    const inspect = {
-      dsl: [inspectStringifyObject(buildUniquePrivateIpsQuery(options))],
-    };
+export const networkKpiUniquePrivateIps: SecuritySolutionFactory<NetworkKpiQueries.uniquePrivateIps> =
+  {
+    // @ts-expect-error auto_date_histogram.buckets is incompatible
+    buildDsl: (options: NetworkKpiUniquePrivateIpsRequestOptions) =>
+      buildUniquePrivateIpsQuery(options),
+    parse: async (
+      options: NetworkKpiUniquePrivateIpsRequestOptions,
+      response: IEsSearchResponse<unknown>
+    ): Promise<NetworkKpiUniquePrivateIpsStrategyResponse> => {
+      const inspect = {
+        dsl: [inspectStringifyObject(buildUniquePrivateIpsQuery(options))],
+      };
 
-    const uniqueSourcePrivateIpsHistogram = getOr(
-      null,
-      'aggregations.source.histogram.buckets',
-      response.rawResponse
-    );
-    const uniqueDestinationPrivateIpsHistogram = getOr(
-      null,
-      'aggregations.destination.histogram.buckets',
-      response.rawResponse
-    );
-
-    return {
-      ...response,
-      inspect,
-      uniqueSourcePrivateIps: getOr(
+      const uniqueSourcePrivateIpsHistogram = getOr(
         null,
-        'aggregations.source.unique_private_ips.value',
+        'aggregations.source.histogram.buckets',
         response.rawResponse
-      ),
-      uniqueDestinationPrivateIps: getOr(
+      );
+      const uniqueDestinationPrivateIpsHistogram = getOr(
         null,
-        'aggregations.destination.unique_private_ips.value',
+        'aggregations.destination.histogram.buckets',
         response.rawResponse
-      ),
-      uniqueSourcePrivateIpsHistogram: formatHistogramData(uniqueSourcePrivateIpsHistogram),
-      uniqueDestinationPrivateIpsHistogram: formatHistogramData(
-        uniqueDestinationPrivateIpsHistogram
-      ),
-    };
-  },
-};
+      );
+
+      return {
+        ...response,
+        inspect,
+        uniqueSourcePrivateIps: getOr(
+          null,
+          'aggregations.source.unique_private_ips.value',
+          response.rawResponse
+        ),
+        uniqueDestinationPrivateIps: getOr(
+          null,
+          'aggregations.destination.unique_private_ips.value',
+          response.rawResponse
+        ),
+        uniqueSourcePrivateIpsHistogram: formatHistogramData(uniqueSourcePrivateIpsHistogram),
+        uniqueDestinationPrivateIpsHistogram: formatHistogramData(
+          uniqueDestinationPrivateIpsHistogram
+        ),
+      };
+    },
+  };
+
+export const networkKpiUniquePrivateIpsEntities: SecuritySolutionFactory<NetworkKpiQueries.uniquePrivateIps> =
+  {
+    // @ts-expect-error auto_date_histogram.buckets is incompatible
+    buildDsl: (options: NetworkKpiUniquePrivateIpsRequestOptions) =>
+      buildUniquePrivateIpsQueryEntities(options),
+    parse: async (
+      options: NetworkKpiUniquePrivateIpsRequestOptions,
+      response: IEsSearchResponse<unknown>
+    ): Promise<NetworkKpiUniquePrivateIpsStrategyResponse> => {
+      const inspect = {
+        dsl: [inspectStringifyObject(buildUniquePrivateIpsQueryEntities(options))],
+      };
+
+      const uniqueSourcePrivateIpsHistogram = getOr(
+        null,
+        'aggregations.source.histogram.buckets',
+        response.rawResponse
+      );
+      const uniqueDestinationPrivateIpsHistogram = getOr(
+        null,
+        'aggregations.destination.histogram.buckets',
+        response.rawResponse
+      );
+
+      return {
+        ...response,
+        inspect,
+        uniqueSourcePrivateIps: getOr(
+          null,
+          'aggregations.source.unique_private_ips.value',
+          response.rawResponse
+        ),
+        uniqueDestinationPrivateIps: getOr(
+          null,
+          'aggregations.destination.unique_private_ips.value',
+          response.rawResponse
+        ),
+        uniqueSourcePrivateIpsHistogram: formatHistogramData(uniqueSourcePrivateIpsHistogram),
+        uniqueDestinationPrivateIpsHistogram: formatHistogramData(
+          uniqueDestinationPrivateIpsHistogram
+        ),
+      };
+    },
+  };

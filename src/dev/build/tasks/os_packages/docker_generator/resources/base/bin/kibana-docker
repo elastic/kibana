@@ -1,0 +1,412 @@
+#!/bin/bash
+#
+# ** THIS IS AN AUTO-GENERATED FILE **
+#
+
+# Run Kibana, using environment variables to set longopts defining Kibana's
+# configuration.
+#
+# eg. Setting the environment variable:
+#
+#       ELASTICSEARCH_LOGQUERIES=true
+#
+# will cause Kibana to be invoked with:
+#
+#       --elasticsearch.logQueries=true
+
+kibana_vars=(
+    apm_oss.apmAgentConfigurationIndex
+    apm_oss.errorIndices
+    apm_oss.indexPattern
+    apm_oss.metricsIndices
+    apm_oss.onboardingIndices
+    apm_oss.sourcemapIndices
+    apm_oss.spanIndices
+    apm_oss.transactionIndices
+    console.proxyConfig
+    console.proxyFilter
+    csp.strict
+    csp.warnLegacyBrowsers
+    csp.script_src
+    csp.worker_src
+    csp.style_src
+    csp.connect_src
+    csp.default_src
+    csp.font_src
+    csp.frame_src
+    csp.img_src
+    csp.frame_ancestors
+    csp.report_uri
+    csp.report_to
+    data.autocomplete.valueSuggestions.terminateAfter
+    data.autocomplete.valueSuggestions.timeout
+    elasticsearch.customHeaders
+    elasticsearch.hosts
+    elasticsearch.logQueries
+    elasticsearch.password
+    elasticsearch.pingTimeout
+    elasticsearch.requestHeadersWhitelist
+    elasticsearch.requestTimeout
+    elasticsearch.serviceAccountToken
+    elasticsearch.shardTimeout
+    elasticsearch.sniffInterval
+    elasticsearch.sniffOnConnectionFault
+    elasticsearch.sniffOnStart
+    elasticsearch.ssl.alwaysPresentCertificate
+    elasticsearch.ssl.certificate
+    elasticsearch.ssl.certificateAuthorities
+    elasticsearch.ssl.key
+    elasticsearch.ssl.keyPassphrase
+    elasticsearch.ssl.keystore.password
+    elasticsearch.ssl.keystore.path
+    elasticsearch.ssl.truststore.password
+    elasticsearch.ssl.truststore.path
+    elasticsearch.ssl.verificationMode
+    elasticsearch.username
+    enterpriseSearch.accessCheckTimeout
+    enterpriseSearch.accessCheckTimeoutWarning
+    enterpriseSearch.host
+    externalUrl.policy
+    i18n.locale
+    interactiveSetup.enabled
+    interactiveSetup.connectionCheck.interval
+    interpreter.enableInVisualize
+    kibana.autocompleteTerminateAfter
+    kibana.autocompleteTimeout
+    kibana.index
+    logging.appenders
+    logging.appenders.console
+    logging.appenders.file
+    logging.loggers
+    logging.loggers.appenders
+    logging.loggers.level
+    logging.loggers.name
+    logging.root
+    logging.root.appenders
+    logging.root.level
+    map.includeElasticMapsService
+    map.tilemap.options.attribution
+    map.tilemap.options.maxZoom
+    map.tilemap.options.minZoom
+    map.tilemap.options.subdomains
+    map.tilemap.url
+    migrations.batchSize
+    migrations.maxBatchSizeBytes
+    migrations.pollInterval
+    migrations.retryAttempts
+    migrations.scrollDuration
+    migrations.skip
+    monitoring.cluster_alerts.email_notifications.email_address
+    monitoring.kibana.collection.enabled
+    monitoring.kibana.collection.interval
+    monitoring.ui.container.elasticsearch.enabled
+    monitoring.ui.container.logstash.enabled
+    monitoring.ui.elasticsearch.hosts
+    monitoring.ui.elasticsearch.logFetchCount
+    monitoring.ui.elasticsearch.password
+    monitoring.ui.elasticsearch.pingTimeout
+    monitoring.ui.elasticsearch.ssl.certificateAuthorities
+    monitoring.ui.elasticsearch.ssl.verificationMode
+    monitoring.ui.elasticsearch.username
+    monitoring.ui.enabled
+    monitoring.ui.logs.index
+    monitoring.ui.max_bucket_size
+    monitoring.ui.min_interval_seconds
+    newsfeed.enabled
+    ops.cGroupOverrides.cpuAcctPath
+    ops.cGroupOverrides.cpuPath
+    ops.interval
+    path.data
+    pid.file
+    regionmap
+    savedObjects.maxImportExportSize
+    savedObjects.maxImportPayloadBytes
+    security.showInsecureClusterWarning
+    server.basePath
+    server.compression.enabled
+    server.compression.referrerWhitelist
+    server.cors
+    server.cors.allowCredentials
+    server.cors.allowOrigin
+    server.cors.enabled
+    server.cors.origin
+    server.customResponseHeaders
+    server.defaultRoute
+    server.host
+    server.keepAliveTimeout
+    server.maxPayload
+    server.maxPayloadBytes
+    server.name
+    server.port
+    server.publicBaseUrl
+    server.requestId.allowFromAnyIp
+    server.requestId.ipAllowlist
+    server.rewriteBasePath
+    server.securityResponseHeaders.disableEmbedding
+    server.securityResponseHeaders.permissionsPolicy
+    server.securityResponseHeaders.referrerPolicy
+    server.securityResponseHeaders.strictTransportSecurity
+    server.securityResponseHeaders.xContentTypeOptions
+    server.shutdownTimeout
+    server.socketTimeout
+    server.ssl.cert
+    server.ssl.certificate
+    server.ssl.certificateAuthorities
+    server.ssl.cipherSuites
+    server.ssl.clientAuthentication
+    server.ssl.enabled
+    server.ssl.key
+    server.ssl.keyPassphrase
+    server.ssl.keystore.password
+    server.ssl.keystore.path
+    server.ssl.redirectHttpFromPort
+    server.ssl.supportedProtocols
+    server.ssl.truststore.password
+    server.ssl.truststore.path
+    server.uuid
+    server.xsrf.allowlist
+    server.xsrf.disableProtection
+    status.allowAnonymous
+    status.v6ApiFormat
+    telemetry.allowChangingOptInStatus
+    telemetry.enabled
+    telemetry.optIn
+    telemetry.sendUsageTo
+    telemetry.sendUsageFrom
+    tilemap.options.attribution
+    tilemap.options.maxZoom
+    tilemap.options.minZoom
+    tilemap.options.subdomains
+    tilemap.url
+    vega.enableExternalUrls
+    vis_type_vega.enableExternalUrls
+    xpack.actions.allowedHosts
+    xpack.actions.customHostSettings
+    xpack.actions.enabledActionTypes
+    xpack.actions.maxResponseContentLength
+    xpack.actions.preconfigured
+    xpack.actions.preconfiguredAlertHistoryEsIndex
+    xpack.actions.proxyBypassHosts
+    xpack.actions.proxyHeaders
+    xpack.actions.proxyOnlyHosts
+    xpack.actions.proxyRejectUnauthorizedCertificates
+    xpack.actions.proxyUrl
+    xpack.actions.rejectUnauthorized
+    xpack.actions.responseTimeout
+    xpack.actions.ssl.proxyVerificationMode
+    xpack.actions.ssl.verificationMode
+    xpack.alerting.healthCheck.interval
+    xpack.alerting.invalidateApiKeysTask.interval
+    xpack.alerting.invalidateApiKeysTask.removalDelay
+    xpack.alerting.defaultRuleTaskTimeout
+    xpack.alerting.cancelAlertsOnRuleTimeout
+    xpack.alerts.healthCheck.interval
+    xpack.alerts.invalidateApiKeysTask.interval
+    xpack.alerts.invalidateApiKeysTask.removalDelay
+    xpack.apm.indices.error
+    xpack.apm.indices.metric
+    xpack.apm.indices.onboarding
+    xpack.apm.indices.sourcemap
+    xpack.apm.indices.span
+    xpack.apm.indices.transaction
+    xpack.apm.maxServiceEnvironments
+    xpack.apm.searchAggregatedTransactions
+    xpack.apm.serviceMapEnabled
+    xpack.apm.serviceMapFingerprintBucketSize
+    xpack.apm.serviceMapFingerprintGlobalBucketSize
+    xpack.apm.ui.enabled
+    xpack.apm.ui.maxTraceItems
+    xpack.apm.ui.transactionGroupBucketSize
+    xpack.banners.backgroundColor
+    xpack.banners.disableSpaceBanners
+    xpack.banners.placement
+    xpack.banners.textColor
+    xpack.banners.textContent
+    xpack.code.disk.thresholdEnabled
+    xpack.code.disk.watermarkLow
+    xpack.code.indexRepoFrequencyMs
+    xpack.code.lsp.verbose
+    xpack.code.maxWorkspace
+    xpack.code.security.enableGitCertCheck
+    xpack.code.security.gitHostWhitelist
+    xpack.code.security.gitProtocolWhitelist
+    xpack.code.ui.enabled
+    xpack.code.updateRepoFrequencyMs
+    xpack.code.verbose
+    xpack.data_enhanced.search.sessions.defaultExpiration
+    xpack.data_enhanced.search.sessions.enabled
+    xpack.data_enhanced.search.sessions.maxUpdateRetries
+    xpack.data_enhanced.search.sessions.notTouchedInProgressTimeout
+    xpack.data_enhanced.search.sessions.notTouchedTimeout
+    xpack.data_enhanced.search.sessions.pageSize
+    xpack.data_enhanced.search.sessions.trackingInterval
+    xpack.discoverEnhanced.actions.exploreDataInChart.enabled
+    xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
+    xpack.encryptedSavedObjects.encryptionKey
+    xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
+    xpack.event_log.indexEntries
+    xpack.event_log.logEntries
+    xpack.fleet.agentPolicies
+    xpack.fleet.agents.elasticsearch.host
+    xpack.fleet.agents.elasticsearch.hosts
+    xpack.fleet.agents.enabled
+    xpack.fleet.agents.fleet_server.hosts
+    xpack.fleet.agents.kibana.host
+    xpack.fleet.agents.tlsCheckDisabled
+    xpack.fleet.packages
+    xpack.fleet.registryUrl
+    xpack.graph.canEditDrillDownUrls
+    xpack.graph.savePolicy
+    xpack.infra.query.partitionFactor
+    xpack.infra.query.partitionSize
+    xpack.infra.sources.default.fields.container
+    xpack.infra.sources.default.fields.host
+    xpack.infra.sources.default.fields.message
+    xpack.infra.sources.default.fields.pod
+    xpack.infra.sources.default.fields.tiebreaker
+    xpack.infra.sources.default.fields.timestamp
+    xpack.infra.sources.default.logAlias
+    xpack.infra.sources.default.metricAlias
+    xpack.ingestManager.fleet.tlsCheckDisabled
+    xpack.ingestManager.registryUrl
+    xpack.observability.annotations.index
+    xpack.observability.unsafe.alertingExperience.enabled
+    xpack.observability.unsafe.cases.enabled
+    xpack.reporting.capture.browser.autoDownload
+    xpack.reporting.capture.browser.chromium.disableSandbox
+    xpack.reporting.capture.browser.chromium.inspect
+    xpack.reporting.capture.browser.chromium.maxScreenshotDimension
+    xpack.reporting.capture.browser.chromium.proxy.bypass
+    xpack.reporting.capture.browser.chromium.proxy.enabled
+    xpack.reporting.capture.browser.chromium.proxy.server
+    xpack.reporting.capture.browser.type
+    xpack.reporting.capture.concurrency
+    xpack.reporting.capture.loadDelay
+    xpack.reporting.capture.maxAttempts
+    xpack.reporting.capture.networkPolicy
+    xpack.reporting.capture.settleTime
+    xpack.reporting.capture.timeout
+    xpack.reporting.capture.timeouts.openUrl
+    xpack.reporting.capture.timeouts.openUrl
+    xpack.reporting.capture.timeouts.renderComplete
+    xpack.reporting.capture.timeouts.waitForElements
+    xpack.reporting.capture.viewport.height
+    xpack.reporting.capture.viewport.width
+    xpack.reporting.capture.zoom
+    xpack.reporting.csv.checkForFormulas
+    xpack.reporting.csv.enablePanelActionDownload
+    xpack.reporting.csv.escapeFormulaValues
+    xpack.reporting.csv.maxSizeBytes
+    xpack.reporting.csv.scroll.duration
+    xpack.reporting.csv.scroll.size
+    xpack.reporting.csv.useByteOrderMarkEncoding
+    xpack.reporting.enabled
+    xpack.reporting.encryptionKey
+    xpack.reporting.kibanaApp
+    xpack.reporting.kibanaServer.hostname
+    xpack.reporting.kibanaServer.port
+    xpack.reporting.kibanaServer.protocol
+    xpack.reporting.poll.jobCompletionNotifier.interval
+    xpack.reporting.poll.jobCompletionNotifier.intervalErrorMultiplier
+    xpack.reporting.poll.jobsRefresh.interval
+    xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier
+    xpack.reporting.queue.indexInterval
+    xpack.reporting.queue.pollEnabled
+    xpack.reporting.queue.pollInterval
+    xpack.reporting.queue.pollIntervalErrorMultiplier
+    xpack.reporting.queue.timeout
+    xpack.reporting.roles.allow
+    xpack.reporting.roles.enabled
+    xpack.ruleRegistry.write.enabled
+    xpack.security.audit.appender.fileName
+    xpack.security.audit.appender.layout.highlight
+    xpack.security.audit.appender.layout.pattern
+    xpack.security.audit.appender.layout.type
+    xpack.security.audit.appender.legacyLoggingConfig
+    xpack.security.audit.appender.policy.interval
+    xpack.security.audit.appender.policy.modulate
+    xpack.security.audit.appender.policy.size
+    xpack.security.audit.appender.policy.type
+    xpack.security.audit.appender.strategy.max
+    xpack.security.audit.appender.strategy.pattern
+    xpack.security.audit.appender.strategy.type
+    xpack.security.audit.appender.type
+    xpack.security.audit.enabled
+    xpack.security.audit.ignore_filters
+    xpack.security.authc.http.autoSchemesEnabled
+    xpack.security.authc.http.enabled
+    xpack.security.authc.http.schemes
+    xpack.security.authc.oidc.realm
+    xpack.security.authc.providers
+    xpack.security.authc.saml.maxRedirectURLSize
+    xpack.security.authc.saml.realm
+    xpack.security.authc.selector.enabled
+    xpack.security.cookieName
+    xpack.security.encryptionKey
+    xpack.security.loginAssistanceMessage
+    xpack.security.loginHelp
+    xpack.security.sameSiteCookies
+    xpack.security.secureCookies
+    xpack.security.session.cleanupInterval
+    xpack.security.session.idleTimeout
+    xpack.security.session.lifespan
+    xpack.security.sessionTimeout
+    xpack.security.showInsecureClusterWarning
+    xpack.securitySolution.alertMergeStrategy
+    xpack.securitySolution.alertIgnoreFields
+    xpack.securitySolution.endpointResultListDefaultFirstPageIndex
+    xpack.securitySolution.endpointResultListDefaultPageSize
+    xpack.securitySolution.maxRuleImportExportSize
+    xpack.securitySolution.maxRuleImportPayloadBytes
+    xpack.securitySolution.maxTimelineImportExportSize
+    xpack.securitySolution.maxTimelineImportPayloadBytes
+    xpack.securitySolution.packagerTaskInterval
+    xpack.securitySolution.prebuiltRulesFromFileSystem
+    xpack.securitySolution.prebuiltRulesFromSavedObjects
+    xpack.spaces.maxSpaces
+    xpack.task_manager.max_attempts
+    xpack.task_manager.max_poll_inactivity_cycles
+    xpack.task_manager.max_workers
+    xpack.task_manager.monitored_aggregated_stats_refresh_rate
+    xpack.task_manager.monitored_stats_required_freshness
+    xpack.task_manager.monitored_stats_running_average_window
+    xpack.task_manager.monitored_stats_health_verbose_log.enabled
+    xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds
+    xpack.task_manager.monitored_task_execution_thresholds
+    xpack.task_manager.poll_interval
+    xpack.task_manager.request_capacity
+    xpack.task_manager.version_conflict_threshold
+    xpack.uptime.index
+)
+
+longopts=''
+for kibana_var in ${kibana_vars[*]}; do
+    # 'elasticsearch.hosts' -> 'ELASTICSEARCH_HOSTS'
+    env_var=$(echo ${kibana_var^^} | tr . _)
+
+    # Indirectly lookup env var values via the name of the var.
+    # REF: http://tldp.org/LDP/abs/html/bashver2.html#EX78
+    value=${!env_var}
+    if [[ -n $value ]]; then
+      longopt="--${kibana_var}=${value}"
+      longopts+=" ${longopt}"
+    fi
+done
+
+# Files created at run-time should be group-writable, for Openshift's sake.
+umask 0002
+
+# The virtual file /proc/self/cgroup should list the current cgroup
+# membership. For each hierarchy, you can follow the cgroup path from
+# this file to the cgroup filesystem (usually /sys/fs/cgroup/) and
+# introspect the statistics for the cgroup for the given
+# hierarchy. Alas, Docker breaks this by mounting the container
+# statistics at the root while leaving the cgroup paths as the actual
+# paths. Therefore, Kibana provides a mechanism to override
+# reading the cgroup path from /proc/self/cgroup and instead uses the
+# cgroup path defined the configuration properties
+# ops.cGroupOverrides.cpuPath and ops.cGroupOverrides.cpuAcctPath.
+# Therefore, we set this value here so that cgroup statistics are
+# available for the container this process will run in.
+
+exec /usr/share/kibana/bin/kibana --ops.cGroupOverrides.cpuPath=/ --ops.cGroupOverrides.cpuAcctPath=/ ${longopts} "$@"

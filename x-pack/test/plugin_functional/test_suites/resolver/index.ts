@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -89,9 +91,9 @@ export default function ({
           let button: WebElementWrapper;
           beforeEach(async () => {
             // hover the button
-            button = await (await element()).findByCssSelector(
-              `button[data-test-resolver-node-id="${nodeID}"]`
-            );
+            button = await (
+              await element()
+            ).findByCssSelector(`button[data-test-resolver-node-id="${nodeID}"]`);
             await button.moveMouseTo();
           });
           it('should render as expected', async () => {
@@ -140,9 +142,9 @@ export default function ({
                   beforeEach(async () => {
                     firstPill = async () => {
                       // select a pill
-                      const pills = await (await element()).findAllByTestSubject(
-                        'resolver:map:node-submenu-item'
-                      );
+                      const pills = await (
+                        await element()
+                      ).findAllByTestSubject('resolver:map:node-submenu-item');
                       return pills[0];
                     };
 

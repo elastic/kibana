@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KQL_INPUT, REFRESH_BUTTON } from '../screens/security_header';
@@ -20,8 +21,4 @@ export const navigateFromHeaderTo = (page: string) => {
 
 export const refreshPage = () => {
   cy.get(REFRESH_BUTTON).click({ force: true }).should('not.have.text', 'Updating');
-};
-
-export const waitForThePageToBeUpdated = () => {
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
 };

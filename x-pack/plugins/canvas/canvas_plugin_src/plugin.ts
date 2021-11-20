@@ -1,19 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import { CanvasSetup } from '../public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 
 import { functions } from './functions/browser';
+import { initFunctions } from './functions/external';
 import { typeFunctions } from './expression_types';
 import { renderFunctions, renderFunctionFactories } from './renderers';
+
 interface SetupDeps {
   canvas: CanvasSetup;
 }
@@ -23,6 +27,7 @@ export interface StartDeps {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
   charts: ChartsPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export type SetupInitializer<T> = (core: CoreSetup<StartDeps>, plugins: SetupDeps) => T;
@@ -37,6 +42,13 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     plugins.canvas.addRenderers(renderFunctions);
 
     core.getStartServices().then(([coreStart, depsStart]) => {
+      const externalFunctions = initFunctions({
+        embeddablePersistableStateService: {
+          extract: depsStart.embeddable.extract,
+          inject: depsStart.embeddable.inject,
+        },
+      });
+      plugins.canvas.addFunctions(externalFunctions);
       plugins.canvas.addRenderers(
         renderFunctionFactories.map((factory: any) => factory(coreStart, depsStart))
       );

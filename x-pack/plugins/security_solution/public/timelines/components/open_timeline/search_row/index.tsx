@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -61,6 +62,7 @@ export const SearchRow = React.memo<Props>(
             ? i18n.SEARCH_PLACEHOLDER
             : i18n.SEARCH_TEMPLATE_PLACEHOLDER,
         incremental: false,
+        'data-test-subj': 'search-bar',
       }),
       [timelineType]
     );
@@ -69,7 +71,7 @@ export const SearchRow = React.memo<Props>(
       <SearchRowContainer>
         <SearchRowFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <EuiSearchBar data-test-subj="search-bar" box={searchBox} onChange={onQueryChange} />
+            <EuiSearchBar box={searchBox} onChange={onQueryChange} />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>

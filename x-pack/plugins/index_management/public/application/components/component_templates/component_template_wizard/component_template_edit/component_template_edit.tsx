@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
   ComponentTemplateDeserialized,
-  SectionLoading,
+  PageLoading,
+  PageError,
   attemptToURIDecode,
+  Error,
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
 
@@ -63,64 +67,57 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
     setSaveError(null);
   };
 
-  let content;
-
   if (isLoading) {
-    content = (
-      <SectionLoading>
+    return (
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.componentTemplateEdit.loadingDescription"
           defaultMessage="Loading component template…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
-  } else if (error) {
-    content = (
-      <>
-        <EuiCallOut
-          title={
+  }
+
+  if (error) {
+    return (
+      <PageError
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateEdit.loadComponentTemplateError"
+            defaultMessage="Error loading component template"
+          />
+        }
+        error={error as Error}
+        data-test-subj="loadComponentTemplateError"
+      />
+    );
+  }
+
+  return (
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
             <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateEdit.loadComponentTemplateError"
-              defaultMessage="Error loading component template"
+              id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
+              defaultMessage="Edit component template '{name}'"
+              values={{ name: decodedName }}
             />
-          }
-          color="danger"
-          iconType="alert"
-          data-test-subj="loadComponentTemplateError"
-        >
-          <div>{error.message}</div>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    );
-  } else if (componentTemplate) {
-    content = (
+          </span>
+        }
+        bottomBorder
+      />
+
+      <EuiSpacer size="l" />
+
       <ComponentTemplateForm
-        defaultValue={componentTemplate}
+        defaultValue={componentTemplate!}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}
         clearSaveError={clearSaveError}
         isEditing={true}
       />
-    );
-  }
-
-  return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
-              defaultMessage="Edit component template '{name}'"
-              values={{ name: decodedName }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {content}
-      </EuiPageContent>
-    </EuiPageBody>
+    </EuiPageContentBody>
   );
 };

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { getClusterStatus } from '../../../../../lib/logstash/get_cluster_status';
 import { handleError } from '../../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../../common/ccs_utils';
 import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
 import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
 
@@ -60,17 +61,16 @@ export function logstashClusterPipelinesRoute(server) {
       if (sort) {
         sort.field = sortMetricSetMap[sort.field] || sort.field;
       }
-
       try {
-        const response = await getPaginatedPipelines(
+        const response = await getPaginatedPipelines({
           req,
           lsIndexPattern,
-          { clusterUuid },
-          { throughputMetric, nodesCountMetric },
+          clusterUuid,
+          metrics: { throughputMetric, nodesCountMetric },
           pagination,
           sort,
-          queryText
-        );
+          queryText,
+        });
 
         return {
           ...response,

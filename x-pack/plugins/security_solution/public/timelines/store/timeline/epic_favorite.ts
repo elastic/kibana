@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-client';
 import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, Observable, empty } from 'rxjs';
 import { filter, mergeMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
-import { persistTimelineFavoriteMutation } from '../../containers/favorite/persist.gql_query';
-import { PersistTimelineFavoriteMutation, ResponseFavoriteTimeline } from '../../../graphql/types';
 import { addError } from '../../../common/store/app/actions';
 import {
   endTimelineSaving,
@@ -23,15 +20,15 @@ import {
   showCallOutUnauthorizedMsg,
 } from './actions';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { inputsModel } from '../../../common/store/inputs';
+import { ResponseFavoriteTimeline, TimelineType } from '../../../../common/types/timeline';
+import { persistFavorite } from '../../containers/api';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 
 export const epicPersistTimelineFavorite = (
-  apolloClient: ApolloClient<NormalizedCacheObject>,
   action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,
@@ -40,16 +37,11 @@ export const epicPersistTimelineFavorite = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   from(
-    apolloClient.mutate<
-      PersistTimelineFavoriteMutation.Mutation,
-      PersistTimelineFavoriteMutation.Variables
-    >({
-      mutation: persistTimelineFavoriteMutation,
-      fetchPolicy: 'no-cache',
-      variables: {
-        timelineId: myEpicTimelineId.getTimelineId(),
-      },
-      refetchQueries,
+    persistFavorite({
+      timelineId: myEpicTimelineId.getTimelineId(),
+      templateTimelineId: timeline[action.payload.id].templateTimelineId,
+      templateTimelineVersion: timeline[action.payload.id].templateTimelineVersion,
+      timelineType: timeline[action.payload.id].timelineType ?? TimelineType.default,
     })
   ).pipe(
     withLatestFrom(timeline$, allTimelineQuery$),
@@ -96,6 +88,12 @@ export const epicPersistTimelineFavorite = (
             myEpicTimelineId.setTimelineVersion(
               updatedTimeline[get('payload.id', checkAction)].version
             );
+            myEpicTimelineId.setTemplateTimelineId(
+              updatedTimeline[get('payload.id', checkAction)].templateTimelineId
+            );
+            myEpicTimelineId.setTemplateTimelineVersion(
+              updatedTimeline[get('payload.id', checkAction)].templateTimelineVersion
+            );
             return true;
           }
           return false;
@@ -104,12 +102,14 @@ export const epicPersistTimelineFavorite = (
     )
   );
 
-export const createTimelineFavoriteEpic = <State>(): Epic<Action, Action, State> => (action$) => {
-  return action$.pipe(
-    filter((action) => timelineFavoriteActionsType.includes(action.type)),
-    mergeMap((action) => {
-      dispatcherTimelinePersistQueue.next({ action });
-      return empty();
-    })
-  );
-};
+export const createTimelineFavoriteEpic =
+  <State>(): Epic<Action, Action, State> =>
+  (action$) => {
+    return action$.pipe(
+      filter((action) => timelineFavoriteActionsType.includes(action.type)),
+      mergeMap((action) => {
+        dispatcherTimelinePersistQueue.next({ action });
+        return empty();
+      })
+    );
+  };

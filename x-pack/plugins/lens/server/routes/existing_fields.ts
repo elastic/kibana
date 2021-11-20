@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
-import { IndexPattern, IndexPatternsService } from 'src/plugins/data/common';
+import { IndexPattern, IndexPatternsService, RuntimeField } from 'src/plugins/data/common';
 import { BASE_API_URL } from '../../common';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 import { PluginStartContract } from '../plugin';
@@ -27,8 +29,9 @@ export interface Field {
   name: string;
   isScript: boolean;
   isMeta: boolean;
-  lang?: string;
+  lang?: estypes.ScriptLanguage;
   script?: string;
+  runtimeField?: RuntimeField;
 }
 
 export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>, logger: Logger) {
@@ -50,8 +53,12 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
       },
     },
     async (context, req, res) => {
-      const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
+      const [{ savedObjects, elasticsearch, uiSettings }, { data }] =
+        await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
+      const includeFrozen: boolean = await uiSettings
+        .asScopedToClient(savedObjectsClient)
+        .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
       const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
       try {
         return res.ok({
@@ -63,11 +70,19 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
               esClient
             ),
             context,
+            includeFrozen,
           }),
         });
       } catch (e) {
+        if (e instanceof errors.TimeoutError) {
+          logger.info(`Field existence check timed out on ${req.params.indexPatternId}`);
+          // 408 is Request Timeout
+          return res.customError({ statusCode: 408, body: e.message });
+        }
         logger.info(
-          `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
+          `Field existence check failed on ${req.params.indexPatternId}: ${
+            isBoomError(e) ? e.output.payload.message : e.message
+          }`
         );
         if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound({ body: e.message });
@@ -76,11 +91,9 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
           if (e.output.statusCode === 404) {
             return res.notFound({ body: e.output.payload.message });
           }
-          return res.internalError({ body: e.output.payload.message });
+          throw new Error(e.output.payload.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }
@@ -95,6 +108,7 @@ async function fetchFieldExistence({
   fromDate,
   toDate,
   timeFieldName,
+  includeFrozen,
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
@@ -103,6 +117,7 @@ async function fetchFieldExistence({
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
+  includeFrozen: boolean;
 }) {
   const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
   const indexPattern = await indexPatternsService.get(indexPatternId);
@@ -116,6 +131,7 @@ async function fetchFieldExistence({
     index: indexPattern.title,
     timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
+    includeFrozen,
   });
 
   return {
@@ -137,6 +153,7 @@ export function buildFieldList(indexPattern: IndexPattern, metaFields: string[])
       // id is a special case - it doesn't show up in the meta field list,
       // but as it's not part of source, it has to be handled separately.
       isMeta: metaFields.includes(field.name) || field.name === '_id',
+      runtimeField: !field.isMapped ? field.runtimeField : undefined,
     };
   });
 }
@@ -149,6 +166,7 @@ async function fetchIndexPatternStats({
   fromDate,
   toDate,
   fields,
+  includeFrozen,
 }: {
   client: ElasticsearchClient;
   index: string;
@@ -157,6 +175,7 @@ async function fetchIndexPatternStats({
   fromDate?: string;
   toDate?: string;
   fields: Field[];
+  includeFrozen: boolean;
 }) {
   const filter =
     timeFieldName && fromDate && toDate
@@ -180,35 +199,52 @@ async function fetchIndexPatternStats({
   };
 
   const scriptedFields = fields.filter((f) => f.isScript);
-  const { body: result } = await client.search({
-    index,
-    body: {
-      size: SAMPLE_SIZE,
-      query,
-      sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
-      fields: ['*'],
-      _source: false,
-      script_fields: scriptedFields.reduce((acc, field) => {
-        acc[field.name] = {
-          script: {
-            lang: field.lang,
-            source: field.script,
-          },
-        };
-        return acc;
-      }, {} as Record<string, unknown>),
+  const runtimeFields = fields.filter((f) => f.runtimeField);
+  const { body: result } = await client.search(
+    {
+      index,
+      ...(includeFrozen ? { ignore_throttled: false } : {}),
+      body: {
+        size: SAMPLE_SIZE,
+        query,
+        // Sorted queries are usually able to skip entire shards that don't match
+        sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
+        fields: ['*'],
+        _source: false,
+        runtime_mappings: runtimeFields.reduce((acc, field) => {
+          if (!field.runtimeField) return acc;
+          acc[field.name] = field.runtimeField;
+          return acc;
+        }, {} as Record<string, estypes.MappingRuntimeField>),
+        script_fields: scriptedFields.reduce((acc, field) => {
+          acc[field.name] = {
+            script: {
+              lang: field.lang!,
+              source: field.script!,
+            },
+          };
+          return acc;
+        }, {} as Record<string, estypes.ScriptField>),
+        // Small improvement because there is overhead in counting
+        track_total_hits: false,
+        // Per-shard timeout, must be lower than overall. Shards return partial results on timeout
+        timeout: '4500ms',
+      },
     },
-  });
+    {
+      // Global request timeout. Will cancel the request if exceeded. Overrides the elasticsearch.requestTimeout
+      requestTimeout: '5000ms',
+      // Fails fast instead of retrying- default is to retry
+      maxRetries: 0,
+    }
+  );
   return result.hits.hits;
 }
 
 /**
  * Exported only for unit tests.
  */
-export function existingFields(
-  docs: Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>,
-  fields: Field[]
-): string[] {
+export function existingFields(docs: estypes.SearchHit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 
   for (const doc of docs) {
@@ -217,7 +253,7 @@ export function existingFields(
     }
 
     missingFields.forEach((field) => {
-      let fieldStore: Record<string, unknown> = doc.fields;
+      let fieldStore = doc.fields!;
       if (field.isMeta) {
         fieldStore = doc;
       }

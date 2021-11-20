@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../common/constants';
 import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
 export async function fetchLicenseType(
-  callCluster: LegacyAPICaller,
+  client: ElasticsearchClient,
   availableCcs: string[],
   clusterUuid: string
 ) {
@@ -18,9 +20,9 @@ export async function fetchLicenseType(
   if (availableCcs) {
     index = getCcsIndexPattern(index, availableCcs);
   }
-  const params = {
+  const params: estypes.SearchRequest = {
     index,
-    filterPath: ['hits.hits._source.license'],
+    filter_path: ['hits.hits._source.license'],
     body: {
       size: 1,
       sort: [
@@ -53,6 +55,6 @@ export async function fetchLicenseType(
       },
     },
   };
-  const response = await callCluster('search', params);
+  const { body: response } = await client.search(params);
   return get(response, 'hits.hits[0]._source.license.type', null);
 }

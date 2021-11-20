@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Action } from 'redux-actions';
 import { IHttpFetchError } from 'src/core/public';
-import { Alert } from '../../../../alerts/common';
+import { Alert } from '../../../../alerting/common';
 import { UptimeAlertTypeParams } from '../alerts/alerts';
 
 export interface AsyncAction<Payload, SuccessPayload> {
@@ -47,6 +48,7 @@ export interface MonitorDetailsActionPayload {
 export interface CreateMLJobSuccess {
   count: number;
   jobId: string;
+  awaitingNodeAssignment: boolean;
 }
 
 export interface DeleteJobResults {

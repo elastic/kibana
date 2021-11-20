@@ -1,33 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { SetupUX } from '../routes/rum_client/route';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
   SERVICE_LANGUAGE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../common/utils/range_filter';
+import { rangeQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
+import { getEsFilter } from '../routes/rum_client/ui_filters/get_es_filter';
 
 export function getRumPageLoadTransactionsProjection({
   setup,
   urlQuery,
   checkFetchStartFieldExists = true,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   urlQuery?: string;
   checkFetchStartFieldExists?: boolean;
+  start: number;
+  end: number;
 }) {
-  const { start, end, esFilter } = setup;
+  const { uiFilters } = setup;
 
   const bool = {
     filter: [
-      { range: rangeFilter(start, end) },
+      ...rangeQuery(start, end),
       { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
       ...(checkFetchStartFieldExists
         ? [
@@ -44,15 +50,14 @@ export function getRumPageLoadTransactionsProjection({
         ? [
             {
               wildcard: {
-                'url.full': {
-                  value: `*${urlQuery}*`,
-                },
+                'url.full': `*${urlQuery}*`,
               },
             },
           ]
         : []),
-      ...esFilter,
+      ...getEsFilter(uiFilters),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {
@@ -70,34 +75,37 @@ export function getRumPageLoadTransactionsProjection({
 export function getRumErrorsProjection({
   setup,
   urlQuery,
+  start,
+  end,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX;
   urlQuery?: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end, esFilter: esFilter } = setup;
+  const { uiFilters } = setup;
 
   const bool = {
     filter: [
-      { range: rangeFilter(start, end) },
+      ...rangeQuery(start, end),
       { term: { [AGENT_NAME]: 'rum-js' } },
       {
         term: {
           [SERVICE_LANGUAGE_NAME]: 'javascript',
         },
       },
-      ...esFilter,
+      ...getEsFilter(uiFilters),
       ...(urlQuery
         ? [
             {
               wildcard: {
-                'url.full': {
-                  value: `*${urlQuery}*`,
-                },
+                'url.full': `*${urlQuery}*`,
               },
             },
           ]
         : []),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { ViewSourceConfigurationButton } from '../../../../components/source_configuration';
+import { ViewSourceConfigurationButton } from '../../../../components/source_configuration/view_source_configuration_button';
 import { useLinkProps } from '../../../../hooks/use_link_props';
 
 interface InvalidNodeErrorProps {
@@ -17,8 +18,8 @@ interface InvalidNodeErrorProps {
 
 export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = ({ nodeName }) => {
   const tutorialLinkProps = useLinkProps({
-    app: 'home',
-    hash: '/tutorial_directory/metrics',
+    app: 'integrations',
+    hash: '/browse',
   });
 
   return (

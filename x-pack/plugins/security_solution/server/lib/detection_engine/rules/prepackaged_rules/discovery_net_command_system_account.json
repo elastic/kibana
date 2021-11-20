@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "Net command via SYSTEM account",
-  "query": "event.category:process and event.type:(start or process_started) and (process.name:(whoami.exe or net.exe) or process.name:net1.exe and not process.parent.name:net.exe) and user.name:SYSTEM",
+  "query": "process where event.type in (\"start\", \"process_started\") and \n  user.id in (\"S-1-5-18\", \"S-1-5-19\", \"S-1-5-20\") and\n  process.name : \"whoami.exe\" or\n  (process.name : \"net1.exe\" and not process.parent.name : \"net.exe\")\n",
   "risk_score": 21,
   "rule_id": "2856446a-34e6-435b-9fb5-f8f040bfa7ed",
   "severity": "low",
@@ -32,13 +33,14 @@
       },
       "technique": [
         {
-          "id": "T1087",
-          "name": "Account Discovery",
-          "reference": "https://attack.mitre.org/techniques/T1087/"
+          "id": "T1033",
+          "name": "System Owner/User Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1033/"
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 4
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 8
 }

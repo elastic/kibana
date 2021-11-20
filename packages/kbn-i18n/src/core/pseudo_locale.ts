@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
  * Matches every single [A-Za-z] character, `<tag attr="any > text">`, `](markdown-link-address)` and `@I18N@valid_variable_name@I18N@`
  */
-const CHARS_FOR_PSEUDO_LOCALIZATION_REGEX = /[A-Za-z]|(\]\([\s\S]*?\))|(<([^"<>]|("[^"]*?"))*?>)|(@I18N@\w*?@I18N@)/g;
+const CHARS_FOR_PSEUDO_LOCALIZATION_REGEX =
+  /[A-Za-z]|(\]\([\s\S]*?\))|(<([^"<>]|("[^"]*?"))*?>)|(@I18N@\w*?@I18N@)/g;
 const PSEUDO_ACCENTS_LOCALE = 'en-xa';
 
 export function isPseudoLocale(locale: string) {

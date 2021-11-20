@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useEffect } from 'react';
@@ -14,14 +15,14 @@ import { useKibana } from '../../lib/kibana';
 
 export const useSavedQueryServices = () => {
   const kibana = useKibana();
-  const client = kibana.services.savedObjects.client;
+  const { http } = kibana.services;
 
   const [savedQueryService, setSavedQueryService] = useState<SavedQueryService>(
-    createSavedQueryService(client)
+    createSavedQueryService(http)
   );
 
   useEffect(() => {
-    setSavedQueryService(createSavedQueryService(client));
-  }, [client]);
+    setSavedQueryService(createSavedQueryService(http));
+  }, [http]);
   return savedQueryService;
 };

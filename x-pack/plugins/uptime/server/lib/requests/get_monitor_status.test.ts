@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getMonitorStatus } from './get_monitor_status';
@@ -84,125 +85,12 @@ describe('getMonitorStatus', () => {
       filters: exampleFilter,
       locations: [],
       numTimes: 5,
-      timerange: {
+      timespanRange: {
         from: 'now-10m',
         to: 'now-1m',
       },
-    });
-    expect(esMock.search).toHaveBeenCalledTimes(1);
-    const [params] = esMock.search.mock.calls[0];
-    expect(params).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "aggs": Object {
-            "monitors": Object {
-              "aggs": Object {
-                "fields": Object {
-                  "top_hits": Object {
-                    "size": 1,
-                  },
-                },
-              },
-              "composite": Object {
-                "size": 2000,
-                "sources": Array [
-                  Object {
-                    "monitorId": Object {
-                      "terms": Object {
-                        "field": "monitor.id",
-                      },
-                    },
-                  },
-                  Object {
-                    "status": Object {
-                      "terms": Object {
-                        "field": "monitor.status",
-                      },
-                    },
-                  },
-                  Object {
-                    "location": Object {
-                      "terms": Object {
-                        "field": "observer.geo.name",
-                        "missing_bucket": true,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "term": Object {
-                    "monitor.status": "down",
-                  },
-                },
-                Object {
-                  "range": Object {
-                    "@timestamp": Object {
-                      "gte": "now-10m",
-                      "lte": "now-1m",
-                    },
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
-                      Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "match_phrase": Object {
-                                "monitor.id": "apm-dev",
-                              },
-                            },
-                          ],
-                        },
-                      },
-                      Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "match_phrase": Object {
-                                "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-          "size": 0,
-        },
-        "index": "heartbeat-8*",
-      }
-    `);
-  });
-
-  it('applies locations to params', async () => {
-    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
-      [],
-      genBucketItem
-    );
-
-    const { uptimeEsClient } = getUptimeESMockClient(esMock);
-
-    await getMonitorStatus({
-      uptimeEsClient,
-      locations: ['fairbanks', 'harrisburg'],
-      numTimes: 1,
-      timerange: {
-        from: 'now-2m',
+      timestampRange: {
+        from: 'now-24h',
         to: 'now',
       },
     });
@@ -260,6 +148,143 @@ describe('getMonitorStatus', () => {
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
+                      "gte": "now-10m",
+                      "lte": "now-1m",
+                    },
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "monitor.id": "apm-dev",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        },
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+      }
+    `);
+  });
+
+  it('applies locations to params', async () => {
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [],
+      genBucketItem
+    );
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
+    await getMonitorStatus({
+      uptimeEsClient,
+      locations: ['fairbanks', 'harrisburg'],
+      numTimes: 1,
+      timespanRange: {
+        from: 'now-2m',
+        to: 'now',
+      },
+      timestampRange: {
+        from: 'now-24h',
+        to: 'now',
+      },
+    });
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
+    expect(params).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "aggs": Object {
+            "monitors": Object {
+              "aggs": Object {
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                  },
+                },
+              },
+              "composite": Object {
+                "size": 2000,
+                "sources": Array [
+                  Object {
+                    "monitorId": Object {
+                      "terms": Object {
+                        "field": "monitor.id",
+                      },
+                    },
+                  },
+                  Object {
+                    "status": Object {
+                      "terms": Object {
+                        "field": "monitor.status",
+                      },
+                    },
+                  },
+                  Object {
+                    "location": Object {
+                      "terms": Object {
+                        "field": "observer.geo.name",
+                        "missing_bucket": true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "monitor.status": "down",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-2m",
                       "lte": "now",
                     },
@@ -286,7 +311,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -297,8 +322,12 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     const clientParameters = {
-      timerange: {
+      timespanRange: {
         from: 'now-15m',
+        to: 'now',
+      },
+      timestampRange: {
+        from: 'now-24h',
         to: 'now',
       },
       numTimes: 5,
@@ -414,6 +443,14 @@ describe('getMonitorStatus', () => {
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-15m",
                       "lte": "now",
                     },
@@ -473,7 +510,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -484,8 +521,12 @@ describe('getMonitorStatus', () => {
       genBucketItem
     );
     const clientParameters = {
-      timerange: {
+      timespanRange: {
         from: 'now-15m',
+        to: 'now',
+      },
+      timestampRange: {
+        from: 'now-24h',
         to: 'now',
       },
       numTimes: 5,
@@ -561,6 +602,14 @@ describe('getMonitorStatus', () => {
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-15m",
                       "lte": "now",
                     },
@@ -580,7 +629,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -617,9 +666,13 @@ describe('getMonitorStatus', () => {
       filters: undefined,
       locations: [],
       numTimes: 5,
-      timerange: {
+      timespanRange: {
         from: 'now-12m',
         to: 'now-2m',
+      },
+      timestampRange: {
+        from: 'now-24h',
+        to: 'now',
       },
     };
 
@@ -683,6 +736,14 @@ describe('getMonitorStatus', () => {
                 Object {
                   "range": Object {
                     "@timestamp": Object {
+                      "gte": "now-24h",
+                      "lte": "now",
+                    },
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "monitor.timespan": Object {
                       "gte": "now-12m",
                       "lte": "now-2m",
                     },
@@ -693,7 +754,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
     expect(result.length).toBe(3);
@@ -809,9 +870,13 @@ describe('getMonitorStatus', () => {
       uptimeEsClient,
       locations: [],
       numTimes: 5,
-      timerange: {
+      timespanRange: {
         from: 'now-10m',
         to: 'now-1m',
+      },
+      timestampRange: {
+        from: 'now-24h',
+        to: 'now',
       },
     });
     expect(result.length).toBe(8);

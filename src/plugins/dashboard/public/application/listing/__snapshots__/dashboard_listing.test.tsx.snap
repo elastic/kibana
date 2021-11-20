@@ -6,8 +6,15 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -18,6 +25,50 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create a dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Add some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -25,68 +76,6 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     initialFilter="\\"search by title\\""
     initialPageSize={20}
     listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -119,116 +108,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
-</DashboardListing>
-`;
-
-exports[`after fetch hideWriteControls 1`] = `
-<DashboardListing
-  kbnUrlStateStorage={
-    Object {
-      "cancel": [Function],
-      "change$": [Function],
-      "flush": [Function],
-      "get": [Function],
-      "set": [Function],
-    }
-  }
-  redirectTo={[MockFunction]}
->
-  <TableListView
-    entityName="dashboard"
-    entityNamePlural="dashboards"
-    findItems={[Function]}
-    headingId="dashboardListingHeading"
-    initialFilter=""
-    initialPageSize={20}
-    listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Looks like you don't have any dashboards."
-                id="dashboard.listing.noItemsMessage"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "description",
-          "name": "Description",
-          "render": [Function],
-          "sortable": true,
-        },
-      ]
-    }
-    tableListTitle="Dashboards"
-    toastNotifications={
-      Object {
-        "add": [MockFunction],
-        "addDanger": [MockFunction],
-        "addError": [MockFunction],
-        "addInfo": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction],
-        "get$": [MockFunction],
-        "remove": [MockFunction],
-      }
-    }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
 </DashboardListing>
 `;
 
@@ -239,8 +119,15 @@ exports[`after fetch initialFilter 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -250,6 +137,50 @@ exports[`after fetch initialFilter 1`] = `
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create a dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Add some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -257,68 +188,6 @@ exports[`after fetch initialFilter 1`] = `
     initialFilter="testFilter"
     initialPageSize={20}
     listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -351,24 +220,7 @@ exports[`after fetch initialFilter 1`] = `
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
 </DashboardListing>
 `;
 
@@ -378,8 +230,15 @@ exports[`after fetch renders all table rows 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -389,6 +248,50 @@ exports[`after fetch renders all table rows 1`] = `
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create a dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Add some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -396,68 +299,6 @@ exports[`after fetch renders all table rows 1`] = `
     initialFilter=""
     initialPageSize={20}
     listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -490,24 +331,7 @@ exports[`after fetch renders all table rows 1`] = `
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
 </DashboardListing>
 `;
 
@@ -517,8 +341,15 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -528,6 +359,50 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create a dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Add some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -535,68 +410,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     initialFilter=""
     initialPageSize={20}
     listingLimit={100}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -629,24 +442,129 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
+</DashboardListing>
+`;
+
+exports[`after fetch renders call to action with continue when no dashboards exist but one is in progress 1`] = `
+<DashboardListing
+  kbnUrlStateStorage={
+    Object {
+      "cancel": [Function],
+      "change$": [Function],
+      "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
+      "set": [Function],
+    }
+  }
+  redirectTo={[MockFunction]}
+>
+  <TableListView
+    createItem={[Function]}
+    deleteItems={[Function]}
+    editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            justifyContent="center"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButtonEmpty
+                aria-label="Discard changes to New Dashboard"
+                color="danger"
+                data-test-subj="discardDashboardPromptButton"
+                onClick={[Function]}
+                size="s"
+              >
+                Discard changes
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButton
+                aria-label="Continue editing New Dashboard"
+                color="primary"
+                data-test-subj="createDashboardPromptButton"
+                fill={true}
+                iconType="pencil"
+                onClick={[Function]}
+              >
+                Continue editing
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Dashboard in progress
+          </h1>
+        }
+      />
+    }
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    headingId="dashboardListingHeading"
+    initialFilter=""
+    initialPageSize={20}
+    listingLimit={100}
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "description",
+          "name": "Description",
+          "render": [Function],
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={
+      Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      }
+    }
+  />
 </DashboardListing>
 `;
 
@@ -656,8 +574,15 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -667,6 +592,50 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
+    emptyPrompt={
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            data-test-subj="createDashboardPromptButton"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            Create a dashboard
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                values={
+                  Object {
+                    "sampleDataInstallLink": <EuiLink
+                      onClick={[Function]}
+                    >
+                      Add some sample data
+                    </EuiLink>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="dashboardApp"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            Create your first dashboard
+          </h1>
+        }
+      />
+    }
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
@@ -674,68 +643,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     initialFilter=""
     initialPageSize={20}
     listingLimit={1}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -768,23 +675,87 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         "remove": [MockFunction],
       }
     }
-  >
-    <EuiPage
-      className="itemListing__page"
-      data-test-subj="dashboardLandingPage"
-      restrictWidth={true}
-    >
-      <div
-        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
-        data-test-subj="dashboardLandingPage"
-      >
-        <EuiPageBody>
-          <main
-            className="euiPageBody"
-          />
-        </EuiPageBody>
-      </div>
-    </EuiPage>
-  </TableListView>
+  />
+</DashboardListing>
+`;
+
+exports[`after fetch showWriteControls 1`] = `
+<DashboardListing
+  kbnUrlStateStorage={
+    Object {
+      "cancel": [Function],
+      "change$": [Function],
+      "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
+      "set": [Function],
+    }
+  }
+  redirectTo={[MockFunction]}
+>
+  <TableListView
+    emptyPrompt={
+      <EuiEmptyPrompt
+        body={
+          <p>
+            There are no available dashboards. To change your permissions to view the dashboards in this space, contact your administrator.
+          </p>
+        }
+        iconType="glasses"
+        title={
+          <h1
+            id="dashboardListingHeading"
+          >
+            No dashboards to view
+          </h1>
+        }
+      />
+    }
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    headingId="dashboardListingHeading"
+    initialFilter=""
+    initialPageSize={20}
+    listingLimit={100}
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "description",
+          "name": "Description",
+          "render": [Function],
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={
+      Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      }
+    }
+  />
 </DashboardListing>
 `;

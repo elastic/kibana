@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -83,6 +84,7 @@ export const LegendControls = ({
         defaultMessage: 'configure legend',
       })}
       onClick={() => setPopoverState(true)}
+      data-test-subj="openLegendControlsButton"
     />
   );
 
@@ -130,6 +132,7 @@ export const LegendControls = ({
       bounds: { min: draftBounds.min / 100, max: draftBounds.max / 100 },
       legend: draftLegend,
     });
+    setPopoverState(false);
   }, [onChange, draftAuto, draftBounds, draftLegend]);
 
   const handleCancelClick = useCallback(() => {
@@ -172,13 +175,13 @@ export const LegendControls = ({
   const errors = !boundsValidRange
     ? [
         i18n.translate('xpack.infra.legnedControls.boundRangeError', {
-          defaultMessage: 'Minimum must be smaller then the maximum',
+          defaultMessage: 'Minimum must be smaller than the maximum',
         }),
       ]
     : [];
 
   return (
-    <ControlContainer>
+    <ControlContainer data-test-subj="legendControls">
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={handleCancelClick}
@@ -200,6 +203,7 @@ export const LegendControls = ({
                 id="palette"
                 onChange={handlePaletteChange}
                 compressed
+                data-test-subj="legendControlsPalette"
               />
               <EuiSpacer size="m" />
               <PalettePreview
@@ -337,6 +341,7 @@ export const LegendControls = ({
                 fill
                 disabled={commited || !boundsValidRange}
                 onClick={handleApplyClick}
+                data-test-subj="applyLegendControlsButton"
               >
                 <FormattedMessage
                   id="xpack.infra.legendControls.applyButton"

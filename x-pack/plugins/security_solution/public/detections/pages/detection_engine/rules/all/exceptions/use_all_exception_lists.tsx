@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Rule } from '../../../../../containers/detection_engine/rules';
-import { ExceptionListSchema } from '../../../../../../../../lists/common';
 import { fetchRules } from '../../../../../containers/detection_engine/rules/api';
 export interface ExceptionListInfo extends ExceptionListSchema {
   rules: Rule[];
@@ -82,6 +83,8 @@ export const useAllExceptionLists = ({
     const fetchData = async (): Promise<void> => {
       if (exceptionLists.length === 0 && isSubscribed) {
         setLoading(false);
+        setExceptions([]);
+        setExceptionsListInfo({});
         return;
       }
 

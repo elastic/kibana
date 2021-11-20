@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -11,18 +11,18 @@ import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import { IRouter, KibanaRequest } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import {
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportError,
 } from '../export';
-import { validateTypes, validateObjects } from './utils';
+import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 type EitherExportOptions = SavedObjectsExportByTypeOptions | SavedObjectsExportByObjectOptions;
@@ -163,11 +163,11 @@ export const registerExportRoute = (
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, req, res) => {
       const cleaned = cleanOptions(req.body);
-      const supportedTypes = context.core.savedObjects.typeRegistry
-        .getImportableAndExportableTypes()
-        .map((t) => t.name);
+      const { typeRegistry, getExporter, getClient } = context.core.savedObjects;
+      const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
+
       let options: EitherExportOptions;
       try {
         options = validateOptions(cleaned, {
@@ -181,7 +181,12 @@ export const registerExportRoute = (
         });
       }
 
-      const exporter = context.core.savedObjects.exporter;
+      const includedHiddenTypes = supportedTypes.filter((supportedType) =>
+        typeRegistry.isHidden(supportedType)
+      );
+
+      const client = getClient({ includedHiddenTypes });
+      const exporter = getExporter(client);
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -26,7 +26,7 @@ import {
   DataPublicPluginStart,
   esFilters,
   Filter,
-  IIndexPattern,
+  IndexPattern,
   Query,
   QueryState,
   syncQueryStateWithUrl,
@@ -127,7 +127,7 @@ export const App = ({
 };
 
 function useIndexPattern(data: DataPublicPluginStart) {
-  const [indexPattern, setIndexPattern] = useState<IIndexPattern>();
+  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
   useEffect(() => {
     const fetchIndexPattern = async () => {
       const defaultIndexPattern = await data.indexPatterns.getDefault();

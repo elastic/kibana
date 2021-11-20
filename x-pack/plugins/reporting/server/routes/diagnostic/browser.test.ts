@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
@@ -9,10 +10,16 @@ import { spawn } from 'child_process';
 import { createInterface } from 'readline';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
+import * as Rx from 'rxjs';
 import { ReportingCore } from '../..';
-import { createMockLevelLogger, createMockReportingCore } from '../../test_helpers';
-import { registerDiagnoseBrowser } from './browser';
+import {
+  createMockConfigSchema,
+  createMockLevelLogger,
+  createMockPluginSetup,
+  createMockReportingCore,
+} from '../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../types';
+import { registerDiagnoseBrowser } from './browser';
 
 jest.mock('child_process');
 jest.mock('readline');
@@ -21,6 +28,9 @@ type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
 const fontNotFoundMessage = 'Could not find the default font';
+
+const wait = (ms: number): Rx.Observable<0> =>
+  Rx.from(new Promise<0>((resolve) => setTimeout(() => resolve(0), ms)));
 
 describe('POST /diagnose/browser', () => {
   jest.setTimeout(6000);
@@ -33,35 +43,29 @@ describe('POST /diagnose/browser', () => {
   const mockedSpawn: any = spawn;
   const mockedCreateInterface: any = createInterface;
 
-  const config = {
-    get: jest.fn().mockImplementation((...keys) => {
-      const key = keys.join('.');
-      switch (key) {
-        case 'queue.timeout':
-          return 120000;
-        case 'capture.browser.chromium.proxy':
-          return { enabled: false };
-      }
-    }),
-    kbnConfig: { get: jest.fn() },
-  };
+  const config = createMockConfigSchema({
+    queue: { timeout: 120000 },
+    capture: { browser: { chromium: { proxy: { enabled: false } } } },
+  });
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({})
+      () => ({ usesUiCapabilities: () => false })
     );
 
-    const mockSetupDeps = ({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
-      },
-      router: httpSetup.createRouter(''),
-    } as unknown) as any;
+    // Make all uses of 'Rx.timer' return an observable that completes in 50ms
+    jest.spyOn(Rx, 'timer').mockImplementation(() => wait(50));
 
-    core = await createMockReportingCore(config, mockSetupDeps);
+    core = await createMockReportingCore(
+      config,
+      createMockPluginSetup({
+        router: httpSetup.createRouter(''),
+        security: null,
+      })
+    );
 
     mockedSpawn.mockImplementation(() => ({
       removeAllListeners: jest.fn(),
@@ -81,6 +85,7 @@ describe('POST /diagnose/browser', () => {
   });
 
   afterEach(async () => {
+    jest.restoreAllMocks();
     await server.stop();
   });
 
@@ -90,7 +95,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
+      addEventListener: (_e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
       removeEventListener: jest.fn(),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
@@ -112,7 +117,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => setTimeout(() => cb(logs), 0),
+      addEventListener: (_e: string, cb: any) => setTimeout(() => cb(logs), 0),
       removeEventListener: jest.fn(),
       removeAllListeners: jest.fn(),
       close: jest.fn(),
@@ -148,7 +153,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => {
+      addEventListener: (_e: string, cb: any) => {
         setTimeout(() => cb(devtoolMessage), 0);
         setTimeout(() => cb(fontNotFoundMessage), 0);
       },
@@ -188,7 +193,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => {
+      addEventListener: (_e: string, cb: any) => {
         setTimeout(() => cb(fontNotFoundMessage), 0);
       },
       removeEventListener: jest.fn(),
@@ -211,17 +216,16 @@ describe('POST /diagnose/browser', () => {
       .post('/api/reporting/diagnose/browser')
       .expect(200)
       .then(({ body }) => {
-        expect(body).toMatchInlineSnapshot(`
-          Object {
-            "help": Array [
-              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
-            ],
-            "logs": "Could not find the default font
-          Browser exited abnormally during startup
-          ",
-            "success": false,
-          }
+        const helpArray = [...body.help];
+        helpArray.sort();
+        expect(helpArray).toMatchInlineSnapshot(`
+          Array [
+            "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
+          ]
         `);
+        expect(body.logs).toMatch(/Could not find the default font/);
+        expect(body.logs).toMatch(/Browser exited abnormally during startup/);
+        expect(body.success).toBe(false);
       });
   });
 
@@ -244,7 +248,7 @@ describe('POST /diagnose/browser', () => {
     }));
 
     mockedCreateInterface.mockImplementation(() => ({
-      addEventListener: (e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
+      addEventListener: (_e: string, cb: any) => setTimeout(() => cb(devtoolMessage), 0),
       removeEventListener: jest.fn(),
       removeAllListeners: createInterfaceListenersMock,
       close: createInterfaceCloseMock,

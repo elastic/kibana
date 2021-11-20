@@ -1,59 +1,111 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import pMap from 'p-map';
 import semver from 'semver';
-import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import LRU from 'lru-cache';
+import { isEqual, isEmpty } from 'lodash';
+import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import { ListResult } from '../../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
-import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
+import {
+  manifestDispatchSchema,
+  ManifestSchema,
+} from '../../../../../common/endpoint/schema/manifest';
 
 import {
   ArtifactConstants,
   buildArtifact,
   getArtifactId,
-  getFullEndpointExceptionList,
+  getEndpointEventFiltersList,
+  getEndpointExceptionList,
+  getEndpointTrustedAppsList,
+  getHostIsolationExceptionsList,
   Manifest,
-  ManifestDiff,
 } from '../../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
   internalArtifactCompleteSchema,
 } from '../../../schemas/artifacts';
-import { ArtifactClient } from '../artifact_client';
+import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
-import { ENDPOINT_LIST_ID } from '../../../../../../lists/common';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common/constants';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { InvalidInternalManifestError } from '../errors';
+import { wrapErrorIfNeeded } from '../../../utils';
+import { EndpointError } from '../../../errors';
+
+interface ArtifactsBuildResult {
+  defaultArtifacts: InternalArtifactCompleteSchema[];
+  policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]>;
+}
+
+const iterateArtifactsBuildResult = async (
+  result: ArtifactsBuildResult,
+  callback: (artifact: InternalArtifactCompleteSchema, policyId?: string) => Promise<void>
+) => {
+  for (const artifact of result.defaultArtifacts) {
+    await callback(artifact);
+  }
+
+  for (const policyId of Object.keys(result.policySpecificArtifacts)) {
+    for (const artifact of result.policySpecificArtifacts[policyId]) {
+      await callback(artifact, policyId);
+    }
+  }
+};
+
+const iterateAllListItems = async <T>(
+  pageSupplier: (page: number) => Promise<ListResult<T>>,
+  itemCallback: (item: T) => void
+) => {
+  let paging = true;
+  let page = 1;
+
+  while (paging) {
+    const { items, total } = await pageSupplier(page);
+
+    for (const item of items) {
+      await itemCallback(item);
+    }
+
+    paging = (page - 1) * 20 + items.length < total;
+    page++;
+  }
+};
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
-  artifactClient: ArtifactClient;
+  artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
   packagePolicyService: PackagePolicyServiceInterface;
   logger: Logger;
   cache: LRU<string, Buffer>;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
-export interface ManifestSnapshotOpts {
-  initialize?: boolean;
-}
+const getArtifactIds = (manifest: ManifestSchema) =>
+  [...Object.keys(manifest.artifacts)].map(
+    (key) => `${key}-${manifest.artifacts[key].decoded_sha256}`
+  );
 
-export interface ManifestSnapshot {
-  manifest: Manifest;
-  diffs: ManifestDiff[];
-}
+const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
+  isEqual(new Set(getArtifactIds(manifest1)), new Set(getArtifactIds(manifest2)));
 
 export class ManifestManager {
-  protected artifactClient: ArtifactClient;
+  protected artifactClient: EndpointArtifactClientInterface;
   protected exceptionListClient: ExceptionListClient;
   protected packagePolicyService: PackagePolicyServiceInterface;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
+  protected experimentalFeatures: ExperimentalFeatures;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -63,6 +115,7 @@ export class ManifestManager {
     this.logger = context.logger;
     this.cache = context.cache;
     this.schemaVersion = 'v1';
+    this.experimentalFeatures = context.experimentalFeatures;
   }
 
   /**
@@ -75,73 +128,170 @@ export class ManifestManager {
   }
 
   /**
+   * Builds an artifact (one per supported OS) based on the current
+   * state of exception-list-agnostic SOs.
+   */
+  protected async buildExceptionListArtifact(os: string): Promise<InternalArtifactCompleteSchema> {
+    return buildArtifact(
+      await getEndpointExceptionList(this.exceptionListClient, this.schemaVersion, os),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    );
+  }
+
+  /**
    * Builds an array of artifacts (one per supported OS) based on the current
    * state of exception-list-agnostic SOs.
    *
    * @returns {Promise<InternalArtifactCompleteSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
    * @throws Throws/rejects if there are errors building the list.
    */
-  protected async buildExceptionListArtifacts(
-    artifactSchemaVersion?: string
-  ): Promise<InternalArtifactCompleteSchema[]> {
-    const artifacts: InternalArtifactCompleteSchema[] = [];
+  protected async buildExceptionListArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
-      const exceptionList = await getFullEndpointExceptionList(
-        this.exceptionListClient,
-        os,
-        artifactSchemaVersion ?? 'v1',
-        ENDPOINT_LIST_ID
-      );
-      const artifact = await buildArtifact(
-        exceptionList,
-        os,
-        artifactSchemaVersion ?? 'v1',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
-      );
-      artifacts.push(artifact);
+      defaultArtifacts.push(await this.buildExceptionListArtifact(os));
     }
-    return artifacts;
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        policySpecificArtifacts[policyId] = defaultArtifacts;
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  /**
+   * Builds an artifact (one per supported OS) based on the current state of the
+   * Trusted Apps list (which uses the `exception-list-agnostic` SO type)
+   */
+  protected async buildTrustedAppsArtifact(os: string, policyId?: string) {
+    return buildArtifact(
+      await getEndpointTrustedAppsList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME
+    );
   }
 
   /**
    * Builds an array of artifacts (one per supported OS) based on the current state of the
    * Trusted Apps list (which uses the `exception-list-agnostic` SO type)
-   * @param artifactSchemaVersion
    */
-  protected async buildTrustedAppsArtifacts(
-    artifactSchemaVersion?: string
-  ): Promise<InternalArtifactCompleteSchema[]> {
-    const artifacts: InternalArtifactCompleteSchema[] = [];
+  protected async buildTrustedAppsArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
 
     for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
-      const trustedApps = await getFullEndpointExceptionList(
-        this.exceptionListClient,
-        os,
-        artifactSchemaVersion ?? 'v1',
-        ENDPOINT_TRUSTED_APPS_LIST_ID
-      );
-      const artifact = await buildArtifact(
-        trustedApps,
-        os,
-        'v1',
-        ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME
-      );
-      artifacts.push(artifact);
+      defaultArtifacts.push(await this.buildTrustedAppsArtifact(os));
     }
-    return artifacts;
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(await this.buildTrustedAppsArtifact(os, policyId));
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  /**
+   * Builds an array of endpoint event filters (one per supported OS) based on the current state of the
+   * Event Filters list
+   * @protected
+   */
+  protected async buildEventFiltersArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildEventFiltersForOs(os));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(await this.buildEventFiltersForOs(os, policyId));
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  protected async buildEventFiltersForOs(os: string, policyId?: string) {
+    return buildArtifact(
+      await getEndpointEventFiltersList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME
+    );
+  }
+
+  protected async buildHostIsolationExceptionsArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildHostIsolationExceptionForOs(os));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(
+            await this.buildHostIsolationExceptionForOs(os, policyId)
+          );
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  protected async buildHostIsolationExceptionForOs(
+    os: string,
+    policyId?: string
+  ): Promise<InternalArtifactCompleteSchema> {
+    return buildArtifact(
+      await getHostIsolationExceptionsList(
+        this.exceptionListClient,
+        this.schemaVersion,
+        os,
+        policyId
+      ),
+      this.schemaVersion,
+      os,
+      ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME
+    );
   }
 
   /**
    * Writes new artifact SO.
    *
    * @param artifact An InternalArtifactCompleteSchema representing the artifact.
-   * @returns {Promise<Error | null>} An error, if encountered, or null.
+   * @returns {Promise<[Error | null, InternalArtifactCompleteSchema | undefined]>} An array with the error if encountered or null and the generated artifact or null.
    */
-  protected async pushArtifact(artifact: InternalArtifactCompleteSchema): Promise<Error | null> {
+  protected async pushArtifact(
+    artifact: InternalArtifactCompleteSchema
+  ): Promise<[Error | null, InternalArtifactCompleteSchema | undefined]> {
     const artifactId = getArtifactId(artifact);
+    let fleetArtifact;
     try {
       // Write the artifact SO
-      await this.artifactClient.createArtifact(artifact);
+      fleetArtifact = await this.artifactClient.createArtifact(artifact);
 
       // Cache the compressed body of the artifact
       this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
@@ -149,29 +299,35 @@ export class ManifestManager {
       if (this.savedObjectsClient.errors.isConflictError(err)) {
         this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
       } else {
-        return err;
+        return [err, undefined];
       }
     }
 
-    return null;
+    return [null, fleetArtifact];
   }
 
   /**
    * Writes new artifact SOs.
    *
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
+   * @param newManifest A Manifest representing the new manifest
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  public async pushArtifacts(artifacts: InternalArtifactCompleteSchema[]): Promise<Error[]> {
+  public async pushArtifacts(
+    artifacts: InternalArtifactCompleteSchema[],
+    newManifest: Manifest
+  ): Promise<Error[]> {
     const errors: Error[] = [];
     for (const artifact of artifacts) {
       if (internalArtifactCompleteSchema.is(artifact)) {
-        const err = await this.pushArtifact(artifact);
+        const [err, fleetArtifact] = await this.pushArtifact(artifact);
         if (err) {
           errors.push(err);
+        } else if (fleetArtifact) {
+          newManifest.replaceArtifact(fleetArtifact);
         }
       } else {
-        errors.push(new Error(`Incomplete artifact: ${getArtifactId(artifact)}`));
+        errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`, artifact));
       }
     }
     return errors;
@@ -199,19 +355,21 @@ export class ManifestManager {
   }
 
   /**
-   * Returns the last computed manifest based on the state of the
-   * user-artifact-manifest SO.
+   * Returns the last computed manifest based on the state of the user-artifact-manifest SO. If no
+   * artifacts have been created yet (ex. no Endpoint policies are in use), then method return `null`
    *
    * @returns {Promise<Manifest | null>} The last computed manifest, or null if does not exist.
    * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
    */
   public async getLastComputedManifest(): Promise<Manifest | null> {
     try {
-      const manifestClient = this.getManifestClient();
-      const manifestSo = await manifestClient.getManifest();
+      const manifestSo = await this.getManifestClient().getManifest();
 
       if (manifestSo.version === undefined) {
-        throw new Error('No version returned for manifest.');
+        throw new InvalidInternalManifestError(
+          'Internal Manifest map SavedObject is missing version',
+          manifestSo
+        );
       }
 
       const manifest = new Manifest({
@@ -220,17 +378,35 @@ export class ManifestManager {
         soVersion: manifestSo.version,
       });
 
-      for (const id of manifestSo.attributes.ids) {
-        const artifactSo = await this.artifactClient.getArtifact(id);
-        manifest.addEntry(artifactSo.attributes);
+      for (const entry of manifestSo.attributes.artifacts) {
+        const artifact = await this.artifactClient.getArtifact(entry.artifactId);
+
+        if (!artifact) {
+          this.logger.error(
+            new InvalidInternalManifestError(`artifact id [${entry.artifactId}] not found!`, {
+              entry,
+              action: 'removed from internal ManifestManger tracking map',
+            })
+          );
+        } else {
+          manifest.addEntry(artifact, entry.policyId);
+        }
       }
+
       return manifest;
-    } catch (err) {
-      if (err.output.statusCode !== 404) {
-        throw err;
+    } catch (error) {
+      if (!error.output || error.output.statusCode !== 404) {
+        throw wrapErrorIfNeeded(error);
       }
       return null;
     }
+  }
+
+  /**
+   * creates a new default Manifest
+   */
+  public static createDefaultManifest(schemaVersion?: ManifestSchemaVersion): Manifest {
+    return Manifest.getDefault(schemaVersion);
   }
 
   /**
@@ -239,17 +415,35 @@ export class ManifestManager {
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
    * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
-  public async buildNewManifest(baselineManifest?: Manifest): Promise<Manifest> {
-    // Build new exception list artifacts
-    const artifacts = (
-      await Promise.all([this.buildExceptionListArtifacts(), this.buildTrustedAppsArtifacts()])
-    ).flat();
+  public async buildNewManifest(
+    baselineManifest: Manifest = ManifestManager.createDefaultManifest(this.schemaVersion)
+  ): Promise<Manifest> {
+    const results = await Promise.all([
+      this.buildExceptionListArtifacts(),
+      this.buildTrustedAppsArtifacts(),
+      this.buildEventFiltersArtifacts(),
+      this.buildHostIsolationExceptionsArtifacts(),
+    ]);
 
-    // Build new manifest
-    const manifest = Manifest.fromArtifacts(
-      artifacts,
-      baselineManifest ?? Manifest.getDefault(this.schemaVersion)
-    );
+    const manifest = new Manifest({
+      schemaVersion: this.schemaVersion,
+      semanticVersion: baselineManifest.getSemanticVersion(),
+      soVersion: baselineManifest.getSavedObjectVersion(),
+    });
+
+    for (const result of results) {
+      await iterateArtifactsBuildResult(result, async (artifact, policyId) => {
+        const artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
+        if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
+          throw new EndpointError(
+            `Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`,
+            artifactToAdd
+          );
+        }
+
+        manifest.addEntry(artifactToAdd, policyId);
+      });
+    }
 
     return manifest;
   }
@@ -262,23 +456,11 @@ export class ManifestManager {
    * @returns {Promise<Error[]>} Any errors encountered.
    */
   public async tryDispatch(manifest: Manifest): Promise<Error[]> {
-    const serializedManifest = manifest.toEndpointFormat();
-    if (!manifestDispatchSchema.is(serializedManifest)) {
-      return [new Error('Invalid manifest')];
-    }
-
-    let paging = true;
-    let page = 1;
     const errors: Error[] = [];
 
-    while (paging) {
-      const { items, total } = await this.packagePolicyService.list(this.savedObjectsClient, {
-        page,
-        perPage: 20,
-        kuery: 'ingest-package-policies.package.name:endpoint',
-      });
-
-      for (const packagePolicy of items) {
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicies(page),
+      async (packagePolicy) => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, revision, updated_at, updated_by, ...newPackagePolicy } = packagePolicy;
         if (newPackagePolicy.inputs.length > 0 && newPackagePolicy.inputs[0].config !== undefined) {
@@ -288,34 +470,47 @@ export class ManifestManager {
 
           const newManifestVersion = manifest.getSemanticVersion();
           if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
-            newPackagePolicy.inputs[0].config.artifact_manifest = {
-              value: serializedManifest,
-            };
+            const serializedManifest = manifest.toPackagePolicyManifest(packagePolicy.id);
 
-            try {
-              await this.packagePolicyService.update(
-                this.savedObjectsClient,
-                // @ts-ignore
-                undefined,
-                id,
-                newPackagePolicy
+            if (!manifestDispatchSchema.is(serializedManifest)) {
+              errors.push(
+                new EndpointError(
+                  `Invalid manifest for policy ${packagePolicy.id}`,
+                  serializedManifest
+                )
               );
+            } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
+              newPackagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
+
+              try {
+                await this.packagePolicyService.update(
+                  this.savedObjectsClient,
+                  // @ts-expect-error TS2345
+                  undefined,
+                  id,
+                  newPackagePolicy
+                );
+                this.logger.debug(
+                  `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
+                );
+              } catch (err) {
+                errors.push(err);
+              }
+            } else {
               this.logger.debug(
-                `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
+                `No change in manifest content for package policy: ${id}. Staying on old version`
               );
-            } catch (err) {
-              errors.push(err);
             }
           } else {
-            this.logger.debug(`No change in package policy: ${id}`);
+            this.logger.debug(`No change in manifest version for package policy: ${id}`);
           }
         } else {
-          errors.push(new Error(`Package Policy ${id} has no config.`));
+          errors.push(
+            new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, newPackagePolicy)
+          );
         }
       }
-      paging = (page - 1) * 20 + items.length < total;
-      page++;
-    }
+    );
 
     return errors;
   }
@@ -326,27 +521,112 @@ export class ManifestManager {
    * @param manifest The Manifest to commit.
    * @returns {Promise<Error | null>} An error, if encountered, or null.
    */
-  public async commit(manifest: Manifest): Promise<Error | null> {
-    try {
-      const manifestClient = this.getManifestClient();
+  public async commit(manifest: Manifest) {
+    const manifestClient = this.getManifestClient();
 
-      // Commit the new manifest
-      const manifestSo = manifest.toSavedObject();
-      const version = manifest.getSavedObjectVersion();
+    // Commit the new manifest
+    const manifestSo = manifest.toSavedObject();
+    const version = manifest.getSavedObjectVersion();
 
-      if (version == null) {
-        await manifestClient.createManifest(manifestSo);
-      } else {
-        await manifestClient.updateManifest(manifestSo, {
-          version,
-        });
-      }
-
-      this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
-    } catch (err) {
-      return err;
+    if (version == null) {
+      await manifestClient.createManifest(manifestSo);
+    } else {
+      await manifestClient.updateManifest(manifestSo, {
+        version,
+      });
     }
 
-    return null;
+    this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
+  }
+
+  private async listEndpointPolicies(page: number) {
+    return this.packagePolicyService.list(this.savedObjectsClient, {
+      page,
+      perPage: 20,
+      kuery: 'ingest-package-policies.package.name:endpoint',
+    });
+  }
+
+  private async listEndpointPolicyIds(page: number) {
+    return this.packagePolicyService.listIds(this.savedObjectsClient, {
+      page,
+      perPage: 20,
+      kuery: 'ingest-package-policies.package.name:endpoint',
+    });
+  }
+
+  public getArtifactsClient(): EndpointArtifactClientInterface {
+    return this.artifactClient;
+  }
+
+  /**
+   * Cleanup .fleet-artifacts index if there are some orphan artifacts
+   */
+  public async cleanup(manifest: Manifest) {
+    try {
+      const fleetArtifacts = [];
+      const perPage = 100;
+      let page = 1;
+
+      let fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+        perPage,
+        page,
+      });
+      fleetArtifacts.push(...fleetArtifactsResponse.items);
+
+      while (
+        fleetArtifactsResponse.total > fleetArtifacts.length &&
+        !isEmpty(fleetArtifactsResponse.items)
+      ) {
+        page += 1;
+        fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+          perPage,
+          page,
+        });
+        fleetArtifacts.push(...fleetArtifactsResponse.items);
+      }
+
+      if (isEmpty(fleetArtifacts)) {
+        return;
+      }
+
+      const badArtifacts = [];
+
+      const manifestArtifactsIds = manifest
+        .getAllArtifacts()
+        .map((artifact) => getArtifactId(artifact));
+
+      for (const fleetArtifact of fleetArtifacts) {
+        const artifactId = getArtifactId(fleetArtifact);
+        const isArtifactInManifest = manifestArtifactsIds.includes(artifactId);
+
+        if (!isArtifactInManifest) {
+          badArtifacts.push(fleetArtifact);
+        }
+      }
+
+      if (isEmpty(badArtifacts)) {
+        return;
+      }
+
+      this.logger.error(
+        new EndpointError(`Cleaning up ${badArtifacts.length} orphan artifacts`, badArtifacts)
+      );
+
+      await pMap(
+        badArtifacts,
+        async (badArtifact) => this.artifactClient.deleteArtifact(getArtifactId(badArtifact)),
+        {
+          concurrency: 5,
+          /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
+           * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
+          stopOnError: false,
+        }
+      );
+
+      this.logger.info(`All orphan artifacts has been removed successfully`);
+    } catch (error) {
+      this.logger.error(new EndpointError('There was an error cleaning orphan artifacts', error));
+    }
   }
 }

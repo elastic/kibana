@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Stream } from 'stream';
@@ -11,25 +11,27 @@ import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
 
-import { HttpService } from '../http_service';
-
 import { contextServiceMock } from '../../context/context_service.mock';
+import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
+import { HttpService } from '../http_service';
+import { Router } from '../router';
+import { loggerMock } from '@kbn/logging/mocks';
 
 let server: HttpService;
-
 let logger: ReturnType<typeof loggingSystemMock.create>;
 const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
   context: contextSetup,
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 
-beforeEach(() => {
+beforeEach(async () => {
   logger = loggingSystemMock.create();
-
   server = createHttpServer({ logger });
+  await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
 afterEach(async () => {
@@ -62,9 +64,12 @@ describe('Options', () => {
       });
 
       it('Authenticated user has access to a route', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => {
@@ -89,9 +94,12 @@ describe('Options', () => {
       });
 
       it('User with no credentials can access a route', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => toolkit.notHandled());
@@ -114,25 +122,42 @@ describe('Options', () => {
         });
       });
 
-      it('User with invalid credentials cannot access a route', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+      it('User with invalid credentials can access a route', async () => {
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => res.unauthorized());
 
         router.get(
           { path: '/', validate: false, options: { authRequired: 'optional' } },
-          (context, req, res) => res.ok({ body: 'ok' })
+          (context, req, res) =>
+            res.ok({
+              body: {
+                httpAuthIsAuthenticated: auth.isAuthenticated(req),
+                requestIsAuthenticated: req.auth.isAuthenticated,
+              },
+            })
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(401);
+        await supertest(innerServer.listener).get('/').expect(200, {
+          httpAuthIsAuthenticated: false,
+          requestIsAuthenticated: false,
+        });
       });
 
       it('does not redirect user and allows access to a resource', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) =>
@@ -184,9 +209,12 @@ describe('Options', () => {
       });
 
       it('Authenticated user has access to a route', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => {
@@ -264,9 +292,12 @@ describe('Options', () => {
 
     describe('false', () => {
       it('does not try to authenticate a user', async () => {
-        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
-          setupDeps
-        );
+        const {
+          server: innerServer,
+          createRouter,
+          registerAuth,
+          auth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const authHook = jest.fn();
@@ -900,7 +931,7 @@ describe('Response factory', () => {
         return res.ok({
           body: 'value',
           headers: {
-            etag: '1234',
+            age: '42',
           },
         });
       });
@@ -910,7 +941,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
-      expect(result.header.etag).toBe('1234');
+      expect(result.header.age).toBe('42');
     });
 
     it('supports configuring non-standard headers', async () => {
@@ -921,7 +952,7 @@ describe('Response factory', () => {
         return res.ok({
           body: 'value',
           headers: {
-            etag: '1234',
+            age: '42',
             'x-kibana': 'key',
           },
         });
@@ -932,7 +963,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
-      expect(result.header.etag).toBe('1234');
+      expect(result.header.age).toBe('42');
       expect(result.header['x-kibana']).toBe('key');
     });
 
@@ -944,7 +975,7 @@ describe('Response factory', () => {
         return res.ok({
           body: 'value',
           headers: {
-            ETag: '1234',
+            AgE: '42',
           },
         });
       });
@@ -953,7 +984,7 @@ describe('Response factory', () => {
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
-      expect(result.header.etag).toBe('1234');
+      expect(result.header.age).toBe('42');
     });
 
     it('accept array of headers', async () => {
@@ -1672,7 +1703,11 @@ describe('Response factory', () => {
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
-      expect(result.body.message).toBe('reason');
+      expect(result.body).toEqual({
+        error: 'Internal Server Error',
+        message: 'reason',
+        statusCode: 500,
+      });
       expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
     });
 
@@ -1770,5 +1805,115 @@ describe('Response factory', () => {
         ]
       `);
     });
+  });
+});
+
+describe('ETag', () => {
+  it('returns the `etag` header', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+
+    const router = createRouter('');
+    router.get(
+      {
+        path: '/route',
+        validate: false,
+      },
+      (context, req, res) =>
+        res.ok({
+          body: { foo: 'bar' },
+          headers: {
+            etag: 'etag-1',
+          },
+        })
+    );
+
+    await server.start();
+    const response = await supertest(innerServer.listener)
+      .get('/route')
+      .expect(200, { foo: 'bar' });
+    expect(response.get('etag')).toEqual('"etag-1"');
+  });
+
+  it('returns a 304 when the etag value matches', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+
+    const router = createRouter('');
+    router.get(
+      {
+        path: '/route',
+        validate: false,
+      },
+      (context, req, res) =>
+        res.ok({
+          body: { foo: 'bar' },
+          headers: {
+            etag: 'etag-1',
+          },
+        })
+    );
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .get('/route')
+      .set('If-None-Match', '"etag-1"')
+      .expect(304, '');
+  });
+});
+
+describe('registerRouterAfterListening', () => {
+  it('allows a router to be registered before server has started listening', async () => {
+    const {
+      server: innerServer,
+      createRouter,
+      registerRouterAfterListening,
+    } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => {
+      return res.ok({ body: 'hello' });
+    });
+
+    const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
+      return res.ok({ body: 'hello from other router' });
+    });
+
+    registerRouterAfterListening(otherRouter);
+
+    await server.start();
+
+    await supertest(innerServer.listener).get('/').expect(200);
+    await supertest(innerServer.listener).get('/test/afterListening').expect(200);
+  });
+
+  it('allows a router to be registered after server has started listening', async () => {
+    const {
+      server: innerServer,
+      createRouter,
+      registerRouterAfterListening,
+    } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => {
+      return res.ok({ body: 'hello' });
+    });
+
+    await server.start();
+
+    await supertest(innerServer.listener).get('/').expect(200);
+    await supertest(innerServer.listener).get('/test/afterListening').expect(404);
+
+    const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
+      return res.ok({ body: 'hello from other router' });
+    });
+
+    registerRouterAfterListening(otherRouter);
+
+    await supertest(innerServer.listener).get('/test/afterListening').expect(200);
   });
 });

@@ -3,14 +3,16 @@
     "Elastic"
   ],
   "description": "The Debugger and SilentProcessExit registry keys can allow an adversary to intercept the execution of files, causing a different process to be executed. This functionality can be abused by an adversary to establish persistence.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Image File Execution Options Injection",
-  "query": "registry where length(registry.data.strings) > 0 and\n registry.path : (\"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Image File Execution Options\\\\*.exe\\\\Debugger\", \n                  \"HKLM\\\\SOFTWARE\\\\WOW6432Node\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Image File Execution Options\\\\*\\\\Debugger\", \n                  \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\SilentProcessExit\\\\*\\\\MonitorProcess\", \n                  \"HKLM\\\\SOFTWARE\\\\WOW6432Node\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\SilentProcessExit\\\\*\\\\MonitorProcess\") and\n   /* add FPs here */\n not registry.data.strings : (\"C:\\\\Program Files*\\\\ThinKiosk\\\\thinkiosk.exe\", \"*\\\\PSAppDeployToolkit\\\\*\")\n",
+  "query": "registry where length(registry.data.strings) > 0 and\n registry.path : (\"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Image File Execution Options\\\\*.exe\\\\Debugger\", \n                  \"HKLM\\\\SOFTWARE\\\\WOW6432Node\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Image File Execution Options\\\\*\\\\Debugger\", \n                  \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\SilentProcessExit\\\\*\\\\MonitorProcess\", \n                  \"HKLM\\\\SOFTWARE\\\\WOW6432Node\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\SilentProcessExit\\\\*\\\\MonitorProcess\") and\n   /* add FPs here */\n not registry.data.strings regex~ (\"\"\"C:\\\\Program Files( \\(x86\\))?\\\\ThinKiosk\\\\thinkiosk\\.exe\"\"\", \"\"\".*\\\\PSAppDeployToolkit\\\\.*\"\"\")\n",
   "references": [
     "https://oddvar.moe/2018/04/10/persistence-using-globalflags-in-image-file-execution-options-hidden-from-autoruns-exe/"
   ],
@@ -48,6 +50,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 4
 }

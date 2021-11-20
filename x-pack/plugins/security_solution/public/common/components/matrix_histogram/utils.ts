@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ScaleType, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
@@ -80,6 +82,7 @@ export const defaultLegendColors = [
   '#B0916F',
   '#7B000B',
   '#34130C',
+  '#GGGGGG',
 ];
 
 export const formatToChartDataItem = ([key, value]: [
@@ -98,11 +101,8 @@ export const getCustomChartData = (
   const dataGroupedByEvent = groupBy('g', data);
   const dataGroupedEntries = toPairs(dataGroupedByEvent);
   const formattedChartData = map(formatToChartDataItem, dataGroupedEntries);
-
-  if (mapping)
-    return map((item: ChartSeriesData) => {
-      const mapItem = get(item.key, mapping);
-      return { ...item, color: mapItem?.color };
-    }, formattedChartData);
-  else return formattedChartData;
+  return formattedChartData.map((item: ChartSeriesData, idx: number) => {
+    const mapItem = get(item.key, mapping);
+    return { ...item, color: mapItem?.color ?? defaultLegendColors[idx] };
+  });
 };

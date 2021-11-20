@@ -1,10 +1,13 @@
 import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
-import { Subject } from 'rxjs';
+import { defer, of, Subject } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 import { I18nProvider } from '@kbn/i18n/react';
+import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-
+import { LOG_ENTRIES_SEARCH_STRATEGY } from '../../../common/search_strategies/log_entries/log_entries';
+import { createIndexPatternMock, createIndexPatternsMock } from '../../hooks/use_kibana_index_patterns.mock';
 import { DEFAULT_SOURCE_CONFIGURATION } from '../../test_utils/source_configuration';
 import { generateFakeEntries, ENTRIES_EMPTY } from '../../test_utils/entries';
 
@@ -15,30 +18,106 @@ import { LogStream } from './';
 export const startTimestamp = 1595145600000;
 export const endTimestamp = startTimestamp + 15 * 60 * 1000;
 
-export const fetch = function (url, params) {
+export const dataMock = {
+  indexPatterns: createIndexPatternsMock(500, [
+    createIndexPatternMock({
+      id: 'some-test-id',
+      title: 'mock-index-pattern-*',
+      timeFieldName: '@timestamp',
+      fields: [
+        {
+          name: '@timestamp',
+          type: KBN_FIELD_TYPES.DATE,
+          searchable: true,
+          aggregatable: true,
+        },
+        {
+          name: 'event.dataset',
+          type: KBN_FIELD_TYPES.STRING,
+          searchable: true,
+          aggregatable: true,
+        },
+        {
+          name: 'host.name',
+          type: KBN_FIELD_TYPES.STRING,
+          searchable: true,
+          aggregatable: true,
+        },
+        {
+          name: 'log.level',
+          type: KBN_FIELD_TYPES.STRING,
+          searchable: true,
+          aggregatable: true,
+        },
+        {
+          name: 'message',
+          type: KBN_FIELD_TYPES.STRING,
+          searchable: true,
+          aggregatable: true,
+        },
+      ],
+    })
+  ]),
+  search: {
+    search: ({ params }, options) => {
+      return defer(() => {
+        switch (options.strategy) {
+          case LOG_ENTRIES_SEARCH_STRATEGY:
+            if (params.after?.time === params.endTimestamp || params.before?.time === params.startTimestamp) {
+              return of({
+                id: 'EMPTY_FAKE_RESPONSE',
+                total: 1,
+                loaded: 1,
+                isRunning: false,
+                isPartial: false,
+                rawResponse: ENTRIES_EMPTY,
+              });
+            } else {
+              const entries = generateFakeEntries(
+                200,
+                params.startTimestamp,
+                params.endTimestamp,
+                params.columns || DEFAULT_SOURCE_CONFIGURATION.data.configuration.logColumns
+              );
+              return of({
+                id: 'FAKE_RESPONSE',
+                total: 1,
+                loaded: 1,
+                isRunning: false,
+                isPartial: false,
+                rawResponse: {
+                  data: {
+                    entries,
+                    topCursor: entries[0].cursor,
+                    bottomCursor: entries[entries.length - 1].cursor,
+                    hasMoreBefore: false,
+                  },
+                  errors: [],
+                }
+              });
+            }
+          default:
+            return of({
+              id: 'FAKE_RESPONSE',
+              rawResponse: {},
+            });
+        }
+      }).pipe(delay(2000));
+    },
+  },
+};
+
+
+export const fetch = async function (url, params) {
   switch (url) {
     case '/api/infra/log_source_configurations/default':
       return DEFAULT_SOURCE_CONFIGURATION;
-    case '/api/log_entries/entries':
-      const body = JSON.parse(params.body);
-      if (body.after?.time === body.endTimestamp || body.before?.time === body.startTimestamp) {
-        return ENTRIES_EMPTY;
-      } else {
-        const entries = generateFakeEntries(
-          200,
-          body.startTimestamp,
-          body.endTimestamp,
-          body.columns || DEFAULT_SOURCE_CONFIGURATION.data.configuration.logColumns
-        );
-        return {
-          data: {
-            entries,
-            topCursor: entries[0].cursor,
-            bottomCursor: entries[entries.length - 1].cursor,
-            hasMoreBefore: false,
-          },
-        };
-      }
+    case '/api/infra/log_source_configurations/default/status':
+      return {
+        data: {
+          logIndexStatus: 'available',
+        }
+      };
     default:
       return {};
   }
@@ -67,7 +146,7 @@ export const Template = (args) => <LogStream {...args} />;
     (story) => (
       <I18nProvider>
         <EuiThemeProvider>
-          <KibanaContextProvider services={{ http: { fetch }, uiSettings }}>
+          <KibanaContextProvider services={{ data: dataMock, http: { fetch }, uiSettings }}>
             {story()}
           </KibanaContextProvider>
         </EuiThemeProvider>
@@ -80,7 +159,7 @@ export const Template = (args) => <LogStream {...args} />;
 
 The purpose of this component is to allow you, the developer, to have your very own Log Stream in your plugin.
 
-The component is exposed through `infra/public`. Since Kibana uses relative paths is up to you to find how to import it (sorry).
+The component is exposed through `infra/public`. Since Kibana uses relative paths, it is up to you to find how to import it (sorry).
 
 ```tsx
 import { LogStream } from '../../../../../../infra/public';
@@ -91,8 +170,9 @@ import { LogStream } from '../../../../../../infra/public';
 
 To use the component your plugin needs to follow certain criteria:
 
-- Ensure `"infra"` is specified as a `requiredPlugins` in your plugin's `kibana.json`.
-- Ensure the `<LogStream />` component is mounted inside the hiearchy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45).
+- Ensure `"infra"` and `"data"` are specified as a `requiredPlugins` in your plugin's `kibana.json`.
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45). At a minimum, the kibana-react provider must pass `http` (from core start services) and `data` (from core plugin start dependencies).
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`EuiThemeProvider`](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/common/eui_styled_components.tsx).
 
 ## Usage
 
@@ -115,13 +195,42 @@ This will show a list of log entries between the specified timestamps.
 
 ## Query log entries
 
-You might want to show specific log entries in your plugin. Maybe you want to show log lines from a specific host, or for an AMP trace. The component has a `query` prop that accepts valid KQL expressions.
+You might want to show specific log entries in your plugin. Maybe you want to show log lines from a specific host, or for an AMP trace. The LogStream component supports both `query` and `filters`, and these are the standard `es-query` types. 
+
+### Query
+
+The component has a `query` prop that accepts a valid es-query `query`. You can either supply this with a `language` and `query` property, or you can just supply a string which is a shortcut for KQL expressions. 
 
 ```tsx
 <LogStream
   startTimestamp={startTimestamp}
   endTimestamp={endTimestamp}
   query="trace.id: 18fabada9384abd4"
+/>
+```
+
+### Filters
+
+The component also has a `filters` prop that accepts valid es-query `filters`. This example would specifiy that we want the `message` field to exist:
+
+```tsx
+<LogStream
+  startTimestamp={startTimestamp}
+  endTimestamp={endTimestamp}
+  filters={[
+    {
+      query: {
+        exists: {
+          field: 'message',
+        },
+      },
+      meta: {
+        alias: null,
+        disabled: false,
+        negate: false,
+      },
+    }]
+  }
 />
 ```
 
@@ -321,28 +430,37 @@ The infra plugin has the concept of a "source configuration", a collection of se
 The `<LogStream />` component will use the `"default"` source configuration. If you want to use your own configuration, you need to first create it when you initialize your plugin, and then specify it in the `<LogStream />` component with the `sourceId` prop.
 
 ```tsx
-//  Your `plugin/init.ts`
+//  Your `server/plugin.ts`
 class MyPlugin {
   // ...
   setup(core, plugins) {
     plugins.infra.defineInternalSourceConfiguration(
       'my_source',  // ID for your source configuration
       {
-        logAlias: 'some-index-*',  // Optional. what ES index to query.
+        name: 'some-name',
+        description: 'some description',
+        logIndices: { // Also accepts an `index_pattern` type with `indexPatternId`
+          type: 'index_name',
+          indexName: 'some-index',
+        },
         logColumns: [
-          { timestampColumn: { id: '...uuid4' },                   // The `@timestamp` column.
-          { fieldColumn: { id: '...uuid4', field: 'some_field' }}, // Any column(s) you want.
-          { messageColumn: { id: '...uuid' }}                      // The `message` column.
+          { timestampColumn: { id: '...uuid4' },                   // The `@timestamp` column. `id` is an arbitrary string identifier.
+          { fieldColumn: { id: '...uuid4', field: 'some_field' }}, // Any column(s) you want. `id` is an arbitrary string identifier.
+          { messageColumn: { id: '...uuid' }}                      // The `message` column. `id` is an arbitrary string identifier.
         ]
       }
     );
   }
 }
 
-// Somewhere else on your code
+// Somewhere else in your client-side code
 <LogStream
   sourceId="my_source"
   startTimestamp={...}
   endTimestamp={...}
 />
 ```
+
+### Setting component height
+
+It's possible to pass a `height` prop, e.g. `60vh` or `300px`, to specify how much vertical space the component should consume.

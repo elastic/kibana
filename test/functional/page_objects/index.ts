@@ -1,57 +1,59 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { CommonPageProvider } from './common_page';
-import { ConsolePageProvider } from './console_page';
-import { ContextPageProvider } from './context_page';
-import { DashboardPageProvider } from './dashboard_page';
-import { DiscoverPageProvider } from './discover_page';
-import { ErrorPageProvider } from './error_page';
-import { HeaderPageProvider } from './header_page';
-import { HomePageProvider } from './home_page';
-import { NewsfeedPageProvider } from './newsfeed_page';
-import { SettingsPageProvider } from './settings_page';
-import { SharePageProvider } from './share_page';
-import { LoginPageProvider } from './login_page';
-import { TimePickerProvider } from './time_picker';
-import { TimelionPageProvider } from './timelion_page';
-import { VisualBuilderPageProvider } from './visual_builder_page';
-import { VisualizePageProvider } from './visualize_page';
-import { VisualizeEditorPageProvider } from './visualize_editor_page';
-import { VisualizeChartPageProvider } from './visualize_chart_page';
-import { TileMapPageProvider } from './tile_map_page';
-import { TagCloudPageProvider } from './tag_cloud_page';
-import { VegaChartPageProvider } from './vega_chart_page';
-import { SavedObjectsPageProvider } from './management/saved_objects_page';
-import { LegacyDataTableVisProvider } from './legacy/data_table_vis';
+import { CommonPageObject } from './common_page';
+import { ConsolePageObject } from './console_page';
+import { ContextPageObject } from './context_page';
+import { DashboardPageObject } from './dashboard_page';
+import { DiscoverPageObject } from './discover_page';
+import { ErrorPageObject } from './error_page';
+import { HeaderPageObject } from './header_page';
+import { HomePageObject } from './home_page';
+import { NewsfeedPageObject } from './newsfeed_page';
+import { SettingsPageObject } from './settings_page';
+import { SharePageObject } from './share_page';
+import { LoginPageObject } from './login_page';
+import { TimePickerPageObject } from './time_picker';
+import { TimelionPageObject } from './timelion_page';
+import { VisualBuilderPageObject } from './visual_builder_page';
+import { VisualizePageObject } from './visualize_page';
+import { VisualizeEditorPageObject } from './visualize_editor_page';
+import { VisualizeChartPageObject } from './visualize_chart_page';
+import { TimeToVisualizePageObject } from './time_to_visualize_page';
+import { TagCloudPageObject } from './tag_cloud_page';
+import { VegaChartPageObject } from './vega_chart_page';
+import { SavedObjectsPageObject } from './management/saved_objects_page';
+import { LegacyDataTableVisPageObject } from './legacy/data_table_vis';
+import { IndexPatternFieldEditorPageObject } from './management/indexpattern_field_editor_page';
 
 export const pageObjects = {
-  common: CommonPageProvider,
-  console: ConsolePageProvider,
-  context: ContextPageProvider,
-  dashboard: DashboardPageProvider,
-  discover: DiscoverPageProvider,
-  error: ErrorPageProvider,
-  header: HeaderPageProvider,
-  home: HomePageProvider,
-  newsfeed: NewsfeedPageProvider,
-  settings: SettingsPageProvider,
-  share: SharePageProvider,
-  legacyDataTableVis: LegacyDataTableVisProvider,
-  login: LoginPageProvider,
-  timelion: TimelionPageProvider,
-  timePicker: TimePickerProvider,
-  visualBuilder: VisualBuilderPageProvider,
-  visualize: VisualizePageProvider,
-  visEditor: VisualizeEditorPageProvider,
-  visChart: VisualizeChartPageProvider,
-  tileMap: TileMapPageProvider,
-  tagCloud: TagCloudPageProvider,
-  vegaChart: VegaChartPageProvider,
-  savedObjects: SavedObjectsPageProvider,
+  common: CommonPageObject,
+  console: ConsolePageObject,
+  context: ContextPageObject,
+  dashboard: DashboardPageObject,
+  discover: DiscoverPageObject,
+  error: ErrorPageObject,
+  header: HeaderPageObject,
+  home: HomePageObject,
+  newsfeed: NewsfeedPageObject,
+  settings: SettingsPageObject,
+  share: SharePageObject,
+  legacyDataTableVis: LegacyDataTableVisPageObject,
+  login: LoginPageObject,
+  timelion: TimelionPageObject,
+  timePicker: TimePickerPageObject,
+  visualBuilder: VisualBuilderPageObject,
+  visualize: VisualizePageObject,
+  visEditor: VisualizeEditorPageObject,
+  visChart: VisualizeChartPageObject,
+  timeToVisualize: TimeToVisualizePageObject,
+  tagCloud: TagCloudPageObject,
+  vegaChart: VegaChartPageObject,
+  savedObjects: SavedObjectsPageObject,
+  indexPatternFieldEditorObjects: IndexPatternFieldEditorPageObject,
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo } from 'react';
@@ -10,7 +11,6 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../common/environment_filter_values';
-import { callApmApi } from '../services/rest/createCallApmApi';
 
 function getEnvironmentOptions(environments: string[]) {
   const environmentOptions = environments
@@ -23,6 +23,8 @@ function getEnvironmentOptions(environments: string[]) {
   return [ENVIRONMENT_ALL, ...environmentOptions];
 }
 
+const INITIAL_DATA = { environments: [] };
+
 export function useEnvironmentsFetcher({
   serviceName,
   start,
@@ -32,25 +34,28 @@ export function useEnvironmentsFetcher({
   start?: string;
   end?: string;
 }) {
-  const { data: environments = [], status = 'loading' } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/ui_filters/environments',
-        params: {
-          query: {
-            start,
-            end,
-            serviceName,
+  const { data = INITIAL_DATA, status = 'loading' } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi({
+          endpoint: 'GET /internal/apm/environments',
+          params: {
+            query: {
+              start,
+              end,
+              serviceName,
+            },
           },
-        },
-      });
-    }
-  }, [start, end, serviceName]);
-
-  const environmentOptions = useMemo(
-    () => getEnvironmentOptions(environments),
-    [environments]
+        });
+      }
+    },
+    [start, end, serviceName]
   );
 
-  return { environments, status, environmentOptions };
+  const environmentOptions = useMemo(
+    () => getEnvironmentOptions(data.environments),
+    [data?.environments]
+  );
+
+  return { environments: data.environments, status, environmentOptions };
 }

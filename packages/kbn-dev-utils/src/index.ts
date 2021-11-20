@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export * from '@kbn/utils';
@@ -23,7 +23,6 @@ export {
   KBN_P12_PATH,
   KBN_P12_PASSWORD,
 } from './certs';
-export * from './kbn_client';
 export * from './run';
 export * from './axios';
 export * from './stdio';
@@ -32,3 +31,5 @@ export * from './plugin_list';
 export * from './plugins';
 export * from './streams';
 export * from './babel';
+export * from './extract';
+export * from './vscode_config';

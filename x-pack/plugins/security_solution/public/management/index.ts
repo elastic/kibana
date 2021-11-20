@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreStart } from 'kibana/public';
 import { Reducer, CombinedState } from 'redux';
-import { ManagementRoutes } from './routes';
+import { routes } from './routes';
 import { StartPlugins } from '../types';
 import { SecuritySubPluginWithStore } from '../app/types';
 import { managementReducer } from './store/reducer';
@@ -38,10 +39,15 @@ export class Management {
     plugins: StartPlugins
   ): SecuritySubPluginWithStore<'management', ManagementState> {
     return {
-      SubPluginRoutes: ManagementRoutes,
+      routes,
       store: {
         initialState: {
-          management: undefined,
+          /**
+           * Cast the state to ManagementState for compatibility with
+           * the subplugin architecture (which expects initialize state.)
+           * but you do not need it because this plugin is doing it through its middleware
+           */
+          management: {} as ManagementState,
         },
         /**
          * Cast the ImmutableReducer to a regular reducer for compatibility with

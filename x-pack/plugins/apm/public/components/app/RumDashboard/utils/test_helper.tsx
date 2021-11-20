@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,7 +16,7 @@ import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_rea
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { UrlParamsProvider } from '../../../../context/url_params_context/url_params_context';
 
-export const core = ({
+export const core = {
   http: {
     basePath: {
       prepend: jest.fn(),
@@ -25,7 +26,7 @@ export const core = ({
     get: (key: string) => true,
     get$: (key: string) => of(true),
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
 export const render = (
   component: React.ReactNode,

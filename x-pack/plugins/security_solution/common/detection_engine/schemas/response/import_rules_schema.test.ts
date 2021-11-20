@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -9,8 +10,7 @@ import { left, Either } from 'fp-ts/lib/Either';
 import { ImportRulesSchema, importRulesSchema } from './import_rules_schema';
 import { ErrorSchema } from './error_schema';
 import { Errors } from 'io-ts';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('import_rules_schema', () => {
   test('it should validate an empty import response with no errors', () => {

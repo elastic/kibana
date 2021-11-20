@@ -1,49 +1,66 @@
-[{
-  "cluster_uuid": "__standalone_cluster__",
-  "license": {},
-  "elasticsearch": {
-    "cluster_stats": {
-      "indices": {},
-      "nodes": {
-        "count": {},
-        "jvm": {}
+[
+  {
+    "cluster_uuid": "__standalone_cluster__",
+    "license": {},
+    "elasticsearch": {
+      "cluster_stats": {
+        "indices": {
+          "docs": {},
+          "shards": {},
+          "store": {}
+        },
+        "nodes": {
+          "count": {
+            "total": {}
+          },
+          "fs": {},
+          "jvm": {
+            "mem": {}
+          }
+        }
+      },
+      "logs": {
+        "enabled": false,
+        "reason": {
+          "clusterExists": false,
+          "indexPatternExists": false,
+          "indexPatternInTimeRangeExists": false,
+          "typeExistsAtAnyTime": false,
+          "usingStructuredLogs": false,
+          "nodeExists": null,
+          "indexExists": null,
+          "typeExists": false
+        },
+        "types": []
       }
     },
-    "logs": {
-      "enabled": false,
-      "reason": {
-        "clusterExists": false,
-        "indexPatternExists": false,
-        "indexPatternInTimeRangeExists": false,
-        "typeExistsAtAnyTime": false,
-        "usingStructuredLogs": false,
-        "nodeExists": null,
-        "indexExists": null,
-        "typeExists": false
-      },
-      "types": []
-    }
-  },
-  "logstash": {},
-  "kibana": {},
-  "beats": {
-    "totalEvents": 348,
-    "bytesSent": 319913,
+    "logstash": {},
+    "kibana": {},
     "beats": {
-      "total": 1,
-      "types": [{
-        "type": "Packetbeat",
-        "count": 1
-      }]
-    }
-  },
-  "apm": {
-    "totalEvents": 0,
-    "memRss": 0,
-    "memTotal": 0,
-    "apms": {
-      "total": 0
-    }
-  },
-  "isPrimary": false
-}]
+      "totalEvents": 348,
+      "bytesSent": 319913,
+      "beats": {
+        "total": 1,
+        "types": [
+          {
+            "type": "Packetbeat",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "apm": {
+      "totalEvents": 0,
+      "memRss": 0,
+      "apms": {
+        "total": 0
+      },
+      "config": {
+        "container": false
+      },
+      "versions": []
+    },
+    "isPrimary": false,
+    "isCcrEnabled": false
+  }
+]

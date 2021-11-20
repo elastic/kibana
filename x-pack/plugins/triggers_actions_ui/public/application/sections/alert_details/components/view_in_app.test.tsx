@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { mount, ReactWrapper } from 'enzyme';
@@ -21,7 +23,7 @@ describe('view in app', () => {
   describe('link to the app that created the alert', () => {
     it('is disabled when there is no navigation', async () => {
       const alert = mockAlert();
-      const { alerts } = useKibana().services;
+      const { alerting } = useKibana().services;
       let component: ReactWrapper;
       await act(async () => {
         // use mount as we need useEffect to run
@@ -32,7 +34,7 @@ describe('view in app', () => {
         expect(component!.find('button').prop('disabled')).toBe(true);
         expect(component!.text()).toBe('View in app');
 
-        expect(alerts!.getNavigation).toBeCalledWith(alert.id);
+        expect(alerting!.getNavigation).toBeCalledWith(alert.id);
       });
     });
 

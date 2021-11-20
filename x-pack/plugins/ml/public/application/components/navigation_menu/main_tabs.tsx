@@ -1,23 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useEffect } from 'react';
 
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TabId } from './navigation_menu';
-import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
-import { MlUrlGeneratorState } from '../../../../common/types/ml_url_generator';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
 import { ML_APP_NAME } from '../../../../common/constants/app';
+import './main_tabs.scss';
 
 export interface Tab {
   id: TabId;
   name: any;
   disabled: boolean;
+  betaTag?: JSX.Element;
 }
 
 interface Props {
@@ -49,6 +52,13 @@ function getTabs(disableLinks: boolean): Tab[] {
       disabled: disableLinks,
     },
     {
+      id: 'trained_models',
+      name: i18n.translate('xpack.ml.navMenu.trainedModelsTabLinkText', {
+        defaultMessage: 'Model Management',
+      }),
+      disabled: disableLinks,
+    },
+    {
       id: 'datavisualizer',
       name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
         defaultMessage: 'Data Visualizer',
@@ -66,7 +76,7 @@ function getTabs(disableLinks: boolean): Tab[] {
 }
 interface TabData {
   testSubject: string;
-  pathId?: MlUrlGeneratorState['page'];
+  pathId?: MlLocatorParams['page'];
   name: string;
 }
 
@@ -89,6 +99,12 @@ const TAB_DATA: Record<TabId, TabData> = {
     testSubject: 'mlMainTab dataFrameAnalytics',
     name: i18n.translate('xpack.ml.dataFrameAnalyticsTabLabel', {
       defaultMessage: 'Data Frame Analytics',
+    }),
+  },
+  trained_models: {
+    testSubject: 'mlMainTab modelManagement',
+    name: i18n.translate('xpack.ml.trainedModelsTabLabel', {
+      defaultMessage: 'Trained Models',
     }),
   },
   datavisualizer: {
@@ -124,10 +140,10 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   }
 
   const tabs = getTabs(disableLinks);
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
 
-  const redirectToTab = async (defaultPathId: MlUrlGeneratorState['page']) => {
+  const redirectToTab = async (defaultPathId: MlLocatorParams['page']) => {
     const pageState =
       globalState?.refreshInterval !== undefined
         ? {
@@ -138,7 +154,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
         : undefined;
     // TODO - Fix ts so passing pageState won't default to MlGenericUrlState when pageState is passed in
     // @ts-ignore
-    const path = await mlUrlGenerator.createUrl({
+    const path = await mlLocator.getUrl({
       page: defaultPathId,
       // only retain the refreshInterval part of globalState
       // appState will not be considered.
@@ -153,38 +169,26 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   }, [selectedTabId]);
 
   return (
-    <EuiTabs display="condensed">
-      {tabs.map((tab: Tab) => {
+    <EuiPageHeader
+      paddingSize="m"
+      className="mlMainTabs"
+      bottomBorder
+      tabs={tabs.map((tab: Tab) => {
         const { id, disabled } = tab;
         const testSubject = TAB_DATA[id].testSubject;
-        const defaultPathId = (TAB_DATA[id].pathId || id) as MlUrlGeneratorState['page'];
+        const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
 
-        return disabled ? (
-          <EuiTab
-            key={`${id}-key`}
-            className={'mlNavigationMenu__mainTab'}
-            disabled={true}
-            data-test-subj={testSubject}
-          >
-            {tab.name}
-          </EuiTab>
-        ) : (
-          <div className="euiTab" key={`div-${id}-key`}>
-            <EuiTab
-              data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
-              className={'mlNavigationMenu__mainTab'}
-              onClick={() => {
-                onSelectedTabChanged(id);
-                redirectToTab(defaultPathId);
-              }}
-              isSelected={id === selectedTabId}
-              key={`tab-${id}-key`}
-            >
-              {tab.name}
-            </EuiTab>
-          </div>
-        );
+        return {
+          label: tab.name,
+          disabled,
+          onClick: () => {
+            onSelectedTabChanged(id);
+            redirectToTab(defaultPathId);
+          },
+          'data-test-subj': testSubject + (id === selectedTabId ? ' selected' : ''),
+          isSelected: id === selectedTabId,
+        };
       })}
-    </EuiTabs>
+    />
   );
 };

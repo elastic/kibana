@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
-
+import 'react-ace';
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
 import 'brace/mode/json';
@@ -17,8 +17,8 @@ import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
+  EuiColorPicker,
   EuiScreenReaderOnly,
-  EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
@@ -38,13 +38,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
-import {
-  UiSettingsType,
-  ImageValidation,
-  StringValidationRegex,
-  DocLinksStart,
-  ToastsStart,
-} from '../../../../../../core/public';
+import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
+import { EuiCodeEditor } from '../../../../../es_ui_shared/public';
 
 interface FieldProps {
   setting: FieldSetting;
@@ -165,7 +160,7 @@ export class Field extends PureComponent<FieldProps> {
     this.onFieldChange(e.target.value);
 
   onFieldChange = (targetValue: any) => {
-    const { type, validation, value, defVal } = this.props.setting;
+    const { type, value, defVal } = this.props.setting;
     let newUnsavedValue;
 
     switch (type) {
@@ -183,20 +178,8 @@ export class Field extends PureComponent<FieldProps> {
         newUnsavedValue = targetValue;
     }
 
-    let errorParams = {};
-
-    if ((validation as StringValidationRegex)?.regex) {
-      if (!(validation as StringValidationRegex).regex!.test(newUnsavedValue.toString())) {
-        errorParams = {
-          error: (validation as StringValidationRegex).message,
-          isInvalid: true,
-        };
-      }
-    }
-
     this.handleChange({
       value: newUnsavedValue,
-      ...errorParams,
     });
   };
 
@@ -211,30 +194,15 @@ export class Field extends PureComponent<FieldProps> {
     }
 
     const file = files[0];
-    const { maxSize } = this.props.setting.validation as ImageValidation;
     try {
       let base64Image = '';
       if (file instanceof File) {
         base64Image = (await this.getImageAsBase64(file)) as string;
       }
 
-      let errorParams = {};
-      const isInvalid = !!(maxSize?.length && base64Image.length > maxSize.length);
-      if (isInvalid) {
-        errorParams = {
-          isInvalid,
-          error: i18n.translate('advancedSettings.field.imageTooLargeErrorMessage', {
-            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
-            values: {
-              maxSizeDescription: maxSize.description,
-            },
-          }),
-        };
-      }
       this.handleChange({
         changeImage: true,
         value: base64Image,
-        ...errorParams,
       });
     } catch (err) {
       this.props.toasts.addDanger(
@@ -325,6 +293,7 @@ export class Field extends PureComponent<FieldProps> {
           <div data-test-subj={`advancedSetting-editField-${name}`}>
             <EuiCodeEditor
               {...a11yProps}
+              name={`advancedSetting-editField-${name}-editor`}
               mode={type}
               theme="textmate"
               value={currentValue}
@@ -389,6 +358,17 @@ export class Field extends PureComponent<FieldProps> {
             isLoading={loading}
             disabled={loading || isOverridden || !enableSaving}
             fullWidth
+            data-test-subj={`advancedSetting-editField-${name}`}
+          />
+        );
+      case 'color':
+        return (
+          <EuiColorPicker
+            {...a11yProps}
+            color={currentValue}
+            onChange={this.onFieldChange}
+            disabled={loading || isOverridden || !enableSaving}
+            format="hex"
             data-test-subj={`advancedSetting-editField-${name}`}
           />
         );

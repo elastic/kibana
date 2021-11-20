@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { API_BASE_PATH } from './constants';
@@ -28,8 +29,6 @@ export const registerHelpers = ({ supertest }) => {
 
   const forceMerge = (index, args) => executeActionOnIndices(index, 'forcemerge', args);
 
-  const freeze = (index) => executeActionOnIndices(index, 'freeze');
-
   const unfreeze = (index) => executeActionOnIndices(index, 'unfreeze');
 
   const clearCache = (index) => executeActionOnIndices(index, 'clear_cache');
@@ -46,7 +45,6 @@ export const registerHelpers = ({ supertest }) => {
     flushIndex,
     refreshIndex,
     forceMerge,
-    freeze,
     unfreeze,
     list,
     reload,

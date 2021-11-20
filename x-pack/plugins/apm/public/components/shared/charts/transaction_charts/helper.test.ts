@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getResponseTimeTickFormatter, getMaxY } from './helper';
@@ -35,14 +36,14 @@ describe('transaction chart helper', () => {
     });
 
     it('returns zero for invalid y coordinate', () => {
-      const timeSeries = ([
+      const timeSeries = [
         { data: [{ x: 1 }, { x: 2 }, { x: 3, y: -1 }] },
-      ] as unknown) as Array<TimeSeries<Coordinate>>;
+      ] as unknown as Array<TimeSeries<Coordinate>>;
       expect(getMaxY(timeSeries)).toEqual(0);
     });
 
     it('returns the max y coordinate', () => {
-      const timeSeries = ([
+      const timeSeries = [
         {
           data: [
             { x: 1, y: 10 },
@@ -50,7 +51,7 @@ describe('transaction chart helper', () => {
             { x: 3, y: 1 },
           ],
         },
-      ] as unknown) as Array<TimeSeries<Coordinate>>;
+      ] as unknown as Array<TimeSeries<Coordinate>>;
       expect(getMaxY(timeSeries)).toEqual(10);
     });
   });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -63,6 +63,26 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.message).to.be(
         '[request body.refresh_fields]: expected value of type [boolean] but got [number]'
       );
+    });
+
+    it('returns an error when unknown runtime field type', async () => {
+      const title = `basic_index*`;
+      const response = await supertest.post('/api/index_patterns/index_pattern').send({
+        override: true,
+        index_pattern: {
+          title,
+          runtimeFieldMap: {
+            runtimeFoo: {
+              type: 'wrong-type',
+              script: {
+                source: 'emit(doc["foo"].value)',
+              },
+            },
+          },
+        },
+      });
+
+      expect(response.status).to.be(400);
     });
   });
 }

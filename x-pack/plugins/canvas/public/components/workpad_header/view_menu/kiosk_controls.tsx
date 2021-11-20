@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
+  EuiButtonIcon,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiTitle,
+  EuiToolTip,
   EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
@@ -19,17 +22,37 @@ import {
   EuiFlexGroup,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { timeDuration } from '../../../lib/time_duration';
+import { UnitStrings } from '../../../../i18n';
 import { CustomInterval } from './custom_interval';
 
-import { ComponentStrings, UnitStrings } from '../../../../i18n';
-const { WorkpadHeaderKioskControls: strings } = ComponentStrings;
 const { time: timeStrings } = UnitStrings;
 const { getSecondsText, getMinutesText } = timeStrings;
 
+const strings = {
+  getCycleFormLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleFormLabel', {
+      defaultMessage: 'Change cycling interval',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
+      defaultMessage: 'Cycle fullscreen pages',
+    }),
+  getAutoplayListDurationManualText: () =>
+    i18n.translate('xpack.canvas.workpadHeaderKioskControl.autoplayListDurationManual', {
+      defaultMessage: 'Manually',
+    }),
+  getDisableTooltip: () =>
+    i18n.translate('xpack.canvas.workpadHeaderKioskControl.disableTooltip', {
+      defaultMessage: 'Disable auto-play',
+    }),
+};
+
 interface Props {
   autoplayInterval: number;
-  onSetInterval: (interval: number | undefined) => void;
+  onSetInterval: (interval: number) => void;
 }
 
 interface ListGroupProps {
@@ -52,6 +75,10 @@ const ListGroup = ({ children, ...rest }: ListGroupProps) => (
 const generateId = htmlIdGenerator();
 
 export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
+  const disableAutoplay = useCallback(() => {
+    onSetInterval(0);
+  }, [onSetInterval]);
+
   const RefreshItem = ({ duration, label, descriptionId }: RefreshItemProps) => (
     <li>
       <EuiLink onClick={() => onSetInterval(duration)} aria-describedby={descriptionId}>
@@ -70,12 +97,37 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
       className="canvasViewMenu__kioskSettings"
     >
       <EuiFlexItem grow={false}>
-        <EuiDescriptionList textStyle="reverse">
-          <EuiDescriptionListTitle>{strings.getTitle()}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            {timeStrings.getCycleTimeText(interval.length, interval.format)}
-          </EuiDescriptionListDescription>
-        </EuiDescriptionList>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiDescriptionList textStyle="reverse">
+              <EuiDescriptionListTitle>{strings.getTitle()}</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {autoplayInterval > 0 ? (
+                  <>{timeStrings.getCycleTimeText(interval.length, interval.format)}</>
+                ) : (
+                  <>{strings.getAutoplayListDurationManualText()}</>
+                )}
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
+              {autoplayInterval > 0 ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip position="bottom" content={strings.getDisableTooltip()}>
+                    <EuiButtonIcon
+                      iconType="cross"
+                      onClick={disableAutoplay}
+                      aria-label={strings.getDisableTooltip()}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiHorizontalRule margin="m" />
         <EuiTitle size="xxxs" id={intervalTitleId}>
           <p>{strings.getCycleFormLabel()}</p>

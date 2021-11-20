@@ -11,18 +11,24 @@
     "visualizations",
     "embeddable",
     "dashboard",
-    "uiActions"
+    "presentationUtil"
   ],
   "optionalPlugins": [
     "home",
     "share",
-    "savedObjectsTaggingOss"
+    "savedObjectsTaggingOss",
+    "usageCollection",
+    "spaces"
   ],
   "requiredBundles": [
     "kibanaUtils",
     "kibanaReact",
     "home",
-    "presentationUtil",
     "discover"
-  ]
+  ],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "Contains the visualize application which includes the listing page and the app frame, which will load the visualization's editor."
 }

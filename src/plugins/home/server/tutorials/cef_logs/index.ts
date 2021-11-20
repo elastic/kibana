@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,12 +24,12 @@ export function cefLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'cefLogs',
     name: i18n.translate('home.tutorials.cefLogs.nameTitle', {
-      defaultMessage: 'CEF logs',
+      defaultMessage: 'CEF Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.cefLogs.shortDescription', {
-      defaultMessage: 'Collect Common Event Format (CEF) log data over syslog.',
+      defaultMessage: 'Collect and parse logs from Common Event Format (CEF) with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cefLogs.longDescription', {
       defaultMessage:
@@ -63,5 +63,6 @@ export function cefLogsSpecProvider(context: TutorialContext): TutorialSchema {
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['network', 'security'],
   };
 }

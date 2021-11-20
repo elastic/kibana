@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
@@ -34,7 +35,9 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       processors?: string;
       onFailureProcessors?: string;
     }) {
-      await testSubjects.click('createPipelineButton');
+      await testSubjects.click('emptyStateCreatePipelineDropdown');
+      await testSubjects.click('emptyStateCreatePipelineButton');
+
       await testSubjects.exists('pipelineForm');
 
       await testSubjects.setValue('nameField > input', name);
@@ -67,6 +70,35 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       };
 
       return await Promise.all(pipelines.map((pipeline) => getPipelineName(pipeline)));
+    },
+
+    async navigateToCreateFromCsv() {
+      await testSubjects.click('emptyStateCreatePipelineDropdown');
+      await testSubjects.click('emptyStatecreatePipelineFromCsvButton');
+
+      await testSubjects.exists('createFromCsvInstructions');
+    },
+
+    async createPipelineFromCsv({ name }: { name: string }) {
+      await testSubjects.click('processFileButton');
+
+      await testSubjects.exists('pipelineMappingsJSONEditor');
+
+      await testSubjects.exists('copyToClipboard');
+      await testSubjects.exists('downloadJson');
+
+      await testSubjects.click('continueToCreate');
+
+      await testSubjects.exists('pipelineForm');
+
+      await testSubjects.setValue('nameField > input', name);
+      await testSubjects.click('submitButton');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    async closePipelineDetailsFlyout() {
+      await testSubjects.click('euiFlyoutCloseButton');
     },
   };
 }

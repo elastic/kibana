@@ -6,15 +6,17 @@
   "false_positives": [
     "Some networks may utilize these protocols but usage that is unfamiliar to local network administrators can be unexpected and suspicious. Because this port is in the ephemeral range, this rule may false under certain conditions, such as when an application server with a public IP address replies to a client which has used a UDP port in the range by coincidence. This is uncommon but such servers can be excluded."
   ],
+  "from": "now-9m",
   "index": [
+    "auditbeat-*",
     "filebeat-*",
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "IPSEC NAT Traversal Port Activity",
-  "query": "event.category:(network or network_traffic) and network.transport:udp and destination.port:4500",
+  "query": "event.category:(network or network_traffic) and network.transport:udp and destination.port:4500\n",
   "risk_score": 21,
   "rule_id": "a9cb3641-ff4b-4cdc-a063-b4b8d02a67c7",
   "severity": "low",
@@ -23,7 +25,8 @@
     "Host",
     "Network",
     "Threat Detection",
-    "Command and Control"
+    "Command and Control",
+    "Host"
   ],
   "threat": [
     {
@@ -36,6 +39,7 @@
       "technique": []
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 8
 }

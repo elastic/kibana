@@ -1,20 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+jest.mock('../../../../shared/layout', () => ({
+  generateNavLink: jest.fn(({ to }) => ({ href: to })),
+}));
 
-import { SideNavLink } from '../../../../shared/layout';
+import { mockUseRouteMatch } from '../../../../__mocks__/react_router';
 
-import { SettingsSubNav } from './settings_sub_nav';
+import { useSettingsSubNav } from './settings_sub_nav';
 
-describe('SettingsSubNav', () => {
-  it('renders', () => {
-    const wrapper = shallow(<SettingsSubNav />);
+describe('useSettingsSubNav', () => {
+  it('returns an array of side nav items when on the /settings path', () => {
+    mockUseRouteMatch.mockReturnValueOnce(true);
 
-    expect(wrapper.find(SideNavLink)).toHaveLength(3);
+    expect(useSettingsSubNav()).toEqual([
+      {
+        id: 'settingsCustomize',
+        name: 'Customize',
+        href: '/settings/customize',
+      },
+      {
+        id: 'settingsConnectors',
+        name: 'Content source connectors',
+        href: '/settings/connectors',
+      },
+      {
+        id: 'settingsOAuth',
+        name: 'OAuth application',
+        href: '/settings/oauth',
+      },
+    ]);
+  });
+
+  it('returns undefined when not on the /settings path', () => {
+    mockUseRouteMatch.mockReturnValueOnce(false);
+
+    expect(useSettingsSubNav()).toEqual(undefined);
   });
 });

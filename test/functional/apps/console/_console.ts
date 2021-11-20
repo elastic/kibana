@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console']);
+  const toasts = getService('toasts');
 
   describe('console app', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -85,7 +86,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.dismissTutorial();
       expect(await PageObjects.console.hasAutocompleter()).to.be(false);
       await PageObjects.console.promptAutocomplete();
-      retry.waitFor('autocomplete to be visible', () => PageObjects.console.hasAutocompleter());
+      await retry.waitFor('autocomplete to be visible', () =>
+        PageObjects.console.hasAutocompleter()
+      );
+    });
+
+    describe('with a data URI in the load_from query', () => {
+      it('loads the data from the URI', async () => {
+        await PageObjects.common.navigateToApp('console', {
+          hash: '#/console?load_from=data:text/plain,BYUwNmD2Q',
+        });
+
+        await retry.try(async () => {
+          const actualRequest = await PageObjects.console.getRequest();
+          log.debug(actualRequest);
+          expect(actualRequest.trim()).to.eql('hello');
+        });
+      });
+
+      describe('with invalid data', () => {
+        it('shows a toast error', async () => {
+          await PageObjects.common.navigateToApp('console', {
+            hash: '#/console?load_from=data:text/plain,BYUwNmD2',
+          });
+
+          await retry.try(async () => {
+            expect(await toasts.getToastCount()).to.equal(1);
+          });
+        });
+      });
     });
   });
 }

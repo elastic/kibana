@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { merge, omit, chunk, isEmpty } from 'lodash';
 import uuid from 'uuid';
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { IEvent } from '../../../../plugins/event_log/server';
@@ -31,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     for (const namespace of [undefined, 'namespace-a']) {
@@ -159,14 +160,14 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     describe(`Index Lifecycle`, () => {
-      it('should query across indicies matching the Event Log index pattern', async () => {
-        await esArchiver.load('event_log_multiple_indicies');
+      it('should query across indices matching the Event Log data view', async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/event_log_multiple_indicies');
 
         const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
 
         const {
           body: { data, total },
-        } = await findEvents(undefined, id, {});
+        } = await findEventsByIds(undefined, [id], {}, [id]);
 
         expect(data.length).to.be(6);
         expect(total).to.be(6);
@@ -180,7 +181,52 @@ export default function ({ getService }: FtrProviderContext) {
           'test 2020-10-28T15:19:55.962Z',
         ]);
 
-        await esArchiver.unload('event_log_multiple_indicies');
+        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+      });
+    });
+
+    describe(`Legacy Ids`, () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/event_log_legacy_ids');
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_legacy_ids');
+      });
+      it('should support search event by ids and legacyIds', async () => {
+        const legacyId = `521f2511-5cd1-44fd-95df-e0df83e354d5`;
+        const id = `621f2511-5cd1-44fd-95df-e0df83e354d5`;
+
+        const {
+          body: { data, total },
+        } = await findEventsByIds(undefined, [id], {}, [legacyId]);
+
+        expect(data.length).to.be(5);
+        expect(total).to.be(5);
+
+        expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
+          'test 2020-10-28T15:19:55.913Z',
+          'test legacy 2020-10-28T15:19:55.913Z',
+          'test 2020-10-28T15:19:55.938Z',
+          'test legacy 2020-10-28T15:19:55.962Z',
+          'test 2020-10-28T15:19:55.962Z',
+        ]);
+      });
+
+      it('should search event only by ids if no legacyIds are provided', async () => {
+        const id = `621f2511-5cd1-44fd-95df-e0df83e354d5`;
+
+        const {
+          body: { data, total },
+        } = await findEventsByIds(undefined, [id], {});
+
+        expect(data.length).to.be(3);
+        expect(total).to.be(3);
+
+        expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
+          'test 2020-10-28T15:19:55.913Z',
+          'test 2020-10-28T15:19:55.938Z',
+          'test 2020-10-28T15:19:55.962Z',
+        ]);
       });
     });
   });
@@ -198,8 +244,35 @@ export default function ({ getService }: FtrProviderContext) {
             .map(([key, val]) => `${key}=${val}`)
             .join('&')}`
     }`;
+    await delay(1000); // wait for buffer to be written
     log.debug(`Finding Events for Saved Object with ${url}`);
     return await supertest.get(url).set('kbn-xsrf', 'foo').expect(200);
+  }
+
+  async function findEventsByIds(
+    namespace: string | undefined,
+    ids: string[],
+    query: Record<string, any> = {},
+    legacyIds: string[] = []
+  ) {
+    const urlPrefix = urlPrefixFromNamespace(namespace);
+    const url = `${urlPrefix}/api/event_log/event_log_test/_find${
+      isEmpty(query)
+        ? ''
+        : `?${Object.entries(query)
+            .map(([key, val]) => `${key}=${val}`)
+            .join('&')}`
+    }`;
+    await delay(1000); // wait for buffer to be written
+    log.debug(`Finding Events for Saved Object with ${url}`);
+    return await supertest
+      .post(url)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        ids,
+        legacyIds,
+      })
+      .expect(200);
   }
 
   function assertEventsFromApiMatchCreatedEvents(
@@ -211,7 +284,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(omit(foundEvent!.event ?? {}, 'start', 'end', 'duration')).to.eql(
           expectedEvents[index]!.event
         );
-        expect(omit(foundEvent!.kibana ?? {}, 'server_uuid')).to.eql(expectedEvents[index]!.kibana);
+        expect(omit(foundEvent!.kibana ?? {}, 'server_uuid', 'version')).to.eql(
+          expectedEvents[index]!.kibana
+        );
         expect(foundEvent!.message).to.eql(expectedEvents[index]!.message);
       });
     } catch (ex) {

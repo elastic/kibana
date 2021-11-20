@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IndexPatternMapping } from '../types';
@@ -13,6 +14,7 @@ export const mockIndexPatternIds: IndexPatternMapping[] = [
 
 export const mockAPMIndexPatternIds: IndexPatternMapping[] = [
   { title: 'apm-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
+  { title: 'traces-apm*,logs-apm*,metrics-apm*,apm-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
 ];
 
 export const mockSourceLayer = {
@@ -182,6 +184,11 @@ export const mockClientLayer = {
   joins: [],
 };
 
+const mockApmDataStreamClientLayer = {
+  ...mockClientLayer,
+  label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Client Point',
+};
+
 export const mockServerLayer = {
   sourceDescriptor: {
     id: 'uuid.v4()',
@@ -235,6 +242,11 @@ export const mockServerLayer = {
   visible: true,
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
+};
+
+const mockApmDataStreamServerLayer = {
+  ...mockServerLayer,
+  label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Server Point',
 };
 
 export const mockLineLayer = {
@@ -364,6 +376,10 @@ export const mockClientServerLineLayer = {
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
 };
+const mockApmDataStreamClientServerLineLayer = {
+  ...mockClientServerLineLayer,
+  label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Line',
+};
 
 export const mockLayerList = [
   {
@@ -420,6 +436,9 @@ export const mockLayerListMixed = [
   mockClientServerLineLayer,
   mockServerLayer,
   mockClientLayer,
+  mockApmDataStreamClientServerLineLayer,
+  mockApmDataStreamServerLayer,
+  mockApmDataStreamClientLayer,
 ];
 
 export const mockAPMIndexPattern: IndexPatternSavedObject = {
@@ -464,6 +483,15 @@ export const mockAPMTransactionIndexPattern: IndexPatternSavedObject = {
   _version: 'abc',
   attributes: {
     title: 'apm-*-transaction*',
+  },
+};
+
+export const mockAPMTracesDataStreamIndexPattern: IndexPatternSavedObject = {
+  id: 'traces-apm*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: 'traces-apm*',
   },
 };
 

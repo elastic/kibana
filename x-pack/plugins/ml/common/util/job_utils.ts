@@ -1,32 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { isEmpty, isEqual, each, pick } from 'lodash';
+import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // @ts-ignore
 import numeral from '@elastic/numeral';
-
 import { i18n } from '@kbn/i18n';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
-import { CombinedJob, CustomSettings, Datafeed, JobId, Job } from '../types/anomaly_detection_jobs';
+import { CombinedJob, CustomSettings, Datafeed, Job, JobId } from '../types/anomaly_detection_jobs';
 import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
-import {
-  getAggregationBucketsName,
-  getAggregations,
-  getDatafeedAggregations,
-} from './datafeed_utils';
+import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
+import { getFirstKeyInObject, isPopulatedObject } from './object_utils';
+import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
   valid: boolean;
@@ -49,22 +48,6 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: numb
   return freq;
 }
 
-export function hasRuntimeMappings(job: CombinedJob): boolean {
-  const hasDatafeed =
-    typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
-  if (hasDatafeed) {
-    const runtimeMappings =
-      typeof job.datafeed_config.runtime_mappings === 'object'
-        ? Object.keys(job.datafeed_config.runtime_mappings)
-        : undefined;
-
-    if (Array.isArray(runtimeMappings) && runtimeMappings.length > 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
 export function isTimeSeriesViewJob(job: CombinedJob): boolean {
   return getSingleMetricViewerJobErrorMessage(job) === undefined;
 }
@@ -76,6 +59,55 @@ export function isTimeSeriesViewDetector(job: CombinedJob, detectorIndex: number
     isSourceDataChartableForDetector(job, detectorIndex) ||
     isModelPlotChartableForDetector(job, detectorIndex)
   );
+}
+
+// Returns a flag to indicate whether the specified job is suitable for embedded map viewing.
+export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean {
+  let isMappable = false;
+  const { detectors } = job.analysis_config;
+  if (detectorIndex >= 0 && detectorIndex < detectors.length) {
+    const dtr = detectors[detectorIndex];
+    const functionName = dtr.function;
+    isMappable = functionName === ML_JOB_AGGREGATION.LAT_LONG;
+  }
+  return isMappable;
+}
+
+/**
+ * Validates that composite definition only have sources that are only terms and date_histogram
+ * if composite is defined.
+ * @param buckets
+ */
+export function hasValidComposite(buckets: estypes.AggregationsAggregationContainer) {
+  if (
+    isPopulatedObject(buckets, ['composite']) &&
+    isPopulatedObject(buckets.composite, ['sources']) &&
+    Array.isArray(buckets.composite.sources)
+  ) {
+    const sources = buckets.composite.sources;
+    return !sources.some((source) => {
+      const sourceName = getFirstKeyInObject(source);
+      if (sourceName !== undefined && isPopulatedObject(source[sourceName])) {
+        const sourceTypes = Object.keys(source[sourceName]);
+        return (
+          sourceTypes.length === 1 &&
+          sourceTypes[0] !== 'date_histogram' &&
+          sourceTypes[0] !== 'terms'
+        );
+      }
+      return false;
+    });
+  }
+  return true;
+}
+
+/**
+ * Validates if aggregation type is currently not supported
+ * e.g. any other type other than 'date_histogram' or 'aggregations'
+ * @param buckets
+ */
+export function isUnsupportedAggType(aggType: string) {
+  return aggType !== 'date_histogram' && aggType !== 'aggs' && aggType !== 'aggregations';
 }
 
 // Returns a flag to indicate whether the source data can be plotted in a time
@@ -98,39 +130,45 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       dtr.partition_field_name !== MLCATEGORY &&
       dtr.over_field_name !== MLCATEGORY;
 
-    // If the datafeed uses script fields, we can only plot the time series if
-    // model plot is enabled. Without model plot it will be very difficult or impossible
-    // to invert to a reverse search of the underlying metric data.
-    if (isSourceDataChartable === true && typeof job.datafeed_config?.script_fields === 'object') {
-      // Perform extra check to see if the detector is using a scripted field.
-      const scriptFields = Object.keys(job.datafeed_config.script_fields);
-      isSourceDataChartable =
-        scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
-        scriptFields.indexOf(dtr.by_field_name!) === -1 &&
-        scriptFields.indexOf(dtr.over_field_name!) === -1;
-    }
+    const hasDatafeed = isPopulatedObject(job.datafeed_config);
 
-    const hasDatafeed =
-      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
-    if (hasDatafeed) {
+    if (isSourceDataChartable && hasDatafeed) {
+      // Perform extra check to see if the detector is using a scripted field.
+      if (isPopulatedObject(job.datafeed_config.script_fields)) {
+        // If the datafeed uses script fields, we can only plot the time series if
+        // model plot is enabled. Without model plot it will be very difficult or impossible
+        // to invert to a reverse search of the underlying metric data.
+
+        const scriptFields = Object.keys(job.datafeed_config.script_fields);
+        return (
+          scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
+          scriptFields.indexOf(dtr.by_field_name!) === -1 &&
+          scriptFields.indexOf(dtr.over_field_name!) === -1
+        );
+      }
+
       // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);
-      if (aggs !== undefined) {
-        const aggBucketsName = getAggregationBucketsName(aggs);
+      if (isPopulatedObject(aggs)) {
+        const aggBucketsName = getFirstKeyInObject(aggs);
         if (aggBucketsName !== undefined) {
-          // if fieldName is a aggregated field under nested terms using bucket_script
-          const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
+          if (Object.keys(aggs[aggBucketsName]).some(isUnsupportedAggType)) {
+            return false;
+          }
+          // if fieldName is an aggregated field under nested terms using bucket_script
+          const aggregations =
+            getAggregations<estypes.AggregationsAggregationContainer>(aggs[aggBucketsName]) ?? {};
           const foundField = findAggField(aggregations, dtr.field_name, false);
           if (foundField?.bucket_script !== undefined) {
             return false;
           }
+
+          // composite sources should be terms and date_histogram only for now
+          return hasValidComposite(aggregations);
         }
       }
 
-      // We also cannot plot the source data if they datafeed uses any field defined by runtime_mappings
-      if (hasRuntimeMappings(job)) {
-        return false;
-      }
+      return true;
     }
   }
 
@@ -170,11 +208,22 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 // Returns a reason to indicate why the job configuration is not supported
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
-  // if job has runtime mappings with no model plot
-  if (hasRuntimeMappings(job) && !job.model_plot_config?.enabled) {
-    return i18n.translate('xpack.ml.timeSeriesJob.jobWithRunTimeMessage', {
-      defaultMessage: 'the datafeed contains runtime fields and model plot is disabled',
-    });
+  // if job has at least one composite source that is not terms or date_histogram
+  const aggs = getDatafeedAggregations(job.datafeed_config);
+  if (isPopulatedObject(aggs)) {
+    const aggBucketsName = getFirstKeyInObject(aggs);
+    if (aggBucketsName !== undefined && aggs[aggBucketsName] !== undefined) {
+      // if fieldName is an aggregated field under nested terms using bucket_script
+
+      if (!hasValidComposite(aggs[aggBucketsName])) {
+        return i18n.translate(
+          'xpack.ml.timeSeriesJob.jobWithUnsupportedCompositeAggregationMessage',
+          {
+            defaultMessage: 'the datafeed contains unsupported composite sources',
+          }
+        );
+      }
+    }
   }
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which
@@ -186,7 +235,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
 
   if (isChartableTimeSeriesViewJob === false) {
     return i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
-      defaultMessage: 'not a viewable time series job',
+      defaultMessage: 'it is not a viewable time series job',
     });
   }
 }
@@ -319,7 +368,7 @@ export function mlFunctionToESAggregation(
   }
 
   if (functionName === ML_JOB_AGGREGATION.MIN || functionName === ML_JOB_AGGREGATION.MAX) {
-    return (functionName as unknown) as ES_AGGREGATION;
+    return functionName as unknown as ES_AGGREGATION;
   }
 
   if (functionName === ML_JOB_AGGREGATION.RARE) {
@@ -723,7 +772,7 @@ export function validateGroupNames(job: Job): ValidationResults {
  * @return {Duration} the parsed interval, or null if it does not represent a valid
  * time interval.
  */
-export function parseTimeIntervalForJob(value: string | undefined): Duration | null {
+export function parseTimeIntervalForJob(value: string | number | undefined): Duration | null {
   if (value === undefined) {
     return null;
   }
@@ -738,7 +787,7 @@ export function parseTimeIntervalForJob(value: string | undefined): Duration | n
 
 // Checks that the value for a field which represents a time interval,
 // such as a job bucket span or datafeed query delay, is valid.
-function isValidTimeInterval(value: string | undefined): boolean {
+function isValidTimeInterval(value: string | number | undefined): boolean {
   if (value === undefined) {
     return true;
   }
@@ -782,7 +831,7 @@ export function getLatestDataOrBucketTimestamp(
  * in the job wizards and so would be lost in a clone.
  */
 export function processCreatedBy(customSettings: CustomSettings) {
-  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by!)) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by as CREATED_BY_LABEL)) {
     delete customSettings.created_by;
   }
 }
@@ -791,4 +840,19 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
   return indexPatternName.includes(',')
     ? indexPatternName.split(',').map((i) => i.trim())
     : [indexPatternName];
+}
+
+/**
+ * Resolves the longest time interval from the list.
+ * @param timeIntervals Collection of the strings representing time intervals, e.g. ['15m', '1h', '2d']
+ */
+export function resolveMaxTimeInterval(timeIntervals: string[]): number | undefined {
+  const result = Math.max(
+    ...timeIntervals
+      .map((b) => parseInterval(b))
+      .filter(isDefined)
+      .map((v) => v.asSeconds())
+  );
+
+  return Number.isFinite(result) ? result : undefined;
 }

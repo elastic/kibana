@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
@@ -40,12 +42,12 @@ export function registerPipelineSaveRoute(
             username = user?.username;
           }
 
-          const client = context.logstash!.esClient;
+          const { client } = context.core.elasticsearch;
           const pipeline = Pipeline.fromDownstreamJSON(request.body, request.params.id, username);
 
-          await client.callAsCurrentUser('transport.request', {
-            path: '/_logstash/pipeline/' + encodeURIComponent(pipeline.id),
-            method: 'PUT',
+          await client.asCurrentUser.logstash.putPipeline({
+            id: pipeline.id,
+            // @ts-expect-error description is required
             body: pipeline.upstreamJSON,
           });
 

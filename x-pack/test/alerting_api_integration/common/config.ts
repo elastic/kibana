@@ -1,22 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
 import getPort from 'get-port';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
+import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
+  verificationMode?: 'full' | 'none' | 'certificate';
+  publicBaseUrl?: boolean;
+  preconfiguredAlertHistoryEsIndex?: boolean;
+  customizeLocalHostSsl?: boolean;
+  rejectUnauthorized?: boolean; // legacy
 }
 
 // test.not-enabled is specifically not enabled
@@ -24,8 +31,11 @@ const enabledActionTypes = [
   '.email',
   '.index',
   '.pagerduty',
+  '.swimlane',
   '.server-log',
   '.servicenow',
+  '.servicenow-sir',
+  '.servicenow-itom',
   '.jira',
   '.resilient',
   '.slack',
@@ -34,12 +44,23 @@ const enabledActionTypes = [
   'test.failing',
   'test.index-record',
   'test.noop',
+  'test.delayed',
   'test.rate-limit',
+  'test.no-attempts-rate-limit',
   'test.throw',
+  'test.excluded',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [], ssl = false } = options;
+  const {
+    license = 'trial',
+    disabledPlugins = [],
+    ssl = false,
+    verificationMode = 'full',
+    preconfiguredAlertHistoryEsIndex = false,
+    customizeLocalHostSsl = false,
+    rejectUnauthorized = true, // legacy
+  } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -59,12 +80,54 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     const proxyPort =
-      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6300) }));
+      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6299) }));
+
+    // Create URLs of identical simple webhook servers using TLS, but we'll
+    // create custom host settings for them below.
+    const tlsWebhookServers = await getTlsWebhookServerUrls(6300, 6399);
+
+    // If testing with proxy, also test proxyOnlyHosts for this proxy;
+    // all the actions are assumed to be acccessing localhost anyway.
+    // If not testing with proxy, set a bogus proxy up, and set the bypass
+    // flag for all our localhost actions to bypass it.  Currently,
+    // security_and_spaces uses enableActionsProxy: true, and spaces_only
+    // uses enableActionsProxy: false.
+    const proxyHosts = ['localhost', 'some.non.existent.com'];
     const actionsProxyUrl = options.enableActionsProxy
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
+          `--xpack.actions.proxyOnlyHosts=${JSON.stringify(proxyHosts)}`,
           '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
         ]
+      : [
+          `--xpack.actions.proxyUrl=http://elastic.co`,
+          `--xpack.actions.proxyBypassHosts=${JSON.stringify(proxyHosts)}`,
+        ];
+
+    // set up custom host settings for webhook ports; don't set one for noCustom
+    const customHostSettingsValue = [
+      {
+        url: tlsWebhookServers.rejectUnauthorizedFalse,
+        ssl: {
+          verificationMode: 'none',
+        },
+      },
+      {
+        url: tlsWebhookServers.rejectUnauthorizedTrue,
+        ssl: {
+          verificationMode: 'full',
+        },
+      },
+      {
+        url: tlsWebhookServers.caFile,
+        ssl: {
+          verificationMode: 'certificate',
+          certificateAuthoritiesFiles: [CA_CERT_PATH],
+        },
+      },
+    ];
+    const customHostSettings = customizeLocalHostSsl
+      ? [`--xpack.actions.customHostSettings=${JSON.stringify(customHostSettingsValue)}`]
       : [];
 
     return {
@@ -74,7 +137,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack Alerting API Integration Tests',
       },
-      esArchiver: xPackApiIntegrationTestsConfig.get('esArchiver'),
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
@@ -90,14 +152,27 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          '--server.publicBaseUrl=https://localhost:5601',
-          `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
+          ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
+          `--xpack.actions.allowedHosts=${JSON.stringify([
+            'localhost',
+            'some.non.existent.com',
+            'smtp.live.com',
+          ])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
-          '--xpack.alerts.invalidateApiKeysTask.interval="15s"',
+          '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
+          '--xpack.alerting.healthCheck.interval="1s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
+          `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
+          `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
-
+          ...customHostSettings,
           '--xpack.eventLog.logEntries=true',
+          '--xpack.task_manager.ephemeral_tasks.enabled=false',
+          `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
+            'actions:test.excluded',
+          ])}`,
+          `--xpack.actions.preconfiguredAlertHistoryEsIndex=${preconfiguredAlertHistoryEsIndex}`,
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {
               actionTypeId: '.slack',
@@ -138,8 +213,38 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 encrypted: 'this-is-also-ignored-and-also-required',
               },
             },
+            'custom.ssl.noCustom': {
+              actionTypeId: '.webhook',
+              name: `${tlsWebhookServers.noCustom}`,
+              config: {
+                url: tlsWebhookServers.noCustom,
+              },
+            },
+            'custom.ssl.rejectUnauthorizedFalse': {
+              actionTypeId: '.webhook',
+              name: `${tlsWebhookServers.rejectUnauthorizedFalse}`,
+              config: {
+                url: tlsWebhookServers.rejectUnauthorizedFalse,
+              },
+            },
+            'custom.ssl.rejectUnauthorizedTrue': {
+              actionTypeId: '.webhook',
+              name: `${tlsWebhookServers.rejectUnauthorizedTrue}`,
+              config: {
+                url: tlsWebhookServers.rejectUnauthorizedTrue,
+              },
+            },
+            'custom.ssl.caFile': {
+              actionTypeId: '.webhook',
+              name: `${tlsWebhookServers.caFile}`,
+              config: {
+                url: tlsWebhookServers.caFile,
+              },
+            },
           })}`,
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
           ...plugins.map(
             (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`

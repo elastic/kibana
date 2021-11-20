@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Client } from 'elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
+import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 export function createIndexDocRecordsStream(
   client: Client,
@@ -18,24 +20,43 @@ export function createIndexDocRecordsStream(
   useCreate: boolean = false
 ) {
   async function indexDocs(docs: any[]) {
-    const body: any[] = [];
     const operation = useCreate === true ? 'create' : 'index';
-    docs.forEach((doc) => {
-      stats.indexedDoc(doc.index);
-      body.push(
-        {
-          [operation]: {
-            _index: doc.index,
-            _id: doc.id,
-          },
-        },
-        doc.source
-      );
-    });
+    const ops = new WeakMap<any, any>();
+    const errors: string[] = [];
 
-    const resp = await client.bulk({ requestTimeout: 2 * 60 * 1000, body });
-    if (resp.errors) {
-      throw new Error(`Failed to index all documents: ${JSON.stringify(resp, null, 2)}`);
+    await client.helpers.bulk(
+      {
+        retries: 5,
+        datasource: docs.map((doc) => {
+          const body = doc.source;
+          ops.set(body, {
+            [operation]: {
+              _index: doc.index,
+              _id: doc.id,
+            },
+          });
+          return body;
+        }),
+        onDocument(doc) {
+          return ops.get(doc);
+        },
+        onDrop(dropped) {
+          const dj = JSON.stringify(dropped.document);
+          const ej = JSON.stringify(dropped.error);
+          errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
+        },
+      },
+      {
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
+
+    if (errors.length) {
+      throw new AggregateError(errors);
+    }
+
+    for (const doc of docs) {
+      stats.indexedDoc(doc.index);
     }
   }
 

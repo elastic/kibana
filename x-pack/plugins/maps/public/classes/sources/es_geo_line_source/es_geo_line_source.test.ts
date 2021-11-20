@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ESGeoLineSource } from './es_geo_line_source';
 import { DataRequest } from '../../util/data_request';
 
-describe('getSourceTooltipContent', () => {
+describe('getSourceStatus', () => {
   const geoLineSource = new ESGeoLineSource({
     indexPatternId: 'myindex',
     geoField: 'myGeoField',
@@ -19,7 +20,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: false,
         areEntitiesTrimmed: false,
         entityCount: 70,
@@ -27,9 +28,7 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 70,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceStatus(sourceDataRequest);
     expect(areResultsTrimmed).toBe(false);
     expect(tooltipContent).toBe('Found 70 tracks.');
   });
@@ -38,7 +37,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: true,
         areEntitiesTrimmed: true,
         entityCount: 1000,
@@ -46,18 +45,16 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 5000,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceStatus(sourceDataRequest);
     expect(areResultsTrimmed).toBe(true);
-    expect(tooltipContent).toBe('Results limited to first 1000 tracks of ~5000.');
+    expect(tooltipContent).toBe('Results limited to first 1,000 tracks of ~5,000.');
   });
 
   it('Should show results trimmed icon and message when tracks are trimmed', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: false,
         areEntitiesTrimmed: false,
         entityCount: 70,
@@ -65,9 +62,7 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 70,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceStatus(sourceDataRequest);
     expect(areResultsTrimmed).toBe(true);
     expect(tooltipContent).toBe('Found 70 tracks. 10 of 70 tracks are incomplete.');
   });
@@ -76,7 +71,7 @@ describe('getSourceTooltipContent', () => {
     const sourceDataRequest = new DataRequest({
       data: {},
       dataId: 'source',
-      dataMeta: {
+      dataRequestMeta: {
         areResultsTrimmed: true,
         areEntitiesTrimmed: true,
         entityCount: 1000,
@@ -84,12 +79,10 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 5000,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceStatus(sourceDataRequest);
     expect(areResultsTrimmed).toBe(true);
     expect(tooltipContent).toBe(
-      'Results limited to first 1000 tracks of ~5000. 10 of 1000 tracks are incomplete.'
+      'Results limited to first 1,000 tracks of ~5,000. 10 of 1,000 tracks are incomplete.'
     );
   });
 });

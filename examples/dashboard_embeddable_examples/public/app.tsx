@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -18,9 +18,10 @@ import {
   EuiSideNav,
 } from '@elastic/eui';
 import 'brace/mode/json';
-import { AppMountParameters } from '../../../src/core/public';
+import { AppMountParameters, IUiSettingsClient } from '../../../src/core/public';
 import { DashboardEmbeddableByValue } from './by_value/embeddable';
 import { DashboardStart } from '../../../src/plugins/dashboard/public';
+import { KibanaContextProvider } from '../../../src/plugins/kibana_react/public';
 
 interface PageDef {
   title: string;
@@ -55,10 +56,17 @@ const Nav = withRouter(({ history, pages }: NavProps) => {
 
 interface Props {
   basename: string;
-  DashboardContainerByValueRenderer: DashboardStart['DashboardContainerByValueRenderer'];
+  DashboardContainerByValueRenderer: ReturnType<
+    DashboardStart['getDashboardContainerByValueRenderer']
+  >;
+  uiSettings: IUiSettingsClient;
 }
 
-const DashboardEmbeddableExplorerApp = ({ basename, DashboardContainerByValueRenderer }: Props) => {
+const DashboardEmbeddableExplorerApp = ({
+  basename,
+  DashboardContainerByValueRenderer,
+  uiSettings,
+}: Props) => {
   const pages: PageDef[] = [
     {
       title: 'By value dashboard embeddable',
@@ -81,16 +89,18 @@ const DashboardEmbeddableExplorerApp = ({ basename, DashboardContainerByValueRen
   ));
 
   return (
-    <Router basename={basename}>
-      <EuiPage>
-        <EuiPageSideBar>
-          <Nav pages={pages} />
-        </EuiPageSideBar>
-        <EuiPageContent>
-          <EuiPageContentBody>{routes}</EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPage>
-    </Router>
+    <KibanaContextProvider services={{ uiSettings }}>
+      <Router basename={basename}>
+        <EuiPage>
+          <EuiPageSideBar>
+            <Nav pages={pages} />
+          </EuiPageSideBar>
+          <EuiPageContent>
+            <EuiPageContentBody>{routes}</EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPage>
+      </Router>
+    </KibanaContextProvider>
   );
 };
 

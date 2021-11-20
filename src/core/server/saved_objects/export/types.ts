@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { KibanaRequest } from '../../http';
@@ -15,6 +15,12 @@ export interface SavedObjectExportBaseOptions {
   request: KibanaRequest;
   /** flag to also include all related saved objects in the export stream. */
   includeReferencesDeep?: boolean;
+  /**
+   * Flag to also include namespace information in the export stream. By default, namespace information is not included in exported objects.
+   * This is only intended to be used internally during copy-to-space operations, and it is not exposed as an option for the external HTTP
+   * route for exports.
+   */
+  includeNamespaces?: boolean;
   /** flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream. */
   excludeExportDetails?: boolean;
   /** optional namespace to override the namespace used by the savedObjectsClient. */
@@ -66,6 +72,20 @@ export interface SavedObjectsExportResultDetails {
     /** the missing reference type. */
     type: string;
   }>;
+  /** number of objects that were excluded from the export */
+  excludedObjectsCount: number;
+  /** excluded objects details */
+  excludedObjects: SavedObjectsExportExcludedObject[];
+}
+
+/** @public */
+export interface SavedObjectsExportExcludedObject {
+  /** id of the excluded object */
+  id: string;
+  /** type of the excluded object */
+  type: string;
+  /** optional cause of the exclusion */
+  reason?: string;
 }
 
 /**
@@ -152,7 +172,7 @@ export interface SavedObjectsExportTransformContext {
  *
  * @public
  */
-export type SavedObjectsExportTransform = <T = unknown>(
+export type SavedObjectsExportTransform<T = unknown> = (
   context: SavedObjectsExportTransformContext,
   objects: Array<SavedObject<T>>
 ) => SavedObject[] | Promise<SavedObject[]>;

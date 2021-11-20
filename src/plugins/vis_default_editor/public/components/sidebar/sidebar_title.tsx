@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useState } from 'react';
@@ -25,18 +25,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
-import { SavedObject } from 'src/plugins/saved_objects/public';
+import { SavedSearch, getSavedSearchUrl } from '../../../../discover/public';
 import { ApplicationStart } from '../../../../../core/public';
 import { useKibana } from '../../../../kibana_react/public';
 
 interface LinkedSearchProps {
-  savedSearch: SavedObject;
+  savedSearch: SavedSearch;
   eventEmitter: EventEmitter;
 }
 
 interface SidebarTitleProps {
   isLinkedSearch: boolean;
-  savedSearch?: SavedObject;
+  savedSearch?: SavedSearch;
   vis: Vis;
   eventEmitter: EventEmitter;
 }
@@ -55,7 +55,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   }, [eventEmitter]);
   const onClickViewInDiscover = useCallback(() => {
     application.navigateToApp('discover', {
-      path: `#/view/${savedSearch.id}`,
+      path: getSavedSearchUrl(savedSearch.id),
     });
   }, [application, savedSearch.id]);
 

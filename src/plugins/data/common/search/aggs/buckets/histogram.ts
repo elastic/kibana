@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'kibana/public';
 
 import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
+
+import { ExtendedBounds, extendedBoundsToAst } from '../../expressions';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
@@ -17,7 +20,6 @@ import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggHistogramFnName } from './histogram_fn';
-import { ExtendedBounds } from './lib/extended_bounds';
 import { isAutoInterval, autoInterval } from './_interval_options';
 import { calculateHistogramInterval } from './lib/histogram_calculate_interval';
 
@@ -39,6 +41,7 @@ export interface IBucketHistogramAggConfig extends IBucketAggConfig {
 export interface AggParamsHistogram extends BaseAggParams {
   field: string;
   interval: number | string;
+  used_interval?: number | string;
   maxBars?: number;
   intervalBase?: number;
   min_doc_count?: boolean;
@@ -83,7 +86,7 @@ export const getHistogramBucketAgg = ({
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.NUMBER_RANGE],
       },
       {
         /*
@@ -103,6 +106,11 @@ export const getHistogramBucketAgg = ({
           options: any
         ) {
           const field = aggConfig.getField();
+          if (field?.type === 'number_range') {
+            // Can't scale number_histogram requests
+            return;
+          }
+
           const aggBody = field.scripted
             ? { script: { source: field.script, lang: field.lang } }
             : { field: field.name };
@@ -141,22 +149,29 @@ export const getHistogramBucketAgg = ({
             });
         },
         write(aggConfig, output) {
-          const values = aggConfig.getAutoBounds();
-
-          output.params.interval = calculateHistogramInterval({
-            values,
-            interval: aggConfig.params.interval,
-            maxBucketsUiSettings: getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-            maxBucketsUserInput: aggConfig.params.maxBars,
-            intervalBase: aggConfig.params.intervalBase,
-            esTypes: aggConfig.params.field?.spec?.esTypes || [],
-          });
+          output.params.interval = calculateInterval(aggConfig, getConfig);
         },
+      },
+      {
+        name: 'used_interval',
+        default: autoInterval,
+        shouldShow() {
+          return false;
+        },
+        write: () => {},
+        serialize(val, aggConfig) {
+          if (!aggConfig) return undefined;
+          // store actually used auto interval in serialized agg config to be able to read it from the result data table meta information
+          return calculateInterval(aggConfig, getConfig);
+        },
+        toExpressionAst: () => undefined,
       },
       {
         name: 'maxBars',
         shouldShow(agg) {
-          return isAutoInterval(get(agg, 'params.interval'));
+          const field = agg.getField();
+          // Show this for empty field and number field, but not range
+          return field?.type !== 'number_range' && isAutoInterval(get(agg, 'params.interval'));
         },
         write: () => {},
       },
@@ -190,6 +205,22 @@ export const getHistogramBucketAgg = ({
           }
         },
         shouldShow: (aggConfig: IBucketAggConfig) => aggConfig.params.has_extended_bounds,
+        toExpressionAst: extendedBoundsToAst,
       },
     ],
   });
+
+function calculateInterval(
+  aggConfig: IBucketHistogramAggConfig,
+  getConfig: IUiSettingsClient['get']
+): any {
+  const values = aggConfig.getAutoBounds();
+  return calculateHistogramInterval({
+    values,
+    interval: aggConfig.params.interval,
+    maxBucketsUiSettings: getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+    maxBucketsUserInput: aggConfig.params.maxBars,
+    intervalBase: aggConfig.params.intervalBase,
+    esTypes: aggConfig.params.field?.spec?.esTypes || [],
+  });
+}

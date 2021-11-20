@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -19,14 +20,14 @@ import { DynamicIconProperty } from './dynamic_icon_property';
 import { mockField, MockLayer } from './test_helpers/test_util';
 import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 
 const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mockField) => {
   const defaultOptions: IconDynamicOptions = {
     iconPaletteId: null,
     fieldMetaOptions: { isEnabled: false },
   };
-  const mockVectorLayer = (new MockLayer() as unknown) as IVectorLayer;
+  const mockVectorLayer = new MockLayer() as unknown as IVectorLayer;
   return new DynamicIconProperty(
     { ...defaultOptions, ...options },
     VECTOR_STYLES.ICON,

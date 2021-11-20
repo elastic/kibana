@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useReducer } from 'react';
@@ -12,13 +13,9 @@ import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
-import { DuplicateIndexPatternError } from '../../../../../../../../../../src/plugins/data/public';
+import { DuplicateDataViewError } from '../../../../../../../../../../src/plugins/data/public';
 
-import {
-  useRefreshAnalyticsList,
-  DataFrameAnalyticsId,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
+import { useRefreshAnalyticsList, DataFrameAnalyticsConfig } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
 import { ActionDispatchers, ACTION } from './actions';
@@ -45,7 +42,7 @@ export interface CreateAnalyticsFormProps {
 }
 
 export interface CreateAnalyticsStepProps extends CreateAnalyticsFormProps {
-  setCurrentStep: React.Dispatch<React.SetStateAction<any>>;
+  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
   step?: ANALYTICS_STEPS;
   stepActivated?: boolean;
 }
@@ -80,9 +77,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SET_IS_JOB_STARTED, isJobStarted });
   };
 
-  const setJobIds = (jobIds: DataFrameAnalyticsId[]) =>
-    dispatch({ type: ACTION.SET_JOB_IDS, jobIds });
-
   const resetRequestMessages = () => dispatch({ type: ACTION.RESET_REQUEST_MESSAGES });
 
   const resetForm = () => dispatch({ type: ACTION.RESET_FORM });
@@ -90,9 +84,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const createAnalyticsJob = async () => {
     resetRequestMessages();
 
-    const analyticsJobConfig = (isAdvancedEditorEnabled
-      ? jobConfig
-      : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
+    const analyticsJobConfig = (
+      isAdvancedEditorEnabled ? jobConfig : getJobConfigFromFormState(form)
+    ) as DataFrameAnalyticsConfig;
 
     if (isAdvancedEditorEnabled) {
       destinationIndex = analyticsJobConfig.dest.index;
@@ -114,6 +108,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         createKibanaIndexPattern();
       }
       refresh();
+      return true;
     } catch (e) {
       addRequestMessage({
         error: extractErrorMessage(e),
@@ -124,16 +119,17 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
+      return false;
     }
   };
 
   const createKibanaIndexPattern = async () => {
-    const indexPatternName = destinationIndex;
+    const dataViewName = destinationIndex;
 
     try {
-      await mlContext.indexPatterns.createAndSave(
+      await mlContext.dataViewsContract.createAndSave(
         {
-          title: indexPatternName,
+          title: dataViewName,
         },
         false,
         true
@@ -141,27 +137,27 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
       addRequestMessage({
         message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.createIndexPatternSuccessMessage',
+          'xpack.ml.dataframe.analytics.create.createDataViewSuccessMessage',
           {
-            defaultMessage: 'Kibana index pattern {indexPatternName} created.',
-            values: { indexPatternName },
+            defaultMessage: 'Kibana data view {dataViewName} created.',
+            values: { dataViewName },
           }
         ),
       });
     } catch (e) {
-      if (e instanceof DuplicateIndexPatternError) {
+      if (e instanceof DuplicateDataViewError) {
         addRequestMessage({
           error: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError',
+            'xpack.ml.dataframe.analytics.create.duplicateDataViewErrorMessageError',
             {
-              defaultMessage: 'The index pattern {indexPatternName} already exists.',
-              values: { indexPatternName },
+              defaultMessage: 'The data view {dataViewName} already exists.',
+              values: { dataViewName },
             }
           ),
           message: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessage',
+            'xpack.ml.dataframe.analytics.create.duplicateDataViewErrorMessage',
             {
-              defaultMessage: 'An error occurred creating the Kibana index pattern:',
+              defaultMessage: 'An error occurred creating the Kibana data view:',
             }
           ),
         });
@@ -169,9 +165,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         addRequestMessage({
           error: extractErrorMessage(e),
           message: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
+            'xpack.ml.dataframe.analytics.create.createDataViewErrorMessage',
             {
-              defaultMessage: 'An error occurred creating the Kibana index pattern:',
+              defaultMessage: 'An error occurred creating the Kibana data view:',
             }
           ),
         });
@@ -180,29 +176,10 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const prepareFormValidation = async () => {
-    // re-fetch existing analytics job IDs and indices for form validation
     try {
-      setJobIds(
-        (await ml.dataFrameAnalytics.getDataFrameAnalytics()).data_frame_analytics.map(
-          (job: DataFrameAnalyticsConfig) => job.id
-        )
-      );
-    } catch (e) {
-      addRequestMessage({
-        error: extractErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList',
-          {
-            defaultMessage: 'An error occurred getting the existing data frame analytics job IDs:',
-          }
-        ),
-      });
-    }
-
-    try {
-      // Set the existing index pattern titles.
+      // Set the existing data view names.
       const indexPatternsMap: SourceIndexMap = {};
-      const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
+      const savedObjects = (await mlContext.dataViewsContract.getCache()) || [];
       savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
@@ -216,18 +193,15 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     } catch (e) {
       addRequestMessage({
         error: extractErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorGettingIndexPatternTitles',
-          {
-            defaultMessage: 'An error occurred getting the existing index pattern titles:',
-          }
-        ),
+        message: i18n.translate('xpack.ml.dataframe.analytics.create.errorGettingDataViewNames', {
+          defaultMessage: 'An error occurred getting the existing data view names:',
+        }),
       });
     }
   };
 
   const initiateWizard = async () => {
-    await mlContext.indexPatterns.clearCache();
+    await mlContext.dataViewsContract.clearCache();
     await prepareFormValidation();
   };
 

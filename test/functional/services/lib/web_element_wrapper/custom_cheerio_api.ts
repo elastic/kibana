@@ -8,13 +8,13 @@
 interface CheerioSelector {
   (selector: string): CustomCheerio;
   (selector: string, context: string): CustomCheerio;
-  (selector: string, context: CheerioElement): CustomCheerio;
-  (selector: string, context: CheerioElement[]): CustomCheerio;
-  (selector: string, context: Cheerio): CustomCheerio;
+  (selector: string, context: cheerio.Element): CustomCheerio;
+  (selector: string, context: cheerio.Element[]): CustomCheerio;
+  (selector: string, context: cheerio.Cheerio): CustomCheerio;
   (selector: string, context: string, root: string): CustomCheerio;
-  (selector: string, context: CheerioElement, root: string): CustomCheerio;
-  (selector: string, context: CheerioElement[], root: string): CustomCheerio;
-  (selector: string, context: Cheerio, root: string): CustomCheerio;
+  (selector: string, context: cheerio.Element, root: string): CustomCheerio;
+  (selector: string, context: cheerio.Element[], root: string): CustomCheerio;
+  (selector: string, context: cheerio.Cheerio, root: string): CustomCheerio;
   (selector: any): CustomCheerio;
 }
 
@@ -24,13 +24,13 @@ export interface CustomCheerioStatic extends CheerioSelector {
   // JQuery http://api.jquery.com
   xml(): string;
   root(): CustomCheerio;
-  contains(container: CheerioElement, contained: CheerioElement): boolean;
+  contains(container: cheerio.Element, contained: cheerio.Element): boolean;
   parseHTML(data: string, context?: Document, keepScripts?: boolean): Document[];
 
-  html(options?: CheerioOptionsInterface): string;
-  html(selector: string, options?: CheerioOptionsInterface): string;
-  html(element: CustomCheerio, options?: CheerioOptionsInterface): string;
-  html(element: CheerioElement, options?: CheerioOptionsInterface): string;
+  html(options?: cheerio.CheerioParserOptions): string;
+  html(selector: string, options?: cheerio.CheerioParserOptions): string;
+  html(element: CustomCheerio, options?: cheerio.CheerioParserOptions): string;
+  html(element: cheerio.Element, options?: cheerio.CheerioParserOptions): string;
 
   //
   // CUSTOM METHODS
@@ -44,7 +44,7 @@ export interface CustomCheerio {
   // Cheerio https://github.com/cheeriojs/cheerio
   // JQuery http://api.jquery.com
 
-  [index: number]: CheerioElement;
+  [index: number]: cheerio.Element;
   length: number;
 
   // Attributes
@@ -63,7 +63,7 @@ export interface CustomCheerio {
   removeAttr(name: string): CustomCheerio;
 
   has(selector: string): CustomCheerio;
-  has(element: CheerioElement): CustomCheerio;
+  has(element: cheerio.Element): CustomCheerio;
 
   hasClass(className: string): boolean;
   addClass(classNames: string): CustomCheerio;
@@ -81,10 +81,10 @@ export interface CustomCheerio {
   ): CustomCheerio;
 
   is(selector: string): boolean;
-  is(element: CheerioElement): boolean;
-  is(element: CheerioElement[]): boolean;
+  is(element: cheerio.Element): boolean;
+  is(element: cheerio.Element[]): boolean;
   is(selection: CustomCheerio): boolean;
-  is(func: (index: number, element: CheerioElement) => boolean): boolean;
+  is(func: (index: number, element: cheerio.Element) => boolean): boolean;
 
   // Form
   serialize(): string;
@@ -98,7 +98,7 @@ export interface CustomCheerio {
   parent(selector?: string): CustomCheerio;
   parents(selector?: string): CustomCheerio;
   parentsUntil(selector?: string, filter?: string): CustomCheerio;
-  parentsUntil(element: CheerioElement, filter?: string): CustomCheerio;
+  parentsUntil(element: cheerio.Element, filter?: string): CustomCheerio;
   parentsUntil(element: CustomCheerio, filter?: string): CustomCheerio;
 
   prop(name: string): any;
@@ -112,7 +112,7 @@ export interface CustomCheerio {
   nextAll(selector: string): CustomCheerio;
 
   nextUntil(selector?: string, filter?: string): CustomCheerio;
-  nextUntil(element: CheerioElement, filter?: string): CustomCheerio;
+  nextUntil(element: cheerio.Element, filter?: string): CustomCheerio;
   nextUntil(element: CustomCheerio, filter?: string): CustomCheerio;
 
   prev(selector?: string): CustomCheerio;
@@ -120,7 +120,7 @@ export interface CustomCheerio {
   prevAll(selector: string): CustomCheerio;
 
   prevUntil(selector?: string, filter?: string): CustomCheerio;
-  prevUntil(element: CheerioElement, filter?: string): CustomCheerio;
+  prevUntil(element: cheerio.Element, filter?: string): CustomCheerio;
   prevUntil(element: CustomCheerio, filter?: string): CustomCheerio;
 
   slice(start: number, end?: number): CustomCheerio;
@@ -131,19 +131,19 @@ export interface CustomCheerio {
 
   contents(): CustomCheerio;
 
-  each(func: (index: number, element: CheerioElement) => any): CustomCheerio;
-  map(func: (index: number, element: CheerioElement) => any): CustomCheerio;
+  each(func: (index: number, element: cheerio.Element) => any): CustomCheerio;
+  map(func: (index: number, element: cheerio.Element) => any): CustomCheerio;
 
   filter(selector: string): CustomCheerio;
   filter(selection: CustomCheerio): CustomCheerio;
-  filter(element: CheerioElement): CustomCheerio;
-  filter(elements: CheerioElement[]): CustomCheerio;
-  filter(func: (index: number, element: CheerioElement) => boolean): CustomCheerio;
+  filter(element: cheerio.Element): CustomCheerio;
+  filter(elements: cheerio.Element[]): CustomCheerio;
+  filter(func: (index: number, element: cheerio.Element) => boolean): CustomCheerio;
 
   not(selector: string): CustomCheerio;
   not(selection: CustomCheerio): CustomCheerio;
-  not(element: CheerioElement): CustomCheerio;
-  not(func: (index: number, element: CheerioElement) => boolean): CustomCheerio;
+  not(element: cheerio.Element): CustomCheerio;
+  not(func: (index: number, element: cheerio.Element) => boolean): CustomCheerio;
 
   first(): CustomCheerio;
   last(): CustomCheerio;
@@ -161,8 +161,8 @@ export interface CustomCheerio {
 
   add(selectorOrHtml: string): CustomCheerio;
   add(selector: string, context: Document): CustomCheerio;
-  add(element: CheerioElement): CustomCheerio;
-  add(elements: CheerioElement[]): CustomCheerio;
+  add(element: cheerio.Element): CustomCheerio;
+  add(elements: cheerio.Element[]): CustomCheerio;
   add(selection: CustomCheerio): CustomCheerio;
 
   addBack(): CustomCheerio;
@@ -203,8 +203,8 @@ export interface CustomCheerio {
   remove(selector?: string): CustomCheerio;
 
   replaceWith(content: string): CustomCheerio;
-  replaceWith(content: CheerioElement): CustomCheerio;
-  replaceWith(content: CheerioElement[]): CustomCheerio;
+  replaceWith(content: cheerio.Element): CustomCheerio;
+  replaceWith(content: cheerio.Element[]): CustomCheerio;
   replaceWith(content: CustomCheerio): CustomCheerio;
   replaceWith(content: () => CustomCheerio): CustomCheerio;
 
@@ -236,7 +236,7 @@ export interface CustomCheerio {
 
   // Not Documented
 
-  toArray(): CheerioElement[];
+  toArray(): CustomCheerio[];
 
   //
   // CUSTOM METHODS

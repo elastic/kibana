@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import httpProxy from 'http-proxy';
@@ -62,11 +63,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
     describe('IBM Resilient - Action Creation', () => {
       it('should return 200 when creating a ibm resilient action successfully', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient action',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: {
               ...mockResilient.config,
               apiUrl: resilientSimulatorURL,
@@ -77,9 +78,10 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
         expect(createdAction).to.eql({
           id: createdAction.id,
-          isPreconfigured: false,
+          is_preconfigured: false,
           name: 'An IBM Resilient action',
-          actionTypeId: '.resilient',
+          connector_type_id: '.resilient',
+          is_missing_secrets: false,
           config: {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
@@ -87,14 +89,15 @@ export default function resilientTest({ getService }: FtrProviderContext) {
         });
 
         const { body: fetchedAction } = await supertest
-          .get(`/api/actions/action/${createdAction.id}`)
+          .get(`/api/actions/connector/${createdAction.id}`)
           .expect(200);
 
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
-          isPreconfigured: false,
+          is_preconfigured: false,
           name: 'An IBM Resilient action',
-          actionTypeId: '.resilient',
+          connector_type_id: '.resilient',
+          is_missing_secrets: false,
           config: {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
@@ -104,11 +107,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a ibm resilient action with no apiUrl', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: { orgId: '201' },
           })
           .expect(400)
@@ -124,11 +127,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a ibm resilient action with no orgId', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: { apiUrl: resilientSimulatorURL },
           })
           .expect(400)
@@ -144,11 +147,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a ibm resilient action with a not present in allowedHosts apiUrl', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: {
               apiUrl: 'http://resilient.mynonexistent.com',
               orgId: mockResilient.config.orgId,
@@ -168,11 +171,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a ibm resilient action without secrets', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'An IBM Resilient',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: {
               apiUrl: resilientSimulatorURL,
               orgId: mockResilient.config.orgId,
@@ -196,11 +199,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
       let proxyHaveBeenCalled = false;
       before(async () => {
         const { body } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A ibm resilient simulator',
-            actionTypeId: '.resilient',
+            connector_type_id: '.resilient',
             config: {
               apiUrl: resilientSimulatorURL,
               orgId: mockResilient.config.orgId,
@@ -221,55 +224,28 @@ export default function resilientTest({ getService }: FtrProviderContext) {
       describe('Validation', () => {
         it('should handle failing with a simulated success without action', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql(['status', 'actionId', 'message', 'retry']);
-              expect(resp.body.actionId).to.eql(simulatedActionId);
+              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+              expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
-              expect(resp.body.retry).to.eql(false);
-              // Node.js 12 oddity:
-              //
-              // The first time after the server is booted, the error message will be:
-              //
-              //     undefined is not iterable (cannot read property Symbol(Symbol.iterator))
-              //
-              // After this, the error will be:
-              //
-              //     Cannot destructure property 'value' of 'undefined' as it is undefined.
-              //
-              // The error seems to come from the exact same place in the code based on the
-              // exact same circomstances:
-              //
-              //     https://github.com/elastic/kibana/blob/b0a223ebcbac7e404e8ae6da23b2cc6a4b509ff1/packages/kbn-config-schema/src/types/literal_type.ts#L28
-              //
-              // What triggers the error is that the `handleError` function expects its 2nd
-              // argument to be an object containing a `valids` property of type array.
-              //
-              // In this test the object does not contain a `valids` property, so hence the
-              // error.
-              //
-              // Why the error message isn't the same in all scenarios is unknown to me and
-              // could be a bug in V8.
-              expect(resp.body.message).to.match(
-                /^error validating action params: (undefined is not iterable \(cannot read property Symbol\(Symbol.iterator\)\)|Cannot destructure property 'value' of 'undefined' as it is undefined\.)$/
-              );
             });
         });
 
         it('should handle failing with a simulated success without unsupported action', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'non-supported' },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -280,14 +256,14 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without subActionParams', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'pushToService' },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -298,7 +274,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without title', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -313,7 +289,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -324,7 +300,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without commentId', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -340,7 +316,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -351,7 +327,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without comment message', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -367,7 +343,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -380,7 +356,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
       describe('Execution', () => {
         it('should handle creating an incident without comments', async () => {
           const { body } = await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -396,7 +372,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           expect(proxyHaveBeenCalled).to.equal(true);
           expect(body).to.eql({
             status: 'ok',
-            actionId: simulatedActionId,
+            connector_id: simulatedActionId,
             data: {
               id: '123',
               title: '123',

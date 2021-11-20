@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -9,19 +10,16 @@ import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
+import type { Filter } from '@kbn/es-query';
 
-import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import {
-  SerializedFilterQuery,
-  State,
-  inputsModel,
-  inputsSelectors,
-} from '../../../../common/store';
+import type { FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { State, inputsModel, inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { KqlMode, TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
+import { SerializedFilterQuery } from '../../../../../common/types/timeline';
 
 interface OwnProps {
   filterManager: FilterManager;
@@ -77,7 +75,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         from={from}
         fromStr={fromStr}
         isRefreshPaused={isRefreshPaused}
-        kqlMode={kqlMode!}
+        kqlMode={kqlMode}
         refreshInterval={refreshInterval}
         savedQueryId={savedQueryId}
         setFilters={setFiltersInTimeline}
@@ -85,7 +83,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         timelineId={timelineId}
         to={to}
         toStr={toStr}
-        updateKqlMode={updateKqlMode!}
+        updateKqlMode={updateKqlMode}
         updateReduxTime={updateReduxTime}
       />
     );
@@ -122,15 +120,19 @@ const makeMapStateToProps = () => {
     const policy: inputsModel.Policy = getInputsPolicy(state);
     return {
       dataProviders: timeline.dataProviders,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       filterQuery: getKqlFilterQuery(state, timelineId)!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       filters: timeline.filters!,
       from: input.timerange.from,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       fromStr: input.timerange.fromStr!,
       isRefreshPaused: policy.kind === 'manual',
       kqlMode: getOr('filter', 'kqlMode', timeline),
       refreshInterval: policy.duration,
       savedQueryId: getOr(null, 'savedQueryId', timeline),
       to: input.timerange.to,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       toStr: input.timerange.toStr!,
     };
   };

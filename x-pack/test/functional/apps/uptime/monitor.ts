@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -10,7 +11,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const uptimeService = getService('uptime');
   const { uptime } = getPageObjects(['uptime']);
-  const archive = 'uptime/full_heartbeat';
+  const archive = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
   describe('monitor page', function () {
     this.tags(['skipFirefox']);
@@ -33,7 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should select the ping list location filter', async () => {
-        await uptimeService.common.selectFilterItem('location', 'mpls');
+        await uptimeService.common.selectFilterItem('Location', 'mpls');
       });
 
       it('should set the status filter', async () => {

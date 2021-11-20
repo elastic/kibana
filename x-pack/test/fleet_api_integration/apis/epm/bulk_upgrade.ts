@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,10 +13,13 @@ import {
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
 } from '../../../../plugins/fleet/common';
+import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const deletePackage = async (pkgkey: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
@@ -23,6 +27,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('bulk package upgrade api', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
 
     describe('bulk package upgrade with a package already installed', async () => {
       beforeEach(async () => {
@@ -41,6 +46,13 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 400 if no packages are requested for upgrade', async function () {
         await supertest.post(`/api/fleet/epm/packages/_bulk`).set('kbn-xsrf', 'xxxx').expect(400);
       });
+      it('should return 403 if read only user requests upgrade', async function () {
+        await supertestWithoutAuth
+          .post(`/api/fleet/epm/packages/_bulk`)
+          .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(403);
+      });
       it('should return 200 and an array for upgrading a package', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/fleet/epm/packages/_bulk`)
@@ -50,8 +62,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.response.length).equal(1);
         expect(body.response[0].name).equal('multiple_versions');
         const entry = body.response[0] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal('0.1.0');
-        expect(entry.newVersion).equal('0.3.0');
+        expect(entry.version).equal('0.3.0');
       });
       it('should return an error for packages that do not exist', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
@@ -62,8 +73,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.response.length).equal(2);
         expect(body.response[0].name).equal('multiple_versions');
         const entry = body.response[0] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal('0.1.0');
-        expect(entry.newVersion).equal('0.3.0');
+        expect(entry.version).equal('0.3.0');
 
         const err = body.response[1] as IBulkInstallPackageHTTPError;
         expect(err.statusCode).equal(404);
@@ -78,12 +88,10 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.response.length).equal(2);
         expect(body.response[0].name).equal('multiple_versions');
         let entry = body.response[0] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal('0.1.0');
-        expect(entry.newVersion).equal('0.3.0');
+        expect(entry.version).equal('0.3.0');
 
         entry = body.response[1] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal(null);
-        expect(entry.newVersion).equal('0.1.0');
+        expect(entry.version).equal('0.1.0');
         expect(entry.name).equal('overrides');
       });
     });
@@ -102,8 +110,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.response.length).equal(1);
         expect(body.response[0].name).equal('multiple_versions');
         const entry = body.response[0] as BulkInstallPackageInfo;
-        expect(entry.oldVersion).equal(null);
-        expect(entry.newVersion).equal('0.3.0');
+        expect(entry.version).equal('0.3.0');
       });
     });
   });

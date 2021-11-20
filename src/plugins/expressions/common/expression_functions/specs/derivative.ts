@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable } from '../../expression_types';
-import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
 
 export interface DerivativeArgs {
   by?: string[];
@@ -22,7 +21,7 @@ export type ExpressionFunctionDerivative = ExpressionFunctionDefinition<
   'derivative',
   Datatable,
   DerivativeArgs,
-  Datatable
+  Promise<Datatable>
 >;
 
 /**
@@ -95,43 +94,8 @@ export const derivative: ExpressionFunctionDerivative = {
     },
   },
 
-  fn(input, { by, inputColumnId, outputColumnId, outputColumnName }) {
-    const resultColumns = buildResultColumns(
-      input,
-      outputColumnId,
-      inputColumnId,
-      outputColumnName
-    );
-
-    if (!resultColumns) {
-      return input;
-    }
-
-    const previousValues: Partial<Record<string, number>> = {};
-    return {
-      ...input,
-      columns: resultColumns,
-      rows: input.rows.map((row) => {
-        const newRow = { ...row };
-
-        const bucketIdentifier = getBucketIdentifier(row, by);
-        const previousValue = previousValues[bucketIdentifier];
-        const currentValue = newRow[inputColumnId];
-
-        if (currentValue != null && previousValue != null) {
-          newRow[outputColumnId] = Number(currentValue) - previousValue;
-        } else {
-          newRow[outputColumnId] = undefined;
-        }
-
-        if (currentValue != null) {
-          previousValues[bucketIdentifier] = Number(currentValue);
-        } else {
-          previousValues[bucketIdentifier] = undefined;
-        }
-
-        return newRow;
-      }),
-    };
+  async fn(input, args) {
+    const { derivativeFn } = await import('./derivative_fn');
+    return derivativeFn(input, args);
   },
 };

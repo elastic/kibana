@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
@@ -26,7 +27,8 @@ export type FetchPreviousPage = () => void;
 export type ChangeSortOptions = (sortOptions: AnomaliesSort) => void;
 export type ChangePaginationOptions = (paginationOptions: PaginationOptions) => void;
 export type LogEntryAnomalies = LogEntryAnomaly[];
-type LogEntryAnomaliesDatasets = GetLogEntryAnomaliesDatasetsSuccessResponsePayload['data']['datasets'];
+type LogEntryAnomaliesDatasets =
+  GetLogEntryAnomaliesDatasetsSuccessResponsePayload['data']['datasets'];
 interface PaginationCursors {
   previousPageCursor: PaginationCursor;
   nextPageCursor: PaginationCursor;
@@ -284,10 +286,8 @@ export const useLogEntryAnomaliesResults = ({
   );
 
   // Anomalies datasets
-  const [
-    logEntryAnomaliesDatasets,
-    setLogEntryAnomaliesDatasets,
-  ] = useState<LogEntryAnomaliesDatasets>([]);
+  const [logEntryAnomaliesDatasets, setLogEntryAnomaliesDatasets] =
+    useState<LogEntryAnomaliesDatasets>([]);
 
   const [getLogEntryAnomaliesDatasetsRequest, getLogEntryAnomaliesDatasets] = useTrackedPromise(
     {
@@ -314,9 +314,10 @@ export const useLogEntryAnomaliesResults = ({
     [endTime, sourceId, startTime]
   );
 
-  const isLoadingDatasets = useMemo(() => getLogEntryAnomaliesDatasetsRequest.state === 'pending', [
-    getLogEntryAnomaliesDatasetsRequest.state,
-  ]);
+  const isLoadingDatasets = useMemo(
+    () => getLogEntryAnomaliesDatasetsRequest.state === 'pending',
+    [getLogEntryAnomaliesDatasetsRequest.state]
+  );
 
   const hasFailedLoadingDatasets = useMemo(
     () => getLogEntryAnomaliesDatasetsRequest.state === 'rejected',

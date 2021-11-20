@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+import { Plugin, CoreSetup, AppMountParameters, AppDeepLink } from 'src/core/public';
 import { AppUpdater } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
@@ -15,6 +15,7 @@ import { sortBy } from 'lodash';
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
+import { DocTitleService, BreadcrumbService } from './services';
 
 import './index.scss';
 
@@ -36,6 +37,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
   private readonly devTools = new Map<string, DevToolApp>();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
+  private breadcrumbService = new BreadcrumbService();
+  private docTitleService = new DocTitleService();
+
   private getSortedDevTools(): readonly DevToolApp[] {
     return sortBy([...this.devTools.values()], 'order');
   }
@@ -53,14 +57,30 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
-        const { element, history } = params;
+        const { element, history, theme$ } = params;
         element.classList.add('devAppWrapper');
 
         const [core] = await getStartServices();
         const { application, chrome } = core;
 
+        this.docTitleService.setup(chrome.docTitle.change);
+        this.breadcrumbService.setup(chrome.setBreadcrumbs);
+
+        const appServices = {
+          breadcrumbService: this.breadcrumbService,
+          docTitleService: this.docTitleService,
+        };
+
         const { renderApp } = await import('./application');
-        return renderApp(element, application, chrome, history, this.getSortedDevTools());
+        return renderApp(
+          element,
+          application,
+          chrome,
+          history,
+          theme$,
+          this.getSortedDevTools(),
+          appServices
+        );
       },
     });
 
@@ -84,6 +104,20 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
   public start() {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+    } else {
+      this.appStateUpdater.next(() => {
+        const deepLinks: AppDeepLink[] = [...this.devTools.values()]
+          .filter(
+            // Some tools do not use a string title, so we filter those out
+            (tool) => !tool.enableRouting && !tool.isDisabled() && typeof tool.title === 'string'
+          )
+          .map((tool) => ({
+            id: tool.id,
+            title: tool.title as string,
+            path: `#/${tool.id}`,
+          }));
+        return { deepLinks };
+      });
     }
   }
 

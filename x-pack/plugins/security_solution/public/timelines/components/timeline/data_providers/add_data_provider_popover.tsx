@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pick } from 'lodash/fp';
@@ -43,13 +44,15 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
     pick(['dataProviders', 'timelineType'], getTimeline(state, timelineId))
   );
 
-  const handleOpenPopover = useCallback(() => setIsAddFilterPopoverOpen(true), [
-    setIsAddFilterPopoverOpen,
-  ]);
+  const handleOpenPopover = useCallback(
+    () => setIsAddFilterPopoverOpen(true),
+    [setIsAddFilterPopoverOpen]
+  );
 
-  const handleClosePopover = useCallback(() => setIsAddFilterPopoverOpen(false), [
-    setIsAddFilterPopoverOpen,
-  ]);
+  const handleClosePopover = useCallback(
+    () => setIsAddFilterPopoverOpen(false),
+    [setIsAddFilterPopoverOpen]
+  );
 
   const handleDataProviderEdited = useCallback(
     ({ andProviderId, excluded, field, id, operator, providerId, value, type }) => {
@@ -110,7 +113,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         width: 400,
         content: (
           <StatefulEditDataProvider
-            browserFields={browserFields!}
+            browserFields={browserFields}
             field=""
             isExcluded={false}
             onDataProviderEdited={handleDataProviderEdited}
@@ -128,7 +131,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         width: 400,
         content: (
           <StatefulEditDataProvider
-            browserFields={browserFields!}
+            browserFields={browserFields}
             field=""
             isExcluded={false}
             onDataProviderEdited={handleDataProviderEdited}
@@ -179,7 +182,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
 
     return (
       <StatefulEditDataProvider
-        browserFields={browserFields!}
+        browserFields={browserFields}
         field=""
         isExcluded={false}
         onDataProviderEdited={handleDataProviderEdited}
@@ -200,7 +203,6 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       closePopover={handleClosePopover}
       anchorPosition="downLeft"
       panelPaddingSize="none"
-      ownFocus={true}
       repositionOnScroll
     >
       {content}

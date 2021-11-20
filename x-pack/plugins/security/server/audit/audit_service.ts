@@ -1,50 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Subscription } from 'rxjs';
-import { map, distinctUntilKeyChanged } from 'rxjs/operators';
-import {
-  Logger,
-  LoggingServiceSetup,
-  KibanaRequest,
+import { distinctUntilKeyChanged, map } from 'rxjs/operators';
+
+import type {
   HttpServiceSetup,
+  KibanaRequest,
+  Logger,
   LoggerContextConfigInput,
-} from '../../../../../src/core/server';
-import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
-import { ConfigType } from '../config';
-import { SpacesPluginSetup } from '../../../spaces/server';
-import { AuditEvent, httpRequestEvent } from './audit_events';
-import { SecurityPluginSetup } from '..';
+  LoggingServiceSetup,
+} from 'src/core/server';
+
+import type { SpacesPluginSetup } from '../../../spaces/server';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
+import type { ConfigType } from '../config';
+import type { SecurityPluginSetup } from '../plugin';
+import type { AuditEvent } from './audit_events';
+import { httpRequestEvent } from './audit_events';
 
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
-
-/**
- * @deprecated
- */
-export interface LegacyAuditLogger {
-  log: (eventType: string, message: string, data?: Record<string, any>) => void;
-}
 
 export interface AuditLogger {
   log: (event: AuditEvent | undefined) => void;
 }
 
-interface AuditLogMeta extends AuditEvent {
-  ecs: {
-    version: string;
-  };
-  trace: {
-    id: string;
-  };
-}
-
 export interface AuditServiceSetup {
   asScoped: (request: KibanaRequest) => AuditLogger;
-  getLogger: (id?: string) => LegacyAuditLogger;
 }
 
 interface AuditServiceSetupParams {
@@ -63,19 +49,11 @@ interface AuditServiceSetupParams {
 }
 
 export class AuditService {
-  /**
-   * @deprecated
-   */
-  private licenseFeaturesSubscription?: Subscription;
-  /**
-   * @deprecated
-   */
-  private allowLegacyAuditLogging = false;
-  private ecsLogger: Logger;
+  private logger: Logger;
   private usageIntervalId?: NodeJS.Timeout;
 
-  constructor(private readonly logger: Logger) {
-    this.ecsLogger = logger.get('ecs');
+  constructor(_logger: Logger) {
+    this.logger = _logger.get('ecs');
   }
 
   setup({
@@ -88,14 +66,6 @@ export class AuditService {
     getSpaceId,
     recordAuditLoggingUsage,
   }: AuditServiceSetupParams): AuditServiceSetup {
-    if (config.enabled && !config.appender) {
-      this.licenseFeaturesSubscription = license.features$.subscribe(
-        ({ allowLegacyAuditLogging }) => {
-          this.allowLegacyAuditLogging = allowLegacyAuditLogging;
-        }
-      );
-    }
-
     // Configure logging during setup and when license changes
     logging.configure(
       license.features$.pipe(
@@ -142,7 +112,7 @@ export class AuditService {
        *   message: 'User is updating dashboard [id=123]',
        *   event: {
        *     action: 'saved_object_update',
-       *     outcome: EventOutcome.UNKNOWN
+       *     outcome: 'unknown'
        *   },
        *   kibana: {
        *     saved_object: { type: 'dashboard', id: '123' }
@@ -157,13 +127,12 @@ export class AuditService {
         const spaceId = getSpaceId(request);
         const user = getCurrentUser(request);
         const sessionId = await getSID(request);
-        const meta: AuditLogMeta = {
-          ecs: { version: ECS_VERSION },
+        const meta: AuditEvent = {
           ...event,
           user:
             (user && {
               name: user.username,
-              roles: user.roles,
+              roles: user.roles as string[],
             }) ||
             event.user,
           kibana: {
@@ -174,30 +143,11 @@ export class AuditService {
           trace: { id: request.id },
         };
         if (filterEvent(meta, config.ignore_filters)) {
-          this.ecsLogger.info(event.message!, meta);
+          const { message, ...eventMeta } = meta;
+          this.logger.info(message, eventMeta);
         }
       };
       return { log };
-    };
-
-    /**
-     * @deprecated
-     * Use `audit.asScoped(request)` method instead to create an audit logger
-     */
-    const getLogger = (id?: string): LegacyAuditLogger => {
-      return {
-        log: (eventType: string, message: string, data?: Record<string, any>) => {
-          if (!this.allowLegacyAuditLogging) {
-            return;
-          }
-
-          this.logger.info(message, {
-            tags: id ? [id, eventType] : [eventType],
-            eventType,
-            ...data,
-          });
-        },
-      };
     };
 
     http.registerOnPostAuth((request, response, t) => {
@@ -207,14 +157,10 @@ export class AuditService {
       return t.next();
     });
 
-    return { asScoped, getLogger };
+    return { asScoped };
   }
 
   stop() {
-    if (this.licenseFeaturesSubscription) {
-      this.licenseFeaturesSubscription.unsubscribe();
-      this.licenseFeaturesSubscription = undefined;
-    }
     clearInterval(this.usageIntervalId!);
   }
 }
@@ -223,22 +169,29 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
   map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => ({
     appenders: {
       auditTrailAppender: config.appender ?? {
-        kind: 'console',
+        type: 'console',
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           highlight: true,
         },
       },
     },
     loggers: [
       {
-        context: 'audit.ecs',
+        name: 'audit.ecs',
         level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
         appenders: ['auditTrailAppender'],
       },
     ],
   }));
 
+/**
+ * Evaluates the list of provided ignore rules, and filters out events only
+ * if *all* rules match the event.
+ *
+ * For event fields that can contain an array of multiple values, every value
+ * must be matched by an ignore rule for the event to be excluded.
+ */
 export function filterEvent(
   event: AuditEvent,
   ignoreFilters: ConfigType['audit']['ignore_filters']
@@ -246,10 +199,10 @@ export function filterEvent(
   if (ignoreFilters) {
     return !ignoreFilters.some(
       (rule) =>
-        (!rule.actions || rule.actions.includes(event.event.action)) &&
-        (!rule.categories || rule.categories.includes(event.event.category!)) &&
-        (!rule.types || rule.types.includes(event.event.type!)) &&
-        (!rule.outcomes || rule.outcomes.includes(event.event.outcome!)) &&
+        (!rule.actions || rule.actions.includes(event.event?.action!)) &&
+        (!rule.categories || event.event?.category?.every((c) => rule.categories?.includes(c))) &&
+        (!rule.types || event.event?.type?.every((t) => rule.types?.includes(t))) &&
+        (!rule.outcomes || rule.outcomes.includes(event.event?.outcome!)) &&
         (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!))
     );
   }

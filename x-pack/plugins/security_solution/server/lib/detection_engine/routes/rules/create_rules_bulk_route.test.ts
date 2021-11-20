@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -9,34 +10,44 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getReadBulkRequest,
-  getEmptyIndex,
-  getNonEmptyIndex,
   getFindResultWithSingleHit,
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   createBulkMlRuleRequest,
+  getBasicEmptySearchResponse,
+  getBasicNoShardsSearchResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('create_rules_bulk', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('create_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.create>;
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.create();
+    ml = mlServicesMock.createSetupContract();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
-    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.alertsClient.create.mockResolvedValue(getResult()); // successful creation
+    clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
+    clients.rulesClient.create.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // successful creation
 
-    createRulesBulkRoute(server.router, ml);
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
+    );
+    createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
   describe('status codes', () => {
@@ -46,13 +57,13 @@ describe('create_rules_bulk', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getReadBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
-    it('returns 404 if siem client is unavailable', async () => {
+    test('returns 404 if siem client is unavailable', async () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
       // @ts-expect-error
       const response = await server.inject(getReadBulkRequest(), contextWithoutSecuritySolution);
@@ -62,7 +73,7 @@ describe('create_rules_bulk', () => {
   });
 
   describe('unhappy paths', () => {
-    it('returns a 403 error object if ML Authz fails', async () => {
+    test('returns a 403 error object if ML Authz fails', async () => {
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
           .fn()
@@ -82,24 +93,32 @@ describe('create_rules_bulk', () => {
       ]);
     });
 
-    it('returns an error object if the index does not exist', async () => {
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
+    test('returns an error object if the index does not exist when rule registry not enabled', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          getBasicNoShardsSearchResponse()
+        )
+      );
       const response = await server.inject(getReadBulkRequest(), context);
 
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual([
-        {
-          error: {
-            message: 'To create a rule, the index must exist first. Index undefined does not exist',
-            status_code: 400,
+
+      if (!isRuleRegistryEnabled) {
+        expect(response.body).toEqual([
+          {
+            error: {
+              message:
+                'To create a rule, the index must exist first. Index undefined does not exist',
+              status_code: 400,
+            },
+            rule_id: 'rule-1',
           },
-          rule_id: 'rule-1',
-        },
-      ]);
+        ]);
+      }
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
       const response = await server.inject(getReadBulkRequest(), context);
 
       expect(response.status).toEqual(200);
@@ -114,7 +133,7 @@ describe('create_rules_bulk', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.alertsClient.create.mockImplementation(async () => {
+      clients.rulesClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getReadBulkRequest(), context);
@@ -130,7 +149,7 @@ describe('create_rules_bulk', () => {
       ]);
     });
 
-    it('returns an error object if duplicate rule_ids found in request payload', async () => {
+    test('returns an error object if duplicate rule_ids found in request payload', async () => {
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,

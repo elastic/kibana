@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -31,8 +31,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('dashboard filtering', function () {
     this.tags('includeFirefox');
 
+    const populateDashboard = async () => {
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setDefaultDataRange();
+      await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
+      await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
+
+      await dashboardAddPanel.closeAddPanel();
+    };
+
+    const addFilterAndRefresh = async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+      await filterBar.addFilter('bytes', 'is', '12345678');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+      // first round of requests sometimes times out, refresh all visualizations to fetch again
+      await queryBar.clickQuerySubmitButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+    };
+
     before(async () => {
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -48,22 +69,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('adding a filter that excludes all data', () => {
       before(async () => {
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setDefaultDataRange();
-        await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
-        await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
+        await populateDashboard();
+        await addFilterAndRefresh();
+      });
 
-        await dashboardAddPanel.closeAddPanel();
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
-        await filterBar.addFilter('bytes', 'is', '12345678');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
-        // first round of requests sometimes times out, refresh all visualizations to fetch again
-        await queryBar.clickQuerySubmitButton();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+      after(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
       it('filters on pie charts', async () => {
@@ -99,17 +110,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb top n is filtered', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+        await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await dashboardExpect.savedSearchRowsMissing();
       });
 
-      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timelion is filtered', async () => {
-      //   await dashboardExpect.timelionLegendCount(0);
-      // });
+      it('timelion is filtered', async () => {
+        await dashboardExpect.timelionLegendCount(0);
+      });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
@@ -118,6 +128,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('using a pinned filter that excludes all data', () => {
       before(async () => {
+        // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
+        await populateDashboard();
+        await addFilterAndRefresh();
+
         await filterBar.toggleFilterPinned('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -125,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await filterBar.toggleFilterPinned('bytes');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
       it('filters on pie charts', async () => {
@@ -156,17 +171,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb top n is filtered', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+        await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
       });
 
       it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowCount(0);
+        await dashboardExpect.savedSearchRowsMissing();
       });
 
-      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
-      // it('timelion is filtered', async () => {
-      //   await dashboardExpect.timelionLegendCount(0);
-      // });
+      it('timelion is filtered', async () => {
+        await dashboardExpect.timelionLegendCount(0);
+      });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
@@ -175,6 +189,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('disabling a filter unfilters the data on', function () {
       before(async () => {
+        // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
+        await populateDashboard();
+        await addFilterAndRefresh();
+
         await filterBar.toggleFilterEnabled('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -185,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts', async () => {
-        await dashboardExpect.seriesElementCount(3);
+        await dashboardExpect.seriesElementCount(2);
       });
 
       it('data tables', async () => {
@@ -217,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowCount(1);
+        await dashboardExpect.savedSearchRowsExist();
       });
 
       it('vega', async () => {

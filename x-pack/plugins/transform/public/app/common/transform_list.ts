@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiTableActionsColumnType } from '@elastic/eui';
-
-import { TransformConfigUnion, TransformId } from '../../../common/types/transform';
-import { TransformStats } from '../../../common/types/transform_stats';
+import type { EuiTableActionsColumnType } from '@elastic/eui';
+import type { TransformConfigUnion, TransformId } from '../../../common/types/transform';
+import type { TransformStats } from '../../../common/types/transform_stats';
+import type { TransformHealthAlertRule } from '../../../common/types/alerting';
 
 // Used to pass on attribute names to table columns
 export enum TRANSFORM_LIST_COLUMN {
@@ -20,6 +21,7 @@ export interface TransformListRow {
   config: TransformConfigUnion;
   mode?: string; // added property on client side to allow filtering by this field
   stats: TransformStats;
+  alerting_rules?: TransformHealthAlertRule[];
 }
 
 // The single Action type is not exported as is

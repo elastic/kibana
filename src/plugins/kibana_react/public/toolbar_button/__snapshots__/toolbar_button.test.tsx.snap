@@ -68,7 +68,7 @@ exports[`hasArrow is rendered 1`] = `
 
 exports[`positions center is applied 1`] = `
 <EuiButton
-  className="kbnToolbarButton toolbarButton--groupCenter kbnToolbarButton--normal kbnToolbarButton--m"
+  className="kbnToolbarButton kbnToolbarButton--groupCenter kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
@@ -90,7 +90,7 @@ exports[`positions center is applied 1`] = `
 
 exports[`positions left is applied 1`] = `
 <EuiButton
-  className="kbnToolbarButton toolbarButton--groupLeft kbnToolbarButton--normal kbnToolbarButton--m"
+  className="kbnToolbarButton kbnToolbarButton--groupLeft kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {
@@ -134,7 +134,7 @@ exports[`positions none is applied 1`] = `
 
 exports[`positions right is applied 1`] = `
 <EuiButton
-  className="kbnToolbarButton toolbarButton--groupRight kbnToolbarButton--normal kbnToolbarButton--m"
+  className="kbnToolbarButton kbnToolbarButton--groupRight kbnToolbarButton--normal kbnToolbarButton--m"
   color="text"
   contentProps={
     Object {

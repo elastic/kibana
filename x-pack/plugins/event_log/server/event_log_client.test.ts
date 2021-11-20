@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'src/core/server';
@@ -110,21 +111,27 @@ describe('EventLogStart', () => {
       esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue(result);
 
       expect(
-        await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'])
+        await eventLogClient.findEventsBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          undefined,
+          ['legacy-id']
+        )
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
-        esContext.esNames.indexPattern,
-        undefined,
-        'saved-object-type',
-        ['saved-object-id'],
-        {
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        ids: ['saved-object-id'],
+        findOptions: {
           page: 1,
           per_page: 10,
           sort_field: '@timestamp',
           sort_order: 'asc',
-        }
-      );
+        },
+        legacyIds: ['legacy-id'],
+      });
     });
 
     test('fetches all events in time frame that reference the saved object', async () => {
@@ -188,26 +195,32 @@ describe('EventLogStart', () => {
       const end = moment().add(1, 'days').toISOString();
 
       expect(
-        await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
-          start,
-          end,
-        })
+        await eventLogClient.findEventsBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          {
+            start,
+            end,
+          },
+          ['legacy-id']
+        )
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
-        esContext.esNames.indexPattern,
-        undefined,
-        'saved-object-type',
-        ['saved-object-id'],
-        {
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        ids: ['saved-object-id'],
+        findOptions: {
           page: 1,
           per_page: 10,
           sort_field: '@timestamp',
           sort_order: 'asc',
           start,
           end,
-        }
-      );
+        },
+        legacyIds: ['legacy-id'],
+      });
     });
 
     test('validates that the start date is valid', async () => {
@@ -309,7 +322,7 @@ function fakeEvent(overrides = {}) {
 function FakeRequest(): KibanaRequest {
   const savedObjectGetter = jest.fn();
 
-  return ({
+  return {
     headers: {},
     getBasePath: () => '',
     path: '/',
@@ -323,5 +336,5 @@ function FakeRequest(): KibanaRequest {
       },
     },
     getSavedObjectsClient: () => savedObjectGetter,
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 }

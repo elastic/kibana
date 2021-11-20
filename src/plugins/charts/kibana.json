@@ -3,5 +3,10 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["expressions"]
+  "extraPublicDirs": ["common"],
+  "requiredPlugins": ["expressions"],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
 }

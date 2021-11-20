@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import { CursorPagination } from './types';
-import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 import { UptimeESClient } from '../../lib';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { parseRelativeDate } from '../../../../common/lib/get_histogram_interval';
 
 export class QueryContext {
   callES: UptimeESClient;
@@ -20,6 +21,7 @@ export class QueryContext {
   size: number;
   statusFilter?: string;
   hasTimespanCache?: boolean;
+  query?: string;
 
   constructor(
     database: UptimeESClient,
@@ -28,7 +30,8 @@ export class QueryContext {
     pagination: CursorPagination,
     filterClause: any | null,
     size: number,
-    statusFilter?: string
+    statusFilter?: string,
+    query?: string
   ) {
     this.callES = database;
     this.dateRangeStart = dateRangeStart;
@@ -37,14 +40,17 @@ export class QueryContext {
     this.filterClause = filterClause;
     this.size = size;
     this.statusFilter = statusFilter;
+    this.query = query;
   }
 
-  async search<TParams>(params: TParams) {
-    return this.callES.search(params);
+  async search<TParams>(params: TParams, operationName?: string) {
+    return this.callES.search(params, operationName);
   }
 
   async count(params: any): Promise<any> {
-    const { body } = await this.callES.count(params);
+    const {
+      result: { body },
+    } = await this.callES.count(params);
     return body;
   }
 
@@ -140,7 +146,8 @@ export class QueryContext {
       this.pagination,
       this.filterClause,
       this.size,
-      this.statusFilter
+      this.statusFilter,
+      this.query
     );
   }
 

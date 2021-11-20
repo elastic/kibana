@@ -1,25 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { PublicContract } from '@kbn/utility-types';
+import { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
-import { Observable, Subject, Subscription } from 'rxjs';
-import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
-import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
+import { Observable, Subscription } from 'rxjs';
+import {
+  PluginInitializerContext,
+  StartServicesAccessor,
+  ToastsStart as ToastService,
+} from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { ConfigSchema } from '../../../config';
 import {
   createSessionStateContainer,
   SearchSessionState,
+  SessionMeta,
   SessionStateContainer,
+  SessionStateInternal,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 import { ISearchOptions } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { formatSessionName } from './lib/session_name_formatter';
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -28,18 +36,30 @@ export interface TrackSearchDescriptor {
 }
 
 /**
+ * Represents a search session state in {@link SessionService} in any given moment of time
+ */
+export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
+
+/**
  * Provide info about current search session to be stored in the Search Session saved object
  */
-export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
+export interface SearchSessionInfoProvider<P extends SerializableRecord = SerializableRecord> {
   /**
    * User-facing name of the session.
    * e.g. will be displayed in saved Search Sessions management list
    */
   getName: () => Promise<string>;
-  getUrlGeneratorData: () => Promise<{
-    urlGeneratorId: ID;
-    initialState: UrlGeneratorStateMapping[ID]['State'];
-    restoreState: UrlGeneratorStateMapping[ID]['State'];
+
+  /**
+   * Append session start time to a session name,
+   * `true` by default
+   */
+  appendSessionStartTimeToName?: boolean;
+
+  getLocatorData: () => Promise<{
+    id: string;
+    initialState: P;
+    restoreState: P;
   }>;
 }
 
@@ -58,16 +78,27 @@ export interface SearchSessionIndicatorUiConfig {
 }
 
 /**
- * Responsible for tracking a current search session. Supports only a single session at a time.
+ * Responsible for tracking a current search session. Supports a single session at a time.
  */
 export class SessionService {
   public readonly state$: Observable<SearchSessionState>;
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
+  public readonly sessionMeta$: Observable<SessionMeta>;
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
-  private curApp?: string;
+  private currentApp?: string;
+  private hasAccessToSearchSessions: boolean = false;
+
+  private toastService?: ToastService;
+
+  /**
+   * Holds snapshot of last cleared session so that it can be continued
+   * Can be used to re-use a session between apps
+   * @private
+   */
+  private lastSessionSnapshot?: SessionSnapshot;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -76,45 +107,63 @@ export class SessionService {
     private readonly nowProvider: NowProviderInternalContract,
     { freezeState = true }: { freezeState: boolean } = { freezeState: true }
   ) {
-    const {
-      stateContainer,
-      sessionState$,
-      sessionStartTime$,
-    } = createSessionStateContainer<TrackSearchDescriptor>({
-      freeze: freezeState,
-    });
+    const { stateContainer, sessionState$, sessionMeta$ } =
+      createSessionStateContainer<TrackSearchDescriptor>({
+        freeze: freezeState,
+      });
     this.state$ = sessionState$;
     this.state = stateContainer;
+    this.sessionMeta$ = sessionMeta$;
 
     this.subscription.add(
-      sessionStartTime$.subscribe((startTime) => {
-        if (startTime) this.nowProvider.set(startTime);
-        else this.nowProvider.reset();
-      })
+      sessionMeta$
+        .pipe(
+          map((meta) => meta.startTime),
+          distinctUntilChanged()
+        )
+        .subscribe((startTime) => {
+          if (startTime) this.nowProvider.set(startTime);
+          else this.nowProvider.reset();
+        })
     );
 
     getStartServices().then(([coreStart]) => {
-      // Apps required to clean up their sessions before unmounting
-      // Make sure that apps don't leave sessions open.
+      // using management?.kibana? we infer if any of the apps allows current user to store sessions
+      this.hasAccessToSearchSessions =
+        coreStart.application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID];
+
+      this.toastService = coreStart.notifications.toasts;
+
       this.subscription.add(
-        coreStart.application.currentAppId$.subscribe((appName) => {
-          if (this.state.get().sessionId) {
-            const message = `Application '${this.curApp}' had an open session while navigating`;
-            if (initializerContext.env.mode.dev) {
-              // TODO: This setTimeout is necessary due to a race condition while navigating.
-              setTimeout(() => {
-                coreStart.fatalErrors.add(message);
-              }, 100);
-            } else {
-              // eslint-disable-next-line no-console
-              console.warn(message);
-              this.clear();
-            }
+        coreStart.application.currentAppId$.subscribe((newAppName) => {
+          this.currentApp = newAppName;
+          if (!this.getSessionId()) return;
+
+          // Apps required to clean up their sessions before unmounting
+          // Make sure that apps don't leave sessions open by throwing an error in DEV mode
+          const message = `Application '${
+            this.state.get().appName
+          }' had an open session while navigating`;
+          if (initializerContext.env.mode.dev) {
+            coreStart.fatalErrors.add(message);
+          } else {
+            // this should never happen in prod because should be caught in dev mode
+            // in case this happen we don't want to throw fatal error, as most likely possible bugs are not that critical
+            // eslint-disable-next-line no-console
+            console.warn(message);
           }
-          this.curApp = appName;
         })
       );
     });
+  }
+
+  /**
+   * If user has access to search sessions
+   * This resolves to `true` in case at least one app allows user to create search session
+   * In this case search session management is available
+   */
+  public hasAccess() {
+    return this.hasAccessToSearchSessions;
   }
 
   /**
@@ -133,6 +182,7 @@ export class SessionService {
   public destroy() {
     this.subscription.unsubscribe();
     this.clear();
+    this.lastSessionSnapshot = undefined;
   }
 
   /**
@@ -172,7 +222,10 @@ export class SessionService {
    * @returns sessionId
    */
   public start() {
-    this.state.transitions.start();
+    if (!this.currentApp) throw new Error('this.currentApp is missing');
+
+    this.state.transitions.start({ appName: this.currentApp });
+
     return this.getSessionId()!;
   }
 
@@ -182,30 +235,58 @@ export class SessionService {
    */
   public restore(sessionId: string) {
     this.state.transitions.restore(sessionId);
+    this.refreshSearchSessionSavedObject();
+  }
+
+  /**
+   * Continue previous search session
+   * Can be used to share a running search session between different apps, so they can reuse search cache
+   *
+   * This is different from {@link restore} as it reuses search session state and search results held in client memory instead of restoring search results from elasticsearch
+   * @param sessionId
+   */
+  public continue(sessionId: string) {
+    if (this.lastSessionSnapshot?.sessionId === sessionId) {
+      this.state.set({
+        ...this.lastSessionSnapshot,
+        // have to change a name, so that current app can cancel a session that it continues
+        appName: this.currentApp,
+        // also have to drop all pending searches which are used to derive client side state of search session indicator,
+        // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
+        // possible solution to this problem is to refactor session service to support multiple sessions
+        pendingSearches: [],
+      });
+      this.lastSessionSnapshot = undefined;
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Continue search session: last known search session id: "${this.lastSessionSnapshot?.sessionId}", but received ${sessionId}`
+      );
+    }
   }
 
   /**
    * Cleans up current state
    */
   public clear() {
+    // make sure apps can't clear other apps' sessions
+    const currentSessionApp = this.state.get().appName;
+    if (currentSessionApp && currentSessionApp !== this.currentApp) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Skip clearing session "${this.getSessionId()}" because it belongs to a different app. current: "${
+          this.currentApp
+        }", owner: "${currentSessionApp}"`
+      );
+      return;
+    }
+
+    if (this.getSessionId()) {
+      this.lastSessionSnapshot = this.state.get();
+    }
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
-  }
-
-  private refresh$ = new Subject<void>();
-  /**
-   * Observable emits when search result refresh was requested
-   * For example, the UI could have it's own "refresh" button
-   * Application would use this observable to handle user interaction on that button
-   */
-  public onRefresh$ = this.refresh$.asObservable();
-
-  /**
-   * Request a search results refresh
-   */
-  public refresh() {
-    this.refresh$.next();
   }
 
   /**
@@ -229,26 +310,59 @@ export class SessionService {
   public async save(): Promise<void> {
     const sessionId = this.getSessionId();
     if (!sessionId) throw new Error('No current session');
-    if (!this.curApp) throw new Error('No current app id');
+    const currentSessionApp = this.state.get().appName;
+    if (!currentSessionApp) throw new Error('No current session app');
+    if (!this.hasAccess()) throw new Error('No access to search sessions');
     const currentSessionInfoProvider = this.searchSessionInfoProvider;
     if (!currentSessionInfoProvider) throw new Error('No info provider for current session');
-    const [name, { initialState, restoreState, urlGeneratorId }] = await Promise.all([
+    const [name, { initialState, restoreState, id: locatorId }] = await Promise.all([
       currentSessionInfoProvider.getName(),
-      currentSessionInfoProvider.getUrlGeneratorData(),
+      currentSessionInfoProvider.getLocatorData(),
     ]);
 
-    await this.sessionsClient.create({
-      name,
-      appId: this.curApp,
-      restoreState: (restoreState as unknown) as Record<string, unknown>,
-      initialState: (initialState as unknown) as Record<string, unknown>,
-      urlGeneratorId,
+    const formattedName = formatSessionName(name, {
+      sessionStartTime: this.state.get().startTime,
+      appendStartTime: currentSessionInfoProvider.appendSessionStartTimeToName,
+    });
+
+    const searchSessionSavedObject = await this.sessionsClient.create({
+      name: formattedName,
+      appId: currentSessionApp,
+      locatorId,
+      restoreState,
+      initialState,
       sessionId,
     });
 
     // if we are still interested in this result
     if (this.getSessionId() === sessionId) {
-      this.state.transitions.store();
+      this.state.transitions.store(searchSessionSavedObject);
+    }
+  }
+
+  /**
+   * Change user-facing name of a current session
+   * Doesn't throw in case of API error but presents a notification toast instead
+   * @param newName - new session name
+   */
+  public async renameCurrentSession(newName: string) {
+    const sessionId = this.getSessionId();
+    if (sessionId && this.state.get().isStored) {
+      let renamed = false;
+      try {
+        await this.sessionsClient.rename(sessionId, newName);
+        renamed = true;
+      } catch (e) {
+        this.toastService?.addError(e, {
+          title: i18n.translate('data.searchSessions.sessionService.sessionEditNameError', {
+            defaultMessage: 'Failed to edit name of the search session',
+          }),
+        });
+      }
+
+      if (renamed && sessionId === this.getSessionId()) {
+        await this.refreshSearchSessionSavedObject();
+      }
     }
   }
 
@@ -262,11 +376,25 @@ export class SessionService {
 
   /**
    * Infers search session options for sessionId using current session state
+   *
+   * In case user doesn't has access to `search-session` SO returns null,
+   * meaning that sessionId and other session parameters shouldn't be used when doing searches
+   *
    * @param sessionId
    */
   public getSearchOptions(
-    sessionId: string
-  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> {
+    sessionId?: string
+  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> | null {
+    if (!sessionId) {
+      return null;
+    }
+
+    // in case user doesn't have permissions to search session, do not forward sessionId to the server
+    // because user most likely also doesn't have access to `search-session` SO
+    if (!this.hasAccessToSearchSessions) {
+      return null;
+    }
+
     const isCurrentSession = this.isCurrentSession(sessionId);
     return {
       sessionId,
@@ -282,11 +410,14 @@ export class SessionService {
    * @param searchSessionInfoProvider - info provider for saving a search session
    * @param searchSessionIndicatorUiConfig - config for "Search session indicator" UI
    */
-  public enableStorage<ID extends UrlGeneratorId = UrlGeneratorId>(
-    searchSessionInfoProvider: SearchSessionInfoProvider<ID>,
+  public enableStorage<P extends SerializableRecord>(
+    searchSessionInfoProvider: SearchSessionInfoProvider<P>,
     searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig
   ) {
-    this.searchSessionInfoProvider = searchSessionInfoProvider;
+    this.searchSessionInfoProvider = {
+      appendSessionStartTimeToName: true,
+      ...searchSessionInfoProvider,
+    };
     this.searchSessionIndicatorUiConfig = searchSessionIndicatorUiConfig;
   }
 
@@ -303,5 +434,24 @@ export class SessionService {
       isDisabled: () => ({ disabled: false }),
       ...this.searchSessionIndicatorUiConfig,
     };
+  }
+
+  private async refreshSearchSessionSavedObject() {
+    const sessionId = this.getSessionId();
+    if (sessionId && this.state.get().isStored) {
+      try {
+        const savedObject = await this.sessionsClient.get(sessionId);
+        if (this.getSessionId() === sessionId) {
+          // still interested in this result
+          this.state.transitions.setSearchSessionSavedObject(savedObject);
+        }
+      } catch (e) {
+        this.toastService?.addError(e, {
+          title: i18n.translate('data.searchSessions.sessionService.sessionObjectFetchError', {
+            defaultMessage: 'Failed to fetch search session info',
+          }),
+        });
+      }
+    }
   }
 }

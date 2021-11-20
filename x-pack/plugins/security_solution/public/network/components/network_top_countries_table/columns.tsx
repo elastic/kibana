@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
-
+import type { DataViewBase } from '@kbn/es-query';
 import { CountryFlagAndName } from '../source_destination/country_flag';
 import {
   FlowTargetSourceDest,
@@ -46,7 +46,7 @@ export type NetworkTopCountriesColumnsNetworkDetails = [
 ];
 
 export const getNetworkTopCountriesColumns = (
-  indexPattern: IIndexPattern,
+  indexPattern: DataViewBase,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
@@ -160,7 +160,7 @@ export const getNetworkTopCountriesColumns = (
 ];
 
 export const getCountriesColumnsCurated = (
-  indexPattern: IIndexPattern,
+  indexPattern: DataViewBase,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string

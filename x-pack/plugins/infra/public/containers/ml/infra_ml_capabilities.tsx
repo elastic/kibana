@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import createContainer from 'constate';
@@ -19,9 +20,8 @@ import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const useInfraMLCapabilities = () => {
   const { services } = useKibanaContextForPlugin();
-  const [mlCapabilities, setMlCapabilities] = useState<GetMlCapabilitiesResponsePayload>(
-    initialMlCapabilities
-  );
+  const [mlCapabilities, setMlCapabilities] =
+    useState<GetMlCapabilitiesResponsePayload>(initialMlCapabilities);
 
   const [fetchMlCapabilitiesRequest, fetchMlCapabilities] = useTrackedPromise(
     {
@@ -45,26 +45,26 @@ export const useInfraMLCapabilities = () => {
     fetchMlCapabilities();
   }, [fetchMlCapabilities]);
 
-  const isLoading = useMemo(() => fetchMlCapabilitiesRequest.state === 'pending', [
-    fetchMlCapabilitiesRequest.state,
-  ]);
+  const isLoading = useMemo(
+    () => fetchMlCapabilitiesRequest.state === 'pending',
+    [fetchMlCapabilitiesRequest.state]
+  );
 
   const hasInfraMLSetupCapabilities = mlCapabilities.capabilities.canCreateJob;
   const hasInfraMLReadCapabilities = mlCapabilities.capabilities.canGetJobs;
-  const hasInfraMLCapabilites =
+  const hasInfraMLCapabilities =
     mlCapabilities.isPlatinumOrTrialLicense && mlCapabilities.mlFeatureEnabledInSpace;
 
   return {
-    hasInfraMLCapabilites,
+    hasInfraMLCapabilities,
     hasInfraMLReadCapabilities,
     hasInfraMLSetupCapabilities,
     isLoading,
   };
 };
 
-export const [InfraMLCapabilitiesProvider, useInfraMLCapabilitiesContext] = createContainer(
-  useInfraMLCapabilities
-);
+export const [InfraMLCapabilitiesProvider, useInfraMLCapabilitiesContext] =
+  createContainer(useInfraMLCapabilities);
 
 const initialMlCapabilities = {
   capabilities: {

@@ -1,10 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-/* eslint-disable react/display-name */
 
 import {
   EuiBasicTable,
@@ -24,11 +23,17 @@ interface FailureHistoryProps {
   id?: string | null;
 }
 
+const renderStatus = () => <EuiHealth color="danger">{i18n.TYPE_FAILED}</EuiHealth>;
+const renderLastFailureAt = (value: string) => (
+  <FormattedDate value={value} fieldName="last_failure_at" />
+);
+const renderLastFailureMessage = (value: string) => <>{value}</>;
+
 const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
   const [loading, ruleStatus] = useRuleStatus(id);
   if (loading) {
     return (
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <HeaderSection title={i18n.LAST_FIVE_ERRORS} />
         <EuiLoadingContent />
       </EuiPanel>
@@ -37,14 +42,14 @@ const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
   const columns: Array<EuiBasicTableColumn<RuleInfoStatus>> = [
     {
       name: i18n.COLUMN_STATUS_TYPE,
-      render: () => <EuiHealth color="danger">{i18n.TYPE_FAILED}</EuiHealth>,
+      render: renderStatus,
       truncateText: false,
       width: '16%',
     },
     {
       field: 'last_failure_at',
       name: i18n.COLUMN_FAILED_AT,
-      render: (value: string) => <FormattedDate value={value} fieldName="last_failure_at" />,
+      render: renderLastFailureAt,
       sortable: false,
       truncateText: false,
       width: '24%',
@@ -52,14 +57,14 @@ const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
     {
       field: 'last_failure_message',
       name: i18n.COLUMN_FAILED_MSG,
-      render: (value: string) => <>{value}</>,
+      render: renderLastFailureMessage,
       sortable: false,
       truncateText: false,
       width: '60%',
     },
   ];
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <HeaderSection title={i18n.LAST_FIVE_ERRORS} />
       <EuiBasicTable
         columns={columns}

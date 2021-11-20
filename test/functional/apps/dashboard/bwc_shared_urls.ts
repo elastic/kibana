@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -81,10 +81,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.expectPieSliceCount(0);
         await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
       });
     });
 
     describe('6.0 urls', () => {
+      let savedDashboardId: string;
+
       it('loads an unsaved dashboard', async function () {
         const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
@@ -96,6 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 
@@ -104,8 +108,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           storeTimeWithDashboard: true,
         });
 
-        const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
-        const url = `${kibanaLegacyBaseUrl}#/dashboard/${id}`;
+        savedDashboardId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        const url = `${kibanaLegacyBaseUrl}#/dashboard/${savedDashboardId}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -115,7 +119,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.expectPieSliceCount(5);
         await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
+      });
+
+      it('loads a saved dashboard with query via dashboard_no_match', async function () {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        const currentUrl = await browser.getCurrentUrl();
+        const dashboardBaseUrl = currentUrl.substring(0, currentUrl.indexOf('/app/dashboards'));
+        const url = `${dashboardBaseUrl}/app/dashboards#/dashboard/${savedDashboardId}?_a=(query:(language:kuery,query:'boop'))`;
+        log.debug(`Navigating to ${url}`);
+        await browser.get(url);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const query = await queryBar.getQueryString();
+        expect(query).to.equal('boop');
+
+        await dashboardExpect.panelCount(2);
+        await PageObjects.dashboard.waitForRenderComplete();
       });
 
       it('uiState in url takes precedence over saved dashboard state', async function () {

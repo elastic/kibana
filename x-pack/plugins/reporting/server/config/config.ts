@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
-import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { LevelLogger } from '../lib';
 import { createConfig$ } from './create_config';
@@ -42,7 +42,6 @@ interface Config<BaseType> {
 }
 
 interface KbnServerConfigType {
-  path: { data: Observable<string> };
   server: {
     basePath: string;
     host: string;
@@ -67,9 +66,6 @@ export const buildConfig = async (
   const serverInfo = http.getServerInfo();
 
   const kbnConfig = {
-    path: {
-      data: initContext.config.legacy.globalConfig$.pipe(map((c) => c.path.data)),
-    },
     server: {
       basePath: core.http.basePath.serverBasePath,
       host: serverInfo.hostname,

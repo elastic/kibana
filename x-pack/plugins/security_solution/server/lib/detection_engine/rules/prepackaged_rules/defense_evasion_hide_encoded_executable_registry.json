@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Encoded Executable Stored in the Registry",
   "query": "registry where\n/* update here with encoding combinations */\n registry.data.strings : \"TVqQAAMAAAAEAAAA*\"\n",
   "risk_score": 47,
@@ -35,10 +36,16 @@
           "id": "T1140",
           "name": "Deobfuscate/Decode Files or Information",
           "reference": "https://attack.mitre.org/techniques/T1140/"
+        },
+        {
+          "id": "T1112",
+          "name": "Modify Registry",
+          "reference": "https://attack.mitre.org/techniques/T1112/"
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 4
 }

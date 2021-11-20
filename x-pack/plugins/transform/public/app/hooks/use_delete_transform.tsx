@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -32,12 +33,14 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
 
-  const toggleDeleteIndex = useCallback(() => setDeleteDestIndex(!deleteDestIndex), [
-    deleteDestIndex,
-  ]);
-  const toggleDeleteIndexPattern = useCallback(() => setDeleteIndexPattern(!deleteIndexPattern), [
-    deleteIndexPattern,
-  ]);
+  const toggleDeleteIndex = useCallback(
+    () => setDeleteDestIndex(!deleteDestIndex),
+    [deleteDestIndex]
+  );
+  const toggleDeleteIndexPattern = useCallback(
+    () => setDeleteIndexPattern(!deleteIndexPattern),
+    [deleteIndexPattern]
+  );
   const checkIndexPatternExists = useCallback(
     async (indexName: string) => {
       try {
@@ -49,11 +52,10 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
 
         toastNotifications.addDanger(
           i18n.translate(
-            'xpack.transform.deleteTransform.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
+            'xpack.transform.deleteTransform.errorWithCheckingIfDataViewExistsNotificationErrorMessage',
             {
-              defaultMessage:
-                'An error occurred checking if index pattern {indexPattern} exists: {error}',
-              values: { indexPattern: indexName, error },
+              defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
+              values: { dataView: indexName, error },
             }
           )
         );
@@ -168,10 +170,9 @@ export const useDeleteTransforms = () => {
           if (status.destIndexPatternDeleted?.success) {
             toastNotifications.addSuccess(
               i18n.translate(
-                'xpack.transform.deleteTransform.deleteAnalyticsWithIndexPatternSuccessMessage',
+                'xpack.transform.deleteTransform.deleteAnalyticsWithDataViewSuccessMessage',
                 {
-                  defaultMessage:
-                    'Request to delete index pattern {destinationIndex} acknowledged.',
+                  defaultMessage: 'Request to delete data view {destinationIndex} acknowledged.',
                   values: { destinationIndex },
                 }
               )
@@ -217,9 +218,9 @@ export const useDeleteTransforms = () => {
           const error = status.destIndexPatternDeleted.error.reason;
           toastNotifications.addDanger({
             title: i18n.translate(
-              'xpack.transform.deleteTransform.deleteAnalyticsWithIndexPatternErrorMessage',
+              'xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage',
               {
-                defaultMessage: 'An error occurred deleting index pattern {destinationIndex}',
+                defaultMessage: 'An error occurred deleting data view {destinationIndex}',
                 values: { destinationIndex },
               }
             ),
@@ -254,9 +255,9 @@ export const useDeleteTransforms = () => {
       }
       if (successCount.destIndexPatternDeleted > 0) {
         toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.transformList.bulkDeleteDestIndexPatternSuccessMessage', {
+          i18n.translate('xpack.transform.transformList.bulkDeleteDestDataViewSuccessMessage', {
             defaultMessage:
-              'Successfully deleted {count} destination index {count, plural, one {pattern} other {patterns}}.',
+              'Successfully deleted {count} destination data {count, plural, one {view} other {views}}.',
             values: { count: successCount.destIndexPatternDeleted },
           })
         );

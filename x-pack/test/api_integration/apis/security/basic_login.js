@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import request from 'request';
+import { parse as parseCookie } from 'tough-cookie';
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
@@ -85,7 +86,7 @@ export default function ({ getService }) {
       const cookies = loginResponse.headers['set-cookie'];
       expect(cookies).to.have.length(1);
 
-      const sessionCookie = request.cookie(cookies[0]);
+      const sessionCookie = parseCookie(cookies[0]);
       expect(sessionCookie.key).to.be('sid');
       expect(sessionCookie.value).to.not.be.empty();
       expect(sessionCookie.path).to.be('/');
@@ -166,7 +167,7 @@ export default function ({ getService }) {
           })
           .expect(200);
 
-        sessionCookie = request.cookie(loginResponse.headers['set-cookie'][0]);
+        sessionCookie = parseCookie(loginResponse.headers['set-cookie'][0]);
       });
 
       it('should allow access to the API', async () => {
@@ -206,7 +207,7 @@ export default function ({ getService }) {
           .expect(200);
 
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieOne = request.cookie(apiResponseOne.headers['set-cookie'][0]);
+        const sessionCookieOne = parseCookie(apiResponseOne.headers['set-cookie'][0]);
 
         expect(sessionCookieOne.value).to.not.be.empty();
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
@@ -218,7 +219,7 @@ export default function ({ getService }) {
           .expect(200);
 
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieTwo = request.cookie(apiResponseTwo.headers['set-cookie'][0]);
+        const sessionCookieTwo = parseCookie(apiResponseTwo.headers['set-cookie'][0]);
 
         expect(sessionCookieTwo.value).to.not.be.empty();
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
@@ -255,7 +256,7 @@ export default function ({ getService }) {
         const cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const logoutCookie = request.cookie(cookies[0]);
+        const logoutCookie = parseCookie(cookies[0]);
         expect(logoutCookie.key).to.be('sid');
         expect(logoutCookie.value).to.be.empty();
         expect(logoutCookie.path).to.be('/');
@@ -302,11 +303,11 @@ export default function ({ getService }) {
         expect(loginViewResponse.headers.location).to.be('/');
       });
 
-      it('should redirect to home page if cookie is not provided', async () => {
+      it('should redirect to login page if cookie is not provided', async () => {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/login?msg=LOGGED_OUT');
       });
     });
   });

@@ -1,32 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
 
 import execa from 'execa';
 
+import { REPO_ROOT } from '@kbn/dev-utils';
+
 export type Changes = Map<string, 'modified' | 'deleted'>;
 
 /**
  * get the changes in all the context directories (plugin public paths)
  */
-export async function getChanges(dir: string) {
-  const { stdout } = await execa('git', ['ls-files', '-dmt', '--', dir], {
-    cwd: dir,
+export async function getChanges(relativeDir: string) {
+  const changes: Changes = new Map();
+
+  const { stdout } = await execa('git', ['ls-files', '-dmt', '--', relativeDir], {
+    cwd: REPO_ROOT,
   });
 
-  const changes: Changes = new Map();
   const output = stdout.trim();
 
   if (output) {
     for (const line of output.split('\n')) {
       const [tag, ...pathParts] = line.trim().split(' ');
-      const path = Path.resolve(dir, pathParts.join(' '));
+      const path = Path.resolve(REPO_ROOT, pathParts.join(' '));
       switch (tag) {
         case 'M':
         case 'C':

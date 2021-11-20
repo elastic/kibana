@@ -1,10 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { combineReducers } from 'redux';
+import { i18n } from '@kbn/i18n';
+import { capitalize } from 'lodash';
+import { createSelector } from 'reselect';
+
 import { license } from './license';
 import { uploadStatus } from './upload_status';
 import { startBasicStatus } from './start_basic_license_status';
@@ -134,3 +139,31 @@ export const startBasicLicenseNeedsAcknowledgement = (state) => {
 export const getStartBasicMessages = (state) => {
   return state.startBasicStatus.messages;
 };
+
+export const getLicenseState = createSelector(
+  getLicense,
+  getExpirationDateFormatted,
+  isExpired,
+  (license, expirationDate, isExpired) => {
+    const { isActive, type } = license;
+
+    return {
+      type: capitalize(type),
+      isExpired,
+      expirationDate,
+      status: isActive
+        ? i18n.translate(
+            'xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusText',
+            {
+              defaultMessage: 'active',
+            }
+          )
+        : i18n.translate(
+            'xpack.licenseMgmt.licenseDashboard.licenseStatus.inactiveLicenseStatusText',
+            {
+              defaultMessage: 'inactive',
+            }
+          ),
+    };
+  }
+);

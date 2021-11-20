@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, values, first } from 'lodash';
@@ -18,7 +19,7 @@ import {
   NormalizedMetricValueRT,
   PercentilesTypeRT,
   PercentilesKeyedTypeRT,
-  TopHitsTypeRT,
+  TopMetricsTypeRT,
   MetricValueTypeRT,
 } from '../types';
 
@@ -56,12 +57,16 @@ const getValue = (valueObject: ValueObjectType) => {
     return valueObject.value;
   }
 
-  if (TopHitsTypeRT.is(valueObject)) {
-    return valueObject.hits.hits.map((hit) => hit._source);
+  if (TopMetricsTypeRT.is(valueObject)) {
+    return valueObject.top.map((res) => res.metrics);
   }
 
   return null;
 };
+
+const dropOutOfBoundsBuckets =
+  (from: number, to: number, bucketSizeInMillis: number) => (row: MetricsAPIRow) =>
+    row.timestamp >= from && row.timestamp + bucketSizeInMillis <= to;
 
 const convertBucketsToRows = (
   options: MetricsAPIRequest,
@@ -80,7 +85,8 @@ const convertBucketsToRows = (
 export const convertHistogramBucketsToTimeseries = (
   keys: string[],
   options: MetricsAPIRequest,
-  buckets: HistogramBucket[]
+  buckets: HistogramBucket[],
+  bucketSizeInMillis: number
 ): MetricsAPISeries => {
   const id = keys.join(':');
   // If there are no metrics then we just return the empty series
@@ -93,7 +99,11 @@ export const convertHistogramBucketsToTimeseries = (
     type: 'number',
   })) as MetricsAPIColumn[];
   const allRows = convertBucketsToRows(options, buckets);
-  const rows = options.dropLastBucket ? allRows.slice(0, allRows.length - 1) : allRows;
+  const rows = options.dropPartialBuckets
+    ? allRows.filter(
+        dropOutOfBoundsBuckets(options.timerange.from, options.timerange.to, bucketSizeInMillis)
+      )
+    : allRows;
   return {
     id,
     keys,

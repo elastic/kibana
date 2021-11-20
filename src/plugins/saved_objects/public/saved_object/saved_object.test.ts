@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import Bluebird from 'bluebird';
 import { createSavedObjectClass } from './saved_object';
 import {
   SavedObject,
@@ -18,12 +17,10 @@ import { SavedObjectDecorator } from './decorators';
 
 import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
-import { getStubIndexPattern, StubIndexPattern } from '../../../../plugins/data/public/test_utils';
+import { createStubIndexPattern } from '../../../../plugins/data/common/stubs';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
-import { IIndexPattern } from '../../../data/common/index_patterns';
+import { DataView } from '../../../data/common';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
-
-const getConfig = (cfg: any) => cfg;
 
 describe('Saved Object', () => {
   const startMock = coreMock.createStart();
@@ -57,16 +54,16 @@ describe('Saved Object', () => {
    */
   function stubESResponse(mockDocResponse: SimpleSavedObject<SavedObjectAttributes>) {
     // Stub out search for duplicate title:
-    savedObjectsClientStub.get = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
-    savedObjectsClientStub.update = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
+    savedObjectsClientStub.get = jest.fn().mockReturnValue(Promise.resolve(mockDocResponse));
+    savedObjectsClientStub.update = jest.fn().mockReturnValue(Promise.resolve(mockDocResponse));
 
     savedObjectsClientStub.find = jest
       .fn()
-      .mockReturnValue(Bluebird.resolve({ savedObjects: [], total: 0 }));
+      .mockReturnValue(Promise.resolve({ savedObjects: [], total: 0 }));
 
     savedObjectsClientStub.bulkGet = jest
       .fn()
-      .mockReturnValue(Bluebird.resolve({ savedObjects: [mockDocResponse] }));
+      .mockReturnValue(Promise.resolve({ savedObjects: [mockDocResponse] }));
   }
 
   function stubSavedObjectsClientCreate(
@@ -75,7 +72,7 @@ describe('Saved Object', () => {
   ) {
     savedObjectsClientStub.create = jest
       .fn()
-      .mockReturnValue(resolve ? Bluebird.resolve(resp) : Bluebird.reject(resp));
+      .mockReturnValue(resolve ? Promise.resolve(resp) : Promise.reject(resp));
   }
 
   /**
@@ -95,7 +92,7 @@ describe('Saved Object', () => {
 
   const initSavedObjectClass = () => {
     SavedObjectClass = createSavedObjectClass(
-      ({
+      {
         savedObjectsClient: savedObjectsClientStub,
         indexPatterns: dataStartMock.indexPatterns,
         search: {
@@ -106,7 +103,7 @@ describe('Saved Object', () => {
             createEmpty: createSearchSourceMock,
           },
         },
-      } as unknown) as SavedObjectKibanaServices,
+      } as unknown as SavedObjectKibanaServices,
       decoratorRegistry
     );
   };
@@ -264,7 +261,7 @@ describe('Saved Object', () => {
         return createInitializedSavedObject({ type: 'dashboard', id: myId }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.id).toBe(myId);
-            return Bluebird.resolve({ id: myId });
+            return Promise.resolve({ id: myId });
           });
           savedObject.copyOnSave = false;
 
@@ -298,7 +295,7 @@ describe('Saved Object', () => {
         return createInitializedSavedObject({ type: 'dashboard', id }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.isSaving).toBe(true);
-            return Bluebird.resolve({
+            return Promise.resolve({
               type: 'dashboard',
               id,
               _version: 'foo',
@@ -317,7 +314,7 @@ describe('Saved Object', () => {
         return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.isSaving).toBe(true);
-            return Bluebird.reject('');
+            return Promise.reject('');
           });
 
           expect(savedObject.isSaving).toBe(false);
@@ -375,14 +372,9 @@ describe('Saved Object', () => {
               type: 'dashboard',
             } as SimpleSavedObject<SavedObjectAttributes>);
 
-            const indexPattern = getStubIndexPattern(
-              'my-index',
-              getConfig,
-              null,
-              [],
-              coreMock.createSetup()
-            );
-            indexPattern.title = indexPattern.id!;
+            const indexPattern = createStubIndexPattern({
+              spec: { id: 'my-index', title: 'my-index' },
+            });
             savedObject.searchSource!.setField('index', indexPattern);
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
@@ -416,13 +408,12 @@ describe('Saved Object', () => {
               type: 'dashboard',
             } as SimpleSavedObject<SavedObjectAttributes>);
 
-            const indexPattern = getStubIndexPattern(
-              'non-existant-index',
-              getConfig,
-              null,
-              [],
-              coreMock.createSetup()
-            );
+            const indexPattern = createStubIndexPattern({
+              spec: {
+                id: 'non-existant-index',
+              },
+            });
+
             savedObject.searchSource!.setFields({ index: indexPattern });
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
@@ -661,13 +652,13 @@ describe('Saved Object', () => {
 
     it('passes references to search source parsing function', async () => {
       SavedObjectClass = createSavedObjectClass(
-        ({
+        {
           savedObjectsClient: savedObjectsClientStub,
           indexPatterns: dataStartMock.indexPatterns,
           search: {
             ...dataStartMock.search,
           },
-        } as unknown) as SavedObjectKibanaServices,
+        } as unknown as SavedObjectKibanaServices,
         decoratorRegistry
       );
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });
@@ -733,7 +724,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: true,
-          indexPattern: { id: indexPatternId } as IIndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(
@@ -746,23 +737,21 @@ describe('Saved Object', () => {
 
         const savedObject = new SavedObjectClass(config);
         savedObject.hydrateIndexPattern = jest.fn().mockImplementation(() => {
-          const indexPattern = getStubIndexPattern(
-            indexPatternId,
-            getConfig,
-            null,
-            [],
-            coreMock.createSetup()
-          );
-          indexPattern.title = indexPattern.id!;
+          const indexPattern = createStubIndexPattern({
+            spec: {
+              id: indexPatternId,
+              title: indexPatternId,
+            },
+          });
           savedObject.searchSource!.setField('index', indexPattern);
-          return Bluebird.resolve(indexPattern);
+          return Promise.resolve(indexPattern);
         });
         expect(!!savedObject.searchSource!.getField('index')).toBe(false);
 
         return savedObject.init!().then(() => {
           expect(afterESRespCallback).toHaveBeenCalled();
           const index = savedObject.searchSource!.getField('index');
-          expect(index instanceof StubIndexPattern).toBe(true);
+          expect(index instanceof DataView).toBe(true);
           expect(index!.id).toEqual(indexPatternId);
         });
       });
@@ -775,7 +764,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: false,
-          indexPattern: { id: indexPatternId } as IIndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(getMockedDocResponse(indexPatternId));

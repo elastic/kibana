@@ -1,78 +1,96 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { FC, memo } from 'react';
-import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
-import styled from 'styled-components';
-import { SecurityPageName } from '../../../common/constants';
-import { WrapperPage } from '../../common/components/wrapper_page';
-import { HeaderPage } from '../../common/components/header_page';
-import { SiemNavigation } from '../../common/components/navigation';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { AdministrationSubTab } from '../types';
-import { ENDPOINTS_TAB, TRUSTED_APPS_TAB, BETA_BADGE_LABEL } from '../common/translations';
-import { getEndpointListPath, getTrustedAppsListPath } from '../common/routing';
 
-/** Ensure that all flyouts z-index in Administation area show the flyout header */
-const EuiPanelStyled = styled(EuiPanel)`
-  .euiFlyout {
-    z-index: ${({ theme }) => theme.eui.euiZNavigation + 1};
-  }
-`;
+import React, { FC, memo, useMemo } from 'react';
+import {
+  CommonProps,
+  EuiPageHeader,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
+import { SecurityPageName } from '../../../common/constants';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { useTestIdGenerator } from './hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
-  beta: boolean;
   title: React.ReactNode;
-  subtitle: React.ReactNode;
+  subtitle?: React.ReactNode;
   actions?: React.ReactNode;
+  restrictWidth?: boolean | number;
+  hasBottomBorder?: boolean;
+  hideHeader?: boolean;
   headerBackComponent?: React.ReactNode;
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
-    const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
+  ({
+    title,
+    subtitle,
+    actions,
+    children,
+    restrictWidth = false,
+    hasBottomBorder = true,
+    hideHeader = false,
+    headerBackComponent,
+    ...otherProps
+  }) => {
+    const header = useMemo(() => {
+      return (
+        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+          <EuiFlexItem grow={false}>
+            {headerBackComponent && <>{headerBackComponent}</>}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <span data-test-subj="header-page-title">{title}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }, [headerBackComponent, title]);
+
+    const description = useMemo(() => {
+      return subtitle ? <span data-test-subj="header-panel-subtitle">{subtitle}</span> : undefined;
+    }, [subtitle]);
+
+    const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
 
     return (
-      <WrapperPage noTimeline {...otherProps}>
-        <HeaderPage
-          hideSourcerer={true}
-          title={title}
-          subtitle={subtitle}
-          backComponent={headerBackComponent}
-          badgeOptions={badgeOptions}
+      <div {...otherProps}>
+        {!hideHeader && (
+          <>
+            <EuiPageHeader
+              pageTitle={header}
+              description={description}
+              bottomBorder={hasBottomBorder}
+              rightSideItems={actions ? [actions] : undefined}
+              restrictWidth={restrictWidth}
+              data-test-subj={getTestId('header')}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        <EuiPageContent
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="none"
+          color="transparent"
+          borderRadius="none"
         >
-          {actions}
-        </HeaderPage>
-
-        <SiemNavigation
-          navTabs={{
-            [AdministrationSubTab.endpoints]: {
-              name: ENDPOINTS_TAB,
-              id: AdministrationSubTab.endpoints,
-              href: getEndpointListPath({ name: 'endpointList' }),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-            [AdministrationSubTab.trustedApps]: {
-              name: TRUSTED_APPS_TAB,
-              id: AdministrationSubTab.trustedApps,
-              href: getTrustedAppsListPath(),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-          }}
-        />
-
-        <EuiSpacer />
-
-        <EuiPanelStyled>{children}</EuiPanelStyled>
+          <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
+        </EuiPageContent>
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </WrapperPage>
+      </div>
     );
   }
 );

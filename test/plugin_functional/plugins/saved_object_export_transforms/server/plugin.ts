@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
@@ -90,8 +90,6 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
       },
     });
 
-    /////////////
-    /////////////
     // example of a SO type that will throw an object-transform-error
     savedObjects.registerType({
       name: 'test-export-transform-error',
@@ -134,8 +132,107 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
         },
       },
     });
+
+    // example of a SO type that is exportable while being hidden
+    savedObjects.registerType({
+      name: 'test-actions-export-hidden',
+      hidden: true,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: {
+            type: 'boolean',
+          },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle: (obj) => obj.attributes.title,
+      },
+    });
+
+    // example of a SO type implementing the `isExportable` API
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-is-exportable',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle: (obj) => obj.attributes.title,
+        isExportable: (obj) => {
+          if (obj.id === 'error') {
+            throw new Error('something went wrong');
+          }
+          return obj.attributes.enabled === true;
+        },
+      },
+    });
+
+    // example of a SO type with `visibleInManagement: false`
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-not-visible-in-management',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        visibleInManagement: false,
+      },
+    });
+
+    // example of a SO type with `visibleInManagement: true`
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-visible-in-management',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        visibleInManagement: true,
+      },
+    });
+
+    // example of a SO type specifying a display name
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-with-display-name',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        displayName: 'my display name',
+      },
+    });
   }
 
   public start() {}
+
   public stop() {}
 }

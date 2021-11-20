@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -11,7 +11,7 @@ import { XJson } from '../../../../es_ui_shared/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
-export function textFromRequest(request: any) {
+export function textFromRequest(request: { method: string; url: string; data: string | string[] }) {
   let data = request.data;
   if (typeof data !== 'string') {
     data = data.join('\n');
@@ -19,7 +19,7 @@ export function textFromRequest(request: any) {
   return request.method + ' ' + request.url + '\n' + data;
 }
 
-export function jsonToString(data: any, indent: boolean) {
+export function jsonToString(data: object, indent: boolean) {
   return JSON.stringify(data, null, indent ? 2 : 0);
 }
 
@@ -48,14 +48,15 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
   };
 }
 
-export function extractDeprecationMessages(warnings: string) {
+export function extractWarningMessages(warnings: string) {
   // pattern for valid warning header
-  const re = /\d{3} [0-9a-zA-Z!#$%&'*+-.^_`|~]+ \"((?:\t| |!|[\x23-\x5b]|[\x5d-\x7e]|[\x80-\xff]|\\\\|\\")*)\"(?: \"[^"]*\")?/;
+  const re =
+    /\d{3} [0-9a-zA-Z!#$%&'*+-.^_`|~]+ \"((?:\t| |!|[\x23-\x5b]|[\x5d-\x7e]|[\x80-\xff]|\\\\|\\")*)\"(?: \"[^"]*\")?/;
   // split on any comma that is followed by an even number of quotes
   return _.map(splitOnUnquotedCommaSpace(warnings), (warning) => {
     const match = re.exec(warning);
     // extract the actual warning if there was a match
-    return '#! Deprecation: ' + (match !== null ? unescape(match[1]) : warning);
+    return '#! ' + (match !== null ? unescape(match[1]) : warning);
   });
 }
 

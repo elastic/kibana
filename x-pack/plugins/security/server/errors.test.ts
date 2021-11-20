@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { errors as legacyESErrors } from 'elasticsearch';
+import Boom from '@hapi/boom';
+
 import * as errors from './errors';
 import { securityMock } from './mocks';
 
@@ -70,11 +71,6 @@ describe('lib/errors', () => {
       ).toBe(401);
     });
 
-    it('extracts status code from legacy Elasticsearch client error', () => {
-      expect(errors.getErrorStatusCode(new legacyESErrors.BadRequest())).toBe(400);
-      expect(errors.getErrorStatusCode(new legacyESErrors.AuthenticationException())).toBe(401);
-    });
-
     it('extracts status code from `status` property', () => {
       expect(errors.getErrorStatusCode({ statusText: 'Bad Request', status: 400 })).toBe(400);
       expect(errors.getErrorStatusCode({ statusText: 'Unauthorized', status: 401 })).toBe(401);
@@ -116,13 +112,6 @@ describe('lib/errors', () => {
           )
         )
       ).toBe(JSON.stringify({ field1: 'value-1', field2: 'value-2' }));
-    });
-
-    it('extracts status code from legacy Elasticsearch client error', () => {
-      expect(errors.getDetailedErrorMessage(new legacyESErrors.BadRequest())).toBe('Bad Request');
-      expect(errors.getDetailedErrorMessage(new legacyESErrors.AuthenticationException())).toBe(
-        'Authentication Exception'
-      );
     });
 
     it('extracts `message` property', () => {

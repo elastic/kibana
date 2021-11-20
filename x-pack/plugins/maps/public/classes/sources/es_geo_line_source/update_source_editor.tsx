@@ -1,23 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Component } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import {
-  IFieldType,
-  IndexPattern,
-  indexPatterns,
-} from '../../../../../../../src/plugins/data/public';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';
 import { AggDescriptor } from '../../../../common/descriptor_types';
-import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../source';
 
 interface Props {
   indexPatternId: string;
@@ -29,7 +27,7 @@ interface Props {
 
 interface State {
   indexPattern: IndexPattern | null;
-  fields: IFieldType[];
+  fields: IndexPatternField[];
 }
 
 export class UpdateSourceEditor extends Component<Props, State> {

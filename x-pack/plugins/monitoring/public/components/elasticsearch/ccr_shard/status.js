@@ -1,27 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import { get } from 'lodash';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 import { AlertsStatus } from '../../../alerts/status';
 
 export function Status({ stat, formattedLeader, oldestStat, alerts = {} }) {
-  const {
-    follower_index: followerIndex,
-    shard_id: shardId,
-    operations_written: operationsReceived,
-    failed_read_requests: failedFetches,
-  } = stat;
-
-  const {
-    operations_written: oldestOperationsReceived,
-    failed_read_requests: oldestFailedFetches,
-  } = oldestStat;
+  const followerIndex = stat.follower_index || get(stat, 'follower.index');
+  const shardId =
+    typeof stat.shard_id === 'number' ? stat.shard_id : get(stat, 'follower.shard.number');
+  const operationsReceived = stat.operations_written || get(stat, 'follower.operations_written');
+  const failedFetches = stat.failed_read_requests || get(stat, 'requests.failed.read.count');
+  const oldestOperationsReceived =
+    oldestStat.operations_written || get(oldestStat, 'follower.operations_written');
+  const oldestFailedFetches =
+    oldestStat.failed_read_requests || get(oldestStat, 'requests.failed.read.count');
 
   const metrics = [
     {

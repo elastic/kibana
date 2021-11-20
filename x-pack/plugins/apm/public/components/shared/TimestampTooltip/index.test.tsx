@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -28,6 +29,7 @@ describe('TimestampTooltip', () => {
       <EuiToolTip
         content="Oct 10, 2019, 08:06:40.123 (UTC-7)"
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         5 hours ago

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import getAnnotationsRequestMock from './__mocks__/get_annotations_request.json';
 import getAnnotationsResponseMock from './__mocks__/get_annotations_response.json';
 
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
-import { ML_ANNOTATIONS_INDEX_ALIAS_WRITE } from '../../../common/constants/index_patterns';
 import { Annotation, isAnnotations } from '../../../common/types/annotations';
 
 import { DeleteParams, GetResponse, IndexAnnotationArgs } from './annotation';
@@ -41,7 +41,7 @@ describe('annotation_service', () => {
 
       const annotationMockId = 'mockId';
       const deleteParamsMock: DeleteParams = {
-        index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+        index: '.ml-annotations-6',
         id: annotationMockId,
         refresh: 'wait_for',
       };

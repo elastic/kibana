@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -40,6 +41,7 @@ export type FetchJobStatusRequestPayload = rt.TypeOf<typeof fetchJobStatusReques
 
 const datafeedStateRT = rt.keyof({
   started: null,
+  starting: null,
   stopped: null,
   stopping: null,
   '': null,
@@ -88,6 +90,7 @@ export const jobSummaryRT = rt.intersection([
     jobState: jobStateRT,
   }),
   rt.partial({
+    awaitingNodeAssignment: rt.boolean,
     datafeedIndices: rt.array(rt.string),
     datafeedState: datafeedStateRT,
     fullJob: rt.partial({
@@ -96,6 +99,9 @@ export const jobSummaryRT = rt.intersection([
       custom_settings: jobCustomSettingsRT,
       finished_time: rt.number,
       model_size_stats: jobModelSizeStatsRT,
+      datafeed_config: rt.partial({
+        runtime_mappings: rt.UnknownRecord,
+      }),
     }),
   }),
 ]);

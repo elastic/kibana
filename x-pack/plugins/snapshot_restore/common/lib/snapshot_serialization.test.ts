@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { deserializeSnapshotDetails, serializeSnapshotConfig } from './snapshot_serialization';
@@ -11,10 +12,10 @@ describe('Snapshot serialization and deserialization', () => {
     test('deserializes a snapshot', () => {
       expect(
         deserializeSnapshotDetails(
-          'repositoryName',
           {
             snapshot: 'snapshot name',
             uuid: 'UUID',
+            repository: 'repositoryName',
             version_id: 5,
             version: 'version',
             indices: ['index2', 'index3', 'index1'],
@@ -54,6 +55,7 @@ describe('Snapshot serialization and deserialization', () => {
             {
               snapshot: 'last_successful_snapshot',
               uuid: 'last_successful_snapshot_UUID',
+              repository: 'repositoryName',
               version_id: 5,
               version: 'version',
               indices: ['index2', 'index3', 'index1'],

@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./account_management_page');
 
-import { AppMount, AppNavLinkStatus } from 'src/core/public';
-import { UserAPIClient } from '../management';
-import { accountManagementApp } from './account_management_app';
+import type { AppMount } from 'src/core/public';
+import { AppNavLinkStatus } from 'src/core/public';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 
-import { coreMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
+import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
+import { accountManagementApp } from './account_management_app';
 
 describe('accountManagementApp', () => {
   it('properly registers application', () => {
@@ -56,6 +58,7 @@ describe('accountManagementApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
+      theme$: themeServiceMock.createTheme$(),
     });
 
     expect(coreStartMock.chrome.setBreadcrumbs).toHaveBeenCalledTimes(1);

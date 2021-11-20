@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { FieldFormatsStartCommon } from '../../../../field_formats/common';
 
 import * as buckets from './buckets';
 import * as metrics from './metrics';
@@ -29,6 +29,7 @@ export const getAggTypes = () => ({
     { name: METRIC_TYPES.AVG, fn: metrics.getAvgMetricAgg },
     { name: METRIC_TYPES.SUM, fn: metrics.getSumMetricAgg },
     { name: METRIC_TYPES.MEDIAN, fn: metrics.getMedianMetricAgg },
+    { name: METRIC_TYPES.SINGLE_PERCENTILE, fn: metrics.getSinglePercentileMetricAgg },
     { name: METRIC_TYPES.MIN, fn: metrics.getMinMetricAgg },
     { name: METRIC_TYPES.MAX, fn: metrics.getMaxMetricAgg },
     { name: METRIC_TYPES.STD_DEV, fn: metrics.getStdDeviationMetricAgg },
@@ -44,6 +45,7 @@ export const getAggTypes = () => ({
     { name: METRIC_TYPES.SUM_BUCKET, fn: metrics.getBucketSumMetricAgg },
     { name: METRIC_TYPES.MIN_BUCKET, fn: metrics.getBucketMinMetricAgg },
     { name: METRIC_TYPES.MAX_BUCKET, fn: metrics.getBucketMaxMetricAgg },
+    { name: METRIC_TYPES.FILTERED_METRIC, fn: metrics.getFilteredMetricAgg },
     { name: METRIC_TYPES.GEO_BOUNDS, fn: metrics.getGeoBoundsMetricAgg },
     { name: METRIC_TYPES.GEO_CENTROID, fn: metrics.getGeoCentroidMetricAgg },
   ],
@@ -80,6 +82,7 @@ export const getAggTypesFunctions = () => [
   metrics.aggBucketMax,
   metrics.aggBucketMin,
   metrics.aggBucketSum,
+  metrics.aggFilteredMetric,
   metrics.aggCardinality,
   metrics.aggCount,
   metrics.aggCumulativeSum,
@@ -88,6 +91,7 @@ export const getAggTypesFunctions = () => [
   metrics.aggGeoCentroid,
   metrics.aggMax,
   metrics.aggMedian,
+  metrics.aggSinglePercentile,
   metrics.aggMin,
   metrics.aggMovingAvg,
   metrics.aggPercentileRanks,

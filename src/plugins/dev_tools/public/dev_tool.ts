@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { AppMount } from 'src/core/public';
@@ -26,9 +26,15 @@ export class DevToolApp {
   /**
    * The human readable name of the dev tool. Should be internationalized.
    * This will be used as a label in the tab above the actual tool.
+   * May also be a ReactNode.
    */
   public readonly title: string;
   public readonly mount: AppMount;
+
+  /**
+   * Mark the navigation tab as beta.
+   */
+  public readonly isBeta?: boolean;
 
   /**
    * Flag indicating to disable the tab of this dev tool. Navigating to a
@@ -60,7 +66,8 @@ export class DevToolApp {
     enableRouting: boolean,
     order: number,
     toolTipContent = '',
-    disabled = false
+    disabled = false,
+    isBeta?: boolean
   ) {
     this.id = id;
     this.title = title;
@@ -69,6 +76,7 @@ export class DevToolApp {
     this.order = order;
     this.tooltipContent = toolTipContent;
     this.disabled = disabled;
+    this.isBeta = isBeta;
   }
 
   public enable() {
@@ -92,5 +100,6 @@ export const createDevToolApp = ({
   order,
   tooltipContent,
   disabled,
+  isBeta,
 }: CreateDevToolArgs) =>
-  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled);
+  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled, isBeta);

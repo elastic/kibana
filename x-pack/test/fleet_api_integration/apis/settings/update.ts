@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { Client } from 'elasticsearch';
+import { AGENT_POLICY_INDEX } from '../../../../plugins/fleet/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -14,10 +15,14 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const esClient: Client = getService('legacyEs');
+  const esClient = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('Settings - update', async function () {
     skipIfNoDockerRegistry(providerContext);
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
     setupFleetAndAgents(providerContext);
 
     const createdAgentPolicyIds: string[] = [];
@@ -27,10 +32,24 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId })
-          .expect(200)
       );
       await Promise.all(deletedPromises);
     });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
+
+    it('should explicitly set port on fleet_server_hosts', async function () {
+      await supertest
+        .put(`/api/fleet/settings`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ fleet_server_hosts: ['https://test.fr'] })
+        .expect(200);
+
+      const { body: getSettingsRes } = await supertest.get(`/api/fleet/settings`).expect(200);
+      expect(getSettingsRes.item.fleet_server_hosts).to.eql(['https://test.fr:443']);
+    });
+
     it("should bump all agent policy's revision", async function () {
       const { body: testPolicy1PostRes } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -55,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .put(`/api/fleet/settings`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] })
+        .send({ fleet_server_hosts: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] })
         .expect(200);
 
       const getTestPolicy1Res = await kibanaServer.savedObjects.get({
@@ -82,18 +101,12 @@ export default function (providerContext: FtrProviderContext) {
       createdAgentPolicyIds.push(testPolicyRes.item.id);
 
       const beforeRes = await esClient.search({
-        index: '.kibana',
+        index: AGENT_POLICY_INDEX,
+        ignore_unavailable: true,
         body: {
           query: {
-            bool: {
-              must: [
-                {
-                  terms: {
-                    type: ['fleet-agent-actions'],
-                  },
-                },
-                { match: { 'fleet-agent-actions.policy_id': testPolicyRes.item.id } },
-              ],
+            term: {
+              policy_id: testPolicyRes.item.id,
             },
           },
         },
@@ -102,22 +115,16 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .put(`/api/fleet/settings`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ kibana_urls: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] })
+        .send({ fleet_server_hosts: ['http://localhost:1232/abc', 'http://localhost:1232/abc'] })
         .expect(200);
 
       const res = await esClient.search({
-        index: '.kibana',
+        index: AGENT_POLICY_INDEX,
+        ignore_unavailable: true,
         body: {
           query: {
-            bool: {
-              must: [
-                {
-                  terms: {
-                    type: ['fleet-agent-actions'],
-                  },
-                },
-                { match: { 'fleet-agent-actions.policy_id': testPolicyRes.item.id } },
-              ],
+            term: {
+              policy_id: testPolicyRes.item.id,
             },
           },
         },

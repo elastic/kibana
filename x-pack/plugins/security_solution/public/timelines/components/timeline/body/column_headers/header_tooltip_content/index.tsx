@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiIcon } from '@elastic/eui';
@@ -9,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../../../common';
 import { getIconFromType } from '../../../../../../common/components/event_details/helpers';
 import * as i18n from '../translations';
 
@@ -60,7 +61,7 @@ export const HeaderToolTipContent = React.memo<{ header: ColumnHeaderOptions }>(
         {':'}
       </ToolTipTableMetadata>
       <ToolTipTableValue>
-        <IconType data-test-subj="type-icon" type={getIconFromType(header.type!)} />
+        <IconType data-test-subj="type-icon" type={getIconFromType(header.type)} />
         <span data-test-subj="type-value">{header.type}</span>
       </ToolTipTableValue>
     </P>

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
@@ -123,7 +125,7 @@ describe('ESGeoGridSource', () => {
     getHttp.mockReturnValue({
       basePath: {
         prepend(path: string) {
-          return `rootdir${path};`;
+          return `rootdir${path}`;
         },
       },
     });
@@ -142,6 +144,7 @@ describe('ESGeoGridSource', () => {
   };
 
   const vectorSourceRequestMeta: VectorSourceRequestMeta = {
+    isReadOnly: false,
     geogridPrecision: 4,
     filters: [],
     timeFilters: {
@@ -152,15 +155,16 @@ describe('ESGeoGridSource', () => {
     extent,
     applyGlobalQuery: true,
     applyGlobalTime: true,
+    applyForceRefresh: true,
     fieldNames: [],
     buffer: extent,
     sourceQuery: {
       query: '',
       language: 'KQL',
-      queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
     },
     sourceMeta: null,
     zoom: 0,
+    isForceRefresh: false,
   };
 
   describe('getGeoJsonWithMeta', () => {
@@ -203,7 +207,31 @@ describe('ESGeoGridSource', () => {
       expect(getProperty('query')).toEqual(undefined);
       expect(getProperty('filter')).toEqual([
         {
-          geo_bounding_box: { bar: { bottom_right: [180, -82.67628], top_left: [-180, 82.67628] } },
+          meta: {
+            alias: null,
+            disabled: false,
+            key: 'bar',
+            negate: false,
+          },
+          query: {
+            bool: {
+              must: [
+                {
+                  exists: {
+                    field: 'bar',
+                  },
+                },
+                {
+                  geo_bounding_box: {
+                    bar: {
+                      top_left: [-180, 82.67628],
+                      bottom_right: [180, -82.67628],
+                    },
+                  },
+                },
+              ],
+            },
+          },
         },
       ]);
       expect(getProperty('aggs')).toEqual({
@@ -254,28 +282,41 @@ describe('ESGeoGridSource', () => {
   });
 
   describe('ITiledSingleLayerVectorSource', () => {
+    const mvtGeogridSource = new ESGeoGridSource(
+      {
+        id: 'foobar',
+        indexPatternId: 'fooIp',
+        geoField: geoFieldName,
+        metrics: [],
+        resolution: GRID_RESOLUTION.SUPER_FINE,
+        type: SOURCE_TYPES.ES_GEO_GRID,
+        requestType: RENDER_AS.HEATMAP,
+      },
+      {}
+    );
+
     it('getLayerName', () => {
-      expect(geogridSource.getLayerName()).toBe('source_layer');
+      expect(mvtGeogridSource.getLayerName()).toBe('aggs');
     });
 
     it('getMinZoom', () => {
-      expect(geogridSource.getMinZoom()).toBe(0);
+      expect(mvtGeogridSource.getMinZoom()).toBe(0);
     });
 
     it('getMaxZoom', () => {
-      expect(geogridSource.getMaxZoom()).toBe(24);
+      expect(mvtGeogridSource.getMaxZoom()).toBe(24);
     });
 
     it('getUrlTemplateWithMeta', async () => {
-      const urlTemplateWithMeta = await geogridSource.getUrlTemplateWithMeta(
+      const urlTemplateWithMeta = await mvtGeogridSource.getUrlTemplateWithMeta(
         vectorSourceRequestMeta
       );
 
-      expect(urlTemplateWithMeta.layerName).toBe('source_layer');
+      expect(urlTemplateWithMeta.layerName).toBe('aggs');
       expect(urlTemplateWithMeta.minSourceZoom).toBe(0);
       expect(urlTemplateWithMeta.maxSourceZoom).toBe(24);
-      expect(urlTemplateWithMeta.urlTemplate).toBe(
-        "rootdir/api/maps/mvt/getGridTile;?x={x}&y={y}&z={z}&geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!((geo_bounding_box:(bar:(bottom_right:!(180,-82.67628),top_left:!(-180,82.67628)))))),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point"
+      expect(urlTemplateWithMeta.urlTemplate).toEqual(
+        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':())))&requestType=heatmap"
       );
     });
   });

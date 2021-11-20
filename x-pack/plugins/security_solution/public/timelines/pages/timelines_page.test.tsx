@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -26,7 +27,7 @@ jest.mock('../../common/containers/sourcerer', () => {
 
   return {
     ...originalModule,
-    useSourcererScope: jest.fn().mockReturnValue({
+    useSourcererDataView: jest.fn().mockReturnValue({
       indicesExist: true,
     }),
   };
@@ -45,7 +46,7 @@ describe('TimelinesPageComponent', () => {
 
   describe('If the user is authorized', () => {
     beforeAll(() => {
-      ((useKibana as unknown) as jest.Mock).mockReturnValue({
+      (useKibana as unknown as jest.Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
@@ -60,7 +61,7 @@ describe('TimelinesPageComponent', () => {
     });
 
     afterAll(() => {
-      ((useKibana as unknown) as jest.Mock).mockReset();
+      (useKibana as unknown as jest.Mock).mockReset();
     });
 
     test('should not show the import timeline modal by default', () => {
@@ -91,7 +92,7 @@ describe('TimelinesPageComponent', () => {
 
   describe('If the user is not authorized', () => {
     beforeAll(() => {
-      ((useKibana as unknown) as jest.Mock).mockReturnValue({
+      (useKibana as unknown as jest.Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
@@ -106,7 +107,7 @@ describe('TimelinesPageComponent', () => {
     });
 
     afterAll(() => {
-      ((useKibana as unknown) as jest.Mock).mockReset();
+      (useKibana as unknown as jest.Mock).mockReset();
     });
     test('should not show the import timeline modal by default', () => {
       expect(

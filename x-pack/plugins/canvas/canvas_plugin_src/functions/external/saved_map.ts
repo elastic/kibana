@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
@@ -13,7 +14,8 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { MapEmbeddableInput } from '../../../../../plugins/maps/public/embeddable';
+import { MapEmbeddableInput } from '../../../../../plugins/maps/public';
+import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
   id: string;
@@ -28,7 +30,7 @@ const defaultTimeRange = {
   to: 'now',
 };
 
-type Output = EmbeddableExpression<MapEmbeddableInput>;
+type Output = EmbeddableExpression<MapEmbeddableInput & { savedObjectId: string }>;
 
 export function savedMap(): ExpressionFunctionDefinition<
   'savedMap',
@@ -83,8 +85,9 @@ export function savedMap(): ExpressionFunctionDefinition<
       return {
         type: EmbeddableExpressionType,
         input: {
-          attributes: { title: '' },
           id: args.id,
+          attributes: { title: '' },
+          savedObjectId: args.id,
           filters: getQueryFilters(filters),
           timeRange: args.timerange || defaultTimeRange,
           refreshConfig: {
@@ -101,6 +104,31 @@ export function savedMap(): ExpressionFunctionDefinition<
         embeddableType: EmbeddableTypes.map,
         generatedAt: Date.now(),
       };
+    },
+    extract(state) {
+      const refName = 'savedMap.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'map',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedMap.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
     },
   };
 }

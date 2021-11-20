@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiProgress } from '@elastic/eui';
@@ -37,7 +38,7 @@ export const ProgressInline = React.memo<ProgressInlineProps>(
       <dt className="siemProgressInline__title">{children}</dt>
 
       <dd className="siemProgressInline__bar">
-        <EuiProgress color="secondary" max={max} value={current} />
+        <EuiProgress color="success" max={max} value={current} />
       </dd>
 
       <dd className="siemProgressInline__ratio">

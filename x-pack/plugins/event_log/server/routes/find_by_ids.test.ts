@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServiceMock } from 'src/core/server/mocks';
@@ -40,7 +41,7 @@ describe('find_by_ids', () => {
       eventLogClient,
       {
         params: { type: 'action' },
-        body: { ids: ['1'] },
+        body: { ids: ['1'], legacyIds: ['2'] },
       },
       ['ok']
     );
@@ -49,9 +50,10 @@ describe('find_by_ids', () => {
 
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [type, ids] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
+    const [type, ids, , legacyIds] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
     expect(ids).toEqual(['1']);
+    expect(legacyIds).toEqual(['2']);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: result,

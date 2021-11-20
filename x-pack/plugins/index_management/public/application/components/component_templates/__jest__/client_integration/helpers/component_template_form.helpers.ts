@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act } from 'react-dom/test-utils';
 
 import { TestBed } from '@kbn/test/jest';
@@ -63,7 +65,7 @@ export const getFormActions = (testBed: TestBed) => {
 
     await act(async () => {
       if (settings) {
-        find('mockCodeEditor').simulate('change', {
+        find('settingsEditor').simulate('change', {
           jsonString: JSON.stringify(settings),
         }); // Using mocked EuiCodeEditor
       }
@@ -116,7 +118,7 @@ export const getFormActions = (testBed: TestBed) => {
 
     await act(async () => {
       if (aliases) {
-        find('mockCodeEditor').simulate('change', {
+        find('aliasesEditor').simulate('change', {
           jsonString: JSON.stringify(aliases),
         }); // Using mocked EuiCodeEditor
       }
@@ -159,4 +161,6 @@ export type ComponentTemplateFormTestSubjects =
   | 'stepReview.summaryTab'
   | 'stepReview.requestTab'
   | 'versionField'
+  | 'aliasesEditor'
+  | 'settingsEditor'
   | 'versionField.input';

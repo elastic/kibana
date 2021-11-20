@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
@@ -140,9 +141,7 @@ describe('node data model', () => {
             requestedNodes: new Set(['1']),
             numberOfRequestedEvents: 0,
           })
-        ).toEqual(
-          new Map<string, NodeData>([['2', { events: node2Events, status: 'error' }]])
-        );
+        ).toEqual(new Map<string, NodeData>([['2', { events: node2Events, status: 'error' }]]));
       });
 
       it('attempts to remove entries from the map even if they do not exist', () => {

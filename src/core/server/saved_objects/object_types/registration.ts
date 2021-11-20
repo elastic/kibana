@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { LEGACY_URL_ALIAS_TYPE } from './constants';
@@ -13,10 +13,18 @@ const legacyUrlAliasType: SavedObjectsType = {
   name: LEGACY_URL_ALIAS_TYPE,
   namespaceType: 'agnostic',
   mappings: {
-    dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
-    properties: {},
+    dynamic: false,
+    properties: {
+      sourceId: { type: 'keyword' },
+      targetNamespace: { type: 'keyword' },
+      targetType: { type: 'keyword' },
+      targetId: { type: 'keyword' },
+      resolveCounter: { type: 'long' },
+      disabled: { type: 'boolean' },
+      // other properties exist, but we aren't querying or aggregating on those, so we don't need to specify them (because we use `dynamic: false` above)
+    },
   },
-  hidden: true,
+  hidden: false,
 };
 
 /**

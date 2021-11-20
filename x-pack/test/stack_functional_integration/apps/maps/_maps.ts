@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,13 +15,12 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const screenshot = getService('screenshots');
   const browser = getService('browser');
-  const find = getService('find');
-  const PageObjects = getPageObjects(['maps']);
+  const PageObjects = getPageObjects(['common', 'maps']);
 
   describe('check Elastic Maps Server', function () {
     before(async function () {
       await PageObjects.maps.loadSavedMap('EMS Test');
-      await find.clickByButtonText('Dismiss');
+      await PageObjects.common.dismissBanner();
       await browser.setScreenshotSize(1000, 1000);
     });
 

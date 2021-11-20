@@ -1,75 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiPopover, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { NativeRenderer } from '../../../native_renderer';
 import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
-import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
+import { StaticHeader } from '../../../shared_components';
 
 export function LayerSettings({
-  layerId,
   activeVisualization,
   layerConfigProps,
 }: {
-  layerId: string;
   activeVisualization: Visualization;
   layerConfigProps: VisualizationLayerWidgetProps;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  if (!activeVisualization.renderLayerContextMenu) {
-    return null;
+  if (!activeVisualization.renderLayerHeader) {
+    const description = activeVisualization.getDescription(layerConfigProps.state);
+    if (!description) {
+      return null;
+    }
+    return <StaticHeader label={description.label} icon={description.icon} />;
   }
 
-  const a11yText = (chartType?: string) => {
-    if (chartType) {
-      return i18n.translate('xpack.lens.editLayerSettingsChartType', {
-        defaultMessage: 'Edit layer settings, {chartType}',
-        values: {
-          chartType,
-        },
-      });
-    }
-    return i18n.translate('xpack.lens.editLayerSettings', {
-      defaultMessage: 'Edit layer settings',
-    });
-  };
-
-  const contextMenuIcon = activeVisualization.getLayerContextMenuIcon?.(layerConfigProps);
   return (
-    <EuiPopover
-      id={`lnsLayerPopover_${layerId}`}
-      panelPaddingSize="m"
-      ownFocus
-      button={
-        <EuiToolTip
-          content={i18n.translate('xpack.lens.editLayerSettings', {
-            defaultMessage: 'Edit layer settings',
-          })}
-        >
-          <ToolbarButton
-            size="s"
-            iconType={contextMenuIcon?.icon || 'gear'}
-            aria-label={a11yText(contextMenuIcon?.label || '')}
-            title={a11yText(contextMenuIcon?.label || '')}
-            onClick={() => setIsOpen(!isOpen)}
-            data-test-subj="lns_layer_settings"
-          />
-        </EuiToolTip>
-      }
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      anchorPosition="downLeft"
-    >
-      <NativeRenderer
-        render={activeVisualization.renderLayerContextMenu}
-        nativeProps={layerConfigProps}
-      />
-    </EuiPopover>
+    <NativeRenderer render={activeVisualization.renderLayerHeader} nativeProps={layerConfigProps} />
   );
 }

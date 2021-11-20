@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElementPosition } from './elements';
+import { FilterField } from './filters';
 
 export interface CanvasAsset {
   '@created': string;
@@ -43,6 +45,10 @@ export interface CanvasVariable {
   type: 'boolean' | 'number' | 'string';
 }
 
+export interface Sidebar {
+  groupFiltersByOption?: FilterField;
+}
+
 export interface CanvasWorkpad {
   '@created': string;
   '@timestamp': string;
@@ -52,6 +58,7 @@ export interface CanvasWorkpad {
   variables: CanvasVariable[];
   height: number;
   id: string;
+  aliasId?: string;
   isWriteable: boolean;
   name: string;
   page: number;

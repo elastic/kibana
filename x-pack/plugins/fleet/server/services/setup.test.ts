@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { xpackMocks } from '../../../../../x-pack/mocks';
-import { createAppContextStartContractMock } from '../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../mocks';
+
 import { appContextService } from './app_context';
-import { setupIngestManager } from './setup';
+import { setupFleet } from './setup';
 
 const mockedMethodThrowsError = () =>
   jest.fn().mockImplementation(() => {
@@ -20,7 +21,7 @@ const mockedMethodThrowsCustom = () =>
     throw new CustomTestError('method mocked to throw');
   });
 
-describe('setupIngestManager', () => {
+describe('setupFleet', () => {
   let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
 
   beforeEach(async () => {
@@ -43,7 +44,7 @@ describe('setupIngestManager', () => {
       soClient.update = mockedMethodThrowsError();
       const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-      const setupPromise = setupIngestManager(soClient, esClient, jest.fn());
+      const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
       await expect(setupPromise).rejects.toThrow(Error);
     });
@@ -56,7 +57,7 @@ describe('setupIngestManager', () => {
       soClient.update = mockedMethodThrowsCustom();
       const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-      const setupPromise = setupIngestManager(soClient, esClient, jest.fn());
+      const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('method mocked to throw');
       await expect(setupPromise).rejects.toThrow(CustomTestError);
     });

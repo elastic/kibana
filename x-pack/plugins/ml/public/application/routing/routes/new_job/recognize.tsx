@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { parse } from 'query-string';
@@ -48,10 +49,16 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { id, index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context, results } = useResolver(index, savedSearchId, deps.config, {
-    ...basicResolvers(deps),
-    existingJobsAndGroups: mlJobService.getJobAndGroupIds,
-  });
+  const { context, results } = useResolver(
+    index,
+    savedSearchId,
+    deps.config,
+    deps.dataViewsContract,
+    {
+      ...basicResolvers(deps),
+      existingJobsAndGroups: mlJobService.getJobAndGroupIds,
+    }
+  );
 
   return (
     <PageLoader context={context}>
@@ -61,7 +68,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
 };
 
 const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { id: moduleId, index: indexPatternId }: Record<string, any> = parse(location.search, {
+  const { id: moduleId, index: dataViewId }: Record<string, any> = parse(location.search, {
     sort: false,
   });
   const { createLinkWithUserDefaults } = useCreateADLinks();
@@ -69,9 +76,9 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, deps }) => {
   const navigateToPath = useNavigateToPath();
 
   // the single resolver checkViewOrCreateJobs redirects only. so will always reject
-  useResolver(undefined, undefined, deps.config, {
+  useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
     checkViewOrCreateJobs: () =>
-      checkViewOrCreateJobs(moduleId, indexPatternId, createLinkWithUserDefaults, navigateToPath),
+      checkViewOrCreateJobs(moduleId, dataViewId, createLinkWithUserDefaults, navigateToPath),
   });
   return null;
 };

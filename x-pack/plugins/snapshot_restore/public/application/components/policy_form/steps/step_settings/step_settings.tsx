@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -17,10 +19,10 @@ import {
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../../common/types';
-import { documentationLinksService } from '../../../../services/documentation';
 import { StepProps } from '../';
 
 import { IndicesAndDataStreamsField } from './fields';
+import { useCore } from '../../../../app_context';
 
 export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   policy,
@@ -29,6 +31,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   updatePolicy,
   errors,
 }) => {
+  const { docLinks } = useCore();
   const { config = {}, isManagedPolicy } = policy;
 
   const updatePolicyConfig = (
@@ -139,7 +142,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.includeGlobalStateDescription"
-          defaultMessage="Stores the global cluster state as part of the snapshot."
+          defaultMessage="Stores the global cluster state and system indices as part of the snapshot."
         />
       }
       fullWidth
@@ -182,13 +185,13 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getSnapshotDocUrl()}
+            href={docLinks.links.snapshotRestore.createSnapshot}
             target="_blank"
             iconType="help"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.docsButtonLabel"
-              defaultMessage="Snapshot settings docs"
+              defaultMessage="Snapshot docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

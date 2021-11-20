@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,14 +16,12 @@ import { DEFAULT_POLICY_NAME } from './constants';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const es = getService('es');
-
   const {
     createIndex,
     createComposableIndexTemplate,
     createDataStream,
     cleanUp: cleanUpEsResources,
-  } = initElasticsearchHelpers(es);
+  } = initElasticsearchHelpers(getService);
 
   const {
     loadPolicies,
@@ -33,34 +32,28 @@ export default function ({ getService }) {
 
   const { addPolicyToIndex } = registerIndexHelpers({ supertest });
 
-  describe('policies', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114030
+  describe.skip('policies', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
       it('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
-        const policy = body.find((policy) => policy.name === DEFAULT_POLICY_NAME);
+        const { version, name, policy } = body.find(
+          (policy) => policy.name === DEFAULT_POLICY_NAME
+        );
 
-        // We manually set the date for deterministic test
-        const modifiedDate = '2019-04-30T14:30:00.000Z';
-        policy.modified_date = modifiedDate;
-
-        expect(policy).to.eql({
-          version: 1,
-          modified_date: modifiedDate,
-          policy: {
-            phases: {
+        expect(version).to.eql(1);
+        expect(name).to.eql(DEFAULT_POLICY_NAME);
+        expect(policy.phases).to.eql({
+          delete: {
+            min_age: '7d',
+            actions: {
               delete: {
-                min_age: '7d',
-                actions: {
-                  delete: {
-                    delete_searchable_snapshot: true,
-                  },
-                },
+                delete_searchable_snapshot: true,
               },
             },
           },
-          name: DEFAULT_POLICY_NAME,
         });
       });
 
@@ -77,7 +70,7 @@ export default function ({ getService }) {
 
         const { body } = await loadPolicies(true);
         const fetchedPolicy = body.find((p) => p.name === policyName);
-        expect(fetchedPolicy.linkedIndices).to.eql([indexName]);
+        expect(fetchedPolicy.indices).to.eql([indexName]);
       });
 
       it('should add hidden indices linked to policies', async () => {
@@ -105,7 +98,7 @@ export default function ({ getService }) {
         const { body } = await loadPolicies(true);
         const fetchedPolicy = body.find((p) => p.name === policyName);
         // The index name is dynamically generated as .ds-<indexName>-XXX so we don't check for exact match
-        expect(fetchedPolicy.linkedIndices[0]).to.contain(indexName);
+        expect(fetchedPolicy.indices[0]).to.contain(indexName);
       });
     });
 
@@ -124,6 +117,38 @@ export default function ({ getService }) {
         // Make sure the new policy is returned
         const { body: bodySecondLoad } = await loadPolicies();
         expect(getPolicyNames(bodySecondLoad)).to.contain(name);
+      });
+    });
+
+    describe('edit', () => {
+      it('keeps _meta field intact', async () => {
+        const policyName = 'edit-meta-test-policy';
+        const policy = {
+          ...getPolicyPayload(policyName),
+          _meta: { description: 'test policy with _meta field' },
+        };
+
+        // Update the policy (uses the same route as create)
+        await createPolicy(policy).expect(200);
+
+        // only update warm phase timing, not deleting or changing _meta field
+        const editedPolicy = {
+          ...policy,
+          phases: {
+            ...policy.phases,
+            warm: {
+              ...policy.phases.warm,
+              min_age: '2d',
+            },
+          },
+        };
+
+        await createPolicy(editedPolicy).expect(200);
+
+        const { body } = await loadPolicies();
+        const loadedPolicy = body.find((p) => p.name === policyName);
+        // Make sure the edited policy still has _meta field
+        expect(loadedPolicy.policy._meta).to.eql(editedPolicy._meta);
       });
     });
 

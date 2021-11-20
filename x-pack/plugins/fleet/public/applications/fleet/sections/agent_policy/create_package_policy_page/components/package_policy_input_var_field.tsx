@@ -1,23 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFormRow,
   EuiSwitch,
   EuiFieldText,
-  EuiComboBox,
   EuiText,
-  EuiCodeEditor,
+  EuiFieldPassword,
+  EuiCodeBlock,
 } from '@elastic/eui';
-import { RegistryVarsEntry } from '../../../../types';
+import styled from 'styled-components';
 
-import 'brace/mode/yaml';
-import 'brace/theme/textmate';
+import type { RegistryVarsEntry } from '../../../../types';
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
+
+import { MultiTextInput } from './multi_text_input';
+
+const FixedHeightDiv = styled.div`
+  height: 300px;
+`;
 
 export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
@@ -25,7 +34,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   onChange: (newValue: any) => void;
   errors?: string[] | null;
   forceShowErrors?: boolean;
-}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors }) => {
+  frozen?: boolean;
+}> = memo(({ varDef, value, onChange, errors: varErrors, forceShowErrors, frozen }) => {
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const { multi, required, type, title, name, description } = varDef;
   const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
@@ -35,62 +45,87 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   const field = useMemo(() => {
     if (multi) {
       return (
-        <EuiComboBox
-          noSuggestions
-          isInvalid={isInvalid}
-          selectedOptions={value.map((val: string) => ({ label: val }))}
-          onCreateOption={(newVal: any) => {
-            onChange([...value, newVal]);
-          }}
-          onChange={(newVals: any[]) => {
-            onChange(newVals.map((val) => val.label));
-          }}
-          onBlur={() => setIsDirty(true)}
-        />
-      );
-    }
-    if (type === 'yaml') {
-      return (
-        <EuiCodeEditor
-          width="100%"
-          mode="yaml"
-          theme="textmate"
-          setOptions={{
-            minLines: 10,
-            maxLines: 30,
-            tabSize: 2,
-            showGutter: false,
-          }}
+        <MultiTextInput
           value={value}
-          onChange={(newVal) => onChange(newVal)}
+          onChange={onChange}
           onBlur={() => setIsDirty(true)}
+          isDisabled={frozen}
         />
       );
     }
-    if (type === 'bool') {
-      return (
-        <EuiSwitch
-          label={fieldLabel}
-          checked={value}
-          showLabel={false}
-          onChange={(e) => onChange(e.target.checked)}
-          onBlur={() => setIsDirty(true)}
-        />
-      );
+    switch (type) {
+      case 'yaml':
+        return frozen ? (
+          <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">
+            <pre>{value}</pre>
+          </EuiCodeBlock>
+        ) : (
+          <FixedHeightDiv>
+            <CodeEditor
+              languageId="yaml"
+              width="100%"
+              height="300px"
+              value={value}
+              onChange={onChange}
+              options={{
+                minimap: {
+                  enabled: false,
+                },
+                ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
+                  defaultMessage: 'YAML Code Editor',
+                }),
+                scrollBeyondLastLine: false,
+                wordWrap: 'off',
+                wrappingIndent: 'indent',
+                tabSize: 2,
+                // To avoid left margin
+                lineNumbers: 'off',
+                lineNumbersMinChars: 0,
+                glyphMargin: false,
+                folding: false,
+                lineDecorationsWidth: 0,
+                overviewRulerBorder: false,
+              }}
+            />
+          </FixedHeightDiv>
+        );
+      case 'bool':
+        return (
+          <EuiSwitch
+            label={fieldLabel}
+            checked={value}
+            showLabel={false}
+            onChange={(e) => onChange(e.target.checked)}
+            onBlur={() => setIsDirty(true)}
+            disabled={frozen}
+          />
+        );
+      case 'password':
+        return (
+          <EuiFieldPassword
+            type="dual"
+            isInvalid={isInvalid}
+            value={value === undefined ? '' : value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={() => setIsDirty(true)}
+            disabled={frozen}
+          />
+        );
+      default:
+        return (
+          <EuiFieldText
+            isInvalid={isInvalid}
+            value={value === undefined ? '' : value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={() => setIsDirty(true)}
+            disabled={frozen}
+          />
+        );
     }
-
-    return (
-      <EuiFieldText
-        isInvalid={isInvalid}
-        value={value === undefined ? '' : value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={() => setIsDirty(true)}
-      />
-    );
-  }, [isInvalid, multi, onChange, type, value, fieldLabel]);
+  }, [isInvalid, multi, onChange, type, value, fieldLabel, frozen]);
 
   // Boolean cannot be optional by default set to false
-  const isOptional = type !== 'bool' && !required;
+  const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
   return (
     <EuiFormRow

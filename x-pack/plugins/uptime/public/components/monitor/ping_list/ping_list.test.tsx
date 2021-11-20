@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { PingList } from './ping_list';
+import { formatDuration, PingList } from './ping_list';
 import { Ping, PingsResponse } from '../../../../common/runtime_types';
 import { ExpandedRowMap } from '../../overview/monitor_list/types';
 import { rowShouldExpand, toggleDetails } from './columns/expand_row';
@@ -61,7 +62,7 @@ describe('PingList component', () => {
       ...response,
       error: undefined,
       loading: false,
-      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+      failedSteps: { steps: [], checkGroups: ['1-f-4d-4f'] },
     });
   });
 
@@ -71,7 +72,7 @@ describe('PingList component', () => {
       total: 0,
       error: undefined,
       loading: true,
-      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+      failedSteps: { steps: [], checkGroups: ['1-f-4d-4f'] },
     });
     const { getByText } = render(<PingList />);
     expect(getByText('Loading history...')).toBeInTheDocument();
@@ -83,7 +84,7 @@ describe('PingList component', () => {
       total: 0,
       error: undefined,
       loading: false,
-      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+      failedSteps: { steps: [], checkGroups: ['1-f-4d-4f'] },
     });
     const { getByText } = render(<PingList />);
     expect(getByText('No history found')).toBeInTheDocument();
@@ -182,6 +183,24 @@ describe('PingList component', () => {
         const ping = pings[0];
         ping.monitor.type = 'browser';
         expect(rowShouldExpand(ping)).toBe(true);
+      });
+    });
+
+    describe('formatDuration', () => {
+      it('returns zero for < 1 millisecond', () => {
+        expect(formatDuration(984)).toBe('0 ms');
+      });
+
+      it('returns milliseconds string if < 1 seconds', () => {
+        expect(formatDuration(921_039)).toBe('921 ms');
+      });
+
+      it('returns seconds string if > 1 second', () => {
+        expect(formatDuration(1_032_100)).toBe('1 second');
+      });
+
+      it('rounds to closest second', () => {
+        expect(formatDuration(1_832_100)).toBe('2 seconds');
       });
     });
   });

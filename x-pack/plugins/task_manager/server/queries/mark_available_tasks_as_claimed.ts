@@ -1,26 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  SortClause,
+  ScriptBasedSortClause,
   ScriptClause,
-  ExistsFilter,
-  TermFilter,
-  RangeFilter,
   mustBeAllOf,
   MustCondition,
-  BoolClauseWithAnyCondition,
+  MustNotCondition,
 } from './query_clauses';
 
-export const TaskWithSchedule: ExistsFilter = {
-  exists: { field: 'task.schedule' },
-};
-export function taskWithLessThanMaxAttempts(
-  type: string,
-  maxAttempts: number
-): MustCondition<TermFilter | RangeFilter> {
+export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): MustCondition {
   return {
     bool: {
       must: [
@@ -37,26 +30,36 @@ export function taskWithLessThanMaxAttempts(
   };
 }
 
-export function tasksClaimedByOwner(taskManagerId: string) {
+export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {
+  return {
+    bool: {
+      should: [...taskTypes].map((type) => ({ term: { 'task.taskType': type } })),
+    },
+  };
+}
+
+export function tasksClaimedByOwner(
+  taskManagerId: string,
+  ...taskFilters: estypes.QueryDslQueryContainer[]
+) {
   return mustBeAllOf(
     {
       term: {
         'task.ownerId': taskManagerId,
       },
     },
-    { term: { 'task.status': 'claiming' } }
+    { term: { 'task.status': 'claiming' } },
+    ...taskFilters
   );
 }
 
-export const IdleTaskWithExpiredRunAt: MustCondition<TermFilter | RangeFilter> = {
+export const IdleTaskWithExpiredRunAt: MustCondition = {
   bool: {
     must: [{ term: { 'task.status': 'idle' } }, { range: { 'task.runAt': { lte: 'now' } } }],
   },
 };
 
-// TODO: Fix query clauses to support this
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const InactiveTasks: BoolClauseWithAnyCondition<any> = {
+export const InactiveTasks: MustNotCondition = {
   bool: {
     must_not: [
       {
@@ -69,7 +72,7 @@ export const InactiveTasks: BoolClauseWithAnyCondition<any> = {
   },
 };
 
-export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition<TermFilter | RangeFilter> = {
+export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition = {
   bool: {
     must: [
       {
@@ -82,7 +85,7 @@ export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition<TermFilter |
   },
 };
 
-export const SortByRunAtAndRetryAt: SortClause = {
+const SortByRunAtAndRetryAtScript: ScriptBasedSortClause = {
   _script: {
     type: 'number',
     order: 'asc',
@@ -99,33 +102,45 @@ if (doc['task.runAt'].size()!=0) {
     },
   },
 };
+export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as unknown as Record<
+  string,
+  estypes.SearchSort
+>;
 
 export const updateFieldsAndMarkAsFailed = (
   fieldUpdates: {
     [field: string]: string | number | Date;
   },
   claimTasksById: string[],
-  registeredTaskTypes: string[],
+  claimableTaskTypes: string[],
+  skippedTaskTypes: string[],
   taskMaxAttempts: { [field: string]: number }
-): ScriptClause => ({
-  source: `
-  if (params.registeredTaskTypes.contains(ctx._source.task.taskType)) {
-    if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-        .join(' ')}
+): ScriptClause => {
+  const markAsClaimingScript = `ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+    .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+    .join(' ')}`;
+  return {
+    source: `
+    if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
+      if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+        ${markAsClaimingScript}
+      } else {
+        ctx._source.task.status = "failed";
+      }
+    } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
+      ${markAsClaimingScript}
+    } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
+      ctx._source.task.status = "unrecognized";
     } else {
-      ctx._source.task.status = "failed";
-    }
-  } else {
-    ctx._source.task.status = "unrecognized";
-  }
-  `,
-  lang: 'painless',
-  params: {
-    fieldUpdates,
-    claimTasksById,
-    registeredTaskTypes,
-    taskMaxAttempts,
-  },
-});
+      ctx.op = "noop";
+    }`,
+    lang: 'painless',
+    params: {
+      fieldUpdates,
+      claimTasksById,
+      claimableTaskTypes,
+      skippedTaskTypes,
+      taskMaxAttempts,
+    },
+  };
+};

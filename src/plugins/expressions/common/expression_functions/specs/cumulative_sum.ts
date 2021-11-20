@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable } from '../../expression_types';
-import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
 
 export interface CumulativeSumArgs {
   by?: string[];
@@ -22,7 +21,7 @@ export type ExpressionFunctionCumulativeSum = ExpressionFunctionDefinition<
   'cumulative_sum',
   Datatable,
   CumulativeSumArgs,
-  Datatable
+  Promise<Datatable>
 >;
 
 /**
@@ -94,37 +93,8 @@ export const cumulativeSum: ExpressionFunctionCumulativeSum = {
     },
   },
 
-  fn(input, { by, inputColumnId, outputColumnId, outputColumnName }) {
-    const resultColumns = buildResultColumns(
-      input,
-      outputColumnId,
-      inputColumnId,
-      outputColumnName
-    );
-
-    if (!resultColumns) {
-      return input;
-    }
-
-    const accumulators: Partial<Record<string, number>> = {};
-    return {
-      ...input,
-      columns: resultColumns,
-      rows: input.rows.map((row) => {
-        const newRow = { ...row };
-
-        const bucketIdentifier = getBucketIdentifier(row, by);
-        const accumulatorValue = accumulators[bucketIdentifier] ?? 0;
-        const currentValue = newRow[inputColumnId];
-        if (currentValue != null) {
-          newRow[outputColumnId] = Number(currentValue) + accumulatorValue;
-          accumulators[bucketIdentifier] = newRow[outputColumnId];
-        } else {
-          newRow[outputColumnId] = accumulatorValue;
-        }
-
-        return newRow;
-      }),
-    };
+  async fn(input, args) {
+    const { cumulativeSumFn } = await import('./cumulative_sum_fn');
+    return cumulativeSumFn(input, args);
   },
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState } from 'react';
@@ -31,9 +32,9 @@ import { CloudDeployment } from './blurbs';
 import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 function NoDataMessage(props) {
-  const { isLoading, reason, checkMessage } = props;
+  const { isLoading, reason, checkMessage, isCollectionEnabledUpdated } = props;
 
-  if (isLoading) {
+  if ((isCollectionEnabledUpdated && !reason) || isLoading) {
     return <CheckingSettings checkMessage={checkMessage} />;
   }
 
@@ -55,9 +56,13 @@ export function NoData(props) {
     window.location.hash = getSafeForExternalLink('#/elasticsearch/nodes');
   }
 
+  const NoDataContainer = ({ children }) => {
+    return <EuiPage data-test-subj="noDataContainer">{children}</EuiPage>;
+  };
+
   if (isCloudEnabled) {
     return (
-      <EuiPage>
+      <NoDataContainer>
         <EuiScreenReaderOnly>
           <h1>
             <FormattedMessage
@@ -96,13 +101,13 @@ export function NoData(props) {
             <CloudDeployment />
           </EuiPageContent>
         </EuiPageBody>
-      </EuiPage>
+      </NoDataContainer>
     );
   }
 
   if (useInternalCollection) {
     return (
-      <EuiPage>
+      <NoDataContainer>
         <EuiScreenReaderOnly>
           <h1>
             <FormattedMessage
@@ -139,12 +144,12 @@ export function NoData(props) {
             ) : null}
           </EuiPageContent>
         </EuiPageBody>
-      </EuiPage>
+      </NoDataContainer>
     );
   }
 
   return (
-    <EuiPage>
+    <NoDataContainer>
       <EuiScreenReaderOnly>
         <h1>
           <FormattedMessage
@@ -210,7 +215,7 @@ export function NoData(props) {
           </EuiButtonEmpty>
         </EuiPageContent>
       </EuiPageBody>
-    </EuiPage>
+    </NoDataContainer>
   );
 }
 

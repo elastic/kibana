@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -37,8 +37,7 @@ export const createLogstashInstructions = () => ({
           {
             defaultMessage: 'First time using Logstash?  See the [Getting Started Guide]({link}).',
             values: {
-              link:
-                '{config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html',
+              link: '{config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html',
             },
           }
         ),
@@ -61,8 +60,7 @@ export const createLogstashInstructions = () => ({
           {
             defaultMessage: 'Follow the installation instructions [here]({link}).',
             values: {
-              link:
-                'https://docs.oracle.com/javase/8/docs/technotes/guides/install/windows_jre_install.html',
+              link: 'https://docs.oracle.com/javase/8/docs/technotes/guides/install/windows_jre_install.html',
             },
           }
         ),

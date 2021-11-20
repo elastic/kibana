@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { AggConfigs } from '../agg_configs';
@@ -78,7 +78,23 @@ describe('date_range params', () => {
                 "date_range",
               ],
               "ranges": Array [
-                "[{\\"from\\":\\"now-1w/w\\",\\"to\\":\\"now\\"}]",
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "from": Array [
+                          "now-1w/w",
+                        ],
+                        "to": Array [
+                          "now",
+                        ],
+                      },
+                      "function": "dateRange",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
               ],
               "schema": Array [
                 "buckets",

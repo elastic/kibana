@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // the business logic of this code is from watcher, in:
@@ -16,9 +17,8 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  ILegacyScopedClusterClient,
+  ElasticsearchClient,
 } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 import { Logger } from '../../../../../../src/core/server';
 
 const bodySchema = schema.object({
@@ -53,14 +53,14 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
 
     let aliases: string[] = [];
     try {
-      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
+      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.client.asCurrentUser, pattern);
     } catch (err) {
       logger.warn(`route ${path} error getting aliases from pattern "${pattern}": ${err.message}`);
     }
 
     let indices: string[] = [];
     try {
-      indices = await getIndicesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
+      indices = await getIndicesFromPattern(ctx.core.elasticsearch.client.asCurrentUser, pattern);
     } catch (err) {
       logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
@@ -80,13 +80,12 @@ function uniqueCombined(list1: string[], list2: string[], limit: number) {
 }
 
 async function getIndicesFromPattern(
-  dataClient: ILegacyScopedClusterClient,
+  esClient: ElasticsearchClient,
   pattern: string
 ): Promise<string[]> {
   const params = {
     index: pattern,
-    ignore: [404],
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       size: 0, // no hits
       aggs: {
@@ -99,35 +98,37 @@ async function getIndicesFromPattern(
       },
     },
   };
-  const response: SearchResponse<unknown> = await dataClient.callAsCurrentUser('search', params);
+  const { body: response } = await esClient.search(params);
   // TODO: Investigate when the status field might appear here, type suggests it shouldn't ever happen
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((response as any).status === 404 || !response.aggregations) {
     return [];
   }
 
-  return (response.aggregations as IndiciesAggregation).indices.buckets.map((bucket) => bucket.key);
+  return (response.aggregations as unknown as IndiciesAggregation).indices.buckets.map(
+    (bucket) => bucket.key
+  );
 }
 
 async function getAliasesFromPattern(
-  dataClient: ILegacyScopedClusterClient,
+  esClient: ElasticsearchClient,
   pattern: string
 ): Promise<string[]> {
   const params = {
     index: pattern,
-    ignoreUnavailable: true,
-    ignore: [404],
+    ignore_unavailable: true,
   };
   const result: string[] = [];
 
-  const response = await dataClient.callAsCurrentUser('indices.getAlias', params);
+  const response = await esClient.indices.getAlias(params);
+  const responseBody = response.body;
 
-  if (response.status === 404) {
+  if (response.statusCode === 404) {
     return result;
   }
 
-  for (const index of Object.keys(response)) {
-    const aliasRecord = response[index];
+  for (const index of Object.keys(responseBody)) {
+    const aliasRecord = responseBody[index];
     if (aliasRecord.aliases) {
       const aliases = Object.keys(aliasRecord.aliases);
       result.push(...aliases);

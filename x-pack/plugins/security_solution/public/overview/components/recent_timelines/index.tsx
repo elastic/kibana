@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineType } from '../../../../common/types/timeline';
+import { SortFieldTimeline, TimelineType } from '../../../../common/types/timeline';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
-import { SortFieldTimeline, Direction } from '../../../graphql/types';
 import {
   queryTimelineById,
   dispatchUpdateTimeline,
@@ -26,22 +25,23 @@ import { LoadingPlaceholders } from '../loading_placeholders';
 import { useTimelineStatus } from '../../../timelines/components/open_timeline/use_timeline_status';
 import { useKibana } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../app/types';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkAnchor } from '../../../common/components/links';
+import { Direction } from '../../../../common/search_strategy';
 
 interface Props {
-  apolloClient: ApolloClient<{}>;
   filterBy: FilterMode;
 }
 
 const PAGE_SIZE = 3;
 
-const StatefulRecentTimelinesComponent: React.FC<Props> = ({ apolloClient, filterBy }) => {
+const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   const dispatch = useDispatch();
-  const updateIsLoading = useCallback((payload) => dispatch(dispatchUpdateIsLoading(payload)), [
-    dispatch,
-  ]);
+  const updateIsLoading = useCallback(
+    (payload) => dispatch(dispatchUpdateIsLoading(payload)),
+    [dispatch]
+  );
   const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
@@ -49,20 +49,21 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ apolloClient, filte
   const onOpenTimeline: OnOpenTimeline = useCallback(
     ({ duplicate, timelineId }) => {
       queryTimelineById({
-        apolloClient,
         duplicate,
         timelineId,
         updateIsLoading,
         updateTimeline,
       });
     },
-    [apolloClient, updateIsLoading, updateTimeline]
+    [updateIsLoading, updateTimeline]
   );
 
   const goToTimelines = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.timelines}`);
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.timelines,
+      });
     },
     [navigateToApp]
   );
@@ -112,7 +113,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ apolloClient, filte
         <RecentTimelines
           noTimelinesMessage={noTimelinesMessage}
           onOpenTimeline={onOpenTimeline}
-          timelines={timelines}
+          timelines={timelines ?? []}
         />
       )}
       <EuiHorizontalRule margin="s" />

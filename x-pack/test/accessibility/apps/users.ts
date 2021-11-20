@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // a11y tests for spaces, space selection and spacce creation and feature controls
@@ -18,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Kibana users page a11y tests', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.security.clickElasticsearchUsers();
     });
 
@@ -87,11 +88,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for edit user panel', async () => {
+      await PageObjects.settings.clickLinkText('Users');
       await PageObjects.settings.clickLinkText('deleteA11y');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for change password screen', async () => {
+      await PageObjects.settings.clickLinkText('Users');
       await PageObjects.settings.clickLinkText('deleteA11y');
       await find.clickByButtonText('Change password');
       await a11y.testAppSnapshot();
@@ -99,6 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for deactivate user screen', async () => {
+      await PageObjects.settings.clickLinkText('Users');
       await PageObjects.settings.clickLinkText('deleteA11y');
       await find.clickByButtonText('Deactivate user');
       await a11y.testAppSnapshot();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState, useMemo } from 'react';
@@ -11,12 +12,14 @@ export enum FETCH_STATUS {
   SUCCESS = 'success',
   FAILURE = 'failure',
   PENDING = 'pending',
+  NOT_INITIATED = 'not_initiated',
 }
 
 export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
   error?: Error;
+  loading?: boolean;
 }
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
@@ -26,7 +29,7 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<in
   : unknown;
 
 export function useFetcher<TReturn>(
-  fn: () => TReturn,
+  fn: ({}: { signal: AbortSignal }) => TReturn,
   fnDeps: any[],
   options: {
     preservePreviousData?: boolean;
@@ -37,11 +40,20 @@ export function useFetcher<TReturn>(
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
     status: FETCH_STATUS.PENDING,
+    loading: true,
   });
   const [counter, setCounter] = useState(0);
   useEffect(() => {
+    let controller: AbortController = new AbortController();
+
     async function doFetch() {
-      const promise = fn();
+      controller.abort();
+
+      controller = new AbortController();
+
+      const signal = controller.signal;
+
+      const promise = fn({ signal });
       if (!promise) {
         return;
       }
@@ -50,31 +62,46 @@ export function useFetcher<TReturn>(
         data: preservePreviousData ? prevResult.data : undefined,
         status: FETCH_STATUS.LOADING,
         error: undefined,
+        loading: true,
       }));
 
       try {
         const data = await promise;
-        setResult({
-          data,
-          status: FETCH_STATUS.SUCCESS,
-          error: undefined,
-        } as FetcherResult<InferResponseType<TReturn>>);
+        // when http fetches are aborted, the promise will be rejected
+        // and this code is never reached. For async operations that are
+        // not cancellable, we need to check whether the signal was
+        // aborted before updating the result.
+        if (!signal.aborted) {
+          setResult({
+            data,
+            status: FETCH_STATUS.SUCCESS,
+            error: undefined,
+          } as FetcherResult<InferResponseType<TReturn>>);
+        }
       } catch (e) {
-        setResult((prevResult) => ({
-          data: preservePreviousData ? prevResult.data : undefined,
-          status: FETCH_STATUS.FAILURE,
-          error: e,
-        }));
+        if (!signal.aborted) {
+          setResult((prevResult) => ({
+            data: preservePreviousData ? prevResult.data : undefined,
+            status: FETCH_STATUS.FAILURE,
+            error: e,
+            loading: false,
+          }));
+        }
       }
     }
 
     doFetch();
+
+    return () => {
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [counter, ...fnDeps]);
 
   return useMemo(() => {
     return {
       ...result,
+      loading: result.status === FETCH_STATUS.LOADING || result.status === FETCH_STATUS.PENDING,
       refetch: () => {
         // this will invalidate the deps to `useEffect` and will result in a new request
         setCounter((count) => count + 1);

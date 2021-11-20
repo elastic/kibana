@@ -1,23 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { LegacyScopedClusterClient } from 'src/core/server';
 
-export {
-  // Object types
+export type {
   Agent,
   AgentMetadata,
   AgentSOAttributes,
   AgentStatus,
   AgentType,
-  NewAgentEvent,
-  AgentEvent,
-  AgentEventSOAttributes,
   AgentAction,
   AgentPolicyAction,
-  AgentPolicyActionV7_9,
   BaseAgentActionSOAttributes,
   AgentActionSOAttributes,
   AgentPolicyActionSOAttributes,
@@ -26,12 +21,15 @@ export {
   PackagePolicyInputStream,
   NewPackagePolicy,
   UpdatePackagePolicy,
+  DryRunPackagePolicy,
   PackagePolicySOAttributes,
   FullAgentPolicyInput,
   FullAgentPolicy,
+  FullAgentPolicyOutput,
   AgentPolicy,
   AgentPolicySOAttributes,
   NewAgentPolicy,
+  PreconfiguredAgentPolicy,
   AgentPolicyStatus,
   DataStream,
   Output,
@@ -51,13 +49,10 @@ export {
   AssetReference,
   EsAssetReference,
   KibanaAssetReference,
-  ElasticsearchAssetType,
   RegistryPackage,
   InstallablePackage,
   AssetType,
   Installable,
-  KibanaAssetType,
-  KibanaSavedObjectType,
   AssetParts,
   AssetsGroupedByServiceByType,
   CategoryId,
@@ -65,28 +60,39 @@ export {
   IndexTemplate,
   RegistrySearchResults,
   RegistrySearchResult,
-  DefaultPackages,
-  TemplateRef,
+  IndexTemplateEntry,
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,
   InstallType,
   InstallSource,
-  // Agent Request types
-  PostAgentEnrollRequest,
-  PostAgentCheckinRequest,
+  InstallResult,
+  GetCategoriesRequest,
   DataType,
-  dataTypes,
-  // Fleet Server types
   FleetServerEnrollmentAPIKey,
+  FleetServerAgent,
+  FleetServerAgentAction,
+  FleetServerPolicy,
 } from '../../common';
-
-export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
+export {
+  ElasticsearchAssetType,
+  KibanaAssetType,
+  KibanaSavedObjectType,
+  dataTypes,
+} from '../../common';
 
 export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
   agentPolicyId: string
 ) => Promise<void>;
 
+export interface BulkActionResult {
+  id: string;
+  success: boolean;
+  error?: Error;
+}
+
 export * from './models';
 export * from './rest_spec';
+export * from './extensions';
+export type { FleetRequestHandler, FleetRequestHandlerContext } from './request_context';

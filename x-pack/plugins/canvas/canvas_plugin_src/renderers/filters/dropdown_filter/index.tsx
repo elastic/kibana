@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fromExpression, toExpression, Ast } from '@kbn/interpreter/common';
@@ -15,14 +16,14 @@ import { RendererStrings } from '../../../../i18n';
 
 const { dropdownFilter: strings } = RendererStrings;
 
-interface Config {
+export interface Config {
   /** The column to use within the exactly function */
   column: string;
   /**
    * A collection of choices to display in the dropdown
    * @default []
    */
-  choices: string[];
+  choices: Array<[string, string]>;
   filterGroup: string;
 }
 
@@ -44,9 +45,15 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
   reuseDomNode: true,
   height: 50,
   render(domNode, config, handlers) {
-    const filterExpression = handlers.getFilter();
+    let filterExpression = handlers.getFilter();
 
-    if (filterExpression !== '') {
+    if (
+      filterExpression !== '' &&
+      (filterExpression === undefined || !filterExpression.includes('exactly'))
+    ) {
+      filterExpression = '';
+      handlers.setFilter(filterExpression);
+    } else if (filterExpression !== '') {
       // NOTE: setFilter() will cause a data refresh, avoid calling unless required
       // compare expression and filter, update filter if needed
       const { changed, newAst } = syncFilterExpression(config, filterExpression, ['filterGroup']);
@@ -84,7 +91,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
       <DropdownFilter
         commit={commit}
         choices={config.choices || []}
-        value={getFilterValue(filterExpression)}
+        initialValue={getFilterValue(filterExpression)}
       />,
       domNode,
       () => handlers.done()

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,17 +23,17 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.golangMetrics.nameTitle', {
-      defaultMessage: 'Golang metrics',
+      defaultMessage: 'Golang Metrics',
     }),
     moduleName,
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.golangMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from a Golang app.',
+      defaultMessage: 'Collect metrics from Golang applications with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.golangMetrics.longDescription', {
       defaultMessage:
-        'The `{moduleName}` Metricbeat module fetches internal metrics from a Golang app. \
+        'The `{moduleName}` Metricbeat module fetches metrics from a Golang app. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,
@@ -59,5 +59,6 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['google_cloud', 'cloud', 'network', 'security'],
   };
 }

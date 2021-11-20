@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -12,31 +13,27 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { Observable } from 'rxjs';
 import { MBMap } from '../mb_map';
-// @ts-expect-error
-import { WidgetOverlay } from '../widget_overlay';
-// @ts-expect-error
+import { RightSideControls } from '../right_side_controls';
+import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
-// @ts-expect-error
-import { LayerPanel } from '../layer_panel';
+import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
-import { getIndexPatternsFromIds } from '../../index_pattern_util';
-import { ES_GEO_FIELD_TYPE, RawValue } from '../../../common/constants';
-import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
+import { getCoreChrome } from '../../kibana_services';
+import { RawValue } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../reducers/map';
 import { MapSettingsPanel } from '../map_settings_panel';
-import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
+import { registerLayerWizards } from '../../classes/layers/wizards/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
-import { MapRefreshConfig } from '../../../common/descriptor_types';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { ILayer } from '../../classes/layers/layer';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 export interface Props {
-  addFilters: ((filters: Filter[]) => Promise<void>) | null;
+  addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
@@ -47,55 +44,60 @@ export interface Props {
   isFullScreen: boolean;
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
-  refreshConfig: MapRefreshConfig;
   renderTooltipContent?: RenderToolTipContent;
-  triggerRefreshTimer: () => void;
   title?: string;
   description?: string;
   settings: MapSettings;
+  layerList: ILayer[];
+  waitUntilTimeLayersLoad$: Observable<void>;
+  /*
+   * Set to false to exclude sharing attributes 'data-*'.
+   * An example usage is tile_map and region_map visualizations. The visualizations use MapEmbeddable for rendering.
+   * Visualize Embeddable handles sharing attributes so sharing attributes are not needed in the children.
+   */
+  isSharable: boolean;
 }
 
 interface State {
   isInitialLoadRenderTimeoutComplete: boolean;
   domId: string;
-  geoFields: GeoFieldWithIndex[];
+  showFitToBoundsButton: boolean;
+  showTimesliderButton: boolean;
 }
 
 export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
-  private _prevIndexPatternIds: string[] = [];
-  private _refreshTimerId: number | null = null;
-  private _prevIsPaused: boolean | null = null;
-  private _prevInterval: number | null = null;
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
     domId: uuid(),
-    geoFields: [],
+    showFitToBoundsButton: false,
+    showTimesliderButton: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._setRefreshTimer();
+    this._loadShowFitToBoundsButton();
+    this._loadShowTimesliderButton();
     registerLayerWizards();
   }
 
   componentDidUpdate() {
-    this._setRefreshTimer();
-    if (this.props.areLayersLoaded && !this._isInitalLoadRenderTimerStarted) {
+    this._loadShowFitToBoundsButton();
+    this._loadShowTimesliderButton();
+    if (
+      this.props.isSharable &&
+      this.props.areLayersLoaded &&
+      !this._isInitalLoadRenderTimerStarted
+    ) {
       this._isInitalLoadRenderTimerStarted = true;
       this._startInitialLoadRenderTimer();
-    }
-
-    if (!!this.props.addFilters) {
-      this._loadGeoFields(this.props.indexPatternIds);
     }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._clearRefreshTimer();
     this.props.cancelAllInFlightRequests();
   }
 
@@ -114,66 +116,34 @@ export class MapContainer extends Component<Props, State> {
     }
   };
 
-  _loadGeoFields = async (nextIndexPatternIds: string[]) => {
-    if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
-      // all ready loaded index pattern ids
-      return;
-    }
-
-    this._prevIndexPatternIds = nextIndexPatternIds;
-
-    const geoFields: GeoFieldWithIndex[] = [];
-    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-    indexPatterns.forEach((indexPattern) => {
-      indexPattern.fields.forEach((field) => {
-        if (
-          indexPattern.id &&
-          !indexPatternsUtils.isNestedField(field) &&
-          (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE)
-        ) {
-          geoFields.push({
-            geoFieldName: field.name,
-            geoFieldType: field.type,
-            indexPatternTitle: indexPattern.title,
-            indexPatternId: indexPattern.id,
-          });
-        }
-      });
+  async _loadShowFitToBoundsButton() {
+    const promises = this.props.layerList.map(async (layer) => {
+      return await layer.isFittable();
     });
+    const showFitToBoundsButton = (await Promise.all(promises)).some((isFittable) => isFittable);
+    if (this._isMounted && this.state.showFitToBoundsButton !== showFitToBoundsButton) {
+      this.setState({ showFitToBoundsButton });
+    }
+  }
 
-    if (!this._isMounted) {
+  async _loadShowTimesliderButton() {
+    if (!this.props.settings.showTimesliderToggleButton) {
+      if (this.state.showTimesliderButton) {
+        this.setState({ showTimesliderButton: false });
+      }
       return;
     }
 
-    this.setState({ geoFields });
-  };
-
-  _setRefreshTimer = () => {
-    const { isPaused, interval } = this.props.refreshConfig;
-
-    if (this._prevIsPaused === isPaused && this._prevInterval === interval) {
-      // refreshConfig is the same, nothing to do
-      return;
+    const promises = this.props.layerList.map(async (layer) => {
+      return await layer.isFilteredByGlobalTime();
+    });
+    const showTimesliderButton = (await Promise.all(promises)).some(
+      (isFilteredByGlobalTime) => isFilteredByGlobalTime
+    );
+    if (this._isMounted && this.state.showTimesliderButton !== showTimesliderButton) {
+      this.setState({ showTimesliderButton });
     }
-
-    this._prevIsPaused = isPaused;
-    this._prevInterval = interval;
-
-    this._clearRefreshTimer();
-
-    if (!isPaused && interval > 0) {
-      this._refreshTimerId = window.setInterval(() => {
-        this.props.triggerRefreshTimer();
-      }, interval);
-    }
-  };
-
-  _clearRefreshTimer = () => {
-    if (this._refreshTimerId) {
-      window.clearInterval(this._refreshTimerId);
-      this._refreshTimerId = null;
-    }
-  };
+  }
 
   // Mapbox does not provide any feedback when rendering is complete.
   // Temporary solution is just to wait set period of time after data has loaded.
@@ -224,25 +194,29 @@ export class MapContainer extends Component<Props, State> {
     if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
       flyoutPanel = <AddLayerPanel />;
     } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
-      flyoutPanel = <LayerPanel />;
+      flyoutPanel = <EditLayerPanel />;
     } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
       flyoutPanel = <MapSettingsPanel />;
     }
 
     let exitFullScreenButton;
     if (isFullScreen) {
-      exitFullScreenButton = <ExitFullScreenButton onExitFullScreenMode={exitFullScreen} />;
+      exitFullScreenButton = (
+        <ExitFullScreenButton onExitFullScreenMode={exitFullScreen} chrome={getCoreChrome()} />
+      );
     }
+    const shareAttributes = this.props.isSharable
+      ? {
+          ['data-dom-id']: this.state.domId,
+          ['data-render-complete']: this.state.isInitialLoadRenderTimeoutComplete,
+          ['data-shared-item']: true,
+          ['data-title']: this.props.title,
+          ['data-description']: this.props.description,
+        }
+      : {};
+
     return (
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        data-dom-id={this.state.domId}
-        data-render-complete={this.state.isInitialLoadRenderTimeoutComplete}
-        data-shared-item
-        data-title={this.props.title}
-        data-description={this.props.description}
-      >
+      <EuiFlexGroup gutterSize="none" responsive={false} {...shareAttributes}>
         <EuiFlexItem
           className="mapMapWrapper"
           style={{ backgroundColor: this.props.settings.backgroundColor }}
@@ -252,19 +226,21 @@ export class MapContainer extends Component<Props, State> {
             getFilterActions={getFilterActions}
             getActionContext={getActionContext}
             onSingleValueTrigger={onSingleValueTrigger}
-            geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}
           />
           {!this.props.settings.hideToolbarOverlay && (
             <ToolbarOverlay
               addFilters={addFilters}
-              geoFields={this.state.geoFields}
               getFilterActions={getFilterActions}
               getActionContext={getActionContext}
+              showFitToBoundsButton={this.state.showFitToBoundsButton}
+              showTimesliderButton={this.state.showTimesliderButton}
             />
           )}
-          <WidgetOverlay />
+          <RightSideControls />
         </EuiFlexItem>
+
+        <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
 
         <EuiFlexItem
           className={classNames('mapMapLayerPanel', {

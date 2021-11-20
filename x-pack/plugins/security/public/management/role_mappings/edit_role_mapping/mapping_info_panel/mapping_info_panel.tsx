@@ -1,34 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component, ChangeEvent, Fragment } from 'react';
 import {
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
   EuiDescribedFormGroup,
-  EuiFormRow,
   EuiFieldText,
-  EuiLink,
+  EuiFormRow,
   EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
   EuiSwitch,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'src/core/public';
-import { RoleMapping } from '../../../../../common/model';
-import { RolesAPIClient } from '../../../roles';
+
+import type { RoleMapping } from '../../../../../common/model';
+import type { RolesAPIClient } from '../../../roles';
+import { RoleSelector } from '../role_selector';
 import {
   validateRoleMappingName,
   validateRoleMappingRoles,
   validateRoleMappingRoleTemplates,
 } from '../services/role_mapping_validation';
-import { RoleSelector } from '../role_selector';
 
 interface Props {
   roleMapping: RoleMapping;
@@ -57,7 +61,7 @@ export class MappingInfoPanel extends Component<Props, State> {
   }
   public render() {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiTitle>
           <h2>
             <FormattedMessage

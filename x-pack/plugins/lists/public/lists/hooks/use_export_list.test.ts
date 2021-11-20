@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useExportList } from '@kbn/securitysolution-list-hooks';
+import * as Api from '@kbn/securitysolution-list-api';
 
-import * as Api from '../api';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 
-import { useExportList } from './use_export_list';
+jest.mock('@kbn/securitysolution-list-api');
 
-jest.mock('../api');
+// TODO: Move this test to the kbn package: packages/kbn-securitysolution-list-hooks/src/use_export_list/index.ts once Mocks are ported from Kibana
 
 describe('useExportList', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

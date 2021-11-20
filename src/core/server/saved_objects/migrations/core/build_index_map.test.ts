@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createIndexMap } from './build_index_map';
@@ -36,7 +36,7 @@ test('mappings without index pattern goes to default index', () => {
       type1: {
         properties: {
           field1: {
-            type: 'string',
+            type: 'text',
           },
         },
       },
@@ -48,7 +48,7 @@ test('mappings without index pattern goes to default index', () => {
         type1: {
           properties: {
             field1: {
-              type: 'string',
+              type: 'text',
             },
           },
         },
@@ -69,7 +69,7 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
       type1: {
         properties: {
           field1: {
-            type: 'string',
+            type: 'text',
           },
         },
       },
@@ -81,7 +81,7 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
         type1: {
           properties: {
             field1: {
-              type: 'string',
+              type: 'text',
             },
           },
         },
@@ -103,7 +103,7 @@ test('creating a script gets added to the index pattern', () => {
       type1: {
         properties: {
           field1: {
-            type: 'string',
+            type: 'text',
           },
         },
       },
@@ -116,7 +116,7 @@ test('creating a script gets added to the index pattern', () => {
         type1: {
           properties: {
             field1: {
-              type: 'string',
+              type: 'text',
             },
           },
         },
@@ -144,18 +144,18 @@ test('throws when two scripts are defined for an index pattern', () => {
     type1: {
       properties: {
         field1: {
-          type: 'string',
+          type: 'text',
         },
       },
     },
     type2: {
       properties: {
         field1: {
-          type: 'string',
+          type: 'text',
         },
       },
     },
-  };
+  } as const;
   expect(() =>
     createIndexMap({
       kibanaIndexName: defaultIndex,

@@ -1,23 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+
+import { GeoBoundingBoxOutput, KibanaQueryOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
 
 export const aggFilterFnName = 'aggFilter';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTER>;
 
-type Arguments = Assign<AggArgs, { geo_bounding_box?: string }>;
+type Arguments = Assign<
+  AggArgs,
+  { geo_bounding_box?: GeoBoundingBoxOutput; filter?: KibanaQueryOutput }
+>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -54,9 +59,16 @@ export const aggFilter = (): FunctionDefinition => ({
       }),
     },
     geo_bounding_box: {
-      types: ['string'],
+      types: ['geo_bounding_box'],
       help: i18n.translate('data.search.aggs.buckets.filter.geoBoundingBox.help', {
         defaultMessage: 'Filter results based on a point location within a bounding box',
+      }),
+    },
+    filter: {
+      types: ['kibana_query'],
+      help: i18n.translate('data.search.aggs.buckets.filter.filter.help', {
+        defaultMessage:
+          'Filter results based on a kql or lucene query. Do not use together with geo_bounding_box',
       }),
     },
     json: {
@@ -72,8 +84,10 @@ export const aggFilter = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
+  fn: (input, { id, enabled, schema, geo_bounding_box: geoBoundingBox, filter, ...params }) => {
+    if (geoBoundingBox && filter) {
+      throw new Error("filter and geo_bounding_box can't be used together");
+    }
 
     return {
       type: 'agg_type',
@@ -81,11 +95,12 @@ export const aggFilter = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.FILTER,
         params: {
-          ...rest,
-          geo_bounding_box: getParsedValue(args, 'geo_bounding_box'),
+          ...params,
+          geo_bounding_box: geoBoundingBox && omit(geoBoundingBox, 'type'),
+          filter: filter && omit(filter, 'type'),
         },
+        type: BUCKET_TYPES.FILTER,
       },
     };
   },

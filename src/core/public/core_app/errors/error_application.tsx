@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { ReactChild, useState, useLayoutEffect } from 'react';
@@ -16,6 +16,7 @@ import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/e
 import { UrlOverflowUi } from './url_overflow_ui';
 import { IBasePath } from '../../http';
 import { AppMountParameters } from '../../application';
+import { CoreThemeProvider } from '../../theme';
 
 interface Props {
   title?: string;
@@ -77,10 +78,12 @@ interface Deps {
  * Renders UI for displaying error messages.
  * @internal
  */
-export const renderApp = ({ element, history }: AppMountParameters, { basePath }: Deps) => {
+export const renderApp = ({ element, history, theme$ }: AppMountParameters, { basePath }: Deps) => {
   ReactDOM.render(
     <I18nProvider>
-      <ErrorApp history={history} basePath={basePath} />
+      <CoreThemeProvider theme$={theme$}>
+        <ErrorApp history={history} basePath={basePath} />
+      </CoreThemeProvider>
     </I18nProvider>,
     element
   );

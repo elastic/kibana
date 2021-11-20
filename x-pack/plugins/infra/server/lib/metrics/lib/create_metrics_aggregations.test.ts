@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MetricsAPIRequest } from '../../../../common/http_api';
@@ -10,7 +11,6 @@ import { createMetricsAggregations } from './create_metrics_aggregations';
 
 const options: MetricsAPIRequest = {
   timerange: {
-    field: '@timestamp',
     from: moment('2020-01-01T00:00:00Z').valueOf(),
     to: moment('2020-01-01T01:00:00Z').valueOf(),
     interval: '>=1m',

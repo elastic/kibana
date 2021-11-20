@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { EuiToolTip, EuiHealth } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,7 +16,7 @@ import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 
 interface Props {
-  alerts: { [alertTypeId: string]: CommonAlertStatus };
+  alerts: { [alertTypeId: string]: CommonAlertStatus[] };
   showBadge: boolean;
   showOnlyCount?: boolean;
   stateFilter?: (state: AlertState) => boolean;
@@ -28,25 +30,27 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   }
 
   let atLeastOneDanger = false;
-  const count = Object.values(alerts).reduce((cnt, alertStatus) => {
-    const firingStates = alertStatus.states.filter((state) => state.firing);
-    const firingAndFilterStates = firingStates.filter((state) => stateFilter(state.state));
-    cnt += firingAndFilterStates.length;
-    if (firingStates.length) {
-      if (!atLeastOneDanger) {
-        for (const state of alertStatus.states) {
-          if (
-            stateFilter(state.state) &&
-            (state.state as AlertState).ui.severity === AlertSeverity.Danger
-          ) {
-            atLeastOneDanger = true;
-            break;
+  const count = Object.values(alerts)
+    .flat()
+    .reduce((cnt, alertStatus) => {
+      const firingStates = alertStatus.states.filter((state) => state.firing);
+      const firingAndFilterStates = firingStates.filter((state) => stateFilter(state.state));
+      cnt += firingAndFilterStates.length;
+      if (firingStates.length) {
+        if (!atLeastOneDanger) {
+          for (const state of alertStatus.states) {
+            if (
+              stateFilter(state.state) &&
+              (state.state as AlertState).ui.severity === AlertSeverity.Danger
+            ) {
+              atLeastOneDanger = true;
+              break;
+            }
           }
         }
       }
-    }
-    return cnt;
-  }, 0);
+      return cnt;
+    }, 0);
 
   if (count === 0 && (!inSetupMode || showOnlyCount)) {
     return (
@@ -60,10 +64,12 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
           {showOnlyCount ? (
             count
           ) : (
-            <FormattedMessage
-              id="xpack.monitoring.alerts.status.clearText"
-              defaultMessage="Clear"
-            />
+            <span data-test-subj="alertStatusText">
+              <FormattedMessage
+                id="xpack.monitoring.alerts.status.clearText"
+                defaultMessage="Clear"
+              />
+            </span>
           )}
         </EuiHealth>
       </EuiToolTip>
@@ -73,7 +79,6 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   if (showBadge || inSetupMode) {
     return <AlertsBadge alerts={alerts} stateFilter={stateFilter} />;
   }
-
   const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;
 
   const tooltipText = (() => {

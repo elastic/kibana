@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ILicense, LicenseType } from '../../../licensing/common/types';
-import { SecurityLicenseFeatures } from './license_features';
+
+import type { ILicense, LicenseType } from '../../../licensing/common/types';
+import type { SecurityLicenseFeatures } from './license_features';
 
 export interface SecurityLicense {
   isLicenseAvailable(): boolean;
   isEnabled(): boolean;
-  getType(): LicenseType | undefined;
   getFeatures(): SecurityLicenseFeatures;
+  hasAtLeast(licenseType: LicenseType): boolean | undefined;
   features$: Observable<SecurityLicenseFeatures>;
 }
 
@@ -37,7 +39,7 @@ export class SecurityLicenseService {
 
         isEnabled: () => this.isSecurityEnabledFromRawLicense(rawLicense),
 
-        getType: () => rawLicense?.type,
+        hasAtLeast: (licenseType: LicenseType) => rawLicense?.hasAtLeast(licenseType),
 
         getFeatures: () => this.calculateFeaturesFromRawLicense(rawLicense),
 
@@ -79,7 +81,6 @@ export class SecurityLicenseService {
         showRoleMappingsManagement: false,
         allowAccessAgreement: false,
         allowAuditLogging: false,
-        allowLegacyAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
@@ -99,7 +100,6 @@ export class SecurityLicenseService {
         showRoleMappingsManagement: false,
         allowAccessAgreement: false,
         allowAuditLogging: false,
-        allowLegacyAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
@@ -107,7 +107,6 @@ export class SecurityLicenseService {
       };
     }
 
-    const isLicenseStandardOrBetter = rawLicense.hasAtLeast('standard');
     const isLicenseGoldOrBetter = rawLicense.hasAtLeast('gold');
     const isLicensePlatinumOrBetter = rawLicense.hasAtLeast('platinum');
     return {
@@ -117,7 +116,6 @@ export class SecurityLicenseService {
       showRoleMappingsManagement: isLicenseGoldOrBetter,
       allowAccessAgreement: isLicenseGoldOrBetter,
       allowAuditLogging: isLicenseGoldOrBetter,
-      allowLegacyAuditLogging: isLicenseStandardOrBetter,
       allowSubFeaturePrivileges: isLicenseGoldOrBetter,
       // Only platinum and trial licenses are compliant with field- and document-level security.
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,

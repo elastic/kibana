@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const path = require('path');
-const KIBANA_ROOT = path.resolve(__dirname, '../../..');
+const findKibanaRoot = require('../helpers/find_kibana_root');
+const KIBANA_ROOT = findKibanaRoot();
 
-function checkModuleNameNode(context, mappings, node) {
+function checkModuleNameNode(context, mappings, node, desc = 'Imported') {
   const mapping = mappings.find(
     (mapping) => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
   );
@@ -42,7 +43,7 @@ function checkModuleNameNode(context, mappings, node) {
   }
 
   context.report({
-    message: `Imported module "${node.value}" should be "${newSource}"`,
+    message: `${desc} module "${node.value}" should be "${newSource}"`,
     loc: node.loc,
     fix(fixer) {
       return fixer.replaceText(node, `'${newSource}'`);
@@ -78,6 +79,12 @@ module.exports = {
             disallowedMessage: {
               type: 'string',
             },
+            include: {
+              type: 'array',
+            },
+            exclude: {
+              type: 'array',
+            },
           },
           anyOf: [
             {
@@ -95,11 +102,31 @@ module.exports = {
     ],
   },
   create: (context) => {
-    const mappings = context.options[0];
+    const filename = path.relative(KIBANA_ROOT, context.getFilename());
+
+    const mappings = context.options[0].filter((mapping) => {
+      // exclude mapping rule if it is explicitly excluded from this file
+      if (mapping.exclude && mapping.exclude.some((p) => p.test(filename))) {
+        return false;
+      }
+
+      // if this mapping rule is only included in specific files, optionally include it
+      if (mapping.include) {
+        return mapping.include.some((p) => p.test(filename));
+      }
+
+      // include all mapping rules by default
+      return true;
+    });
 
     return {
       ImportDeclaration(node) {
         checkModuleNameNode(context, mappings, node.source);
+      },
+      ExportNamedDeclaration(node) {
+        if (node.source) {
+          checkModuleNameNode(context, mappings, node.source, 'Re-exported');
+        }
       },
       CallExpression(node) {
         if (

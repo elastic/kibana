@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -25,7 +26,7 @@ import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
 import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { createFlyoutManageDrilldowns } from './drilldowns';
+import { createPublicDrilldownManager, PublicDrilldownManagerComponent } from './drilldowns';
 import { createStartServicesGetter, Storage } from '../../../../src/plugins/kibana_utils/public';
 import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
 
@@ -56,11 +57,12 @@ export interface StartContract
       | 'extract'
       | 'inject'
     > {
-  FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
+  DrilldownManager: PublicDrilldownManagerComponent;
 }
 
 export class AdvancedUiActionsPublicPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
+{
   readonly licenseInfo = new BehaviorSubject<ILicense | undefined>(undefined);
   private getLicenseInfo(): ILicense {
     if (!this.licenseInfo.getValue()) {
@@ -117,7 +119,7 @@ export class AdvancedUiActionsPublicPlugin
     return {
       ...uiActions,
       ...this.enhancements!,
-      FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
+      DrilldownManager: createPublicDrilldownManager({
         actionFactories: this.enhancements!.getActionFactories(),
         getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
         storage: new Storage(window?.localStorage),

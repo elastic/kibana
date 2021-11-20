@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectReference } from 'kibana/public';
+import type { Serializable } from '@kbn/utility-types';
 
 import { GridData } from '../';
 
@@ -78,6 +79,7 @@ export type RawSavedDashboardPanel730ToLatest = Pick<
   readonly name?: string;
 
   panelIndex: string;
+  panelRefName?: string;
 };
 
 // NOTE!!
@@ -109,7 +111,7 @@ export type RawSavedDashboardPanel630 = RawSavedDashboardPanel620;
 // In 6.2 we added an inplace migration, moving uiState into each panel's new embeddableConfig property.
 // Source: https://github.com/elastic/kibana/pull/14949
 export type RawSavedDashboardPanel620 = RawSavedDashboardPanel610 & {
-  embeddableConfig: { [key: string]: unknown };
+  embeddableConfig: { [key: string]: Serializable };
   version: string;
 };
 

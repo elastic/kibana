@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import { createFeature } from '../../../../__fixtures__/kibana_features';
-import { mountWithIntl } from '@kbn/test/jest';
-import { FeatureTableCell } from '.';
-import { SecuredFeature } from '../../../../model';
 import { EuiIconTip } from '@elastic/eui';
+import React from 'react';
+
+import { mountWithIntl } from '@kbn/test/jest';
+
+import { createFeature } from '../../../../__fixtures__/kibana_features';
+import { SecuredFeature } from '../../../../model';
+import { FeatureTableCell } from './feature_table_cell';
 
 describe('FeatureTableCell', () => {
   it('renders the feature name', () => {

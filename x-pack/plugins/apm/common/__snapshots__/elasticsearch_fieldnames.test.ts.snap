@@ -23,7 +23,13 @@ Object {
 }
 `;
 
+exports[`Error CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
 exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Error CLOUD_INSTANCE_ID 1`] = `undefined`;
+
+exports[`Error CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Error CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
@@ -47,6 +53,8 @@ exports[`Error ERROR_EXC_TYPE 1`] = `undefined`;
 
 exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
+exports[`Error ERROR_ID 1`] = `"error id"`;
+
 exports[`Error ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
@@ -68,6 +76,8 @@ Object {
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HOST_OS_PLATFORM 1`] = `undefined`;
+
+exports[`Error HOSTNAME 1`] = `undefined`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -109,6 +119,8 @@ exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Error METRICSET_NAME 1`] = `undefined`;
+
 exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
@@ -120,6 +132,28 @@ exports[`Error PARENT_ID 1`] = `"parentId"`;
 exports[`Error POD_NAME 1`] = `undefined`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
+
+exports[`Error PROFILE_ALLOC_OBJECTS 1`] = `undefined`;
+
+exports[`Error PROFILE_ALLOC_SPACE 1`] = `undefined`;
+
+exports[`Error PROFILE_CPU_NS 1`] = `undefined`;
+
+exports[`Error PROFILE_DURATION 1`] = `undefined`;
+
+exports[`Error PROFILE_ID 1`] = `undefined`;
+
+exports[`Error PROFILE_INUSE_OBJECTS 1`] = `undefined`;
+
+exports[`Error PROFILE_INUSE_SPACE 1`] = `undefined`;
+
+exports[`Error PROFILE_SAMPLES_COUNT 1`] = `undefined`;
+
+exports[`Error PROFILE_STACK 1`] = `undefined`;
+
+exports[`Error PROFILE_TOP_ID 1`] = `undefined`;
+
+exports[`Error PROFILE_WALL_US 1`] = `undefined`;
 
 exports[`Error SERVICE 1`] = `
 Object {
@@ -174,8 +208,6 @@ exports[`Error SPAN_TYPE 1`] = `undefined`;
 exports[`Error TBT_FIELD 1`] = `undefined`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
-
-exports[`Error TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
@@ -236,7 +268,13 @@ Object {
 }
 `;
 
+exports[`Span CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
 exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Span CLOUD_INSTANCE_ID 1`] = `undefined`;
+
+exports[`Span CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Span CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
@@ -260,13 +298,15 @@ exports[`Span ERROR_EXC_TYPE 1`] = `undefined`;
 
 exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
+exports[`Span ERROR_ID 1`] = `undefined`;
+
 exports[`Span ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
-exports[`Span EVENT_OUTCOME 1`] = `undefined`;
+exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
 
 exports[`Span FCP_FIELD 1`] = `undefined`;
 
@@ -277,6 +317,8 @@ exports[`Span HOST 1`] = `undefined`;
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HOST_OS_PLATFORM 1`] = `undefined`;
+
+exports[`Span HOSTNAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -318,6 +360,8 @@ exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Span METRICSET_NAME 1`] = `undefined`;
+
 exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
@@ -329,6 +373,28 @@ exports[`Span PARENT_ID 1`] = `"parentId"`;
 exports[`Span POD_NAME 1`] = `undefined`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
+
+exports[`Span PROFILE_ALLOC_OBJECTS 1`] = `undefined`;
+
+exports[`Span PROFILE_ALLOC_SPACE 1`] = `undefined`;
+
+exports[`Span PROFILE_CPU_NS 1`] = `undefined`;
+
+exports[`Span PROFILE_DURATION 1`] = `undefined`;
+
+exports[`Span PROFILE_ID 1`] = `undefined`;
+
+exports[`Span PROFILE_INUSE_OBJECTS 1`] = `undefined`;
+
+exports[`Span PROFILE_INUSE_SPACE 1`] = `undefined`;
+
+exports[`Span PROFILE_SAMPLES_COUNT 1`] = `undefined`;
+
+exports[`Span PROFILE_STACK 1`] = `undefined`;
+
+exports[`Span PROFILE_TOP_ID 1`] = `undefined`;
+
+exports[`Span PROFILE_WALL_US 1`] = `undefined`;
 
 exports[`Span SERVICE 1`] = `
 Object {
@@ -379,8 +445,6 @@ exports[`Span SPAN_TYPE 1`] = `"span type"`;
 exports[`Span TBT_FIELD 1`] = `undefined`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
-
-exports[`Span TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
@@ -441,7 +505,13 @@ Object {
 }
 `;
 
+exports[`Transaction CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
 exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Transaction CLOUD_INSTANCE_ID 1`] = `undefined`;
+
+exports[`Transaction CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Transaction CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
@@ -465,13 +535,15 @@ exports[`Transaction ERROR_EXC_TYPE 1`] = `undefined`;
 
 exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 
+exports[`Transaction ERROR_ID 1`] = `undefined`;
+
 exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
-exports[`Transaction EVENT_OUTCOME 1`] = `undefined`;
+exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
 
 exports[`Transaction FCP_FIELD 1`] = `undefined`;
 
@@ -486,6 +558,8 @@ Object {
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HOST_OS_PLATFORM 1`] = `undefined`;
+
+exports[`Transaction HOSTNAME 1`] = `undefined`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
@@ -533,6 +607,8 @@ exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Transaction METRICSET_NAME 1`] = `undefined`;
+
 exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
@@ -544,6 +620,28 @@ exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 exports[`Transaction POD_NAME 1`] = `undefined`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
+
+exports[`Transaction PROFILE_ALLOC_OBJECTS 1`] = `undefined`;
+
+exports[`Transaction PROFILE_ALLOC_SPACE 1`] = `undefined`;
+
+exports[`Transaction PROFILE_CPU_NS 1`] = `undefined`;
+
+exports[`Transaction PROFILE_DURATION 1`] = `undefined`;
+
+exports[`Transaction PROFILE_ID 1`] = `undefined`;
+
+exports[`Transaction PROFILE_INUSE_OBJECTS 1`] = `undefined`;
+
+exports[`Transaction PROFILE_INUSE_SPACE 1`] = `undefined`;
+
+exports[`Transaction PROFILE_SAMPLES_COUNT 1`] = `undefined`;
+
+exports[`Transaction PROFILE_STACK 1`] = `undefined`;
+
+exports[`Transaction PROFILE_TOP_ID 1`] = `undefined`;
+
+exports[`Transaction PROFILE_WALL_US 1`] = `undefined`;
 
 exports[`Transaction SERVICE 1`] = `
 Object {
@@ -598,8 +696,6 @@ exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 exports[`Transaction TBT_FIELD 1`] = `undefined`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
-
-exports[`Transaction TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 

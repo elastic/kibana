@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { stubIndexPatternWithFields } from '../../stubs';
+import { stubIndexPattern } from '../../stubs';
 
 export const mockPersistedLog = {
   add: jest.fn(),
@@ -19,7 +19,7 @@ export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedL
 
 export const mockFetchIndexPatterns = jest
   .fn()
-  .mockReturnValue(Promise.resolve([stubIndexPatternWithFields]));
+  .mockReturnValue(Promise.resolve([stubIndexPattern]));
 
 jest.mock('../../query/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,

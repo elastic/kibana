@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
@@ -9,22 +10,29 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { clearCache } from '../../../services/rest/callApi';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';
+import { TimePickerQuickRange } from './typings';
 
-export function DatePicker() {
+export function DatePicker({
+  rangeFrom,
+  rangeTo,
+  refreshPaused,
+  refreshInterval,
+  onTimeRangeRefresh,
+}: {
+  rangeFrom?: string;
+  rangeTo?: string;
+  refreshPaused?: boolean;
+  refreshInterval?: number;
+  onTimeRangeRefresh: (range: { start: string; end: string }) => void;
+}) {
   const history = useHistory();
   const location = useLocation();
   const { core, plugins } = useApmPluginContext();
 
   const timePickerQuickRanges = core.uiSettings.get<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
-  );
-
-  const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
-    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
 
   const commonlyUsedRanges = timePickerQuickRanges.map(
@@ -34,8 +42,6 @@ export function DatePicker() {
       label: display,
     })
   );
-
-  const { urlParams, refreshTimeRange } = useUrlParams();
 
   function updateUrl(nextQuery: {
     rangeFrom?: string;
@@ -53,13 +59,16 @@ export function DatePicker() {
   }
 
   function onRefreshChange({
-    isPaused,
-    refreshInterval,
+    nextRefreshPaused,
+    nextRefreshInterval,
   }: {
-    isPaused: boolean;
-    refreshInterval: number;
+    nextRefreshPaused: boolean;
+    nextRefreshInterval: number;
   }) {
-    updateUrl({ refreshPaused: isPaused, refreshInterval });
+    updateUrl({
+      refreshPaused: nextRefreshPaused,
+      refreshInterval: nextRefreshInterval,
+    });
   }
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
@@ -68,52 +77,32 @@ export function DatePicker() {
 
   useEffect(() => {
     // set time if both to and from are given in the url
-    if (urlParams.rangeFrom && urlParams.rangeTo) {
+    if (rangeFrom && rangeTo) {
       plugins.data.query.timefilter.timefilter.setTime({
-        from: urlParams.rangeFrom,
-        to: urlParams.rangeTo,
+        from: rangeFrom,
+        to: rangeTo,
       });
       return;
     }
-
-    // read time from state and update the url
-    const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
-
-    history.replace({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        rangeFrom:
-          urlParams.rangeFrom ??
-          timePickerSharedState.from ??
-          timePickerTimeDefaults.from,
-        rangeTo:
-          urlParams.rangeTo ??
-          timePickerSharedState.to ??
-          timePickerTimeDefaults.to,
-      }),
-    });
-  }, [
-    urlParams.rangeFrom,
-    urlParams.rangeTo,
-    plugins,
-    history,
-    location,
-    timePickerTimeDefaults,
-  ]);
+  }, [rangeFrom, rangeTo, plugins]);
 
   return (
     <EuiSuperDatePicker
-      start={urlParams.rangeFrom}
-      end={urlParams.rangeTo}
-      isPaused={urlParams.refreshPaused}
-      refreshInterval={urlParams.refreshInterval}
+      start={rangeFrom}
+      end={rangeTo}
+      isPaused={refreshPaused}
+      refreshInterval={refreshInterval}
       onTimeChange={onTimeChange}
       onRefresh={({ start, end }) => {
         clearCache();
-        refreshTimeRange({ rangeFrom: start, rangeTo: end });
+        onTimeRangeRefresh({ start, end });
       }}
-      onRefreshChange={onRefreshChange}
+      onRefreshChange={({
+        isPaused: nextRefreshPaused,
+        refreshInterval: nextRefreshInterval,
+      }) => {
+        onRefreshChange({ nextRefreshPaused, nextRefreshInterval });
+      }}
       showUpdateButton={true}
       commonlyUsedRanges={commonlyUsedRanges}
     />

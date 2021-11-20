@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { CSSProperties, PureComponent } from 'react';
-// @ts-expect-error untyped local
-import { WORKPAD_CONTAINER_ID } from '../../../apps/workpad/workpad_app';
+import { WORKPAD_CONTAINER_ID } from '../../workpad_app';
 
 interface State {
   height: string;

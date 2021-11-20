@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+import { MaybePromise } from '@kbn/utility-types';
+import type { IntervalHistogram } from '../types';
 
 /** Base interface for all metrics gatherers */
 export interface MetricsCollector<T> {
   /** collect the data currently gathered by the collector */
-  collect(): Promise<T>;
+  collect(): MaybePromise<T>;
   /** reset the internal state of the collector */
   reset(): void;
 }
@@ -19,6 +21,8 @@ export interface MetricsCollector<T> {
  * @public
  */
 export interface OpsProcessMetrics {
+  /** pid of the kibana process */
+  pid: number;
   /** process memory usage */
   memory: {
     /** heap memory usage */
@@ -33,10 +37,10 @@ export interface OpsProcessMetrics {
     /** node rss */
     resident_set_size_in_bytes: number;
   };
-  /** node event loop delay */
+  /** mean event loop delay since last collection*/
   event_loop_delay: number;
-  /** pid of the kibana process */
-  pid: number;
+  /** node event loop delay histogram since last collection */
+  event_loop_delay_histogram: IntervalHistogram;
   /** uptime of the kibana process */
   uptime_in_millis: number;
 }

@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { mockCreateWriteStream } from './file_appender.test.mocks';
+import { mockCreateWriteStream, mockMkdirSync } from './file_appender.test.mocks';
 
 import { LogRecord, LogLevel } from '@kbn/logging';
 import { FileAppender } from './file_appender';
@@ -15,29 +15,30 @@ const tickMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 beforeEach(() => {
   mockCreateWriteStream.mockReset();
+  mockMkdirSync.mockReset();
 });
 
 test('`createConfigSchema()` creates correct schema.', () => {
   const appenderSchema = FileAppender.configSchema;
 
-  const validConfig = { kind: 'file', layout: { kind: 'mock' }, path: 'path' };
+  const validConfig = { type: 'file', layout: { type: 'mock' }, fileName: 'path' };
   expect(appenderSchema.validate(validConfig)).toEqual({
-    kind: 'file',
-    layout: { kind: 'mock' },
-    path: 'path',
+    type: 'file',
+    layout: { type: 'mock' },
+    fileName: 'path',
   });
 
   const wrongConfig1 = {
-    kind: 'not-file',
-    layout: { kind: 'mock' },
-    path: 'path',
+    type: 'not-file',
+    layout: { type: 'mock' },
+    fileName: 'path',
   };
   expect(() => appenderSchema.validate(wrongConfig1)).toThrow();
 
-  const wrongConfig2 = { kind: 'file', layout: { kind: 'mock' } };
+  const wrongConfig2 = { type: 'file', layout: { type: 'mock' } };
   expect(() => appenderSchema.validate(wrongConfig2)).toThrow();
 
-  const wrongConfig3 = { kind: 'console', layout: { kind: 'mock' } };
+  const wrongConfig3 = { type: 'console', layout: { type: 'mock' } };
   expect(() => appenderSchema.validate(wrongConfig3)).toThrow();
 });
 
@@ -49,8 +50,10 @@ test('file stream is created only once and only after first `append()` is called
   });
 
   const mockPath = 'mock://path/file.log';
+  const mockDir = 'mock://path';
   const appender = new FileAppender({ format: () => '' }, mockPath);
 
+  expect(mockMkdirSync).not.toHaveBeenCalled();
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
 
   appender.append({
@@ -61,12 +64,17 @@ test('file stream is created only once and only after first `append()` is called
     pid: 5355,
   });
 
+  expect(mockMkdirSync).toHaveBeenCalledTimes(1);
+  expect(mockMkdirSync).toHaveBeenCalledWith(mockDir, {
+    recursive: true,
+  });
   expect(mockCreateWriteStream).toHaveBeenCalledTimes(1);
   expect(mockCreateWriteStream).toHaveBeenCalledWith(mockPath, {
     encoding: 'utf8',
     flags: 'a',
   });
 
+  mockMkdirSync.mockClear();
   mockCreateWriteStream.mockClear();
   appender.append({
     context: 'context-2',
@@ -76,6 +84,7 @@ test('file stream is created only once and only after first `append()` is called
     pid: 5355,
   });
 
+  expect(mockMkdirSync).not.toHaveBeenCalled();
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
 });
 

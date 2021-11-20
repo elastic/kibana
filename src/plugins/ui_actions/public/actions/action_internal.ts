@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // @ts-ignore
 import React from 'react';
-import { Action, ActionContext as Context, ActionDefinition } from './action';
+import type { UiComponent } from 'src/plugins/kibana_utils/public';
+import { Action, ActionContext as Context, ActionDefinition, ActionMenuItemProps } from './action';
 import { Presentable, PresentableGrouping } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 
@@ -16,15 +17,23 @@ import { uiToReactComponent } from '../../../kibana_react/public';
  * @internal
  */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
-  implements Action<Context<A>>, Presentable<Context<A>> {
-  constructor(public readonly definition: A) {}
+  implements Action<Context<A>>, Presentable<Context<A>>
+{
+  public readonly id: string;
+  public readonly type: string;
+  public readonly order: number;
+  public readonly MenuItem?: UiComponent<ActionMenuItemProps<Context<A>>>;
+  public readonly ReactMenuItem?: React.FC<ActionMenuItemProps<Context<A>>>;
+  public readonly grouping?: PresentableGrouping<Context<A>>;
 
-  public readonly id: string = this.definition.id;
-  public readonly type: string = this.definition.type || '';
-  public readonly order: number = this.definition.order || 0;
-  public readonly MenuItem? = this.definition.MenuItem;
-  public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
-  public readonly grouping?: PresentableGrouping<Context<A>> = this.definition.grouping;
+  constructor(public readonly definition: A) {
+    this.id = this.definition.id;
+    this.type = this.definition.type || '';
+    this.order = this.definition.order || 0;
+    this.MenuItem = this.definition.MenuItem;
+    this.ReactMenuItem = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
+    this.grouping = this.definition.grouping;
+  }
 
   public execute(context: Context<A>) {
     return this.definition.execute(context);

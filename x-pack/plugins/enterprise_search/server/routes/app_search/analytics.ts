@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -24,7 +25,7 @@ export function registerAnalyticsRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/analytics/queries',
+      path: '/internal/app_search/engines/{engineName}/analytics/queries',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -39,7 +40,7 @@ export function registerAnalyticsRoutes({
 
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/analytics/queries/{query}',
+      path: '/internal/app_search/engines/{engineName}/analytics/queries/{query}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

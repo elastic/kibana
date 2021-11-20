@@ -1,12 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
+import React, {
+  memo,
+  useMemo,
+  useState,
+  useCallback,
+  KeyboardEventHandler,
+  useEffect,
+} from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -19,7 +26,7 @@ import {
 } from 'src/plugins/visualizations/public';
 import type { Schema } from 'src/plugins/visualizations/public';
 import { TimeRange } from 'src/plugins/data/public';
-import { SavedObject } from 'src/plugins/saved_objects/public';
+import { SavedSearch } from 'src/plugins/discover/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -35,11 +42,11 @@ interface DefaultEditorSideBarProps {
   vis: Vis;
   isLinkedSearch: boolean;
   eventEmitter: EventEmitter;
-  savedSearch?: SavedObject;
+  savedSearch?: SavedSearch;
   timeRange: TimeRange;
 }
 
-function DefaultEditorSideBar({
+function DefaultEditorSideBarComponent({
   embeddableHandler,
   isCollapsed,
   onClickCollapse,
@@ -55,17 +62,19 @@ function DefaultEditorSideBar({
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
   const [optionTabs, setSelectedTab] = useOptionTabs(vis);
 
-  const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
-    state.data.aggs,
-  ]);
+  const responseAggs = useMemo(
+    () => (state.data.aggs ? state.data.aggs.getResponseAggs() : []),
+    [state.data.aggs]
+  );
   const metricSchemas = (vis.type.schemas.metrics || []).map((s: Schema) => s.name);
   const metricAggs = useMemo(
     () => responseAggs.filter((agg) => agg.schema && metricSchemas.includes(agg.schema)),
     [responseAggs, metricSchemas]
   );
-  const hasHistogramAgg = useMemo(() => responseAggs.some((agg) => agg.type.name === 'histogram'), [
-    responseAggs,
-  ]);
+  const hasHistogramAgg = useMemo(
+    () => responseAggs.some((agg) => agg.type.name === 'histogram'),
+    [responseAggs]
+  );
 
   const setStateValidity = useCallback(
     (value: boolean) => {
@@ -173,7 +182,7 @@ function DefaultEditorSideBar({
         gutterSize="none"
         responsive={false}
       >
-        <EuiFlexItem className="visEditorSidebar__formWrapper">
+        <EuiFlexItem>
           <form
             className="visEditorSidebar__form"
             name="visualizeEditor"
@@ -235,5 +244,7 @@ function DefaultEditorSideBar({
     </>
   );
 }
+
+const DefaultEditorSideBar = memo(DefaultEditorSideBarComponent);
 
 export { DefaultEditorSideBar };

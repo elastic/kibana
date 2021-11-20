@@ -1,21 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EmbeddableFactory } from '../../../../../src/plugins/embeddable/public';
-import { CanvasServiceFactory } from '.';
+import {
+  EmbeddableFactory,
+  EmbeddableStateTransfer,
+} from '../../../../../src/plugins/embeddable/public';
 
-export interface EmbeddablesService {
+export interface CanvasEmbeddablesService {
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
+  getStateTransfer: () => EmbeddableStateTransfer;
 }
-
-export const embeddablesServiceFactory: CanvasServiceFactory<EmbeddablesService> = async (
-  _coreSetup,
-  _coreStart,
-  _setupPlugins,
-  startPlugins
-) => ({
-  getEmbeddableFactories: startPlugins.embeddable.getEmbeddableFactories,
-});

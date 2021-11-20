@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { registerRoutesMock, createTagUsageCollectorMock } from './plugin.test.mocks';
@@ -18,7 +19,7 @@ describe('SavedObjectTaggingPlugin', () => {
   let usageCollectionSetup: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
 
   beforeEach(() => {
-    plugin = new SavedObjectTaggingPlugin(coreMock.createPluginInitializerContext());
+    plugin = new SavedObjectTaggingPlugin();
     featuresPluginSetup = featuresPluginMock.createSetup();
     usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
     // `usageCollection` 'mocked' implementation use the real `CollectorSet` implementation

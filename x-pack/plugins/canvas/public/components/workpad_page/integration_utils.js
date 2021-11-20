@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallowEqual } from 'recompose';
@@ -11,8 +12,8 @@ import { selectToplevelNodes } from '../../state/actions/transient';
 import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
 import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
-import { isGroupId, elementToShape } from './utils';
-export * from './utils';
+import { isGroupId, elementToShape } from './positioning_utils';
+export * from './positioning_utils';
 
 const shapeToElement = (shape) => ({
   left: shape.transformMatrix[12] - shape.a,
@@ -74,8 +75,40 @@ const missingParentCheck = (groups) => {
 };
 
 export const shapesForNodes = (nodes) => {
+  // For a group, it's z-layer should be the same as the highest of it's children
+  // So we cache every nodes layer in this array so when we get to a group
+  // we can refer back to all of the elements and figure out the appropriate layer
+  // for the group
+  const nodeLayers = nodes.map(() => null);
+
+  const getNodeLayer = (nodeIndex) => {
+    if (nodeLayers[nodeIndex]) {
+      return nodeLayers[nodeIndex];
+    }
+
+    const node = nodes[nodeIndex];
+    const thisId = node.id;
+
+    const childrenIndexesOfThisNode = nodes
+      .map((n, i) => [n, i])
+      .filter(([node]) => node.position.parent === thisId)
+      .map(([, index]) => index);
+
+    if (childrenIndexesOfThisNode.length === 0) {
+      nodeLayers[nodeIndex] = nodeIndex;
+    } else {
+      const layer = Math.max(...childrenIndexesOfThisNode.map(getNodeLayer));
+      nodeLayers[nodeIndex] = layer;
+    }
+
+    return nodeLayers[nodeIndex];
+  };
+
   const rawShapes = nodes
-    .map(elementToShape)
+    .map((node, index) => {
+      const layer = getNodeLayer(index);
+      return elementToShape(node, layer);
+    })
     // filtering to eliminate residual element of a possible group that had been deleted in Redux
     .filter((d, i, a) => !isGroupId(d.id) || a.find((s) => s.parent === d.id))
     .filter(dedupe);

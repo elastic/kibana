@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
 import type { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { SavedObjectSaveModal } from '../../services/saved_objects';
-import { DashboardSaveOptions } from '../types';
+import { DashboardSaveOptions } from '../../types';
 
 interface Props {
   onSave: ({
@@ -147,7 +148,10 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         onClose={this.props.onClose}
         title={this.props.title}
         showCopyOnSave={this.props.showCopyOnSave}
-        objectType="dashboard"
+        initialCopyOnSave={this.props.showCopyOnSave}
+        objectType={i18n.translate('dashboard.topNav.saveModal.objectType', {
+          defaultMessage: 'dashboard',
+        })}
         options={this.renderDashboardSaveOptions()}
         showDescription={false}
       />

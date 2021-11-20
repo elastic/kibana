@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactElement } from 'react';
@@ -9,13 +10,9 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import { Feature } from 'geojson';
-import { SearchResponse } from 'elasticsearch';
-import {
-  convertCompositeRespToGeoJson,
-  convertRegularRespToGeoJson,
-  makeESBbox,
-} from '../../../../common/elasticsearch_util';
-// @ts-expect-error
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { makeESBbox } from '../../../../common/elasticsearch_util';
+import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -25,30 +22,35 @@ import {
   GIS_API_PATH,
   GRID_RESOLUTION,
   MVT_GETGRIDTILE_API_PATH,
-  MVT_SOURCE_LAYER_NAME,
+  MVT_TOKEN_PARAM_NAME,
   RENDER_AS,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import { GeoJsonWithMeta } from '../vector_source';
+import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import {
   ESGeoGridSourceDescriptor,
   MapExtent,
   VectorSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
+
+type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType'>;
+
+const ES_MVT_AGGS_LAYER_NAME = 'aggs';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -81,11 +83,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   constructor(descriptor: Partial<ESGeoGridSourceDescriptor>, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESGeoGridSource.createDescriptor(descriptor);
-    super(
-      sourceDescriptor,
-      inspectorAdapters,
-      descriptor.resolution !== GRID_RESOLUTION.SUPER_FINE
-    );
+    super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 
@@ -102,7 +100,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     );
   }
 
-  getSyncMeta(): VectorSourceSyncMeta {
+  getSyncMeta(): ESGeoGridSourceSyncMeta {
     return {
       requestType: this._descriptor.requestType,
     };
@@ -123,9 +121,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         value: this._descriptor.requestType === RENDER_AS.HEATMAP ? heatmapTitle : clustersTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.esGrid.indexPatternLabel', {
-          defaultMessage: 'Index pattern',
-        }),
+        label: getDataViewLabel(),
         value: indexPatternName,
       },
       {
@@ -135,6 +131,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         value: this._descriptor.geoField,
       },
     ];
+  }
+
+  isMvt() {
+    return this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE;
   }
 
   getFieldNames() {
@@ -195,6 +195,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   async _compositeAggRequest({
     searchSource,
+    searchSessionId,
     indexPattern,
     precision,
     layerName,
@@ -204,6 +205,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     bufferedExtent,
   }: {
     searchSource: ISearchSource;
+    searchSessionId?: string;
     indexPattern: IndexPattern;
     precision: number;
     layerName: string;
@@ -268,7 +270,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       const requestId: string = afterKey
         ? `${this.getId()} afterKey ${afterKey.geoSplit}`
         : this.getId();
-      const esResponse: SearchResponse<unknown> = await this._runEsQuery({
+      const esResponse: estypes.SearchResponse<unknown> = await this._runEsQuery({
         requestId,
         requestName: `${layerName} (${requestCount})`,
         searchSource,
@@ -280,12 +282,15 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
             values: { requestId },
           }
         ),
+        searchSessionId,
       });
 
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
 
-      afterKey = esResponse.aggregations.compositeSplit.after_key;
-      if (esResponse.aggregations.compositeSplit.buckets.length < gridsPerRequest) {
+      const aggr = esResponse.aggregations
+        ?.compositeSplit as estypes.AggregationsCompositeBucketAggregate;
+      afterKey = aggr.after_key;
+      if (aggr.buckets.length < gridsPerRequest) {
         // Finished because request did not get full resultset back
         break;
       }
@@ -297,8 +302,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   _addNonCompositeAggsToSearchSource(
     searchSource: ISearchSource,
     indexPattern: IndexPattern,
-    precision: number | null,
-    bufferedExtent?: MapExtent | null
+    precision: number,
+    bufferedExtent?: MapExtent
   ) {
     searchSource.setField('aggs', {
       [GEOTILE_GRID_AGG_NAME]: {
@@ -325,6 +330,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   // see https://github.com/elastic/kibana/pull/57875#issuecomment-590515482 for explanation on using separate code paths
   async _nonCompositeAggRequest({
     searchSource,
+    searchSessionId,
     indexPattern,
     precision,
     layerName,
@@ -332,6 +338,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     bufferedExtent,
   }: {
     searchSource: ISearchSource;
+    searchSessionId?: string;
     indexPattern: IndexPattern;
     precision: number;
     layerName: string;
@@ -348,6 +355,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
         defaultMessage: 'Elasticsearch geo grid aggregation request',
       }),
+      searchSessionId,
     });
 
     return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
@@ -361,6 +369,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   ): Promise<GeoJsonWithMeta> {
     const indexPattern: IndexPattern = await this.getIndexPattern();
     const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
+    searchSource.setField('trackTotalHits', false);
 
     let bucketsPerGrid = 1;
     this.getMetricFields().forEach((metricField) => {
@@ -373,6 +382,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         bucketsPerGrid === 1
           ? await this._nonCompositeAggRequest({
               searchSource,
+              searchSessionId: searchFilters.searchSessionId,
               indexPattern,
               precision: searchFilters.geogridPrecision || 0,
               layerName,
@@ -381,6 +391,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
             })
           : await this._compositeAggRequest({
               searchSource,
+              searchSessionId: searchFilters.searchSessionId,
               indexPattern,
               precision: searchFilters.geogridPrecision || 0,
               layerName,
@@ -405,38 +416,31 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   getLayerName(): string {
-    return MVT_SOURCE_LAYER_NAME;
+    return ES_MVT_AGGS_LAYER_NAME;
   }
 
   async getUrlTemplateWithMeta(
     searchFilters: VectorSourceRequestMeta
-  ): Promise<{
-    layerName: string;
-    urlTemplate: string;
-    minSourceZoom: number;
-    maxSourceZoom: number;
-  }> {
+  ): Promise<ITiledSingleLayerMvtParams> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
-
-    this._addNonCompositeAggsToSearchSource(
-      searchSource,
-      indexPattern,
-      null, // needs to be set server-side
-      null // needs to be stripped server-side
-    );
-
-    const dsl = await searchSource.getSearchRequestBody();
+    searchSource.setField('aggs', this.getValueAggsDsl(indexPattern));
+    const dsl = searchSource.getSearchRequestBody();
 
     const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
-      `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}`
+      `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const geoField = await this._getGeoField();
-    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}&requestType=${this._descriptor.requestType}&geoFieldType=${geoField.type}`;
+    const urlTemplate = `${mvtUrlServicePath}\
+?geometryFieldName=${this._descriptor.geoField}\
+&index=${indexPattern.title}\
+&requestBody=${risonDsl}\
+&requestType=${this._descriptor.requestType}`;
+
     return {
+      refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
@@ -454,7 +458,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     }
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return true;
   }
 

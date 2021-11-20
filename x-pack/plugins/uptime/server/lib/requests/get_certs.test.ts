@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getCerts } from './get_certs';
@@ -93,7 +94,7 @@ describe('getCerts', () => {
 
     const result = await getCerts({
       uptimeEsClient,
-      index: 1,
+      pageIndex: 1,
       from: 'now-2d',
       to: 'now+1h',
       search: 'my_common_name',
@@ -172,7 +173,7 @@ describe('getCerts', () => {
                   "filter": Array [
                     Object {
                       "exists": Object {
-                        "field": "tls.server",
+                        "field": "tls.server.hash.sha256",
                       },
                     },
                     Object {
@@ -211,7 +212,7 @@ describe('getCerts', () => {
                 },
               ],
             },
-            "index": "heartbeat-8*",
+            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
           },
         ],
       ]

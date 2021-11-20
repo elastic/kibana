@@ -3,18 +3,20 @@
     "Elastic"
   ],
   "description": "Identifies a privilege escalation attempt via a rogue Windows directory (Windir) environment variable. This is a known primitive that is often combined with other vulnerabilities to elevate privileges.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Privilege Escalation via Windir Environment Variable",
   "query": "registry where registry.path : (\"HKEY_USERS\\\\*\\\\Environment\\\\windir\", \"HKEY_USERS\\\\*\\\\Environment\\\\systemroot\") and \n not registry.data.strings : (\"C:\\\\windows\", \"%SystemRoot%\")\n",
   "references": [
     "https://www.tiraniddo.dev/2017/05/exploiting-environment-variables-in.html"
   ],
-  "risk_score": 71,
+  "risk_score": 73,
   "rule_id": "d563aaba-2e72-462b-8658-3e5ea22db3a6",
   "severity": "high",
   "tags": [
@@ -48,6 +50,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

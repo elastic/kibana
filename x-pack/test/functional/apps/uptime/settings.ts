@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -49,7 +50,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await settings.applyButtonIsDisabled()).to.eql(true);
     });
 
-    // Failing: https://github.com/elastic/kibana/issues/60863
     it('changing index pattern setting is reflected elsewhere in UI', async () => {
       const settings = uptimeService.settings;
 

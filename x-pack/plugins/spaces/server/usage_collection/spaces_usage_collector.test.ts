@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getSpacesUsageCollector, UsageData } from './spaces_usage_collector';
 import * as Rx from 'rxjs';
-import { PluginsSetup } from '../plugin';
-import { KibanaFeature } from '../../../features/server';
-import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
-import { UsageStats } from '../usage_stats';
+
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+
+import { createCollectorFetchContextMock } from '../../../../../src/plugins/usage_collection/server/mocks';
+import type { KibanaFeature } from '../../../features/server';
+import type { ILicense, LicensingPluginSetup } from '../../../licensing/server';
+import type { PluginsSetup } from '../plugin';
+import type { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../usage_stats/usage_stats_service.mock';
-import {
-  elasticsearchServiceMock,
-  pluginInitializerContextConfigMock,
-} from 'src/core/server/mocks';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import type { UsageData } from './spaces_usage_collector';
+import { getSpacesUsageCollector } from './spaces_usage_collector';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
@@ -36,7 +37,10 @@ const MOCK_USAGE_STATS: UsageStats = {
   'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no': 0,
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes': 6,
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no': 7,
+  'apiCalls.disableLegacyUrlAliases.total': 17,
 };
+
+const kibanaIndex = '.kibana-tests';
 
 function setup({
   license = { isAvailable: true },
@@ -48,6 +52,7 @@ function setup({
     constructor({ fetch }: any) {
       this.fetch = fetch;
     }
+
     // to make typescript happy
     public fakeFetchUsage() {
       return this.fetch;
@@ -58,9 +63,9 @@ function setup({
     license$: Rx.of(license),
   } as LicensingPluginSetup;
 
-  const featuresSetup = ({
+  const featuresSetup = {
     getKibanaFeatures: jest.fn().mockReturnValue(features),
-  } as unknown) as PluginsSetup['features'];
+  } as unknown as PluginsSetup['features'];
 
   const usageStatsClient = usageStatsClientMock.create();
   usageStatsClient.getUsageStats.mockResolvedValue(MOCK_USAGE_STATS);
@@ -111,35 +116,19 @@ const getMockedEsClient = (esClientMock: jest.Mock) => {
 };
 
 describe('error handling', () => {
-  it('handles a 404 when searching for space usage', async () => {
+  it('throws error if cluster unavailable', async () => {
     const { features, licensing, usageCollection, usageStatsService } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
-      features,
-      licensing,
-      usageStatsServicePromise: Promise.resolve(usageStatsService),
-    });
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.search.mockRejectedValue({ status: 404 });
-
-    await collector.fetch(getMockFetchContext(esClient));
-  });
-
-  it('throws error for a non-404', async () => {
-    const { features, licensing, usageCollection, usageStatsService } = setup({
-      license: { isAvailable: true, type: 'basic' },
-    });
-    const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    const statusCodes = [401, 402, 403, 500];
+    const statusCodes = [401, 402, 403, 404, 500];
     for (const statusCode of statusCodes) {
       const error = { status: statusCode };
       esClient.search.mockRejectedValue(error);
@@ -156,7 +145,7 @@ describe('with a basic license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -175,7 +164,7 @@ describe('with a basic license', () => {
         size: 0,
         track_total_hits: true,
       },
-      index: '.kibana-tests',
+      index: kibanaIndex,
     });
   });
 
@@ -215,7 +204,7 @@ describe('with no license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -256,7 +245,7 @@ describe('with platinum license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),

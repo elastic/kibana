@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -17,7 +18,8 @@ interface EmbeddableTimeRangeInput extends EmbeddableInput {
 }
 
 export class TimeRangeEmbeddableFactory
-  implements EmbeddableFactoryDefinition<EmbeddableTimeRangeInput> {
+  implements EmbeddableFactoryDefinition<EmbeddableTimeRangeInput>
+{
   public readonly type = TIME_RANGE_EMBEDDABLE;
 
   public async isEditable() {

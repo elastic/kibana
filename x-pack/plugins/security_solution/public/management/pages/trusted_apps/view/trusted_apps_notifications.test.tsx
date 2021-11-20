@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -90,8 +91,7 @@ describe('TrustedAppsNotifications', () => {
 
     expect(notifications.toasts.addSuccess).not.toBeCalled();
     expect(notifications.toasts.addDanger).toBeCalledWith({
-      text:
-        'Unable to remove "trusted app 3" from the Trusted Applications list. Reason: Not Found',
+      text: 'Unable to remove "trusted app 3" from the Trusted Applications list. Reason: Not Found',
       title: 'Removal failure',
     });
   });

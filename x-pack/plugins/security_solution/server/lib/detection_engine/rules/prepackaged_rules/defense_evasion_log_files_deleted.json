@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "System Log File Deletion",
   "query": "file where event.type == \"deletion\" and \n  file.path : \n    (\n    \"/var/run/utmp\", \n    \"/var/log/wtmp\", \n    \"/var/log/btmp\", \n    \"/var/log/lastlog\", \n    \"/var/log/faillog\",\n    \"/var/log/syslog\", \n    \"/var/log/messages\", \n    \"/var/log/secure\", \n    \"/var/log/auth.log\"\n    )\n",
   "references": [
@@ -42,6 +42,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

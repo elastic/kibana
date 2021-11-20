@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElasticsearchClient } from 'kibana/server';
@@ -14,7 +15,7 @@ export const esIndicesStateCheck = async (
   asCurrentUser: ElasticsearchClient,
   indices: string[]
 ): Promise<StatusCheckResult> => {
-  const { body: response } = await asCurrentUser.indices.resolveIndex<ResolveIndexResponseFromES>({
+  const { body: response } = await asCurrentUser.indices.resolveIndex({
     name: '*',
     expand_wildcards: 'all',
   });
@@ -22,7 +23,7 @@ export const esIndicesStateCheck = async (
   const result: StatusCheckResult = {};
 
   indices.forEach((index) => {
-    result[index] = getIndexState(index, response);
+    result[index] = getIndexState(index, response as ResolveIndexResponseFromES);
   });
 
   return result;

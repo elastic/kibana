@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactText, useContext, useState } from 'react';
@@ -15,9 +16,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../CsmSharedContext';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
@@ -29,7 +31,7 @@ interface JSErrorItem {
 }
 
 export function JSErrors() {
-  const { urlParams, uiFilters } = useUrlParams();
+  const { urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, serviceName, searchTerm } = urlParams;
 
@@ -39,13 +41,13 @@ export function JSErrors() {
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/js-errors',
+          endpoint: 'GET /internal/apm/ux/js-errors',
           params: {
             query: {
               start,
               end,
               urlQuery: searchTerm || undefined,
-              uiFilters: JSON.stringify(uiFilters),
+              uiFilters: JSON.stringify(uxUiFilters),
               pageSize: String(pagination.pageSize),
               pageIndex: String(pagination.pageIndex),
             },
@@ -54,7 +56,7 @@ export function JSErrors() {
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uiFilters, pagination, searchTerm]
+    [start, end, serviceName, uxUiFilters, pagination, searchTerm]
   );
 
   const {
@@ -124,14 +126,21 @@ export function JSErrors() {
               )
             }
             description={I18LABELS.totalErrors}
-            isLoading={status !== 'success'}
+            isLoading={status === FETCH_STATUS.LOADING}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable
         data-test-subj={'uxJsErrorTable'}
-        loading={status !== 'success'}
+        loading={status === FETCH_STATUS.LOADING}
+        error={
+          status === FETCH_STATUS.FAILURE
+            ? i18n.translate('xpack.apm.rum.jsErrorsTable.errorMessage', {
+                defaultMessage: 'Failed to fetch',
+              })
+            : ''
+        }
         responsive={false}
         compressed={true}
         columns={cols}

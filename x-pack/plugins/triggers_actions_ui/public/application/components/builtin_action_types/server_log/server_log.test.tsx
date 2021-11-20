@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel, UserConfiguredActionConnector } from '../../../../types';
@@ -27,7 +29,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('server-log connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector: UserConfiguredActionConnector<{}, {}> = {
       secrets: {},
       id: 'test',
@@ -37,7 +39,7 @@ describe('server-log connector validation', () => {
       isPreconfigured: false,
     };
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {},
       },
@@ -49,23 +51,23 @@ describe('server-log connector validation', () => {
 });
 
 describe('action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       message: 'test message',
       level: 'trace',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: { message: [] },
     });
   });
 
-  test('params validation fails when message is not valid', () => {
+  test('params validation fails when message is not valid', async () => {
     const actionParams = {
       message: '',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         message: ['Message is required.'],
       },

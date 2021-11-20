@@ -1,16 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
-import { isEsSearchResponse } from '../../../../../../../../../common/api_schemas/type_guards';
+import {
+  isEsSearchResponseWithAggregations,
+  isMultiBucketAggregate,
+} from '../../../../../../../../../common/api_schemas/type_guards';
 import { useApi } from '../../../../../../../hooks';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { FilterAggConfigTerm } from '../types';
@@ -25,10 +30,10 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   selectedField,
 }) => {
   const api = useApi();
-  const { indexPattern } = useContext(CreateTransformWizardContext);
+  const { indexPattern, runtimeMappings } = useContext(CreateTransformWizardContext);
   const toastNotifications = useToastNotifications();
 
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -37,6 +42,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       const esSearchRequest = {
         index: indexPattern!.title,
         body: {
+          ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
           query: {
             wildcard: {
               [selectedField!]: {
@@ -60,7 +66,14 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
 
       setIsLoading(false);
 
-      if (!isEsSearchResponse(response)) {
+      if (
+        !(
+          isEsSearchResponseWithAggregations(response) &&
+          isMultiBucketAggregate<estypes.AggregationsKeyedBucketKeys>(
+            response.aggregations.field_values
+          )
+        )
+      ) {
         toastNotifications.addWarning(
           i18n.translate('xpack.transform.agg.popoverForm.filerAgg.term.errorFetchSuggestions', {
             defaultMessage: 'Unable to fetch suggestions',
@@ -70,9 +83,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       }
 
       setOptions(
-        response.aggregations.field_values.buckets.map(
-          (value: { key: string; doc_count: number }) => ({ label: value.key })
-        )
+        response.aggregations.field_values.buckets.map((value) => ({ label: value.key + '' }))
       );
     }, 600),
     [selectedField]

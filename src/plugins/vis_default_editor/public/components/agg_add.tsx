@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -52,7 +52,7 @@ function DefaultEditorAggAdd({
 
   const addButton = (
     <EuiButtonEmpty
-      size="xs"
+      size="s"
       iconType="plusInCircleFilled"
       data-test-subj={`visEditorAdd_${groupName}`}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -88,7 +88,7 @@ function DefaultEditorAggAdd({
           repositionOnScroll={true}
           closePopover={() => setIsPopoverOpen(false)}
         >
-          <EuiPopoverTitle>
+          <EuiPopoverTitle paddingSize="s">
             {(groupName !== AggGroupNames.Buckets || !stats.count) && (
               <FormattedMessage
                 id="visDefaultEditor.aggAdd.addGroupButtonLabel"

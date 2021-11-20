@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
 import {
   ML_JOB_AGGREGATION,
@@ -78,8 +79,9 @@ export function getRichDetectors(
       byField,
       overField,
       partitionField,
-      excludeFrequent: d.exclude_frequent || null,
-      description: d.detector_description || null,
+      excludeFrequent: d.exclude_frequent ?? null,
+      description: d.detector_description ?? null,
+      useNull: d.use_null ?? null,
     };
   });
 }
@@ -228,17 +230,14 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   return false;
 }
 
-function stashCombinedJob(
+function stashJobForCloning(
   jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
   includeTimeRange: boolean = false
 ) {
-  const combinedJob = {
-    ...jobCreator.jobConfig,
-    datafeed_config: jobCreator.datafeedConfig,
-  };
-
-  mlJobService.tempJobCloningObjects.job = combinedJob;
+  mlJobService.tempJobCloningObjects.job = jobCreator.jobConfig;
+  mlJobService.tempJobCloningObjects.datafeed = jobCreator.datafeedConfig;
+  mlJobService.tempJobCloningObjects.createdBy = jobCreator.createdBy ?? undefined;
 
   // skip over the time picker step of the wizard
   mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
@@ -258,21 +257,25 @@ export function convertToMultiMetricJob(
 ) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
-  stashCombinedJob(jobCreator, true, true);
-
+  stashJobForCloning(jobCreator, true, true);
   navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
-  stashCombinedJob(jobCreator, true, true);
-
+  stashJobForCloning(jobCreator, true, true);
   navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
+}
+
+export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+  jobCreator.createdBy = null;
+  stashJobForCloning(jobCreator, true, false);
+  navigateToPath('/jobs/new_job');
 }
 
 export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.jobId = '';
-  stashCombinedJob(jobCreator, true, true);
+  stashJobForCloning(jobCreator, true, true);
   navigateToPath('/jobs/new_job');
 }
 
@@ -281,7 +284,7 @@ export function advancedStartDatafeed(
   navigateToPath: NavigateToPath
 ) {
   if (jobCreator !== null) {
-    stashCombinedJob(jobCreator, false, false);
+    stashJobForCloning(jobCreator, false, false);
   }
   navigateToPath('/jobs');
 }
@@ -311,6 +314,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
     case JOB_TYPE.CATEGORIZATION:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.categorization', {
         defaultMessage: 'Categorization',
+      });
+    case JOB_TYPE.RARE:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.rare', {
+        defaultMessage: 'Rare',
       });
     default:
       return '';

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
-import { AppMountParameters } from 'kibana/public';
-import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import type { AppMountParameters } from 'kibana/public';
+import type { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapApp } from './map_app';
 import { SavedMap, getInitialLayersFromUrlParam } from './saved_map';
 import { MapEmbeddableInput } from '../../embeddable/types';
@@ -19,6 +20,7 @@ interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
+  history: AppMountParameters['history'];
 }
 
 interface State {
@@ -68,6 +70,7 @@ export class MapPage extends Component<Props, State> {
     return (
       <Provider store={this.state.savedMap.getStore()}>
         <MapApp
+          history={this.props.history}
           savedMap={this.state.savedMap}
           onAppLeave={this.props.onAppLeave}
           setHeaderActionMenu={this.props.setHeaderActionMenu}

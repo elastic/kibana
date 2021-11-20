@@ -1,34 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { InfraPluginRequestHandlerContext } from '../../types';
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { fetchMlJob } from './common';
-import { getJobId, metricsHostsJobTypes } from '../../../common/infra_ml';
+import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
+import { getJobId, metricsHostsJobTypes, ANOMALY_THRESHOLD } from '../../../common/infra_ml';
 import { Sort, Pagination } from '../../../common/http_api/infra_ml';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
-import { InsufficientAnomalyMlJobsConfigured, isMlPrivilegesError } from './errors';
+import { isMlPrivilegesError } from './errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   metricsHostsAnomaliesResponseRT,
   createMetricsHostsAnomaliesQuery,
 } from './queries/metrics_hosts_anomalies';
-
-interface MappedAnomalyHit {
-  id: string;
-  anomalyScore: number;
-  typical: number;
-  actual: number;
-  jobId: string;
-  startTime: number;
-  duration: number;
-  influencers: string[];
-  categoryId?: string;
-}
 
 async function getCompatibleAnomaliesJobIds(
   spaceId: string,
@@ -72,31 +60,47 @@ async function getCompatibleAnomaliesJobIds(
   };
 }
 
-export async function getMetricsHostsAnomalies(
-  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
-  sourceId: string,
-  startTime: number,
-  endTime: number,
-  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
-  sort: Sort,
-  pagination: Pagination
-) {
+export async function getMetricsHostsAnomalies({
+  context,
+  sourceId,
+  anomalyThreshold,
+  startTime,
+  endTime,
+  metric,
+  sort,
+  pagination,
+  influencerFilter,
+  query,
+}: {
+  context: Required<InfraRequestHandlerContext>;
+  sourceId: string;
+  anomalyThreshold: ANOMALY_THRESHOLD;
+  startTime: number;
+  endTime: number;
+  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined;
+  sort: Sort;
+  pagination: Pagination;
+  influencerFilter?: InfluencerFilter;
+  query?: string;
+}) {
   const finalizeMetricsHostsAnomaliesSpan = startTracingSpan('get metrics hosts entry anomalies');
 
   const {
     jobIds,
     timing: { spans: jobSpans },
   } = await getCompatibleAnomaliesJobIds(
-    context.infra.spaceId,
+    context.spaceId,
     sourceId,
     metric,
-    context.infra.mlAnomalyDetectors
+    context.mlAnomalyDetectors
   );
 
   if (jobIds.length === 0) {
-    throw new InsufficientAnomalyMlJobsConfigured(
-      'Metrics Hosts ML jobs need to be configured to search anomalies'
-    );
+    return {
+      data: [],
+      hasMoreEntries: false,
+      timimg: { spans: [] },
+    };
   }
 
   try {
@@ -106,12 +110,15 @@ export async function getMetricsHostsAnomalies(
       hasMoreEntries,
       timing: { spans: fetchLogEntryAnomaliesSpans },
     } = await fetchMetricsHostsAnomalies(
-      context.infra.mlSystem,
+      context.mlSystem,
+      anomalyThreshold,
       jobIds,
       startTime,
       endTime,
       sort,
-      pagination
+      pagination,
+      influencerFilter,
+      query
     );
 
     const data = anomalies.map((anomaly) => {
@@ -144,6 +151,8 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     duration,
     influencers,
     startTime: anomalyStartTime,
+    partitionFieldName,
+    partitionFieldValue,
   } = anomaly;
 
   return {
@@ -156,16 +165,21 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     startTime: anomalyStartTime,
     type: 'metrics_hosts' as const,
     jobId,
+    partitionFieldName,
+    partitionFieldValue,
   };
 };
 
 async function fetchMetricsHostsAnomalies(
   mlSystem: MlSystem,
+  anomalyThreshold: ANOMALY_THRESHOLD,
   jobIds: string[],
   startTime: number,
   endTime: number,
   sort: Sort,
-  pagination: Pagination
+  pagination: Pagination,
+  influencerFilter?: InfluencerFilter,
+  query?: string
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
@@ -174,12 +188,18 @@ async function fetchMetricsHostsAnomalies(
   const expandedPagination = { ...pagination, pageSize: pagination.pageSize + 1 };
 
   const finalizeFetchLogEntryAnomaliesSpan = startTracingSpan('fetch metrics hosts anomalies');
-
+  const hostQuery = createMetricsHostsAnomaliesQuery({
+    jobIds,
+    anomalyThreshold,
+    startTime,
+    endTime,
+    sort,
+    pagination: expandedPagination,
+    influencerFilter,
+    jobQuery: query,
+  });
   const results = decodeOrThrow(metricsHostsAnomaliesResponseRT)(
-    await mlSystem.mlAnomalySearch(
-      createMetricsHostsAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination),
-      jobIds
-    )
+    await mlSystem.mlAnomalySearch(hostQuery, jobIds)
   );
 
   const {
@@ -217,6 +237,8 @@ async function fetchMetricsHostsAnomalies(
       bucket_span: duration,
       timestamp: anomalyStartTime,
       by_field_value: categoryId,
+      partition_field_value: partitionFieldValue,
+      partition_field_name: partitionFieldName,
     } = result._source;
 
     const hostInfluencers = influencers.filter((i) => i.influencer_field_name === 'host.name');
@@ -234,6 +256,8 @@ async function fetchMetricsHostsAnomalies(
       startTime: anomalyStartTime,
       duration: duration * 1000,
       categoryId,
+      partitionFieldName,
+      partitionFieldValue,
     };
   });
 

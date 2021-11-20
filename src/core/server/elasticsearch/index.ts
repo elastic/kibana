@@ -1,25 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export { ElasticsearchService } from './elasticsearch_service';
-export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
-export { NodesVersionCompatibility } from './version_check/ensure_es_version';
-export {
+export { config, configSchema } from './elasticsearch_config';
+export { ElasticsearchConfig } from './elasticsearch_config';
+export type {
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from './version_check/ensure_es_version';
+export type {
+  ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
+  InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
   FakeRequest,
   ScopeableRequest,
+  ElasticsearchConfigPreboot,
 } from './types';
-export * from './legacy';
-export {
+export type {
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
@@ -30,7 +36,9 @@ export {
   CountResponse,
   ShardsInfo,
   ShardsResponse,
-  Explanation,
   GetResponse,
   DeleteDocumentResponse,
+  ElasticsearchErrorDetails,
 } from './client';
+export { getRequestDebugMeta, getErrorMessage } from './client';
+export { pollEsNodesVersion } from './version_check/ensure_es_version';

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import type { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from './index';
 import { shallow } from 'enzyme';
-import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
@@ -83,9 +84,12 @@ const indexPattern2: IndexPattern = {
   ]),
 };
 
+const uiSettingsMock = {} as IUiSettingsClient;
+
 const defaultOptions = {
+  layerId: '1',
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',
@@ -94,6 +98,10 @@ const defaultOptions = {
   data: dataStart,
   http: {} as HttpSetup,
   indexPattern: indexPattern1,
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
 };
 
 describe('date_histogram', () => {
@@ -116,13 +124,13 @@ describe('date_histogram', () => {
             interval: '42w',
           },
           sourceField: 'timestamp',
-        },
+        } as DateHistogramIndexPatternColumn,
       },
     };
   });
 
   function layerWithInterval(interval: string) {
-    return ({
+    return {
       ...layer,
       columns: {
         ...layer.columns,
@@ -133,7 +141,7 @@ describe('date_histogram', () => {
           },
         },
       },
-    } as unknown) as IndexPatternLayer;
+    } as unknown as IndexPatternLayer;
   }
 
   describe('buildColumn', () => {
@@ -168,30 +176,6 @@ describe('date_histogram', () => {
       });
       expect(column.params.interval).toEqual('auto');
     });
-
-    it('should create column object with restrictions', () => {
-      const column = dateHistogramOperation.buildColumn({
-        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
-        indexPattern: createMockedIndexPattern(),
-        field: {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          esTypes: ['date'],
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            date_histogram: {
-              agg: 'date_histogram',
-              time_zone: 'UTC',
-              calendar_interval: '1y',
-            },
-          },
-        },
-      });
-      expect(column.params.interval).toEqual('1y');
-      expect(column.params.timeZone).toEqual('UTC');
-    });
   });
 
   describe('toEsAggsFn', () => {
@@ -200,7 +184,9 @@ describe('date_histogram', () => {
         layer.columns.col1 as DateHistogramIndexPatternColumn,
         'col1',
         indexPattern1,
-        layer
+        layer,
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -213,7 +199,7 @@ describe('date_histogram', () => {
       );
     });
 
-    it('should not use normalized es interval for rollups', () => {
+    it('should use restricted time zone and omit use normalized es interval for rollups', () => {
       const esAggsFn = dateHistogramOperation.toEsAggsFn(
         layer.columns.col1 as DateHistogramIndexPatternColumn,
         'col1',
@@ -252,13 +238,16 @@ describe('date_histogram', () => {
             },
           ]),
         },
-        layer
+        layer,
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
             interval: ['42w'],
             field: ['timestamp'],
+            time_zone: ['UTC'],
             useNormalizedEsInterval: [false],
           }),
         })
@@ -308,114 +297,6 @@ describe('date_histogram', () => {
     });
   });
 
-  describe('transfer', () => {
-    it('should adjust interval and time zone params if that is necessary due to restrictions', () => {
-      const transferedColumn = dateHistogramOperation.transfer!(
-        {
-          dataType: 'date',
-          isBucketed: true,
-          label: '',
-          operationType: 'date_histogram',
-          sourceField: 'dateField',
-          params: {
-            interval: 'd',
-          },
-        },
-        {
-          title: '',
-          id: '',
-          hasRestrictions: true,
-          fields: [
-            {
-              name: 'dateField',
-              displayName: 'dateField',
-              type: 'date',
-              aggregatable: true,
-              searchable: true,
-              aggregationRestrictions: {
-                date_histogram: {
-                  agg: 'date_histogram',
-                  time_zone: 'CET',
-                  calendar_interval: 'w',
-                },
-              },
-            },
-          ],
-          getFieldByName: getFieldByNameFactory([
-            {
-              name: 'dateField',
-              displayName: 'dateField',
-              type: 'date',
-              aggregatable: true,
-              searchable: true,
-              aggregationRestrictions: {
-                date_histogram: {
-                  agg: 'date_histogram',
-                  time_zone: 'CET',
-                  calendar_interval: 'w',
-                },
-              },
-            },
-          ]),
-        }
-      );
-      expect(transferedColumn).toEqual(
-        expect.objectContaining({
-          params: {
-            interval: 'w',
-            timeZone: 'CET',
-          },
-        })
-      );
-    });
-
-    it('should retain interval', () => {
-      const transferedColumn = dateHistogramOperation.transfer!(
-        {
-          dataType: 'date',
-          isBucketed: true,
-          label: '',
-          operationType: 'date_histogram',
-          sourceField: 'dateField',
-          params: {
-            interval: '20s',
-          },
-        },
-        {
-          title: '',
-          id: '',
-          hasRestrictions: false,
-          fields: [
-            {
-              name: 'dateField',
-              displayName: 'dateField',
-              type: 'date',
-              aggregatable: true,
-              searchable: true,
-            },
-          ],
-          getFieldByName: getFieldByNameFactory([
-            {
-              name: 'dateField',
-              displayName: 'dateField',
-              type: 'date',
-              aggregatable: true,
-              searchable: true,
-            },
-          ]),
-        }
-      );
-      expect(transferedColumn).toEqual(
-        expect.objectContaining({
-          params: {
-            interval: '20s',
-            timeZone: undefined,
-          },
-        })
-      );
-    });
-  });
-
   describe('param editor', () => {
     it('should render current value', () => {
       const updateLayerSpy = jest.fn();
@@ -451,7 +332,7 @@ describe('date_histogram', () => {
               interval: 'd',
             },
             sourceField: 'other_timestamp',
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
       const instance = shallow(
@@ -485,7 +366,7 @@ describe('date_histogram', () => {
               interval: 'auto',
             },
             sourceField: 'timestamp',
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
 
@@ -520,7 +401,7 @@ describe('date_histogram', () => {
               interval: 'auto',
             },
             sourceField: 'timestamp',
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
 
@@ -534,9 +415,9 @@ describe('date_histogram', () => {
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find(EuiSwitch).prop('onChange')!({
+      instance.find(EuiSwitch).simulate('change', {
         target: { checked: true },
-      } as EuiSwitchEvent);
+      });
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0];
       expect(newLayer).toHaveProperty('columns.col1.params.interval', '30d');
@@ -553,11 +434,11 @@ describe('date_histogram', () => {
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDateHistogramValue"]').prop('onChange')!({
+      instance.find('[data-test-subj="lensDateHistogramValue"]').simulate('change', {
         target: {
           value: '2',
         },
-      } as React.ChangeEvent<HTMLInputElement>);
+      });
       expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('1w'));
     });
 
@@ -617,11 +498,11 @@ describe('date_histogram', () => {
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDateHistogramUnit"]').prop('onChange')!({
+      instance.find('[data-test-subj="lensDateHistogramUnit"]').simulate('change', {
         target: {
           value: 'd',
         },
-      } as React.ChangeEvent<HTMLInputElement>);
+      });
       expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('42d'));
     });
 
@@ -638,11 +519,11 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDateHistogramValue"]').prop('onChange')!({
+      instance.find('[data-test-subj="lensDateHistogramValue"]').simulate('change', {
         target: {
           value: '9',
         },
-      } as React.ChangeEvent<HTMLInputElement>);
+      });
       expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('9d'));
     });
 
@@ -713,7 +594,7 @@ describe('date_histogram', () => {
               operationType: 'date_histogram',
               sourceField: 'missing',
               params: { interval: 'auto' },
-            },
+            } as DateHistogramIndexPatternColumn,
           }
         )
       ).toEqual('Missing field');

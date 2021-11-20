@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 var EOL = require('os').EOL;
@@ -28,6 +28,23 @@ var IGNORE_WARNINGS = [
     code: 'DEP0066',
     file: '/node_modules/supertest/node_modules/superagent/lib/node/index.js',
     line: 418,
+  },
+  // TODO @elastic/es-clients
+  // 'Use of deprecated folder mapping "./" in the "exports" field module resolution of the package
+  // at node_modules/@elastic/elasticsearch/package.json.'
+  // This is a breaking change in Node 12, which elasticsearch-js supports.
+  // https://github.com/elastic/elasticsearch-js/issues/1465
+  // https://nodejs.org/api/deprecations.html#DEP0148
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0148',
+  },
+  {
+    // TODO: @elastic/es-clients - The new client will attempt a Product check and it will `process.emitWarning`
+    //  that the security features are blocking such check.
+    //  Such emit is causing Node.js to crash unless we explicitly catch it.
+    //  We need to discard that warning
+    name: 'ProductNotSupportedSecurityError',
   },
 ];
 

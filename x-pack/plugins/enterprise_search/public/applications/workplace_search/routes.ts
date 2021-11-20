@@ -1,25 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { generatePath } from 'react-router-dom';
 
-import { CURRENT_MAJOR_VERSION } from '../../../common/version';
-import { ENT_SEARCH_DOCS_PREFIX } from '../shared/constants';
+import { docLinks } from '../shared/doc_links';
 
 export const SETUP_GUIDE_PATH = '/setup_guide';
 
 export const NOT_FOUND_PATH = '/404';
+export const LOGOUT_ROUTE = '/logout';
 
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
-export const DOCS_PREFIX = `https://www.elastic.co/guide/en/workplace-search/${CURRENT_MAJOR_VERSION}`;
+export const DOCS_PREFIX = docLinks.workplaceSearchBase;
+export const PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-permissions.html`;
 export const DOCUMENT_PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-sources-document-permissions.html`;
 export const DOCUMENT_PERMISSIONS_SYNC_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-synchronizing`;
-export const PRIVATE_SOURCES_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-org-private`;
+export const PRIVATE_SOURCES_DOCS_URL = `${PERMISSIONS_DOCS_URL}#organizational-sources-private-sources`;
 export const EXTERNAL_IDENTITIES_DOCS_URL = `${DOCS_PREFIX}/workplace-search-external-identities-api.html`;
 export const SECURITY_DOCS_URL = `${DOCS_PREFIX}/workplace-search-security.html`;
 export const SMTP_DOCS_URL = `${DOCS_PREFIX}/workplace-search-smtp-mailer.html`;
@@ -42,15 +44,18 @@ export const ZENDESK_DOCS_URL = `${DOCS_PREFIX}/workplace-search-zendesk-connect
 export const CUSTOM_SOURCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-api-sources.html`;
 export const CUSTOM_API_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-sources-api.html`;
 export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_URL}#custom-api-source-document-level-access-control`;
-export const ENT_SEARCH_LICENSE_MANAGEMENT = `${ENT_SEARCH_DOCS_PREFIX}/license-management.html`;
+export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/license-management.html`;
+export const SYNCHRONIZATION_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
+export const DIFFERENT_SYNC_TYPES_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#_indexing_schedule`;
+export const OBJECTS_AND_ASSETS_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
 
 export const PERSONAL_PATH = '/p';
 
-export const ROLE_MAPPINGS_PATH = '/role_mappings';
-export const ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/:roleId`;
-export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
+export const OAUTH_AUTHORIZE_PATH = `${PERSONAL_PATH}/oauth/authorize`;
+export const SEARCH_AUTHORIZE_PATH = `${PERSONAL_PATH}/authorize_search`;
 
-export const USERS_PATH = '/users';
+export const USERS_AND_ROLES_PATH = '/users_and_roles';
+
 export const SECURITY_PATH = '/security';
 
 export const GROUPS_PATH = '/groups';
@@ -58,7 +63,7 @@ export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
 export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
 export const SOURCES_PATH = '/sources';
-export const PERSONAL_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
+export const PRIVATE_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
 
 export const SOURCE_ADDED_PATH = `${SOURCES_PATH}/added`;
 export const ADD_SOURCE_PATH = `${SOURCES_PATH}/add`;
@@ -72,11 +77,11 @@ export const ADD_GMAIL_PATH = `${SOURCES_PATH}/add/gmail`;
 export const ADD_GOOGLE_DRIVE_PATH = `${SOURCES_PATH}/add/google_drive`;
 export const ADD_JIRA_PATH = `${SOURCES_PATH}/add/jira_cloud`;
 export const ADD_JIRA_SERVER_PATH = `${SOURCES_PATH}/add/jira_server`;
-export const ADD_ONEDRIVE_PATH = `${SOURCES_PATH}/add/onedrive`;
+export const ADD_ONEDRIVE_PATH = `${SOURCES_PATH}/add/one_drive`;
 export const ADD_SALESFORCE_PATH = `${SOURCES_PATH}/add/salesforce`;
 export const ADD_SALESFORCE_SANDBOX_PATH = `${SOURCES_PATH}/add/salesforce_sandbox`;
 export const ADD_SERVICENOW_PATH = `${SOURCES_PATH}/add/servicenow`;
-export const ADD_SHAREPOINT_PATH = `${SOURCES_PATH}/add/sharepoint`;
+export const ADD_SHAREPOINT_PATH = `${SOURCES_PATH}/add/share_point`;
 export const ADD_SLACK_PATH = `${SOURCES_PATH}/add/slack`;
 export const ADD_ZENDESK_PATH = `${SOURCES_PATH}/add/zendesk`;
 export const ADD_CUSTOM_PATH = `${SOURCES_PATH}/add/custom`;
@@ -87,11 +92,16 @@ export const SOURCE_DETAILS_PATH = `${SOURCES_PATH}/:sourceId`;
 export const SOURCE_CONTENT_PATH = `${SOURCES_PATH}/:sourceId/content`;
 export const SOURCE_SCHEMAS_PATH = `${SOURCES_PATH}/:sourceId/schemas`;
 export const SOURCE_DISPLAY_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/display_settings`;
+export const SOURCE_SYNCHRONIZATION_PATH = `${SOURCES_PATH}/:sourceId/synchronization`;
 export const SOURCE_SETTINGS_PATH = `${SOURCES_PATH}/:sourceId/settings`;
-export const REINDEX_JOB_PATH = `${SOURCES_PATH}/:sourceId/schema_errors/:activeReindexJobId`;
+export const REINDEX_JOB_PATH = `${SOURCE_SCHEMAS_PATH}/:activeReindexJobId`;
 
 export const DISPLAY_SETTINGS_SEARCH_RESULT_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/`;
 export const DISPLAY_SETTINGS_RESULT_DETAIL_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/result_detail`;
+
+export const SYNC_FREQUENCY_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/frequency`;
+export const BLOCKED_TIME_WINDOWS_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/frequency/blocked_windows`;
+export const OBJECTS_AND_ASSETS_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/objects_and_assets`;
 
 export const ORG_SETTINGS_PATH = '/settings';
 export const ORG_SETTINGS_CUSTOMIZE_PATH = `${ORG_SETTINGS_PATH}/customize`;
@@ -107,11 +117,11 @@ export const EDIT_GMAIL_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/gmail/edit`;
 export const EDIT_GOOGLE_DRIVE_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/google_drive/edit`;
 export const EDIT_JIRA_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/jira_cloud/edit`;
 export const EDIT_JIRA_SERVER_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/jira_server/edit`;
-export const EDIT_ONEDRIVE_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/onedrive/edit`;
+export const EDIT_ONEDRIVE_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/one_drive/edit`;
 export const EDIT_SALESFORCE_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/salesforce/edit`;
 export const EDIT_SALESFORCE_SANDBOX_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/salesforce_sandbox/edit`;
 export const EDIT_SERVICENOW_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/servicenow/edit`;
-export const EDIT_SHAREPOINT_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/sharepoint/edit`;
+export const EDIT_SHAREPOINT_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/share_point/edit`;
 export const EDIT_SLACK_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/slack/edit`;
 export const EDIT_ZENDESK_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/zendesk/edit`;
 export const EDIT_CUSTOM_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/custom/edit`;

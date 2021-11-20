@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { storiesOf } from '@storybook/react';
@@ -94,17 +95,6 @@ You can use standard Markdown in here, but you can also access your piped-in dat
   | progress shape="gauge" label={formatnumber 0%} font={font size=24 family="Helvetica" color="#000000" align=center}
   | render`,
   },
-  revealImage: {
-    name: 'revealImage',
-    displayName: 'Image reveal',
-    type: 'image',
-    help: 'Reveals a percentage of an image',
-    expression: `filters
-  | demodata
-  | math "mean(percent_uptime)"
-  | revealImage origin=bottom image=null
-  | render`,
-  },
   shape: {
     name: 'shape',
     displayName: 'Shape',
@@ -139,12 +129,6 @@ You can use standard Markdown in here, but you can also access your piped-in dat
   },
 };
 
-const mockRenderEmbedPanel = () => <div id="embeddablePanel" />;
-
 storiesOf('components/WorkpadHeader/ElementMenu', module).add('default', () => (
-  <ElementMenu
-    elements={testElements}
-    addElement={action('addElement')}
-    renderEmbedPanel={mockRenderEmbedPanel}
-  />
+  <ElementMenu elements={testElements} addElement={action('addElement')} />
 ));

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -27,32 +28,39 @@ import {
   EuiTableRowCell,
   EuiLink,
 } from '@elastic/eui';
-
-import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
-import { SourceContentItem } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { TruncatedContent } from '../../../../shared/truncate';
-
-const MAX_LENGTH = 28;
-
 import { ComponentLoader } from '../../../components/shared/component_loader';
-import { Loading } from '../../../../../applications/shared/loading';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
-import { CUSTOM_SERVICE_TYPE } from '../../../constants';
-
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../../constants';
+import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
+import { SourceContentItem } from '../../../types';
+import {
+  NO_CONTENT_MESSAGE,
+  CUSTOM_DOCUMENTATION_LINK,
+  TITLE_HEADING,
+  LAST_UPDATED_HEADING,
+  GO_BUTTON,
+  RESET_BUTTON,
+  SOURCE_CONTENT_TITLE,
+  SEARCH_CONTENT_PLACEHOLDER,
+  FILTER_CONTENT_PLACEHOLDER,
+  CONTENT_LOADING_TEXT,
+} from '../constants';
 import { SourceLogic } from '../source_logic';
+
+import { SourceLayout } from './source_layout';
+
+const MAX_LENGTH = 28;
 
 export const SourceContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const {
-    setActivePage,
-    searchContentSourceDocuments,
-    resetSourceState,
-    setContentFilterValue,
-  } = useActions(SourceLogic);
+  const { setActivePage, searchContentSourceDocuments, setContentFilterValue } =
+    useActions(SourceLogic);
 
   const {
     contentSource: { id, serviceType, urlField, titleField, urlFieldIsLinkable, isFederatedSource },
@@ -61,25 +69,21 @@ export const SourceContent: React.FC = () => {
     },
     contentItems,
     contentFilterValue,
-    dataLoading,
     sectionLoading,
   } = useValues(SourceLogic);
-
-  useEffect(() => {
-    return resetSourceState;
-  }, []);
 
   useEffect(() => {
     searchContentSourceDocuments(id);
   }, [contentFilterValue, activePage]);
 
-  if (dataLoading) return <Loading />;
-
   const showPagination = totalPages > 1;
   const hasItems = totalItems > 0;
   const emptyMessage = contentFilterValue
-    ? `No results for '${contentFilterValue}'`
-    : "This source doesn't have any content yet";
+    ? i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.noContentForValue.message', {
+        defaultMessage: "No results for '{contentFilterValue}'",
+        values: { contentFilterValue },
+      })
+    : NO_CONTENT_MESSAGE;
 
   const paginationOptions = {
     totalPages,
@@ -94,17 +98,24 @@ export const SourceContent: React.FC = () => {
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
 
   const emptyState = (
-    <EuiPanel className="euiPanel--inset">
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiEmptyPrompt
         title={<h2>{emptyMessage}</h2>}
         iconType="documents"
         body={
           isCustomSource ? (
             <p>
-              Learn more about adding content in our{' '}
-              <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
-                documentation
-              </EuiLink>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.workplaceSearch.sources.customSourceDocs.text"
+                defaultMessage="Learn more about adding content in our {documentationLink}"
+                values={{
+                  documentationLink: (
+                    <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
+                      {CUSTOM_DOCUMENTATION_LINK}
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
           ) : null
         }
@@ -127,12 +138,14 @@ export const SourceContent: React.FC = () => {
             <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
           )}
           {urlFieldIsLinkable && (
-            <EuiLink target="_blank" href={url}>
+            <EuiLink target="_blank" href={url.toString()}>
               <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
             </EuiLink>
           )}
         </EuiTableRowCell>
-        <EuiTableRowCell>{moment(updated).format('M/D/YYYY, h:mm:ss A')}</EuiTableRowCell>
+        <EuiTableRowCell align="right">
+          {moment(updated).format('M/D/YYYY, h:mm:ss A')}
+        </EuiTableRowCell>
       </EuiTableRow>
     );
   };
@@ -143,9 +156,9 @@ export const SourceContent: React.FC = () => {
       <EuiSpacer size="m" />
       <EuiTable>
         <EuiTableHeader>
-          <EuiTableHeaderCell>Title</EuiTableHeaderCell>
+          <EuiTableHeaderCell>{TITLE_HEADING}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{startCase(urlField)}</EuiTableHeaderCell>
-          <EuiTableHeaderCell>Last Updated</EuiTableHeaderCell>
+          <EuiTableHeaderCell align="right">{LAST_UPDATED_HEADING}</EuiTableHeaderCell>
         </EuiTableHeader>
         <EuiTableBody>{contentItems.map(contentItem)}</EuiTableBody>
       </EuiTable>
@@ -167,25 +180,27 @@ export const SourceContent: React.FC = () => {
           color="primary"
           onClick={() => setContentFilterValue(searchTerm)}
         >
-          Go
+          {GO_BUTTON}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty disabled={!searchTerm} onClick={resetFederatedSearchTerm}>
-          Reset
+          {RESET_BUTTON}
         </EuiButtonEmpty>
       </EuiFlexItem>
     </>
   );
 
   return (
-    <>
-      <ViewContentHeader title="Source content" />
+    <SourceLayout pageChrome={[NAV.CONTENT]} pageViewTelemetry="source_overview">
+      <ViewContentHeader title={SOURCE_CONTENT_TITLE} />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiFieldSearch
             disabled={!hasItems && !contentFilterValue}
-            placeholder={`${isFederatedSource ? 'Search' : 'Filter'} content...`}
+            placeholder={
+              isFederatedSource ? SEARCH_CONTENT_PLACEHOLDER : FILTER_CONTENT_PLACEHOLDER
+            }
             incremental={!isFederatedSource}
             isClearable={!isFederatedSource}
             onSearch={setContentFilterValue}
@@ -197,8 +212,8 @@ export const SourceContent: React.FC = () => {
         {isFederatedSource && federatedSearchControls}
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
-      {sectionLoading && <ComponentLoader text="Loading content..." />}
+      {sectionLoading && <ComponentLoader text={CONTENT_LOADING_TEXT} />}
       {!sectionLoading && (hasItems ? contentTable : emptyState)}
-    </>
+    </SourceLayout>
   );
 };

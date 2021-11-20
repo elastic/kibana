@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { throttle } from 'lodash/fp';
@@ -21,6 +22,7 @@ export const getDaysDiff = (minDate: moment.Moment, maxDate: moment.Moment) => {
 };
 
 export const histogramDateTimeFormatter = (domain: [string, string] | null, fixedDiff?: number) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const diff = fixedDiff ?? getDaysDiff(moment(domain![0]), moment(domain![1]));
   const format = niceTimeFormatByDay(diff);
   return timeFormatter(format);

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -48,8 +48,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   private redirecToAddData() {
-    const path = this.services.addBasePath('#/tutorial_directory');
-    window.location.href = path;
+    this.services.application.navigateToApp('integrations', { path: '/browse' });
   }
 
   private onSampleDataDecline = () => {
@@ -77,7 +76,11 @@ export class Welcome extends React.Component<Props> {
 
   private renderTelemetryEnabledOrDisabledText = () => {
     const { telemetry } = this.props;
-    if (!telemetry || !telemetry.telemetryService.userCanChangeSettings) {
+    if (
+      !telemetry ||
+      !telemetry.telemetryService.userCanChangeSettings ||
+      !telemetry.telemetryService.getCanChangeOptInStatus()
+    ) {
       return null;
     }
 
@@ -119,7 +122,7 @@ export class Welcome extends React.Component<Props> {
     const { urlBasePath, telemetry } = this.props;
     return (
       <EuiPortal>
-        <div className="homWelcome">
+        <div className="homWelcome" data-test-subj="homeWelcomeInterstitial">
           <header className="homWelcome__header">
             <div className="homWelcome__content eui-textCenter">
               <EuiSpacer size="xl" />

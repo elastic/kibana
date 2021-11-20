@@ -1,33 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { withTimeout } from '@kbn/std';
+import { withTimeout, isPromise } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, PluginName } from './types';
-import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { PluginDependencies } from '.';
+import { DiscoveredPlugin, PluginDependencies, PluginName, PluginType } from './types';
+import {
+  createPluginPrebootSetupContext,
+  createPluginSetupContext,
+  createPluginStartContext,
+} from './plugin_context';
+import {
+  PluginsServicePrebootSetupDeps,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';
 
 const Sec = 1000;
+
 /** @internal */
-export class PluginsSystem {
+export class PluginsSystem<T extends PluginType> {
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext) {
-    this.log = coreContext.logger.get('plugins-system');
+  constructor(private readonly coreContext: CoreContext, public readonly type: T) {
+    this.log = coreContext.logger.get('plugins-system', this.type);
   }
 
   public addPlugin(plugin: PluginWrapper) {
+    if (plugin.manifest.type !== this.type) {
+      throw new Error(
+        `Cannot add plugin with type "${plugin.manifest.type}" to plugin system with type "${this.type}".`
+      );
+    }
+
     this.plugins.set(plugin.name, plugin);
   }
 
@@ -66,7 +80,9 @@ export class PluginsSystem {
     return { asNames, asOpaqueIds };
   }
 
-  public async setupPlugins(deps: PluginsServiceSetupDeps) {
+  public async setupPlugins(
+    deps: T extends PluginType.preboot ? PluginsServicePrebootSetupDeps : PluginsServiceSetupDeps
+  ): Promise<Map<string, unknown>> {
     const contracts = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
       return contracts;
@@ -94,14 +110,44 @@ export class PluginsSystem {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      const contract = await withTimeout({
-        promise: plugin.setup(
-          createPluginSetupContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
+      let pluginSetupContext;
+      if (this.type === PluginType.preboot) {
+        pluginSetupContext = createPluginPrebootSetupContext(
+          this.coreContext,
+          deps as PluginsServicePrebootSetupDeps,
+          plugin
+        );
+      } else {
+        pluginSetupContext = createPluginSetupContext(
+          this.coreContext,
+          deps as PluginsServiceSetupDeps,
+          plugin
+        );
+      }
+
+      let contract: unknown;
+      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          this.log.warn(
+            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+        const contractMaybe = await withTimeout<any>({
+          promise: contractOrPromise,
+          timeoutMs: 10 * Sec,
+        });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
+      } else {
+        contract = contractOrPromise;
+      }
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -111,6 +157,10 @@ export class PluginsSystem {
   }
 
   public async startPlugins(deps: PluginsServiceStartDeps) {
+    if (this.type === PluginType.preboot) {
+      throw new Error('Preboot plugins cannot be started.');
+    }
+
     const contracts = new Map<PluginName, unknown>();
     if (this.satupPlugins.length === 0) {
       return contracts;
@@ -132,14 +182,32 @@ export class PluginsSystem {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      const contract = await withTimeout({
-        promise: plugin.start(
-          createPluginStartContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
+      let contract: unknown;
+      const contractOrPromise = plugin.start(
+        createPluginStartContext(this.coreContext, deps, plugin),
+        pluginDepContracts
+      );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          this.log.warn(
+            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+        const contractMaybe = await withTimeout({
+          promise: contractOrPromise,
+          timeoutMs: 10 * Sec,
+        });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
+      } else {
+        contract = contractOrPromise;
+      }
 
       contracts.set(pluginName, contract);
     }
@@ -159,7 +227,15 @@ export class PluginsSystem {
       const pluginName = this.satupPlugins.pop()!;
 
       this.log.debug(`Stopping plugin "${pluginName}"...`);
-      await this.plugins.get(pluginName)!.stop();
+
+      const resultMaybe = await withTimeout({
+        promise: this.plugins.get(pluginName)!.stop(),
+        timeoutMs: 30 * Sec,
+      });
+
+      if (resultMaybe?.timedout) {
+        this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+      }
     }
   }
 
@@ -177,6 +253,7 @@ export class PluginsSystem {
           pluginName,
           {
             id: pluginName,
+            type: plugin.manifest.type,
             configPath: plugin.manifest.configPath,
             requiredPlugins: plugin.manifest.requiredPlugins.filter((p) =>
               uiPluginNames.includes(p)

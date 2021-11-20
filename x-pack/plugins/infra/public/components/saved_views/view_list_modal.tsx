@@ -1,20 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiModalFooter, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-} from '@elastic/eui';
+import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import { EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -63,51 +58,51 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
   }, [views, currentView]);
 
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={close}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <FormattedMessage
-              defaultMessage="Select a view to load"
-              id="xpack.infra.waffle.savedView.selectViewHeader"
-            />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiSelectable
-            singleSelection={true}
-            searchable={true}
-            options={options || defaultOptions}
-            onChange={onChange}
-            searchProps={{
-              placeholder: i18n.translate('xpack.infra.savedView.searchPlaceholder', {
-                defaultMessage: 'Search for saved views',
-              }),
-            }}
-            listProps={{ bordered: true }}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                <div style={{ marginTop: 20 }}>{list}</div>
-              </>
-            )}
-          </EuiSelectable>
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cancelSavedViewModal" onClick={close}>
-            <FormattedMessage defaultMessage="Cancel" id="xpack.infra.openView.cancelButton" />
-          </EuiButtonEmpty>
-          <EuiButton
-            fill={true}
-            color={'primary'}
-            data-test-subj="loadSavedViewModal"
-            onClick={loadView}
-          >
-            <FormattedMessage defaultMessage="Load view" id="xpack.infra.openView.loadButton" />
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal onClose={close} data-test-subj="savedViews-loadModal">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            defaultMessage="Select a view to load"
+            id="xpack.infra.waffle.savedView.selectViewHeader"
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiSelectable
+          singleSelection={true}
+          searchable={true}
+          options={options || defaultOptions}
+          onChange={onChange}
+          searchProps={{
+            placeholder: i18n.translate('xpack.infra.savedView.searchPlaceholder', {
+              defaultMessage: 'Search for saved views',
+            }),
+          }}
+          listProps={{ bordered: true }}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              <div style={{ marginTop: 20 }} data-test-subj="savedViews-loadList">
+                {list}
+              </div>
+            </>
+          )}
+        </EuiSelectable>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty data-test-subj="cancelSavedViewModal" onClick={close}>
+          <FormattedMessage defaultMessage="Cancel" id="xpack.infra.openView.cancelButton" />
+        </EuiButtonEmpty>
+        <EuiButton
+          fill={true}
+          color={'primary'}
+          data-test-subj="loadSavedViewModal"
+          onClick={loadView}
+        >
+          <FormattedMessage defaultMessage="Load view" id="xpack.infra.openView.loadButton" />
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 }

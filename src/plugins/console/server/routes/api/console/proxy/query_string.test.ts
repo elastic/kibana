@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { IKibanaResponse } from 'src/core/server';
 import { kibanaResponseFactory } from '../../../../../../../core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 import { createResponseStub } from './stubs';
@@ -14,7 +15,7 @@ import * as requestModule from '../../../../lib/proxy_request';
 import { createHandler } from './create_handler';
 
 describe('Console Proxy Route', () => {
-  let request: any;
+  let request: (method: string, path: string) => Promise<IKibanaResponse> | IKibanaResponse;
   beforeEach(() => {
     (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub('foo'));
 

@@ -9,7 +9,7 @@ Function returning the url to use to redirect to this object from the management
 <b>Signature:</b>
 
 ```typescript
-getInAppUrl?: (savedObject: SavedObject<any>) => {
+getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
         path: string;
         uiCapabilitiesPath: string;
     };

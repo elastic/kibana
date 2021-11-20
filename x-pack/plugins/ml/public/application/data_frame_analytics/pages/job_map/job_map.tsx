@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState } from 'react';
@@ -9,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Cytoscape, Controls, JobMapLegend } from './components';
-import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
+import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useCurrentEuiTheme, EuiThemeType } from '../../../components/color_range_legend';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
@@ -63,11 +64,11 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
       application: { navigateToUrl },
     },
   } = useMlKibana();
-  const urlGenerator = useMlUrlGenerator();
+  const locator = useMlLocator()!;
   const { euiTheme } = useCurrentEuiTheme();
 
   const redirectToAnalyticsManagementPage = async () => {
-    const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
+    const url = await locator.getUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
     await navigateToUrl(url);
   };
 

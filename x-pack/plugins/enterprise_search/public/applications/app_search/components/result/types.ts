@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { InternalSchemaTypes, SchemaTypes } from '../../../shared/types';
+import { EuiButtonIconColor } from '@elastic/eui';
 
-export type FieldType = InternalSchemaTypes | SchemaTypes;
+import { InternalSchemaType, SchemaType } from '../../../shared/schema/types';
+
+export type FieldType = InternalSchemaType | SchemaType;
 
 export type Raw = string | string[] | number | number[];
 export type Snippet = string;
@@ -32,3 +35,11 @@ export type Result = {
   // You'll need to cast it to FieldValue whenever you use it.
   [key: string]: object;
 };
+
+export interface ResultAction {
+  onClick(): void;
+  title: string;
+  iconType: string;
+  iconColor?: EuiButtonIconColor;
+  disabled?: boolean;
+}

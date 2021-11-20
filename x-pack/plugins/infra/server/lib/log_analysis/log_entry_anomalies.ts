@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { InfraPluginRequestHandlerContext, InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { fetchMlJob, getLogEntryDatasets } from './common';
@@ -17,6 +19,7 @@ import {
   Pagination,
   isCategoryAnomaly,
 } from '../../../common/log_analysis';
+import type { ResolvedLogSourceConfiguration } from '../../../common/log_sources';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
 import {
@@ -30,7 +33,6 @@ import {
   createLogEntryExamplesQuery,
   logEntryExamplesResponseRT,
 } from './queries/log_entry_examples';
-import { InfraSource } from '../sources';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { fetchLogEntryCategories } from './log_entry_categories_analysis';
 
@@ -280,7 +282,6 @@ async function fetchLogEntryAnomalies(
           nextPageCursor: hits[hits.length - 1].sort,
         }
       : undefined;
-
   const anomalies = hits.map((result) => {
     const {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -326,7 +327,7 @@ export async function getLogEntryExamples(
   endTime: number,
   dataset: string,
   exampleCount: number,
-  sourceConfiguration: InfraSource,
+  resolvedSourceConfiguration: ResolvedLogSourceConfiguration,
   callWithRequest: KibanaFramework['callWithRequest'],
   categoryId?: string
 ) {
@@ -346,7 +347,7 @@ export async function getLogEntryExamples(
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
-  const tiebreakerField = sourceConfiguration.configuration.fields.tiebreaker;
+  const { tiebreakerField, runtimeMappings } = resolvedSourceConfiguration;
 
   if (indices == null || timestampField == null) {
     throw new InsufficientLogAnalysisMlJobConfigurationError(
@@ -361,6 +362,7 @@ export async function getLogEntryExamples(
     context,
     sourceId,
     indices,
+    runtimeMappings,
     timestampField,
     tiebreakerField,
     startTime,
@@ -385,6 +387,7 @@ export async function fetchLogEntryExamples(
   context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
   indices: string,
+  runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
@@ -431,6 +434,7 @@ export async function fetchLogEntryExamples(
       'search',
       createLogEntryExamplesQuery(
         indices,
+        runtimeMappings,
         timestampField,
         tiebreakerField,
         startTime,

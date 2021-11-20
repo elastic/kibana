@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import { UsageCollectionSetup } from '../../services/usage_collection';
-import { DashboardAppState, SavedDashboardPanel } from '../../types';
+import { RawDashboardState, SavedDashboardPanel } from '../../types';
 import {
   migratePanelsTo730,
   SavedDashboardPanelTo60,
@@ -28,10 +29,10 @@ import {
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
 export function migrateAppState(
-  appState: { [key: string]: any } & DashboardAppState,
+  appState: { [key: string]: any } & RawDashboardState,
   kibanaVersion: string,
   usageCollection?: UsageCollectionSetup
-): DashboardAppState {
+): RawDashboardState {
   if (!appState.panels) {
     throw new Error(
       i18n.translate('dashboard.panel.invalidData', {
@@ -40,14 +41,16 @@ export function migrateAppState(
     );
   }
 
-  const panelNeedsMigration = (appState.panels as Array<
-    | SavedDashboardPanelTo60
-    | SavedDashboardPanel610
-    | SavedDashboardPanel620
-    | SavedDashboardPanel630
-    | SavedDashboardPanel640To720
-    | SavedDashboardPanel730ToLatest
-  >).some((panel) => {
+  const panelNeedsMigration = (
+    appState.panels as Array<
+      | SavedDashboardPanelTo60
+      | SavedDashboardPanel610
+      | SavedDashboardPanel620
+      | SavedDashboardPanel630
+      | SavedDashboardPanel640To720
+      | SavedDashboardPanel730ToLatest
+    >
+  ).some((panel) => {
     if ((panel as { version?: string }).version === undefined) return true;
 
     const version = (panel as SavedDashboardPanel730ToLatest).version;
@@ -75,7 +78,7 @@ export function migrateAppState(
       >,
       kibanaVersion,
       appState.useMargins as boolean,
-      appState.uiState as Record<string, Record<string, unknown>>
+      appState.uiState as { [key: string]: SerializableRecord }
     ) as SavedDashboardPanel[];
     delete appState.uiState;
   }

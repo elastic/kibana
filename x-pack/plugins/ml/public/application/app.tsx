@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -10,6 +11,7 @@ import ReactDOM from 'react-dom';
 
 import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
 
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import {
@@ -18,13 +20,18 @@ import {
 } from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
-import { MlSetupDependencies, MlStartDependencies } from '../plugin';
+import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
+import { mlUsageCollectionProvider } from './services/usage_collection';
 
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
-import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../common/constants/ml_url_generator';
-export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
+import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+
+export type MlDependencies = Omit<
+  MlSetupDependencies,
+  'share' | 'indexPatternManagement' | 'fieldFormats'
+> &
   MlStartDependencies;
 
 interface AppProps {
@@ -38,11 +45,12 @@ const localStorage = new Storage(window.localStorage);
 /**
  * Provides global services available across the entire ML app.
  */
-export function getMlGlobalServices(httpStart: HttpStart) {
+export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: UsageCollectionSetup) {
   const httpService = new HttpService(httpStart);
   return {
     httpService,
     mlApiServices: mlApiServicesProvider(httpService),
+    mlUsageCollection: mlUsageCollectionProvider(usageCollection),
   };
 }
 
@@ -54,23 +62,21 @@ export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const redirectToMlAccessDeniedPage = async () => {
-    const accessDeniedPageUrl = await deps.share.urlGenerators
-      .getUrlGenerator(ML_APP_URL_GENERATOR)
-      .createUrl({
-        page: ML_PAGES.ACCESS_DENIED,
-      });
+    const accessDeniedPageUrl = await deps.share.url.locators.get(ML_APP_LOCATOR)!.getUrl({
+      page: ML_PAGES.ACCESS_DENIED,
+    });
     await coreStart.application.navigateToUrl(accessDeniedPageUrl);
   };
 
   const pageDeps = {
     history: appMountParams.history,
-    indexPatterns: deps.data.indexPatterns,
+    dataViewsContract: deps.data.dataViews,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     redirectToMlAccessDeniedPage,
   };
+
   const services = {
-    appName: 'ML',
     kibanaVersion: deps.kibanaVersion,
     share: deps.share,
     data: deps.data,
@@ -79,21 +85,33 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     storage: localStorage,
     embeddable: deps.embeddable,
     maps: deps.maps,
+    triggersActionsUi: deps.triggersActionsUi,
+    dataVisualizer: deps.dataVisualizer,
+    usageCollection: deps.usageCollection,
+    fieldFormats: deps.fieldFormats,
     ...coreStart,
   };
 
   const I18nContext = coreStart.i18n.Context;
+  const ApplicationUsageTrackingProvider =
+    deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+
   return (
     /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
      * avoiding full page reload **/
     <RedirectAppLinks application={coreStart.application}>
-      <I18nContext>
-        <KibanaContextProvider
-          services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
-        >
-          <MlRouter pageDeps={pageDeps} />
-        </KibanaContextProvider>
-      </I18nContext>
+      <ApplicationUsageTrackingProvider>
+        <I18nContext>
+          <KibanaContextProvider
+            services={{
+              ...services,
+              mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+            }}
+          >
+            <MlRouter pageDeps={pageDeps} />
+          </KibanaContextProvider>
+        </I18nContext>
+      </ApplicationUsageTrackingProvider>
     </RedirectAppLinks>
   );
 };
@@ -121,6 +139,8 @@ export const renderApp = (
     security: deps.security,
     urlGenerators: deps.share.urlGenerators,
     maps: deps.maps,
+    dataVisualizer: deps.dataVisualizer,
+    dataViews: deps.data.dataViews,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

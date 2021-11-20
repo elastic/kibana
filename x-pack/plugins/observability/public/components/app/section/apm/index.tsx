@@ -1,10 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  XYBrushEvent,
+} from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -21,20 +30,34 @@ import { useHasData } from '../../../../hooks/use_has_data';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
+import { BucketSize } from '../../../../pages/overview';
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: BucketSize;
 }
 
 function formatTpm(value?: number) {
   return numeral(value).format('0.00a');
 }
 
+function formatTpmStat(value?: number) {
+  if (!value || value === 0) {
+    return '0';
+  }
+  if (value <= 0.1) {
+    return '< 0.1';
+  }
+  if (value > 1000) {
+    return numeral(value).format('0.00a');
+  }
+  return numeral(value).format('0,0.0');
+}
+
 export function APMSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const chartTheme = useChartTheme();
   const history = useHistory();
-  const { forceUpdate, hasData } = useHasData();
+  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
@@ -43,7 +66,7 @@ export function APMSection({ bucketSize }: Props) {
         return getDataHandler('apm')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
-          bucketSize,
+          ...bucketSize,
         });
       }
     },
@@ -52,7 +75,7 @@ export function APMSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
-  if (!hasData.apm?.hasData) {
+  if (!hasDataMap.apm?.hasData) {
     return null;
   }
 
@@ -92,7 +115,7 @@ export function APMSection({ bucketSize }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StyledStat
-            title={`${formatTpm(stats?.transactions.value)} tpm`}
+            title={`${formatTpmStat(stats?.transactions.value)} tpm`}
             description={i18n.translate('xpack.observability.overview.apm.throughput', {
               defaultMessage: 'Throughput',
             })}
@@ -103,7 +126,7 @@ export function APMSection({ bucketSize }: Props) {
       </EuiFlexGroup>
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           theme={chartTheme}
           showLegend={false}
           xDomain={{ min, max }}

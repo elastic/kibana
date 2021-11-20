@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -13,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
-import { AnomalyRecordDoc } from '../types/anomalies';
+import type { AnomalyRecordDoc } from '../types/anomalies';
 
 export interface SeverityType {
   id: ANOMALY_SEVERITY;
@@ -26,10 +27,19 @@ export enum ENTITY_FIELD_TYPE {
   PARTITON = 'partition',
 }
 
+export const ENTITY_FIELD_OPERATIONS = {
+  ADD: '+',
+  REMOVE: '-',
+} as const;
+
+export type EntityFieldOperation =
+  typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
+
 export interface EntityField {
   fieldName: string;
   fieldValue: string | number | undefined;
   fieldType?: ENTITY_FIELD_TYPE;
+  operation?: EntityFieldOperation;
 }
 
 // List of function descriptions for which actual values from record level results should be displayed.
@@ -229,8 +239,6 @@ export function getEntityFieldName(record: AnomalyRecordDoc): string | undefined
   if (record.partition_field_name !== undefined) {
     return record.partition_field_name;
   }
-
-  return undefined;
 }
 
 // Returns the value of the field to use as the entity value from the source record
@@ -248,8 +256,6 @@ export function getEntityFieldValue(record: AnomalyRecordDoc): string | number |
   if (record.partition_field_value !== undefined) {
     return record.partition_field_value;
   }
-
-  return undefined;
 }
 
 // Returns the list of partitioning entity fields for the source record as a list

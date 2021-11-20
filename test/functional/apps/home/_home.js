@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const globalNav = getService('globalNav');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'home']);
 
   describe('Kibana takes you home', function describeIndexTests() {
@@ -25,7 +26,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('clicking on console on homepage should take you to console app', async () => {
-      await PageObjects.home.clickSynopsis('console');
+      await PageObjects.common.navigateToApp('home');
+      await testSubjects.click('homeDevTools');
       const url = await browser.getCurrentUrl();
       expect(url.includes('/app/dev_tools#/console')).to.be(true);
     });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,17 +23,17 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'kafkaMetrics',
     name: i18n.translate('home.tutorials.kafkaMetrics.nameTitle', {
-      defaultMessage: 'Kafka metrics',
+      defaultMessage: 'Kafka Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kafkaMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Kafka server.',
+      defaultMessage: 'Collect metrics from Kafka servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kafkaMetrics.longDescription', {
       defaultMessage:
-        'The `kafka` Metricbeat module fetches internal metrics from Kafka. \
+        'The `kafka` Metricbeat module fetches metrics from Kafka. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kafka.html',
@@ -56,5 +56,6 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['message_queue'],
   };
 }

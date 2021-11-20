@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Serializable } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
-  name: string;
-  value?: any;
+  name: string[];
+  value: Serializable[];
 }
 
 export type ExpressionFunctionVarSet = ExpressionFunctionDefinition<
@@ -31,12 +32,14 @@ export const variableSet: ExpressionFunctionVarSet = {
       types: ['string'],
       aliases: ['_'],
       required: true,
+      multi: true,
       help: i18n.translate('expressions.functions.varset.name.help', {
         defaultMessage: 'Specify the name of the variable.',
       }),
     },
     value: {
       aliases: ['val'],
+      multi: true,
       help: i18n.translate('expressions.functions.varset.val.help', {
         defaultMessage:
           'Specify the value for the variable. When unspecified, the input context is used.',
@@ -44,8 +47,11 @@ export const variableSet: ExpressionFunctionVarSet = {
     },
   },
   fn(input, args, context) {
-    const variables: Record<string, any> = context.variables;
-    variables[args.name] = args.value === undefined ? input : args.value;
+    const { variables } = context;
+    args.name.forEach((name, i) => {
+      variables[name] = args.value[i] === undefined ? input : args.value[i];
+    });
+
     return input;
   },
 };

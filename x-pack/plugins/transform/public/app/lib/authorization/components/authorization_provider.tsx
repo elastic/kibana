@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { createContext } from 'react';
@@ -19,12 +20,14 @@ interface Authorization {
   capabilities: Capabilities;
 }
 
-const initialCapabalities: Capabilities = {
+const initialCapabilities: Capabilities = {
   canGetTransform: false,
   canDeleteTransform: false,
   canPreviewTransform: false,
   canCreateTransform: false,
   canStartStopTransform: false,
+  canCreateTransformAlerts: false,
+  canUseTransformAlerts: false,
 };
 
 const initialValue: Authorization = {
@@ -34,7 +37,7 @@ const initialValue: Authorization = {
     hasAllPrivileges: false,
     missingPrivileges: {},
   },
-  capabilities: initialCapabalities,
+  capabilities: initialCapabilities,
 };
 
 export const AuthorizationContext = createContext<Authorization>({ ...initialValue });
@@ -45,7 +48,11 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) => {
-  const { isLoading, error, data: privilegesData } = useRequest({
+  const {
+    isLoading,
+    error,
+    data: privilegesData,
+  } = useRequest({
     path: privilegesEndpoint,
     method: 'get',
   });
@@ -53,7 +60,7 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
   const value = {
     isLoading,
     privileges: isLoading ? { ...initialValue.privileges } : privilegesData,
-    capabilities: { ...initialCapabalities },
+    capabilities: { ...initialCapabilities },
     apiError: error ? (error as Error) : null,
   };
 
@@ -79,6 +86,10 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
     hasPrivilege(['cluster', 'cluster:admin/transform/start']) &&
     hasPrivilege(['cluster', 'cluster:admin/transform/start_task']) &&
     hasPrivilege(['cluster', 'cluster:admin/transform/stop']);
+
+  value.capabilities.canCreateTransformAlerts = value.capabilities.canCreateTransform;
+
+  value.capabilities.canUseTransformAlerts = value.capabilities.canGetTransform;
 
   return (
     <AuthorizationContext.Provider value={{ ...value }}>{children}</AuthorizationContext.Provider>

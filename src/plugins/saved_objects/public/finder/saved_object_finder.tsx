@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -46,6 +46,7 @@ export interface SavedObjectMetaData<T = unknown> {
   getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
   getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
+  getSavedObjectSubType?(savedObject: SimpleSavedObject<T>): string;
   includeFields?: string[];
 }
 
@@ -115,7 +116,7 @@ class SavedObjectFinderUi extends React.Component<
 
   private isComponentMounted: boolean = false;
 
-  private debouncedFetch = _.debounce(async (query: string) => {
+  private debouncedFetch = debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
 
     const fields = Object.values(metaDataMap)
@@ -511,6 +512,7 @@ class SavedObjectFinderUi extends React.Component<
               }}
               onChangeItemsPerPage={(perPage) => {
                 this.setState({
+                  page: 0,
                   perPage,
                 });
               }}

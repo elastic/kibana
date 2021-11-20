@@ -1,30 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  ThreatMap,
-  threatMap,
-  ThreatMapping,
-} from '../../../../common/detection_engine/schemas/types';
+import uuid from 'uuid';
+import { i18n } from '@kbn/i18n';
+import { addIdToItem } from '@kbn/securitysolution-utils';
+import { ThreatMap, threatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { IndexPattern, IFieldType } from '../../../../../../../src/plugins/data/common';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
+import { ValidationFunc } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { ERROR_CODE } from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
 
 /**
  * Formats the entry into one that is easily usable for the UI.
  *
- * @param patterns IndexPattern containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param item item entry
  * @param itemIndex entry index
  */
 export const getFormattedEntry = (
-  indexPattern: IndexPattern,
-  threatIndexPatterns: IndexPattern,
+  indexPattern: DataViewBase,
+  threatIndexPatterns: DataViewBase,
   item: Entry,
-  itemIndex: number
+  itemIndex: number,
+  uuidGen: () => string = uuid.v4
 ): FormattedEntry => {
   const { fields } = indexPattern;
   const { fields: threatFields } = threatIndexPatterns;
@@ -34,7 +37,9 @@ export const getFormattedEntry = (
   const [threatFoundField] = threatFields.filter(
     ({ name }) => threatField != null && threatField === name
   );
+  const maybeId: typeof item & { id?: string } = item;
   return {
+    id: maybeId.id ?? uuidGen(),
     field: foundField,
     type: 'mapping',
     value: threatFoundField,
@@ -45,12 +50,12 @@ export const getFormattedEntry = (
 /**
  * Formats the entries to be easily usable for the UI
  *
- * @param patterns IndexPattern containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param entries item entries
  */
 export const getFormattedEntries = (
-  indexPattern: IndexPattern,
-  threatIndexPatterns: IndexPattern,
+  indexPattern: DataViewBase,
+  threatIndexPatterns: DataViewBase,
   entries: Entry[]
 ): FormattedEntry[] => {
   return entries.reduce<FormattedEntry[]>((acc, item, index) => {
@@ -85,15 +90,16 @@ export const getUpdatedEntriesOnDelete = (
  */
 export const getEntryOnFieldChange = (
   item: FormattedEntry,
-  newField: IFieldType
+  newField: DataViewFieldBase
 ): { updatedEntry: Entry; index: number } => {
   const { entryIndex } = item;
   return {
     updatedEntry: {
+      id: item.id,
       field: newField != null ? newField.name : '',
       type: 'mapping',
       value: item.value != null ? item.value.name : '',
-    },
+    } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
     index: entryIndex,
   };
 };
@@ -107,35 +113,38 @@ export const getEntryOnFieldChange = (
  */
 export const getEntryOnThreatFieldChange = (
   item: FormattedEntry,
-  newField: IFieldType
+  newField: DataViewFieldBase
 ): { updatedEntry: Entry; index: number } => {
   const { entryIndex } = item;
   return {
     updatedEntry: {
+      id: item.id,
       field: item.field != null ? item.field.name : '',
       type: 'mapping',
       value: newField != null ? newField.name : '',
-    },
+    } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
     index: entryIndex,
   };
 };
 
-export const getDefaultEmptyEntry = (): EmptyEntry => ({
-  field: '',
-  type: 'mapping',
-  value: '',
-});
+export const getDefaultEmptyEntry = (): EmptyEntry => {
+  return addIdToItem({
+    field: '',
+    type: 'mapping',
+    value: '',
+  });
+};
 
 export const getNewItem = (): ThreatMap => {
-  return {
+  return addIdToItem({
     entries: [
-      {
+      addIdToItem({
         field: '',
         type: 'mapping',
         value: '',
-      },
+      }),
     ],
-  };
+  });
 };
 
 export const filterItems = (items: ThreatMapEntries[]): ThreatMapping => {
@@ -171,4 +180,37 @@ export const singleEntryThreat = (items: ThreatMapEntries[]): boolean => {
     items[0].entries[0].field === '' &&
     items[0].entries[0].value === ''
   );
+};
+
+export const customValidators = {
+  forbiddenField: (
+    value: unknown,
+    forbiddenString: string
+  ): ReturnType<ValidationFunc<{}, ERROR_CODE>> => {
+    let match: boolean;
+
+    if (typeof value === 'string') {
+      match = value === forbiddenString;
+    } else if (Array.isArray(value)) {
+      match = !!value.find((item) => item === forbiddenString);
+    } else {
+      match = false;
+    }
+
+    if (match) {
+      return {
+        code: 'ERR_FIELD_FORMAT',
+        message: i18n.translate(
+          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchIndexForbiddenError',
+          {
+            defaultMessage:
+              'The index pattern cannot be { forbiddenString }. Please choose a more specific index pattern.',
+            values: {
+              forbiddenString,
+            },
+          }
+        ),
+      };
+    }
+  },
 };

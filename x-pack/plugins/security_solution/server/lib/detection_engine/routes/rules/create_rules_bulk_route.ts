@@ -1,33 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { getIndexExists } from '@kbn/securitysolution-es-utils';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError } from './validate';
-import { getIndexExists } from '../../index/get_index_exists';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerts/common';
 
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.post(
     {
@@ -41,12 +43,12 @@ export const createRulesBulkRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
-      const clusterClient = context.core.elasticsearch.legacy.client;
+      const rulesClient = context.alerting?.getRulesClient();
+      const esClient = context.core.elasticsearch.client;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution?.getAppClient();
 
-      if (!siemClient || !alertsClient) {
+      if (!siemClient || !rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -66,9 +68,10 @@ export const createRulesBulkRoute = (
           .map(async (payloadRule) => {
             if (payloadRule.rule_id != null) {
               const rule = await readRules({
-                alertsClient,
-                ruleId: payloadRule.rule_id,
                 id: undefined,
+                isRuleRegistryEnabled,
+                rulesClient,
+                ruleId: payloadRule.rule_id,
               });
               if (rule != null) {
                 return createBulkErrorObject({
@@ -78,7 +81,11 @@ export const createRulesBulkRoute = (
                 });
               }
             }
-            const internalRule = convertCreateAPIToInternalSchema(payloadRule, siemClient);
+            const internalRule = convertCreateAPIToInternalSchema(
+              payloadRule,
+              siemClient,
+              isRuleRegistryEnabled
+            );
             try {
               const validationErrors = createRuleValidateTypeDependents(payloadRule);
               if (validationErrors.length) {
@@ -91,8 +98,8 @@ export const createRulesBulkRoute = (
 
               throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
               const finalIndex = internalRule.params.outputIndex;
-              const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
-              if (!indexExists) {
+              const indexExists = await getIndexExists(esClient.asCurrentUser, finalIndex);
+              if (!isRuleRegistryEnabled && !indexExists) {
                 return createBulkErrorObject({
                   ruleId: internalRule.params.ruleId,
                   statusCode: 400,
@@ -100,30 +107,26 @@ export const createRulesBulkRoute = (
                 });
               }
 
-              /**
-               * TODO: Remove this use of `as` by utilizing the proper type
-               */
-              const createdRule = (await alertsClient.create({
+              const createdRule = await rulesClient.create({
                 data: internalRule,
-              })) as Alert<RuleTypeParams>;
-
-              const ruleActions = await updateRulesNotifications({
-                ruleAlertId: createdRule.id,
-                alertsClient,
-                savedObjectsClient,
-                enabled: createdRule.enabled,
-                actions: payloadRule.actions,
-                throttle: payloadRule.throttle ?? null,
-                name: createdRule.name,
               });
+
+              // mutes if we are creating the rule with the explicit "no_actions"
+              if (payloadRule.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+                await rulesClient.muteAll({ id: createdRule.id });
+              }
 
               return transformValidateBulkError(
                 internalRule.params.ruleId,
                 createdRule,
-                ruleActions
+                undefined,
+                isRuleRegistryEnabled
               );
             } catch (err) {
-              return transformBulkError(internalRule.params.ruleId, err);
+              return transformBulkError(
+                internalRule.params.ruleId,
+                err as Error & { statusCode?: number | undefined }
+              );
             }
           })
       );

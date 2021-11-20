@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { CoreUsageDataService } from './core_usage_data_service';
 import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
-import { CoreUsageData, CoreUsageDataSetup, CoreUsageDataStart } from './types';
+import { CoreUsageData, InternalCoreUsageDataSetup, CoreUsageDataStart } from './types';
 
 const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
-  const setupContract: jest.Mocked<CoreUsageDataSetup> = {
+  const setupContract: jest.Mocked<InternalCoreUsageDataSetup> = {
     registerType: jest.fn(),
     getClient: jest.fn().mockReturnValue(usageStatsClient),
+    registerUsageCounter: jest.fn(),
+    incrementUsageCounter: jest.fn(),
   };
   return setupContract;
 };
@@ -47,6 +49,7 @@ const createStartContractMock = () => {
               keystoreConfigured: false,
               truststoreConfigured: false,
             },
+            principal: 'unknown',
           },
           http: {
             basePathConfigured: false,
@@ -95,6 +98,13 @@ const createStartContractMock = () => {
               supportedProtocols: ['TLSv1.1', 'TLSv1.2'],
               truststoreConfigured: false,
             },
+            securityResponseHeaders: {
+              strictTransportSecurity: 'NULL', // `null` values are coalesced to `"NULL"` strings
+              xContentTypeOptions: 'nosniff',
+              referrerPolicy: 'no-referrer-when-downgrade',
+              permissionsPolicyConfigured: false,
+              disableEmbedding: false,
+            },
             xsrf: {
               disableProtection: false,
               allowlistConfigured: false,
@@ -105,8 +115,13 @@ const createStartContractMock = () => {
             loggersConfiguredCount: 0,
           },
           savedObjects: {
-            maxImportExportSizeBytes: 10000,
+            customIndex: false,
+            maxImportExportSize: 10000,
             maxImportPayloadBytes: 26214400,
+          },
+          deprecatedKeys: {
+            set: ['path.to.a.prop'],
+            unset: [],
           },
         },
         environment: {
@@ -127,10 +142,17 @@ const createStartContractMock = () => {
                 storeSizeBytes: 1,
               },
             ],
+            legacyUrlAliases: {
+              inactiveCount: 1,
+              activeCount: 1,
+              disabledCount: 1,
+              totalCount: 3,
+            },
           },
         },
       })
     ),
+    getConfigsUsageData: jest.fn(),
   };
 
   return startContract;

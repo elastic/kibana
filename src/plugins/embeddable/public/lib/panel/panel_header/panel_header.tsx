@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -36,7 +36,7 @@ export interface PanelHeaderProps {
   embeddable: IEmbeddable;
   headerId?: string;
   showPlaceholderTitle?: boolean;
-  customizeTitle: CustomizePanelTitleAction;
+  customizeTitle?: CustomizePanelTitleAction;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -177,7 +177,7 @@ export function PanelHeader({
         >
           {title || placeholderTitle}
         </span>
-      ) : (
+      ) : customizeTitle ? (
         <EuiLink
           color="text"
           data-test-subj={'embeddablePanelTitleLink'}
@@ -193,7 +193,7 @@ export function PanelHeader({
         >
           {title || placeholderTitle}
         </EuiLink>
-      );
+      ) : null;
     }
     return description ? (
       <EuiToolTip

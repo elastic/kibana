@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { uiActionsPluginMock } from '../mocks';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { Action, createAction } from '../actions';
 import { Trigger } from '../triggers';
+import { OverlayStart } from 'kibana/public';
 
 let action: Action<{ name: string }>;
 let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
@@ -31,14 +32,14 @@ beforeEach(() => {
 
 test('can register action', async () => {
   const { setup } = uiActions;
-  const helloWorldAction = createHelloWorldAction({} as any);
+  const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
 
   setup.registerAction(helloWorldAction);
 });
 
 test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = uiActions;
-  const helloWorldAction = createHelloWorldAction({} as any);
+  const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
 
   setup.registerAction(helloWorldAction);
 

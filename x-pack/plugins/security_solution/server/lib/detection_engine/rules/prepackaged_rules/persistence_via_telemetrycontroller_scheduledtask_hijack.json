@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "Persistence via TelemetryController Scheduled Task Hijack",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:(CompatTelRunner.exe or compattelrunner.exe) and process.args:-cv* and not process.name:(conhost.exe or DeviceCensus.exe or devicecensus.exe or CompatTelRunner.exe or compattelrunner.exe or DismHost.exe or dismhost.exe or rundll32.exe or powershell.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"CompatTelRunner.exe\" and process.args : \"-cv*\" and\n  not process.name : (\"conhost.exe\",\n                      \"DeviceCensus.exe\",\n                      \"CompatTelRunner.exe\",\n                      \"DismHost.exe\",\n                      \"rundll32.exe\",\n                      \"powershell.exe\")\n",
   "references": [
     "https://www.trustedsec.com/blog/abusing-windows-telemetry-for-persistence/?utm_content=131234033&utm_medium=social&utm_source=twitter&hss_channel=tw-403811306"
   ],
@@ -37,11 +38,19 @@
         {
           "id": "T1053",
           "name": "Scheduled Task/Job",
-          "reference": "https://attack.mitre.org/techniques/T1053/"
+          "reference": "https://attack.mitre.org/techniques/T1053/",
+          "subtechnique": [
+            {
+              "id": "T1053.005",
+              "name": "Scheduled Task",
+              "reference": "https://attack.mitre.org/techniques/T1053/005/"
+            }
+          ]
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 2
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 6
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -15,21 +15,21 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
-    await esArchiver.unload('logstash_functional');
-    await esArchiver.loadIfNeeded('dashboard/current/data');
+    await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   async function unloadCurrentData() {
-    await esArchiver.unload('dashboard/current/data');
+    await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   async function loadLogstash() {
     await browser.setWindowSize(1200, 900);
-    await esArchiver.loadIfNeeded('logstash_functional');
+    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   async function unloadLogstash() {
-    await esArchiver.unload('logstash_functional');
+    await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   describe('dashboard app', function () {
@@ -46,8 +46,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./embeddable_data_grid'));
       loadTestFile(require.resolve('./create_and_add_embeddables'));
       loadTestFile(require.resolve('./edit_embeddable_redirects'));
+      loadTestFile(require.resolve('./dashboard_unsaved_state'));
+      loadTestFile(require.resolve('./dashboard_unsaved_listing'));
       loadTestFile(require.resolve('./edit_visualizations'));
-      loadTestFile(require.resolve('./time_zones'));
       loadTestFile(require.resolve('./dashboard_options'));
       loadTestFile(require.resolve('./data_shared_attributes'));
       loadTestFile(require.resolve('./share'));
@@ -55,6 +56,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dashboard_back_button'));
       loadTestFile(require.resolve('./dashboard_error_handling'));
       loadTestFile(require.resolve('./legacy_urls'));
+      loadTestFile(require.resolve('./saved_search_embeddable'));
 
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
@@ -79,6 +81,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.
       // If we don't use the timestamp in the URL, the colors in the charts will be different.
       loadTestFile(require.resolve('./dashboard_snapshots'));
+      loadTestFile(require.resolve('./embeddable_library'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
@@ -93,6 +96,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./bwc_shared_urls'));
       loadTestFile(require.resolve('./panel_replacing'));
       loadTestFile(require.resolve('./panel_cloning'));
+      loadTestFile(require.resolve('./copy_panel_to'));
       loadTestFile(require.resolve('./panel_context_menu'));
       loadTestFile(require.resolve('./dashboard_state'));
     });
@@ -116,7 +120,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       before(async () => {
         await loadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': false,
+          'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
       });
@@ -124,7 +128,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       after(async () => {
         await unloadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': true,
+          'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();
       });

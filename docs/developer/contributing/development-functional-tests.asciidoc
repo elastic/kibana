@@ -114,7 +114,7 @@ Use the `--help` flag for more options.
 [discrete]
 ==== Environment
 
-The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/master/packages/kbn-expect[@kbn/expect] for assertions.
+The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/main/packages/kbn-expect[@kbn/expect] for assertions.
 
 We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
@@ -139,11 +139,14 @@ export default function (/* { providerAPI } */) {
 }
 -----------
 
-**Services**:::
-Services are named singleton values produced by a Service Provider. Tests and other services can retrieve service instances by asking for them by name. All functionality except the mocha API is exposed via services.\
+**Service**:::
+A Service is a named singleton created using a subclass of `FtrService`. Tests and other services can retrieve service instances by asking for them by name. All functionality except the mocha API is exposed via services. When you write your own functional tests check for existing services that help with the interactions you're looking to execute, and add new services for interactions which aren't already encoded in a service.
+
+**Service Providers**:::
+For legacy purposes, and for when creating a subclass of `FtrService` is inconvenient, you can also create services using a "Service Provider". These are functions which  which create service instances and return them. These instances are cached and provided to tests. Currently these providers may also return a Promise for the service instance, allowing the service to do some setup work before tests run. We expect to fully deprecate and remove support for async service providers in the near future and instead require that services use the `lifecycle` service to run setup before tests. Providers which return instances of classes other than `FtrService` will likely remain supported for as long as possible.
 
 **Page objects**:::
-Page objects are a special type of service that encapsulate behaviors common to a particular page or plugin. When you write your own plugin, you’ll likely want to add a page object (or several) that describes the common interactions your tests need to execute.
+Page objects are functionally equivalent to services, except they are loaded with a slightly different mechanism and generally defined separate from services. When you write your own functional tests you might want to write some of your services as Page objects, but it is not required.
 
 **Test Files**:::
 The `FunctionalTestRunner`'s primary purpose is to execute test files. These files export a Test Provider that is called with a Provider API but is not expected to return a value. Instead Test Providers define a suite using https://mochajs.org/#bdd[mocha's BDD interface].
@@ -182,8 +185,8 @@ node scripts/functional_test_runner --config test/functional/config.firefox.js
 [discrete]
 ==== Using the test_user service
 
-Tests should run at the positive security boundry condition, meaning that they should be run with the mimimum privileges required (and documented) and not as the superuser.
- This prevents the type of regression where additional privleges accidentally become required to perform the same action. 
+Tests should run at the positive security boundary condition, meaning that they should be run with the minimum privileges required (and documented) and not as the superuser.
+ This prevents the type of regression where additional privileges accidentally become required to perform the same action. 
  
 The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.  
 
@@ -201,7 +204,7 @@ Tests should normally setRoles() in the before() and restoreDefaults() in the af
 [discrete]
 ==== Anatomy of a test file
 
-This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
+This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/main/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
 
 ["source","js"]
 ----
@@ -226,9 +229,9 @@ export default function ({ getService, getPageObject }) {
     before(async () => {
       await Promise.all([
         // start with an empty .kibana index
-        esArchiver.load('empty_kibana'),
+        esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana'),
         // load some basic log data only if the index doesn't exist
-        esArchiver.loadIfNeeded('makelogs')
+        esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs')
       ]);
       // go to the page described by `apps.visualize` in the config
       await PageObjects.common.navigateTo('visualize');
@@ -240,7 +243,7 @@ export default function ({ getService, getPageObject }) {
       // we unload the empty_kibana archive but not the makelogs
       // archive because we don't make any changes to it, and subsequent
       // suites could use it if they call `.loadIfNeeded()`.
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/empty_kibana');
     });
 
     // This series of tests illustrate how tests generally verify
@@ -367,9 +370,9 @@ await testSubjects.click(‘containerButton’);
 * Source: {blob}test/common/services/es_archiver.ts[test/common/services/es_archiver.ts]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
-** `esArchiver.load(name)`
-** `esArchiver.loadIfNeeded(name)`
-** `esArchiver.unload(name)`
+** `esArchiver.load(path)`
+** `esArchiver.loadIfNeeded(path)`
+** `esArchiver.unload(path)`
 
 Full list of services that are used in functional tests can be found here: {blob}test/functional/services[test/functional/services]
 
@@ -455,7 +458,7 @@ Bad example: `PageObjects.app.clickButton()`
 class AppPage {
   // what can people who call this method expect from the
   // UI after the promise resolves? Since the reaction to most
-  // clicks is asynchronous the behavior is dependant on timing
+  // clicks is asynchronous the behavior is dependent on timing
   // and likely to cause test that fail unexpectedly
   async clickButton () {
     await testSubjects.click(‘menuButton’);
@@ -487,7 +490,7 @@ From the command line run:
 
 ["source","shell"]
 -----------
-node --debug-brk --inspect scripts/functional_test_runner
+node --inspect-brk scripts/functional_test_runner
 -----------
 
 This prints out a URL that you can visit in Chrome and debug your functional tests in the browser.

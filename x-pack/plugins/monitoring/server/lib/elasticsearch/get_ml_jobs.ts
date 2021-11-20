@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { includes } from 'lodash';
@@ -20,8 +21,21 @@ import { LegacyRequest } from '../../types';
  */
 export function handleResponse(response: ElasticsearchResponse) {
   const hits = response.hits?.hits;
-  return hits?.map((hit) => hit._source.job_stats) ?? [];
+  return (
+    hits?.map((hit) => {
+      const job = hit._source.job_stats ?? hit._source.elasticsearch;
+      return {
+        ...job,
+        node: {
+          ...job?.node,
+          name: job?.node?.name ?? job?.node?.id,
+        },
+      };
+    }) ?? []
+  );
 }
+
+export type MLJobs = ReturnType<typeof handleResponse>;
 
 export function getMlJobs(req: LegacyRequest, esIndexPattern: string) {
   checkParam(esIndexPattern, 'esIndexPattern in getMlJobs');
@@ -35,20 +49,27 @@ export function getMlJobs(req: LegacyRequest, esIndexPattern: string) {
   const params = {
     index: esIndexPattern,
     size: maxBucketSize,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.job_stats.job_id',
+      'hits.hits._source.elasticsearch.ml.job.id',
       'hits.hits._source.job_stats.state',
+      'hits.hits._source.elasticsearch.ml.job.state',
       'hits.hits._source.job_stats.data_counts.processed_record_count',
+      'hits.hits._source.elasticsearch.ml.job.data_counts.processed_record_count',
       'hits.hits._source.job_stats.model_size_stats.model_bytes',
+      'hits.hits._source.elasticsearch.ml.job.model_size_stats.model_bytes',
       'hits.hits._source.job_stats.forecasts_stats.total',
+      'hits.hits._source.elasticsearch.ml.job.forecasts_stats.total',
       'hits.hits._source.job_stats.node.id',
+      'hits.hits._source.elasticsearch.node.id',
       'hits.hits._source.job_stats.node.name',
+      'hits.hits._source.elasticsearch.node.name',
     ],
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       collapse: { field: 'job_stats.job_id' },
-      query: createQuery({ type: 'job_stats', start, end, clusterUuid, metric }),
+      query: createQuery({ types: ['ml_job', 'job_stats'], start, end, clusterUuid, metric }),
     },
   };
 
@@ -65,7 +86,7 @@ export function getMlJobsForCluster(
   esIndexPattern: string,
   cluster: ElasticsearchSource
 ) {
-  const license = cluster.license ?? {};
+  const license = cluster.license ?? cluster.elasticsearch?.cluster?.stats?.license ?? {};
 
   if (license.status === 'active' && includes(ML_SUPPORTED_LICENSES, license.type)) {
     // ML is supported
@@ -76,10 +97,10 @@ export function getMlJobsForCluster(
     const params = {
       index: esIndexPattern,
       size: 0,
-      ignoreUnavailable: true,
-      filterPath: 'aggregations.jobs_count.value',
+      ignore_unavailable: true,
+      filter_path: 'aggregations.jobs_count.value',
       body: {
-        query: createQuery({ type: 'job_stats', start, end, clusterUuid, metric }),
+        query: createQuery({ types: ['ml_job', 'job_stats'], start, end, clusterUuid, metric }),
         aggs: {
           jobs_count: { cardinality: { field: 'job_stats.job_id' } },
         },
@@ -89,7 +110,7 @@ export function getMlJobsForCluster(
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
     return callWithRequest(req, 'search', params).then((response: ElasticsearchResponse) => {
-      return response.aggregations.jobs_count.value ?? 0;
+      return response.aggregations?.jobs_count.value ?? 0;
     });
   }
 

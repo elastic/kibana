@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // combines and abstracts job and datafeed status
@@ -11,6 +12,7 @@ export type JobStatus =
   | 'initializing'
   | 'stopped'
   | 'started'
+  | 'starting'
   | 'finished'
   | 'failed';
 
@@ -34,10 +36,10 @@ export type SetupStatus =
  * before this state was reached.
  */
 export const isJobStatusWithResults = (jobStatus: JobStatus) =>
-  ['started', 'finished', 'stopped', 'failed'].includes(jobStatus);
+  ['started', 'starting', 'finished', 'stopped', 'failed'].includes(jobStatus);
 
 export const isHealthyJobStatus = (jobStatus: JobStatus) =>
-  ['started', 'finished'].includes(jobStatus);
+  ['started', 'starting', 'finished'].includes(jobStatus);
 
 /**
  * Maps a setup status to the possibility that results have already been

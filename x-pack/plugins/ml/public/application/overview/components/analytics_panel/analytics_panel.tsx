@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState } from 'react';
@@ -23,25 +24,34 @@ import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
-import { useMlUrlGenerator, useNavigateToPath } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
 
 interface Props {
   jobCreationDisabled: boolean;
+  setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
+  refreshCount: number;
 }
-export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
+export const AnalyticsPanel: FC<Props> = ({
+  jobCreationDisabled,
+  setLazyJobCount,
+  refreshCount,
+}) => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
   );
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
 
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
 
   const redirectToDataFrameAnalyticsManagementPage = async () => {
-    const path = await mlUrlGenerator.createUrl({
+    if (!mlLocator) return;
+    const path = await mlLocator.getUrl({
       page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
     });
     await navigateToPath(path, true);
@@ -52,13 +62,14 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
     setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
+    setLazyJobCount,
     false,
     false
   );
 
   useEffect(() => {
     getAnalytics(true);
-  }, []);
+  }, [refreshCount]);
 
   const onRefresh = () => {
     getAnalytics(true);
@@ -107,7 +118,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
           }
           actions={
             <EuiButton
-              onClick={redirectToDataFrameAnalyticsManagementPage}
+              onClick={() => setIsSourceIndexModalVisible(true)}
               color="primary"
               fill
               iconType="plusInCircle"
@@ -156,6 +167,9 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
             </EuiButton>
           </div>
         </>
+      )}
+      {isSourceIndexModalVisible === true && (
+        <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
       )}
     </EuiPanel>
   );

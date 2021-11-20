@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -44,6 +44,7 @@ export const useVisualizeAppState = (
         kbnUrlStateStorage: services.kbnUrlStateStorage,
         byValue,
       });
+      const currentAppState = stateContainer.getState();
 
       const onDirtyStateChange = ({ isDirty }: { isDirty: boolean }) => {
         if (!isDirty) {
@@ -57,8 +58,8 @@ export const useVisualizeAppState = (
 
       const { filterManager, queryString } = services.data.query;
       // sync initial app state from state to managers
-      filterManager.setAppFilters(cloneDeep(stateContainer.getState().filters));
-      queryString.setQuery(migrateLegacyQuery(stateContainer.getState().query));
+      filterManager.setAppFilters(cloneDeep(currentAppState.filters));
+      queryString.setQuery(migrateLegacyQuery(currentAppState.query));
 
       // setup syncing of app filters between appState and query services
       const stopSyncingAppFilters = connectToQueryState(
@@ -90,10 +91,24 @@ export const useVisualizeAppState = (
       // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
       // defaults applied. If the url was from a previous session which included modifications to the
       // appState then they won't be equal.
-      if (!isEqual(stateContainer.getState().vis, stateDefaults.vis)) {
-        const { aggs, ...visState } = stateContainer.getState().vis;
+      if (
+        !isEqual(currentAppState.vis, stateDefaults.vis) ||
+        !isEqual(currentAppState.query, stateDefaults.query) ||
+        !isEqual(currentAppState.filters, stateDefaults.filters)
+      ) {
+        const { aggs, ...visState } = currentAppState.vis;
+        const query = currentAppState.query;
+        const filter = currentAppState.filters;
+        const visSearchSource = instance.vis.data.searchSource?.getFields() || {};
         instance.vis
-          .setState({ ...visState, data: { aggs } })
+          .setState({
+            ...visState,
+            data: {
+              aggs,
+              searchSource: { ...visSearchSource, query, filter },
+              savedSearchId: instance.vis.data.savedSearchId,
+            },
+          })
           .then(() => {
             // setting up the stateContainer after setState is successful will prevent loading the editor with failures
             // otherwise the catch will take presedence

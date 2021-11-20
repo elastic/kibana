@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
 /**
  * This can convert a type into a known Expression string representation of
@@ -23,9 +23,9 @@ export type TypeToString<T> = KnownTypeToString<T> | UnmappedTypeStrings;
  * the `type` key as a string literal type for it.
  */
 // prettier-ignore
-export type KnownTypeToString<T> = 
-  T extends string ? 'string' : 
-  T extends boolean ? 'boolean' : 
+export type KnownTypeToString<T> =
+  T extends string ? 'string' :
+  T extends boolean ? 'boolean' :
   T extends number ? 'number' :
   T extends null ? 'null' :
   T extends { type: string } ? T['type'] :
@@ -36,7 +36,9 @@ export type KnownTypeToString<T> =
  *
  * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
  */
-export type TypeString<T> = KnownTypeToString<UnwrapPromiseOrReturn<T>>;
+export type TypeString<T> = KnownTypeToString<
+  T extends ObservableLike<unknown> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>
+>;
 
 /**
  * Types used in Expressions that don't map to a primitive cleanly:
@@ -44,13 +46,3 @@ export type TypeString<T> = KnownTypeToString<UnwrapPromiseOrReturn<T>>;
  * `date` is typed as a number or string, and represents a date
  */
 export type UnmappedTypeStrings = 'date' | 'filter';
-
-/**
- * JSON representation of a field formatter configuration.
- * Is used to carry information about how to format data in
- * a data table as part of the column definition.
- */
-export interface SerializedFieldFormat<TParams = Record<string, any>> {
-  id?: string;
-  params?: TParams;
-}

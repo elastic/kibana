@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -11,7 +12,7 @@ import { RouteDependencies } from '../../plugin';
 export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/groups',
+      path: '/internal/workplace_search/groups',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -21,7 +22,7 @@ export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: 
 
   router.post(
     {
-      path: '/api/workplace_search/groups',
+      path: '/internal/workplace_search/groups',
       validate: {
         body: schema.object({
           group_name: schema.string(),
@@ -40,7 +41,7 @@ export function registerSearchGroupsRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/groups/search',
+      path: '/internal/workplace_search/groups/search',
       validate: {
         body: schema.object({
           page: schema.object({
@@ -64,7 +65,7 @@ export function registerSearchGroupsRoute({
 export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/groups/{id}',
+      path: '/internal/workplace_search/groups/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -78,7 +79,7 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
 
   router.put(
     {
-      path: '/api/workplace_search/groups/{id}',
+      path: '/internal/workplace_search/groups/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -97,7 +98,7 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
 
   router.delete(
     {
-      path: '/api/workplace_search/groups/{id}',
+      path: '/internal/workplace_search/groups/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -116,7 +117,7 @@ export function registerGroupUsersRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/groups/{id}/group_users',
+      path: '/internal/workplace_search/groups/{id}/group_users',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -135,7 +136,7 @@ export function registerShareGroupRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/groups/{id}/share',
+      path: '/internal/workplace_search/groups/{id}/share',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -151,35 +152,13 @@ export function registerShareGroupRoute({
   );
 }
 
-export function registerAssignGroupRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.post(
-    {
-      path: '/api/workplace_search/groups/{id}/assign',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: schema.object({
-          user_ids: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/groups/:id/assign',
-    })
-  );
-}
-
 export function registerBoostsGroupRoute({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/groups/{id}/boosts',
+      path: '/internal/workplace_search/groups/{id}/boosts',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -203,6 +182,5 @@ export const registerGroupsRoutes = (dependencies: RouteDependencies) => {
   registerGroupRoute(dependencies);
   registerGroupUsersRoute(dependencies);
   registerShareGroupRoute(dependencies);
-  registerAssignGroupRoute(dependencies);
   registerBoostsGroupRoute(dependencies);
 };

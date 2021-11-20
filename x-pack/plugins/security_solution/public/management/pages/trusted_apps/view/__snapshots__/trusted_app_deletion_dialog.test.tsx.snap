@@ -23,12 +23,13 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
       >
         <button
           aria-label="Closes this modal window"
-          class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
           type="button"
         >
           <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="cross"
           />
         </button>
@@ -41,7 +42,13 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
             <div
               class="euiModalHeader__title"
             >
-              Remove trusted application
+              Delete "
+              <b
+                class="eui-textBreakWord"
+              >
+                trusted app 3
+              </b>
+              "
             </div>
           </div>
           <div
@@ -51,15 +58,41 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
               class="euiModalBody__overflow"
             >
               <div
+                class="euiCallOut euiCallOut--danger"
+              >
+                <div
+                  class="euiCallOutHeader"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiCallOutHeader__icon"
+                    color="inherit"
+                    data-euiicon-type="alert"
+                  />
+                  <span
+                    class="euiCallOutHeader__title"
+                  >
+                    Warning
+                  </span>
+                </div>
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--default"
+                  >
+                    <p>
+                      Deleting this entry will remove it from all associated policies.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+              <div
                 class="euiText euiText--medium"
               >
-                <p>
-                  You are removing trusted application "
-                  <strong>
-                    trusted app 3
-                  </strong>
-                  ".
-                </p>
                 <p>
                   This action cannot be undone. Are you sure you wish to continue?
                 </p>
@@ -95,7 +128,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion failed 1`] = `
                 <span
                   class="euiButton__text"
                 >
-                  Remove trusted application
+                  Delete
                 </span>
               </span>
             </button>
@@ -124,12 +157,13 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
       >
         <button
           aria-label="Closes this modal window"
-          class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
           type="button"
         >
           <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="cross"
           />
         </button>
@@ -142,7 +176,13 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
             <div
               class="euiModalHeader__title"
             >
-              Remove trusted application
+              Delete "
+              <b
+                class="eui-textBreakWord"
+              >
+                trusted app 3
+              </b>
+              "
             </div>
           </div>
           <div
@@ -152,15 +192,41 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
               class="euiModalBody__overflow"
             >
               <div
+                class="euiCallOut euiCallOut--danger"
+              >
+                <div
+                  class="euiCallOutHeader"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiCallOutHeader__icon"
+                    color="inherit"
+                    data-euiicon-type="alert"
+                  />
+                  <span
+                    class="euiCallOutHeader__title"
+                  >
+                    Warning
+                  </span>
+                </div>
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--default"
+                  >
+                    <p>
+                      Deleting this entry will remove it from all associated policies.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+              <div
                 class="euiText euiText--medium"
               >
-                <p>
-                  You are removing trusted application "
-                  <strong>
-                    trusted app 3
-                  </strong>
-                  ".
-                </p>
                 <p>
                   This action cannot be undone. Are you sure you wish to continue?
                 </p>
@@ -201,7 +267,7 @@ exports[`TrustedAppDeletionDialog renders correctly when deletion is in progress
                 <span
                   class="euiButton__text"
                 >
-                  Remove trusted application
+                  Delete
                 </span>
               </span>
             </button>
@@ -230,12 +296,13 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
       >
         <button
           aria-label="Closes this modal window"
-          class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
           type="button"
         >
           <span
             aria-hidden="true"
             class="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="cross"
           />
         </button>
@@ -248,7 +315,13 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
             <div
               class="euiModalHeader__title"
             >
-              Remove trusted application
+              Delete "
+              <b
+                class="eui-textBreakWord"
+              >
+                trusted app 3
+              </b>
+              "
             </div>
           </div>
           <div
@@ -258,15 +331,41 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
               class="euiModalBody__overflow"
             >
               <div
+                class="euiCallOut euiCallOut--danger"
+              >
+                <div
+                  class="euiCallOutHeader"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiCallOutHeader__icon"
+                    color="inherit"
+                    data-euiicon-type="alert"
+                  />
+                  <span
+                    class="euiCallOutHeader__title"
+                  >
+                    Warning
+                  </span>
+                </div>
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--default"
+                  >
+                    <p>
+                      Deleting this entry will remove it from all associated policies.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+              <div
                 class="euiText euiText--medium"
               >
-                <p>
-                  You are removing trusted application "
-                  <strong>
-                    trusted app 3
-                  </strong>
-                  ".
-                </p>
                 <p>
                   This action cannot be undone. Are you sure you wish to continue?
                 </p>
@@ -302,7 +401,7 @@ exports[`TrustedAppDeletionDialog renders correctly when dialog started 1`] = `
                 <span
                   class="euiButton__text"
                 >
-                  Remove trusted application
+                  Delete
                 </span>
               </span>
             </button>

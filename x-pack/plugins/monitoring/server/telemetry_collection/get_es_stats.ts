@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
@@ -16,7 +17,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  */
 export async function getElasticsearchStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   maxBucketSize: number
 ) {
@@ -33,16 +34,16 @@ export async function getElasticsearchStats(
  *
  * Returns the response for the aggregations to fetch details for the product.
  */
-export function fetchElasticsearchStats(
-  callCluster: LegacyAPICaller,
+export async function fetchElasticsearchStats(
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   maxBucketSize: number
 ) {
-  const params = {
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: maxBucketSize,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.timestamp',
       'hits.hits._source.cluster_name',
@@ -68,7 +69,8 @@ export function fetchElasticsearchStats(
     },
   };
 
-  return callCluster('search', params);
+  const { body: response } = await callCluster.search<ESClusterStats>(params);
+  return response;
 }
 
 export interface ESClusterStats {
@@ -83,8 +85,8 @@ export interface ESClusterStats {
 /**
  * Extract the cluster stats for each cluster.
  */
-export function handleElasticsearchStats(response: SearchResponse<ESClusterStats>) {
+export function handleElasticsearchStats(response: estypes.SearchResponse<ESClusterStats>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.map((cluster) => cluster._source);
+  return clusters.map((cluster) => cluster._source!);
 }

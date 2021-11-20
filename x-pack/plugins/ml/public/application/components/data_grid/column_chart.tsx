@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
 import classNames from 'classnames';
 
-import { BarSeries, Chart, Settings } from '@elastic/charts';
+import { BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import './column_chart.scss';
 
-import { isUnsupportedChartData, useColumnChart, ChartData } from './use_column_chart';
+import { isUnsupportedChartData, ChartData } from '../../../../common/types/field_histograms';
+
+import { useColumnChart } from './use_column_chart';
 
 interface Props {
   chartData: ChartData;
@@ -45,7 +48,7 @@ export const ColumnChart: FC<Props> = ({
   hideLabel,
   maxChartColumns,
 }) => {
-  const { data, legendText, xScaleType } = useColumnChart(chartData, columnType, maxChartColumns);
+  const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns);
 
   return (
     <div data-test-subj={dataTestSubj}>
@@ -56,8 +59,8 @@ export const ColumnChart: FC<Props> = ({
             <BarSeries
               id="histogram"
               name="count"
-              xScaleType={xScaleType}
-              yScaleType="linear"
+              xScaleType={ScaleType.Ordinal}
+              yScaleType={ScaleType.Linear}
               xAccessor={'key_as_string'}
               yAccessors={['doc_count']}
               styleAccessor={(d) => d.datum.color}

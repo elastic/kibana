@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ascending } from './array_helpers';
@@ -16,9 +16,9 @@ const isArrayOfStrings = (input: unknown): input is string[] =>
   Array.isArray(input) && input.every((v) => typeof v === 'string');
 
 export type ThemeTags = readonly ThemeTag[];
-export type ThemeTag = 'v7light' | 'v7dark' | 'v8light' | 'v8dark';
-export const DEFAULT_THEMES = tags('v7light', 'v7dark');
-export const ALL_THEMES = tags('v7light', 'v7dark', 'v8light', 'v8dark');
+export type ThemeTag = 'v8light' | 'v8dark';
+export const DEFAULT_THEMES = tags('v8light', 'v8dark');
+export const ALL_THEMES = tags('v8light', 'v8dark');
 
 export function parseThemeTags(input?: any): ThemeTags {
   if (!input) {

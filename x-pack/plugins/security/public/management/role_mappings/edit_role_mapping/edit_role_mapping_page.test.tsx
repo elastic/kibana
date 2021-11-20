@@ -1,31 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import React from 'react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { findTestSubject } from '@kbn/test/jest';
 
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/test/target/jest/utils/stub_web_worker';
+import '@kbn/test/target_node/jest/utils/stub_web_worker';
 
-import { EditRoleMappingPage } from '.';
-import { NoCompatibleRealms, SectionLoading, PermissionDenied } from '../components';
-import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
-import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
-import { RolesAPIClient } from '../../roles';
-import { Role } from '../../../../common/model';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import React from 'react';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
-import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
-import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+
+import type { Role } from '../../../../common/model';
 import { RoleComboBox } from '../../role_combo_box';
+import type { RolesAPIClient } from '../../roles';
+import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
+import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';
+import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
+import { EditRoleMappingPage } from './edit_role_mapping_page';
+import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
+import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 
 describe('EditRoleMappingPage', () => {
   const history = scopedHistoryMock.create();
@@ -39,6 +39,7 @@ describe('EditRoleMappingPage', () => {
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
         <EditRoleMappingPage
+          action="edit"
           name={name}
           roleMappingsAPI={roleMappingsAPI}
           rolesAPIClient={rolesAPI}

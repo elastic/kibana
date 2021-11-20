@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { applyElementStrings } from '../../i18n/elements';
@@ -30,6 +31,8 @@ import { timeFilter } from './time_filter';
 import { verticalBarChart } from './vert_bar_chart';
 import { verticalProgressBar } from './vertical_progress_bar';
 import { verticalProgressPill } from './vertical_progress_pill';
+import { tagCloud } from './tag_cloud';
+import { metricVis } from './metric_vis';
 
 import { SetupInitializer } from '../plugin';
 import { ElementFactory } from '../../types';
@@ -59,6 +62,7 @@ const elementSpecs = [
   verticalBarChart,
   verticalProgressBar,
   verticalProgressPill,
+  tagCloud,
 ];
 
 const initializeElementFactories = [metricElementInitializer];
@@ -68,6 +72,11 @@ export const initializeElements: SetupInitializer<ElementFactory[]> = (core, plu
     ...elementSpecs,
     ...initializeElementFactories.map((factory) => factory(core, plugins)),
   ];
-
   return applyElementStrings(specs);
+};
+
+// For testing purpose. Will be removed after exposing `metricVis` element.
+export const initializeElementsSpec: SetupInitializer<ElementFactory[]> = (core, plugins) => {
+  const specs = initializeElements(core, plugins);
+  return [...applyElementStrings([metricVis]), ...specs];
 };

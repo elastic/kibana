@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Action } from 'redux';
@@ -18,6 +19,8 @@ import {
   applyDeltaToColumnWidth,
   setExcludedRowRendererIds,
   updateColumns,
+  updateColumnOrder,
+  updateColumnWidth,
   updateItemsPerPage,
   updateSort,
 } from './actions';
@@ -29,6 +32,8 @@ const timelineActionTypes = [
   upsertColumn.type,
   applyDeltaToColumnWidth.type,
   updateColumns.type,
+  updateColumnOrder.type,
+  updateColumnWidth.type,
   updateItemsPerPage.type,
   updateSort.type,
   setExcludedRowRendererIds.type,
@@ -38,25 +43,22 @@ export const isPageTimeline = (timelineId: string | undefined): boolean =>
   // Is not a flyout timeline
   !(timelineId && timelineId.toLowerCase().startsWith('timeline'));
 
-export const createTimelineLocalStorageEpic = <State>(): Epic<
-  Action,
-  Action,
-  State,
-  TimelineEpicDependencies<State>
-> => (action$, state$, { timelineByIdSelector, storage }) => {
-  const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
-  return action$.pipe(
-    delay(500),
-    withLatestFrom(timeline$),
-    filter(([action]) => isPageTimeline(get('payload.id', action))),
-    tap(([action, timelineById]) => {
-      if (timelineActionTypes.includes(action.type)) {
-        if (storage) {
-          const timelineId: TimelineIdLiteral = get('payload.id', action);
-          addTimelineInStorage(storage, timelineId, timelineById[timelineId]);
+export const createTimelineLocalStorageEpic =
+  <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
+  (action$, state$, { timelineByIdSelector, storage }) => {
+    const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
+    return action$.pipe(
+      delay(500),
+      withLatestFrom(timeline$),
+      filter(([action]) => isPageTimeline(get('payload.id', action))),
+      tap(([action, timelineById]) => {
+        if (timelineActionTypes.includes(action.type)) {
+          if (storage) {
+            const timelineId: TimelineIdLiteral = get('payload.id', action);
+            addTimelineInStorage(storage, timelineId, timelineById[timelineId]);
+          }
         }
-      }
-    }),
-    ignoreElements()
-  );
-};
+      }),
+      ignoreElements()
+    );
+  };

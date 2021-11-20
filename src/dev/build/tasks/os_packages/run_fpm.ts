@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -28,11 +28,7 @@ export async function runFpm(
   const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(linux, ...paths);
 
   const pickLicense = () => {
-    if (build.isOss()) {
-      return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
-    } else {
-      return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
-    }
+    return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
   };
 
   const envFolder = type === 'rpm' ? 'sysconfig' : 'default';
@@ -57,7 +53,7 @@ export async function runFpm(
 
     // general info about the package
     '--name',
-    build.isOss() ? 'kibana-oss' : 'kibana',
+    'kibana',
     '--description',
     'Explore and visualize your Elasticsearch data',
     '--version',
@@ -71,10 +67,6 @@ export async function runFpm(
     '--license',
     pickLicense(),
 
-    // prevent installing kibana if installing kibana-oss and vice versa
-    '--conflicts',
-    build.isOss() ? 'kibana' : 'kibana-oss',
-
     // define install/uninstall scripts
     '--after-install',
     resolve(__dirname, 'package_scripts/post_install.sh'),
@@ -86,6 +78,10 @@ export async function runFpm(
     resolve(__dirname, 'package_scripts/post_remove.sh'),
     '--rpm-posttrans',
     resolve(__dirname, 'package_scripts/post_trans.sh'),
+
+    // for RHEL 8+ package verification
+    '--rpm-digest',
+    'sha256',
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
@@ -117,6 +113,8 @@ export async function runFpm(
     '--exclude',
     `usr/share/kibana/data`,
     '--exclude',
+    `usr/share/kibana/logs`,
+    '--exclude',
     'run/kibana/.gitempty',
 
     // flags specific to the package we are building, supplied by tasks below
@@ -127,10 +125,14 @@ export async function runFpm(
     `${resolveWithTrailingSlash(fromBuild('.'))}=/usr/share/kibana/`,
 
     // copy the config directory to /etc/kibana
+    `${config.resolveFromRepo('build/os_packages/config/kibana.yml')}=/etc/kibana/kibana.yml`,
     `${resolveWithTrailingSlash(fromBuild('config'))}=/etc/kibana/`,
 
     // copy the data directory at /var/lib/kibana
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
+
+    // copy the logs directory at /var/log/kibana
+    `${resolveWithTrailingSlash(fromBuild('logs'))}=/var/log/kibana/`,
 
     // copy package configurations
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,

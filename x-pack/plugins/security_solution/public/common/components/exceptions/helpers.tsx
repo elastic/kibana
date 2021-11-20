@@ -1,100 +1,77 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import moment from 'moment';
-import uuid from 'uuid';
 
-import * as i18n from './translations';
 import {
-  BuilderEntry,
-  CreateExceptionListItemBuilderSchema,
-  ExceptionsBuilderExceptionItem,
-} from './types';
-import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
-import { OperatorOption } from '../autocomplete/types';
-import {
+  comment,
+  osType,
   CommentsArray,
   Comment,
   CreateComment,
   Entry,
-  ExceptionListItemSchema,
   NamespaceType,
-  OperatorTypeEnum,
-  CreateExceptionListItemSchema,
-  comment,
-  entry,
-  entriesNested,
-  createExceptionListItemSchema,
-  exceptionListItemSchema,
-  UpdateExceptionListItemSchema,
   EntryNested,
   OsTypeArray,
-} from '../../../shared_imports';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { validate } from '../../../../common/validate';
+  ExceptionListType,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import {
+  getOperatorType,
+  getNewExceptionItem,
+  addIdToEntries,
+  ExceptionsBuilderExceptionItem,
+} from '@kbn/securitysolution-list-utils';
+import type { DataViewBase } from '@kbn/es-query';
+import * as i18n from './translations';
+import { AlertData, Flattened } from './types';
+
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
+import exceptionableLinuxFields from './exceptionable_linux_fields.json';
+import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
+import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
+import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
 
-/**
- * Returns the operator type, may not need this if using io-ts types
- *
- * @param item a single ExceptionItem entry
- */
-export const getOperatorType = (item: BuilderEntry): OperatorTypeEnum => {
-  switch (item.type) {
-    case 'match':
-      return OperatorTypeEnum.MATCH;
-    case 'match_any':
-      return OperatorTypeEnum.MATCH_ANY;
-    case 'list':
-      return OperatorTypeEnum.LIST;
+export const filterIndexPatterns = (
+  patterns: DataViewBase,
+  type: ExceptionListType,
+  osTypes?: OsTypeArray
+): DataViewBase => {
+  switch (type) {
+    case 'endpoint':
+      const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
+        ? (name: string) =>
+            exceptionableLinuxFields.includes(name) || exceptionableEndpointFields.includes(name)
+        : (name: string) =>
+            exceptionableWindowsMacFields.includes(name) ||
+            exceptionableEndpointFields.includes(name);
+
+      return {
+        ...patterns,
+        fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
+      };
+    case 'endpoint_events':
+      return {
+        ...patterns,
+        fields: patterns.fields.filter(({ name }) =>
+          exceptionableEndpointEventFields.includes(name)
+        ),
+      };
     default:
-      return OperatorTypeEnum.EXISTS;
-  }
-};
-
-/**
- * Determines operator selection (is/is not/is one of, etc.)
- * Default operator is "is"
- *
- * @param item a single ExceptionItem entry
- */
-export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption => {
-  if (item.type === 'nested') {
-    return isOperator;
-  } else {
-    const operatorType = getOperatorType(item);
-    const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
-      return item.operator === operatorOption.operator && operatorType === operatorOption.type;
-    });
-
-    return foundOperator ?? isOperator;
-  }
-};
-
-/**
- * Returns the fields corresponding value for an entry
- *
- * @param item a single ExceptionItem entry
- */
-export const getEntryValue = (item: BuilderEntry): string | string[] | undefined => {
-  switch (item.type) {
-    case OperatorTypeEnum.MATCH:
-    case OperatorTypeEnum.MATCH_ANY:
-      return item.value;
-    case OperatorTypeEnum.EXISTS:
-      return undefined;
-    case OperatorTypeEnum.LIST:
-      return item.list.id;
-    default:
-      return undefined;
+      return patterns;
   }
 };
 
@@ -133,70 +110,6 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
       />
     ),
   }));
-
-export const getNewExceptionItem = ({
-  listId,
-  namespaceType,
-  ruleName,
-}: {
-  listId: string;
-  namespaceType: NamespaceType;
-  ruleName: string;
-}): CreateExceptionListItemBuilderSchema => {
-  return {
-    comments: [],
-    description: `${ruleName} - exception list item`,
-    entries: [
-      {
-        field: '',
-        operator: 'included',
-        type: 'match',
-        value: '',
-      },
-    ],
-    item_id: undefined,
-    list_id: listId,
-    meta: {
-      temporaryUuid: uuid.v4(),
-    },
-    name: `${ruleName} - exception list item`,
-    namespace_type: namespaceType,
-    tags: [],
-    type: 'simple',
-  };
-};
-
-export const filterExceptionItems = (
-  exceptions: ExceptionsBuilderExceptionItem[]
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
-    (acc, exception) => {
-      const entries = exception.entries.filter((t) => {
-        const [validatedEntry] = validate(t, entry);
-        const [validatedNestedEntry] = validate(t, entriesNested);
-
-        if (validatedEntry != null || validatedNestedEntry != null) {
-          return true;
-        }
-
-        return false;
-      });
-
-      const item = { ...exception, entries };
-
-      if (exceptionListItemSchema.is(item)) {
-        return [...acc, item];
-      } else if (createExceptionListItemSchema.is(item)) {
-        const { meta, ...rest } = item;
-        const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
-        return [...acc, itemSansMetaId];
-      } else {
-        return acc;
-      }
-    },
-    []
-  );
-};
 
 export const formatExceptionItemForUpdate = (
   exceptionItem: ExceptionListItemSchema
@@ -263,6 +176,16 @@ export const enrichNewExceptionItemsWithComments = (
   });
 };
 
+export const buildGetAlertByIdQuery = (id: string | undefined) => ({
+  query: {
+    match: {
+      _id: {
+        query: id || '',
+      },
+    },
+  },
+});
+
 /**
  * Adds new and existing comments to exceptionItem
  * @param exceptionItem existing ExceptionItem
@@ -308,6 +231,20 @@ export const enrichExceptionItemsWithOS = (
       os_types: osTypes,
     };
   });
+};
+
+export const retrieveAlertOsTypes = (alertData?: AlertData): OsTypeArray => {
+  const osDefaults: OsTypeArray = ['windows', 'macos'];
+  if (alertData != null) {
+    const os =
+      alertData?.agent?.type === 'endpoint'
+        ? alertData.host?.os?.name?.toLowerCase()
+        : alertData.host?.os?.family;
+    if (os != null) {
+      return osType.is(os) ? [os] : osDefaults;
+    }
+  }
+  return osDefaults;
 };
 
 /**
@@ -357,61 +294,187 @@ export const entryHasListType = (
  * Returns the value for `file.Ext.code_signature` which
  * can be an object or array of objects
  */
-export const getCodeSignatureValue = (
-  alertData: Ecs
+export const getFileCodeSignature = (
+  alertData: Flattened<Ecs>
 ): Array<{ subjectName: string; trusted: string }> => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
 
-  // Pre 7.10 file.Ext.code_signature was mistakenly populated as
-  // a single object with subject_name and trusted.
+  return getCodeSignatureValue(codeSignature);
+};
+
+/**
+ * Returns the value for `process.Ext.code_signature` which
+ * can be an object or array of objects
+ */
+export const getProcessCodeSignature = (
+  alertData: Flattened<Ecs>
+): Array<{ subjectName: string; trusted: string }> => {
+  const { process } = alertData;
+  const codeSignature = process && process.Ext && process.Ext.code_signature;
+  return getCodeSignatureValue(codeSignature);
+};
+
+/**
+ * Pre 7.10 `Ext.code_signature` fields were mistakenly populated as
+ * a single object with subject_name and trusted.
+ */
+export const getCodeSignatureValue = (
+  codeSignature: Flattened<CodeSignature> | Flattened<CodeSignature[]> | undefined
+): Array<{ subjectName: string; trusted: string }> => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
-    return codeSignature.map((signature) => ({
-      subjectName: (signature.subject_name && signature.subject_name[0]) ?? '',
-      trusted: (signature.trusted && signature.trusted[0]) ?? '',
-    }));
+    return codeSignature.map((signature) => {
+      return {
+        subjectName: signature?.subject_name ?? '',
+        trusted: signature?.trusted?.toString() ?? '',
+      };
+    });
   } else {
-    const signature: CodeSignature | undefined = !Array.isArray(codeSignature)
+    const signature: Flattened<CodeSignature> | undefined = !Array.isArray(codeSignature)
       ? codeSignature
       : undefined;
-    const subjectName: string | undefined =
-      signature && signature.subject_name && signature.subject_name[0];
-    const trusted: string | undefined = signature && signature.trusted && signature.trusted[0];
 
     return [
       {
-        subjectName: subjectName ?? '',
-        trusted: trusted ?? '',
+        subjectName: signature?.subject_name ?? '',
+        trusted: signature?.trusted ?? '',
       },
     ];
   }
 };
 
+// helper type to filter empty-valued exception entries
+interface ExceptionEntry {
+  value?: string;
+  entries?: ExceptionEntry[];
+}
+
+/**
+ * Takes an array of Entries and filter out the ones with empty values.
+ * It will also filter out empty values for nested entries.
+ */
+function filterEmptyExceptionEntries<T extends ExceptionEntry>(entries: T[]): T[] {
+  const finalEntries: T[] = [];
+  for (const entry of entries) {
+    if (entry.entries !== undefined) {
+      entry.entries = entry.entries.filter((el) => el.value !== undefined && el.value.length > 0);
+      finalEntries.push(entry);
+    } else if (entry.value !== undefined && entry.value.length > 0) {
+      finalEntries.push(entry);
+    }
+  }
+  return finalEntries;
+}
+
 /**
  * Returns the default values from the alert data to autofill new endpoint exceptions
  */
-export const getPrepopulatedItem = ({
+export const getPrepopulatedEndpointException = ({
   listId,
   ruleName,
   codeSignature,
-  filePath,
-  sha256Hash,
   eventCode,
   listNamespace = 'agnostic',
+  alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
   ruleName: string;
   codeSignature: { subjectName: string; trusted: string };
-  filePath: string;
-  sha256Hash: string;
   eventCode: string;
+  alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
+  const { file, host } = alertEcsData;
+  const filePath = file?.path ?? '';
+  const sha256Hash = file?.hash?.sha256 ?? '';
+  const isLinux = host?.os?.name === 'Linux';
+
+  const commonFields: Array<{
+    field: string;
+    operator: 'excluded' | 'included';
+    type: 'match';
+    value: string;
+  }> = [
+    {
+      field: isLinux ? 'file.path' : 'file.path.caseless',
+      operator: 'included',
+      type: 'match',
+      value: filePath ?? '',
+    },
+    {
+      field: 'file.hash.sha256',
+      operator: 'included',
+      type: 'match',
+      value: sha256Hash ?? '',
+    },
+    {
+      field: 'event.code',
+      operator: 'included',
+      type: 'match',
+      value: eventCode ?? '',
+    },
+  ];
+  const entriesToAdd = () => {
+    if (isLinux) {
+      return addIdToEntries(commonFields);
+    } else {
+      return addIdToEntries([
+        {
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: codeSignature != null ? codeSignature.subjectName : '',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: codeSignature != null ? codeSignature.trusted : '',
+            },
+          ],
+        },
+        ...commonFields,
+      ]);
+    }
+  };
+
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
-    entries: [
+    entries: entriesToAdd(),
+  };
+};
+
+/**
+ * Returns the default values from the alert data to autofill new endpoint exceptions
+ */
+export const getPrepopulatedRansomwareException = ({
+  listId,
+  ruleName,
+  codeSignature,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  codeSignature: { subjectName: string; trusted: string };
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process, Ransomware } = alertEcsData;
+  const sha256Hash = process?.hash?.sha256 ?? '';
+  const executable = process?.executable ?? '';
+  const ransomwareFeature = Ransomware?.feature ?? '';
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries([
       {
-        field: 'file.Ext.code_signature',
+        field: 'process.Ext.code_signature',
         type: 'nested',
         entries: [
           {
@@ -429,16 +492,22 @@ export const getPrepopulatedItem = ({
         ],
       },
       {
-        field: 'file.path.caseless',
+        field: 'process.executable',
         operator: 'included',
         type: 'match',
-        value: filePath ?? '',
+        value: executable ?? '',
       },
       {
-        field: 'file.hash.sha256',
+        field: 'process.hash.sha256',
         operator: 'included',
         type: 'match',
         value: sha256Hash ?? '',
+      },
+      {
+        field: 'Ransomware.feature',
+        operator: 'included',
+        type: 'match',
+        value: ransomwareFeature ?? '',
       },
       {
         field: 'event.code',
@@ -446,7 +515,235 @@ export const getPrepopulatedItem = ({
         type: 'match',
         value: eventCode ?? '',
       },
-    ],
+    ]),
+  };
+};
+
+export const getPrepopulatedMemorySignatureException = ({
+  listId,
+  ruleName,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process } = alertEcsData;
+  const entries = filterEmptyExceptionEntries([
+    {
+      field: 'Memory_protection.feature',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.Memory_protection?.feature ?? '',
+    },
+    {
+      field: 'process.executable.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.executable ?? '',
+    },
+    {
+      field: 'process.name.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.name ?? '',
+    },
+    {
+      field: 'process.hash.sha256',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.hash?.sha256 ?? '',
+    },
+  ]);
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries(entries),
+  };
+};
+export const getPrepopulatedMemoryShellcodeException = ({
+  listId,
+  ruleName,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process } = alertEcsData;
+  const entries = filterEmptyExceptionEntries([
+    {
+      field: 'Memory_protection.feature',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.Memory_protection?.feature ?? '',
+    },
+    {
+      field: 'Memory_protection.self_injection',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: String(alertEcsData.Memory_protection?.self_injection) ?? '',
+    },
+    {
+      field: 'process.executable.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.executable ?? '',
+    },
+    {
+      field: 'process.name.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.name ?? '',
+    },
+    {
+      field: 'process.Ext.token.integrity_level_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.Ext?.token?.integrity_level_name ?? '',
+    },
+  ]);
+
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries(entries),
+  };
+};
+
+export const getPrepopulatedBehaviorException = ({
+  listId,
+  ruleName,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process } = alertEcsData;
+  const entries = filterEmptyExceptionEntries([
+    {
+      field: 'rule.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.rule?.id ?? '',
+    },
+    {
+      field: 'process.executable.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.executable ?? '',
+    },
+    {
+      field: 'process.command_line',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.command_line ?? '',
+    },
+    {
+      field: 'process.parent.executable',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.parent?.executable ?? '',
+    },
+    {
+      field: 'process.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.code_signature?.subject_name ?? '',
+    },
+    {
+      field: 'file.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.path ?? '',
+    },
+    {
+      field: 'file.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.name ?? '',
+    },
+    {
+      field: 'source.ip',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.source?.ip ?? '',
+    },
+    {
+      field: 'destination.ip',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.destination?.ip ?? '',
+    },
+    {
+      field: 'registry.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.path ?? '',
+    },
+    {
+      field: 'registry.value',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.value ?? '',
+    },
+    {
+      field: 'registry.data.strings',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.data?.strings ?? '',
+    },
+    {
+      field: 'dll.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.path ?? '',
+    },
+    {
+      field: 'dll.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.code_signature?.subject_name ?? '',
+    },
+    {
+      field: 'dll.pe.original_file_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.pe?.original_file_name ?? '',
+    },
+    {
+      field: 'dns.question.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.name ?? '',
+    },
+    {
+      field: 'dns.question.type',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.type ?? '',
+    },
+    {
+      field: 'user.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.user?.id ?? '',
+    },
+  ]);
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries(entries),
   };
 };
 
@@ -455,7 +752,7 @@ export const getPrepopulatedItem = ({
  */
 export const entryHasNonEcsType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  indexPatterns: IIndexPattern
+  indexPatterns: DataViewBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
     return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
@@ -486,18 +783,59 @@ export const entryHasNonEcsType = (
 export const defaultEndpointExceptionItems = (
   listId: string,
   ruleName: string,
-  alertEcsData: Ecs
+  alertEcsData: Flattened<Ecs>
 ): ExceptionsBuilderExceptionItem[] => {
-  const { file, event: alertEvent } = alertEcsData;
+  const { event: alertEvent } = alertEcsData;
+  const eventCode = alertEvent?.code ?? '';
 
-  return getCodeSignatureValue(alertEcsData).map((codeSignature) =>
-    getPrepopulatedItem({
-      listId,
-      ruleName,
-      filePath: file && file.path ? file.path[0] : '',
-      sha256Hash: file && file.hash && file.hash.sha256 ? file.hash.sha256[0] : '',
-      eventCode: alertEvent && alertEvent.code ? alertEvent.code[0] : '',
-      codeSignature,
-    })
-  );
+  switch (eventCode) {
+    case 'behavior':
+      return [
+        getPrepopulatedBehaviorException({
+          listId,
+          ruleName,
+          eventCode,
+          alertEcsData,
+        }),
+      ];
+    case 'memory_signature':
+      return [
+        getPrepopulatedMemorySignatureException({
+          listId,
+          ruleName,
+          eventCode,
+          alertEcsData,
+        }),
+      ];
+    case 'shellcode_thread':
+      return [
+        getPrepopulatedMemoryShellcodeException({
+          listId,
+          ruleName,
+          eventCode,
+          alertEcsData,
+        }),
+      ];
+    case 'ransomware':
+      return getProcessCodeSignature(alertEcsData).map((codeSignature) =>
+        getPrepopulatedRansomwareException({
+          listId,
+          ruleName,
+          eventCode,
+          codeSignature,
+          alertEcsData,
+        })
+      );
+    default:
+      // By default return the standard prepopulated Endpoint Exception fields
+      return getFileCodeSignature(alertEcsData).map((codeSignature) =>
+        getPrepopulatedEndpointException({
+          listId,
+          ruleName,
+          eventCode,
+          codeSignature,
+          alertEcsData,
+        })
+      );
+  }
 };

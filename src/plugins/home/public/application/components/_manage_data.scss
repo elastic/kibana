@@ -1,0 +1,5 @@
+.homDataManage__item {
+  @include euiBreakpoint('l', 'xl') {
+    max-width: calc(33.33% - #{$euiSizeM * 2});
+  }
+}

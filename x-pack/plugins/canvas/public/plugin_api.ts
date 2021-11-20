@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
@@ -20,7 +22,9 @@ export interface CanvasApi {
   addArgumentUIs: AddToRegistry<any>;
   addDatasourceUIs: AddToRegistry<any>;
   addElements: AddToRegistry<ElementFactory>;
-  addFunctions: AddSpecsToRegistry<() => AnyExpressionFunctionDefinition>;
+  addFunctions: AddSpecsToRegistry<
+    (() => AnyExpressionFunctionDefinition) | AnyExpressionFunctionDefinition
+  >;
   addModelUIs: AddToRegistry<any>;
   addRenderers: AddSpecsToRegistry<AnyRendererFactory>;
   addTagUIs: AddToRegistry<any>;
@@ -41,9 +45,10 @@ export interface SetupRegistries extends Record<string, any[]> {
   transitions: any[];
 }
 
-export function getPluginApi(
-  expressionsPluginSetup: ExpressionsSetup
-): { api: CanvasApi; registries: SetupRegistries } {
+export function getPluginApi(expressionsPluginSetup: ExpressionsSetup): {
+  api: CanvasApi;
+  registries: SetupRegistries;
+} {
   const registries: SetupRegistries = {
     elements: [],
     transformUIs: [],
@@ -82,7 +87,7 @@ export function getPluginApi(
         // There is an issue of the canvas render definition not matching the expression render definition
         // due to our handlers needing additional methods.  For now, we are going to cast to get to the proper
         // type, but we should work with AppArch to figure out how the Handlers can be genericized
-        expressionsPluginSetup.registerRenderer((r as unknown) as AnyExpressionRenderDefinition);
+        expressionsPluginSetup.registerRenderer(r as unknown as AnyExpressionRenderDefinition);
       });
     },
 

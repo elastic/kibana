@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
-import { UiSettingsType, StringValidation } from '../../../../../../core/public';
+import { UiSettingsType } from '../../../../../../core/public';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -29,6 +29,7 @@ const defaults = {
 const exampleValues = {
   array: ['example_value'],
   boolean: false,
+  color: '#FF00CC',
   image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=',
   json: { foo: 'bar2' },
   markdown: 'Hello World',
@@ -73,12 +74,6 @@ const settings: Record<string, FieldSetting> = {
     defVal: null,
     isCustom: false,
     isOverridden: false,
-    validation: {
-      maxSize: {
-        length: 1000,
-        description: 'Description for 1 kB',
-      },
-    },
     ...defaults,
   },
   json: {
@@ -153,12 +148,20 @@ const settings: Record<string, FieldSetting> = {
     displayName: 'String test validation setting',
     description: 'Description for String test validation setting',
     type: 'string',
-    validation: {
-      regex: new RegExp('^foo'),
-      message: 'must start with "foo"',
-    },
     value: undefined,
     defVal: 'foo-default',
+    isCustom: false,
+    isOverridden: false,
+    ...defaults,
+  },
+  color: {
+    name: 'color:test:setting',
+    ariaName: 'color test setting',
+    displayName: 'Color test setting',
+    description: 'Description for Color test setting',
+    type: 'color',
+    value: undefined,
+    defVal: null,
     isCustom: false,
     isOverridden: false,
     ...defaults,
@@ -174,10 +177,7 @@ const userValues = {
   select: 'banana',
   string: 'foo',
   stringWithValidation: 'fooUserValue',
-};
-
-const invalidUserValues = {
-  stringWithValidation: 'invalidUserValue',
+  color: '#FACF0C',
 };
 
 const handleChange = jest.fn();
@@ -187,6 +187,8 @@ const getFieldSettingValue = (wrapper: ReactWrapper, name: string, type: string)
   const field = findTestSubject(wrapper, `advancedSetting-editField-${name}`);
   if (type === 'boolean') {
     return field.props()['aria-checked'];
+  } else if (type === 'color') {
+    return field.props().color;
   } else {
     return field.props().value;
   }
@@ -351,7 +353,7 @@ describe('Field', () => {
         (component.instance() as Field).getImageAsBase64 = ({}: Blob) => Promise.resolve('');
 
         it('should be able to change value and cancel', async () => {
-          (component.instance() as Field).onImageChange(([userValue] as unknown) as FileList);
+          (component.instance() as Field).onImageChange([userValue] as unknown as FileList);
           expect(handleChange).toBeCalled();
           await wrapper.setProps({
             unsavedChanges: {
@@ -375,9 +377,9 @@ describe('Field', () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-changeImage-${setting.name}`).simulate('click');
           const newUserValue = `${userValue}=`;
-          await (component.instance() as Field).onImageChange(([
+          await (component.instance() as Field).onImageChange([
             newUserValue,
-          ] as unknown) as FileList);
+          ] as unknown as FileList);
           expect(handleChange).toBeCalled();
         });
 
@@ -423,30 +425,42 @@ describe('Field', () => {
           });
         }
       });
+    } else if (type === 'color') {
+      describe(`for changing ${type} setting`, () => {
+        const { wrapper, component } = setup();
+        const userValue = userValues[type];
+
+        it('should be able to change value', async () => {
+          await (component.instance() as Field).onFieldChange(userValue);
+          const updated = wrapper.update();
+          expect(handleChange).toBeCalledWith(setting.name, { value: userValue });
+          updated.setProps({ unsavedChanges: { value: userValue } });
+          const currentValue = wrapper.find('EuiColorPicker').prop('color');
+          expect(currentValue).toEqual(userValue);
+        });
+
+        it('should be able to reset to default value', async () => {
+          await wrapper.setProps({
+            unsavedChanges: {},
+            setting: { ...setting, value: userValue },
+          });
+          const updated = wrapper.update();
+          findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
+          const expectedEditableValue = getEditableValue(setting.type, setting.defVal);
+          expect(handleChange).toBeCalledWith(setting.name, {
+            value: expectedEditableValue,
+          });
+          updated.setProps({ unsavedChanges: { value: expectedEditableValue } });
+          const currentValue = wrapper.find('EuiColorPicker').prop('color');
+          expect(currentValue).toEqual(expectedEditableValue);
+        });
+      });
     } else {
       describe(`for changing ${type} setting`, () => {
         const { wrapper, component } = setup();
         // @ts-ignore
         const userValue = userValues[type];
         const fieldUserValue = type === 'array' ? userValue.join(', ') : userValue;
-
-        if (setting.validation) {
-          // @ts-ignore
-          const invalidUserValue = invalidUserValues[type];
-          it('should display an error when validation fails', async () => {
-            await (component.instance() as Field).onFieldChange(invalidUserValue);
-            const expectedUnsavedChanges = {
-              value: invalidUserValue,
-              error: (setting.validation as StringValidation).message,
-              isInvalid: true,
-            };
-            expect(handleChange).toBeCalledWith(setting.name, expectedUnsavedChanges);
-            wrapper.setProps({ unsavedChanges: expectedUnsavedChanges });
-            const updated = wrapper.update();
-            const errorMessage = updated.find('.euiFormErrorText').text();
-            expect(errorMessage).toEqual(expectedUnsavedChanges.error);
-          });
-        }
 
         it('should be able to change value', async () => {
           await (component.instance() as Field).onFieldChange(fieldUserValue);

@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UiActionsService } from './ui_actions_service';
-import { Action, ActionInternal, createAction } from '../actions';
+import { Action, ActionDefinition, ActionInternal, createAction } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { TriggerRegistry, ActionRegistry } from '../types';
 import { Trigger } from '../triggers';
+import { OverlayStart } from 'kibana/public';
 
 const FOO_TRIGGER = 'FOO_TRIGGER';
 const BAR_TRIGGER = 'BAR_TRIGGER';
@@ -152,8 +153,8 @@ describe('UiActionsService', () => {
       const list2 = service.getTriggerActions(FOO_TRIGGER);
 
       expect(list2).toHaveLength(2);
-      expect(!!list2.find(({ id }: any) => id === 'action1')).toBe(true);
-      expect(!!list2.find(({ id }: any) => id === 'action2')).toBe(true);
+      expect(!!list2.find(({ id }: { id: string }) => id === 'action1')).toBe(true);
+      expect(!!list2.find(({ id }: { id: string }) => id === 'action2')).toBe(true);
     });
   });
 
@@ -161,7 +162,7 @@ describe('UiActionsService', () => {
     test('can register and get actions', async () => {
       const actions: ActionRegistry = new Map();
       const service = new UiActionsService({ actions });
-      const helloWorldAction = createHelloWorldAction({} as any);
+      const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
       const length = actions.size;
 
       service.registerAction(helloWorldAction);
@@ -172,7 +173,7 @@ describe('UiActionsService', () => {
 
     test('getTriggerCompatibleActions returns attached actions', async () => {
       const service = new UiActionsService();
-      const helloWorldAction = createHelloWorldAction({} as any);
+      const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
 
       service.registerAction(helloWorldAction);
 
@@ -231,7 +232,7 @@ describe('UiActionsService', () => {
       );
     });
 
-    test('returns empty list if trigger not attached to any action', async () => {
+    test('returns empty list if trigger not attached to an action', async () => {
       const service = new UiActionsService();
       const testTrigger: Trigger = {
         id: '123',
@@ -375,7 +376,7 @@ describe('UiActionsService', () => {
       service.registerAction({
         id: ACTION_HELLO_WORLD,
         order: 13,
-      } as any);
+      } as unknown as ActionDefinition);
 
       expect(actions.get(ACTION_HELLO_WORLD)).toMatchObject({
         id: ACTION_HELLO_WORLD,
@@ -392,7 +393,7 @@ describe('UiActionsService', () => {
       const action = {
         id: ACTION_HELLO_WORLD,
         order: 25,
-      } as any;
+      } as unknown as ActionDefinition;
 
       service.registerTrigger(trigger);
       service.addTriggerAction(MY_TRIGGER, action);
@@ -412,7 +413,7 @@ describe('UiActionsService', () => {
       const action = {
         id: ACTION_HELLO_WORLD,
         order: 25,
-      } as any;
+      } as unknown as ActionDefinition;
 
       service.registerTrigger(trigger);
       service.registerAction(action);
@@ -429,7 +430,7 @@ describe('UiActionsService', () => {
       const action = {
         id: ACTION_HELLO_WORLD,
         order: 25,
-      } as any;
+      } as unknown as ActionDefinition;
 
       service.registerAction(action);
       expect(() => service.detachAction('i do not exist', ACTION_HELLO_WORLD)).toThrowError(
@@ -443,7 +444,7 @@ describe('UiActionsService', () => {
       const action = {
         id: ACTION_HELLO_WORLD,
         order: 25,
-      } as any;
+      } as unknown as ActionDefinition;
 
       service.registerAction(action);
       expect(() => service.addTriggerAction('i do not exist', action)).toThrowError(
@@ -457,7 +458,7 @@ describe('UiActionsService', () => {
       const action = {
         id: ACTION_HELLO_WORLD,
         order: 25,
-      } as any;
+      } as unknown as ActionDefinition;
 
       service.registerAction(action);
       expect(() => service.registerAction(action)).toThrowError(
@@ -468,7 +469,7 @@ describe('UiActionsService', () => {
     test('cannot register another trigger with the same ID', async () => {
       const service = new UiActionsService();
 
-      const trigger = { id: 'MY-TRIGGER' } as any;
+      const trigger = { id: 'MY-TRIGGER' } as unknown as Trigger;
 
       service.registerTrigger(trigger);
       expect(() => service.registerTrigger(trigger)).toThrowError(

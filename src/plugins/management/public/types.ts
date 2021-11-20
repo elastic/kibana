@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import { ScopedHistory, Capabilities } from 'kibana/public';
+import type { LocatorPublic } from 'src/plugins/share/common';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
-import { ChromeBreadcrumb } from '../../../core/public/';
+import { ChromeBreadcrumb, CoreTheme } from '../../../core/public/';
+import type { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
+  locator: LocatorPublic<ManagementAppLocatorParams>;
 }
 
 export interface DefinedSections {
@@ -60,6 +64,7 @@ export interface ManagementAppMountParams {
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
+  theme$: Observable<CoreTheme>;
 }
 
 export interface CreateManagementItemArgs {
@@ -69,4 +74,6 @@ export interface CreateManagementItemArgs {
   order?: number;
   euiIconType?: string; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`
+  capabilitiesId?: string; // overrides app id
+  redirectFrom?: string; // redirects from an old app id to the current app id
 }

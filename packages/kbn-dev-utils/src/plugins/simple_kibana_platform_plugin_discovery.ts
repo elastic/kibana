@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
 
 import globby from 'globby';
+import normalize from 'normalize-path';
 
 import { parseKibanaPlatformPlugin } from './parse_kibana_platform_plugin';
 
@@ -32,7 +33,7 @@ export function simpleKibanaPlatformPluginDiscovery(scanDirs: string[], pluginPa
       ),
       ...pluginPaths.map((path) => Path.resolve(path, `kibana.json`)),
     ])
-  );
+  ).map((path) => normalize(path));
 
   const manifestPaths = globby.sync(patterns, { absolute: true }).map((path) =>
     // absolute paths returned from globby are using normalize or

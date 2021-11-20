@@ -1,25 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
-import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../store/inputs/constants';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
 import { TopNOption } from './helpers';
 import * as i18n from './translations';
+import { getIndicesSelector, IndicesSelector } from './selectors';
+import { State } from '../../store';
+import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const TopNContainer = styled.div`
-  width: 600px;
+  min-width: 600px;
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
@@ -45,13 +52,14 @@ const TopNContent = styled.div`
 export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
   defaultView: TimelineEventsType;
-  field: string;
+  field: AlertsStackByField;
   filters: Filter[];
-  indexPattern: IIndexPattern;
-  indexNames: string[];
+  indexPattern: DataViewBase;
   options: TopNOption[];
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
+  showLegend?: boolean;
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -66,9 +74,10 @@ const TopNComponent: React.FC<Props> = ({
   field,
   from,
   indexPattern,
-  indexNames,
   options,
+  paddingSize,
   query,
+  showLegend,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   timelineId,
@@ -76,9 +85,23 @@ const TopNComponent: React.FC<Props> = ({
   toggleTopN,
 }) => {
   const [view, setView] = useState<TimelineEventsType>(defaultView);
-  const onViewSelected = useCallback((value: string) => setView(value as TimelineEventsType), [
-    setView,
-  ]);
+  const onViewSelected = useCallback(
+    (value: string) => setView(value as TimelineEventsType),
+    [setView]
+  );
+  const indicesSelector = useMemo(getIndicesSelector, []);
+  const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
+    (state) =>
+      indicesSelector(
+        state,
+        timelineId != null
+          ? defaultView === 'alert'
+            ? SourcererScopeName.detections
+            : SourcererScopeName.timeline
+          : SourcererScopeName.default
+      ),
+    deepEqual
+  );
 
   useEffect(() => {
     setView(defaultView);
@@ -115,26 +138,29 @@ const TopNComponent: React.FC<Props> = ({
             from={from}
             headerChildren={headerChildren}
             indexPattern={indexPattern}
-            indexNames={indexNames}
+            indexNames={view === 'raw' ? rawIndices : allIndices}
             onlyField={field}
+            paddingSize={paddingSize}
             query={query}
+            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
+            toggleTopN={toggleTopN}
             timelineId={timelineId}
             to={to}
           />
         ) : (
           <SignalsByCategory
+            combinedQueries={combinedQueries}
             filters={filters}
-            from={from}
             headerChildren={headerChildren}
             onlyField={field}
+            paddingSize={paddingSize}
             query={query}
+            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            setQuery={setQuery}
             timelineId={timelineId}
-            to={to}
           />
         )}
       </TopNContent>

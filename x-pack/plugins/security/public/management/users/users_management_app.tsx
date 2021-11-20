@@ -1,27 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { History } from 'history';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom';
-import { History } from 'history';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Redirect, Route, Router, Switch } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { StartServicesAccessor, CoreStart } from '../../../../../../src/core/public';
-import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
+import type { CoreStart, StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
+
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { AuthenticationServiceSetup } from '../../authentication';
-import { PluginStartDependencies } from '../../plugin';
+import type { AuthenticationServiceSetup } from '../../authentication';
+import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
-  BreadcrumbsProvider,
-  BreadcrumbsChangeHandler,
   Breadcrumb,
-  getDocTitle,
+  BreadcrumbsProvider,
+  createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
+import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -36,10 +41,13 @@ interface EditUserParams {
 export const usersManagementApp = Object.freeze({
   id: 'users',
   create({ authc, getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.usersTitle', {
+      defaultMessage: 'Users',
+    });
     return {
       id: this.id,
       order: 10,
-      title: i18n.translate('xpack.security.management.usersTitle', { defaultMessage: 'Users' }),
+      title,
       async mount({ element, setBreadcrumbs, history }) {
         const [
           [coreStart],
@@ -48,7 +56,7 @@ export const usersManagementApp = Object.freeze({
           { UserAPIClient },
           { RolesAPIClient },
         ] = await Promise.all([
-          getStartServices(),
+          getStartServices(), // TODO: remove this and write test.
           import('./users_grid'),
           import('./edit_user'),
           import('./user_api_client'),
@@ -60,10 +68,7 @@ export const usersManagementApp = Object.freeze({
             services={coreStart}
             history={history}
             authc={authc}
-            onChange={(breadcrumbs) => {
-              setBreadcrumbs(breadcrumbs);
-              coreStart.chrome.docTitle.change(getDocTitle(breadcrumbs));
-            }}
+            onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
           >
             <Breadcrumb
               text={i18n.translate('xpack.security.users.breadcrumb', {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -9,59 +10,13 @@ import { isObject } from 'lodash/fp';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { isMlRule } from '../../../machine_learning/helpers';
-import { isThresholdRule } from '../../utils';
 import {
   actions,
-  anomaly_threshold,
-  description,
-  enabled,
-  event_category_override,
-  false_positives,
   from,
-  id,
-  immutable,
-  index,
-  interval,
-  rule_id,
-  language,
-  name,
-  output_index,
-  max_signals,
   machine_learning_job_id,
-  query,
-  references,
-  severity,
-  updated_by,
-  tags,
-  to,
   risk_score,
-  created_at,
-  created_by,
-  updated_at,
-  saved_id,
-  timeline_id,
-  timeline_title,
-  type,
-  threats,
-  threshold,
-  throttle,
-  job_status,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
-  version,
-  filters,
-  meta,
-  note,
-  building_block_type,
-  license,
-  rule_name_override,
-  timestamp_override,
-} from '../common/schemas';
-import {
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
   threat_index,
   concurrent_searches,
   items_per_search,
@@ -69,14 +24,62 @@ import {
   threat_filters,
   threat_mapping,
   threat_language,
-} from '../types/threat_mapping';
+  threat_indicator_path,
+  threats,
+  type,
+  language,
+  severity,
+  throttle,
+  max_signals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { DefaultStringArray, version } from '@kbn/securitysolution-io-ts-types';
 
-import { DefaultListArray } from '../types/lists_default_array';
+import { DefaultListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { isMlRule } from '../../../machine_learning/helpers';
+import { isThresholdRule } from '../../utils';
 import {
-  DefaultStringArray,
-  DefaultRiskScoreMappingArray,
-  DefaultSeverityMappingArray,
-} from '../types';
+  anomaly_threshold,
+  description,
+  enabled,
+  event_category_override,
+  false_positives,
+  id,
+  immutable,
+  index,
+  interval,
+  rule_id,
+  name,
+  output_index,
+  query,
+  references,
+  updated_by,
+  tags,
+  to,
+  created_at,
+  created_by,
+  updated_at,
+  saved_id,
+  timeline_id,
+  timeline_title,
+  threshold,
+  ruleExecutionStatus,
+  status_date,
+  last_success_at,
+  last_success_message,
+  last_failure_at,
+  last_failure_message,
+  filters,
+  meta,
+  outcome,
+  alias_target_id,
+  note,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
+  namespace,
+} from '../common/schemas';
+
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
 /**
@@ -150,6 +153,7 @@ export const dependentRulesSchema = t.partial({
   items_per_search,
   threat_mapping,
   threat_language,
+  threat_indicator_path,
 });
 
 /**
@@ -163,7 +167,7 @@ export const partialRulesSchema = t.partial({
   license,
   throttle,
   rule_name_override,
-  status: job_status,
+  status: ruleExecutionStatus,
   status_date,
   timestamp_override,
   last_success_at,
@@ -172,8 +176,12 @@ export const partialRulesSchema = t.partial({
   last_failure_message,
   filters,
   meta,
+  outcome,
+  alias_target_id,
   index,
+  namespace,
   note,
+  uuid: id, // Move to 'required' post-migration
 });
 
 /**
@@ -285,6 +293,9 @@ export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): 
       t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),
       t.exact(t.partial({ threat_language: dependentRulesSchema.props.threat_language })),
       t.exact(t.partial({ threat_filters: dependentRulesSchema.props.threat_filters })),
+      t.exact(
+        t.partial({ threat_indicator_path: dependentRulesSchema.props.threat_indicator_path })
+      ),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
       t.exact(t.partial({ concurrent_searches: dependentRulesSchema.props.concurrent_searches })),
       t.exact(

@@ -1,19 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Observable, combineLatest, defer, of } from 'rxjs';
+import { concatMap } from 'rxjs/operators';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  case: Array<() => Promise<Case>>;
-  default: () => any;
+  case: Array<() => Observable<Case>>;
+  default?(): Observable<any>;
 }
 
-export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Arguments, unknown> {
+export function switchFn(): ExpressionFunctionDefinition<
+  'switch',
+  unknown,
+  Arguments,
+  Observable<unknown>
+> {
   const { help, args: argHelp } = getFunctionHelp().switch;
 
   return {
@@ -26,30 +34,23 @@ export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Argu
         resolve: false,
         multi: true,
         required: true,
-        help: argHelp.case,
+        help: argHelp.case!,
       },
       default: {
         aliases: ['finally'],
         resolve: false,
-        help: argHelp.default,
+        help: argHelp.default!,
       },
     },
-    fn: async (input, args) => {
-      const cases = args.case || [];
+    fn(input, args) {
+      return combineLatest(args.case.map((item) => defer(() => item()))).pipe(
+        concatMap((items) => {
+          const item = items.find(({ matches }) => matches);
+          const item$ = item && of(item.result);
 
-      for (let i = 0; i < cases.length; i++) {
-        const { matches, result } = await cases[i]();
-
-        if (matches) {
-          return result;
-        }
-      }
-
-      if (typeof args.default !== 'undefined') {
-        return await args.default();
-      }
-
-      return input;
+          return item$ ?? args.default?.() ?? of(input);
+        })
+      );
     },
   };
 }

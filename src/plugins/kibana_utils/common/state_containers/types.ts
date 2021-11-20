@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -132,16 +132,14 @@ export type Reducer<State extends BaseState> = (
  * Utility type for inferring state shape from {@link StateContainer}
  * @public
  */
-export type UnboxState<
-  Container extends StateContainer<any, any>
-> = Container extends StateContainer<infer T, any> ? T : never;
+export type UnboxState<Container extends StateContainer<any, any>> =
+  Container extends StateContainer<infer T, any> ? T : never;
 /**
  * Utility type for inferring transitions type from {@link StateContainer}
  * @public
  */
-export type UnboxTransitions<
-  Container extends StateContainer<any, any>
-> = Container extends StateContainer<any, infer T> ? T : never;
+export type UnboxTransitions<Container extends StateContainer<any, any>> =
+  Container extends StateContainer<any, infer T> ? T : never;
 
 /**
  * @public

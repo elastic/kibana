@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../common/constants';
 
 import {
   getDeprecationLoggingStatus,
@@ -12,11 +14,15 @@ import {
 } from '../lib/es_deprecation_logging_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
+import { DEPRECATION_LOGS_INDEX } from '../../common/constants';
 
-export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) {
+export function registerDeprecationLoggingRoutes({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     {
-      path: '/api/upgrade_assistant/deprecation_logging',
+      path: `${API_BASE_PATH}/deprecation_logging`,
       validate: false,
     },
     versionCheckHandlerWrapper(
@@ -32,8 +38,8 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         try {
           const result = await getDeprecationLoggingStatus(client);
           return response.ok({ body: result });
-        } catch (e) {
-          return response.internalError({ body: e });
+        } catch (error) {
+          return handleEsError({ error, response });
         }
       }
     )
@@ -41,7 +47,7 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
 
   router.put(
     {
-      path: '/api/upgrade_assistant/deprecation_logging',
+      path: `${API_BASE_PATH}/deprecation_logging`,
       validate: {
         body: schema.object({
           isEnabled: schema.boolean(),
@@ -63,8 +69,86 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
           return response.ok({
             body: await setDeprecationLogging(client, isEnabled),
           });
-        } catch (e) {
-          return response.internalError({ body: e });
+        } catch (error) {
+          return handleEsError({ error, response });
+        }
+      }
+    )
+  );
+
+  router.get(
+    {
+      path: `${API_BASE_PATH}/deprecation_logging/count`,
+      validate: {
+        query: schema.object({
+          from: schema.string(),
+        }),
+      },
+    },
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { client },
+          },
+        },
+        request,
+        response
+      ) => {
+        try {
+          const { body: indexExists } = await client.asCurrentUser.indices.exists({
+            index: DEPRECATION_LOGS_INDEX,
+          });
+
+          if (!indexExists) {
+            return response.ok({ body: { count: 0 } });
+          }
+
+          const { body } = await client.asCurrentUser.count({
+            index: DEPRECATION_LOGS_INDEX,
+            body: {
+              query: {
+                range: {
+                  '@timestamp': {
+                    gte: request.query.from,
+                  },
+                },
+              },
+            },
+          });
+
+          return response.ok({ body: { count: body.count } });
+        } catch (error) {
+          return handleEsError({ error, response });
+        }
+      }
+    )
+  );
+
+  router.delete(
+    {
+      path: `${API_BASE_PATH}/deprecation_logging/cache`,
+      validate: false,
+    },
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { client },
+          },
+        },
+        request,
+        response
+      ) => {
+        try {
+          await client.asCurrentUser.transport.request({
+            method: 'DELETE',
+            path: '/_logging/deprecation_cache',
+          });
+
+          return response.ok({ body: 'ok' });
+        } catch (error) {
+          return handleEsError({ error, response });
         }
       }
     )

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
+import { IRouter, Logger, IScopedClusterClient } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -17,12 +18,14 @@ import {
 } from '../lib/translate_timestamp';
 import { loadData } from '../lib/load_data';
 import { SampleDataUsageTracker } from '../usage/usage';
+import { getSavedObjectsClient } from './utils';
+import { getUniqueObjectTypes } from '../lib/utils';
 
 const insertDataIntoIndex = (
   dataIndexConfig: any,
   index: string,
   nowReference: string,
-  context: RequestHandlerContext,
+  esClient: IScopedClusterClient,
   logger: Logger
 ) => {
   function updateTimestamps(doc: any) {
@@ -51,9 +54,11 @@ const insertDataIntoIndex = (
       bulk.push(insertCmd);
       bulk.push(updateTimestamps(doc));
     });
-    const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser('bulk', {
+
+    const { body: resp } = await esClient.asCurrentUser.bulk({
       body: bulk,
     });
+
     if (resp.errors) {
       const errMsg = `sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(
         resp,
@@ -100,7 +105,7 @@ export function createInstallRoute(
 
         // clean up any old installation of dataset
         try {
-          await context.core.elasticsearch.legacy.client.callAsCurrentUser('indices.delete', {
+          await context.core.elasticsearch.client.asCurrentUser.indices.delete({
             index,
           });
         } catch (err) {
@@ -108,17 +113,13 @@ export function createInstallRoute(
         }
 
         try {
-          const createIndexParams = {
+          await context.core.elasticsearch.client.asCurrentUser.indices.create({
             index,
             body: {
               settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
               mappings: { properties: dataIndexConfig.fields },
             },
-          };
-          await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-            'indices.create',
-            createIndexParams
-          );
+          });
         } catch (err) {
           const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
           logger.warn(errMsg);
@@ -130,37 +131,40 @@ export function createInstallRoute(
             dataIndexConfig,
             index,
             nowReference,
-            context,
+            context.core.elasticsearch.client,
             logger
           );
           (counts as any)[index] = count;
         } catch (err) {
           const errMsg = `sample_data install errors while loading data. Error: ${err}`;
-          logger.warn(errMsg);
-          return res.internalError({ body: errMsg });
+          throw new Error(errMsg);
         }
       }
 
-      let createResults;
+      const { getImporter } = context.core.savedObjects;
+      const objectTypes = getUniqueObjectTypes(sampleDataset.savedObjects);
+      const savedObjectsClient = getSavedObjectsClient(context, objectTypes);
+      const importer = getImporter(savedObjectsClient);
+
+      const savedObjects = sampleDataset.savedObjects.map(({ version, ...obj }) => obj);
+      const readStream = Readable.from(savedObjects);
+
       try {
-        createResults = await context.core.savedObjects.client.bulkCreate(
-          sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
-          { overwrite: true }
-        );
+        const { errors = [] } = await importer.import({
+          readStream,
+          overwrite: true,
+          createNewCopies: false,
+        });
+        if (errors.length > 0) {
+          const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
+            errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
+          )}`;
+          logger.warn(errMsg);
+          return res.customError({ body: errMsg, statusCode: 500 });
+        }
       } catch (err) {
-        const errMsg = `bulkCreate failed, error: ${err.message}`;
-        logger.warn(errMsg);
-        return res.internalError({ body: errMsg });
-      }
-      const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {
-        return Boolean(savedObjectCreateResult.error);
-      });
-      if (errors.length > 0) {
-        const errMsg = `sample_data install errors while loading saved objects. Errors: ${errors.join(
-          ','
-        )}`;
-        logger.warn(errMsg);
-        return res.customError({ body: errMsg, statusCode: 403 });
+        const errMsg = `import failed, error: ${err.message}`;
+        throw new Error(errMsg);
       }
       usageTracker.addInstall(params.id);
 

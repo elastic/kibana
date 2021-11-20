@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
+import { ElasticsearchClient } from 'kibana/server';
 import { Logger } from 'src/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
 import {
-  Query,
-  IIndexPattern,
   fromKueryExpression,
   toElasticsearchQuery,
   luceneStringToDsl,
-} from '../../../../../../src/plugins/data/common';
+  IndexPatternBase,
+  Query,
+} from '@kbn/es-query';
 
 export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?
@@ -21,7 +23,7 @@ const MAX_TOP_LEVEL_QUERY_SIZE = 0;
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
 
-export const getEsFormattedQuery = (query: Query, indexPattern?: IIndexPattern) => {
+export const getEsFormattedQuery = (query: Query, indexPattern?: IndexPatternBase) => {
   let esFormattedQuery;
 
   const queryLanguage = query.language;
@@ -38,7 +40,7 @@ export async function getShapesFilters(
   boundaryIndexTitle: string,
   boundaryGeoField: string,
   geoField: string,
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
+  esClient: ElasticsearchClient,
   log: Logger,
   alertId: string,
   boundaryNameField?: string,
@@ -47,7 +49,8 @@ export async function getShapesFilters(
   const filters: Record<string, unknown> = {};
   const shapesIdsNamesMap: Record<string, unknown> = {};
   // Get all shapes in index
-  const boundaryData: SearchResponse<Record<string, unknown>> = await callCluster('search', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { body: boundaryData }: TransportResult<Record<string, any>> = await esClient.search({
     index: boundaryIndexTitle,
     body: {
       size: MAX_SHAPES_QUERY_SIZE,
@@ -55,7 +58,7 @@ export async function getShapesFilters(
     },
   });
 
-  boundaryData.hits.hits.forEach(({ _index, _id }) => {
+  boundaryData.hits.hits.forEach(({ _index, _id }: { _index: string; _id: string }) => {
     filters[_id] = {
       geo_shape: {
         [geoField]: {
@@ -100,14 +103,14 @@ export async function executeEsQueryFactory(
     boundaryNameField?: string;
     indexQuery?: Query;
   },
-  { callCluster }: { callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] },
+  esClient: ElasticsearchClient,
   log: Logger,
   shapesFilters: Record<string, unknown>
 ) {
   return async (
     gteDateTime: Date | null,
     ltDateTime: Date | null
-  ): Promise<SearchResponse<unknown> | undefined> => {
+  ): Promise<estypes.SearchResponse<unknown> | undefined> => {
     let esFormattedQuery;
     if (indexQuery) {
       const gteEpochDateTime = gteDateTime ? new Date(gteDateTime).getTime() : null;
@@ -149,7 +152,14 @@ export async function executeEsQueryFactory(
                           },
                         },
                       ],
-                      docvalue_fields: [entity, dateField, geoField],
+                      docvalue_fields: [
+                        entity,
+                        {
+                          field: dateField,
+                          format: 'strict_date_optional_time',
+                        },
+                        geoField,
+                      ],
                       _source: false,
                     },
                   },
@@ -191,9 +201,9 @@ export async function executeEsQueryFactory(
       },
     };
 
-    let esResult: SearchResponse<unknown> | undefined;
+    let esResult: estypes.SearchResponse<unknown> | undefined;
     try {
-      esResult = await callCluster('search', esQuery);
+      ({ body: esResult } = await esClient.search(esQuery));
     } catch (err) {
       log.warn(`${err.message}`);
     }

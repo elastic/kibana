@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getSuggestions } from './metric_suggestions';
@@ -49,40 +50,40 @@ describe('metric_suggestions', () => {
     };
 
     expect(
-      ([
-        {
-          columns: [dateCol('a')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          columns: [strCol('foo'), strCol('bar')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          layerId: 'l1',
-          isMultiRow: true,
-          columns: [numCol('bar')],
-          changeType: 'unchanged',
-        },
-        {
-          columns: [unknownCol(), numCol('bar')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          columns: [numCol('bar'), numCol('baz')],
-          isMultiRow: false,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-      ] as TableSuggestion[]).map((table) =>
-        expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([])
-      )
+      (
+        [
+          {
+            columns: [dateCol('a')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            columns: [strCol('foo'), strCol('bar')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            layerId: 'l1',
+            isMultiRow: true,
+            columns: [numCol('bar')],
+            changeType: 'unchanged',
+          },
+          {
+            columns: [unknownCol(), numCol('bar')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            columns: [numCol('bar'), numCol('baz')],
+            isMultiRow: false,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([]))
     );
   });
 
@@ -105,6 +106,7 @@ describe('metric_suggestions', () => {
         "state": Object {
           "accessor": "bytes",
           "layerId": "l1",
+          "layerType": "data",
         },
         "title": "Avg bytes",
       }

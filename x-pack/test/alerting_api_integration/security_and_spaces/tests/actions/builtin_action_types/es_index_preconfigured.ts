@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // from: x-pack/test/alerting_api_integration/common/config.ts
@@ -14,15 +15,16 @@ const ES_TEST_INDEX_NAME = 'functional-test-actions-index-preconfigured';
 
 // eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es: Client = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
 
   describe('preconfigured index action', () => {
-    beforeEach(() => clearTestIndex(es));
+    beforeEach(() => esDeleteAllIndices(ES_TEST_INDEX_NAME));
 
     it('should execute successfully when expected for a single body', async () => {
       const { body: result } = await supertest
-        .post(`/api/actions/action/${ACTION_ID}/_execute`)
+        .post(`/api/actions/connector/${ACTION_ID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -36,7 +38,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(items.length).to.eql(1);
 
       // check document sans timestamp
-      const document = items[0]._source;
+      const document: any = items[0]._source;
       const timestamp = document.timestamp;
       delete document.timestamp;
       expect(document).to.eql({ testing: [4, 5, 6] });
@@ -50,14 +52,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
   });
 }
 
-async function clearTestIndex(es: any) {
-  return await es.indices.delete({
-    index: ES_TEST_INDEX_NAME,
-    ignoreUnavailable: true,
-  });
-}
-
-async function getTestIndexItems(es: any) {
+async function getTestIndexItems(es: Client) {
   const result = await es.search({
     index: ES_TEST_INDEX_NAME,
   });

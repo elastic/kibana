@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -83,7 +85,7 @@ function NewsItem({ item }: { item: INewsItem }) {
           {item.image_url?.en && (
             <EuiFlexItem grow={false}>
               <img
-                data-test-subj="news_image"
+                data-test-subj="newsImage"
                 style={{ border: theme.eui.euiBorderThin }}
                 width={48}
                 height={48}

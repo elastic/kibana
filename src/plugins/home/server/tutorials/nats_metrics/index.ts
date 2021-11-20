@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,16 +23,16 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'natsMetrics',
     name: i18n.translate('home.tutorials.natsMetrics.nameTitle', {
-      defaultMessage: 'NATS metrics',
+      defaultMessage: 'NATS Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.natsMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the Nats server.',
+      defaultMessage: 'Collect metrics from NATS servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.natsMetrics.longDescription', {
       defaultMessage:
-        'The `nats` Metricbeat module fetches monitoring metrics from Nats. \
+        'The `nats` Metricbeat module fetches metrics from Nats. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-nats.html',
@@ -58,5 +58,6 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['message_queue'],
   };
 }

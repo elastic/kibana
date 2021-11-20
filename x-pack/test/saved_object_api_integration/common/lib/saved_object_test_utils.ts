@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import type { Client } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SPACES, ALL_SPACES_ID } from './spaces';
 import { AUTHENTICATION } from './authentication';
@@ -114,19 +116,20 @@ export const createRequest = ({ type, id }: TestCase) => ({ type, id });
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 const isNamespaceAgnostic = (type: string) => type === 'globaltype';
-const isMultiNamespace = (type: string) => type === 'sharedtype';
+const isMultiNamespace = (type: string) => type === 'sharedtype' || type === 'sharecapabletype';
 export const expectResponses = {
-  forbiddenTypes: (action: string) => (
-    typeOrTypes: string | string[]
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const uniqueSorted = uniq(types).sort();
-    expect(response.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to ${action} ${uniqueSorted.join()}`,
-    });
-  },
+  forbiddenTypes:
+    (action: string) =>
+    (typeOrTypes: string | string[]): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
+      const uniqueSorted = uniq(types).sort();
+      expect(response.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: `Unable to ${action} ${uniqueSorted.join()}`,
+      });
+    },
   forbiddenSpaces: (response: Record<string, any>) => {
     expect(response.body).to.eql({
       statusCode: 403,
@@ -152,12 +155,14 @@ export const expectResponses = {
         // bulk request error
         expect(object.type).to.eql(type);
         expect(object.id).to.eql(id);
-        expect(object.error).to.eql(error.output.payload);
+        expect(object.error.error).to.eql(error.output.payload.error);
+        expect(object.error.statusCode).to.eql(error.output.payload.statusCode);
+        // ignore the error.message, because it can vary for decorated errors
       } else {
         // non-bulk request error
         expect(object.error).to.eql(error.output.payload.error);
         expect(object.statusCode).to.eql(error.output.payload.statusCode);
-        // ignore the error.message, because it can vary for decorated non-bulk errors (e.g., conflict)
+        // ignore the error.message, because it can vary for decorated errors
       }
     } else {
       // fall back to default behavior of testing the success outcome
@@ -177,17 +182,75 @@ export const expectResponses = {
    * Additional assertions that we use in `import` and `resolve_import_errors` to ensure that
    * newly-created (or overwritten) objects don't have unexpected properties
    */
-  successCreated: async (es: any, spaceId: string, type: string, id: string) => {
+  successCreated: async (es: Client, spaceId: string, type: string, id: string) => {
     const isNamespaceUndefined =
       spaceId === SPACES.DEFAULT.spaceId || isNamespaceAgnostic(type) || isMultiNamespace(type);
     const expectedSpacePrefix = isNamespaceUndefined ? '' : `${spaceId}:`;
-    const savedObject = await es.get({
+    const savedObject = await es.get<Record<string, any>>({
       id: `${expectedSpacePrefix}${type}:${id}`,
       index: '.kibana',
     });
     return savedObject;
   },
 };
+
+const commonUsers = {
+  noAccess: {
+    ...NOT_A_KIBANA_USER,
+    description: 'user with no access',
+    authorizedAtSpaces: [],
+  },
+  superuser: {
+    ...SUPERUSER,
+    description: 'superuser',
+    authorizedAtSpaces: ['*'],
+  },
+  legacyAll: { ...KIBANA_LEGACY_USER, description: 'legacy user', authorizedAtSpaces: [] },
+  allGlobally: {
+    ...KIBANA_RBAC_USER,
+    description: 'rbac user with all globally',
+    authorizedAtSpaces: ['*'],
+  },
+  readGlobally: {
+    ...KIBANA_RBAC_DASHBOARD_ONLY_USER,
+    description: 'rbac user with read globally',
+    authorizedAtSpaces: ['*'],
+  },
+  dualAll: {
+    ...KIBANA_DUAL_PRIVILEGES_USER,
+    description: 'dual-privileges user',
+    authorizedAtSpaces: ['*'],
+  },
+  dualRead: {
+    ...KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+    description: 'dual-privileges readonly user',
+    authorizedAtSpaces: ['*'],
+  },
+};
+
+interface Security<T> {
+  modifier?: T;
+  users: Record<
+    | keyof typeof commonUsers
+    | 'allAtDefaultSpace'
+    | 'readAtDefaultSpace'
+    | 'allAtSpace1'
+    | 'readAtSpace1',
+    TestUser
+  >;
+}
+interface SecurityAndSpaces<T> {
+  modifier?: T;
+  users: Record<
+    keyof typeof commonUsers | 'allAtSpace' | 'readAtSpace' | 'allAtOtherSpace',
+    TestUser
+  >;
+  spaceId: string;
+}
+interface Spaces<T> {
+  modifier?: T;
+  spaceId: string;
+}
 
 /**
  * Get test scenarios for each type of suite.
@@ -201,66 +264,10 @@ export const expectResponses = {
  *  ]
  */
 export const getTestScenarios = <T>(modifiers?: T[]) => {
-  const commonUsers = {
-    noAccess: {
-      ...NOT_A_KIBANA_USER,
-      description: 'user with no access',
-      authorizedAtSpaces: [],
-    },
-    superuser: {
-      ...SUPERUSER,
-      description: 'superuser',
-      authorizedAtSpaces: ['*'],
-    },
-    legacyAll: { ...KIBANA_LEGACY_USER, description: 'legacy user', authorizedAtSpaces: [] },
-    allGlobally: {
-      ...KIBANA_RBAC_USER,
-      description: 'rbac user with all globally',
-      authorizedAtSpaces: ['*'],
-    },
-    readGlobally: {
-      ...KIBANA_RBAC_DASHBOARD_ONLY_USER,
-      description: 'rbac user with read globally',
-      authorizedAtSpaces: ['*'],
-    },
-    dualAll: {
-      ...KIBANA_DUAL_PRIVILEGES_USER,
-      description: 'dual-privileges user',
-      authorizedAtSpaces: ['*'],
-    },
-    dualRead: {
-      ...KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-      description: 'dual-privileges readonly user',
-      authorizedAtSpaces: ['*'],
-    },
-  };
-
-  interface Security {
-    modifier?: T;
-    users: Record<
-      | keyof typeof commonUsers
-      | 'allAtDefaultSpace'
-      | 'readAtDefaultSpace'
-      | 'allAtSpace1'
-      | 'readAtSpace1',
-      TestUser
-    >;
-  }
-  interface SecurityAndSpaces {
-    modifier?: T;
-    users: Record<
-      keyof typeof commonUsers | 'allAtSpace' | 'readAtSpace' | 'allAtOtherSpace',
-      TestUser
-    >;
-    spaceId: string;
-  }
-  interface Spaces {
-    modifier?: T;
-    spaceId: string;
-  }
-
-  let spaces: Spaces[] = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID].map((x) => ({ spaceId: x }));
-  let security: Security[] = [
+  let spaces: Array<Spaces<T>> = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID].map((x) => ({
+    spaceId: x,
+  }));
+  let security: Array<Security<T>> = [
     {
       users: {
         ...commonUsers,
@@ -287,7 +294,7 @@ export const getTestScenarios = <T>(modifiers?: T[]) => {
       },
     },
   ];
-  let securityAndSpaces: SecurityAndSpaces[] = [
+  let securityAndSpaces: Array<SecurityAndSpaces<T>> = [
     {
       spaceId: DEFAULT_SPACE_ID,
       users: {

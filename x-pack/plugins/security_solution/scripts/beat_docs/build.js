@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 require('../../../../../src/setup_node_env');
@@ -25,35 +26,32 @@ const zlib = require('zlib');
 
 const OUTPUT_DIRECTORY = resolve('scripts', 'beat_docs');
 const OUTPUT_SERVER_DIRECTORY = resolve('server', 'utils', 'beat_schema');
+const BEATS_VERSION = '7.14.0';
 
 const beats = [
   {
-    filePath: `${OUTPUT_DIRECTORY}/auditbeat-7.9.0-darwin-x86_64.tar.gz`,
+    filePath: `${OUTPUT_DIRECTORY}/auditbeat-${BEATS_VERSION}-darwin-x86_64.tar.gz`,
     index: 'auditbeat-*',
-    outputDir: `${OUTPUT_DIRECTORY}/auditbeat-7.9.0-darwin-x86_64`,
-    url:
-      'https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-7.9.0-darwin-x86_64.tar.gz',
+    outputDir: `${OUTPUT_DIRECTORY}/auditbeat-${BEATS_VERSION}-darwin-x86_64`,
+    url: `https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-${BEATS_VERSION}-darwin-x86_64.tar.gz`,
   },
   {
-    filePath: `${OUTPUT_DIRECTORY}/filebeat-7.9.0-darwin-x86_64.tar.gz`,
+    filePath: `${OUTPUT_DIRECTORY}/filebeat-${BEATS_VERSION}-darwin-x86_64.tar.gz`,
     index: 'filebeat-*',
-    outputDir: `${OUTPUT_DIRECTORY}/filebeat-7.9.0-darwin-x86_64`,
-    url:
-      'https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.9.0-darwin-x86_64.tar.gz',
+    outputDir: `${OUTPUT_DIRECTORY}/filebeat-${BEATS_VERSION}-darwin-x86_64`,
+    url: `https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-darwin-x86_64.tar.gz`,
   },
   {
-    filePath: `${OUTPUT_DIRECTORY}/packetbeat-7.9.0-darwin-x86_64.tar.gz`,
+    filePath: `${OUTPUT_DIRECTORY}/packetbeat-${BEATS_VERSION}-darwin-x86_64.tar.gz`,
     index: 'packetbeat-*',
-    outputDir: `${OUTPUT_DIRECTORY}/packetbeat-7.9.0-darwin-x86_64`,
-    url:
-      'https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-7.9.0-darwin-x86_64.tar.gz',
+    outputDir: `${OUTPUT_DIRECTORY}/packetbeat-${BEATS_VERSION}-darwin-x86_64`,
+    url: `https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-${BEATS_VERSION}-darwin-x86_64.tar.gz`,
   },
   {
-    filePath: `${OUTPUT_DIRECTORY}/winlogbeat-7.9.0-windows-x86_64.zip`,
+    filePath: `${OUTPUT_DIRECTORY}/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip`,
     index: 'winlogbeat-*',
     outputDir: `${OUTPUT_DIRECTORY}`,
-    url:
-      'https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-7.9.0-windows-x86_64.zip',
+    url: `https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip`,
   },
 ];
 
@@ -140,13 +138,13 @@ const manageZipFields = async (beat, filePath, beatFields) => {
     await extract(filePath, { dir: beat.outputDir });
     console.log('building fields', beat.index);
     const obj = yaml.load(
-      fs.readFileSync(`${beat.outputDir}/winlogbeat-7.9.0-windows-x86_64/fields.yml`, {
+      fs.readFileSync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64/fields.yml`, {
         encoding: 'utf-8',
       })
     );
     const eBeatFields = convertSchemaToHash(obj, beatFields);
     console.log('deleting files', beat.index);
-    rimraf.sync(`${beat.outputDir}/winlogbeat-7.9.0-windows-x86_64`);
+    rimraf.sync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64`);
     rimraf.sync(beat.filePath);
 
     return eBeatFields;
@@ -215,11 +213,12 @@ async function main() {
   }
   const body = `/*
       * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-      * or more contributor license agreements. Licensed under the Elastic License;
-      * you may not use this file except in compliance with the Elastic License.
+      * or more contributor license agreements. Licensed under the Elastic License
+      * 2.0; you may not use this file except in compliance with the Elastic License
+      * 2.0.
       */
 
-      import { BeatFields } from '../../../common/search_strategy/security_solution/beat_fields';
+      import { BeatFields } from '../../../common/search_strategy/index_fields';
 
       /* eslint-disable @typescript-eslint/naming-convention */
       export const fieldsBeat: BeatFields =

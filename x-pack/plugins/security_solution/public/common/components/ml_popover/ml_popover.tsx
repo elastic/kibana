@@ -1,13 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiHeaderSectionItemButton,
+  EuiCallOut,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { Dispatch, useCallback, useReducer, useState } from 'react';
+import React, { Dispatch, useCallback, useReducer, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useKibana } from '../../lib/kibana';
@@ -23,9 +30,14 @@ import * as i18n from './translations';
 import { JobsFilters, SecurityJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
 import { useSecurityJobs } from './hooks/use_security_jobs';
+import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 15px;
 `;
 
 PopoverContentsDiv.displayName = 'PopoverContentsDiv';
@@ -85,9 +97,12 @@ export const MlPopover = React.memo(() => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-  const { isMlAdmin, isLicensed, loading: isLoadingSecurityJobs, jobs } = useSecurityJobs(
-    refreshToggle
-  );
+  const {
+    isMlAdmin,
+    isLicensed,
+    loading: isLoadingSecurityJobs,
+    jobs,
+  } = useSecurityJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
   const docLinks = useKibana().services.docLinks;
   const handleJobStateChange = useCallback(
@@ -102,6 +117,10 @@ export const MlPopover = React.memo(() => {
   });
 
   const incompatibleJobCount = jobs.filter((j) => !j.isCompatible).length;
+  const installedJobsIds = useMemo(
+    () => jobs.filter((j) => j.isInstalled).map((j) => j.id),
+    [jobs]
+  );
 
   if (!isLicensed) {
     // If the user does not have platinum show upgrade UI
@@ -110,14 +129,19 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButtonEmpty
+          <EuiHeaderSectionItemButton
+            aria-expanded={isPopoverOpen}
+            aria-haspopup="true"
+            aria-label={i18n.ML_JOB_SETTINGS}
+            color="primary"
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            textProps={{ style: { fontSize: '1rem' } }}
           >
             {i18n.ML_JOB_SETTINGS}
-          </EuiButtonEmpty>
+          </EuiHeaderSectionItemButton>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -133,7 +157,11 @@ export const MlPopover = React.memo(() => {
         anchorPosition="downRight"
         id="integrations-popover"
         button={
-          <EuiButtonEmpty
+          <EuiHeaderSectionItemButton
+            aria-expanded={isPopoverOpen}
+            aria-haspopup="true"
+            aria-label={i18n.ML_JOB_SETTINGS}
+            color="primary"
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
@@ -141,9 +169,10 @@ export const MlPopover = React.memo(() => {
               setIsPopoverOpen(!isPopoverOpen);
               dispatch({ type: 'refresh' });
             }}
+            textProps={{ style: { fontSize: '1rem' } }}
           >
             {i18n.ML_JOB_SETTINGS}
-          </EuiButtonEmpty>
+          </EuiHeaderSectionItemButton>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -176,7 +205,7 @@ export const MlPopover = React.memo(() => {
                     values={{
                       mlDocs: (
                         <a
-                          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/machine-learning.html`}
+                          href={`${docLinks.links.siem.ml}`}
                           rel="noopener noreferrer"
                           target="_blank"
                         >
@@ -192,6 +221,7 @@ export const MlPopover = React.memo(() => {
             </>
           )}
 
+          <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
           <JobsTable
             isLoading={isLoadingSecurityJobs || isLoading}
             jobs={filteredJobs}

@@ -1,79 +1,202 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
-import { unset } from '@kbn/std';
-import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
+import { i18n } from '@kbn/i18n';
+
+import {
+  ConfigDeprecation,
+  AddConfigDeprecation,
+  ConfigDeprecationFactory,
+  DeprecatedConfigDetails,
+  ConfigDeprecationCommand,
+} from './types';
+
+const getDeprecationTitle = (deprecationPath: string) => {
+  return i18n.translate('kbnConfig.deprecations.deprecatedSettingTitle', {
+    defaultMessage: 'Setting "{deprecationPath}" is deprecated',
+    values: { deprecationPath },
+  });
+};
+
+const _deprecate = (
+  config: Record<string, any>,
+  rootPath: string,
+  addDeprecation: AddConfigDeprecation,
+  deprecatedKey: string,
+  removeBy: string,
+  details?: Partial<DeprecatedConfigDetails>
+): void => {
+  const fullPath = getPath(rootPath, deprecatedKey);
+  if (get(config, fullPath) === undefined) {
+    return;
+  }
+  addDeprecation({
+    configPath: fullPath,
+    title: getDeprecationTitle(fullPath),
+    message: i18n.translate('kbnConfig.deprecations.deprecatedSettingMessage', {
+      defaultMessage: 'Configuring "{fullPath}" is deprecated and will be removed in {removeBy}.',
+      values: { fullPath, removeBy },
+    }),
+    correctiveActions: {
+      manualSteps: [
+        i18n.translate('kbnConfig.deprecations.deprecatedSetting.manualStepOneMessage', {
+          defaultMessage:
+            'Remove "{fullPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only) before upgrading to {removeBy}.',
+          values: { fullPath, removeBy },
+        }),
+      ],
+    },
+    ...details,
+  });
+};
 
 const _rename = (
   config: Record<string, any>,
   rootPath: string,
-  log: ConfigDeprecationLogger,
+  addDeprecation: AddConfigDeprecation,
   oldKey: string,
   newKey: string,
-  silent?: boolean
-) => {
+  details?: Partial<DeprecatedConfigDetails>
+): void | ConfigDeprecationCommand => {
   const fullOldPath = getPath(rootPath, oldKey);
   const oldValue = get(config, fullOldPath);
   if (oldValue === undefined) {
-    return config;
+    return;
   }
-
-  unset(config, fullOldPath);
 
   const fullNewPath = getPath(rootPath, newKey);
   const newValue = get(config, fullNewPath);
   if (newValue === undefined) {
-    set(config, fullNewPath, oldValue);
-
-    if (!silent) {
-      log(`"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`);
-    }
+    addDeprecation({
+      configPath: fullOldPath,
+      title: getDeprecationTitle(fullOldPath),
+      message: i18n.translate('kbnConfig.deprecations.replacedSettingMessage', {
+        defaultMessage: `Setting "{fullOldPath}" has been replaced by "{fullNewPath}"`,
+        values: { fullOldPath, fullNewPath },
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('kbnConfig.deprecations.replacedSetting.manualStepOneMessage', {
+            defaultMessage:
+              'Replace "{fullOldPath}" with "{fullNewPath}" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
+            values: { fullOldPath, fullNewPath },
+          }),
+        ],
+      },
+      ...details,
+    });
+    return {
+      set: [{ path: fullNewPath, value: oldValue }],
+      unset: [{ path: fullOldPath }],
+    };
   } else {
-    if (!silent) {
-      log(
-        `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`
-      );
-    }
+    addDeprecation({
+      configPath: fullOldPath,
+      title: getDeprecationTitle(fullOldPath),
+      message: i18n.translate('kbnConfig.deprecations.conflictSettingMessage', {
+        defaultMessage:
+          'Setting "{fullOldPath}" has been replaced by "{fullNewPath}". However, both keys are present. Ignoring "{fullOldPath}"',
+        values: { fullOldPath, fullNewPath },
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('kbnConfig.deprecations.conflictSetting.manualStepOneMessage', {
+            defaultMessage:
+              'Make sure "{fullNewPath}" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).',
+            values: { fullNewPath },
+          }),
+          i18n.translate('kbnConfig.deprecations.conflictSetting.manualStepTwoMessage', {
+            defaultMessage: 'Remove "{fullOldPath}" from the config.',
+            values: { fullOldPath },
+          }),
+        ],
+      },
+      ...details,
+    });
   }
-  return config;
+
+  return {
+    unset: [{ path: fullOldPath }],
+  };
 };
 
 const _unused = (
   config: Record<string, any>,
   rootPath: string,
-  log: ConfigDeprecationLogger,
-  unusedKey: string
-) => {
+  addDeprecation: AddConfigDeprecation,
+  unusedKey: string,
+  details?: Partial<DeprecatedConfigDetails>
+): void | ConfigDeprecationCommand => {
   const fullPath = getPath(rootPath, unusedKey);
   if (get(config, fullPath) === undefined) {
-    return config;
+    return;
   }
-  unset(config, fullPath);
-  log(`${fullPath} is deprecated and is no longer used`);
-  return config;
+  addDeprecation({
+    configPath: fullPath,
+    title: getDeprecationTitle(fullPath),
+    message: i18n.translate('kbnConfig.deprecations.unusedSettingMessage', {
+      defaultMessage: 'You no longer need to configure "{fullPath}".',
+      values: { fullPath },
+    }),
+    correctiveActions: {
+      manualSteps: [
+        i18n.translate('kbnConfig.deprecations.unusedSetting.manualStepOneMessage', {
+          defaultMessage:
+            'Remove "{fullPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only).',
+          values: { fullPath },
+        }),
+      ],
+    },
+    ...details,
+  });
+  return {
+    unset: [{ path: fullPath }],
+  };
 };
 
-const rename = (oldKey: string, newKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _rename(config, rootPath, log, oldKey, newKey);
+const deprecate =
+  (
+    unusedKey: string,
+    removeBy: string,
+    details?: Partial<DeprecatedConfigDetails>
+  ): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _deprecate(config, rootPath, addDeprecation, unusedKey, removeBy, details);
 
-const renameFromRoot = (oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation => (
-  config,
-  rootPath,
-  log
-) => _rename(config, '', log, oldKey, newKey, silent);
+const deprecateFromRoot =
+  (
+    unusedKey: string,
+    removeBy: string,
+    details?: Partial<DeprecatedConfigDetails>
+  ): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _deprecate(config, '', addDeprecation, unusedKey, removeBy, details);
 
-const unused = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _unused(config, rootPath, log, unusedKey);
+const rename =
+  (oldKey: string, newKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _rename(config, rootPath, addDeprecation, oldKey, newKey, details);
 
-const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _unused(config, '', log, unusedKey);
+const renameFromRoot =
+  (oldKey: string, newKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _rename(config, '', addDeprecation, oldKey, newKey, details);
+
+const unused =
+  (unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _unused(config, rootPath, addDeprecation, unusedKey, details);
+
+const unusedFromRoot =
+  (unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (config, rootPath, addDeprecation) =>
+    _unused(config, '', addDeprecation, unusedKey, details);
 
 const getPath = (rootPath: string, subPath: string) =>
   rootPath !== '' ? `${rootPath}.${subPath}` : subPath;
@@ -84,6 +207,8 @@ const getPath = (rootPath: string, subPath: string) =>
  * @internal
  */
 export const configDeprecationFactory: ConfigDeprecationFactory = {
+  deprecate,
+  deprecateFromRoot,
   rename,
   renameFromRoot,
   unused,

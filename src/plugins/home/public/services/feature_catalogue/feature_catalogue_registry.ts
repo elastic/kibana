@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Capabilities } from 'src/core/public';
@@ -48,18 +48,14 @@ export interface FeatureCatalogueSolution {
   readonly id: string;
   /** Title of solution displayed to the user. */
   readonly title: string;
-  /** The tagline of the solution displayed to the user. */
-  readonly subtitle: string;
   /** One-line description of the solution displayed to the user. */
-  readonly description?: string;
-  /** A list of use cases for this solution displayed to the user. */
-  readonly appDescriptions: string[];
+  readonly description: string;
   /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
   readonly icon: IconType;
   /** URL path to link to this future. Should not include the basePath. */
   readonly path: string;
   /** An ordinal used to sort solutions relative to one another for display on the home page */
-  readonly order?: number;
+  readonly order: number;
 }
 
 export class FeatureCatalogueRegistry {
@@ -124,12 +120,14 @@ export class FeatureCatalogueRegistry {
 
 export type FeatureCatalogueRegistrySetup = ReturnType<FeatureCatalogueRegistry['setup']>;
 
-const compareByKey = <T>(key: keyof T) => (left: T, right: T) => {
-  if (left[key] < right[key]) {
-    return -1;
-  } else if (left[key] > right[key]) {
-    return 1;
-  } else {
-    return 0;
-  }
-};
+const compareByKey =
+  <T>(key: keyof T) =>
+  (left: T, right: T) => {
+    if (left[key] < right[key]) {
+      return -1;
+    } else if (left[key] > right[key]) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };

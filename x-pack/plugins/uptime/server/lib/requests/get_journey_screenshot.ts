@@ -1,22 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { Ping } from '../../../common/runtime_types/ping';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { UMElasticsearchQueryFn } from '../adapters';
+import { RefResult, FullScreenshot } from '../../../common/runtime_types/ping/synthetics';
 
-interface GetJourneyScreenshotParams {
-  checkGroup: string;
-  stepIndex: number;
+interface ResultType {
+  _source: RefResult | FullScreenshot;
 }
 
+export type ScreenshotReturnTypesUnion =
+  | ((FullScreenshot | RefResult) & { totalSteps: number })
+  | null;
+
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
-  GetJourneyScreenshotParams,
-  any
-> = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
-  const params = {
+  { checkGroup: string; stepIndex: number },
+  ScreenshotReturnTypesUnion
+> = async ({ checkGroup, stepIndex, uptimeEsClient }) => {
+  const body = {
     track_total_hits: true,
     size: 0,
     query: {
@@ -28,11 +33,11 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
             },
           },
           {
-            term: {
-              'synthetics.type': 'step/screenshot',
+            terms: {
+              'synthetics.type': ['step/screenshot', 'step/screenshot_ref'],
             },
           },
-        ],
+        ] as QueryDslQueryContainer[],
       },
     },
     aggs: {
@@ -46,24 +51,22 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
           image: {
             top_hits: {
               size: 1,
-              _source: ['synthetics.blob', 'synthetics.step.name'],
             },
           },
         },
       },
     },
   };
-  const { body: result } = await uptimeEsClient.search({ body: params });
 
-  if (result?.hits?.total.value < 1) {
-    return null;
-  }
+  const result = await uptimeEsClient.search({ body });
 
-  const stepHit = result?.aggregations?.step.image.hits.hits[0]._source as Ping;
+  const screenshotsOrRefs =
+    (result.body.aggregations?.step.image.hits.hits as ResultType[]) ?? null;
+
+  if (screenshotsOrRefs.length === 0) return null;
 
   return {
-    blob: stepHit.synthetics?.blob ?? null,
-    stepName: stepHit?.synthetics?.step?.name ?? '',
-    totalSteps: result?.hits?.total.value,
+    ...screenshotsOrRefs[0]._source,
+    totalSteps: result.body.hits.total.value,
   };
 };

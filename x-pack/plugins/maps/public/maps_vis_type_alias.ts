@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   VisualizationsSetup,
   VisualizationStage,
 } from '../../../../src/plugins/visualizations/public';
-import { SavedObject } from '../../../../src/core/types/saved_objects';
-import { MapSavedObject } from '../common/map_saved_object_type';
+import type { SavedObject } from '../../../../src/core/types/saved_objects';
+import type { MapSavedObject } from '../common/map_saved_object_type';
 import {
   APP_ID,
   APP_ICON,
@@ -20,13 +21,8 @@ import {
   MAP_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 
-export function getMapsVisTypeAlias(
-  visualizations: VisualizationsSetup,
-  showMapVisualizationTypes: boolean
-) {
-  if (!showMapVisualizationTypes) {
-    visualizations.hideTypes(['region_map', 'tile_map']);
-  }
+export function getMapsVisTypeAlias(visualizations: VisualizationsSetup) {
+  visualizations.hideTypes(['region_map', 'tile_map']);
 
   const appDescription = i18n.translate('xpack.maps.visTypeAlias.description', {
     defaultMessage: 'Create and style maps with multiple layers and indices.',

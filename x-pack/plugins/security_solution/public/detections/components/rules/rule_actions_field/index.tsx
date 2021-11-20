@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -19,12 +20,13 @@ import {
   loadActionTypes,
   ActionVariables,
 } from '../../../../../../triggers_actions_ui/public';
-import { AlertAction } from '../../../../../../alerts/common';
-import { useKibana } from '../../../../common/lib/kibana';
+import { AlertAction } from '../../../../../../alerting/common';
+import { convertArrayToCamelCase, useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
 interface Props {
   field: FieldHook;
+  hasErrorOnCreationCaseAction: boolean;
   messageVariables: ActionVariables;
 }
 
@@ -38,7 +40,44 @@ const FieldErrorsContainer = styled.div`
   }
 `;
 
-export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
+const ContainerActions = styled.div.attrs(
+  ({ className = '', $caseIndexes = [] }: { className?: string; $caseIndexes: string[] }) => ({
+    className,
+  })
+)<{ $caseIndexes: string[] }>`
+  ${({ $caseIndexes }) =>
+    $caseIndexes.map(
+      (index) => `
+        div[id="${index}"].euiAccordion__childWrapper .euiAccordion__padding--l {
+          padding: 0px;
+          .euiFlexGroup {
+            display: none;
+          }
+          .euiSpacer.euiSpacer--xl {
+            height: 0px;
+          }
+        }
+      `
+    )}
+`;
+
+export const getSupportedActions = (
+  actionTypes: ActionType[],
+  hasErrorOnCreationCaseAction: boolean
+): ActionType[] => {
+  return actionTypes.filter((actionType) => {
+    if (actionType.id === '.case' && hasErrorOnCreationCaseAction) {
+      return false;
+    }
+    return NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id);
+  });
+};
+
+export const RuleActionsField: React.FC<Props> = ({
+  field,
+  hasErrorOnCreationCaseAction,
+  messageVariables,
+}) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const [supportedActionTypes, setSupportedActionTypes] = useState<ActionType[] | undefined>();
   const form = useFormContext();
@@ -51,6 +90,17 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   const actions: AlertAction[] = useMemo(
     () => (!isEmpty(field.value) ? (field.value as AlertAction[]) : []),
     [field.value]
+  );
+
+  const caseActionIndexes = useMemo(
+    () =>
+      actions.reduce<string[]>((acc, action, actionIndex) => {
+        if (action.actionTypeId === '.case') {
+          return [...acc, `${actionIndex}`];
+        }
+        return acc;
+      }, []),
+    [actions]
   );
 
   const setActionIdByIndex = useCallback(
@@ -72,7 +122,13 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (key: string, value: any, index: number) => {
       const updatedActions = [...actions];
-      updatedActions[index].params[key] = value;
+      updatedActions[index] = {
+        ...updatedActions[index],
+        params: {
+          ...updatedActions[index].params,
+          [key]: value,
+        },
+      };
       field.setValue(updatedActions);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,14 +137,12 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
 
   useEffect(() => {
     (async function () {
-      const actionTypes = await loadActionTypes({ http });
-      const supportedTypes = actionTypes.filter((actionType) =>
-        NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id)
-      );
+      const actionTypes = convertArrayToCamelCase(await loadActionTypes({ http })) as ActionType[];
+      const supportedTypes = getSupportedActions(actionTypes, hasErrorOnCreationCaseAction);
       setSupportedActionTypes(supportedTypes);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hasErrorOnCreationCaseAction]);
 
   useEffect(() => {
     if (isSubmitting || !field.errors.length) {
@@ -103,7 +157,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   if (!supportedActionTypes) return <></>;
 
   return (
-    <>
+    <ContainerActions $caseIndexes={caseActionIndexes}>
       {fieldErrors ? (
         <>
           <FieldErrorsContainer>
@@ -125,6 +179,6 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         actionTypes={supportedActionTypes}
         defaultActionMessage={DEFAULT_ACTION_MESSAGE}
       />
-    </>
+    </ContainerActions>
   );
 };

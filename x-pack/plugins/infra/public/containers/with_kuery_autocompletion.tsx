@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { QuerySuggestion, IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
+import { QuerySuggestion, DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   withKibana,
   KibanaReactContextValue,
@@ -20,7 +22,7 @@ interface WithKueryAutocompletionLifecycleProps {
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: QuerySuggestion[];
   }>;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
 }
 
 interface WithKueryAutocompletionLifecycleState {
@@ -55,13 +57,13 @@ class WithKueryAutocompletionComponent extends React.Component<
   private loadSuggestions = async (
     expression: string,
     cursorPosition: number,
-    maxSuggestions?: number
+    maxSuggestions?: number,
+    transformSuggestions?: (s: QuerySuggestion[]) => QuerySuggestion[]
   ) => {
     const { indexPattern } = this.props;
     const language = 'kuery';
-    const hasQuerySuggestions = this.props.kibana.services.data?.autocomplete.hasQuerySuggestions(
-      language
-    );
+    const hasQuerySuggestions =
+      this.props.kibana.services.data?.autocomplete.hasQuerySuggestions(language);
 
     if (!hasQuerySuggestions) {
       return;
@@ -85,6 +87,10 @@ class WithKueryAutocompletionComponent extends React.Component<
         boolFilter: [],
       })) || [];
 
+    const transformedSuggestions = transformSuggestions
+      ? transformSuggestions(suggestions)
+      : suggestions;
+
     this.setState((state) =>
       state.currentRequest &&
       state.currentRequest.expression !== expression &&
@@ -93,7 +99,9 @@ class WithKueryAutocompletionComponent extends React.Component<
         : {
             ...state,
             currentRequest: null,
-            suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
+            suggestions: maxSuggestions
+              ? transformedSuggestions.slice(0, maxSuggestions)
+              : transformedSuggestions,
           }
     );
   };

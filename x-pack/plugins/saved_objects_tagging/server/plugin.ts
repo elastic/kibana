@@ -1,17 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import {
-  CoreSetup,
-  CoreStart,
-  PluginInitializerContext,
-  Plugin,
-  SharedGlobalConfig,
-} from 'src/core/server';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -29,12 +23,6 @@ interface SetupDeps {
 }
 
 export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
-  private readonly legacyConfig$: Observable<SharedGlobalConfig>;
-
-  constructor(context: PluginInitializerContext) {
-    this.legacyConfig$ = context.config.legacy.globalConfig$;
-  }
-
   public setup(
     { savedObjects, http }: CoreSetup,
     { features, usageCollection, security }: SetupDeps
@@ -57,7 +45,7 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
       usageCollection.registerCollector(
         createTagUsageCollector({
           usageCollection,
-          legacyConfig$: this.legacyConfig$,
+          kibanaIndex: savedObjects.getKibanaIndex(),
         })
       );
     }

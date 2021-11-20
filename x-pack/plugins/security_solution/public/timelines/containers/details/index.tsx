@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { Subscription } from 'rxjs';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import {
@@ -17,37 +20,45 @@ import {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
+import { EntityType } from '../../../../../timelines/common';
+
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
 
 export interface UseTimelineEventsDetailsProps {
+  entityType?: EntityType;
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
+  runtimeMappings: MappingRuntimeFields;
   skip: boolean;
 }
 
 export const useTimelineEventsDetails = ({
+  entityType = EntityType.EVENTS,
   docValueFields,
   indexName,
   eventId,
+  runtimeMappings,
   skip,
-}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
-  const { data, notifications } = useKibana().services;
+}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData'], object | undefined] => {
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    timelineDetailsRequest,
-    setTimelineDetailsRequest,
-  ] = useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const [timelineDetailsRequest, setTimelineDetailsRequest] =
+    useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const { addError, addWarning } = useAppToasts();
 
-  const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
-    null
-  );
+  const [timelineDetailsResponse, setTimelineDetailsResponse] =
+    useState<EventsArgs['detailsData']>(null);
+
+  const [rawEventData, setRawEventData] = useState<object | undefined>(undefined);
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
@@ -55,55 +66,44 @@ export const useTimelineEventsDetails = ({
         return;
       }
 
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
             request,
             {
-              strategy: 'securitySolutionTimelineSearchStrategy',
+              strategy: 'timelineSearchStrategy',
               abortSignal: abortCtrl.current.signal,
             }
           )
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setTimelineDetailsResponse(response.data || []);
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setTimelineDetailsResponse(response.data || []);
+                setRawEventData(response.rawResponse.hits.hits[0]);
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning('An error has occurred');
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                addWarning(i18n.FAIL_TIMELINE_DETAILS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel) {
-                setLoading(false);
-              }
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger('Failed to run search');
-              }
+              setLoading(false);
+              addError(msg, { title: i18n.FAIL_TIMELINE_SEARCH_DETAILS });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
@@ -111,20 +111,26 @@ export const useTimelineEventsDetails = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         docValueFields,
+        entityType,
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
+        runtimeMappings,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [docValueFields, eventId, indexName]);
+  }, [docValueFields, entityType, eventId, indexName, runtimeMappings]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
-  return [loading, timelineDetailsResponse];
+  return [loading, timelineDetailsResponse, rawEventData];
 };

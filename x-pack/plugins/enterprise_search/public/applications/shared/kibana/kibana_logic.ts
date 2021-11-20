@@ -1,32 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { FC } from 'react';
+
+import { History } from 'history';
 import { kea, MakeLogicType } from 'kea';
 
-import { FC } from 'react';
-import { History } from 'history';
-import { ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { ApplicationStart, ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
 import { CloudSetup } from '../../../../../cloud/public';
+import { SecurityPluginStart } from '../../../../../security/public';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
 
 interface KibanaLogicProps {
   config: { host?: string };
+  // Kibana core
   history: History;
-  cloud: Partial<CloudSetup>;
-  charts: ChartsPluginStart;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
+  setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   renderHeaderActions(HeaderActions: FC): void;
+  // Required plugins
+  charts: ChartsPluginStart;
+  security: SecurityPluginStart;
+  // Optional plugins
+  cloud?: CloudSetup;
 }
-export interface KibanaValues extends KibanaLogicProps {
+export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
+  cloud: Partial<CloudSetup>;
 }
 
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
@@ -44,7 +53,9 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       },
       {},
     ],
+    security: [props.security, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
+    setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
   }),

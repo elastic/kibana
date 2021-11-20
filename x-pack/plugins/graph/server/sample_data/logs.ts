@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -175,8 +176,7 @@ const wsState: any = {
         'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
       color: '#CE0060',
       field: 'agent.keyword',
-      term:
-        'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
+      term: 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
       parent: null,
       size: 15,
     },
@@ -406,8 +406,7 @@ const wsState: any = {
   ],
   urlTemplates: [
     {
-      url:
-        '/app/discover#/?_a=(columns%3A!(_source)%2Cindex%3A%2790943e30-9a47-11e8-b64d-95841ca0b247%27%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
+      url: '/app/discover#/?_a=(columns%3A!(_source)%2Cindex%3A%2790943e30-9a47-11e8-b64d-95841ca0b247%27%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
       description: 'Raw documents',
       isDefault: true,
       encoderID: 'kql-loose',
@@ -420,7 +419,6 @@ const wsState: any = {
     maxValuesPerDoc: 1,
     minDocCount: 3,
   },
-  indexPatternRefName: 'indexPattern_0',
 };
 
 export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySetup) {
@@ -432,21 +430,16 @@ export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySet
       attributes: {
         title: 'Kibana Sample Data - Data Logs',
         description:
-          'This is a sample graph based on the data logs index, which shows agents, extensions, source geography of the log, and response codes.  The graph has 200 and 404 response codes blocked, as they have low cardinality.',
+          'This is a sample graph based on the data logs data view, which shows agents, extensions, source geography of the log, and response codes.  The graph has 200 and 404 response codes blocked, as they have low cardinality.',
         numLinks: 61,
         numVertices: 27,
         version: 1,
         wsState: JSON.stringify(JSON.stringify(wsState)),
+        legacyIndexPatternRef: 'kibana_sample_data_logs',
       },
-      references: [
-        {
-          name: 'indexPattern_0',
-          type: 'index-pattern',
-          id: 'kibana_sample_data_logs',
-        },
-      ],
+      references: [],
       migrationVersion: {
-        'graph-workspace': '7.0.0',
+        'graph-workspace': '7.11.0',
       },
       updated_at: '2020-01-09T16:40:36.122Z',
     },
@@ -455,7 +448,11 @@ export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySet
 export function registerLogsSampleDataLink(sampleDataRegistry: SampleDataRegistrySetup) {
   sampleDataRegistry.addAppLinksToSampleDataset(datasetId, [
     {
-      path: createWorkspacePath('e2141080-32fa-11ea-bbe4-818d9c786051'),
+      sampleObject: {
+        type: 'graph-workspace',
+        id: 'e2141080-32fa-11ea-bbe4-818d9c786051',
+      },
+      getPath: createWorkspacePath,
       label: i18n.translate('xpack.graph.sampleData.label', { defaultMessage: 'Graph' }),
       icon: APP_ICON,
     },

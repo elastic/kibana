@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { SNAPSHOT_STATE } from '../../public/application/constants';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH } from '../../common';
 import {
   setupEnvironment,
   pageHelpers,
   nextTick,
-  delay,
   getRandomString,
   findTestSubject,
 } from './helpers';
@@ -29,6 +29,16 @@ jest.mock('@kbn/i18n/react', () => {
     ...original,
     FormattedDate: () => '',
     FormattedTime: () => '',
+  };
+});
+
+jest.mock('../../common/constants', () => {
+  const original = jest.requireActual('../../common/constants');
+
+  return {
+    ...original,
+    // Mocking this value to a lower number in order to more easily trigger the max snapshots warning in the tests
+    SNAPSHOT_LIST_MAX_SIZE: 2,
   };
 });
 
@@ -120,7 +130,7 @@ describe('<SnapshotRestoreHome />', () => {
         });
 
         expect(exists('repositoryList')).toBe(false);
-        expect(exists('snapshotList')).toBe(true);
+        expect(exists('snapshotListEmpty')).toBe(true);
       });
     });
   });
@@ -362,6 +372,60 @@ describe('<SnapshotRestoreHome />', () => {
             expect(latestRequest.method).toBe('GET');
             expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}/verify`);
           });
+
+          describe('clean repository', () => {
+            test('shows results when request succeeds', async () => {
+              httpRequestsMockHelpers.setCleanupRepositoryResponse({
+                cleanup: {
+                  cleaned: true,
+                  response: {
+                    results: {
+                      deleted_bytes: 0,
+                      deleted_blobs: 0,
+                    },
+                  },
+                },
+              });
+
+              const { exists, find, component } = testBed;
+              await act(async () => {
+                find('repositoryDetail.cleanupRepositoryButton').simulate('click');
+              });
+              component.update();
+
+              const latestRequest = server.requests[server.requests.length - 1];
+              expect(latestRequest.method).toBe('POST');
+              expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}/cleanup`);
+
+              expect(exists('repositoryDetail.cleanupCodeBlock')).toBe(true);
+              expect(exists('repositoryDetail.cleanupError')).toBe(false);
+            });
+
+            test('shows error when success fails', async () => {
+              httpRequestsMockHelpers.setCleanupRepositoryResponse({
+                cleanup: {
+                  cleaned: false,
+                  error: {
+                    message: 'Error message',
+                    statusCode: 400,
+                  },
+                },
+              });
+
+              const { exists, find, component } = testBed;
+              await act(async () => {
+                find('repositoryDetail.cleanupRepositoryButton').simulate('click');
+              });
+              component.update();
+
+              const latestRequest = server.requests[server.requests.length - 1];
+              expect(latestRequest.method).toBe('POST');
+              expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}/cleanup`);
+
+              expect(exists('repositoryDetail.cleanupCodeBlock')).toBe(false);
+              expect(exists('repositoryDetail.cleanupError')).toBe(true);
+            });
+          });
         });
 
         describe('when the repository has been fetched (and has snapshots)', () => {
@@ -398,9 +462,9 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await delay(100);
-          testBed.component.update();
         });
+
+        testBed.component.update();
       });
 
       test('should display an empty prompt', () => {
@@ -421,15 +485,15 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots: [],
           repositories: ['my-repo'],
+          total: 0,
         });
 
         testBed = await setup();
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await delay(2000);
-          testBed.component.update();
         });
+        testBed.component.update();
       });
 
       test('should display an empty prompt', () => {
@@ -460,16 +524,16 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
           repositories: [REPOSITORY_NAME],
-          errors: {},
+          total: 2,
         });
 
         testBed = await setup();
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await delay(2000);
-          testBed.component.update();
         });
+
+        testBed.component.update();
       });
 
       test('should list them in the table', async () => {
@@ -491,6 +555,61 @@ describe('<SnapshotRestoreHome />', () => {
             '',
           ]);
         });
+      });
+
+      test('should show a warning if one repository contains errors', async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({
+          snapshots,
+          total: 2,
+          repositories: [REPOSITORY_NAME],
+          errors: {
+            repository_with_errors: {
+              type: 'repository_exception',
+              reason:
+                '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
+            },
+          },
+        });
+
+        testBed = await setup();
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+
+        const { find, exists } = testBed;
+        expect(exists('repositoryErrorsWarning')).toBe(true);
+        expect(find('repositoryErrorsWarning').text()).toContain(
+          'Some repositories contain errors'
+        );
+      });
+
+      test('should show a prompt if a repository contains errors and there are no other repositories', async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({
+          snapshots,
+          repositories: [],
+          errors: {
+            repository_with_errors: {
+              type: 'repository_exception',
+              reason:
+                '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
+            },
+          },
+        });
+
+        testBed = await setup();
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+
+        const { find, exists } = testBed;
+        expect(exists('repositoryErrorsPrompt')).toBe(true);
+        expect(find('repositoryErrorsPrompt').text()).toContain('Some repositories contain errors');
       });
 
       test('each row should have a link to the repository', async () => {

@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
 import { REPO_ROOT } from '@kbn/dev-utils';
-import { mockPackage } from './plugins_discovery.test.mocks';
+import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 
+import { from } from 'rxjs';
 import { first, map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { ConfigService, Env } from '../../config';
@@ -20,6 +21,7 @@ import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
+import { PluginType } from '../types';
 
 const KIBANA_ROOT = process.cwd();
 
@@ -28,16 +30,53 @@ const Plugins = {
     'kibana.json': 'not-json',
   }),
   incomplete: () => ({
-    'kibana.json': JSON.stringify({ version: '1' }),
+    'kibana.json': JSON.stringify({
+      version: '1',
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
+    }),
   }),
   incompatible: () => ({
-    'kibana.json': JSON.stringify({ id: 'plugin', version: '1' }),
+    'kibana.json': JSON.stringify({
+      id: 'plugin',
+      version: '1',
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
+    }),
+  }),
+  incompatibleType: (id: string) => ({
+    'kibana.json': JSON.stringify({
+      id,
+      version: '1',
+      kibanaVersion: '1.2.3',
+      type: 'evenEarlierThanPreboot',
+      server: true,
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
+    }),
   }),
   missingManifest: () => ({}),
   inaccessibleManifest: () => ({
     'kibana.json': mockFs.file({
       mode: 0, // 0000,
       content: JSON.stringify({ id: 'plugin', version: '1' }),
+    }),
+  }),
+  missingOwnerAttribute: () => ({
+    'kibana.json': JSON.stringify({
+      id: 'foo',
+      configPath: ['plugins', 'foo'],
+      version: '1',
+      kibanaVersion: '1.2.3',
+      requiredPlugins: [],
+      optionalPlugins: [],
+      server: true,
     }),
   }),
   valid: (id: string) => ({
@@ -49,6 +88,26 @@ const Plugins = {
       requiredPlugins: [],
       optionalPlugins: [],
       server: true,
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
+    }),
+  }),
+  validPreboot: (id: string) => ({
+    'kibana.json': JSON.stringify({
+      id,
+      configPath: ['plugins', id],
+      version: '1',
+      kibanaVersion: '1.2.3',
+      type: PluginType.preboot,
+      requiredPlugins: [],
+      optionalPlugins: [],
+      server: true,
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
     }),
   }),
 };
@@ -131,6 +190,7 @@ describe('plugins discovery system', () => {
         [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
         [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
         [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
+        [`${KIBANA_ROOT}/src/plugins/plugin_d`]: Plugins.validPreboot('pluginD'),
       },
       { createCwd: false }
     );
@@ -138,8 +198,10 @@ describe('plugins discovery system', () => {
     const plugins = await plugin$.pipe(toArray()).toPromise();
     const pluginNames = plugins.map((plugin) => plugin.name);
 
-    expect(pluginNames).toHaveLength(3);
-    expect(pluginNames).toEqual(expect.arrayContaining(['pluginA', 'pluginB', 'pluginC']));
+    expect(pluginNames).toHaveLength(4);
+    expect(pluginNames).toEqual(
+      expect.arrayContaining(['pluginA', 'pluginB', 'pluginC', 'pluginD'])
+    );
   });
 
   it('return errors when the manifest is invalid or incompatible', async () => {
@@ -154,7 +216,9 @@ describe('plugins discovery system', () => {
         [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.invalid(),
         [`${KIBANA_ROOT}/src/plugins/plugin_b`]: Plugins.incomplete(),
         [`${KIBANA_ROOT}/src/plugins/plugin_c`]: Plugins.incompatible(),
+        [`${KIBANA_ROOT}/src/plugins/plugin_d`]: Plugins.incompatibleType('pluginD'),
         [`${KIBANA_ROOT}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
+        [`${KIBANA_ROOT}/src/plugins/plugin_e`]: Plugins.missingOwnerAttribute(),
       },
       { createCwd: false }
     );
@@ -169,18 +233,40 @@ describe('plugins discovery system', () => {
       )
       .toPromise();
 
-    expect(errors).toEqual(
-      expect.arrayContaining([
-        `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${manifestPath(
-          'plugin_a'
-        )})`,
-        `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
-          'plugin_b'
-        )})`,
-        `Error: Plugin "plugin" is only compatible with Kibana version "1", but used Kibana version is "1.2.3". (incompatible-version, ${manifestPath(
-          'plugin_c'
-        )})`,
-      ])
+    expect(errors).toContain(
+      `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${manifestPath(
+        'plugin_a'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
+        'plugin_b'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: Plugin "plugin" is only compatible with Kibana version "1", but used Kibana version is "1.2.3". (incompatible-version, ${manifestPath(
+        'plugin_c'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: The "type" in manifest for plugin "pluginD" is set to "evenEarlierThanPreboot", but it should either be "standard" or "preboot". (invalid-manifest, ${manifestPath(
+        'plugin_d'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: The "type" in manifest for plugin "pluginD" is set to "evenEarlierThanPreboot", but it should either be "standard" or "preboot". (invalid-manifest, ${manifestPath(
+        'plugin_d'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: Plugin manifest for "foo" must contain an "owner" property, which includes a nested "name" property. (invalid-manifest, ${manifestPath(
+        'plugin_e'
+      )})`
     );
   });
 
@@ -270,7 +356,8 @@ describe('plugins discovery system', () => {
         [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
         [`${KIBANA_ROOT}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
         [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_d`]: Plugins.incomplete(),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_d`]: Plugins.validPreboot('pluginD'),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_e`]: Plugins.incomplete(),
       },
       { createCwd: false }
     );
@@ -278,8 +365,10 @@ describe('plugins discovery system', () => {
     const plugins = await plugin$.pipe(toArray()).toPromise();
     const pluginNames = plugins.map((plugin) => plugin.name);
 
-    expect(pluginNames).toHaveLength(3);
-    expect(pluginNames).toEqual(expect.arrayContaining(['pluginA', 'pluginB', 'pluginC']));
+    expect(pluginNames).toHaveLength(4);
+    expect(pluginNames).toEqual(
+      expect.arrayContaining(['pluginA', 'pluginB', 'pluginC', 'pluginD'])
+    );
 
     const errors = await error$
       .pipe(
@@ -293,7 +382,7 @@ describe('plugins discovery system', () => {
         `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
           'sub1',
           'sub2',
-          'plugin_d'
+          'plugin_e'
         )})`,
       ])
     );
@@ -328,9 +417,8 @@ describe('plugins discovery system', () => {
         [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
         [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
         [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid('plugin5'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid(
-          'plugin6'
-        ),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]:
+          Plugins.valid('plugin6'),
       },
       { createCwd: false }
     );
@@ -357,6 +445,7 @@ describe('plugins discovery system', () => {
         [pluginFolder]: {
           plugin_a: Plugins.valid('pluginA'),
           plugin_b: Plugins.valid('pluginB'),
+          plugin_c: Plugins.validPreboot('pluginC'),
         },
       },
       { createCwd: false }
@@ -365,8 +454,8 @@ describe('plugins discovery system', () => {
     const plugins = await plugin$.pipe(toArray()).toPromise();
     const pluginNames = plugins.map((plugin) => plugin.name);
 
-    expect(pluginNames).toHaveLength(2);
-    expect(pluginNames).toEqual(expect.arrayContaining(['pluginA', 'pluginB']));
+    expect(pluginNames).toHaveLength(3);
+    expect(pluginNames).toEqual(expect.arrayContaining(['pluginA', 'pluginB', 'pluginC']));
   });
 
   it('logs a warning about --plugin-path when used in development', async () => {
@@ -419,5 +508,59 @@ describe('plugins discovery system', () => {
     );
 
     expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+  });
+
+  describe('discovery order', () => {
+    beforeEach(() => {
+      scanPluginSearchPathsMock.mockClear();
+    });
+
+    it('returns the plugins in a deterministic order', async () => {
+      mockFs(
+        {
+          [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+          [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
+          [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
+        },
+        { createCwd: false }
+      );
+
+      scanPluginSearchPathsMock.mockReturnValue(
+        from([
+          `${KIBANA_ROOT}/src/plugins/plugin_a`,
+          `${KIBANA_ROOT}/plugins/plugin_b`,
+          `${KIBANA_ROOT}/x-pack/plugins/plugin_c`,
+        ])
+      );
+
+      let { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
+
+      expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(1);
+      let plugins = await plugin$.pipe(toArray()).toPromise();
+      let pluginNames = plugins.map((plugin) => plugin.name);
+
+      expect(pluginNames).toHaveLength(3);
+      // order coming from `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
+      expect(pluginNames).toEqual(['pluginB', 'pluginA', 'pluginC']);
+
+      // second pass
+      scanPluginSearchPathsMock.mockReturnValue(
+        from([
+          `${KIBANA_ROOT}/plugins/plugin_b`,
+          `${KIBANA_ROOT}/x-pack/plugins/plugin_c`,
+          `${KIBANA_ROOT}/src/plugins/plugin_a`,
+        ])
+      );
+
+      plugin$ = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo).plugin$;
+
+      expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(2);
+      plugins = await plugin$.pipe(toArray()).toPromise();
+      pluginNames = plugins.map((plugin) => plugin.name);
+
+      expect(pluginNames).toHaveLength(3);
+      // order coming from `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
+      expect(pluginNames).toEqual(['pluginB', 'pluginA', 'pluginC']);
+    });
   });
 });

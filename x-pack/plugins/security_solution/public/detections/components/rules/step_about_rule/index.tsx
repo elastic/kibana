@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -30,7 +31,7 @@ import {
 import { defaultRiskScoreBySeverity, severityOptions } from './data';
 import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from '../../../../common/utils/validators';
-import { schema } from './schema';
+import { schema as defaultSchema, threatIndicatorPathRequiredSchemaValue } from './schema';
 import * as I18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
@@ -39,6 +40,8 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -70,7 +73,28 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
-  const initialState = defaultValues ?? stepAboutDefaultValue;
+  const isThreatMatchRuleValue = useMemo(
+    () => isThreatMatchRule(defineRuleData?.ruleType),
+    [defineRuleData?.ruleType]
+  );
+
+  const initialState: AboutStepRule = useMemo(
+    () =>
+      defaultValues ??
+      (isThreatMatchRuleValue
+        ? { ...stepAboutDefaultValue, threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH }
+        : stepAboutDefaultValue),
+    [defaultValues, isThreatMatchRuleValue]
+  );
+
+  const schema = useMemo(
+    () =>
+      isThreatMatchRuleValue
+        ? { ...defaultSchema, threatIndicatorPath: threatIndicatorPathRequiredSchemaValue }
+        : defaultSchema,
+    [isThreatMatchRuleValue]
+  );
+
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
 
@@ -296,6 +320,23 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 }}
               />
             </EuiFormRow>
+            <EuiSpacer size="l" />
+            {isThreatMatchRuleValue && (
+              <>
+                <CommonUseField
+                  path="threatIndicatorPath"
+                  componentProps={{
+                    idAria: 'detectionEngineStepAboutThreatIndicatorPath',
+                    'data-test-subj': 'detectionEngineStepAboutThreatIndicatorPath',
+                    euiFieldProps: {
+                      fullWidth: true,
+                      disabled: isLoading,
+                      placeholder: DEFAULT_INDICATOR_SOURCE_PATH,
+                    },
+                  }}
+                />
+              </>
+            )}
             <EuiSpacer size="l" />
             <UseField
               path="ruleNameOverride"

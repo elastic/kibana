@@ -34,7 +34,8 @@
       "destination.ip",
       "host.name",
       "dns.question.etld_plus_one"
-    ]
+    ],
+    "model_prune_window": "30d"
   },
   "allow_lazy_open": true,
   "analysis_limits": {

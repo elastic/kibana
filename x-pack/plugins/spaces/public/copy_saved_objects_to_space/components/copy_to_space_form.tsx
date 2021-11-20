@@ -1,33 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { EuiSpacer, EuiTitle, EuiFormRow } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CopyOptions } from '../types';
-import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+
+import type { SpacesDataEntry } from '../../types';
+import type { CopyOptions, CopyToSpaceSavedObjectTarget } from '../types';
+import type { CopyMode } from './copy_mode_control';
+import { CopyModeControl } from './copy_mode_control';
 import { SelectableSpacesControl } from './selectable_spaces_control';
-import { CopyModeControl, CopyMode } from './copy_mode_control';
 
 interface Props {
-  savedObject: SavedObjectsManagementRecord;
-  spaces: Space[];
+  savedObjectTarget: Required<CopyToSpaceSavedObjectTarget>;
+  spaces: SpacesDataEntry[];
   onUpdate: (copyOptions: CopyOptions) => void;
   copyOptions: CopyOptions;
 }
 
 export const CopyToSpaceForm = (props: Props) => {
-  const { savedObject, spaces, onUpdate, copyOptions } = props;
+  const { savedObjectTarget, spaces, onUpdate, copyOptions } = props;
 
   // if the user is not creating new copies, prevent them from copying objects an object into a space where it already exists
   const getDisabledSpaceIds = (createNewCopies: boolean) =>
     createNewCopies
       ? new Set<string>()
-      : (savedObject.namespaces ?? []).reduce((acc, cur) => acc.add(cur), new Set<string>());
+      : savedObjectTarget.namespaces.reduce((acc, cur) => acc.add(cur), new Set<string>());
 
   const changeCopyMode = ({ createNewCopies, overwrite }: CopyMode) => {
     const disabled = getDisabledSpaceIds(createNewCopies);

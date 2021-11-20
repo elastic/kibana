@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
@@ -52,18 +52,28 @@ export interface ICustomClusterClient extends IClusterClient {
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
-  public readonly asInternalUser: Client;
-  private readonly rootScopedClient: Client;
+  public readonly asInternalUser: KibanaClient;
+  private readonly rootScopedClient: KibanaClient;
+  private readonly allowListHeaders: string[];
 
   private isClosed = false;
 
   constructor(
     private readonly config: ElasticsearchClientConfig,
     logger: Logger,
-    private readonly getAuthHeaders: GetAuthHeaders = noop
+    type: string,
+    private readonly getAuthHeaders: GetAuthHeaders = noop,
+    getExecutionContext: () => string | undefined = noop
   ) {
-    this.asInternalUser = configureClient(config, { logger });
-    this.rootScopedClient = configureClient(config, { logger, scoped: true });
+    this.asInternalUser = configureClient(config, { logger, type, getExecutionContext });
+    this.rootScopedClient = configureClient(config, {
+      logger,
+      type,
+      getExecutionContext,
+      scoped: true,
+    });
+
+    this.allowListHeaders = ['x-opaque-id', ...this.config.requestHeadersWhitelist];
   }
 
   asScoped(request: ScopeableRequest) {
@@ -89,10 +99,10 @@ export class ClusterClient implements ICustomClusterClient {
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
       const authHeaders = this.getAuthHeaders(request);
 
-      scopedHeaders = filterHeaders({ ...requestHeaders, ...requestIdHeaders, ...authHeaders }, [
-        'x-opaque-id',
-        ...this.config.requestHeadersWhitelist,
-      ]);
+      scopedHeaders = filterHeaders(
+        { ...requestHeaders, ...requestIdHeaders, ...authHeaders },
+        this.allowListHeaders
+      );
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }

@@ -4,6 +4,10 @@
   padding: $euiSize $euiSize 0;
 }
 
+.lnsInnerIndexPatternDataPanel__switcher {
+  min-width: 0;
+}
+
 .lnsInnerIndexPatternDataPanel__header {
   display: flex;
   align-items: center;
@@ -37,4 +41,18 @@
   .lnsFieldListPanel__fieldIcon {
     margin-right: $euiSizeS;
   }
+}
+
+.lnsChangeIndexPatternPopover {
+  width: 320px;
+}
+
+.lnsChangeIndexPatternPopover__trigger {
+  padding: 0 $euiSize;
+}
+
+.lnsLayerPanelChartSwitch_title {
+  font-weight: 600;
+  display: inline;
+  padding-left: 8px;
 }

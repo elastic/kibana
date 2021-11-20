@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
-
+import { emptyField } from '../../helpers/field_validators';
 import { Form, UseField } from '../components';
 import {
   FormSubmitHandler,
@@ -18,7 +18,8 @@ import {
   FormHook,
   ValidationFunc,
   FieldConfig,
-} from '../types';
+  VALIDATION_TYPES,
+} from '..';
 import { useForm } from './use_form';
 
 interface MyForm {
@@ -499,6 +500,135 @@ describe('useForm() hook', () => {
 
       ({ isValid } = formHook!);
       expect(isValid).toBeUndefined(); // Make sure it is "undefined" and not "false".
+    });
+  });
+
+  describe('form.validate()', () => {
+    test('should not invalidate a field with arrayItem validation when validating a form', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField
+              path="test-path"
+              config={{
+                validations: [
+                  {
+                    validator: emptyField('error-message'),
+                    type: VALIDATION_TYPES.ARRAY_ITEM,
+                    isBlocking: false,
+                  },
+                ],
+              }}
+            />
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      let isValid: boolean = false;
+
+      await act(async () => {
+        isValid = await formHook!.validate();
+      });
+
+      expect(isValid).toBe(true);
+    });
+
+    test('should invalidate a field with a blocking arrayItem validation when validating a form', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField
+              path="test-path"
+              config={{
+                validations: [
+                  {
+                    validator: emptyField('error-message'),
+                    type: VALIDATION_TYPES.ARRAY_ITEM,
+                    isBlocking: true,
+                  },
+                ],
+              }}
+            />
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      let isValid: boolean = false;
+
+      await act(async () => {
+        isValid = await formHook!.validate();
+      });
+
+      expect(isValid).toBe(false);
+    });
+  });
+
+  describe('form.getErrors()', () => {
+    test('should return the errors in the form', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField
+              path="field1"
+              config={{
+                validations: [
+                  {
+                    validator: emptyField('Field1 can not be empty'),
+                  },
+                ],
+              }}
+            />
+
+            <UseField
+              path="field2"
+              data-test-subj="field2"
+              config={{
+                validations: [
+                  {
+                    validator: ({ value }) => {
+                      if (value === 'bad') {
+                        return {
+                          message: 'Field2 is invalid',
+                        };
+                      }
+                    },
+                  },
+                ],
+              }}
+            />
+          </Form>
+        );
+      };
+
+      const {
+        form: { setInputValue },
+      } = registerTestBed(TestComp)() as TestBed;
+
+      let errors: string[] = formHook!.getErrors();
+      expect(errors).toEqual([]);
+
+      await act(async () => {
+        await formHook!.submit();
+      });
+      errors = formHook!.getErrors();
+      expect(errors).toEqual(['Field1 can not be empty']);
+
+      await setInputValue('field2', 'bad');
+      errors = formHook!.getErrors();
+      expect(errors).toEqual(['Field1 can not be empty', 'Field2 is invalid']);
     });
   });
 });

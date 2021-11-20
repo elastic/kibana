@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,17 +13,15 @@ import '@testing-library/jest-dom/extend-expect';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
 import {
-  getFieldType,
-  getLegendText,
-  getXScaleType,
   isNumericChartData,
   isOrdinalChartData,
   isUnsupportedChartData,
-  useColumnChart,
   NumericChartData,
   OrdinalChartData,
   UnsupportedChartData,
-} from './use_column_chart';
+} from '../../../../common/types/field_histograms';
+
+import { getFieldType, getLegendText, getXScaleType, useColumnChart } from './use_column_chart';
 
 describe('getFieldType()', () => {
   it('should return the Kibana field type for a given EUI data grid schema', () => {

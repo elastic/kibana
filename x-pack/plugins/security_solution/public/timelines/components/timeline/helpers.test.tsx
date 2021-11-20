@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash/fp';
@@ -11,7 +12,7 @@ import { DataProviderType } from './data_providers/data_provider';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { EsQueryConfig, Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { EsQueryConfig, FilterStateStore, Filter } from '@kbn/es-query';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
@@ -254,7 +255,7 @@ describe('Combined Queries', () => {
         isEventViewer,
       })
     ).toEqual({
-      filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+      filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
     });
   });
 
@@ -268,7 +269,7 @@ describe('Combined Queries', () => {
         browserFields: mockBrowserFields,
         filters: [
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -280,7 +281,7 @@ describe('Combined Queries', () => {
             query: { match_phrase: { 'event.category': 'file' } },
           },
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -289,7 +290,7 @@ describe('Combined Queries', () => {
               type: 'exists',
               value: 'exists',
             },
-            exists: { field: 'host.name' },
+            query: { exists: { field: 'host.name' } },
           } as Filter,
         ],
         kqlQuery: { query: '', language: 'kuery' },
@@ -298,13 +299,13 @@ describe('Combined Queries', () => {
       })
     ).toEqual({
       filterQuery:
-        '{"bool":{"must":[],"filter":[{"match_all":{}},{"exists":{"field":"host.name"}}],"should":[],"must_not":[]}}',
+        '{"bool":{"must":[],"filter":[{"exists":{"field":"host.name"}}],"should":[],"must_not":[]}}',
     });
   });
 
   test('Only Data Provider', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
       indexPattern: mockIndexPattern,
@@ -316,13 +317,14 @@ describe('Combined Queries', () => {
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
+    expect(kqlError).toBeUndefined();
   });
 
   test('Only Data Provider with timestamp (string input)', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
       indexPattern: mockIndexPattern,
@@ -331,16 +333,17 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"range\\":{\\"@timestamp\\":{\\"gte\\":\\"1521848183232\\",\\"lte\\":\\"1521848183232\\"}}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
+    expect(kqlError).toBeUndefined();
   });
 
   test('Only Data Provider with timestamp (numeric input)', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = 1521848183232;
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
       indexPattern: mockIndexPattern,
@@ -349,16 +352,17 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"range\\":{\\"@timestamp\\":{\\"gte\\":\\"1521848183232\\",\\"lte\\":\\"1521848183232\\"}}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
+    expect(kqlError).toBeUndefined();
   });
 
   test('Only Data Provider with a date type (string input)', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = '2018-03-23T23:36:23.232Z';
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
       indexPattern: mockIndexPattern,
@@ -367,16 +371,17 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"event.end\\":\\"1521848183232\\"}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
+    expect(kqlError).toBeUndefined();
   });
 
   test('Only Data Provider with date type (numeric input)', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = 'event.end';
     dataProviders[0].queryMatch.value = 1521848183232;
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
       indexPattern: mockIndexPattern,
@@ -385,13 +390,14 @@ describe('Combined Queries', () => {
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"event.end\\":\\"1521848183232\\"}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
+    expect(kqlError).toBeUndefined();
   });
 
   test('Only KQL search/filter query', () => {
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders: [],
       indexPattern: mockIndexPattern,
@@ -403,11 +409,26 @@ describe('Combined Queries', () => {
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
+    expect(kqlError).toBeUndefined();
+  });
+
+  test('Invalid KQL search/filter query', () => {
+    const { filterQuery, kqlError } = combineQueries({
+      config,
+      dataProviders: [],
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: 'host.name: "host-1', language: 'kuery' },
+      kqlMode: 'search',
+    })!;
+    expect(filterQuery).toBeUndefined();
+    expect(kqlError).toBeDefined(); // Not testing on the error message since we don't control changes to them
   });
 
   test('Data Provider & KQL search query', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
       indexPattern: mockIndexPattern,
@@ -419,11 +440,12 @@ describe('Combined Queries', () => {
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
+    expect(kqlError).toBeUndefined();
   });
 
   test('Data Provider & KQL filter query', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
       indexPattern: mockIndexPattern,
@@ -435,13 +457,14 @@ describe('Combined Queries', () => {
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
     );
+    expect(kqlError).toBeUndefined();
   });
 
   test('Data Provider & KQL search query multiple', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
     dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
       indexPattern: mockIndexPattern,
@@ -450,16 +473,17 @@ describe('Combined Queries', () => {
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'search',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 3\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 4\\"}}],\\"minimum_should_match\\":1}}]}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 2\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 5\\"}}],\\"minimum_should_match\\":1}}]}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"host.name\\":\\"host-1\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
+    expect(kqlError).toBeUndefined();
   });
 
   test('Data Provider & KQL filter query multiple', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
     dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
     dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
-    const { filterQuery } = combineQueries({
+    const { filterQuery, kqlError } = combineQueries({
       config,
       dataProviders,
       indexPattern: mockIndexPattern,
@@ -468,8 +492,75 @@ describe('Combined Queries', () => {
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'filter',
     })!;
-    expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 3\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 4\\"}}],\\"minimum_should_match\\":1}}]}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 2\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 5\\"}}],\\"minimum_should_match\\":1}}]}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"host.name\\":\\"host-1\\"}}],\\"minimum_should_match\\":1}}]}}],\\"should\\":[],\\"must_not\\":[]}}"`
+    );
+    expect(kqlError).toBeUndefined();
+  });
+
+  test('Data Provider & kql filter query with nested field that exists', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    const query = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'exists',
+            key: 'nestedField.firstAttributes',
+            value: 'exists',
+          },
+          query: {
+            exists: {
+              field: 'nestedField.firstAttributes',
+            },
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        } as Filter,
+      ],
+      kqlQuery: { query: '', language: 'kuery' },
+      kqlMode: 'filter',
+    });
+    const filterQuery = query && query.filterQuery;
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"exists\\":{\\"field\\":\\"nestedField.firstAttributes\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
+    );
+  });
+
+  test('Data Provider & kql filter query with nested field of a particular value', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    const query = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [
+        {
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            alias: null,
+            disabled: false,
+            key: 'nestedField.secondAttributes',
+            negate: false,
+            params: { query: 'test' },
+            type: 'phrase',
+          },
+          query: { match_phrase: { 'nestedField.secondAttributes': 'test' } },
+        },
+      ],
+      kqlQuery: { query: '', language: 'kuery' },
+      kqlMode: 'filter',
+    });
+    const filterQuery = query && query.filterQuery;
+    expect(filterQuery).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"name\\":\\"Provider 1\\"}}],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"nestedField.secondAttributes\\":\\"test\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 

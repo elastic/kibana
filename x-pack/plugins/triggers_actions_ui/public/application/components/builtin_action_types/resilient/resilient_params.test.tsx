@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mount } from 'enzyme';
 import ResilientParamsFields from './resilient_params';
@@ -185,9 +187,11 @@ describe('ResilientParamsFields renders', () => {
     test('incidentTypeComboBox creation triggers editAction', () => {
       const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
       const incidentTypes = wrapper.find('[data-test-subj="incidentTypeComboBox"]');
-      ((incidentTypes.at(0).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: 'Cool' }]);
+      (
+        incidentTypes.at(0).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: 'Cool' }]);
       expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual(['Cool']);
     });
     test('incidentTypes undefined triggers editAction', () => {
@@ -206,9 +210,11 @@ describe('ResilientParamsFields renders', () => {
       };
       const wrapper = mount(<ResilientParamsFields {...newProps} />);
       const incidentTypes = wrapper.find('[data-test-subj="incidentTypeComboBox"]');
-      ((incidentTypes.at(0).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        incidentTypes.at(0).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
       expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual([]);
     });
     test('A comment triggers editAction', () => {

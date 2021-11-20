@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExpressionFunctionParameter } from './expression_function_parameter';
@@ -21,7 +21,7 @@ describe('ExpressionFunctionParameter', () => {
     const param = new ExpressionFunctionParameter('foo', {
       help: 'bar',
       types: ['baz', 'quux'],
-    });
+    } as ConstructorParameters<typeof ExpressionFunctionParameter>[1]);
 
     expect(param.accepts('baz')).toBe(true);
     expect(param.accepts('quux')).toBe(true);

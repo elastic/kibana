@@ -1,30 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
-import { getIndexExists } from '../../index/get_index_exists';
-import { transformError, buildSiemResponse } from '../utils';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { buildSiemResponse } from '../utils';
+
 import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerts/common';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ): void => {
   router.post(
     {
@@ -43,18 +45,19 @@ export const createRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const rulesClient = context.alerting?.getRulesClient();
+        const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
-        if (!siemClient || !alertsClient) {
+        if (!siemClient || !rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
-            alertsClient,
+            isRuleRegistryEnabled,
+            rulesClient,
             ruleId: request.body.rule_id,
             id: undefined,
           });
@@ -66,7 +69,11 @@ export const createRulesRoute = (
           }
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
+        const internalRule = convertCreateAPIToInternalSchema(
+          request.body,
+          siemClient,
+          isRuleRegistryEnabled
+        );
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -77,10 +84,10 @@ export const createRulesRoute = (
         throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
 
         const indexExists = await getIndexExists(
-          clusterClient.callAsCurrentUser,
+          esClient.asCurrentUser,
           internalRule.params.outputIndex
         );
-        if (!indexExists) {
+        if (!isRuleRegistryEnabled && !indexExists) {
           return siemResponse.error({
             statusCode: 400,
             body: `To create a rule, the index must exist first. Index ${internalRule.params.outputIndex} does not exist`,
@@ -90,34 +97,23 @@ export const createRulesRoute = (
         // This will create the endpoint list if it does not exist yet
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        /**
-         * TODO: Remove this use of `as` by utilizing the proper type
-         */
-        const createdRule = (await alertsClient.create({
+        const createdRule = await rulesClient.create({
           data: internalRule,
-        })) as Alert<RuleTypeParams>;
-
-        const ruleActions = await updateRulesNotifications({
-          ruleAlertId: createdRule.id,
-          alertsClient,
-          savedObjectsClient,
-          enabled: createdRule.enabled,
-          actions: request.body.actions,
-          throttle: request.body.throttle ?? null,
-          name: createdRule.name,
         });
 
-        const ruleStatuses = await ruleStatusSavedObjectsClientFactory(savedObjectsClient).find({
-          perPage: 1,
-          sortField: 'statusDate',
-          sortOrder: 'desc',
-          search: `${createdRule.id}`,
-          searchFields: ['alertId'],
+        // mutes if we are creating the rule with the explicit "no_actions"
+        if (request.body.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+          await rulesClient.muteAll({ id: createdRule.id });
+        }
+
+        const ruleStatus = await context.securitySolution.getExecutionLogClient().getCurrentStatus({
+          ruleId: createdRule.id,
+          spaceId: context.securitySolution.getSpaceId(),
         });
         const [validated, errors] = newTransformValidate(
           createdRule,
-          ruleActions,
-          ruleStatuses.saved_objects[0]
+          ruleStatus,
+          isRuleRegistryEnabled
         );
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
@@ -125,7 +121,7 @@ export const createRulesRoute = (
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
-        const error = transformError(err);
+        const error = transformError(err as Error);
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

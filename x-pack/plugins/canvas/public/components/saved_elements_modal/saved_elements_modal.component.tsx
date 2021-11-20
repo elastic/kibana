@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, {
@@ -12,7 +13,6 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiModal,
   EuiModalBody,
@@ -22,80 +22,120 @@ import {
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiSpacer,
-  EuiOverlayMask,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { sortBy } from 'lodash';
-import { ComponentStrings } from '../../../i18n';
 import { CustomElement } from '../../../types';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
 import { CustomElementModal } from '../custom_element_modal';
 import { ElementGrid } from './element_grid';
 
-const { SavedElementsModal: strings } = ComponentStrings;
+const strings = {
+  getAddNewElementDescription: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.addNewElementDescription', {
+      defaultMessage: 'Group and save workpad elements to create new elements',
+    }),
+  getAddNewElementTitle: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.addNewElementTitle', {
+      defaultMessage: 'Add new elements',
+    }),
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getDeleteButtonLabel: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.deleteButtonLabel', {
+      defaultMessage: 'Delete',
+    }),
+  getDeleteElementDescription: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.deleteElementDescription', {
+      defaultMessage: 'Are you sure you want to delete this element?',
+    }),
+  getDeleteElementTitle: (elementName: string) =>
+    i18n.translate('xpack.canvas.savedElementsModal.deleteElementTitle', {
+      defaultMessage: `Delete element '{elementName}'?`,
+      values: {
+        elementName,
+      },
+    }),
+  getEditElementTitle: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.editElementTitle', {
+      defaultMessage: 'Edit element',
+    }),
+  getFindElementPlaceholder: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.findElementPlaceholder', {
+      defaultMessage: 'Find element',
+    }),
+  getModalTitle: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.modalTitle', {
+      defaultMessage: 'My elements',
+    }),
+  getSavedElementsModalCloseButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
+      defaultMessage: 'Close',
+    }),
+};
 
 export interface Props {
   /**
-   * Adds the custom element to the workpad
+   * Element add handler
    */
-  addCustomElement: (customElement: CustomElement) => void;
-  /**
-   * Queries ES for custom element saved objects
-   */
-  findCustomElements: () => void;
+  onAddCustomElement: (customElement: CustomElement) => void;
   /**
    * Handler invoked when the modal closes
    */
   onClose: () => void;
   /**
-   * Deletes the custom element
+   * Element delete handler
    */
-  removeCustomElement: (id: string) => void;
+  onRemoveCustomElement: (id: string) => void;
   /**
-   * Saved edits to the custom element
+   * Element update handler
    */
-  updateCustomElement: (id: string, name: string, description: string, image: string) => void;
+  onUpdateCustomElement: (id: string, name: string, description: string, image: string) => void;
   /**
    * Array of custom elements to display
    */
   customElements: CustomElement[];
   /**
-   * Text used to filter custom elements list
+   * Element search handler
    */
-  search: string;
+  onSearch: (search: string) => void;
   /**
-   * Setter for search text
+   * Initial search term
    */
-  setSearch: (search: string) => void;
+  initialSearch?: string;
 }
 
 export const SavedElementsModal: FunctionComponent<Props> = ({
-  search,
-  setSearch,
   customElements,
-  addCustomElement,
-  findCustomElements,
+  onAddCustomElement,
   onClose,
-  removeCustomElement,
-  updateCustomElement,
+  onRemoveCustomElement,
+  onUpdateCustomElement,
+  onSearch,
+  initialSearch = '',
 }) => {
   const hasLoadedElements = useRef<boolean>(false);
   const [elementToDelete, setElementToDelete] = useState<CustomElement | null>(null);
   const [elementToEdit, setElementToEdit] = useState<CustomElement | null>(null);
+  const [search, setSearch] = useState<string>(initialSearch);
 
   useEffect(() => {
     if (!hasLoadedElements.current) {
       hasLoadedElements.current = true;
-      findCustomElements();
+      onSearch('');
     }
-  }, [findCustomElements, hasLoadedElements]);
+  }, [onSearch, hasLoadedElements]);
 
   const showEditModal = (element: CustomElement) => setElementToEdit(element);
   const hideEditModal = () => setElementToEdit(null);
 
   const handleEdit = async (name: string, description: string, image: string) => {
     if (elementToEdit) {
-      updateCustomElement(elementToEdit.id, name, description, image);
+      onUpdateCustomElement(elementToEdit.id, name, description, image);
     }
     hideEditModal();
   };
@@ -105,7 +145,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   const handleDelete = async () => {
     if (elementToDelete) {
-      removeCustomElement(elementToDelete.id);
+      onRemoveCustomElement(elementToDelete.id);
     }
     hideDeleteModal();
   };
@@ -116,16 +156,14 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
     }
 
     return (
-      <EuiOverlayMask>
-        <CustomElementModal
-          title={strings.getEditElementTitle()}
-          name={elementToEdit.displayName}
-          description={elementToEdit.help}
-          image={elementToEdit.image}
-          onSave={handleEdit}
-          onCancel={hideEditModal}
-        />
-      </EuiOverlayMask>
+      <CustomElementModal
+        title={strings.getEditElementTitle()}
+        name={elementToEdit.displayName}
+        description={elementToEdit.help}
+        image={elementToEdit.image}
+        onSave={handleEdit}
+        onCancel={hideEditModal}
+      />
     );
   };
 
@@ -150,7 +188,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   const sortElements = (elements: CustomElement[]): CustomElement[] =>
     sortBy(elements, 'displayName');
 
-  const onSearch = (e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value);
+  const onFieldSearch = (e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value);
 
   let customElementContent = (
     <EuiEmptyPrompt
@@ -166,7 +204,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
       <ElementGrid
         elements={sortElements(customElements)}
         filterText={search}
-        onClick={addCustomElement}
+        onClick={onAddCustomElement}
         onEdit={showEditModal}
         onDelete={showDeleteModal}
       />
@@ -175,51 +213,37 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   return (
     <Fragment>
-      <EuiOverlayMask>
-        <EuiModal
-          onClose={onClose}
-          className="canvasModal--fixedSize"
-          maxWidth="1000px"
-          initialFocus=".canvasElements__filter input"
-        >
-          <EuiModalHeader className="canvasAssetManager__modalHeader">
-            <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
-              {strings.getModalTitle()}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+      <EuiModal
+        onClose={onClose}
+        className="canvasModal--fixedSize"
+        maxWidth="1000px"
+        initialFocus=".canvasElements__filter input"
+      >
+        <EuiModalHeader className="canvasAssetManager__modalHeader">
+          <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
+            {strings.getModalTitle()}
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody style={{ paddingRight: '1px' }}>
-            <EuiFieldSearch
-              fullWidth
-              value={search}
-              placeholder={strings.getFindElementPlaceholder()}
-              onChange={onSearch}
-            />
-            <EuiSpacer />
-            {customElementContent}
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButton
-              size="s"
-              onClick={onClose}
-              data-test-subj="saved-elements-modal-close-button"
-            >
-              {strings.getSavedElementsModalCloseButtonLabel()}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+        <EuiModalBody style={{ paddingRight: '1px' }}>
+          <EuiFieldSearch
+            fullWidth
+            value={search}
+            placeholder={strings.getFindElementPlaceholder()}
+            onChange={onFieldSearch}
+          />
+          <EuiSpacer />
+          {customElementContent}
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButton size="s" onClick={onClose} data-test-subj="saved-elements-modal-close-button">
+            {strings.getSavedElementsModalCloseButtonLabel()}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
 
       {renderDeleteModal()}
       {renderEditModal()}
     </Fragment>
   );
-};
-
-SavedElementsModal.propTypes = {
-  addCustomElement: PropTypes.func.isRequired,
-  findCustomElements: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
-  removeCustomElement: PropTypes.func.isRequired,
-  updateCustomElement: PropTypes.func.isRequired,
 };

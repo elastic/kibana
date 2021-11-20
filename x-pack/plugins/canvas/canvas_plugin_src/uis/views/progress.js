@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { shapes } from '../../renderers/progress/shapes';
+import { getAvailableProgressShapes } from '../../../../../../src/plugins/expression_shape/common';
 import { ViewStrings } from '../../../i18n';
 
 const { Progress: strings } = ViewStrings;
@@ -22,7 +23,7 @@ export const progress = () => ({
       help: strings.getShapeHelp(),
       argType: 'select',
       options: {
-        choices: Object.keys(shapes).map((key) => ({
+        choices: getAvailableProgressShapes().map((key) => ({
           value: key,
           //turns camel into title case
           name: key[0].toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),

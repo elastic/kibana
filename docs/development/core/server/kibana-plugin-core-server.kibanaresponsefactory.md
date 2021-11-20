@@ -10,7 +10,7 @@ Set of helpers used to create `KibanaResponse` to form HTTP response on an incom
 
 ```typescript
 kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Buffer | Error | Stream | {
+    custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
         message: string | Error;
         attributes?: Record<string, any> | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
@@ -19,7 +19,6 @@ kibanaResponseFactory: {
     forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    internalError: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
     redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
@@ -41,7 +40,6 @@ return response.ok({ body: Buffer.from(...) });
 const stream = new Stream.PassThrough();
 fs.createReadStream('./file').pipe(stream);
 return res.ok({ body: stream });
-
 ```
 HTTP headers are configurable via response factory parameter `options` [HttpResponseOptions](./kibana-plugin-core-server.httpresponseoptions.md)<!-- -->.
 
@@ -52,7 +50,6 @@ return response.ok({
     'content-type': 'application/json'
   }
 });
-
 ```
 2. Redirection response. Redirection URL is configures via 'Location' header.
 
@@ -63,7 +60,6 @@ return response.redirected({
    location: '/new-url',
   },
 });
-
 ```
 3. Error response. You may pass an error message to the client, where error message can be: - `string` send message text - `Error` send the message text of given Error object. - `{ message: string | Error, attributes: {data: Record<string, any>, ...} }` - send message text and attach additional error data.
 
@@ -101,7 +97,6 @@ try {
   });
 }
 
-
 ```
 4. Custom response. `ResponseFactory` may not cover your use case, so you can use the `custom` function to customize the response.
 
@@ -113,6 +108,5 @@ return response.custom({
     location: '/created-url'
   }
 })
-
 ```
 

@@ -1,57 +1,57 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { map as mapAsync } from 'bluebird';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function WatcherPageProvider({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['header']);
-  const find = getService('find');
-  const testSubjects = getService('testSubjects');
+export class WatcherPageObject extends FtrService {
+  private readonly header = this.ctx.getPageObject('header');
+  private readonly find = this.ctx.getService('find');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
 
-  class WatcherPage {
-    async clearAllWatches() {
-      const checkBoxExists = await testSubjects.exists('checkboxSelectAll');
-      if (checkBoxExists) {
-        await testSubjects.click('checkboxSelectAll');
-        await testSubjects.click('btnDeleteWatches');
-        await testSubjects.click('confirmModalConfirmButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-      }
+  async clearAllWatches() {
+    const checkBoxExists = await this.testSubjects.exists('checkboxSelectAll');
+    if (checkBoxExists) {
+      await this.testSubjects.click('checkboxSelectAll');
+      await this.testSubjects.click('btnDeleteWatches');
+      await this.testSubjects.click('confirmModalConfirmButton');
+      await this.header.waitUntilLoadingHasFinished();
     }
+  }
 
-    async createWatch(watchName: string, name: string) {
-      await testSubjects.click('createWatchButton');
-      await testSubjects.click('jsonWatchCreateLink');
-      await find.setValue('#id', watchName);
-      await find.setValue('#watchName', name);
-      await find.clickByCssSelector('[type="submit"]');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
+  async createWatch(watchName: string, name: string) {
+    await this.testSubjects.click('createWatchButton');
+    await this.testSubjects.click('jsonWatchCreateLink');
+    await this.find.setValue('#id', watchName);
+    await this.find.setValue('#watchName', name);
+    await this.find.clickByCssSelector('[type="submit"]');
+    await this.header.waitUntilLoadingHasFinished();
+  }
 
-    async getWatch(watchID: string) {
-      const watchIdColumn = await testSubjects.find(`watchIdColumn-${watchID}`);
-      const watchNameColumn = await testSubjects.find(`watchNameColumn-${watchID}`);
-      const id = await watchIdColumn.getVisibleText();
-      const name = await watchNameColumn.getVisibleText();
-      return {
-        id,
-        name,
-      };
-    }
+  async getWatch(watchID: string) {
+    const watchIdColumn = await this.testSubjects.find(`watchIdColumn-${watchID}`);
+    const watchNameColumn = await this.testSubjects.find(`watchNameColumn-${watchID}`);
+    const id = await watchIdColumn.getVisibleText();
+    const name = await watchNameColumn.getVisibleText();
+    return {
+      id,
+      name,
+    };
+  }
 
-    async deleteWatch() {
-      await testSubjects.click('checkboxSelectAll');
-      await testSubjects.click('btnDeleteWatches');
-    }
+  async deleteWatch() {
+    await this.testSubjects.click('checkboxSelectAll');
+    await this.testSubjects.click('btnDeleteWatches');
+  }
 
-    // get all the watches in the list
-    async getWatches() {
-      const watches = await find.allByCssSelector('.euiTableRow');
-      return mapAsync(watches, async (watch) => {
+  // get all the watches in the list
+  async getWatches() {
+    const watches = await this.find.allByCssSelector('.euiTableRow');
+    return await Promise.all(
+      watches.map(async (watch) => {
         const checkBox = await watch.findByCssSelector('td:nth-child(1)');
         const id = await watch.findByCssSelector('td:nth-child(2)');
         const name = await watch.findByCssSelector('td:nth-child(3)');
@@ -61,8 +61,7 @@ export function WatcherPageProvider({ getPageObjects, getService }: FtrProviderC
           id: await id.getVisibleText(),
           name: (await name.getVisibleText()).split(',').map((role) => role.trim()),
         };
-      });
-    }
+      })
+    );
   }
-  return new WatcherPage();
 }

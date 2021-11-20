@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -9,8 +10,6 @@ import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
 import type { JobSavedObjectService } from './service';
 import { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
 
-import { Job } from '../../common/types/anomaly_detection_jobs';
-import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 import { ResolveMlCapabilities } from '../../common/types/capabilities';
 
@@ -25,7 +24,7 @@ interface JobSavedObjectStatus {
   };
 }
 
-interface JobStatus {
+export interface JobStatus {
   jobId: string;
   datafeedId?: string | null;
   checks: {
@@ -33,7 +32,7 @@ interface JobStatus {
   };
 }
 
-interface StatusResponse {
+export interface StatusResponse {
   savedObjects: {
     [type in JobType]: JobSavedObjectStatus[];
   };
@@ -50,13 +49,12 @@ export function checksFactory(
     const jobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
 
     // load all non-space jobs and datafeeds
-    const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
-    const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
-      datafeeds: Datafeed[];
-    }>();
-    const { body: dfaJobs } = await client.asInternalUser.ml.getDataFrameAnalytics<{
-      data_frame_analytics: DataFrameAnalyticsConfig[];
-    }>();
+    const { body: adJobs } = await client.asInternalUser.ml.getJobs();
+    const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds();
+    const { body: dfaJobs } =
+      (await client.asInternalUser.ml.getDataFrameAnalytics()) as unknown as {
+        body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
+      };
 
     const savedObjectsStatus: JobSavedObjectStatus[] = jobObjects.map(
       ({ attributes, namespaces }) => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useMemo, useEffect, Fragment } from 'react';
@@ -10,24 +11,24 @@ import {
   CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   EuiEmptyPrompt,
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiPageHeader,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Moment } from 'moment';
+
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../../common/constants';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
@@ -36,15 +37,13 @@ import {
   PageError,
   DeleteWatchesModal,
   WatchStatus,
-  SectionError,
   SectionLoading,
   Error,
 } from '../../../components';
 import { useLoadWatches } from '../../../lib/api';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../../lib/navigation';
 import { useAppContext } from '../../../app_context';
-
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { PageError as GenericPageError } from '../../../shared_imports';
 
 export const WatchList = () => {
   // hooks
@@ -68,9 +67,11 @@ export const WatchList = () => {
     setBreadcrumbs([listBreadcrumb]);
   }, [setBreadcrumbs]);
 
-  const { isLoading: isWatchesLoading, data: watches, error } = useLoadWatches(
-    REFRESH_INTERVALS.WATCH_LIST
-  );
+  const {
+    isLoading: isWatchesLoading,
+    data: watches,
+    error,
+  } = useLoadWatches(REFRESH_INTERVALS.WATCH_LIST);
 
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
@@ -172,20 +173,35 @@ export const WatchList = () => {
 
   if (isWatchesLoading) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.watcher.sections.watchList.loadingWatchesDescription"
-          defaultMessage="Loading watches…"
-        />
-      </SectionLoading>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchList.loadingWatchesDescription"
+            defaultMessage="Loading watches…"
+          />
+        </SectionLoading>
+      </EuiPageContent>
     );
   }
 
-  if (getPageErrorCode(error)) {
+  const errorCode = getPageErrorCode(error);
+  if (errorCode) {
     return (
-      <EuiPageContent>
-        <PageError />
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <PageError errorCode={errorCode} />
       </EuiPageContent>
+    );
+  } else if (error) {
+    return (
+      <GenericPageError
+        title={
+          <FormattedMessage
+            id="xpack.watcher.sections.watchList.errorTitle"
+            defaultMessage="Error loading watches"
+          />
+        }
+        error={error as unknown as Error}
+      />
     );
   }
 
@@ -205,7 +221,7 @@ export const WatchList = () => {
     );
 
     return (
-      <EuiPageContent>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <EuiEmptyPrompt
           iconType="managementApp"
           title={
@@ -226,19 +242,7 @@ export const WatchList = () => {
 
   let content;
 
-  if (error) {
-    content = (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.watcher.sections.watchList.errorTitle"
-            defaultMessage="Error loading watches"
-          />
-        }
-        error={(error as unknown) as Error}
-      />
-    );
-  } else if (availableWatches) {
+  if (availableWatches) {
     const columns = [
       {
         field: 'id',
@@ -462,56 +466,46 @@ export const WatchList = () => {
     );
   }
 
-  if (content) {
-    return (
-      <EuiPageContent>
-        <DeleteWatchesModal
-          callback={(deleted?: string[]) => {
-            if (deleted) {
-              setDeletedWatches([...deletedWatches, ...watchesToDelete]);
-            }
-            setWatchesToDelete([]);
-          }}
-          watchesToDelete={watchesToDelete}
-        />
+  return (
+    <>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="appTitle">
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.header"
+              defaultMessage="Watcher"
+            />
+          </span>
+        }
+        bottomBorder
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={watcherGettingStartedUrl}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText"
+              defaultMessage="Watcher docs"
+            />
+          </EuiButtonEmpty>,
+        ]}
+        description={watcherDescriptionText}
+      />
+      <DeleteWatchesModal
+        callback={(deleted?: string[]) => {
+          if (deleted) {
+            setDeletedWatches([...deletedWatches, ...watchesToDelete]);
+          }
+          setWatchesToDelete([]);
+        }}
+        watchesToDelete={watchesToDelete}
+      />
 
-        <EuiTitle size="l">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
-              <h1 data-test-subj="appTitle">
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchList.header"
-                  defaultMessage="Watcher"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={watcherGettingStartedUrl}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText"
-                  defaultMessage="Watcher docs"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
+      <EuiSpacer size="l" />
 
-        <EuiSpacer size="s" />
-
-        <EuiText color="subdued">
-          <p>{watcherDescriptionText}</p>
-        </EuiText>
-
-        <EuiSpacer size="xl" />
-
-        {content}
-      </EuiPageContent>
-    );
-  }
-  return null;
+      {content}
+    </>
+  );
 };

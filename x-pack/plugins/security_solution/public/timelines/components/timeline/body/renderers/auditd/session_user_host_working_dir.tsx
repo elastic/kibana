@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -22,10 +23,21 @@ interface Props {
   secondary: string | null | undefined;
   workingDirectory: string | null | undefined;
   session: string | null | undefined;
+  isDraggable?: boolean;
 }
 
 export const SessionUserHostWorkingDir = React.memo<Props>(
-  ({ eventId, contextId, hostName, userName, primary, secondary, workingDirectory, session }) => (
+  ({
+    eventId,
+    contextId,
+    hostName,
+    userName,
+    primary,
+    secondary,
+    workingDirectory,
+    session,
+    isDraggable,
+  }) => (
     <>
       <TokensFlexItem grow={false} component="span">
         {i18n.SESSION}
@@ -37,6 +49,7 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
           field="auditd.session"
           value={session}
           iconType="number"
+          isDraggable={isDraggable}
         />
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
@@ -46,6 +59,7 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
           userName={userName}
           primary={primary}
           secondary={secondary}
+          isDraggable={isDraggable}
         />
       </TokensFlexItem>
       {hostName != null && (
@@ -58,6 +72,7 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
         eventId={eventId}
         workingDirectory={workingDirectory}
         hostName={hostName}
+        isDraggable={isDraggable}
       />
     </>
   )

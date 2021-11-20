@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,12 +23,13 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
   return {
     id: 'openmetricsMetrics',
     name: i18n.translate('home.tutorials.openmetricsMetrics.nameTitle', {
-      defaultMessage: 'OpenMetrics metrics',
+      defaultMessage: 'OpenMetrics Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.openmetricsMetrics.shortDescription', {
-      defaultMessage: 'Fetch metrics from an endpoint that serves metrics in OpenMetrics format.',
+      defaultMessage:
+        'Collect metrics from an endpoint that serves metrics in OpenMetrics format with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.openmetricsMetrics.longDescription', {
       defaultMessage:
@@ -49,5 +50,6 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['security'],
   };
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export default function ({ getService }) {
@@ -12,8 +12,12 @@ export default function ({ getService }) {
   const randomness = getService('randomness');
 
   describe('params', () => {
-    before(() => esArchiver.load('index_patterns/basic_index'));
-    after(() => esArchiver.unload('index_patterns/basic_index'));
+    before(() =>
+      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+    );
+    after(() =>
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+    );
 
     it('requires a pattern query param', () =>
       supertest.get('/api/index_patterns/_fields_for_wildcard').query({}).expect(400));

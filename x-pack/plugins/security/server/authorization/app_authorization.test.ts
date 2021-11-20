@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
-import { initAppAuthorization } from './app_authorization';
-
 import {
-  loggingSystemMock,
   coreMock,
   httpServerMock,
   httpServiceMock,
-} from '../../../../../src/core/server/mocks';
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
+import type { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
+import { featuresPluginMock } from '../../../features/server/mocks';
+import { initAppAuthorization } from './app_authorization';
 import { authorizationMock } from './index.mock';
 
 const createFeaturesSetupContractMock = (): FeaturesSetupContract => {

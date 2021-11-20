@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -19,6 +20,8 @@ import {
   JobSelectorFlyoutProps,
 } from './job_selector_flyout';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import { useStorage } from '../../contexts/ml/use_storage';
+import { ApplyTimeRangeConfig, ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 
 interface GroupObj {
   groupId: string;
@@ -78,6 +81,10 @@ export interface JobSelectionMaps {
 
 export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: JobSelectorProps) {
   const [globalState, setGlobalState] = useUrlState('_g');
+  const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage<ApplyTimeRangeConfig>(
+    ML_APPLY_TIME_RANGE_CONFIG,
+    true
+  );
 
   const selectedJobIds = globalState?.ml?.jobIds ?? [];
   const selectedGroups = globalState?.ml?.groups ?? [];
@@ -179,6 +186,8 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
             onJobsFetched={setMaps}
             onFlyoutClose={closeFlyout}
             maps={maps}
+            applyTimeRangeConfig={applyTimeRangeConfig}
+            onTimeRangeConfigChange={setApplyTimeRangeConfig}
           />
         </EuiFlyout>
       );

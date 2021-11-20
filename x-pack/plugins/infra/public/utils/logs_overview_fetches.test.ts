@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreStart } from 'kibana/public';
 import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
+import { createIndexPatternMock } from '../../common/dependency_mocks/index_patterns';
+import { GetLogSourceConfigurationSuccessResponsePayload } from '../../common/http_api/log_sources/get_log_source_configuration';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
+import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './logs_overview_fetchers';
-import { GetLogSourceConfigurationSuccessResponsePayload } from '../../common/http_api/log_sources/get_log_source_configuration';
 
 jest.mock('../containers/logs/log_source/api/fetch_log_source_status');
 const mockedCallFetchLogSourceStatusAPI = callFetchLogSourceStatusAPI as jest.MockedFunction<
@@ -19,14 +21,16 @@ const mockedCallFetchLogSourceStatusAPI = callFetchLogSourceStatusAPI as jest.Mo
 >;
 
 jest.mock('../containers/logs/log_source/api/fetch_log_source_configuration');
-const mockedCallFetchLogSourceConfigurationAPI = callFetchLogSourceConfigurationAPI as jest.MockedFunction<
-  typeof callFetchLogSourceConfigurationAPI
->;
+const mockedCallFetchLogSourceConfigurationAPI =
+  callFetchLogSourceConfigurationAPI as jest.MockedFunction<
+    typeof callFetchLogSourceConfigurationAPI
+  >;
 
 const DEFAULT_PARAMS = {
   absoluteTime: { start: 1593430680000, end: 1593430800000 },
   relativeTime: { start: 'now-2m', end: 'now' }, // Doesn't matter for the test
-  bucketSize: '30s', // Doesn't matter for the test
+  intervalString: '30s', // Doesn't matter for the test
+  bucketSize: 30, // Doesn't matter for the test
 };
 
 function setup() {
@@ -39,6 +43,37 @@ function setup() {
   //     searcher.search(...).subscribe((**response**) => {});
   //
   const dataResponder = jest.fn();
+
+  (data.indexPatterns.get as jest.Mock).mockResolvedValue(
+    createIndexPatternMock({
+      id: 'test-index-pattern',
+      title: 'log-indices-*',
+      timeFieldName: '@timestamp',
+      type: undefined,
+      fields: [
+        {
+          name: 'event.dataset',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'runtime_field',
+          type: 'string',
+          runtimeField: {
+            type: 'keyword',
+            script: {
+              source: 'emit("runtime value")',
+            },
+          },
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+    })
+  );
 
   (data.search.search as jest.Mock).mockReturnValue({
     subscribe: (progress: Function, error: Function, finish: Function) => {
@@ -67,7 +102,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndexStatus: 'available' },
+        data: { logIndexStatus: 'available' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
@@ -81,7 +116,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndexStatus: 'empty' },
+        data: { logIndexStatus: 'empty' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
@@ -95,7 +130,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndexStatus: 'missing' },
+        data: { logIndexStatus: 'missing' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
@@ -111,8 +146,10 @@ describe('Logs UI Observability Homepage Functions', () => {
       mockedCallFetchLogSourceConfigurationAPI.mockResolvedValue({
         data: {
           configuration: {
-            logAlias: 'filebeat-*',
-            fields: { timestamp: '@timestamp', tiebreaker: '_doc' },
+            logIndices: {
+              type: 'index_pattern',
+              indexPatternId: 'test-index-pattern',
+            },
           },
         },
       } as GetLogSourceConfigurationSuccessResponsePayload);

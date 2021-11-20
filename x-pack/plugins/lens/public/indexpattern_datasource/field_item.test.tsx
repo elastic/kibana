@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { IndexPattern } from './types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { documentField } from './document_field';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
+import { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -26,7 +29,6 @@ describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
   let indexPattern: IndexPattern;
   let core: ReturnType<typeof coreMock['createSetup']>;
-  let data: DataPublicPluginStart;
 
   beforeEach(() => {
     indexPattern = {
@@ -69,15 +71,27 @@ describe('IndexPattern Field Item', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'ip_range',
+          displayName: 'ip_range',
+          type: 'ip_range',
+          aggregatable: true,
+          searchable: true,
+        },
+        documentField,
       ],
     } as IndexPattern;
 
     core = coreMock.createSetup();
-    data = dataPluginMock.createStartContract();
     core.http.post.mockClear();
     defaultProps = {
       indexPattern,
-      data,
+      fieldFormats: {
+        ...fieldFormatsServiceMock.createStartContract(),
+        getDefaultInstance: jest.fn(() => ({
+          convert: jest.fn((s: unknown) => JSON.stringify(s)),
+        })),
+      } as unknown as FieldFormatsStart,
       core,
       highlight: '',
       dateRange: {
@@ -95,15 +109,12 @@ describe('IndexPattern Field Item', () => {
       },
       exists: true,
       chartsThemeService,
+      groupIndex: 0,
+      itemIndex: 0,
       dropOntoWorkspace: () => {},
       hasSuggestionForField: () => false,
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
-
-    data.fieldFormats = ({
-      getDefaultInstance: jest.fn(() => ({
-        convert: jest.fn((s: unknown) => JSON.stringify(s)),
-      })),
-    } as unknown) as DataPublicPluginStart['fieldFormats'];
   });
 
   it('should display displayName of a field', () => {
@@ -113,25 +124,24 @@ describe('IndexPattern Field Item', () => {
     );
   });
 
-  it('should request field stats without a time field, if the index pattern has none', async () => {
-    indexPattern.timeFieldName = undefined;
-    core.http.post.mockImplementationOnce(() => {
-      return Promise.resolve({});
+  it('should render edit field button if callback is set', () => {
+    core.http.post.mockImplementation(() => {
+      return new Promise(() => {});
     });
-    const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
-
-    await act(async () => {
-      clickField(wrapper, 'bytes');
-    });
-
-    expect(core.http.post).toHaveBeenCalledWith(
-      '/api/lens/index_stats/my-fake-index-pattern/field',
-      expect.anything()
+    const editFieldSpy = jest.fn();
+    const wrapper = mountWithIntl(
+      <InnerFieldItem {...defaultProps} editField={editFieldSpy} hideDetails />
     );
-    // Function argument types not detected correctly (https://github.com/microsoft/TypeScript/issues/26591)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { body } = (core.http.post.mock.calls[0] as any)[1];
-    expect(JSON.parse(body)).not.toHaveProperty('timeFieldName');
+    clickField(wrapper, 'bytes');
+    wrapper.update();
+    const popoverContent = wrapper.find(EuiPopover).prop('children');
+    act(() => {
+      mountWithIntl(popoverContent as ReactElement)
+        .find('[data-test-subj="lnsFieldListPanelEdit"]')
+        .first()
+        .simulate('click');
+    });
+    expect(editFieldSpy).toHaveBeenCalledWith('bytes');
   });
 
   it('should request field stats every time the button is clicked', async () => {
@@ -147,31 +157,21 @@ describe('IndexPattern Field Item', () => {
 
     clickField(wrapper, 'bytes');
 
-    expect(core.http.post).toHaveBeenCalledWith(
-      `/api/lens/index_stats/my-fake-index-pattern/field`,
-      {
-        body: JSON.stringify({
-          dslQuery: {
-            bool: {
-              must: [{ match_all: {} }],
-              filter: [],
-              should: [],
-              must_not: [],
-            },
+    expect(core.http.post).toHaveBeenCalledWith(`/api/lens/index_stats/1/field`, {
+      body: JSON.stringify({
+        dslQuery: {
+          bool: {
+            must: [],
+            filter: [],
+            should: [],
+            must_not: [],
           },
-          fromDate: 'now-7d',
-          toDate: 'now',
-          timeFieldName: 'timestamp',
-          field: {
-            name: 'bytes',
-            displayName: 'bytesLabel',
-            type: 'number',
-            aggregatable: true,
-            searchable: true,
-          },
-        }),
-      }
-    );
+        },
+        fromDate: 'now-7d',
+        toDate: 'now',
+        fieldName: 'bytes',
+      }),
+    });
 
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
 
@@ -215,7 +215,7 @@ describe('IndexPattern Field Item', () => {
         query: { query: 'geo.src : "US"', language: 'kuery' },
         filters: [
           {
-            match: { phrase: { 'geo.dest': 'US' } },
+            query: { match: { phrase: { 'geo.dest': 'US' } } },
           },
         ],
       });
@@ -224,40 +224,61 @@ describe('IndexPattern Field Item', () => {
     clickField(wrapper, 'bytes');
 
     expect(core.http.post).toHaveBeenCalledTimes(2);
-    expect(core.http.post).toHaveBeenLastCalledWith(
-      `/api/lens/index_stats/my-fake-index-pattern/field`,
-      {
-        body: JSON.stringify({
-          dslQuery: {
-            bool: {
-              must: [],
-              filter: [
-                {
-                  bool: {
-                    should: [{ match_phrase: { 'geo.src': 'US' } }],
-                    minimum_should_match: 1,
-                  },
+    expect(core.http.post).toHaveBeenLastCalledWith(`/api/lens/index_stats/1/field`, {
+      body: JSON.stringify({
+        dslQuery: {
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [{ match_phrase: { 'geo.src': 'US' } }],
+                  minimum_should_match: 1,
                 },
-                {
-                  match: { phrase: { 'geo.dest': 'US' } },
-                },
-              ],
-              should: [],
-              must_not: [],
-            },
+              },
+              {
+                match: { phrase: { 'geo.dest': 'US' } },
+              },
+            ],
+            should: [],
+            must_not: [],
           },
-          fromDate: 'now-14d',
-          toDate: 'now-7d',
-          timeFieldName: 'timestamp',
-          field: {
-            name: 'bytes',
-            displayName: 'bytesLabel',
-            type: 'number',
-            aggregatable: true,
-            searchable: true,
-          },
-        }),
-      }
+        },
+        fromDate: 'now-14d',
+        toDate: 'now-7d',
+        fieldName: 'bytes',
+      }),
+    });
+  });
+
+  it('should not request field stats for document field', async () => {
+    const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} field={documentField} />);
+
+    clickField(wrapper, 'Records');
+
+    expect(core.http.post).not.toHaveBeenCalled();
+    expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+  });
+
+  it('should not request field stats for range fields', async () => {
+    const wrapper = mountWithIntl(
+      <InnerFieldItem
+        {...defaultProps}
+        field={{
+          name: 'ip_range',
+          displayName: 'ip_range',
+          type: 'ip_range',
+          aggregatable: true,
+          searchable: true,
+        }}
+      />
     );
+
+    await act(async () => {
+      clickField(wrapper, 'ip_range');
+    });
+
+    expect(core.http.post).not.toHaveBeenCalled();
   });
 });

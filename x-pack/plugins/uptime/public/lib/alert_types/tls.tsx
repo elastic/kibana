@@ -1,22 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { ALERT_REASON } from '@kbn/rule-data-utils/technical_field_names';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { TlsTranslations } from './translations';
+import { TlsTranslations } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
+
+import { CERTIFICATES_ROUTE } from '../../../common/constants/ui';
 
 const { defaultActionMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
-export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): AlertTypeModel => ({
+export const initTlsAlertType: AlertTypeInitializer = ({
+  core,
+  plugins,
+}): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/uptime/${docLinks.DOC_LINK_VERSION}/uptime-alerting.html#_tls_alerts`;
+    return `${docLinks.links.observability.tlsCertificate}`;
   },
   alertParamsExpression: (params: any) => (
     <TLSAlert core={core} plugins={plugins} params={params} />
@@ -25,4 +32,8 @@ export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): Alert
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   requiresAppContext: false,
+  format: ({ fields }) => ({
+    reason: fields[ALERT_REASON] || '',
+    link: `/app/uptime${CERTIFICATES_ROUTE}`,
+  }),
 });

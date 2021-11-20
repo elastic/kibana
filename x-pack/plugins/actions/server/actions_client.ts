@@ -1,24 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 
 import { i18n } from '@kbn/i18n';
 import { omitBy, isUndefined } from 'lodash';
 import {
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
   KibanaRequest,
   SavedObjectsUtils,
 } from '../../../../src/core/server';
-import { AuditLogger, EventOutcome } from '../../security/server';
+import { AuditLogger } from '../../security/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
-import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
+import { validateConfig, validateSecrets, ActionExecutorContract, validateConnector } from './lib';
 import {
   ActionResult,
   FindActionResult,
@@ -38,6 +42,8 @@ import {
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
+import { RunNowResult } from '../../task_manager/server';
+import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -54,39 +60,43 @@ interface Action extends ActionUpdate {
   actionTypeId: string;
 }
 
-interface CreateOptions {
+export interface CreateOptions {
   action: Action;
 }
 
 interface ConstructorOptions {
   defaultKibanaIndex: string;
-  scopedClusterClient: ILegacyScopedClusterClient;
+  scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
-  executionEnqueuer: ExecutionEnqueuer;
+  executionEnqueuer: ExecutionEnqueuer<void>;
+  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
+  usageCounter?: UsageCounter;
 }
 
-interface UpdateOptions {
+export interface UpdateOptions {
   id: string;
   action: ActionUpdate;
 }
 
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
-  private readonly scopedClusterClient: ILegacyScopedClusterClient;
+  private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
-  private readonly executionEnqueuer: ExecutionEnqueuer;
+  private readonly executionEnqueuer: ExecutionEnqueuer<void>;
+  private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   private readonly auditLogger?: AuditLogger;
+  private readonly usageCounter?: UsageCounter;
 
   constructor({
     actionTypeRegistry,
@@ -96,9 +106,11 @@ export class ActionsClient {
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
+    ephemeralExecutionEnqueuer,
     request,
     authorization,
     auditLogger,
+    usageCounter,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
@@ -107,9 +119,11 @@ export class ActionsClient {
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
+    this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
+    this.usageCounter = usageCounter;
   }
 
   /**
@@ -136,14 +150,16 @@ export class ActionsClient {
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
-
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, { config, secrets });
+    }
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     this.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.CREATE,
         savedObject: { type: 'action', id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -152,6 +168,7 @@ export class ActionsClient {
       {
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -161,6 +178,7 @@ export class ActionsClient {
     return {
       id: result.id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
@@ -198,16 +216,16 @@ export class ActionsClient {
       );
       throw error;
     }
-    const {
-      attributes,
-      references,
-      version,
-    } = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    const { attributes, references, version } =
+      await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, { config, secrets });
+    }
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
@@ -215,7 +233,7 @@ export class ActionsClient {
       connectorAuditEvent({
         action: ConnectorAuditAction.UPDATE,
         savedObject: { type: 'action', id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
@@ -225,6 +243,7 @@ export class ActionsClient {
         ...attributes,
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -242,6 +261,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
+      isMissingSecrets: result.attributes.isMissingSecrets as boolean,
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
@@ -296,6 +316,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
@@ -449,7 +470,7 @@ export class ActionsClient {
     this.auditLogger?.log(
       connectorAuditEvent({
         action: ConnectorAuditAction.DELETE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'action', id },
       })
     );
@@ -461,14 +482,23 @@ export class ActionsClient {
     actionId,
     params,
     source,
+    relatedSavedObjects,
   }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
       await this.authorization.ensureAuthorized('execute');
+    } else {
+      trackLegacyRBACExemption('execute', this.usageCounter);
     }
-    return this.actionExecutor.execute({ actionId, params, source, request: this.request });
+    return this.actionExecutor.execute({
+      actionId,
+      params,
+      source,
+      request: this.request,
+      relatedSavedObjects,
+    });
   }
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
@@ -478,8 +508,23 @@ export class ActionsClient {
       AuthorizationMode.RBAC
     ) {
       await this.authorization.ensureAuthorized('execute');
+    } else {
+      trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
     }
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
+  public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
+    const { source } = options;
+    if (
+      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      AuthorizationMode.RBAC
+    ) {
+      await this.authorization.ensureAuthorized('execute');
+    } else {
+      trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.usageCounter);
+    }
+    return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
   public async listTypes(): Promise<ActionType[]> {
@@ -491,6 +536,10 @@ export class ActionsClient {
     options: { notifyUsage: boolean } = { notifyUsage: false }
   ) {
     return this.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
+  }
+
+  public isPreconfigured(connectorId: string): boolean {
+    return !!this.preconfiguredActions.find((preconfigured) => preconfigured.id === connectorId);
   }
 }
 
@@ -504,10 +553,10 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
 
 async function injectExtraFindData(
   defaultKibanaIndex: string,
-  scopedClusterClient: ILegacyScopedClusterClient,
+  scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
-  const aggs: Record<string, unknown> = {};
+  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
   for (const actionResult of actionResults) {
     aggs[actionResult.id] = {
       filter: {
@@ -541,7 +590,7 @@ async function injectExtraFindData(
       },
     };
   }
-  const aggregationResult = await scopedClusterClient.callAsInternalUser('search', {
+  const { body: aggregationResult } = await scopedClusterClient.asInternalUser.search({
     index: defaultKibanaIndex,
     body: {
       aggs,
@@ -553,6 +602,7 @@ async function injectExtraFindData(
   });
   return actionResults.map((actionResult) => ({
     ...actionResult,
+    // @ts-expect-error aggegation type is not specified
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));
 }

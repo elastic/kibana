@@ -5,5 +5,9 @@
   "ui": true,
   "requiredPlugins": ["management"],
   "optionalPlugins": ["home", "usageCollection"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils", "home"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home", "esUiShared"],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
 }

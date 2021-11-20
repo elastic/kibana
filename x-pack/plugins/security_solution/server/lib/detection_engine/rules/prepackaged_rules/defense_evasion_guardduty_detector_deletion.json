@@ -13,10 +13,10 @@
   ],
   "interval": "10m",
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "AWS GuardDuty Detector Deletion",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:DeleteDetector and event.dataset:aws.cloudtrail and event.provider:guardduty.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:guardduty.amazonaws.com and event.action:DeleteDetector and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/guardduty/delete-detector.html",
     "https://docs.aws.amazon.com/guardduty/latest/APIReference/API_DeleteDetector.html"
@@ -56,6 +56,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 6
 }

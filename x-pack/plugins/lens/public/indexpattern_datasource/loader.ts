@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
+import { uniq, mapValues, difference } from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { SavedObjectsClientContract, HttpSetup, SavedObjectReference } from 'kibana/public';
+import { HttpSetup, SavedObjectReference } from 'kibana/public';
 import { InitializationOptions, StateSetter } from '../types';
 import {
   IndexPattern,
@@ -16,30 +17,33 @@ import {
   IndexPatternField,
   IndexPatternLayer,
 } from './types';
-import { updateLayerIndexPattern } from './operations';
+import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
   IndexPatternsContract,
+  IndexPattern as IndexPatternInstance,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
+import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
-type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find'>;
-type IndexPatternsService = Pick<IndexPatternsContract, 'get'>;
+type IndexPatternsService = Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
 type ErrorHandler = (err: Error) => void;
 
 export async function loadIndexPatterns({
   indexPatternsService,
   patterns,
+  notUsedPatterns,
   cache,
 }: {
   indexPatternsService: IndexPatternsService;
   patterns: string[];
+  notUsedPatterns?: string[];
   cache: Record<string, IndexPattern>;
 }) {
   const missingIds = patterns.filter((id) => !cache[id]);
@@ -48,7 +52,32 @@ export async function loadIndexPatterns({
     return cache;
   }
 
-  const indexPatterns = await Promise.all(missingIds.map((id) => indexPatternsService.get(id)));
+  if (memoizedGetAvailableOperationsByMetadata.cache.clear) {
+    // clear operations meta data cache because index pattern reference may change
+    memoizedGetAvailableOperationsByMetadata.cache.clear();
+  }
+
+  const allIndexPatterns = await Promise.allSettled(
+    missingIds.map((id) => indexPatternsService.get(id))
+  );
+  // ignore rejected indexpatterns here, they're already handled at the app level
+  let indexPatterns = allIndexPatterns
+    .filter(
+      (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
+        response.status === 'fulfilled'
+    )
+    .map((response) => response.value);
+
+  // if all of the used index patterns failed to load, try loading one of not used ones till one succeeds
+  for (let i = 0; notUsedPatterns && i < notUsedPatterns?.length && !indexPatterns.length; i++) {
+    const resp = await indexPatternsService.get(notUsedPatterns[i]).catch((e) => {
+      // do nothing
+    });
+    if (resp) {
+      indexPatterns = [resp];
+    }
+  }
+
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
       const newFields = indexPattern.fields
@@ -56,30 +85,29 @@ export async function loadIndexPatterns({
           (field) =>
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
         )
-        .map(
-          (field): IndexPatternField => {
-            // Convert the getters on the index pattern service into plain JSON
-            const base = {
-              name: field.name,
-              displayName: field.displayName,
-              type: field.type,
-              aggregatable: field.aggregatable,
-              searchable: field.searchable,
-              meta: indexPattern.metaFields.includes(field.name),
-              esTypes: field.esTypes,
-              scripted: field.scripted,
-            };
+        .map((field): IndexPatternField => {
+          // Convert the getters on the index pattern service into plain JSON
+          const base = {
+            name: field.name,
+            displayName: field.displayName,
+            type: field.type,
+            aggregatable: field.aggregatable,
+            searchable: field.searchable,
+            meta: indexPattern.metaFields.includes(field.name),
+            esTypes: field.esTypes,
+            scripted: field.scripted,
+            runtime: Boolean(field.runtimeField),
+          };
 
-            // Simplifies tests by hiding optional properties instead of undefined
-            return base.scripted
-              ? {
-                  ...base,
-                  lang: field.lang,
-                  script: field.script,
-                }
-              : base;
-          }
-        )
+          // Simplifies tests by hiding optional properties instead of undefined
+          return base.scripted
+            ? {
+                ...base,
+                lang: field.lang,
+                script: field.script,
+              }
+            : base;
+        })
         .concat(documentField);
 
       const { typeMeta, title, timeFieldName, fieldFormatMap } = indexPattern;
@@ -91,7 +119,7 @@ export async function loadIndexPatterns({
             const restriction =
               typeMeta.aggs && typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
             if (restriction) {
-              restrictionsObj[agg] = restriction;
+              restrictionsObj[translateToOperationName(agg)] = restriction;
             }
           });
           if (Object.keys(restrictionsObj).length) {
@@ -185,7 +213,6 @@ export function injectReferences(
 export async function loadInitialState({
   persistedState,
   references,
-  savedObjectsClient,
   defaultIndexPatternId,
   storage,
   indexPatternsService,
@@ -194,7 +221,6 @@ export async function loadInitialState({
 }: {
   persistedState?: IndexPatternPersistedState;
   references?: SavedObjectReference[];
-  savedObjectsClient: SavedObjectsClient;
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
@@ -202,48 +228,66 @@ export async function loadInitialState({
   options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
   const { isFullEditor } = options ?? {};
-  const indexPatternRefs = await (isFullEditor ? loadIndexPatternRefs(savedObjectsClient) : []);
+  // make it explicit or TS will infer never[] and break few lines down
+  const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
+    ? loadIndexPatternRefs(indexPatternsService)
+    : []);
+
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
 
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
-
-  const requiredPatterns = _.uniq(
-    state
-      ? Object.values(state.layers)
-          .map((l) => l.indexPatternId)
-          .concat(state.currentIndexPatternId)
-      : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id]
+  const usedPatterns = (
+    initialContext
+      ? [initialContext.indexPatternId]
+      : uniq(
+          state
+            ? Object.values(state.layers)
+                .map((l) => l.indexPatternId)
+                .concat(state.currentIndexPatternId)
+            : [fallbackId]
+        )
   )
     // take out the undefined from the list
     .filter(Boolean);
 
-  const currentIndexPatternId = initialContext?.indexPatternId ?? requiredPatterns[0];
-  if (currentIndexPatternId) {
-    setLastUsedIndexPatternId(storage, currentIndexPatternId);
-  }
+  const notUsedPatterns: string[] = difference(
+    uniq(indexPatternRefs.map(({ id }) => id)),
+    usedPatterns
+  );
+
+  const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
 
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
-    patterns: initialContext ? [initialContext.indexPatternId] : requiredPatterns,
+    patterns: usedPatterns,
+    notUsedPatterns,
   });
-  if (state) {
-    return {
-      ...state,
-      currentIndexPatternId,
-      indexPatternRefs,
-      indexPatterns,
-      existingFields: {},
-      isFirstExistenceFetch: true,
-    };
+
+  // Priority list:
+  // * start with the indexPattern in context
+  // * then fallback to the used ones
+  // * then as last resort use a first one from not used refs
+  const availableIndexPatternIds = [
+    initialContext?.indexPatternId,
+    ...usedPatterns,
+    ...notUsedPatterns,
+  ].filter((id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]);
+
+  const currentIndexPatternId = availableIndexPatternIds[0];
+
+  if (currentIndexPatternId) {
+    setLastUsedIndexPatternId(storage, currentIndexPatternId);
   }
 
   return {
+    layers: {},
+    ...state,
     currentIndexPatternId,
     indexPatternRefs,
     indexPatterns,
-    layers: {},
     existingFields: {},
     isFirstExistenceFetch: true,
   };
@@ -264,17 +308,21 @@ export async function changeIndexPattern({
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
 }) {
-  try {
-    const indexPatterns = await loadIndexPatterns({
-      indexPatternsService,
-      cache: state.indexPatterns,
-      patterns: [id],
-    });
+  const indexPatterns = await loadIndexPatterns({
+    indexPatternsService,
+    cache: state.indexPatterns,
+    patterns: [id],
+  });
 
+  if (indexPatterns[id] == null) {
+    return onError(Error('Missing indexpatterns'));
+  }
+
+  try {
     setState((s) => ({
       ...s,
       layers: isSingleEmptyLayer(state.layers)
-        ? _.mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
+        ? mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
         : state.layers,
       indexPatterns: {
         ...s.indexPatterns,
@@ -307,13 +355,16 @@ export async function changeLayerIndexPattern({
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
 }) {
-  try {
-    const indexPatterns = await loadIndexPatterns({
-      indexPatternsService,
-      cache: state.indexPatterns,
-      patterns: [indexPatternId],
-    });
+  const indexPatterns = await loadIndexPatterns({
+    indexPatternsService,
+    cache: state.indexPatterns,
+    patterns: [indexPatternId],
+  });
+  if (indexPatterns[indexPatternId] == null) {
+    return onError(Error('Missing indexpatterns'));
+  }
 
+  try {
     setState((s) => ({
       ...s,
       layers: {
@@ -333,22 +384,13 @@ export async function changeLayerIndexPattern({
 }
 
 async function loadIndexPatternRefs(
-  savedObjectsClient: SavedObjectsClient
+  indexPatternsService: IndexPatternsService
 ): Promise<IndexPatternRef[]> {
-  const result = await savedObjectsClient.find<{ title: string }>({
-    type: 'index-pattern',
-    fields: ['title'],
-    perPage: 10000,
-  });
+  const indexPatterns = await indexPatternsService.getIdsWithTitle();
 
-  return result.savedObjects
-    .map((o) => ({
-      id: String(o.id),
-      title: (o.attributes as { title: string }).title,
-    }))
-    .sort((a, b) => {
-      return a.title.localeCompare(b.title);
-    });
+  return indexPatterns.sort((a, b) => {
+    return a.title.localeCompare(b.title);
+  });
 }
 
 export async function syncExistingFields({
@@ -413,20 +455,28 @@ export async function syncExistingFields({
       ...state,
       isFirstExistenceFetch: false,
       existenceFetchFailed: false,
-      existingFields: emptinessInfo.reduce((acc, info) => {
-        acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
-        return acc;
-      }, state.existingFields),
+      existenceFetchTimeout: false,
+      existingFields: emptinessInfo.reduce(
+        (acc, info) => {
+          acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
+          return acc;
+        },
+        { ...state.existingFields }
+      ),
     }));
   } catch (e) {
-    // show all fields as available if fetch failed
+    // show all fields as available if fetch failed or timed out
     setState((state) => ({
       ...state,
-      existenceFetchFailed: true,
-      existingFields: indexPatterns.reduce((acc, pattern) => {
-        acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
-        return acc;
-      }, state.existingFields),
+      existenceFetchFailed: e.res?.status !== 408,
+      existenceFetchTimeout: e.res?.status === 408,
+      existingFields: indexPatterns.reduce(
+        (acc, pattern) => {
+          acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
+          return acc;
+        },
+        { ...state.existingFields }
+      ),
     }));
   }
 }

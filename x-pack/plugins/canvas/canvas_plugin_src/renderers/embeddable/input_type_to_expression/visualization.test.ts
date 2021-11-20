@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { toExpression } from './visualization';
 import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 const baseInput = {
-  id: 'embeddableId',
+  id: 'elementId',
+  savedObjectId: 'embeddableId',
 };
 
 describe('toExpression', () => {
@@ -23,7 +25,7 @@ describe('toExpression', () => {
     expect(ast.type).toBe('expression');
     expect(ast.chain[0].function).toBe('savedVisualization');
 
-    expect(ast.chain[0].arguments.id).toStrictEqual([input.id]);
+    expect(ast.chain[0].arguments.id).toStrictEqual([input.savedObjectId]);
   });
 
   it('includes timerange if given', () => {

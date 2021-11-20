@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,7 +13,6 @@ import { sampleApp2ClickContext, SAMPLE_APP2_CLICK_TRIGGER } from '../../trigger
 export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
   const { plugins, managerWithoutEmbeddableSingleButton } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
-  const viewRef = React.useRef<'create' | 'manage'>('create');
 
   return (
     <>
@@ -31,7 +31,7 @@ export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
-            color="secondary"
+            color="success"
             fill
             iconType="play"
             iconSide="left"
@@ -49,11 +49,11 @@ export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
 
       {showManager && (
         <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
-          <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
-            onClose={() => setShowManager(false)}
-            viewMode={viewRef.current}
+          <plugins.uiActionsEnhanced.DrilldownManager
+            initialRoute={'/create'}
             dynamicActionManager={managerWithoutEmbeddableSingleButton}
             triggers={[SAMPLE_APP2_CLICK_TRIGGER]}
+            onClose={() => setShowManager(false)}
           />
         </EuiFlyout>
       )}

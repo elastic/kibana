@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import type { MlClient } from '../../lib/ml_client';
 
-import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
-
-export interface Filter {
-  filter_id: string;
-  description?: string;
-  items: string[];
-}
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { Filter, FilterStats } from '../../../common/types/filters';
 
 export interface FormFilter {
   filterId: string;
+  description?: string;
+  addItems?: string[];
+  removeItems?: string[];
+}
+
+export interface UpdateFilter {
   description?: string;
   addItems?: string[];
   removeItems?: string[];
@@ -34,28 +37,21 @@ interface FilterUsage {
   detectors: string[];
 }
 
-interface FilterStats {
-  filter_id: string;
-  description?: string;
-  item_count: number;
-  used_by: FilterUsage;
-}
-
 interface FiltersInUse {
   [id: string]: FilterUsage;
 }
 
-interface PartialDetector {
-  detector_description: string;
-  custom_rules: DetectorRule[];
-}
+// interface PartialDetector {
+//   detector_description: string;
+//   custom_rules: DetectorRule[];
+// }
 
-interface PartialJob {
-  job_id: string;
-  analysis_config: {
-    detectors: PartialDetector[];
-  };
-}
+// interface PartialJob {
+//   job_id: string;
+//   analysis_config: {
+//     detectors: PartialDetector[];
+//   };
+// }
 
 export class FilterManager {
   constructor(private _mlClient: MlClient) {}
@@ -68,15 +64,23 @@ export class FilterManager {
         this._mlClient.getFilters({ filter_id: filterId }),
       ]);
 
-      if (results[FILTERS] && results[FILTERS].body.filters.length) {
+      if (
+        results[FILTERS] &&
+        (results[FILTERS].body as estypes.MlGetFiltersResponse).filters.length
+      ) {
         let filtersInUse: FiltersInUse = {};
-        if (results[JOBS] && results[JOBS].body.jobs) {
-          filtersInUse = this.buildFiltersInUse(results[JOBS].body.jobs);
+        if (results[JOBS] && (results[JOBS].body as estypes.MlGetJobsResponse).jobs) {
+          filtersInUse = this.buildFiltersInUse(
+            (results[JOBS].body as estypes.MlGetJobsResponse).jobs
+          );
         }
 
-        const filter = results[FILTERS].body.filters[0];
-        filter.used_by = filtersInUse[filter.filter_id];
-        return filter;
+        const filter = (results[FILTERS].body as estypes.MlGetFiltersResponse).filters[0];
+        return {
+          ...filter,
+          used_by: filtersInUse[filter.filter_id],
+          item_count: 0,
+        } as FilterStats;
       } else {
         throw Boom.notFound(`Filter with the id "${filterId}" not found`);
       }
@@ -104,8 +108,10 @@ export class FilterManager {
 
       // Build a map of filter_ids against jobs and detectors using that filter.
       let filtersInUse: FiltersInUse = {};
-      if (results[JOBS] && results[JOBS].body.jobs) {
-        filtersInUse = this.buildFiltersInUse(results[JOBS].body.jobs);
+      if (results[JOBS] && (results[JOBS].body as estypes.MlGetJobsResponse).jobs) {
+        filtersInUse = this.buildFiltersInUse(
+          (results[JOBS].body as estypes.MlGetJobsResponse).jobs
+        );
       }
 
       // For each filter, return just
@@ -114,16 +120,18 @@ export class FilterManager {
       //  item_count
       //  jobs using the filter
       const filterStats: FilterStats[] = [];
-      if (results[FILTERS] && results[FILTERS].body.filters) {
-        results[FILTERS].body.filters.forEach((filter: Filter) => {
-          const stats: FilterStats = {
-            filter_id: filter.filter_id,
-            description: filter.description,
-            item_count: filter.items.length,
-            used_by: filtersInUse[filter.filter_id],
-          };
-          filterStats.push(stats);
-        });
+      if (results[FILTERS] && (results[FILTERS].body as estypes.MlGetFiltersResponse).filters) {
+        (results[FILTERS].body as estypes.MlGetFiltersResponse).filters.forEach(
+          (filter: Filter) => {
+            const stats: FilterStats = {
+              filter_id: filter.filter_id,
+              description: filter.description,
+              item_count: filter.items.length,
+              used_by: filtersInUse[filter.filter_id],
+            };
+            filterStats.push(stats);
+          }
+        );
       }
 
       return filterStats;
@@ -143,7 +151,7 @@ export class FilterManager {
     }
   }
 
-  async updateFilter(filterId: string, filter: FormFilter) {
+  async updateFilter(filterId: string, filter: UpdateFilter) {
     try {
       const body: FilterRequest = { filter_id: filterId };
       if (filter.description !== undefined) {
@@ -172,7 +180,7 @@ export class FilterManager {
     return body;
   }
 
-  buildFiltersInUse(jobsList: PartialJob[]) {
+  buildFiltersInUse(jobsList: Job[]) {
     // Build a map of filter_ids against jobs and detectors using that filter.
     const filtersInUse: FiltersInUse = {};
     jobsList.forEach((job) => {
@@ -182,7 +190,7 @@ export class FilterManager {
           const rules = detector.custom_rules;
           rules.forEach((rule) => {
             if (rule.scope) {
-              const ruleScope: DetectorRuleScope = rule.scope;
+              const ruleScope = rule.scope;
               const scopeFields = Object.keys(ruleScope);
               scopeFields.forEach((scopeField) => {
                 const filter = ruleScope[scopeField];

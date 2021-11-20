@@ -1,25 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 
-import { QueryBarTopRow } from './';
+import QueryBarTopRow from './query_bar_top_row';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
-import { stubIndexPatternWithFields } from '../../stubs';
+import { stubIndexPattern } from '../../stubs';
 import { UI_SETTINGS } from '../../../common';
 const startMock = coreMock.createStart();
 
@@ -112,19 +111,19 @@ describe('QueryBarTopRowTopRow', () => {
     jest.clearAllMocks();
   });
 
-  it('Should render query and time picker', async () => {
+  it('Should render query and time picker', () => {
     const { getByText, getByTestId } = render(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
         screenTitle: 'Another Screen',
         isDirty: false,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         timeHistory: mockTimeHistory,
       })
     );
 
-    await waitFor(() => getByText(kqlQuery.query));
-    await waitFor(() => getByTestId('superDatePickerShowDatesButton'));
+    expect(getByText(kqlQuery.query)).toBeInTheDocument();
+    expect(getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
@@ -132,7 +131,7 @@ describe('QueryBarTopRowTopRow', () => {
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
         screenTitle: 'Another Screen',
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         timeHistory: mockTimeHistory,
         disableAutoFocus: true,
         isDirty: false,
@@ -205,7 +204,7 @@ describe('QueryBarTopRowTopRow', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         isDirty: false,
         screenTitle: 'Another Screen',
         showDatePicker: false,
@@ -225,7 +224,7 @@ describe('QueryBarTopRowTopRow', () => {
         query: kqlQuery,
         isDirty: false,
         screenTitle: 'Another Screen',
-        indexPatterns: [stubIndexPatternWithFields],
+        indexPatterns: [stubIndexPattern],
         showQueryInput: false,
         showDatePicker: false,
         timeHistory: mockTimeHistory,

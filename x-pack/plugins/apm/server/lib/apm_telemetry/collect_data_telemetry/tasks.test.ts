@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import {
   SERVICE_NAME,
@@ -13,12 +14,10 @@ import {
 
 describe('data telemetry collection tasks', () => {
   const indices = {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.errorIndices': 'apm-8.0.0-error',
-    'apm_oss.metricsIndices': 'apm-8.0.0-metric',
-    'apm_oss.spanIndices': 'apm-8.0.0-span',
-    'apm_oss.transactionIndices': 'apm-8.0.0-transaction',
-    /* eslint-enable @typescript-eslint/naming-convention */
+    error: 'apm-8.0.0-error',
+    metric: 'apm-8.0.0-metric',
+    span: 'apm-8.0.0-span',
+    transaction: 'apm-8.0.0-transaction',
   } as ApmIndicesConfig;
 
   describe('environments', () => {
@@ -202,6 +201,44 @@ describe('data telemetry collection tasks', () => {
             availability_zone: [],
             provider: [],
             region: [],
+          },
+        });
+      });
+    });
+  });
+
+  describe('host', () => {
+    const task = tasks.find((t) => t.name === 'host');
+
+    it('returns a map of host provider data', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        aggregations: {
+          platform: {
+            buckets: [
+              { doc_count: 1, key: 'linux' },
+              { doc_count: 1, key: 'windows' },
+              { doc_count: 1, key: 'macos' },
+            ],
+          },
+        },
+      });
+
+      expect(await task?.executor({ indices, search } as any)).toEqual({
+        host: {
+          os: { platform: ['linux', 'windows', 'macos'] },
+        },
+      });
+    });
+
+    describe('with no results', () => {
+      it('returns an empty map', async () => {
+        const search = jest.fn().mockResolvedValueOnce({});
+
+        expect(await task?.executor({ indices, search } as any)).toEqual({
+          host: {
+            os: {
+              platform: [],
+            },
           },
         });
       });

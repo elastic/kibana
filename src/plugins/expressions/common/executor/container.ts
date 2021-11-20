@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -19,7 +19,7 @@ export interface ExecutorState<Context extends Record<string, unknown> = Record<
   context: Context;
 }
 
-export const defaultState: ExecutorState<any> = {
+export const defaultState: ExecutorState = {
   functions: {},
   types: {},
   context: {},
@@ -49,17 +49,19 @@ export interface ExecutorPureSelectors {
 export const pureSelectors: ExecutorPureSelectors = {
   getFunction: (state) => (id) => state.functions[id] || null,
   getType: (state) => (id) => state.types[id] || null,
-  getContext: ({ context }) => () => context,
+  getContext:
+    ({ context }) =>
+    () =>
+      context,
 };
 
-export type ExecutorContainer<
-  Context extends Record<string, unknown> = Record<string, unknown>
-> = StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
+export type ExecutorContainer<Context extends Record<string, unknown> = Record<string, unknown>> =
+  StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
 
 export const createExecutorContainer = <
   Context extends Record<string, unknown> = Record<string, unknown>
 >(
-  state: ExecutorState<Context> = defaultState
+  state = defaultState as ExecutorState<Context>
 ): ExecutorContainer<Context> => {
   const container = createStateContainer<
     ExecutorState<Context>,

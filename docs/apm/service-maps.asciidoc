@@ -8,20 +8,40 @@ requests per minute, and errors per minute.
 If enabled, service maps also integrate with machine learning--for real time health indicators based on anomaly detection scores.
 All of these features can help you quickly and visually assess your services' status and health.
 
+// Conditionally display a screenshot or video depending on what the
+// current documentation version is.
+
+ifeval::["{is-current-version}"=="true"]
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js"></script>
+<img
+  style="width: 100%; margin: auto; display: block;"
+  class="vidyard-player-embed"
+  src="https://play.vidyard.com/VH8gKnPE3Z2csACZTCeQrw.jpg"
+  data-uuid="VH8gKnPE3Z2csACZTCeQrw"
+  data-v="4"
+  data-type="inline"
+/>
+</br>
+++++
+endif::[]
+
+ifeval::["{is-current-version}"=="false"]
+[role="screenshot"]
+image::apm/images/service-maps.png[Example view of service maps in the APM app in Kibana]
+endif::[]
+
 We currently surface two types of service maps:
 
 * Global: All services instrumented with APM agents and the connections between them are shown.
 * Service-specific: Highlight connections for a selected service.
-
-[role="screenshot"]
-image::apm/images/service-maps.png[Example view of service maps in the APM app in Kibana]
 
 [float]
 [[service-maps-how]]
 === How do service maps work?
 
 Service maps rely on distributed traces to draw connections between services.
-As {apm-overview-ref-v}/distributed-tracing.html[distributed tracing] is enabled out-of-the-box for supported technologies, so are service maps.
+As {apm-guide-ref}/apm-distributed-tracing.html[distributed tracing] is enabled out-of-the-box for supported technologies, so are service maps.
 However, if a service isn't instrumented,
 or a `traceparent` header isn't being propagated to it,
 distributed tracing will not work, and the connection will not be drawn on the map.
@@ -87,10 +107,12 @@ Type and subtype are based on `span.type`, and `span.subtype`.
 Service maps are supported for the following Agent versions:
 
 [horizontal]
-Go Agent:: ≥ v1.7.0
-Java Agent:: ≥ v1.13.0
-.NET Agent:: ≥ v1.3.0
-Node.js Agent:: ≥ v3.6.0
-Python Agent:: ≥ v5.5.0
-Ruby Agent:: ≥ v3.6.0
-Real User Monitoring (RUM) Agent:: ≥ v4.7.0
+Go agent:: ≥ v1.7.0
+iOS agent:: _Not yet supported_
+Java agent:: ≥ v1.13.0
+.NET agent:: ≥ v1.3.0
+Node.js agent:: ≥ v3.6.0
+PHP agent:: _Not yet supported_
+Python agent:: ≥ v5.5.0
+Ruby agent:: ≥ v3.6.0
+Real User Monitoring (RUM) agent:: ≥ v4.7.0

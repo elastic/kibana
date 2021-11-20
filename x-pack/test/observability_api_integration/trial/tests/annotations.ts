@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/utility-types';
 import { Annotation } from '../../../../plugins/observability/common/annotations';
-import { ESSearchHit } from '../../../../typings/elasticsearch';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
@@ -36,7 +36,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   describe('Observability annotations', () => {
     describe('when creating an annotation', () => {
       afterEach(async () => {
-        const indexExists = (await es.indices.exists({ index: DEFAULT_INDEX_NAME })).body;
+        const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
         if (indexExists) {
           await es.indices.delete({
             index: DEFAULT_INDEX_NAME,
@@ -152,10 +152,11 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           track_total_hits: true,
         });
 
-        expect(search.body.hits.total.value).to.be(1);
+        // @ts-expect-error doesn't handle number
+        expect(search.hits.total.value).to.be(1);
 
-        expect(search.body.hits.hits[0]._source).to.eql(response.body._source);
-        expect(search.body.hits.hits[0]._id).to.eql(response.body._id);
+        expect(search.hits.hits[0]._source).to.eql(response.body._source);
+        expect(search.hits.hits[0]._id).to.eql(response.body._id);
       });
 
       it('returns the annotation', async () => {
@@ -235,16 +236,15 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           },
         });
 
-        const initialSearch = await es.search({
+        const initialSearch = await es.search<Annotation>({
           index: DEFAULT_INDEX_NAME,
           track_total_hits: true,
         });
 
-        expect(initialSearch.body.hits.total.value).to.be(2);
+        // @ts-expect-error doesn't handler number
+        expect(initialSearch.hits.total.value).to.be(2);
 
-        const [id1, id2] = initialSearch.body.hits.hits.map(
-          (hit: ESSearchHit<Annotation>) => hit._id
-        );
+        const [id1, id2] = initialSearch.hits.hits.map((hit) => hit._id);
 
         expect(
           (
@@ -260,9 +260,10 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           track_total_hits: true,
         });
 
-        expect(searchAfterFirstDelete.body.hits.total.value).to.be(1);
+        // @ts-expect-error doesn't handler number
+        expect(searchAfterFirstDelete.hits.total.value).to.be(1);
 
-        expect(searchAfterFirstDelete.body.hits.hits[0]._id).to.be(id2);
+        expect(searchAfterFirstDelete.hits.hits[0]._id).to.be(id2);
 
         expect(
           (
@@ -278,7 +279,8 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           track_total_hits: true,
         });
 
-        expect(searchAfterSecondDelete.body.hits.total.value).to.be(0);
+        // @ts-expect-error doesn't handle number
+        expect(searchAfterSecondDelete.hits.total.value).to.be(0);
       });
     });
   });

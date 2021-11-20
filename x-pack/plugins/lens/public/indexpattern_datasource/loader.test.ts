@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { HttpHandler, SavedObjectsClientContract } from 'kibana/public';
-import _ from 'lodash';
+import { HttpHandler } from 'kibana/public';
+import { last } from 'lodash';
 import {
   loadInitialState,
   loadIndexPatterns,
@@ -16,6 +17,7 @@ import {
   injectReferences,
 } from './loader';
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import { HttpFetchError } from '../../../../../src/core/public';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -24,6 +26,7 @@ import {
 } from './types';
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
+import { DateHistogramIndexPatternColumn } from './operations';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
@@ -34,7 +37,7 @@ const createMockStorage = (lastData?: Record<string, string>) => {
   };
 };
 
-const indexPattern1 = ({
+const indexPattern1 = {
   id: '1',
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
@@ -103,14 +106,14 @@ const indexPattern1 = ({
     },
     documentField,
   ],
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const sampleIndexPatternsFromService = {
   '1': createMockedIndexPattern(),
   '2': createMockedRestrictedIndexPattern(),
 };
 
-const indexPattern2 = ({
+const indexPattern2 = {
   id: '2',
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
@@ -144,7 +147,7 @@ const indexPattern2 = ({
           agg: 'histogram',
           interval: 1000,
         },
-        avg: {
+        average: {
           agg: 'avg',
         },
         max: {
@@ -175,30 +178,35 @@ const indexPattern2 = ({
     },
     documentField,
   ],
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const sampleIndexPatterns = {
   '1': indexPattern1,
   '2': indexPattern2,
 };
 
-function mockClient() {
-  return ({
-    find: jest.fn(async () => ({
-      savedObjects: [
-        { id: '1', attributes: { title: sampleIndexPatterns[1].title } },
-        { id: '2', attributes: { title: sampleIndexPatterns[2].title } },
-      ],
-    })),
-  } as unknown) as Pick<SavedObjectsClientContract, 'find'>;
-}
-
 function mockIndexPatternsService() {
-  return ({
+  return {
     get: jest.fn(async (id: '1' | '2') => {
-      return { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      if (!result.fields) {
+        result.fields = [];
+      }
+      return result;
     }),
-  } as unknown) as Pick<IndexPatternsContract, 'get'>;
+    getIdsWithTitle: jest.fn(async () => {
+      return [
+        {
+          id: sampleIndexPatterns[1].id,
+          title: sampleIndexPatterns[1].title,
+        },
+        {
+          id: sampleIndexPatterns[2].id,
+          title: sampleIndexPatterns[2].title,
+        },
+      ];
+    }),
+  } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
 }
 
 describe('loader', () => {
@@ -207,11 +215,12 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: sampleIndexPatterns,
         patterns: ['1', '2'],
-        indexPatternsService: ({
+        indexPatternsService: {
           get: jest.fn(() =>
             Promise.reject('mockIndexPatternService.get should not have been called')
           ),
-        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+          getIdsWithTitle: jest.fn(),
+        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache).toEqual(sampleIndexPatterns);
@@ -243,7 +252,7 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['foo'],
-        indexPatternsService: ({
+        indexPatternsService: {
           get: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
@@ -280,7 +289,11 @@ describe('loader', () => {
               },
             ],
           })),
-        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -295,7 +308,7 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['foo'],
-        indexPatternsService: ({
+        indexPatternsService: {
           get: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
@@ -332,7 +345,11 @@ describe('loader', () => {
               },
             ],
           })),
-        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -343,7 +360,6 @@ describe('loader', () => {
     it('should load a default state', async () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -367,10 +383,9 @@ describe('loader', () => {
 
     it('should load a default state without loading the indexPatterns when embedded', async () => {
       const storage = createMockStorage();
-      const savedObjectsClient = mockClient();
+      const indexPatternsService = mockIndexPatternsService();
       const state = await loadInitialState({
-        savedObjectsClient,
-        indexPatternsService: mockIndexPatternsService(),
+        indexPatternsService,
         storage,
         options: { isFullEditor: false },
       });
@@ -383,14 +398,12 @@ describe('loader', () => {
       });
 
       expect(storage.set).not.toHaveBeenCalled();
-
-      expect(savedObjectsClient.find).not.toHaveBeenCalled();
+      expect(indexPatternsService.getIdsWithTitle).not.toHaveBeenCalled();
     });
 
     it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', async () => {
       const storage = createMockStorage({ indexPatternId: 'c' });
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -414,7 +427,6 @@ describe('loader', () => {
 
     it('should load lastUsedIndexPatternId if in localStorage', async () => {
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage: createMockStorage({ indexPatternId: '2' }),
         options: { isFullEditor: true },
@@ -437,7 +449,6 @@ describe('loader', () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
         defaultIndexPatternId: '2',
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -462,7 +473,6 @@ describe('loader', () => {
     it('should use the indexPatternId of the visualize trigger field, if provided', async () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         initialContext: {
@@ -488,6 +498,57 @@ describe('loader', () => {
       });
     });
 
+    it('should initialize all the embeddable references without local storage', async () => {
+      const savedState: IndexPatternPersistedState = {
+        layers: {
+          layerb: {
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'date',
+                isBucketed: true,
+                label: 'My date',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'm',
+                },
+                sourceField: 'timestamp',
+              } as DateHistogramIndexPatternColumn,
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Sum of bytes',
+                operationType: 'sum',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      const storage = createMockStorage({});
+      const state = await loadInitialState({
+        persistedState: savedState,
+        references: [
+          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
+          { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
+          { name: 'another-reference', id: 'c', type: 'index-pattern' },
+        ],
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        options: { isFullEditor: false },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: undefined,
+        indexPatternRefs: [],
+        indexPatterns: {
+          '2': sampleIndexPatterns['2'],
+        },
+        layers: { layerb: { ...savedState.layers.layerb, indexPatternId: '2' } },
+      });
+      expect(storage.set).not.toHaveBeenCalled();
+    });
+
     it('should initialize from saved state', async () => {
       const savedState: IndexPatternPersistedState = {
         layers: {
@@ -503,7 +564,7 @@ describe('loader', () => {
                   interval: 'm',
                 },
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
               col2: {
                 dataType: 'number',
                 isBucketed: false,
@@ -523,7 +584,6 @@ describe('loader', () => {
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
           { name: 'another-reference', id: 'c', type: 'index-pattern' },
         ],
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -545,6 +605,97 @@ describe('loader', () => {
         indexPatternId: '2',
       });
     });
+
+    it('should default to the first loaded index pattern if could not load any used one or one from the storage', async () => {
+      function mockIndexPatternsServiceWithConflict() {
+        return {
+          get: jest.fn(async (id: '1' | '2' | 'conflictId') => {
+            if (id === 'conflictId') {
+              return Promise.reject(new Error('Oh noes conflict boom'));
+            }
+            const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
+            if (!result.fields) {
+              result.fields = [];
+            }
+            return result;
+          }),
+          getIdsWithTitle: jest.fn(async () => {
+            return [
+              {
+                id: sampleIndexPatterns[1].id,
+                title: sampleIndexPatterns[1].title,
+              },
+              {
+                id: sampleIndexPatterns[2].id,
+                title: sampleIndexPatterns[2].title,
+              },
+              {
+                id: 'conflictId',
+                title: 'conflictId title',
+              },
+            ];
+          }),
+        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+      }
+      const savedState: IndexPatternPersistedState = {
+        layers: {
+          layerb: {
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'date',
+                isBucketed: true,
+                label: 'My date',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'm',
+                },
+                sourceField: 'timestamp',
+              } as DateHistogramIndexPatternColumn,
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Sum of bytes',
+                operationType: 'sum',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      const storage = createMockStorage({ indexPatternId: 'conflictId' });
+      const state = await loadInitialState({
+        persistedState: savedState,
+        references: [
+          {
+            name: 'indexpattern-datasource-current-indexpattern',
+            id: 'conflictId',
+            type: 'index-pattern',
+          },
+          { name: 'indexpattern-datasource-layer-layerb', id: 'conflictId', type: 'index-pattern' },
+        ],
+        indexPatternsService: mockIndexPatternsServiceWithConflict(),
+        storage,
+        options: { isFullEditor: true },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: '1',
+        indexPatternRefs: [
+          { id: 'conflictId', title: 'conflictId title' },
+          { id: '1', title: sampleIndexPatterns['1'].title },
+          { id: '2', title: sampleIndexPatterns['2'].title },
+        ],
+        indexPatterns: {
+          '1': sampleIndexPatterns['1'],
+        },
+        layers: { layerb: { ...savedState.layers.layerb, indexPatternId: 'conflictId' } },
+      });
+
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: '1',
+      });
+    });
   });
 
   describe('saved object references', () => {
@@ -562,7 +713,7 @@ describe('loader', () => {
               dataType: 'number',
               isBucketed: false,
               label: '',
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'myfield',
             },
           },
@@ -575,7 +726,7 @@ describe('loader', () => {
               dataType: 'number',
               isBucketed: false,
               label: '',
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'myfield2',
             },
           },
@@ -680,6 +831,7 @@ describe('loader', () => {
           get: jest.fn(async () => {
             throw err;
           }),
+          getIdsWithTitle: jest.fn(),
         },
         onError,
         storage,
@@ -687,7 +839,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 
@@ -719,7 +871,7 @@ describe('loader', () => {
                   interval: 'm',
                 },
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
             },
             indexPatternId: '1',
           },
@@ -761,7 +913,7 @@ describe('loader', () => {
                 label: 'My hist',
                 operationType: 'date_histogram',
                 params: {
-                  interval: '1d',
+                  interval: 'm',
                 },
                 sourceField: 'timestamp',
               },
@@ -807,6 +959,7 @@ describe('loader', () => {
           get: jest.fn(async () => {
             throw err;
           }),
+          getIdsWithTitle: jest.fn(),
         },
         onError,
         storage,
@@ -814,7 +967,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 
@@ -830,15 +983,15 @@ describe('loader', () => {
 
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
-      const fetchJson = (jest.fn((path: string) => {
-        const indexPatternTitle = _.last(path.split('/'));
+      const fetchJson = jest.fn((path: string) => {
+        const indexPatternTitle = last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames: ['field_1', 'field_2'].map(
             (fieldName) => `ip${indexPatternTitle}_${fieldName}`
           ),
         };
-      }) as unknown) as HttpHandler;
+      }) as unknown as HttpHandler;
 
       await syncExistingFields({
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
@@ -868,6 +1021,7 @@ describe('loader', () => {
         foo: 'bar',
         isFirstExistenceFetch: false,
         existenceFetchFailed: false,
+        existenceFetchTimeout: false,
         existingFields: {
           '1': { ip1_field_1: true, ip1_field_2: true },
           '2': { ip2_field_1: true, ip2_field_2: true },
@@ -879,8 +1033,8 @@ describe('loader', () => {
     it('should call showNoDataPopover callback if current index pattern returns no fields', async () => {
       const setState = jest.fn();
       const showNoDataPopover = jest.fn();
-      const fetchJson = (jest.fn((path: string) => {
-        const indexPatternTitle = _.last(path.split('/'));
+      const fetchJson = jest.fn((path: string) => {
+        const indexPatternTitle = last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames:
@@ -888,7 +1042,7 @@ describe('loader', () => {
               ? ['field_1', 'field_2'].map((fieldName) => `${indexPatternTitle}_${fieldName}`)
               : [],
         };
-      }) as unknown) as HttpHandler;
+      }) as unknown as HttpHandler;
 
       const args = {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
@@ -915,11 +1069,11 @@ describe('loader', () => {
 
     it('should set all fields to available and existence error flag if the request fails', async () => {
       const setState = jest.fn();
-      const fetchJson = (jest.fn((path: string) => {
+      const fetchJson = jest.fn((path: string) => {
         return new Promise((resolve, reject) => {
           reject(new Error());
         });
-      }) as unknown) as HttpHandler;
+      }) as unknown as HttpHandler;
 
       const args = {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
@@ -948,6 +1102,56 @@ describe('loader', () => {
       }) as IndexPatternPrivateState;
 
       expect(newState.existenceFetchFailed).toEqual(true);
+      expect(newState.existenceFetchTimeout).toEqual(false);
+      expect(newState.existingFields['1']).toEqual({
+        field1: true,
+        field2: true,
+      });
+    });
+
+    it('should set all fields to available and existence error flag if the request times out', async () => {
+      const setState = jest.fn();
+      const fetchJson = jest.fn((path: string) => {
+        return new Promise((resolve, reject) => {
+          reject(
+            new HttpFetchError(
+              'timeout',
+              'name',
+              {} as unknown as Request,
+              { status: 408 } as unknown as Response
+            )
+          );
+        });
+      }) as unknown as HttpHandler;
+
+      const args = {
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatterns: [
+          {
+            id: '1',
+            title: '1',
+            hasRestrictions: false,
+            fields: [{ name: 'field1' }, { name: 'field2' }] as IndexPatternField[],
+          },
+        ],
+        setState,
+        dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
+      };
+
+      await syncExistingFields(args);
+
+      const [fn] = setState.mock.calls[0];
+      const newState = fn({
+        foo: 'bar',
+        existingFields: {},
+      }) as IndexPatternPrivateState;
+
+      expect(newState.existenceFetchFailed).toEqual(false);
+      expect(newState.existenceFetchTimeout).toEqual(true);
       expect(newState.existingFields['1']).toEqual({
         field1: true,
         field2: true,

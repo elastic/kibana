@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('should run the new platform plugins', async () => {
         expect(
           await browser.execute(() => {
-            return window._coreProvider.setup.plugins.core_plugin_b.sayHi();
+            return window._coreProvider.setup.plugins.corePluginB.sayHi();
           })
         ).to.be('Plugin A said: Hello from Plugin A!');
       });
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('should send kbn-system-request header when asSystemRequest: true', async () => {
         expect(
           await browser.executeAsync(async (cb) => {
-            window._coreProvider.start.plugins.core_plugin_b.sendSystemRequest(true).then(cb);
+            window._coreProvider.start.plugins.corePluginB.sendSystemRequest(true).then(cb);
           })
         ).to.be('/core_plugin_b/system_request says: "System request? true"');
       });
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('should not send kbn-system-request header when asSystemRequest: false', async () => {
         expect(
           await browser.executeAsync(async (cb) => {
-            window._coreProvider.start.plugins.core_plugin_b.sendSystemRequest(false).then(cb);
+            window._coreProvider.start.plugins.corePluginB.sendSystemRequest(false).then(cb);
           })
         ).to.be('/core_plugin_b/system_request says: "System request? false"');
       });

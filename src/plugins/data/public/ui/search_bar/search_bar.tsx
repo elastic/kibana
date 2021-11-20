@@ -1,25 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
+import { EuiIconProps } from '@elastic/eui';
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { Query, Filter } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
-import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
+import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
@@ -68,8 +69,14 @@ export interface SearchBarOwnProps {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
-  // Track UI Metrics
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+
+  placeholder?: string;
+  isClearable?: boolean;
+  iconType?: EuiIconProps['type'];
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
+  // defines padding; use 'inPage' to avoid extra padding; use 'detached' if the searchBar appears at the very top of the view, without any wrapper
+  displayStyle?: 'inPage' | 'detached';
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -95,8 +102,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   private services = this.props.kibana.services;
   private savedQueryService = this.services.data.query.savedQueries;
-  public filterBarRef: Element | null = null;
-  public filterBarWrapperRef: Element | null = null;
 
   public static getDerivedStateFromProps(nextProps: SearchBarProps, prevState: State) {
     if (isEqual(prevState.currentProps, nextProps)) {
@@ -207,19 +212,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   }
 
-  public setFilterBarHeight = () => {
-    requestAnimationFrame(() => {
-      const height =
-        this.filterBarRef && this.state.isFiltersVisible ? this.filterBarRef.clientHeight : 0;
-      if (this.filterBarWrapperRef) {
-        this.filterBarWrapperRef.setAttribute('style', `height: ${height}px`);
-      }
-    });
-  };
-
-  // member-ordering rules conflict with use-before-declaration rules
-  public ro = new ResizeObserver(this.setFilterBarHeight);
-
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
 
@@ -253,11 +245,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     try {
       let response;
       if (this.props.savedQuery && !saveAsNew) {
-        response = await this.savedQueryService.saveQuery(savedQueryAttributes, {
-          overwrite: true,
-        });
+        response = await this.savedQueryService.updateQuery(
+          savedQueryMeta.id!,
+          savedQueryAttributes
+        );
       } else {
-        response = await this.savedQueryService.saveQuery(savedQueryAttributes);
+        response = await this.savedQueryService.createQuery(savedQueryAttributes);
       }
 
       this.services.notifications.toasts.addSuccess(
@@ -323,9 +316,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             },
           });
         }
-        if (this.props.trackUiMetric) {
-          this.props.trackUiMetric(METRIC_TYPE.CLICK, `${this.services.appName}:query_submitted`);
-        }
+        this.services.usageCollection?.reportUiCounter(
+          this.services.appName,
+          METRIC_TYPE.CLICK,
+          'query_submitted'
+        );
       }
     );
   };
@@ -345,20 +340,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   };
 
-  public componentDidMount() {
-    if (this.filterBarRef) {
-      this.setFilterBarHeight();
-      this.ro.observe(this.filterBarRef);
-    }
-  }
-
-  public componentDidUpdate() {
-    if (this.filterBarRef) {
-      this.setFilterBarHeight();
-      this.ro.unobserve(this.filterBarRef);
-    }
-  }
-
   public render() {
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
@@ -371,6 +352,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onClearSavedQuery={this.props.onClearSavedQuery}
       />
     );
+
+    const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 
     let queryBar;
     if (this.shouldRenderQueryBar()) {
@@ -399,6 +382,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           }
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          placeholder={this.props.placeholder}
+          isClearable={this.props.isClearable}
+          iconType={this.props.iconType}
+          nonKqlMode={this.props.nonKqlMode}
+          nonKqlModeHelpText={this.props.nonKqlModeHelpText}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         />
       );
     }
@@ -409,40 +398,33 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
+
       filterBar = (
-        <div
-          id="GlobalFilterGroup"
-          ref={(node) => {
-            this.filterBarWrapperRef = node;
-          }}
-          className={filterGroupClasses}
-        >
-          <div
-            ref={(node) => {
-              this.filterBarRef = node;
-            }}
-          >
-            <FilterBar
-              className="globalFilterGroup__filterBar"
-              filters={this.props.filters!}
-              onFiltersUpdated={this.props.onFiltersUpdated}
-              indexPatterns={this.props.indexPatterns!}
-              appName={this.services.appName}
-              trackUiMetric={this.props.trackUiMetric}
-            />
-          </div>
+        <div id="GlobalFilterGroup" className={filterGroupClasses}>
+          <FilterBar
+            className="globalFilterGroup__filterBar"
+            filters={this.props.filters!}
+            onFiltersUpdated={this.props.onFiltersUpdated}
+            indexPatterns={this.props.indexPatterns!}
+            appName={this.services.appName}
+            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          />
         </div>
       );
     }
 
+    const globalQueryBarClasses = classNames('globalQueryBar', {
+      'globalQueryBar--inPage': this.props.displayStyle === 'inPage',
+    });
+
     return (
-      <div className="globalQueryBar" data-test-subj="globalQueryBar">
+      <div className={globalQueryBarClasses} data-test-subj="globalQueryBar">
         {queryBar}
         {filterBar}
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
-            savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
+            savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}
             savedQueryService={this.savedQueryService}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}

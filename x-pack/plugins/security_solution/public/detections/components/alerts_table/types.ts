@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
-
-import { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import { NoteResult } from '../../../graphql/types';
+import { NoteResult } from '../../../../common/types/timeline/note';
+import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { inputsModel } from '../../../common/store';
 
@@ -52,10 +51,8 @@ export interface UpdateAlertStatusActionProps {
 }
 
 export interface SendAlertToTimelineActionProps {
-  apolloClient?: ApolloClient<{}>;
   createTimeline: CreateTimeline;
-  ecsData: Ecs;
-  nonEcsData: TimelineNonEcsData[];
+  ecsData: Ecs | Ecs[];
   updateTimelineIsLoading: UpdateTimelineLoading;
   searchStrategyClient: ISearchStart;
 }
@@ -71,3 +68,9 @@ export interface CreateTimelineProps {
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;
+
+export interface ThresholdAggregationData {
+  thresholdFrom: string;
+  thresholdTo: string;
+  dataProviders: DataProvider[];
+}

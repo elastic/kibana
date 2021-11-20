@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
 import { mount } from 'enzyme';
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
+import { themeServiceMock } from '../../theme/theme_service.mock';
 import { FlyoutService, OverlayFlyoutStart } from './flyout_service';
 import { OverlayRef } from '../types';
 
 const i18nMock = i18nServiceMock.createStartContract();
+const themeMock = themeServiceMock.createStartContract();
 
 beforeEach(() => {
   mockReactDomRender.mockClear();
@@ -29,7 +31,11 @@ const mountText = (text: string) => (container: HTMLElement) => {
 
 const getServiceStart = () => {
   const service = new FlyoutService();
-  return service.start({ i18n: i18nMock, targetDomElement: document.createElement('div') });
+  return service.start({
+    i18n: i18nMock,
+    theme: themeMock,
+    targetDomElement: document.createElement('div'),
+  });
 };
 
 describe('FlyoutService', () => {

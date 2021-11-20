@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+
 import { RoleTemplateEditor } from './role_template_editor';
-import { findTestSubject } from '@kbn/test/jest';
 
 describe('RoleTemplateEditor', () => {
   it('allows inline templates to be edited', () => {
@@ -24,9 +26,9 @@ describe('RoleTemplateEditor', () => {
     };
 
     const wrapper = mountWithIntl(<RoleTemplateEditor {...props} />);
-    (wrapper
-      .find('EuiFieldText[data-test-subj="roleTemplateSourceEditor"]')
-      .props() as any).onChange({ target: { value: 'new_script' } });
+    (
+      wrapper.find('EuiFieldText[data-test-subj="roleTemplateSourceEditor"]').props() as any
+    ).onChange({ target: { value: 'new_script' } });
 
     expect(props.onChange).toHaveBeenCalledWith({
       template: {
@@ -87,9 +89,9 @@ describe('RoleTemplateEditor', () => {
     };
 
     const wrapper = mountWithIntl(<RoleTemplateEditor {...props} />);
-    (wrapper
-      .find('EuiComboBox[data-test-subj="roleMappingsFormTemplateType"]')
-      .props() as any).onChange('stored');
+    (
+      wrapper.find('EuiComboBox[data-test-subj="roleMappingsFormTemplateType"]').props() as any
+    ).onChange('stored');
 
     expect(props.onChange).toHaveBeenCalledWith({
       template: {

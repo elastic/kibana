@@ -1,9 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
 import { ImportListItemsToStreamOptions, WriteBufferToItemsOptions } from '../items';
 import {
   LIST_ID,
@@ -19,9 +23,9 @@ import { getConfigMockDecoded } from '../../config.mock';
 import { TestReadable } from './test_readable.mock';
 
 export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStreamOptions => ({
-  callCluster: getCallClusterMock(),
   config: getConfigMockDecoded(),
   deserializer: undefined,
+  esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listIndex: LIST_INDEX,
   listItemIndex: LIST_ITEM_INDEX,
@@ -35,8 +39,8 @@ export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStream
 
 export const getWriteBufferToItemsOptionsMock = (): WriteBufferToItemsOptions => ({
   buffer: [],
-  callCluster: getCallClusterMock(),
   deserializer: undefined,
+  esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,

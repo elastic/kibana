@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { safeDump } from 'js-yaml';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -20,6 +22,7 @@ import {
   EuiButton,
   EuiCallOut,
 } from '@elastic/eui';
+
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
 import { Loading } from '../../../components';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
@@ -51,10 +54,8 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
         {error.message}
       </EuiCallOut>
     ) : (
-      // Property 'whiteSpace' does not exist on type 'IntrinsicAttributes & CommonProps & OwnProps & HTMLAttributes<HTMLElement> & { children?: ReactNode; }'.
-      // @ts-expect-error linter complains whiteSpace isn't available but docs show it on EuiCodeBlockImpl
       <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
-        {fullAgentPolicyToYaml(yamlData!.item)}
+        {fullAgentPolicyToYaml(yamlData!.item, safeDump)}
       </EuiCodeBlock>
     );
 

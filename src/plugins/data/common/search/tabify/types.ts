@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Moment } from 'moment';
-import { RangeFilterParams } from '../../../common';
+import { RangeFilterParams } from '@kbn/es-query';
 import { IAggConfig } from '../aggs';
 
 /** @internal **/
@@ -41,13 +41,8 @@ export interface TabbedAggColumn {
   aggConfig: IAggConfig;
   id: string;
   name: string;
+  hasPrecisionError?: boolean;
 }
 
 /** @public **/
 export type TabbedAggRow = Record<TabbedAggColumn['id'], string | number>;
-
-/** @public **/
-export interface TabbedTable {
-  columns: TabbedAggColumn[];
-  rows: TabbedAggRow[];
-}

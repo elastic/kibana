@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -11,7 +12,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCodeEditor,
+  EuiCodeBlock,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -29,6 +30,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import 'react-ace';
 import 'brace/theme/textmate';
 
 import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';
@@ -355,18 +357,9 @@ export class DetailPanel extends Component {
                     </h3>
                   </EuiTitle>
                   <EuiSpacer size="s" />
-                  <EuiCodeEditor
-                    mode="json"
-                    theme="textmate"
-                    width="100%"
-                    isReadOnly
-                    setOptions={{ maxLines: Infinity }}
-                    value={JSON.stringify(shard, null, 2)}
-                    editorProps={{
-                      $blockScrolling: Infinity,
-                    }}
-                    data-test-subj={`shardsStats${i}`}
-                  />
+                  <EuiCodeBlock language="json" data-test-subj="shardsStats">
+                    {JSON.stringify(shard, null, 2)}
+                  </EuiCodeBlock>
                 </Fragment>
               ))}
           </section>

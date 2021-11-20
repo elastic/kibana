@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
+import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
+import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {
@@ -19,15 +22,14 @@ import {
 } from '../../hooks/use_metrics_explorer_options';
 import { metricToFormat } from './metric_to_format';
 import { InfraFormatterType } from '../../../../../lib/lib';
-import { SourceQuery } from '../../../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
 import { LinkDescriptor } from '../../../../../hooks/use_link_props';
 
 /*
- We've recently changed the default index pattern in Metrics UI from `metricbeat-*` to 
+ We've recently changed the default index pattern in Metrics UI from `metricbeat-*` to
  `metrics-*,metricbeat-*`. There is a bug in TSVB when there is an empty index in the pattern
  the field dropdowns are not populated correctly. This index pattern is a temporary fix.
- See: https://github.com/elastic/kibana/issues/73987 
+ See: https://github.com/elastic/kibana/issues/73987
 */
 const TSVB_WORKAROUND_INDEX_PATTERN = 'metric*';
 
@@ -83,27 +85,26 @@ export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptions
   }
 };
 
-const mapMetricToSeries = (chartOptions: MetricsExplorerChartOptions) => (
-  metric: MetricsExplorerOptionsMetric
-) => {
-  const format = metricToFormat(metric);
-  return {
-    label: createMetricLabel(metric),
-    axis_position: 'right',
-    chart_type: 'line',
-    color: (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0),
-    fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
-    formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
-    value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
-    id: uuid.v1(),
-    line_width: 2,
-    metrics: metricsExplorerMetricToTSVBMetric(metric),
-    point_size: 0,
-    separate_axis: 0,
-    split_mode: 'everything',
-    stacked: chartOptions.stack ? 'stacked' : 'none',
+const mapMetricToSeries =
+  (chartOptions: MetricsExplorerChartOptions) => (metric: MetricsExplorerOptionsMetric) => {
+    const format = metricToFormat(metric);
+    return {
+      label: createMetricLabel(metric),
+      axis_position: 'right',
+      chart_type: 'line',
+      color: (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0),
+      fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
+      formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
+      value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
+      id: uuid.v1(),
+      line_width: 2,
+      metrics: metricsExplorerMetricToTSVBMetric(metric),
+      point_size: 0,
+      separate_axis: 0,
+      split_mode: 'everything',
+      stacked: chartOptions.stack ? 'stacked' : 'none',
+    };
   };
-};
 
 export const createFilterFromOptions = (
   options: MetricsExplorerOptions,
@@ -142,7 +143,7 @@ const createTSVBIndexPattern = (alias: string) => {
 };
 
 export const createTSVBLink = (
-  source: SourceQuery.Query['source']['configuration'] | undefined,
+  source: MetricsSourceConfigurationProperties | undefined,
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries,
   timeRange: MetricsExplorerTimeOptions,
@@ -169,7 +170,7 @@ export const createTSVBLink = (
         series: options.metrics.map(mapMetricToSeries(chartOptions)),
         show_grid: 1,
         show_legend: 1,
-        time_field: (source && source.fields.timestamp) || '@timestamp',
+        time_field: TIMESTAMP_FIELD,
         type: 'timeseries',
         filter: createFilterFromOptions(options, series),
       },

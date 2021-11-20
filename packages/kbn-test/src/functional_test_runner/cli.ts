@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
 import { inspect } from 'util';
 
-import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import { run, createFlagError, Flags, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 import exitHook from 'exit-hook';
 
 import { FunctionalTestRunner } from './functional_test_runner';
@@ -27,6 +27,12 @@ const parseInstallDir = (flags: Flags) => {
 };
 
 export function runFtrCli() {
+  const runStartTime = Date.now();
+  const toolingLog = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+  const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
       const functionalTestRunner = new FunctionalTestRunner(
@@ -68,9 +74,19 @@ export function runFtrCli() {
 
         teardownRun = true;
         if (err) {
-          log.indent(-log.indent());
+          await reportTime(runStartTime, 'total', {
+            success: false,
+            err: err.message,
+            ...flags,
+          });
+          log.indent(-log.getIndent());
           log.error(err);
           process.exitCode = 1;
+        } else {
+          await reportTime(runStartTime, 'total', {
+            success: true,
+            ...flags,
+          });
         }
 
         try {

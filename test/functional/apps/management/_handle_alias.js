@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
@@ -18,8 +18,8 @@ export default function ({ getService, getPageObjects }) {
   describe('Index patterns on aliases', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
-      await esArchiver.loadIfNeeded('alias');
-      await esArchiver.load('empty_kibana');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/alias');
+      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
       await es.indices.updateAliases({
         body: {
           actions: [
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('alias');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/alias');
     });
   });
 }

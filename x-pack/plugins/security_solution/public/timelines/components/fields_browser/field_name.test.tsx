@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -13,6 +14,8 @@ import '../../../common/mock/match_media';
 import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
 
 import { FieldName } from './field_name';
+
+jest.mock('../../../common/lib/kibana');
 
 const categoryId = 'base';
 const timestampFieldId = '@timestamp';
@@ -56,11 +59,11 @@ describe('FieldName', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      wrapper.find('[data-test-subj="withHoverActionsButton"]').at(0).simulate('mouseenter');
+      wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
       wrapper.update();
       jest.runAllTimers();
       wrapper.update();
-      expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(true);
     });
   });
 

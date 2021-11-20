@@ -1,36 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { IndexPatternField } from 'src/plugins/data/public';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { IFieldType } from '../../../../../../src/plugins/data/public';
 import { IField, AbstractField } from './field';
 import { IESSource } from '../sources/es_source';
 import { IVectorSource } from '../sources/vector_source';
 
 export class ESDocField extends AbstractField implements IField {
   private readonly _source: IESSource;
-  private readonly _canReadFromGeoJson: boolean;
 
   constructor({
     fieldName,
     source,
     origin,
-    canReadFromGeoJson = true,
   }: {
     fieldName: string;
     source: IESSource;
     origin: FIELD_ORIGIN;
-    canReadFromGeoJson?: boolean;
   }) {
     super({ fieldName, origin });
     this._source = source;
-    this._canReadFromGeoJson = canReadFromGeoJson;
+  }
+
+  supportsFieldMetaFromEs(): boolean {
+    return true;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API does not return meta tiles for documents
+    return !this.getSource().isMvt();
   }
 
   canValueBeFormatted(): boolean {
@@ -41,7 +47,7 @@ export class ESDocField extends AbstractField implements IField {
     return this._source;
   }
 
-  async _getIndexPatternField(): Promise<IFieldType | undefined> {
+  async _getIndexPatternField(): Promise<IndexPatternField | undefined> {
     const indexPattern = await this._source.getIndexPattern();
     const indexPatternField = indexPattern.fields.getByName(this.getName());
     return indexPatternField && indexPatterns.isNestedField(indexPatternField)
@@ -52,7 +58,12 @@ export class ESDocField extends AbstractField implements IField {
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const indexPattern = await this._source.getIndexPattern();
     const tooltipProperty = new TooltipProperty(this.getName(), await this.getLabel(), value);
-    return new ESTooltipProperty(tooltipProperty, indexPattern, this as IField);
+    return new ESTooltipProperty(
+      tooltipProperty,
+      indexPattern,
+      this as IField,
+      this._source.getApplyGlobalQuery()
+    );
   }
 
   async getDataType(): Promise<string> {
@@ -65,14 +76,6 @@ export class ESDocField extends AbstractField implements IField {
     return indexPatternField && indexPatternField.displayName
       ? indexPatternField.displayName
       : super.getLabel();
-  }
-
-  supportsFieldMeta(): boolean {
-    return true;
-  }
-
-  canReadFromGeoJson(): boolean {
-    return this._canReadFromGeoJson;
   }
 
   async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {

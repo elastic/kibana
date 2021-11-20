@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { DataViewField } from '../../../../../../src/plugins/data_views/common';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import {
   kbnTypeToMLJobType,
@@ -15,28 +17,34 @@ import {
 describe('ML - field type utils', () => {
   describe('kbnTypeToMLJobType', () => {
     test('returns correct ML_JOB_FIELD_TYPES for KBN_FIELD_TYPES', () => {
-      const field: IFieldType = {
+      // @ts-ignore reassigning missing properties
+      const field: DataViewField = {
         type: KBN_FIELD_TYPES.NUMBER,
         name: KBN_FIELD_TYPES.NUMBER,
         aggregatable: true,
       };
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.NUMBER);
 
+      // @ts-ignore reassigning read-only type
       field.type = KBN_FIELD_TYPES.DATE;
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.DATE);
 
+      // @ts-ignore reassigning read-only type
       field.type = KBN_FIELD_TYPES.IP;
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.IP);
 
+      // @ts-ignore reassigning read-only type
       field.type = KBN_FIELD_TYPES.BOOLEAN;
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.BOOLEAN);
 
+      // @ts-ignore reassigning read-only type
       field.type = KBN_FIELD_TYPES.GEO_POINT;
       expect(kbnTypeToMLJobType(field)).toBe(ML_JOB_FIELD_TYPES.GEO_POINT);
     });
 
     test('returns ML_JOB_FIELD_TYPES.KEYWORD for aggregatable KBN_FIELD_TYPES.STRING', () => {
-      const field: IFieldType = {
+      // @ts-ignore reassigning missing properties
+      const field: DataViewField = {
         type: KBN_FIELD_TYPES.STRING,
         name: KBN_FIELD_TYPES.STRING,
         aggregatable: true,
@@ -45,7 +53,8 @@ describe('ML - field type utils', () => {
     });
 
     test('returns ML_JOB_FIELD_TYPES.TEXT for non-aggregatable KBN_FIELD_TYPES.STRING', () => {
-      const field: IFieldType = {
+      // @ts-ignore reassigning missing properties
+      const field: DataViewField = {
         type: KBN_FIELD_TYPES.STRING,
         name: KBN_FIELD_TYPES.STRING,
         aggregatable: false,
@@ -54,7 +63,8 @@ describe('ML - field type utils', () => {
     });
 
     test('returns undefined for non-aggregatable "foo"', () => {
-      const field: IFieldType = {
+      // @ts-ignore reassigning missing properties
+      const field: DataViewField = {
         type: 'foo',
         name: 'foo',
         aggregatable: false,

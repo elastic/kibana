@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -82,7 +84,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
         <EuiButton
           key="reloadButton"
           iconType="refresh"
-          color="secondary"
+          color="success"
           data-test-subj="reloadButton"
           onClick={onReloadClick}
         >
@@ -98,7 +100,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           {...reactRouterNavigate(history, '/create_component_template')}
         >
           {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.createButtonLabel', {
-            defaultMessage: 'Create a component template',
+            defaultMessage: 'Create component template',
           })}
         </EuiButton>,
       ],

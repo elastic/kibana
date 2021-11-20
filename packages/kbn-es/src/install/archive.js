@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const fs = require('fs');
@@ -12,7 +12,8 @@ const chalk = require('chalk');
 const execa = require('execa');
 const del = require('del');
 const url = require('url');
-const { log: defaultLog, decompress } = require('../utils');
+const { extract } = require('@kbn/dev-utils');
+const { log: defaultLog } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
 const { Artifact } = require('../artifact');
 const { parseSettings, SettingsFilter } = require('../settings');
@@ -50,7 +51,11 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   }
 
   log.info('extracting %s', chalk.bold(dest));
-  await decompress(dest, installPath);
+  await extract({
+    archivePath: dest,
+    targetDir: installPath,
+    stripComponents: 1,
+  });
   log.info('extracted to %s', chalk.bold(installPath));
 
   const tmpdir = path.resolve(installPath, 'ES_TMPDIR');

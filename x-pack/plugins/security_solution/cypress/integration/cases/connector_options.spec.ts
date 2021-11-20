@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
-  case1,
-  connectorIds,
-  mockConnectorsResponse,
-  executeResponses,
-  ibmResilientConnectorOptions,
-  jiraConnectorOptions,
-  serviceNowConnectorOpions,
+  getCase1,
+  getConnectorIds,
+  getMockConnectorsResponse,
+  getExecuteResponses,
+  getIbmResilientConnectorOptions,
+  getJiraConnectorOptions,
+  getServiceNowConnectorOptions,
 } from '../../objects/case';
 import {
   createCase,
@@ -29,39 +30,50 @@ import { cleanKibana } from '../../tasks/common';
 describe('Cases connector incident fields', () => {
   beforeEach(() => {
     cleanKibana();
-    cy.intercept('GET', '/api/cases/configure/connectors/_find', mockConnectorsResponse);
-    cy.intercept('POST', `/api/actions/action/${connectorIds.jira}/_execute`, (req) => {
+    cy.intercept('GET', '/api/cases/configure/connectors/_find', getMockConnectorsResponse());
+    cy.intercept('POST', `/api/actions/connector/${getConnectorIds().sn}/_execute`, (req) => {
+      const response =
+        req.body.params.subAction === 'getChoices'
+          ? getExecuteResponses().servicenow.choices
+          : { status: 'ok', data: [] };
+      req.reply(response);
+    });
+    cy.intercept('POST', `/api/actions/connector/${getConnectorIds().jira}/_execute`, (req) => {
       const response =
         req.body.params.subAction === 'issueTypes'
-          ? executeResponses.jira.issueTypes
-          : executeResponses.jira.fieldsByIssueType;
+          ? getExecuteResponses().jira.issueTypes
+          : getExecuteResponses().jira.fieldsByIssueType;
       req.reply(response);
     });
-    cy.intercept('POST', `/api/actions/action/${connectorIds.resilient}/_execute`, (req) => {
-      const response =
-        req.body.params.subAction === 'incidentTypes'
-          ? executeResponses.resilient.incidentTypes
-          : executeResponses.resilient.severity;
-      req.reply(response);
-    });
+    cy.intercept(
+      'POST',
+      `/api/actions/connector/${getConnectorIds().resilient}/_execute`,
+      (req) => {
+        const response =
+          req.body.params.subAction === 'incidentTypes'
+            ? getExecuteResponses().resilient.incidentTypes
+            : getExecuteResponses().resilient.severity;
+        req.reply(response);
+      }
+    );
   });
 
   it('Correct incident fields show when connector is changed', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
-    fillCasesMandatoryfields(case1);
-    fillJiraConnectorOptions(jiraConnectorOptions);
-    fillServiceNowConnectorOptions(serviceNowConnectorOpions);
-    fillIbmResilientConnectorOptions(ibmResilientConnectorOptions);
+    fillCasesMandatoryfields(getCase1());
+    fillJiraConnectorOptions(getJiraConnectorOptions());
+    fillServiceNowConnectorOptions(getServiceNowConnectorOptions());
+    fillIbmResilientConnectorOptions(getIbmResilientConnectorOptions());
     createCase();
 
-    cy.get(CONNECTOR_TITLE).should('have.text', ibmResilientConnectorOptions.title);
+    cy.get(CONNECTOR_TITLE).should('have.text', getIbmResilientConnectorOptions().title);
     cy.get(CONNECTOR_CARD_DETAILS).should(
       'have.text',
       `${
-        ibmResilientConnectorOptions.title
-      }Incident Types: ${ibmResilientConnectorOptions.incidentTypes.join(', ')}Severity: ${
-        ibmResilientConnectorOptions.severity
+        getIbmResilientConnectorOptions().title
+      }Incident Types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
+        getIbmResilientConnectorOptions().severity
       }`
     );
   });

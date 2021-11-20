@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -13,20 +13,27 @@ import { Tutorial } from './tutorial';
 
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
+    http: {
+      post: jest.fn().mockImplementation(async () => ({ count: 1 })),
+      basePath: { prepend: (path) => `/foo/${path}` },
+    },
     getBasePath: jest.fn(() => 'path'),
     chrome: {
       setBreadcrumbs: () => {},
     },
     tutorialService: {
       getModuleNotices: () => [],
+      getCustomComponent: jest.fn(),
+      getCustomStatusCheck: (name) => {
+        const customStatusCheckMock = {
+          custom_status_check_has_data: async () => true,
+          custom_status_check_no_data: async () => false,
+        };
+        return customStatusCheckMock[name];
+      },
     },
   }),
 }));
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
 
 function buildInstructionSet(type) {
   return {
@@ -54,6 +61,7 @@ const tutorial = {
   elasticCloud: buildInstructionSet('elasticCloud'),
   onPrem: buildInstructionSet('onPrem'),
   onPremElasticCloud: buildInstructionSet('onPremElasticCloud'),
+  customStatusCheckName: 'custom_status_check_has_data',
 };
 const loadTutorialPromise = Promise.resolve(tutorial);
 const getTutorial = () => {
@@ -122,7 +130,7 @@ describe('isCloudEnabled is false', () => {
     );
     await loadTutorialPromise;
     component.update();
-    component.find('#onPremElasticCloud').first().simulate('click');
+    component.find('#onPremElasticCloud').first().find('input').simulate('change');
     component.update();
     expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
   });
@@ -142,4 +150,105 @@ test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', asy
   await loadTutorialPromise;
   component.update();
   expect(component).toMatchSnapshot(); // eslint-disable-line
+});
+
+describe('custom status check', () => {
+  test('should return has_data when custom status check callback is set and returns true', async () => {
+    const component = mountWithIntl(
+      <Tutorial.WrappedComponent
+        addBasePath={addBasePath}
+        isCloudEnabled={true}
+        getTutorial={getTutorial}
+        replaceTemplateStrings={replaceTemplateStrings}
+        tutorialId={'my_testing_tutorial'}
+        bulkCreate={() => {}}
+      />
+    );
+    await loadTutorialPromise;
+    component.update();
+    await component.instance().checkInstructionSetStatus(0);
+    expect(component.state('statusCheckStates')[0]).toEqual('has_data');
+  });
+  test('should return no_data when custom status check callback is set and returns false', async () => {
+    const tutorialWithCustomStatusCheckNoData = {
+      ...tutorial,
+      customStatusCheckName: 'custom_status_check_no_data',
+    };
+    const component = mountWithIntl(
+      <Tutorial.WrappedComponent
+        addBasePath={addBasePath}
+        isCloudEnabled={true}
+        getTutorial={async () => tutorialWithCustomStatusCheckNoData}
+        replaceTemplateStrings={replaceTemplateStrings}
+        tutorialId={'my_testing_tutorial'}
+        bulkCreate={() => {}}
+      />
+    );
+    await loadTutorialPromise;
+    component.update();
+    await component.instance().checkInstructionSetStatus(0);
+    expect(component.state('statusCheckStates')[0]).toEqual('NO_DATA');
+  });
+
+  test('should return no_data when custom status check callback is not defined', async () => {
+    const tutorialWithoutCustomStatusCheck = {
+      ...tutorial,
+      customStatusCheckName: undefined,
+    };
+    const component = mountWithIntl(
+      <Tutorial.WrappedComponent
+        addBasePath={addBasePath}
+        isCloudEnabled={true}
+        getTutorial={async () => tutorialWithoutCustomStatusCheck}
+        replaceTemplateStrings={replaceTemplateStrings}
+        tutorialId={'my_testing_tutorial'}
+        bulkCreate={() => {}}
+      />
+    );
+    await loadTutorialPromise;
+    component.update();
+    await component.instance().checkInstructionSetStatus(0);
+    expect(component.state('statusCheckStates')[0]).toEqual('NO_DATA');
+  });
+
+  test('should return has_data if esHits or customStatusCheck returns true', async () => {
+    const { instructionSets } = tutorial.elasticCloud;
+    const tutorialWithStatusCheckAndCustomStatusCheck = {
+      ...tutorial,
+      customStatusCheckName: undefined,
+      elasticCloud: {
+        instructionSets: [
+          {
+            ...instructionSets[0],
+            statusCheck: {
+              title: 'check status',
+              text: 'check status',
+              esHitsCheck: {
+                index: 'foo',
+                query: {
+                  bool: {
+                    filter: [{ term: { 'processor.event': 'onboarding' } }],
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    };
+    const component = mountWithIntl(
+      <Tutorial.WrappedComponent
+        addBasePath={addBasePath}
+        isCloudEnabled={true}
+        getTutorial={async () => tutorialWithStatusCheckAndCustomStatusCheck}
+        replaceTemplateStrings={replaceTemplateStrings}
+        tutorialId={'my_testing_tutorial'}
+        bulkCreate={() => {}}
+      />
+    );
+    await loadTutorialPromise;
+    component.update();
+    await component.instance().checkInstructionSetStatus(0);
+    expect(component.state('statusCheckStates')[0]).toEqual('has_data');
+  });
 });

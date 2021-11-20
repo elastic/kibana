@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
@@ -21,6 +22,7 @@ const idFilterList = [
 
 export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobCreatorUpdate, jobValidator } = useContext(JobCreatorContext);
+  const [nextActive, setNextActive] = useState(false);
 
   if (jobCreator.type === JOB_TYPE.ADVANCED) {
     // for advanced jobs, ignore time range warning as the
@@ -51,6 +53,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
   // keep a record of the advanced validation in the jobValidator
   function setIsValid(valid: boolean) {
     jobValidator.advancedValid = valid;
+    setNextActive(valid);
   }
 
   return (
@@ -68,7 +71,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           <WizardNav
             previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             next={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
-            nextActive={true}
+            nextActive={nextActive}
           />
         </Fragment>
       )}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -22,6 +23,7 @@ import { JA3_HASH_FIELD_NAME, Ja3Fingerprint } from '../../ja3_fingerprint';
 export const Fingerprints = React.memo<{
   contextId: string;
   eventId: string;
+  isDraggable?: boolean;
   tlsClientCertificateFingerprintSha1?: string[] | null;
   tlsFingerprintsJa3Hash?: string[] | null;
   tlsServerCertificateFingerprintSha1?: string[] | null;
@@ -29,6 +31,7 @@ export const Fingerprints = React.memo<{
   ({
     contextId,
     eventId,
+    isDraggable,
     tlsClientCertificateFingerprintSha1,
     tlsFingerprintsJa3Hash,
     tlsServerCertificateFingerprintSha1,
@@ -47,6 +50,7 @@ export const Fingerprints = React.memo<{
                 eventId={eventId}
                 fieldName={JA3_HASH_FIELD_NAME}
                 contextId={contextId}
+                isDraggable={isDraggable}
                 value={ja3}
               />
             </EuiFlexItem>
@@ -60,6 +64,7 @@ export const Fingerprints = React.memo<{
                 certificateType="client"
                 contextId={contextId}
                 fieldName={TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME}
+                isDraggable={isDraggable}
                 value={clientCert}
               />
             </EuiFlexItem>
@@ -73,6 +78,7 @@ export const Fingerprints = React.memo<{
                 certificateType="server"
                 contextId={contextId}
                 fieldName={TLS_SERVER_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME}
+                isDraggable={isDraggable}
                 value={serverCert}
               />
             </EuiFlexItem>

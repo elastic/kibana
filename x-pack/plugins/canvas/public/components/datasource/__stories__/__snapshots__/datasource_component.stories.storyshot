@@ -15,6 +15,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     >
       <span
         className="euiButtonContent__icon"
+        color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
       />
@@ -38,9 +39,14 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     <div
       className="euiText euiText--small"
     >
-      <p>
-        The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
-      </p>
+      <div
+        className="euiTextColor euiTextColor--default"
+        style={Object {}}
+      >
+        <p>
+          The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
+        </p>
+      </div>
     </div>
   </div>
 </div>
@@ -61,6 +67,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
     >
       <span
         className="euiButtonContent__icon"
+        color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
       />
@@ -111,7 +118,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+        className="euiButton euiButton--success euiButton--small euiButton--fill"
         disabled={false}
         onClick={[Function]}
         style={

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
+
 import { useValues } from 'kea';
 
 import { KibanaLogic } from '../kibana';
@@ -20,7 +22,7 @@ import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './g
 
 /**
  * Helpers for setting Kibana chrome (breadcrumbs, doc titles) on React view mount
- * @see https://github.com/elastic/kibana/blob/master/src/core/public/chrome/chrome_service.tsx
+ * @see https://github.com/elastic/kibana/blob/main/src/core/public/chrome/chrome_service.tsx
  *
  * Example usage (don't forget to i18n.translate() page titles!):
  *

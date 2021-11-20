@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
@@ -42,12 +42,12 @@ describe('preview_scripted_field route', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.search.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "_source": undefined,
         "body": Object {
+          "_source": undefined,
           "query": Object {
             "match_all": Object {},
           },
@@ -59,10 +59,10 @@ describe('preview_scripted_field route', () => {
               },
             },
           },
+          "size": 10,
+          "timeout": "30s",
         },
         "index": "kibana_sample_data_logs",
-        "size": 10,
-        "timeout": "30s",
       }
     `);
 
@@ -98,16 +98,16 @@ describe('preview_scripted_field route', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.search.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "_source": Array [
-          "a",
-          "b",
-          "c",
-        ],
         "body": Object {
+          "_source": Array [
+            "a",
+            "b",
+            "c",
+          ],
           "query": Object {
             "bool": Object {
               "some": "query",
@@ -121,10 +121,10 @@ describe('preview_scripted_field route', () => {
               },
             },
           },
+          "size": 10,
+          "timeout": "30s",
         },
         "index": "kibana_sample_data_logs",
-        "size": 10,
-        "timeout": "30s",
       }
     `);
   });
@@ -152,7 +152,7 @@ describe('preview_scripted_field route', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.search).toBeCalled();
     expect(mockResponse.customError).toBeCalled();

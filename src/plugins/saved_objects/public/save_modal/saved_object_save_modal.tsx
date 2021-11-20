@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -21,7 +21,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
@@ -67,6 +66,7 @@ export interface SaveModalState {
 
 const generateId = htmlIdGenerator();
 
+/** @deprecated */
 export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   public readonly state = {
@@ -123,52 +123,48 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     );
 
     return (
-      <EuiOverlayMask>
-        <form onSubmit={this.onFormSubmit}>
-          <EuiModal
-            data-test-subj="savedObjectSaveModal"
-            className={`kbnSavedObjectSaveModal${
-              hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''
-            }`}
-            onClose={this.props.onClose}
-          >
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                <FormattedMessage
-                  id="savedObjects.saveModal.saveTitle"
-                  defaultMessage="Save {objectType}"
-                  values={{ objectType: this.props.objectType }}
-                />
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
+      <EuiModal
+        data-test-subj="savedObjectSaveModal"
+        className={`kbnSavedObjectSaveModal${hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''}`}
+        onClose={this.props.onClose}
+      >
+        <form onSubmit={this.onFormSubmit} className="euiModal__flex">
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="savedObjects.saveModal.saveTitle"
+                defaultMessage="Save {objectType}"
+                values={{ objectType: this.props.objectType }}
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-            <EuiModalBody>
-              {this.renderDuplicateTitleCallout(duplicateWarningId)}
+          <EuiModalBody>
+            {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
-              <EuiForm>
-                {!this.props.showDescription && this.props.description && (
-                  <EuiText size="s" color="subdued">
-                    {this.props.description}
-                  </EuiText>
-                )}
-                {formBody}
-                {this.renderCopyOnSave()}
-              </EuiForm>
-            </EuiModalBody>
+            <EuiForm>
+              {!this.props.showDescription && this.props.description && (
+                <EuiText size="s" color="subdued">
+                  {this.props.description}
+                </EuiText>
+              )}
+              {formBody}
+              {this.renderCopyOnSave()}
+            </EuiForm>
+          </EuiModalBody>
 
-            <EuiModalFooter>
-              <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
-                <FormattedMessage
-                  id="savedObjects.saveModal.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
+          <EuiModalFooter>
+            <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
+              <FormattedMessage
+                id="savedObjects.saveModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
 
-              {this.renderConfirmButton()}
-            </EuiModalFooter>
-          </EuiModal>
+            {this.renderConfirmButton()}
+          </EuiModalFooter>
         </form>
-      </EuiOverlayMask>
+      </EuiModal>
     );
   }
 

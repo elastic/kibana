@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { combineReducers } from 'redux';
@@ -17,12 +18,13 @@ import { elementsReducer } from './elements';
 import { assetsReducer } from './assets';
 import { historyReducer } from './history';
 import { embeddableReducer } from './embeddable';
+import { sidebarReducer } from './sidebar';
 
 export function getRootReducer(initialState) {
   return combineReducers({
     assets: assetsReducer,
     app: appReducer,
-    transient: reduceReducers(transientReducer, resolvedArgsReducer),
+    transient: reduceReducers(transientReducer, resolvedArgsReducer, sidebarReducer),
     persistent: reduceReducers(
       historyReducer,
       combineReducers({

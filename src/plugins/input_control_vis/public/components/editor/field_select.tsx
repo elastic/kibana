@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -12,7 +12,7 @@ import React, { Component } from 'react';
 import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { IIndexPattern, IFieldType } from '../../../../data/public';
+import { IndexPattern, IndexPatternField } from '../../../../data/public';
 
 interface FieldSelectUiState {
   isLoading: boolean;
@@ -21,11 +21,11 @@ interface FieldSelectUiState {
 }
 
 export type FieldSelectUiProps = InjectedIntlProps & {
-  getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
   indexPatternId: string;
   onChange: (value: any) => void;
   fieldName?: string;
-  filterField?: (field: IFieldType) => boolean;
+  filterField?: (field: IndexPatternField) => boolean;
   controlIndex: number;
 };
 
@@ -74,7 +74,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
       return;
     }
 
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPattern;
     try {
       indexPattern = await this.props.getIndexPattern(indexPatternId);
     } catch (err) {
@@ -96,7 +96,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     const fields: Array<EuiComboBoxOptionOption<string>> = [];
     indexPattern.fields
       .filter(this.props.filterField ?? (() => true))
-      .forEach((field: IFieldType) => {
+      .forEach((field: IndexPatternField) => {
         const fieldsList = fieldsByTypeMap.get(field.type) ?? [];
         fieldsList.push(field.name);
         fieldsByTypeMap.set(field.type, fieldsList);

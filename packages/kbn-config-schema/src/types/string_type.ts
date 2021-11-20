@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import { Type, TypeOptions, convertValidationFunction } from './type';
 
 export type StringOptions = TypeOptions<string> & {
   minLength?: number;
@@ -25,26 +25,32 @@ export class StringType extends Type<string> {
     let schema =
       options.hostname === true
         ? internals.string().hostname()
-        : internals.any().custom((value) => {
-            if (typeof value !== 'string') {
-              return `expected value of type [string] but got [${typeDetect(value)}]`;
-            }
-          });
+        : internals.any().custom(
+            convertValidationFunction((value) => {
+              if (typeof value !== 'string') {
+                return `expected value of type [string] but got [${typeDetect(value)}]`;
+              }
+            })
+          );
 
     if (options.minLength !== undefined) {
-      schema = schema.custom((value) => {
-        if (value.length < options.minLength!) {
-          return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
-        }
-      });
+      schema = schema.custom(
+        convertValidationFunction((value) => {
+          if (value.length < options.minLength!) {
+            return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
+          }
+        })
+      );
     }
 
     if (options.maxLength !== undefined) {
-      schema = schema.custom((value) => {
-        if (value.length > options.maxLength!) {
-          return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
-        }
-      });
+      schema = schema.custom(
+        convertValidationFunction((value) => {
+          if (value.length > options.maxLength!) {
+            return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
+          }
+        })
+      );
     }
 
     super(schema, options);
