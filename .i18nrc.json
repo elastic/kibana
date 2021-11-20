@@ -42,7 +42,7 @@
     "esQuery": "packages/kbn-es-query/src",
     "presentationUtil": "src/plugins/presentation_util",
     "indexPatternEditor": "src/plugins/index_pattern_editor",
-    "dataViewFieldEditor": "src/plugins/data_view_field_editor",
+    "indexPatternFieldEditor": "src/plugins/data_view_field_editor",
     "indexPatternManagement": "src/plugins/index_pattern_management",
     "interactiveSetup": "src/plugins/interactive_setup",
     "advancedSettings": "src/plugins/advanced_settings",
