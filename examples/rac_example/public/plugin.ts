@@ -5,17 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AppMountParameters } from '../../../src/core/public';
 import {
-  AlertsDemoClientCoreStart,
-  AlertsDemoClientCoreSetup,
-  AlertsDemoPluginClass,
-  AlertsDemoClientSetupDeps,
-  AlertsDemoClientStartDeps,
+  RacExampleClientCoreStart,
+  RacExampleClientCoreSetup,
+  RacExamplePluginClass,
+  RacExampleClientSetupDeps,
+  RacExampleClientStartDeps,
 } from './types';
 import { RAC_EXAMPLE_APP_ID } from '../common/constants';
 import { PLUGIN_NAME } from '../common';
@@ -23,10 +21,10 @@ import { DEFAULT_APP_CATEGORIES } from '../../../src/core/public';
 import { createAlwaysFiringAlertType } from './alert_types/always_firing';
 import image from './alerts_table.png';
 
-export class AlertsDemoPlugin implements AlertsDemoPluginClass {
+export class RacExamplePlugin implements RacExamplePluginClass {
   constructor() {}
 
-  public setup(core: AlertsDemoClientCoreSetup, pluginsSetup: AlertsDemoClientSetupDeps) {
+  public setup(core: RacExampleClientCoreSetup, pluginsSetup: RacExampleClientSetupDeps) {
     pluginsSetup.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(
@@ -82,21 +80,9 @@ export class AlertsDemoPlugin implements AlertsDemoPluginClass {
         return renderApp(coreStart, pluginsStart, params);
       },
     });
-
-    // Return methods that should be available to other plugins
-    return {
-      getGreeting() {
-        return i18n.translate('alertsDemo.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
-      },
-    };
   }
 
-  public start(_core: AlertsDemoClientCoreStart, _plugins: AlertsDemoClientStartDeps) {}
+  public start(_core: RacExampleClientCoreStart, _plugins: RacExampleClientStartDeps) {}
 
   public stop() {}
 }

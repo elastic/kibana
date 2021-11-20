@@ -18,43 +18,42 @@ import {
 } from '../../../x-pack/plugins/observability/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
 
-export interface AlertsDemoPluginSetup {
+export interface RacExamplePluginSetup {
   getGreeting: () => string;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AlertsDemoPluginStart {}
+export interface RacExamplePluginStart {}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
-export interface AlertsDemoClientSetupDeps {
+export interface RacExampleClientSetupDeps {
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   developerExamples: DeveloperExamplesSetup;
-  // navigation: NavigationPublicPluginStart;
 }
 
-export interface AlertsDemoClientStartDeps {
+export interface RacExampleClientStartDeps {
   observability: ObservabilityPublicStart;
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   developerExamples: DeveloperExamplesSetup;
 }
 
-export type AlertsDemoSetupExports = void;
-export type AlertsDemoStartExports = void;
+export type RacExampleSetupExports = void;
+export type RacExampleStartExports = void;
 
-export type AlertsDemoClientCoreSetup = CoreSetup<
-  AlertsDemoClientStartDeps,
-  AlertsDemoStartExports
+export type RacExampleClientCoreSetup = CoreSetup<
+  RacExampleClientStartDeps,
+  RacExampleStartExports
 >;
-export type AlertsDemoClientCoreStart = CoreStart;
+export type RacExampleClientCoreStart = CoreStart;
 
-export type AlertsDemoPluginClass = PluginClass<
-  AlertsDemoSetupExports,
-  AlertsDemoStartExports,
-  AlertsDemoClientSetupDeps,
-  AlertsDemoClientStartDeps
+export type RacExamplePluginClass = PluginClass<
+  RacExampleSetupExports,
+  RacExampleStartExports,
+  RacExampleClientSetupDeps,
+  RacExampleClientStartDeps
 >;

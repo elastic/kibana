@@ -8,10 +8,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
 import { RAC_EXAMPLE_APP_ID } from '../../common/constants';
-import { AlertsDemoClientStartDeps } from '../types';
+import { RacExampleClientStartDeps } from '../types';
 export const CreateRule = ({
   triggersActionsUi,
-}: Pick<AlertsDemoClientStartDeps, 'triggersActionsUi'>) => {
+}: Pick<RacExampleClientStartDeps, 'triggersActionsUi'>) => {
   const [ruleFlyoutVisible, setRuleFlyoutVisible] = useState(false);
 
   const onCloseRuleFlyout = useCallback(() => {

@@ -12,13 +12,13 @@ import {
   KibanaReactContextValue,
   useKibana,
 } from '../../../../src/plugins/kibana_react/public';
-import { AlertsDemoClientStartDeps } from '../types';
+import { RacExampleClientStartDeps } from '../types';
 
-export type PluginKibanaContextValue = CoreStart & AlertsDemoClientStartDeps;
+export type PluginKibanaContextValue = CoreStart & RacExampleClientStartDeps;
 
 export const createKibanaContextForPlugin = (
   core: CoreStart,
-  pluginsStart: AlertsDemoClientStartDeps
+  pluginsStart: RacExampleClientStartDeps
 ) =>
   createKibanaReactContext<PluginKibanaContextValue>({
     ...core,

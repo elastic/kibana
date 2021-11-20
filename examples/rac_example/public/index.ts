@@ -7,11 +7,11 @@
  */
 
 import './index.scss';
-import { AlertsDemoPlugin } from './plugin';
+import { RacExamplePlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
-  return new AlertsDemoPlugin();
+  return new RacExamplePlugin();
 }
-export { AlertsDemoPluginSetup, AlertsDemoPluginStart } from './types';
+export { RacExamplePluginSetup, RacExamplePluginStart } from './types';
