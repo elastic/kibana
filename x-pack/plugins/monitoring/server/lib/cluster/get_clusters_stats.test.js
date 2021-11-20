@@ -18,17 +18,17 @@ describe('handleClusterStats', () => {
   };
 
   it('handles no response by returning an empty array', () => {
-    expect(handleClusterStats()).toEqual([]);
-    expect(handleClusterStats(null)).toEqual([]);
-    expect(handleClusterStats({})).toEqual([]);
-    expect(handleClusterStats({ hits: { total: 0 } })).toEqual([]);
-    expect(handleClusterStats({ hits: { hits: [] } })).toEqual([]);
+    expect(handleClusterStats({}, {})).toEqual([]);
+    expect(handleClusterStats({}, {})).toEqual([]);
+    expect(handleClusterStats({}, {})).toEqual([]);
+    expect(handleClusterStats({ hits: { total: 0 } }, {})).toEqual([]);
+    expect(handleClusterStats({ hits: { hits: [] } }, {})).toEqual([]);
     // no _source means we can't use it:
-    expect(handleClusterStats({ hits: { hits: [{}] } })).toEqual([]);
-    expect(handleClusterStats({ hits: { hits: [{ _index: '.monitoring' }] } })).toEqual([]);
+    expect(handleClusterStats({ hits: { hits: [{}] } }, {})).toEqual([]);
+    expect(handleClusterStats({ hits: { hits: [{ _index: '.monitoring' }] } }, {})).toEqual([]);
   });
 
-  it('handles ccs response by adding it to the cluster detail', () => {
+  it('handles ccs request adding it to the cluster detail', () => {
     const response = {
       hits: {
         hits: [
@@ -42,8 +42,16 @@ describe('handleClusterStats', () => {
         ],
       },
     };
+    const req = {
+      log: () => undefined,
+      server: {
+        config: () => ({
+          get: () => 'cluster_one',
+        }),
+      },
+    };
 
-    const clusters = handleClusterStats(response, { log: () => undefined });
+    const clusters = handleClusterStats(response, req);
 
     expect(clusters.length).toEqual(1);
     expect(clusters[0].ccs).toEqual('cluster_one');
@@ -67,7 +75,15 @@ describe('handleClusterStats', () => {
       },
     };
 
-    const clusters = handleClusterStats(response);
+    const req = {
+      server: {
+        config: () => ({
+          get: () => undefined,
+        }),
+      },
+    };
+
+    const clusters = handleClusterStats(response, req);
 
     expect(clusters.length).toEqual(1);
     expect(clusters[0].ccs).toBe(undefined);
@@ -90,7 +106,15 @@ describe('handleClusterStats', () => {
       },
     };
 
-    const clusters = handleClusterStats(response);
+    const req = {
+      server: {
+        config: () => ({
+          get: () => undefined,
+        }),
+      },
+    };
+
+    const clusters = handleClusterStats(response, req);
 
     expect(clusters.length).toEqual(1);
     expect(clusters[0].ccs).toBe(undefined);
@@ -134,16 +158,24 @@ describe('handleClusterStats', () => {
       },
     };
 
-    const clusters = handleClusterStats(response);
+    const req = {
+      server: {
+        config: () => ({
+          get: () => 'abc',
+        }),
+      },
+    };
+
+    const clusters = handleClusterStats(response, req);
 
     expect(clusters.length).toEqual(3);
-    expect(clusters[0].ccs).toBe(undefined);
+    expect(clusters[0].ccs).toBe('abc');
     expect(clusters[0].cluster_uuid).toBe(validLicenseClusterUuid);
     expect(clusters[0].license).toBe(validLicense);
     expect(clusters[1].ccs).toEqual('abc');
     expect(clusters[1].cluster_uuid).toEqual('xyz');
     expect(clusters[1].license).toBe(validLicense);
-    expect(clusters[2].ccs).toEqual('local_cluster');
+    expect(clusters[2].ccs).toEqual('abc');
     expect(clusters[2].cluster_uuid).toBe(validLicenseClusterUuid);
     expect(clusters[2].license).toBe(validLicense);
   });

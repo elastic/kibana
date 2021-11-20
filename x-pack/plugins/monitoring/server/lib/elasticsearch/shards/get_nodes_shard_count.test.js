@@ -16,6 +16,7 @@ describe('getNodeShardCount', () => {
     };
 
     const req = {
+      payload: {},
       server: {
         config: () => ({
           get: () => {},
@@ -38,9 +39,8 @@ describe('getNodeShardCount', () => {
         },
       },
     };
-    const esIndexPattern = '*';
     const cluster = {};
-    const counts = await getNodesShardCount(req, esIndexPattern, cluster);
+    const counts = await getNodesShardCount(req, cluster);
     expect(counts.nodes).toEqual(nodes);
   });
 });

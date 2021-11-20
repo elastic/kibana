@@ -16,6 +16,7 @@ describe('getIndicesUnassignedShardStats', () => {
     };
 
     const req = {
+      payload: {},
       server: {
         config: () => ({
           get: () => {},
@@ -52,9 +53,8 @@ describe('getIndicesUnassignedShardStats', () => {
         },
       },
     };
-    const esIndexPattern = '*';
     const cluster = {};
-    const stats = await getIndicesUnassignedShardStats(req, esIndexPattern, cluster);
+    const stats = await getIndicesUnassignedShardStats(req, cluster);
     expect(stats.indices).toEqual(indices);
   });
 });

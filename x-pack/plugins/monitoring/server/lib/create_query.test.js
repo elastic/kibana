@@ -20,7 +20,19 @@ describe('Create Query', () => {
   it('Allows UUID to not be passed', () => {
     const options = { metric };
     const result = createQuery(options);
-    const expected = set({}, 'bool.filter', []);
+    const expected = set({}, 'bool.filter', [
+      {
+        bool: {
+          should: [
+            {
+              term: {
+                'data_stream.type': 'metrics',
+              },
+            },
+          ],
+        },
+      },
+    ]);
     expect(result).toEqual(expected);
   });
 
@@ -33,10 +45,21 @@ describe('Create Query', () => {
     };
     const result = createQuery(options);
     let expected = {};
-    expected = set(expected, 'bool.filter[0].term', {
+    expected = set(expected, 'bool.filter[0]', {
+      bool: {
+        should: [
+          {
+            term: {
+              'data_stream.type': 'metrics',
+            },
+          },
+        ],
+      },
+    });
+    expected = set(expected, 'bool.filter[1].term', {
       'source_node.uuid': 'abc123',
     });
-    expected = set(expected, 'bool.filter[1].range.timestamp', {
+    expected = set(expected, 'bool.filter[2].range.timestamp', {
       format: 'epoch_millis',
       gte: 1456826400000,
       lte: 1456826401000,
@@ -55,8 +78,19 @@ describe('Create Query', () => {
       },
     };
     const result = createQuery(options);
-    let expected = set({}, 'bool.filter[0].term.testUuidField', 'abc123');
-    expected = set(expected, 'bool.filter[1].range.testTimestampField', {
+    let expected = set({}, 'bool.filter[1].term.testUuidField', 'abc123');
+    expected = set(expected, 'bool.filter[0]', {
+      bool: {
+        should: [
+          {
+            term: {
+              'data_stream.type': 'metrics',
+            },
+          },
+        ],
+      },
+    });
+    expected = set(expected, 'bool.filter[2].range.testTimestampField', {
       format: 'epoch_millis',
       gte: 1456826400000,
       lte: 1456826401000,
