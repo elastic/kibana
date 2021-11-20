@@ -54,8 +54,7 @@ export async function getPaginatedNodes(
       cluster_state: { nodes: Record<string, Node> };
     };
     nodesShardCount: { nodes: Record<string, { shardCount: number }> };
-  },
-  ccs?: string
+  }
 ) {
   const config = req.server.config();
   const size = Number(config.get('monitoring.ui.max_bucket_size'));
@@ -92,8 +91,7 @@ export async function getPaginatedNodes(
     filters,
     { nodes },
     4,
-    groupBy,
-    ccs
+    groupBy
   );
 
   for (const metricName in metricSeriesData) {

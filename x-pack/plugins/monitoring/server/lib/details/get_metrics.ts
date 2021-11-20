@@ -81,8 +81,7 @@ export async function getNewMetrics(
   filters: Array<Record<string, any>> = [],
   metricOptions = {},
   numOfBuckets: number = 0,
-  groupBy: string | Record<string, any> | null = null,
-  ccs?: string
+  groupBy: string | Record<string, any> | null = null
 ) {
   checkParam(moduleType, 'moduleType in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
@@ -113,21 +112,12 @@ export async function getNewMetrics(
 
       return Promise.all(
         metricNames.map((metricName) => {
-          return getNewSeries(
-            req,
-            moduleType,
-            metricName,
-            metricOptions,
-            filters,
-            groupBy,
-            {
-              min,
-              max,
-              bucketSize,
-              timezone,
-            },
-            ccs
-          );
+          return getNewSeries(req, moduleType, metricName, metricOptions, filters, groupBy, {
+            min,
+            max,
+            bucketSize,
+            timezone,
+          });
         })
       );
     })
