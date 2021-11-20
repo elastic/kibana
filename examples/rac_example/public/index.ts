@@ -14,4 +14,4 @@ import { RacExamplePlugin } from './plugin';
 export function plugin() {
   return new RacExamplePlugin();
 }
-export { RacExamplePluginSetup, RacExamplePluginStart } from './types';
+export type { RacExamplePluginSetup, RacExamplePluginStart } from './types';

@@ -16,4 +16,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new AlertsDemoPlugin(initializerContext);
 }
 
-export { AlertsDemoPluginSetup, AlertsDemoPluginStart } from './types';
+export type { AlertsDemoPluginSetup, AlertsDemoPluginStart } from './types';
