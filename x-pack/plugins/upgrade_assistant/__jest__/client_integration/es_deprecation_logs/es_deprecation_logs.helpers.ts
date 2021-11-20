@@ -7,18 +7,18 @@
 
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
-import { Overview } from '../../../public/application/components/overview';
+import { EsDeprecationLogs } from '../../../public/application/components/es_deprecation_logs';
 import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
-    initialEntries: [`/overview`],
-    componentRoutePath: '/overview',
+    initialEntries: ['/es_deprecation_logs'],
+    componentRoutePath: '/es_deprecation_logs',
   },
   doMountAsync: true,
 };
 
-export type OverviewTestBed = TestBed & {
+export type EsDeprecationLogsTestBed = TestBed & {
   actions: ReturnType<typeof createActions>;
 };
 
@@ -27,36 +27,50 @@ const createActions = (testBed: TestBed) => {
    * User Actions
    */
 
-  const clickViewSystemIndicesState = async () => {
+  const clickDeprecationToggle = async () => {
     const { find, component } = testBed;
 
     await act(async () => {
-      find('viewSystemIndicesStateButton').simulate('click');
+      find('deprecationLoggingToggle').simulate('click');
     });
 
     component.update();
   };
 
-  const clickRetrySystemIndicesButton = async () => {
+  const clickRetryButton = async () => {
     const { find, component } = testBed;
 
     await act(async () => {
-      find('systemIndicesStatusRetryButton').simulate('click');
+      find('retryButton').simulate('click');
+    });
+
+    component.update();
+  };
+
+  const clickResetButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('resetLastStoredDate').simulate('click');
     });
 
     component.update();
   };
 
   return {
-    clickViewSystemIndicesState,
-    clickRetrySystemIndicesButton,
+    clickDeprecationToggle,
+    clickRetryButton,
+    clickResetButton,
   };
 };
 
-export const setupOverviewPage = async (
+export const setupESDeprecationLogsPage = async (
   overrides?: Record<string, unknown>
-): Promise<OverviewTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(Overview, overrides), testBedConfig);
+): Promise<EsDeprecationLogsTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(EsDeprecationLogs, overrides),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

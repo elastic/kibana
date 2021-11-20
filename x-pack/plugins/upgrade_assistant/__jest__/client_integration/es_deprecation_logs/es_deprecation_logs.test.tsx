@@ -6,13 +6,24 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import {
+  EsDeprecationLogsTestBed,
+  setupESDeprecationLogsPage,
+} from './es_deprecation_logs.helpers';
+import { setupEnvironment, advanceTime } from '../helpers';
+import { DeprecationLoggingStatus } from '../../../common/types';
+import {
+  DEPRECATION_LOGS_INDEX,
+  DEPRECATION_LOGS_SOURCE_ID,
+  DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
+} from '../../../common/constants';
 
 // Once the logs team register the kibana locators in their app, we should be able
 // to remove this mock and follow a similar approach to how discover link is tested.
 // See: https://github.com/elastic/kibana/issues/104855
 const MOCKED_TIME = '2021-09-05T10:49:01.805Z';
-jest.mock('../../../../public/application/lib/logs_checkpoint', () => {
-  const originalModule = jest.requireActual('../../../../public/application/lib/logs_checkpoint');
+jest.mock('../../../public/application/lib/logs_checkpoint', () => {
+  const originalModule = jest.requireActual('../../../public/application/lib/logs_checkpoint');
 
   return {
     __esModule: true,
@@ -21,83 +32,30 @@ jest.mock('../../../../public/application/lib/logs_checkpoint', () => {
   };
 });
 
-import { DeprecationLoggingStatus } from '../../../../common/types';
-import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
-import { setupEnvironment, advanceTime } from '../../helpers';
-import {
-  DEPRECATION_LOGS_INDEX,
-  DEPRECATION_LOGS_SOURCE_ID,
-  DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
-} from '../../../../common/constants';
-
 const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
   isDeprecationLogIndexingEnabled: toggle,
   isDeprecationLoggingEnabled: toggle,
 });
 
-describe('Overview - Fix deprecation logs step', () => {
-  let testBed: OverviewTestBed;
+describe('ES deprecation logs', () => {
+  let testBed: EsDeprecationLogsTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
-    testBed = await setupOverviewPage();
-
-    const { component } = testBed;
-    component.update();
+    testBed = await setupESDeprecationLogsPage();
+    testBed.component.update();
   });
 
   afterAll(() => {
     server.restore();
   });
 
-  describe('Step status', () => {
-    test(`It's complete when there are no deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
+  describe('Documentation link', () => {
+    test('Has a link for migration info api docs in page header', () => {
+      const { exists } = testBed;
 
-      await act(async () => {
-        testBed = await setupOverviewPage();
-      });
-
-      const { exists, component } = testBed;
-
-      component.update();
-
-      expect(exists(`fixLogsStep-complete`)).toBe(true);
-    });
-
-    test(`It's incomplete when there are deprecation logs since last checkpoint`, async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 5 });
-
-      await act(async () => {
-        testBed = await setupOverviewPage();
-      });
-
-      const { exists, component } = testBed;
-
-      component.update();
-
-      expect(exists(`fixLogsStep-incomplete`)).toBe(true);
-    });
-
-    test(`It's incomplete when log collection is disabled `, async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
-
-      await act(async () => {
-        testBed = await setupOverviewPage();
-      });
-
-      const { actions, exists, component } = testBed;
-
-      component.update();
-
-      expect(exists(`fixLogsStep-complete`)).toBe(true);
-
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(false));
-
-      await actions.clickDeprecationToggle();
-
-      expect(exists(`fixLogsStep-incomplete`)).toBe(true);
+      expect(exists('documentationLink')).toBe(true);
     });
   });
 
@@ -123,7 +81,7 @@ describe('Overview - Fix deprecation logs step', () => {
       });
 
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       const { exists, component } = testBed;
@@ -159,7 +117,7 @@ describe('Overview - Fix deprecation logs step', () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       const { component, exists } = testBed;
@@ -176,7 +134,7 @@ describe('Overview - Fix deprecation logs step', () => {
       });
 
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       const { exists, component } = testBed;
@@ -196,7 +154,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
     test('Has a link to see logs in observability app', async () => {
       await act(async () => {
-        testBed = await setupOverviewPage({
+        testBed = await setupESDeprecationLogsPage({
           http: {
             basePath: {
               prepend: (url: string) => url,
@@ -228,7 +186,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
     test('Has a link to see logs in discover app', async () => {
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       const { exists, component, find } = testBed;
@@ -257,7 +215,7 @@ describe('Overview - Fix deprecation logs step', () => {
       });
 
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       const { find, exists, component } = testBed;
@@ -274,7 +232,7 @@ describe('Overview - Fix deprecation logs step', () => {
       });
 
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       const { find, exists, component } = testBed;
@@ -295,7 +253,7 @@ describe('Overview - Fix deprecation logs step', () => {
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       const { exists, actions, component } = testBed;
@@ -319,7 +277,7 @@ describe('Overview - Fix deprecation logs step', () => {
       });
 
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       const { exists, actions, component } = testBed;
@@ -351,7 +309,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
       const addDanger = jest.fn();
       await act(async () => {
-        testBed = await setupOverviewPage({
+        testBed = await setupESDeprecationLogsPage({
           services: {
             core: {
               notifications: {
@@ -389,17 +347,17 @@ describe('Overview - Fix deprecation logs step', () => {
           count: 0,
         });
 
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       afterEach(() => {
         jest.useRealTimers();
       });
 
-      test('renders step as incomplete when a success state is followed by an error state', async () => {
+      test('success state is followed by an error state', async () => {
         const { exists } = testBed;
 
-        expect(exists('fixLogsStep-complete')).toBe(true);
+        expect(exists('resetLastStoredDate')).toBe(true);
 
         // second request will error
         const error = {
@@ -413,7 +371,7 @@ describe('Overview - Fix deprecation logs step', () => {
         await advanceTime(DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS);
         testBed.component.update();
 
-        expect(exists('fixLogsStep-incomplete')).toBe(true);
+        expect(exists('errorCallout')).toBe(true);
       });
     });
   });
@@ -425,7 +383,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
     test('It shows copy with compatibility api header advice', async () => {
       await act(async () => {
-        testBed = await setupOverviewPage();
+        testBed = await setupESDeprecationLogsPage();
       });
 
       const { exists, component } = testBed;
@@ -449,7 +407,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
     test(`doesn't show analyze and resolve logs if it doesn't have the right privileges`, async () => {
       await act(async () => {
-        testBed = await setupOverviewPage({
+        testBed = await setupESDeprecationLogsPage({
           privileges: {
             hasAllPrivileges: false,
             missingPrivileges: {
