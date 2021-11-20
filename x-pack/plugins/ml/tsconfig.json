@@ -20,7 +20,6 @@
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../../src/plugins/data_view_management/tsconfig.json" },
     { "path": "../../../src/plugins/data_views/tsconfig.json" },
     { "path": "../cloud/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
