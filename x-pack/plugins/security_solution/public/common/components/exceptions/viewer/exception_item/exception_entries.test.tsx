@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedEntryMock } from '../../exceptions.mock';
 import { getEmptyValue } from '../../../empty_value';
-import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({
   eui: { euiSize: '10px', euiColorPrimary: '#ece', euiColorDanger: '#ece' },

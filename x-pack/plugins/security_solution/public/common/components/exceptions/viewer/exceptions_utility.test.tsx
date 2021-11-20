@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { ExceptionsViewerUtility } from './exceptions_utility';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({
   eui: {

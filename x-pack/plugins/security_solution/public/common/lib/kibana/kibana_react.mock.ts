@@ -9,9 +9,11 @@
 
 import React from 'react';
 
-import { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+
+// Importing from the restricted path removes a memory leak from Kibana core and reduces memory consumption
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { securityMock } from '../../../../../../plugins/security/public/mocks';
 import {
@@ -35,12 +37,16 @@ import {
   DEFAULT_RULE_REFRESH_IDLE_VALUE,
   DEFAULT_TRANSFORMS,
 } from '../../../../common/constants';
-import { StartServices } from '../../../types';
+import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
-import { MlLocatorDefinition } from '../../../../../ml/public';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+
+// Importing from the restricted path removes a memory leak from Kibana core and reduces memory consumption
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MlLocatorDefinition } from '../../../../../ml/public/locator/ml_locator';
 import { MockUrlService } from 'src/plugins/share/common/mocks';
-import { fleetMock } from '../../../../../fleet/public/mocks';
+// Importing from the restricted path removes a memory leak from Kibana core and reduces memory consumption
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createStartMock } from '../../../../../fleet/public/mock/plugin_interfaces';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -100,7 +106,7 @@ export const createStartServicesMock = (
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
-  const fleet = fleetMock.createStartMock();
+  const fleet = createStartMock();
 
   return {
     ...core,
@@ -167,6 +173,3 @@ export const createKibanaContextProviderMock = () => {
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(KibanaContextProvider, { services }, children);
 };
-
-export const getMockTheme = (partialTheme: RecursivePartial<EuiTheme>): EuiTheme =>
-  partialTheme as EuiTheme;

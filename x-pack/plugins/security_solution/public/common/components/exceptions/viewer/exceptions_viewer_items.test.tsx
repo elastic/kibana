@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 import * as i18n from '../translations';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({
   eui: {

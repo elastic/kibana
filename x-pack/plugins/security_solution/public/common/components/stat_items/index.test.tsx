@@ -40,7 +40,7 @@ import {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../lib/kibana/kibana_react_theme.mock';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';

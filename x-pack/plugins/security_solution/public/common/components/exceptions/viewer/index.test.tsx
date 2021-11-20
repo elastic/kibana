@@ -16,7 +16,7 @@ import { useExceptionListItems, useApi } from '@kbn/securitysolution-list-hooks'
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({
   eui: {

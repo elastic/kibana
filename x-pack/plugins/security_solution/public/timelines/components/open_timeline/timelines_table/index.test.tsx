@@ -17,7 +17,7 @@ import { TimelinesTable, TimelinesTableProps } from '.';
 import { getMockTimelinesTableProps } from './mocks';
 
 import * as i18n from '../translations';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 

@@ -30,7 +30,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { AlertData } from '../types';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({
   eui: {

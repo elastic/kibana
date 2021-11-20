@@ -15,7 +15,7 @@ import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { TimelinesTable, TimelinesTableProps } from '.';
 import { OpenTimelineResult } from '../types';
 import { getMockTimelinesTableProps } from './mocks';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 

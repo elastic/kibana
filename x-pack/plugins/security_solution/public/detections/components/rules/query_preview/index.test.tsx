@@ -16,7 +16,7 @@ import { PreviewQuery } from './';
 import { getMockEqlResponse } from '../../../../common/hooks/eql/eql_search_response.mock';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql/';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react_theme.mock';
 import type { FilterMeta } from '@kbn/es-query';
 
 const mockTheme = getMockTheme({

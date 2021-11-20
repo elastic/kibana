@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import { RoundedBadgeAntenna } from './rounded_badge_antenna';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorLightShade: '#ece' } });
 

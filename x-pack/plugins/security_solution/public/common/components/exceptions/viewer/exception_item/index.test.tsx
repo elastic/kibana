@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 import { ExceptionItem } from './';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
-import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../lib/kibana/kibana_react_theme.mock';
 
 jest.mock('../../../../lib/kibana');
 

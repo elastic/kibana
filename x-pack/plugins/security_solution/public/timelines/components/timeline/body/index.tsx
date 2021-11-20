@@ -18,7 +18,7 @@ import {
   onKeyDownFocusHandler,
   getActionsColumnWidth,
 } from '../../../../../../timelines/public';
-import { CellValueElementProps } from '../cell_rendering';
+import type { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
   ColumnHeaderOptions,
@@ -28,13 +28,13 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../../common/types/timeline';
-import { BrowserFields } from '../../../../common/containers/source';
-import { TimelineItem } from '../../../../../common/search_strategy/timeline';
+import type { BrowserFields } from '../../../../common/containers/source';
+import type { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, State } from '../../../../common/store';
-import { TimelineModel } from '../../../store/timeline/model';
+import type { TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { OnRowSelected, OnSelectAll } from '../events';
+import type { OnRowSelected, OnSelectAll } from '../events';
 import { getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
 import { Sort } from './sort';

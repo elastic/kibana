@@ -15,7 +15,7 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { FleetStart } from '../../fleet/public';
+import type { FleetStart } from '../../fleet/public';
 import { PluginStart as ListsPluginStart } from '../../lists/public';
 import { SpacesPluginStart } from '../../spaces/public';
 import {

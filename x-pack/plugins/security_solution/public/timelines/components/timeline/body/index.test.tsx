@@ -12,7 +12,9 @@ import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
-import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';
+import { defaultHeaders } from '../../../../common/mock/header';
+import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
+import { mockTimelineModel } from '../../../../common/mock/timeline_results';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
@@ -25,8 +27,32 @@ import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 
-jest.mock('../../../../common/lib/kibana/hooks');
-jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/lib/kibana/hooks', () =>
+  Object.keys(jest.requireActual('../../../../common/lib/kibana/hooks')).reduce(
+    (accum, key) => ({
+      ...{ [key]: jest.fn() },
+      ...accum,
+    }),
+    {
+      __esModule: true,
+      default: jest.fn(),
+    }
+  )
+);
+
+jest.mock('../../../../common/hooks/use_app_toasts', () => {
+  return Object.keys(jest.requireActual('../../../../common/hooks/use_app_toasts')).reduce(
+    (accum, key) => ({
+      ...{ [key]: jest.fn() },
+      ...accum,
+    }),
+    {
+      __esModule: true,
+      default: jest.fn(),
+    }
+  );
+});
+
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {
@@ -89,10 +115,36 @@ jest.mock('../../../../common/hooks/use_selector', () => ({
   useDeepEqualSelector: () => mockTimelineModel,
 }));
 
-jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../common/components/link_to', () => {
+  return Object.keys(jest.requireActual('../../../../common/components/link_to')).reduce(
+    (accum, key) => ({
+      ...{ [key]: jest.fn() },
+      ...accum,
+    }),
+    {
+      __esModule: true,
+      default: jest.fn(),
+      useFormatUrl: jest.fn().mockReturnValue({
+        formatUrl: jest.fn(),
+        search: jest.fn(),
+      }),
+    }
+  );
+});
 
 // Prevent Resolver from rendering
-jest.mock('../../graph_overlay');
+jest.mock('../../graph_overlay', () => {
+  return Object.keys(jest.requireActual('../../graph_overlay')).reduce(
+    (accum, key) => ({
+      ...{ [key]: jest.fn() },
+      ...accum,
+    }),
+    {
+      __esModule: true,
+      default: jest.fn(),
+    }
+  );
+});
 
 jest.mock(
   'react-visibility-sensor',

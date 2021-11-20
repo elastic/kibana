@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react_theme.mock';
 
 export const mockTheme = getMockTheme({
   eui: {

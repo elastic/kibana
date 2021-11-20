@@ -11,7 +11,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { TitleRow } from '.';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({
   eui: { euiSizeS: '10px', euiLineHeight: 10, euiBreakpoints: { s: '10px' }, euiSize: '10px' },

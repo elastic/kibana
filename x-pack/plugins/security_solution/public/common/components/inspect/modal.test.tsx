@@ -11,7 +11,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({
   eui: {

@@ -15,7 +15,7 @@ import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { ListItemComponent } from './list_item';
 import { ThreatMapEntries } from './types';
 import type { DataViewBase } from '@kbn/es-query';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({
   eui: {

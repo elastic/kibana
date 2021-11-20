@@ -18,7 +18,7 @@ import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineModalBody } from './open_timeline_modal_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react_theme.mock';
 
 jest.mock('../../../../common/lib/kibana');
 

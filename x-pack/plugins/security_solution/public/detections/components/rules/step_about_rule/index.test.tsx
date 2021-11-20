@@ -22,7 +22,7 @@ import {
   RuleStep,
 } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react_theme.mock';
 
 const mockTheme = getMockTheme({
   eui: {

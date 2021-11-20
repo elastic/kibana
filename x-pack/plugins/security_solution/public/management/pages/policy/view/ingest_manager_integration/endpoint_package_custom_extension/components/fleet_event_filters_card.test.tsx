@@ -12,7 +12,7 @@ import { FleetEventFiltersCard } from './fleet_event_filters_card';
 import * as reactTestingLibrary from '@testing-library/react';
 import { EventFiltersHttpService } from '../../../../../event_filters/service';
 import { useToasts } from '../../../../../../../common/lib/kibana';
-import { getMockTheme } from '../../../../../../../../public/common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../../../../../public/common/lib/kibana/kibana_react_theme.mock';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 
 jest.mock('./exception_items_summary');

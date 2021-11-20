@@ -23,7 +23,7 @@ import {
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../lib/kibana/kibana_react_theme.mock';
 import { ExceptionBuilder } from '../../../../shared_imports';
 
 const mockTheme = getMockTheme({

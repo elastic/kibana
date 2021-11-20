@@ -13,7 +13,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { BasicTableProps, PaginatedTable } from './index';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 import { ThemeProvider } from 'styled-components';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../lib/kibana/kibana_react_theme.mock';
 import { Direction } from '../../../../common/search_strategy';
 
 jest.mock('react', () => {
