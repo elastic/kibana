@@ -51,7 +51,7 @@ export class RacExamplePlugin implements RacExamplePluginClass {
     // console.log(pluginsSetup.observability.observabilityRuleTypeRegistry.list(), '!!list');
     // pluginsSetup.triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
     pluginsSetup.developerExamples.register({
-      appId: RAC_EXAMPLE_APP_ID,
+      appId: `${RAC_EXAMPLE_APP_ID}/createRule`,
       title: 'RAC example',
       description:
         'This example walks you through how to RAC register an Observability rule type, so that generated alerts get saved in the alerts-as-data indices and show up in the Alerts Observability table. Similar steps could be followed to RAC register rule types of other solutions as well.',
