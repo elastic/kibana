@@ -53,6 +53,10 @@ as uiSettings within the code.
 |The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
+|{kib-repo}blob/{branch}/src/plugins/data_view_management[dataViewManagement]
+|WARNING: Missing README.
+
+
 |{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
 |The data views API provides a consistent method of structuring and formatting documents
 and field lists across the various Kibana apps. Its typically used in conjunction with
@@ -143,10 +147,6 @@ for use in their own application.
 
 |{kib-repo}blob/{branch}/src/plugins/index_pattern_field_editor/README.md[indexPatternFieldEditor]
 |The reusable field editor across Kibana!
-
-
-|{kib-repo}blob/{branch}/src/plugins/index_pattern_management[indexPatternManagement]
-|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/input_control_vis/README.md[inputControlVis]
