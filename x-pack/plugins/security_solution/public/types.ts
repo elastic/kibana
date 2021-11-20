@@ -41,7 +41,7 @@ import { Management } from './management';
 import { Ueba } from './ueba';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
-import { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;

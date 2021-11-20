@@ -11,7 +11,7 @@ import { CreateFieldButton } from './index';
 import {
   indexPatternFieldEditorPluginMock,
   Start,
-} from '../../../../../../../src/plugins/index_pattern_field_editor/public/mocks';
+} from '../../../../../../../src/plugins/data_view_field_editor/public/mocks';
 
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';

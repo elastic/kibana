@@ -27,12 +27,11 @@ export function DataVisualizerIndexPatternManagement(
   props: DataVisualizerIndexPatternManagementProps
 ) {
   const {
-    services: { indexPatternFieldEditor, application },
+    services: { dataViewFieldEditor, application },
   } = useDataVisualizerKibana();
 
   const { useNewFieldsApi, currentIndexPattern } = props;
-  const indexPatternFieldEditPermission =
-    indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
 
@@ -46,12 +45,12 @@ export function DataVisualizerIndexPatternManagement(
     };
   }, []);
 
-  if (indexPatternFieldEditor === undefined || !currentIndexPattern || !canEditIndexPatternField) {
+  if (dataViewFieldEditor === undefined || !currentIndexPattern || !canEditIndexPatternField) {
     return null;
   }
 
   const addField = () => {
-    closeFieldEditor.current = indexPatternFieldEditor.openEditor({
+    closeFieldEditor.current = dataViewFieldEditor.openEditor({
       ctx: {
         indexPattern: currentIndexPattern,
       },
