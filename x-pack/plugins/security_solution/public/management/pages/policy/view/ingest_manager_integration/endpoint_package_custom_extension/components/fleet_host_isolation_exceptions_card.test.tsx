@@ -10,7 +10,7 @@ import * as reactTestingLibrary from '@testing-library/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
-import { getMockTheme } from '../../../../../../../../public/common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../../../../../public/common/lib/kibana/kibana_react_theme.mock';
 import { useToasts } from '../../../../../../../common/lib/kibana';
 import { getHostIsolationExceptionSummary } from '../../../../../host_isolation_exceptions/service';
 import { FleetHostIsolationExceptionsCard } from './fleet_host_isolation_exceptions_card';
