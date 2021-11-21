@@ -27,7 +27,7 @@ import { DataViewEditorPlugin } from './plugin';
 
 const noop = () => {};
 
-describe('IndexPatternEditorPlugin', () => {
+describe('DataViewEditorPlugin', () => {
   const coreStart: CoreStart = coreMock.createStart();
   const pluginStart = {
     data: dataPluginMock.createStartContract(),

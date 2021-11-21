@@ -26,8 +26,8 @@ export class DataViewEditorPlugin
 
     return {
       /**
-       * Index pattern editor flyout via function interface
-       * @param IndexPatternEditorProps - index pattern editor config
+       * Data view editor flyout via function interface
+       * @param DataViewEditorProps - data view editor config
        * @returns method to close editor
        */
       openEditor: getEditorOpener({
@@ -36,8 +36,8 @@ export class DataViewEditorPlugin
         searchClient: data.search.search,
       }),
       /**
-       * Index pattern editor flyout via react component
-       * @param IndexPatternEditorProps - index pattern editor config
+       * Data view editor flyout via react component
+       * @param DataViewEditorProps - data view editor config
        * @returns JSX.Element
        */
       IndexPatternEditorComponent: (props: DataViewEditorProps) => (
@@ -55,7 +55,7 @@ export class DataViewEditorPlugin
         />
       ),
       /**
-       * Convenience method to determine whether the user can create or edit edit the index patterns.
+       * Convenience method to determine whether the user can create or edit edit data views.
        *
        * @returns boolean
        */
