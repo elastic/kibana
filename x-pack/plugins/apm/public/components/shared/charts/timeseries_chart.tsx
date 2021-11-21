@@ -42,12 +42,13 @@ import { APMServiceAlert } from '../../../context/apm_service/apm_service_contex
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
 import { getAlertAnnotations } from './helper/get_alert_annotations';
 import { getTimeZone } from './helper/timezone';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
+import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
+import { getChartAnomalyTimeseries } from './helper/get_chart_anomaly_timeseries';
 
 interface Props {
   id: string;
@@ -65,9 +66,7 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalyTimeseries?: ReturnType<
-    typeof getLatencyChartSelector
-  >['anomalyTimeseries'];
+  anomalyTimeseries?: ServiceAnomalyTimeseries;
   customTheme?: Record<string, unknown>;
   alerts?: APMServiceAlert[];
 }
@@ -103,10 +102,19 @@ export function TimeseriesChart({
   const min = Math.min(...xValues);
   const max = Math.max(...xValues);
 
+  const anomalyChartTimeseries = getChartAnomalyTimeseries({
+    anomalyTimeseries,
+    theme,
+  });
+
   const xFormatter = niceTimeFormatter([min, max]);
   const isEmpty = isTimeseriesEmpty(timeseries);
   const annotationColor = theme.eui.euiColorSuccess;
-  const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
+  const allSeries = [
+    ...timeseries,
+    ...(anomalyChartTimeseries?.boundaries ?? []),
+    ...(anomalyChartTimeseries?.scores ?? []),
+  ];
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
   return (
@@ -151,12 +159,28 @@ export function TimeseriesChart({
           gridLine={{ visible: false }}
         />
         <Axis
+          id="x-axis-anomalies"
+          groupId="anomalies"
+          position={Position.Top}
+          showOverlappingTicks
+          tickFormat={xFormatter}
+          hide
+          gridLine={{ visible: false }}
+        />
+        <Axis
           domain={yDomain}
           id="y-axis"
           ticks={3}
           position={Position.Left}
           tickFormat={yTickFormat ? yTickFormat : yLabelFormat}
           labelFormat={yLabelFormat}
+        />
+        <Axis
+          domain={{ min: 0, max: 100 }}
+          id="y-axis-anomalies"
+          groupId="anomalies"
+          hide
+          gridLine={{ visible: false }}
         />
 
         {showAnnotations && (
@@ -185,11 +209,15 @@ export function TimeseriesChart({
             <Series
               timeZone={timeZone}
               key={serie.title}
-              id={serie.title}
+              id={serie.id || serie.title}
+              groupId={serie.groupId}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
-              yAccessors={['y']}
+              yAccessors={serie.yAccessors ?? ['y']}
+              y0Accessors={serie.y0Accessors}
+              stackAccessors={serie.stackAccessors ?? undefined}
+              markSizeAccessor={serie.markSizeAccessor}
               data={isEmpty ? [] : serie.data}
               color={serie.color}
               curve={CurveType.CURVE_MONOTONE_X}
@@ -198,25 +226,12 @@ export function TimeseriesChart({
               filterSeriesInTooltip={
                 serie.hideTooltipValue ? () => false : undefined
               }
-              stackAccessors={serie.stackAccessors ?? undefined}
               areaSeriesStyle={serie.areaSeriesStyle}
               lineSeriesStyle={serie.lineSeriesStyle}
             />
           );
         })}
 
-        {anomalyTimeseries?.scores && (
-          <RectAnnotation
-            key={anomalyTimeseries.scores.title}
-            id="score_anomalies"
-            dataValues={(anomalyTimeseries.scores.data as RectCoordinate[]).map(
-              ({ x0, x: x1 }) => ({
-                coordinates: { x0, x1 },
-              })
-            )}
-            style={{ fill: anomalyTimeseries.scores.color }}
-          />
-        )}
         {getAlertAnnotations({
           alerts,
           chartStartTime: xValues[0],

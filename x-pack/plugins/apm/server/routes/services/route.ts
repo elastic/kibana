@@ -47,6 +47,7 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -942,6 +943,38 @@ const serviceInfrastructureRoute = createApmServerRoute({
   },
 });
 
+const serviceAnomalyChartsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([rangeRt, t.type({ transactionType: t.string })]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+
+    const {
+      path: { serviceName },
+      query: { start, end, transactionType },
+    } = resources.params;
+
+    return {
+      allAnomalyTimeseries: await getAnomalyTimeseries({
+        serviceName,
+        transactionType,
+        start,
+        end,
+        mlSetup: setup.ml,
+        logger: resources.logger,
+      }),
+    };
+  },
+});
+
 export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesRoute)
   .add(servicesDetailedStatisticsRoute)
@@ -963,4 +996,5 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceProfilingTimelineRoute)
   .add(serviceProfilingStatisticsRoute)
   .add(serviceAlertsRoute)
-  .add(serviceInfrastructureRoute);
+  .add(serviceInfrastructureRoute)
+  .add(serviceAnomalyChartsRoute);

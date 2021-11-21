@@ -10,7 +10,6 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
@@ -30,10 +29,8 @@ export function TransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
-    kuery,
-  });
-  const { transactionType, serviceName } = useApmServiceContext();
+  const { transactionType, serviceName, fallbackToTransactions } =
+    useApmServiceContext();
 
   const history = useHistory();
 

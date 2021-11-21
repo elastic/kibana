@@ -23,7 +23,6 @@ import { ServiceOverviewInstancesChartAndTable } from './service_overview_instan
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { TransactionsTable } from '../../shared/transactions_table';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -36,7 +35,8 @@ import { replace } from '../../shared/Links/url_helpers';
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const { agentName, serviceName, transactionType } = useApmServiceContext();
+  const { agentName, serviceName, transactionType, fallbackToTransactions } =
+    useApmServiceContext();
   const {
     query,
     query: {
@@ -47,9 +47,7 @@ export function ServiceOverview() {
       transactionType: transactionTypeFromUrl,
     },
   } = useApmParams('/services/{serviceName}/overview');
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
-    kuery,
-  });
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const history = useHistory();
@@ -96,11 +94,7 @@ export function ServiceOverview() {
           )}
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <LatencyChart
-                height={latencyChartHeight}
-                environment={environment}
-                kuery={kuery}
-              />
+              <LatencyChart height={latencyChartHeight} kuery={kuery} />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -112,7 +106,6 @@ export function ServiceOverview() {
               <EuiFlexItem grow={3}>
                 <ServiceOverviewThroughputChart
                   height={nonLatencyChartHeight}
-                  environment={environment}
                   kuery={kuery}
                 />
               </EuiFlexItem>
@@ -142,7 +135,6 @@ export function ServiceOverview() {
                     height={nonLatencyChartHeight}
                     showAnnotations={false}
                     kuery={kuery}
-                    environment={environment}
                   />
                 </EuiFlexItem>
               )}
