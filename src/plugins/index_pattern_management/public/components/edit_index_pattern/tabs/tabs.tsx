@@ -124,7 +124,7 @@ export function Tabs({
     (fieldName?: string) => {
       closeEditorHandler.current = dataViewFieldEditor.openEditor({
         ctx: {
-          indexPattern,
+          dataView: indexPattern,
         },
         onSave: refreshFields,
         fieldName,
@@ -217,7 +217,7 @@ export function Tabs({
               <EuiSpacer size="m" />
               {getFilterSection(type)}
               <EuiSpacer size="m" />
-              <DeleteRuntimeFieldProvider indexPattern={indexPattern} onDelete={refreshFields}>
+              <DeleteRuntimeFieldProvider dataView={indexPattern} onDelete={refreshFields}>
                 {(deleteField) => (
                   <IndexedFieldsTable
                     fields={fields}

@@ -11,8 +11,8 @@ import { CoreStart, OverlayRef } from 'src/core/public';
 
 import {
   toMountPoint,
-  DataPublicPluginStart,
-  IndexPattern,
+  DataViewsPublicPluginStart,
+  DataView,
   UsageCollectionStart,
 } from './shared_imports';
 
@@ -23,7 +23,7 @@ import { removeFields } from './lib/remove_fields';
 
 export interface OpenFieldDeleteModalOptions {
   ctx: {
-    indexPattern: IndexPattern;
+    dataView: DataView;
   };
   onDelete?: (fieldNames: string[]) => void;
   fieldName: string | string[];
@@ -31,12 +31,12 @@ export interface OpenFieldDeleteModalOptions {
 
 interface Dependencies {
   core: CoreStart;
-  indexPatternService: DataPublicPluginStart['indexPatterns'];
+  dataViews: DataViewsPublicPluginStart;
   usageCollection: UsageCollectionStart;
 }
 
 export const getFieldDeleteModalOpener =
-  ({ core, indexPatternService, usageCollection }: Dependencies) =>
+  ({ core, dataViews, usageCollection }: Dependencies) =>
   (options: OpenFieldDeleteModalOptions): CloseEditor => {
     const { overlays, notifications } = core;
 
@@ -45,7 +45,7 @@ export const getFieldDeleteModalOpener =
     const openDeleteModal = ({
       onDelete,
       fieldName,
-      ctx: { indexPattern },
+      ctx: { dataView },
     }: OpenFieldDeleteModalOptions): CloseEditor => {
       const fieldsToDelete = Array.isArray(fieldName) ? fieldName : [fieldName];
       const closeModal = () => {
@@ -58,8 +58,8 @@ export const getFieldDeleteModalOpener =
       const onConfirmDelete = async () => {
         closeModal();
 
-        await removeFields(fieldsToDelete, indexPattern, {
-          indexPatternService,
+        await removeFields(fieldsToDelete, dataView, {
+          dataViews,
           usageCollection,
           notifications,
         });

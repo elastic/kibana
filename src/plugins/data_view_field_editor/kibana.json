@@ -3,9 +3,9 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data"],
+  "requiredPlugins": ["data", "fieldFormats"],
   "optionalPlugins": ["usageCollection"],
-  "requiredBundles": ["kibanaReact", "esUiShared", "fieldFormats"],
+  "requiredBundles": ["kibanaReact", "esUiShared"],
   "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"

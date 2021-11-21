@@ -13,10 +13,12 @@ import { i18n } from '@kbn/i18n';
 import {
   createKibanaReactContext,
   toMountPoint,
-  IndexPatternField,
+  DataViewField,
   DataPublicPluginStart,
-  IndexPattern,
+  DataView,
   UsageCollectionStart,
+  DataViewsPublicPluginStart,
+  FieldFormatsStart,
 } from './shared_imports';
 
 import type { PluginStart, InternalFieldType, CloseEditor } from './types';
@@ -26,9 +28,9 @@ import { FieldEditorLoader } from './components/field_editor_loader';
 
 export interface OpenFieldEditorOptions {
   ctx: {
-    indexPattern: IndexPattern;
+    dataView: DataView;
   };
-  onSave?: (field: IndexPatternField) => void;
+  onSave?: (field: DataViewField) => void;
   fieldName?: string;
 }
 
@@ -36,9 +38,9 @@ interface Dependencies {
   core: CoreStart;
   /** The search service from the data plugin */
   search: DataPublicPluginStart['search'];
-  indexPatternService: DataPublicPluginStart['indexPatterns'];
+  dataViews: DataViewsPublicPluginStart;
   apiService: ApiService;
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  fieldFormats: FieldFormatsStart;
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   usageCollection: UsageCollectionStart;
 }
@@ -46,7 +48,7 @@ interface Dependencies {
 export const getFieldEditorOpener =
   ({
     core,
-    indexPatternService,
+    dataViews,
     fieldFormats,
     fieldFormatEditors,
     search,
@@ -73,7 +75,7 @@ export const getFieldEditorOpener =
     const openEditor = ({
       onSave,
       fieldName,
-      ctx: { indexPattern },
+      ctx: { dataView },
     }: OpenFieldEditorOptions): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -82,7 +84,7 @@ export const getFieldEditorOpener =
         }
       };
 
-      const onSaveField = (updatedField: IndexPatternField) => {
+      const onSaveField = (updatedField: DataViewField) => {
         closeEditor();
 
         if (onSave) {
@@ -90,7 +92,7 @@ export const getFieldEditorOpener =
         }
       };
 
-      const field = fieldName ? indexPattern.getFieldByName(fieldName) : undefined;
+      const field = fieldName ? dataView.getFieldByName(fieldName) : undefined;
 
       if (fieldName && !field) {
         const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
@@ -116,9 +118,9 @@ export const getFieldEditorOpener =
               docLinks={docLinks}
               field={field}
               fieldTypeToProcess={fieldTypeToProcess}
-              indexPattern={indexPattern}
+              dataView={dataView}
               search={search}
-              indexPatternService={indexPatternService}
+              dataViews={dataViews}
               notifications={notifications}
               usageCollection={usageCollection}
               apiService={apiService}

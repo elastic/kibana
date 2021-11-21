@@ -522,7 +522,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
-                indexPattern: indexPatternInstance,
+                dataView: indexPatternInstance,
               },
               fieldName,
               onSave: async () => {
@@ -543,7 +543,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
               ctx: {
-                indexPattern: indexPatternInstance,
+                dataView: indexPatternInstance,
               },
               fieldName,
               onDelete: async () => {

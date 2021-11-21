@@ -12,11 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
-  IndexPatternField,
-  IndexPattern,
+  DataViewField,
+  DataView,
   DataPublicPluginStart,
   RuntimeType,
   UsageCollectionStart,
+  DataViewsPublicPluginStart,
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
@@ -30,20 +31,20 @@ import { FieldPreviewProvider } from './preview';
 
 export interface Props {
   /** Handler for the "save" footer button */
-  onSave: (field: IndexPatternField) => void;
+  onSave: (field: DataViewField) => void;
   /** Handler for the "cancel" footer button */
   onCancel: () => void;
   onMounted?: FieldEditorFlyoutContentProps['onMounted'];
   /** The docLinks start service from core */
   docLinks: DocLinksStart;
   /** The index pattern where the field will be added  */
-  indexPattern: IndexPattern;
+  dataView: DataView;
   /** The Kibana field type of the field to create or edit (default: "runtime") */
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to edit */
-  field?: IndexPatternField;
+  field?: DataViewField;
   /** Services */
-  indexPatternService: DataPublicPluginStart['indexPatterns'];
+  dataViews: DataViewsPublicPluginStart;
   notifications: NotificationsStart;
   search: DataPublicPluginStart['search'];
   usageCollection: UsageCollectionStart;
@@ -68,8 +69,8 @@ export const FieldEditorFlyoutContentContainer = ({
   onMounted,
   docLinks,
   fieldTypeToProcess,
-  indexPattern,
-  indexPatternService,
+  dataView,
+  dataViews,
   search,
   notifications,
   usageCollection,
@@ -78,10 +79,10 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormats,
   uiSettings,
 }: Props) => {
-  const fieldToEdit = deserializeField(indexPattern, field);
+  const fieldToEdit = deserializeField(dataView, field);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { fields } = indexPattern;
+  const { fields } = dataView;
 
   const namesNotAllowed = useMemo(() => fields.map((fld) => fld.name), [fields]);
 
@@ -125,10 +126,10 @@ export const FieldEditorFlyoutContentContainer = ({
         } catch {}
         // rename an existing runtime field
         if (field?.name && field.name !== updatedField.name) {
-          indexPattern.removeRuntimeField(field.name);
+          dataView.removeRuntimeField(field.name);
         }
 
-        indexPattern.addRuntimeField(updatedField.name, {
+        dataView.addRuntimeField(updatedField.name, {
           type: updatedField.type as RuntimeType,
           script,
         });
@@ -139,24 +140,24 @@ export const FieldEditorFlyoutContentContainer = ({
         } catch {}
       }
 
-      const editedField = indexPattern.getFieldByName(updatedField.name);
+      const editedField = dataView.getFieldByName(updatedField.name);
 
       try {
         if (!editedField) {
           throw new Error(
-            `Unable to find field named '${updatedField.name}' on index pattern '${indexPattern.title}'`
+            `Unable to find field named '${updatedField.name}' on index pattern '${dataView.title}'`
           );
         }
 
-        indexPattern.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+        dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
         editedField.count = updatedField.popularity || 0;
         if (updatedField.format) {
-          indexPattern.setFieldFormat(updatedField.name, updatedField.format);
+          dataView.setFieldFormat(updatedField.name, updatedField.format);
         } else {
-          indexPattern.deleteFieldFormat(updatedField.name);
+          dataView.deleteFieldFormat(updatedField.name);
         }
 
-        await indexPatternService.updateSavedObject(indexPattern).then(() => {
+        await dataViews.updateSavedObject(dataView).then(() => {
           const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
             defaultMessage: "Saved '{fieldName}'",
             values: { fieldName: updatedField.name },
@@ -173,20 +174,12 @@ export const FieldEditorFlyoutContentContainer = ({
         setIsSaving(false);
       }
     },
-    [
-      onSave,
-      indexPattern,
-      indexPatternService,
-      notifications,
-      fieldTypeToProcess,
-      field?.name,
-      usageCollection,
-    ]
+    [onSave, dataView, dataViews, notifications, fieldTypeToProcess, field?.name, usageCollection]
   );
 
   return (
     <FieldEditorProvider
-      indexPattern={indexPattern}
+      dataView={dataView}
       uiSettings={uiSettings}
       links={getLinks(docLinks)}
       fieldTypeToProcess={fieldTypeToProcess}

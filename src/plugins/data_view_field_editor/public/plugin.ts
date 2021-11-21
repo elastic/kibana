@@ -34,19 +34,19 @@ export class IndexPatternFieldEditorPlugin
       application: { capabilities },
       http,
     } = core;
-    const { data, usageCollection } = plugins;
+    const { data, usageCollection, dataViews, fieldFormats } = plugins;
     const openDeleteModal = getFieldDeleteModalOpener({
       core,
-      indexPatternService: data.indexPatterns,
+      dataViews,
       usageCollection,
     });
     return {
       fieldFormatEditors,
       openEditor: getFieldEditorOpener({
         core,
-        indexPatternService: data.indexPatterns,
+        dataViews,
         apiService: initApi(http),
-        fieldFormats: data.fieldFormats,
+        fieldFormats,
         fieldFormatEditors,
         search: data.search,
         usageCollection,

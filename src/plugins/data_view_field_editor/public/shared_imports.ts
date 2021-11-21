@@ -7,7 +7,9 @@
  */
 
 export type { DataPublicPluginStart } from '../../data/public';
-export { IndexPattern, IndexPatternField } from '../../data/public';
+
+export type { DataViewsPublicPluginStart, DataView, DataViewField } from '../../data_views/public';
+export type { FieldFormatsStart } from '../../field_formats/public';
 
 export type { UsageCollectionStart } from '../../usage_collection/public';
 

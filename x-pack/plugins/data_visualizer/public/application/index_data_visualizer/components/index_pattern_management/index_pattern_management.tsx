@@ -52,7 +52,7 @@ export function DataVisualizerIndexPatternManagement(
   const addField = () => {
     closeFieldEditor.current = dataViewFieldEditor.openEditor({
       ctx: {
-        indexPattern: currentIndexPattern,
+        dataView: currentIndexPattern,
       },
       onSave: () => {
         const refresh: Refresh = {

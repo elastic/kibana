@@ -25,15 +25,17 @@ import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 import { FieldEditorLoader } from './components/field_editor_loader';
 import { IndexPatternFieldEditorPlugin } from './plugin';
 import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
-import { IndexPattern } from './shared_imports';
+import { DataView } from './shared_imports';
 
 const noop = () => {};
 
-describe('IndexPatternFieldEditorPlugin', () => {
+describe('DataViewFieldEditorPlugin', () => {
   const coreStart: CoreStart = coreMock.createStart();
   const pluginStart = {
     data: dataPluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
+    dataViews: dataPluginMock.createStartContract().dataViews,
+    fieldFormats: dataPluginMock.createStartContract().fieldFormats,
   };
 
   let plugin: IndexPatternFieldEditorPlugin;
@@ -60,7 +62,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
     };
     const { openEditor } = await plugin.start(coreStartMocked, pluginStart);
 
-    openEditor({ onSave: onSaveSpy, ctx: { indexPattern: {} as any } });
+    openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as any } });
 
     expect(openFlyout).toHaveBeenCalled();
 
@@ -79,7 +81,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
   test('should return a handler to close the flyout', async () => {
     const { openEditor } = await plugin.start(coreStart, pluginStart);
 
-    const closeEditorHandler = openEditor({ onSave: noop, ctx: { indexPattern: {} as any } });
+    const closeEditorHandler = openEditor({ onSave: noop, ctx: { dataView: {} as any } });
     expect(typeof closeEditorHandler).toBe('function');
   });
 
@@ -112,11 +114,11 @@ describe('IndexPatternFieldEditorPlugin', () => {
     };
     const { openDeleteModal } = await plugin.start(coreStartMocked, pluginStartMocked);
 
-    const indexPatternMock = { removeRuntimeField: removeFieldSpy } as unknown as IndexPattern;
+    const indexPatternMock = { removeRuntimeField: removeFieldSpy } as unknown as DataView;
 
     openDeleteModal({
       onDelete: onDeleteSpy,
-      ctx: { indexPattern: indexPatternMock },
+      ctx: { dataView: indexPatternMock },
       fieldName: ['a', 'b', 'c'],
     });
 
@@ -143,7 +145,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
   test('should return a handler to close the modal', async () => {
     const { openDeleteModal } = await plugin.start(coreStart, pluginStart);
 
-    const closeModal = openDeleteModal({ fieldName: ['a'], ctx: { indexPattern: {} as any } });
+    const closeModal = openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
     expect(typeof closeModal).toBe('function');
   });
 
@@ -152,7 +154,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
 
     const TestComponent = ({ callback }: { callback: (...args: any[]) => void }) => {
       return (
-        <DeleteRuntimeFieldProvider indexPattern={{} as any}>
+        <DeleteRuntimeFieldProvider dataView={{} as any}>
           {(...args) => {
             // Forward arguments passed down to children to our spy callback
             callback(args);

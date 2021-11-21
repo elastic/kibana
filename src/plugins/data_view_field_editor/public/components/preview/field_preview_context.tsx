@@ -63,7 +63,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   });
 
   const {
-    indexPattern,
+    dataView,
     fieldTypeToProcess,
     services: {
       search,
@@ -188,7 +188,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const [response, searchError] = await search
         .search({
           params: {
-            index: indexPattern.title,
+            index: dataView.title,
             body: {
               size: limit,
             },
@@ -225,7 +225,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         });
       }
     },
-    [indexPattern, search]
+    [dataView, search]
   );
 
   const loadDocument = useCallback(
@@ -240,7 +240,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const [response, searchError] = await search
         .search({
           params: {
-            index: indexPattern.title,
+            index: dataView.title,
             body: {
               size: 1,
               query: {
@@ -299,7 +299,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         setIsLoadingPreview(false);
       }
     },
-    [indexPattern, search]
+    [dataView, search]
   );
 
   const updatePreview = useCallback(async () => {

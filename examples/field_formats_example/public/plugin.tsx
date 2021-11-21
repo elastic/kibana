@@ -67,7 +67,7 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
 
       plugins.dataViewFieldEditor.openEditor({
         ctx: {
-          indexPattern,
+          dataView: indexPattern,
         },
         fieldName: numberField.name,
       });

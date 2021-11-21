@@ -10,9 +10,11 @@ import { FunctionComponent } from 'react';
 
 import {
   DataPublicPluginStart,
+  DataViewsPublicPluginStart,
   RuntimeField,
   RuntimeType,
   UsageCollectionStart,
+  FieldFormatsStart,
 } from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
 import { OpenFieldDeleteModalOptions } from './open_delete_modal';
@@ -39,6 +41,8 @@ export interface SetupPlugins {}
 export interface StartPlugins {
   data: DataPublicPluginStart;
   usageCollection: UsageCollectionStart;
+  dataViews: DataViewsPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export type InternalFieldType = 'concrete' | 'runtime';

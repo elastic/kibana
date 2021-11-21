@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 import { monaco } from '@kbn/monaco';
-import { IndexPatternField, IndexPattern } from '../shared_imports';
+import { DataViewField, DataView } from '../shared_imports';
 import type { Field, RuntimeFieldPainlessError } from '../types';
 
-export const deserializeField = (
-  indexPattern: IndexPattern,
-  field?: IndexPatternField
-): Field | undefined => {
+export const deserializeField = (dataView: DataView, field?: DataViewField): Field | undefined => {
   if (field === undefined) {
     return undefined;
   }
@@ -23,7 +20,7 @@ export const deserializeField = (
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,
-    format: indexPattern.getFormatterForFieldNoDefault(field.name)?.toJSON(),
+    format: dataView.getFormatterForFieldNoDefault(field.name)?.toJSON(),
   };
 };
 

@@ -47,7 +47,7 @@ function fuzzyMatch(searchValue: string, text: string) {
 }
 
 export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
-  const { indexPattern } = useFieldEditorContext();
+  const { dataView } = useFieldEditorContext();
   const {
     currentDocument: { value: currentDocument },
     pinnedFields: { value: pinnedFields, set: setPinnedFields },
@@ -57,7 +57,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
 
   const {
     fields: { getAll: getAllFields },
-  } = indexPattern;
+  } = dataView;
 
   const indexPatternFields = useMemo(() => {
     return getAllFields();

@@ -52,7 +52,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
     const onClick = useCallback(() => {
       if (dataView) {
         indexPatternFieldEditor?.openEditor({
-          ctx: { indexPattern: dataView },
+          ctx: { dataView },
           onSave: (field: DataViewField) => {
             // Fetch the updated list of fields
             indexFieldsSearch(selectedDataViewId);

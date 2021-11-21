@@ -78,7 +78,7 @@ export function getActions(
       icon: 'indexEdit',
       onClick: (item: FieldVisConfig) => {
         actionFlyoutRef.current = services.dataViewFieldEditor?.openEditor({
-          ctx: { indexPattern },
+          ctx: { dataView: indexPattern },
           fieldName: item.fieldName,
           onSave: refreshPage,
         });
@@ -102,7 +102,7 @@ export function getActions(
       },
       onClick: (item: FieldVisConfig) => {
         actionFlyoutRef.current = services.dataViewFieldEditor?.openDeleteModal({
-          ctx: { indexPattern },
+          ctx: { dataView: indexPattern },
           fieldName: item.fieldName!,
           onDelete: refreshPage,
         });

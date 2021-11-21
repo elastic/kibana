@@ -53,7 +53,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
           'data-test-subj': 'editField',
           onClick: (fld: IndexPatternField) =>
             indexPatternFieldEditor.openEditor({
-              ctx: { indexPattern: indexPattern! },
+              ctx: { dataView: indexPattern! },
               fieldName: fld.name,
               onSave: refreshFields,
             }),
@@ -69,7 +69,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
             indexPatternFieldEditor.openDeleteModal({
               fieldName: fld.name,
               ctx: {
-                indexPattern: indexPattern!,
+                dataView: indexPattern!,
               },
               onDelete: refreshFields,
             }),
@@ -85,7 +85,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
         <EuiButton
           onClick={() =>
             indexPatternFieldEditor.openEditor({
-              ctx: { indexPattern: indexPattern! },
+              ctx: { dataView: indexPattern! },
               onSave: refreshFields,
             })
           }

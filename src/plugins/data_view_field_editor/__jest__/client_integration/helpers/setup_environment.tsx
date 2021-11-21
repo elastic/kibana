@@ -103,7 +103,7 @@ export const WithFieldEditorDependencies =
     });
 
     const dependencies: Context = {
-      indexPattern: {
+      dataView: {
         title: indexPatternNameForTest,
         fields: { getAll: spyIndexPatternGetAllFields },
       } as any,

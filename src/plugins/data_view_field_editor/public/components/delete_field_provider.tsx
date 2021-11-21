@@ -8,21 +8,21 @@
 
 import React, { useCallback, useRef, useEffect } from 'react';
 
-import { IndexPattern } from '../shared_imports';
+import { DataView } from '../shared_imports';
 import { OpenFieldDeleteModalOptions } from '../open_delete_modal';
 import { CloseEditor } from '../types';
 
 type DeleteFieldFunc = (fieldName: string | string[]) => void;
 export interface Props {
   children: (deleteFieldHandler: DeleteFieldFunc) => React.ReactNode;
-  indexPattern: IndexPattern;
+  dataView: DataView;
   onDelete?: (fieldNames: string[]) => void;
 }
 
 export const getDeleteFieldProvider = (
   modalOpener: (options: OpenFieldDeleteModalOptions) => CloseEditor
 ): React.FunctionComponent<Props> => {
-  return React.memo(({ indexPattern, children, onDelete }: Props) => {
+  return React.memo(({ dataView, children, onDelete }: Props) => {
     const closeModal = useRef<CloseEditor | null>(null);
     const deleteFields = useCallback(
       async (fieldName: string | string[]) => {
@@ -31,13 +31,13 @@ export const getDeleteFieldProvider = (
         }
         closeModal.current = modalOpener({
           ctx: {
-            indexPattern,
+            dataView,
           },
           fieldName,
           onDelete,
         });
       },
-      [onDelete, indexPattern]
+      [onDelete, dataView]
     );
 
     useEffect(() => {

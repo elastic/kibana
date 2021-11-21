@@ -9,21 +9,21 @@
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { NotificationsStart } from 'src/core/public';
-import { IndexPattern, UsageCollectionStart } from '../shared_imports';
+import { DataView, UsageCollectionStart } from '../shared_imports';
 import { pluginName } from '../constants';
-import { DataPublicPluginStart } from '../../../data/public';
+import { DataViewsPublicPluginStart } from '../../../data_views/public';
 
 export async function removeFields(
   fieldNames: string[],
-  indexPattern: IndexPattern,
+  dataView: DataView,
   services: {
-    indexPatternService: DataPublicPluginStart['indexPatterns'];
+    dataViews: DataViewsPublicPluginStart;
     usageCollection: UsageCollectionStart;
     notifications: NotificationsStart;
   }
 ) {
   fieldNames.forEach((fieldName) => {
-    indexPattern.removeRuntimeField(fieldName);
+    dataView.removeRuntimeField(fieldName);
   });
 
   try {
@@ -32,7 +32,7 @@ export async function removeFields(
   } catch {}
 
   try {
-    await services.indexPatternService.updateSavedObject(indexPattern);
+    await services.dataViews.updateSavedObject(dataView);
   } catch (e) {
     const title = i18n.translate('indexPatternFieldEditor.save.deleteErrorTitle', {
       defaultMessage: 'Failed to save field removal',

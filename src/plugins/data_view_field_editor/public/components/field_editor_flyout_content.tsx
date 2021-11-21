@@ -67,7 +67,7 @@ const FieldEditorFlyoutContentComponent = ({
 }: Props) => {
   const isMounted = useRef(false);
   const isEditingExistingField = !!field;
-  const { indexPattern } = useFieldEditorContext();
+  const { dataView } = useFieldEditorContext();
   const {
     panel: { isVisible: isPanelVisible },
   } = useFieldPreviewContext();
@@ -218,7 +218,7 @@ const FieldEditorFlyoutContentComponent = ({
                     id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
                     defaultMessage="Data view: {patternName}"
                     values={{
-                      patternName: <i>{indexPattern.title}</i>,
+                      patternName: <i>{dataView.title}</i>,
                     }}
                   />
                 </p>

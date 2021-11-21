@@ -15,7 +15,7 @@ import type { FieldFormInternal } from '../field_editor';
 import type { FieldFormatConfig } from '../../../types';
 
 export const FormatField = () => {
-  const { indexPattern, uiSettings, fieldFormats, fieldFormatEditors } = useFieldEditorContext();
+  const { dataView, uiSettings, fieldFormats, fieldFormatEditors } = useFieldEditorContext();
   const isMounted = useRef(false);
   const [{ type }] = useFormData<FieldFormInternal>({ watch: ['name', 'type'] });
   const { getFields, isSubmitted } = useFormContext();
@@ -62,7 +62,7 @@ export const FormatField = () => {
 
             <FormatSelectEditor
               esTypes={typeValue || (['keyword'] as ES_FIELD_TYPES[])}
-              indexPattern={indexPattern}
+              indexPattern={dataView}
               fieldFormatEditors={fieldFormatEditors}
               fieldFormats={fieldFormats}
               uiSettings={uiSettings}
