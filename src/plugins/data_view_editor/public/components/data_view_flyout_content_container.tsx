@@ -20,12 +20,12 @@ const IndexPatternFlyoutContentContainer = ({
   requireTimestampField = false,
 }: DataViewEditorProps) => {
   const {
-    services: { indexPatternService, notifications },
+    services: { dataViews, notifications },
   } = useKibana<DataViewEditorContext>();
 
   const onSaveClick = async (indexPatternSpec: IndexPatternSpec) => {
     try {
-      const indexPattern = await indexPatternService.createAndSave(indexPatternSpec);
+      const indexPattern = await dataViews.createAndSave(indexPatternSpec);
 
       const message = i18n.translate('indexPatternEditor.saved', {
         defaultMessage: "Saved '{indexPatternTitle}'",
