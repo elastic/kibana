@@ -54,7 +54,7 @@ as uiSettings within the code.
 
 
 |{kib-repo}blob/{branch}/src/plugins/data_view_editor/README.md[dataViewEditor]
-|Create index patterns from within Kibana apps.
+|Create data views from within Kibana apps.
 
 
 |{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
