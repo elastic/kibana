@@ -6,3 +6,4 @@
  */
 
 export * from './findings';
+export * from './score';
