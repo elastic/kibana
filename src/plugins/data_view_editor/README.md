@@ -1,26 +1,26 @@
-# Index pattern editor
+# Data view editor
 
-Create index patterns from within Kibana apps. 
+Create data views from within Kibana apps. 
 
 ## How to use
 
-You first need to add in your kibana.json the "`indexPatternEditor`" plugin as a required dependency of your plugin.
+You first need to add in your kibana.json the "`dataViewEditor`" plugin as a required dependency of your plugin.
 
-You will then receive in the start contract of the indexPatternEditor plugin the following API:
+You will then receive in the start contract of the dataViewEditor plugin the following API:
 
-### `userPermissions.editIndexPattern(): boolean`
+### `userPermissions.editDataView(): boolean`
 
-Convenience method that uses the `core.application.capabilities` api to determine whether the user can create or edit the index pattern. 
+Convenience method that uses the `core.application.capabilities` api to determine whether the user can create or edit the data view. 
 
-### `openEditor(options: IndexPatternEditorProps): CloseEditor`
+### `openEditor(options: DataViewEditorProps): CloseEditor`
 
-Use this method to display the index pattern editor to create an index pattern.  
+Use this method to display the data view editor to create an index pattern.  
 
 #### `options`
 
-`onSave: (indexPattern: IndexPattern) => void` (**required**)
+`onSave: (dataView: DataView) => void` (**required**)
 
-You must provide an `onSave` handler to be notified when an index pattern has been created/updated. This handler is called after the index pattern has been persisted as a saved object.
+You must provide an `onSave` handler to be notified when a data vuew has been created/updated. This handler is called after the dataview has been persisted as a saved object.
 
 `onCancel: () => void;` (optional)
 

@@ -18,10 +18,10 @@
  * either types, or static code.
  */
 
-import { IndexPatternEditorPlugin } from './plugin';
+import { DataViewEditorPlugin } from './plugin';
 
-export type { PluginStart as IndexPatternEditorStart, IndexPatternEditorProps } from './types';
+export type { PluginStart as IndexPatternEditorStart, DataViewEditorProps } from './types';
 
 export function plugin() {
-  return new IndexPatternEditorPlugin();
+  return new DataViewEditorPlugin();
 }

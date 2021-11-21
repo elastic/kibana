@@ -9,17 +9,11 @@
 import React from 'react';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
-import {
-  PluginSetup,
-  PluginStart,
-  SetupPlugins,
-  StartPlugins,
-  IndexPatternEditorProps,
-} from './types';
+import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewEditorProps } from './types';
 import { getEditorOpener } from './open_editor';
-import { IndexPatternEditor } from './components/index_pattern_editor';
+import { IndexPatternEditor } from './components/data_view_editor';
 
-export class IndexPatternEditorPlugin
+export class DataViewEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>
 {
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
@@ -46,7 +40,7 @@ export class IndexPatternEditorPlugin
        * @param IndexPatternEditorProps - index pattern editor config
        * @returns JSX.Element
        */
-      IndexPatternEditorComponent: (props: IndexPatternEditorProps) => (
+      IndexPatternEditorComponent: (props: DataViewEditorProps) => (
         <IndexPatternEditor
           services={{
             uiSettings,
@@ -66,7 +60,7 @@ export class IndexPatternEditorPlugin
        * @returns boolean
        */
       userPermissions: {
-        editIndexPattern: () => {
+        editDataView: () => {
           return application.capabilities.management.kibana.indexPatterns;
         },
       },

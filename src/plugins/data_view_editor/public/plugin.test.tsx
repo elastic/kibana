@@ -21,8 +21,8 @@ import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 
-import { IndexPatternEditorLazy } from './components/index_pattern_editor_lazy';
-import { IndexPatternEditorPlugin } from './plugin';
+import { DataViewEditorLazy } from './components/data_view_editor_lazy';
+import { DataViewEditorPlugin } from './plugin';
 
 const noop = () => {};
 
@@ -33,13 +33,13 @@ describe('IndexPatternEditorPlugin', () => {
     usageCollection: usageCollectionPluginMock.createSetupContract(),
   };
 
-  let plugin: IndexPatternEditorPlugin;
+  let plugin: DataViewEditorPlugin;
 
   beforeEach(() => {
-    plugin = new IndexPatternEditorPlugin();
+    plugin = new DataViewEditorPlugin();
   });
 
-  test('should expose a handler to open the indexpattern field editor', async () => {
+  test('should expose a handler to open the data view field editor', async () => {
     const startApi = await plugin.start(coreStart, pluginStart);
     expect(startApi.openEditor).toBeDefined();
   });
@@ -63,7 +63,7 @@ describe('IndexPatternEditorPlugin', () => {
 
     const [[arg]] = openFlyout.mock.calls;
     const i18nProvider = arg.props.children;
-    expect(i18nProvider.props.children.type).toBe(IndexPatternEditorLazy);
+    expect(i18nProvider.props.children.type).toBe(DataViewEditorLazy);
 
     // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
     // and make sure that the the spy is being called.

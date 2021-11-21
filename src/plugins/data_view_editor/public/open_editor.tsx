@@ -17,8 +17,8 @@ import {
   DataPublicPluginStart,
 } from './shared_imports';
 
-import { CloseEditor, IndexPatternEditorContext, IndexPatternEditorProps } from './types';
-import { IndexPatternEditorLazy } from './components/index_pattern_editor_lazy';
+import { CloseEditor, IndexPatternEditorContext, DataViewEditorProps } from './types';
+import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 
 interface Dependencies {
   core: CoreStart;
@@ -28,7 +28,7 @@ interface Dependencies {
 
 export const getEditorOpener =
   ({ core, indexPatternService, searchClient }: Dependencies) =>
-  (options: IndexPatternEditorProps): CloseEditor => {
+  (options: DataViewEditorProps): CloseEditor => {
     const { uiSettings, overlays, docLinks, notifications, http, application } = core;
     const { Provider: KibanaReactContextProvider } =
       createKibanaReactContext<IndexPatternEditorContext>({
@@ -48,7 +48,7 @@ export const getEditorOpener =
       onCancel = () => {},
       defaultTypeIsRollup = false,
       requireTimestampField = false,
-    }: IndexPatternEditorProps): CloseEditor => {
+    }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
           overlayRef.close();
@@ -68,7 +68,7 @@ export const getEditorOpener =
         toMountPoint(
           <KibanaReactContextProvider>
             <I18nProvider>
-              <IndexPatternEditorLazy
+              <DataViewEditorLazy
                 onSave={onSaveIndexPattern}
                 onCancel={() => {
                   closeEditor();
