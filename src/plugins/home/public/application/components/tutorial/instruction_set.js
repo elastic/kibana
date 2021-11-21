@@ -46,8 +46,9 @@ class InstructionSetUi extends React.Component {
     };
 
     if (this.tabs.length > 0) {
-      const initialSelectedTab = this.tabs.find(({ initialSelected }) => initialSelected);
-      this.state.selectedTabId = initialSelectedTab ? initialSelectedTab.id : this.tabs[0].id;
+      this.state.selectedTabId = this.tabs.find(({ initialSelected }) => initialSelected)
+        ? initialSelectedTab.id
+        : this.tabs[0].id;
     }
   }
 
