@@ -47,7 +47,7 @@ export class AlertsDemoPlugin implements Plugin<void, void, AlertsDemoServerSetu
     // alerting.registerType(alwaysFiringAlertType);
     features.registerKibanaFeature({
       id: RAC_EXAMPLE_APP_ID,
-      name: 'Alerts Demo examples',
+      name: 'RAC example',
       app: [],
       management: {
         insightsAndAlerting: ['triggersActions'],
