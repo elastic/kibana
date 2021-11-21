@@ -11,7 +11,7 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { useKibana } from '../../shared_imports';
 
-import { MatchedItem, ResolveIndexResponseItemAlias, IndexPatternEditorContext } from '../../types';
+import { MatchedItem, ResolveIndexResponseItemAlias, DataViewEditorContext } from '../../types';
 
 import { getIndices } from '../../lib';
 
@@ -47,7 +47,7 @@ export function isUserDataIndex(source: MatchedItem) {
 export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSources }) => {
   const {
     services: { docLinks, application, http, searchClient, indexPatternService },
-  } = useKibana<IndexPatternEditorContext>();
+  } = useKibana<DataViewEditorContext>();
 
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [hasCheckedRemoteClusters, setHasCheckedRemoteClusters] = useState<boolean>(false);

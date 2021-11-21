@@ -11,7 +11,7 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewEditorProps } from './types';
 import { getEditorOpener } from './open_editor';
-import { IndexPatternEditor } from './components/data_view_editor';
+import { DataViewEditor } from './components/data_view_editor';
 
 export class DataViewEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>
@@ -41,7 +41,7 @@ export class DataViewEditorPlugin
        * @returns JSX.Element
        */
       IndexPatternEditorComponent: (props: DataViewEditorProps) => (
-        <IndexPatternEditor
+        <DataViewEditor
           services={{
             uiSettings,
             docLinks,

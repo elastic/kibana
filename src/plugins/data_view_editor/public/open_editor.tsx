@@ -17,7 +17,7 @@ import {
   DataPublicPluginStart,
 } from './shared_imports';
 
-import { CloseEditor, IndexPatternEditorContext, DataViewEditorProps } from './types';
+import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 
 interface Dependencies {
@@ -31,7 +31,7 @@ export const getEditorOpener =
   (options: DataViewEditorProps): CloseEditor => {
     const { uiSettings, overlays, docLinks, notifications, http, application } = core;
     const { Provider: KibanaReactContextProvider } =
-      createKibanaReactContext<IndexPatternEditorContext>({
+      createKibanaReactContext<DataViewEditorContext>({
         uiSettings,
         docLinks,
         http,

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { IndexPatternSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
-import { IndexPatternEditorContext, DataViewEditorProps } from '../types';
+import { DataViewEditorContext, DataViewEditorProps } from '../types';
 
 const IndexPatternFlyoutContentContainer = ({
   onSave,
@@ -21,7 +21,7 @@ const IndexPatternFlyoutContentContainer = ({
 }: DataViewEditorProps) => {
   const {
     services: { indexPatternService, notifications },
-  } = useKibana<IndexPatternEditorContext>();
+  } = useKibana<DataViewEditorContext>();
 
   const onSaveClick = async (indexPatternSpec: IndexPatternSpec) => {
     try {

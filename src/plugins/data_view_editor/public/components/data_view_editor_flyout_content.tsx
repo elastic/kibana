@@ -25,7 +25,7 @@ import { FlyoutPanels } from './flyout_panels';
 
 import {
   MatchedItem,
-  IndexPatternEditorContext,
+  DataViewEditorContext,
   RollupIndicesCapsResponse,
   INDEX_PATTERN_TYPE,
   IndexPatternConfig,
@@ -71,7 +71,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 }: Props) => {
   const {
     services: { http, indexPatternService, uiSettings, searchClient },
-  } = useKibana<IndexPatternEditorContext>();
+  } = useKibana<DataViewEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     defaultValue: {
@@ -392,8 +392,8 @@ const loadMatchedIndices = memoizeOne(
       searchClient,
     }: {
       isRollupIndex: (index: string) => boolean;
-      http: IndexPatternEditorContext['http'];
-      searchClient: IndexPatternEditorContext['searchClient'];
+      http: DataViewEditorContext['http'];
+      searchClient: DataViewEditorContext['searchClient'];
     }
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;

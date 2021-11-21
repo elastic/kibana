@@ -20,7 +20,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from 'src/plugins/data_views/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
-export interface IndexPatternEditorContext {
+export interface DataViewEditorContext {
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;
   http: HttpSetup;

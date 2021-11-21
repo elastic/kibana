@@ -9,7 +9,7 @@
 export type { Props as IndexPatternEditorFlyoutContentProps } from './data_view_editor_flyout_content';
 export { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
 
-export { IndexPatternEditor } from './data_view_editor';
+export { DataViewEditor } from './data_view_editor';
 
 export { schema } from './form_schema';
 export { TimestampField, TypeField, TitleField } from './form_fields';

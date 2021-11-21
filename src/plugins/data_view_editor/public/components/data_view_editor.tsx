@@ -9,15 +9,15 @@
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { DataViewEditorLazy } from './data_view_editor_lazy';
-import { IndexPatternEditorContext, DataViewEditorProps } from '../types';
+import { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { createKibanaReactContext } from '../shared_imports';
 import './index_pattern_editor.scss';
 
 export interface DataViewEditorPropsWithServices extends DataViewEditorProps {
-  services: IndexPatternEditorContext;
+  services: DataViewEditorContext;
 }
 
-export const IndexPatternEditor = ({
+export const DataViewEditor = ({
   onSave,
   onCancel = () => {},
   services,
@@ -25,7 +25,7 @@ export const IndexPatternEditor = ({
   requireTimestampField = false,
 }: DataViewEditorPropsWithServices) => {
   const { Provider: KibanaReactContextProvider } =
-    createKibanaReactContext<IndexPatternEditorContext>(services);
+    createKibanaReactContext<DataViewEditorContext>(services);
 
   return (
     <KibanaReactContextProvider>
