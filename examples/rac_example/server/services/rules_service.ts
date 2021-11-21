@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Logger } from '../../../../src/core/server';
+import { CoreSetup, CoreStart, Logger } from 'src/core/server';
 import { RulesServiceSetupDeps, RuleRegistrationContext, DemoFeatureId } from '../types';
 import { Dataset, createLifecycleExecutor } from '../../../../x-pack/plugins/rule_registry/server';
 export class RulesService {
