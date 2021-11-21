@@ -876,7 +876,7 @@ describe('IndexPattern Data Panel', () => {
           expect(props.indexPatternFieldEditor.openEditor).toHaveBeenCalledWith(
             expect.objectContaining({
               ctx: expect.objectContaining({
-                indexPattern: mockIndexPattern,
+                dataView: mockIndexPattern,
               }),
             })
           );
