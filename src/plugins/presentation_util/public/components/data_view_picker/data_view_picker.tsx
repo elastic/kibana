@@ -67,7 +67,7 @@ export function DataViewPicker({
         panelPaddingSize="s"
         ownFocus
       >
-        <div>
+        <div style={{ width: 368 }}>
           <EuiPopoverTitle>
             {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
               defaultMessage: 'Data view',

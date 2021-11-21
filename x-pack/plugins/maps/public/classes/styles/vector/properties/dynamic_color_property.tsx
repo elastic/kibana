@@ -101,7 +101,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   supportsFieldMeta() {
-    if (!this.isComplete() || !this._field || !this._field.supportsFieldMeta()) {
+    if (!this.isComplete() || !this._field || !this._field.supportsFieldMetaFromEs()) {
       return false;
     }
 
@@ -425,7 +425,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     if (defaultColor) {
       breaks.push({
         color: defaultColor,
-        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
         symbolId,
       });
     }

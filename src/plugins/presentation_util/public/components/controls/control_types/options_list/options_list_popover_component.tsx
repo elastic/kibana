@@ -45,7 +45,7 @@ export const OptionsListPopover = ({
   } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
-  const { selectedOptions, singleSelect } = useEmbeddableSelector((state) => state);
+  const { selectedOptions, singleSelect, title } = useEmbeddableSelector((state) => state);
 
   // track selectedOptions in a set for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
@@ -53,7 +53,8 @@ export const OptionsListPopover = ({
 
   return (
     <>
-      <EuiPopoverTitle paddingSize="s">
+      <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
+      <div className="optionsList__actions">
         <EuiFormRow>
           <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="spaceBetween">
             <EuiFlexItem>
@@ -91,7 +92,7 @@ export const OptionsListPopover = ({
                   size="s"
                   iconType="list"
                   aria-pressed={showOnlySelected}
-                  color={showOnlySelected ? 'primary' : 'subdued'}
+                  color={showOnlySelected ? 'primary' : 'text'}
                   display={showOnlySelected ? 'base' : 'empty'}
                   aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
                   onClick={() => setShowOnlySelected(!showOnlySelected)}
@@ -100,9 +101,8 @@ export const OptionsListPopover = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
-      </EuiPopoverTitle>
-
-      <div className="optionsList--items">
+      </div>
+      <div className="optionsList__items">
         {!showOnlySelected && (
           <>
             {availableOptions?.map((availableOption, index) => (

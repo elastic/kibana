@@ -490,7 +490,7 @@ describe('alerts_list component with items', () => {
   it('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
     await setup(false);
     expect(wrapper.find('[data-test-subj="alertSidebarEditAction"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="alertSidebarDeleteAction"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="alertSidebarDeleteAction"]').exists()).toBeTruthy();
   });
 });
 
@@ -540,7 +540,7 @@ describe('alerts_list component empty with show only capability', () => {
 describe('alerts_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
-  async function setup() {
+  async function setup(editable: boolean = true) {
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -606,7 +606,20 @@ describe('alerts_list with show only capability', () => {
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
-    ruleTypeRegistry.has.mockReturnValue(false);
+    const ruleTypeMock: AlertTypeModel = {
+      id: 'test_alert_type',
+      iconClass: 'test',
+      description: 'Alert when testing',
+      documentationUrl: 'https://localhost.local/docs',
+      validate: () => {
+        return { errors: {} };
+      },
+      alertParamsExpression: jest.fn(),
+      requiresAppContext: !editable,
+    };
+
+    ruleTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -621,17 +634,26 @@ describe('alerts_list with show only capability', () => {
   }
 
   it('renders table of alerts with edit button disabled', async () => {
-    await setup();
+    await setup(false);
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="editActionHoverButton"]')).toHaveLength(0);
   });
 
   it('renders table of alerts with delete button disabled', async () => {
-    await setup();
+    const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
+    hasAllPrivilege.mockReturnValue(false);
+    await setup(false);
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="deleteActionHoverButton"]')).toHaveLength(0);
+  });
+
+  it('renders table of alerts with actions menu collapsedItemActions', async () => {
+    await setup(false);
+    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="collapsedItemActions"]').length).toBeGreaterThan(0);
   });
 });
 

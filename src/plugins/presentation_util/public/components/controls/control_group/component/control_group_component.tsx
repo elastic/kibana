@@ -108,11 +108,15 @@ export const ControlGroup = () => {
     return null;
   }
 
+  let panelBg: 'subdued' | 'primary' | 'success' = 'subdued';
+  if (emptyState) panelBg = 'primary';
+  if (draggingId) panelBg = 'success';
+
   return (
     <EuiPanel
       borderRadius="m"
-      color={emptyState ? 'subdued' : undefined}
-      paddingSize={emptyState ? 'none' : 's'}
+      color={panelBg}
+      paddingSize={emptyState ? 's' : 'none'}
       className={classNames('controlsWrapper', {
         'controlsWrapper--empty': emptyState,
         'controlsWrapper--twoLine': controlStyle === 'twoLine',
@@ -141,7 +145,7 @@ export const ControlGroup = () => {
                 <EuiFlexGroup
                   className={classNames('controlGroup', { 'controlGroup-isDragging': draggingId })}
                   alignItems="center"
-                  gutterSize={'m'}
+                  gutterSize="s"
                   wrap={true}
                 >
                   {idsInOrder.map(
@@ -170,7 +174,7 @@ export const ControlGroup = () => {
                     <EuiButtonIcon
                       aria-label={ControlGroupStrings.management.getManageButtonTitle()}
                       iconType="gear"
-                      color="subdued"
+                      color="text"
                       data-test-subj="inputControlsSortingButton"
                       onClick={() => {
                         const flyoutInstance = openFlyout(

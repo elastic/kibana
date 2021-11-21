@@ -12,7 +12,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('POST /api/console/proxy', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/117674
+  describe.skip('POST /api/console/proxy', () => {
     describe('system indices behavior', () => {
       it('returns warning header when making requests to .kibana index', async () => {
         return await supertest

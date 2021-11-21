@@ -81,6 +81,7 @@ interface Props<DynamicOptions> {
   onChange: (updatedOptions: DynamicOptions) => void;
   dataMappingFunction: DATA_MAPPING_FUNCTION;
   supportedDataMappingFunctions: DATA_MAPPING_FUNCTION[];
+  supportsFieldMetaFromLocalData: boolean;
 }
 
 export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
@@ -167,6 +168,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
               })}
               checked={props.fieldMetaOptions.isEnabled}
               onChange={onIsEnabledChange}
+              disabled={!props.supportsFieldMetaFromLocalData}
               compressed
             />{' '}
             <EuiToolTip

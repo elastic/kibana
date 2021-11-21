@@ -10,7 +10,7 @@ import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -78,7 +78,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const {
     urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

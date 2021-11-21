@@ -30,11 +30,11 @@ import {
 } from '../../../../../../fleet/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
-import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { licenseService } from '../../../../common/hooks/use_license';
+import { forceHTMLElementOffsetWidth } from '../../../components/effected_policy_select/test_utils';
 
 // TODO: remove this mock when feature flag is removed
 jest.mock('../../../../common/hooks/use_experimental_features');
@@ -89,7 +89,7 @@ describe('When on the Trusted Apps Page', () => {
 
     http.get.mockImplementation(async (...args) => {
       const path = args[0] as unknown as string;
-      // @ts-ignore
+      // @ts-expect-error TS2352
       const httpOptions = args[1] as HttpFetchOptions;
 
       if (path === TRUSTED_APPS_LIST_API) {
@@ -591,7 +591,7 @@ describe('When on the Trusted Apps Page', () => {
           // we can control when the API call response is returned, which will allow us
           // to test the UI behaviours while the API call is in flight
           coreStart.http.post.mockImplementation(
-            // @ts-ignore
+            // @ts-expect-error TS2345
             async (_, options: HttpFetchOptions) => {
               return new Promise((resolve, reject) => {
                 httpPostBody = options.body as string;
@@ -794,7 +794,7 @@ describe('When on the Trusted Apps Page', () => {
 
     beforeEach(() => {
       const priorMockImplementation = coreStart.http.get.getMockImplementation();
-      // @ts-ignore
+      // @ts-expect-error TS7006
       coreStart.http.get.mockImplementation((path, options) => {
         if (path === TRUSTED_APPS_LIST_API) {
           const { page, per_page: perPage } = options.query as { page: number; per_page: number };
@@ -958,7 +958,7 @@ describe('When on the Trusted Apps Page', () => {
     beforeEach(async () => {
       // Ensure implementation is defined before render to avoid undefined responses from hidden api calls
       const priorMockImplementation = coreStart.http.get.getMockImplementation();
-      // @ts-ignore
+      // @ts-expect-error TS7006
       coreStart.http.get.mockImplementation((path, options) => {
         if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
           const policy = generator.generatePolicyPackagePolicy();

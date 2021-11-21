@@ -4,8 +4,11 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import { Action } from 'history';
 import Boom from '@hapi/boom';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
@@ -15,12 +18,13 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
-import { History } from 'history';
+import { EuiOverlayMaskProps } from '@elastic/eui';
+import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
-import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import { Location } from 'history';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
@@ -30,21 +34,22 @@ import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
-import React from 'react';
+import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Request } from '@hapi/hapi';
+import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { TransportRequestOptions } from '@elastic/elasticsearch';
-import { TransportRequestParams } from '@elastic/elasticsearch';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { TransportRequestParams } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
-import { URL } from 'url';
+import { URL as URL_2 } from 'url';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
@@ -166,6 +171,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     // @deprecated
     onAppLeave: (handler: AppLeaveHandler) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    theme$: Observable<CoreTheme>;
 }
 
 // @public
@@ -250,7 +256,7 @@ export type ChromeHelpExtensionLinkBase = Pick<EuiButtonEmptyProps, 'iconType' |
 
 // @public (undocumented)
 export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLinkBase {
-    content: React.ReactNode;
+    content: React_2.ReactNode;
     href: string;
     linkType: 'custom';
 }
@@ -403,6 +409,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
+    theme: ThemeServiceSetup;
+    // (undocumented)
     uiSettings: IUiSettingsClient;
 }
 
@@ -433,6 +441,8 @@ export interface CoreStart {
     // (undocumented)
     savedObjects: SavedObjectsStart;
     // (undocumented)
+    theme: ThemeServiceStart;
+    // (undocumented)
     uiSettings: IUiSettingsClient;
 }
 
@@ -450,7 +460,12 @@ export class CoreSystem {
     } | undefined>;
     // (undocumented)
     stop(): void;
-    }
+}
+
+// @public
+export interface CoreTheme {
+    readonly darkMode: boolean;
+}
 
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
@@ -477,6 +492,9 @@ export interface DocLinksStart {
     readonly links: {
         readonly settings: string;
         readonly elasticStackGetStarted: string;
+        readonly upgrade: {
+            readonly upgradingElasticStack: string;
+        };
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -553,6 +571,7 @@ export interface DocLinksStart {
             readonly range: string;
             readonly significant_terms: string;
             readonly terms: string;
+            readonly terms_doc_count_error: string;
             readonly avg: string;
             readonly avg_bucket: string;
             readonly max_bucket: string;
@@ -600,7 +619,11 @@ export interface DocLinksStart {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+            readonly remoteReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
@@ -622,7 +645,6 @@ export interface DocLinksStart {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
-            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -671,7 +693,11 @@ export interface DocLinksStart {
             uptimeDurationAnomaly: string;
         }>;
         readonly alerting: Record<string, string>;
-        readonly maps: Record<string, string>;
+        readonly maps: Readonly<{
+            guide: string;
+            importGeospatialPrivileges: string;
+            gdalTutorial: string;
+        }>;
         readonly monitoring: Record<string, string>;
         readonly security: Readonly<{
             apiKeyServiceSettings: string;
@@ -703,6 +729,7 @@ export interface DocLinksStart {
             fleetServerAddFleetServer: string;
             settings: string;
             settingsFleetServerHostSettings: string;
+            settingsFleetServerProxySettings: string;
             troubleshooting: string;
             elasticAgent: string;
             datastreams: string;
@@ -712,6 +739,7 @@ export interface DocLinksStart {
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
             apiKeysLearnMore: string;
+            onPremRegistry: string;
         }>;
         readonly ecs: {
             readonly guide: string;
@@ -727,6 +755,9 @@ export interface DocLinksStart {
             readonly pythonGuide: string;
             readonly rubyOverview: string;
             readonly rustGuide: string;
+        };
+        readonly endpoints: {
+            readonly troubleshooting: string;
         };
     };
 }
@@ -805,17 +836,17 @@ export interface HttpFetchQuery {
 // @public
 export interface HttpHandler {
     // (undocumented)
-    <TResponseBody = any>(path: string, options: HttpFetchOptions & {
+    <TResponseBody = unknown>(path: string, options: HttpFetchOptions & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath & {
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
-    <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+    <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
     // (undocumented)
-    <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
+    <TResponseBody = unknown>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 // @public
@@ -867,7 +898,7 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpResponse<TResponseBody = any> {
+export interface HttpResponse<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
     readonly request: Readonly<Request>;
@@ -899,7 +930,7 @@ export type HttpStart = HttpSetup;
 // @public
 export interface I18nStart {
     Context: ({ children }: {
-        children: React.ReactNode;
+        children: React_2.ReactNode;
     }) => JSX.Element;
 }
 
@@ -934,9 +965,9 @@ export interface IExternalUrlPolicy {
 }
 
 // @public (undocumented)
-export interface IHttpFetchError extends Error {
+export interface IHttpFetchError<TResponseBody = unknown> extends Error {
     // (undocumented)
-    readonly body?: any;
+    readonly body?: TResponseBody;
     // (undocumented)
     readonly name: string;
     // @deprecated (undocumented)
@@ -956,7 +987,7 @@ export interface IHttpInterceptController {
 }
 
 // @public
-export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
     readonly body?: TResponseBody;
     readonly response?: Readonly<Response>;
 }
@@ -1048,6 +1079,8 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     hideCloseButton?: boolean;
     // (undocumented)
+    maskProps?: EuiOverlayMaskProps;
+    // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
@@ -1121,7 +1154,7 @@ export interface OverlayStart {
 export { PackageInfo }
 
 // @public
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
+interface Plugin_2<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
     setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
     // (undocumented)
@@ -1129,9 +1162,10 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
     // (undocumented)
     stop?(): void;
 }
+export { Plugin_2 as Plugin }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin_2<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema extends object = object> {
@@ -1186,6 +1220,16 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
     alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
+}
+
+// @public (undocumented)
+export interface ResponseErrorBody {
+    // (undocumented)
+    attributes?: Record<string, unknown>;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    statusCode: number;
 }
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1582,10 +1626,10 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 }
 
 // @public
-export class ScopedHistory<HistoryLocationState = unknown> implements History<HistoryLocationState> {
-    constructor(parentHistory: History, basePath: string);
+export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
+    constructor(parentHistory: History_2, basePath: string);
     get action(): Action;
-    block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    block: (prompt?: string | boolean | History_2.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;
@@ -1594,11 +1638,11 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     goBack: () => void;
     goForward: () => void;
     get length(): number;
-    listen: (listener: (location: Location<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
-    get location(): Location<HistoryLocationState>;
+    listen: (listener: (location: Location_2<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
+    get location(): Location_2<HistoryLocationState>;
     push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
     replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
-    }
+}
 
 // @public
 export class SimpleSavedObject<T = unknown> {
@@ -1634,6 +1678,18 @@ export class SimpleSavedObject<T = unknown> {
 
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+// @public (undocumented)
+export interface ThemeServiceSetup {
+    // (undocumented)
+    theme$: Observable<CoreTheme>;
+}
+
+// @public (undocumented)
+export interface ThemeServiceStart {
+    // (undocumented)
+    theme$: Observable<CoreTheme>;
+}
 
 // Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1674,7 +1730,7 @@ export class ToastsApi implements IToasts {
         overlays: OverlayStart;
         i18n: I18nStart;
     }): void;
-    }
+}
 
 // @public (undocumented)
 export type ToastsSetup = IToasts;
@@ -1729,9 +1785,8 @@ export interface UserProvidedValues<T = any> {
     userValue?: T;
 }
 
-
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:173:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

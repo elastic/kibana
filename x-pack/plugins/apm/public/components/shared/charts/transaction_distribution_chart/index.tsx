@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import type { HistogramItem } from '../../../../../common/search_strategies/types';
+import type { HistogramItem } from '../../../../../common/correlations/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -132,7 +132,7 @@ export function TransactionDistributionChart({
     Math.max(
       ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
     ) ?? 0;
-  const yTicks = Math.ceil(Math.log10(yMax));
+  const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
   const yAxisDomain = {
     min: 0.5,
     max: Math.pow(10, yTicks),

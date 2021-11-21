@@ -15,7 +15,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils/technical_field_names';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
@@ -115,7 +115,7 @@ const EventRenderedViewComponent = ({
         field: 'actions',
         name: ActionTitle,
         truncateText: false,
-        hideForMobile: false,
+        mobileOptions: { show: true },
         render: (name: unknown, item: unknown) => {
           const alertId = get(item, '_id');
           const rowIndex = events.findIndex((evt) => evt._id === alertId);
@@ -147,7 +147,7 @@ const EventRenderedViewComponent = ({
           defaultMessage: 'Timestamp',
         }),
         truncateText: false,
-        hideForMobile: false,
+        mobileOptions: { show: true },
         render: (name: unknown, item: TimelineItem) => {
           const timestamp = get(item, `ecs.timestamp`);
           return <PreferenceFormattedDate value={timestamp} />;
@@ -159,7 +159,7 @@ const EventRenderedViewComponent = ({
           defaultMessage: 'Rule',
         }),
         truncateText: false,
-        hideForMobile: false,
+        mobileOptions: { show: true },
         render: (name: unknown, item: TimelineItem) => {
           const ruleName = get(item, `ecs.signal.rule.name`); /* `ecs.${ALERT_RULE_NAME}`*/
           const ruleId = get(item, `ecs.signal.rule.id`); /* `ecs.${ALERT_RULE_ID}`*/
@@ -172,7 +172,7 @@ const EventRenderedViewComponent = ({
           defaultMessage: 'Event Summary',
         }),
         truncateText: false,
-        hideForMobile: false,
+        mobileOptions: { show: true },
         render: (name: unknown, item: TimelineItem) => {
           const ecsData = get(item, 'ecs');
           const reason = get(item, `ecs.signal.reason`); /* `ecs.${ALERT_REASON}`*/

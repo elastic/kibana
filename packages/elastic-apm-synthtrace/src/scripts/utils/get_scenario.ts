@@ -7,7 +7,7 @@
  */
 import Path from 'path';
 import { Fields } from '../../lib/entity';
-import { Logger } from './logger';
+import { Logger } from '../../lib/utils/create_logger';
 
 export type Scenario = (options: { from: number; to: number }) => Fields[];
 

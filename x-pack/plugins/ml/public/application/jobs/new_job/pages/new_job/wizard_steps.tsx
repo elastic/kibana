@@ -40,10 +40,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
         defaultMessage: 'New job from saved search {title}',
         values: { title: mlContext.currentSavedSearch.attributes.title as string },
       });
-    } else if (mlContext.currentIndexPattern.id !== undefined) {
+    } else if (mlContext.currentDataView.id !== undefined) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleDataView', {
         defaultMessage: 'New job from data view {dataViewName}',
-        values: { dataViewName: mlContext.currentIndexPattern.title },
+        values: { dataViewName: mlContext.currentDataView.title },
       });
     }
     return '';

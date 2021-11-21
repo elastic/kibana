@@ -8,7 +8,7 @@
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
@@ -66,7 +66,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
     setIsRequestPending(true);
     getPageData?.()
       .then(getPageDataResponseHandler)
-      .catch((err: IHttpFetchError) => {
+      .catch((err: IHttpFetchError<ResponseErrorBody>) => {
         handleRequestError(err);
         setHasError(true);
       })

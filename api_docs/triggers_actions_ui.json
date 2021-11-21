@@ -1353,7 +1353,7 @@
             "label": "setAlertProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
+              "<Prop extends \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -1361,7 +1361,7 @@
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
-              "<Params>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
+              "<Params>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null) => void"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -1396,7 +1396,7 @@
                     "section": "def-common.Alert",
                     "text": "Alert"
                   },
-                  "<Params>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null"
+                  "<Params>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[Prop] | null"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
@@ -2115,7 +2115,7 @@
         "label": "Alert",
         "description": [],
         "signature": [
-          "{ id: string; name: string; tags: string[]; enabled: boolean; params: Record<string, unknown>; actions: ",
+          "{ name: string; tags: string[]; id: string; enabled: boolean; params: Record<string, unknown>; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2123,7 +2123,7 @@
             "section": "def-common.AlertAction",
             "text": "AlertAction"
           },
-          "[]; throttle: string | null; alertTypeId: string; consumer: string; schedule: ",
+          "[]; alertTypeId: string; consumer: string; schedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2131,7 +2131,7 @@
             "section": "def-common.IntervalSchedule",
             "text": "IntervalSchedule"
           },
-          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
+          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
           {
             "pluginId": "alerting",
             "scope": "common",

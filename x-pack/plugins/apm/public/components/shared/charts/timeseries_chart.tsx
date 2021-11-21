@@ -105,7 +105,7 @@ export function TimeseriesChart({
 
   const xFormatter = niceTimeFormatter([min, max]);
   const isEmpty = isTimeseriesEmpty(timeseries);
-  const annotationColor = theme.eui.euiColorSecondary;
+  const annotationColor = theme.eui.euiColorSuccess;
   const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
