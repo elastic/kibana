@@ -28,7 +28,7 @@ const runAllPromises = () => new Promise(setImmediate);
 describe('CreateFieldButton', () => {
   beforeEach(() => {
     mockIndexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
-    useKibanaMock().services.indexPatternFieldEditor = mockIndexPatternFieldEditor;
+    useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
     useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
   });
 

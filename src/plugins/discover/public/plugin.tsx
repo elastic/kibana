@@ -184,7 +184,7 @@ export interface DiscoverStartPlugins {
   inspector: InspectorPublicPluginStart;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
 }
 

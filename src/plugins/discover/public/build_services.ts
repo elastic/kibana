@@ -101,7 +101,7 @@ export function buildServices(
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
-    indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    indexPatternFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
   };
