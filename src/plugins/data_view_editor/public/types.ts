@@ -17,7 +17,7 @@ import {
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView, DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
@@ -26,7 +26,7 @@ export interface DataViewEditorContext {
   http: HttpSetup;
   notifications: NotificationsStart;
   application: ApplicationStart;
-  indexPatternService: DataPublicPluginStart['indexPatterns'];
+  dataViews: DataViewsPublicPluginStart;
   searchClient: DataPublicPluginStart['search']['search'];
 }
 
@@ -67,6 +67,7 @@ export interface SetupPlugins {}
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export type CloseEditor = () => void;

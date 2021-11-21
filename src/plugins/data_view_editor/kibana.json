@@ -3,7 +3,7 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["data"],
+  "requiredPlugins": ["data", "dataViews"],
   "requiredBundles": ["kibanaReact", "esUiShared"],
   "owner": {
     "name": "App Services",

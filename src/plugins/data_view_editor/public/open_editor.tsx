@@ -9,6 +9,7 @@
 import React from 'react';
 import { CoreStart, OverlayRef } from 'src/core/public';
 import { I18nProvider } from '@kbn/i18n/react';
+import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 
 import {
   createKibanaReactContext,
@@ -22,12 +23,12 @@ import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 
 interface Dependencies {
   core: CoreStart;
-  indexPatternService: DataPublicPluginStart['indexPatterns'];
   searchClient: DataPublicPluginStart['search']['search'];
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export const getEditorOpener =
-  ({ core, indexPatternService, searchClient }: Dependencies) =>
+  ({ core, searchClient, dataViews }: Dependencies) =>
   (options: DataViewEditorProps): CloseEditor => {
     const { uiSettings, overlays, docLinks, notifications, http, application } = core;
     const { Provider: KibanaReactContextProvider } =
@@ -37,7 +38,7 @@ export const getEditorOpener =
         http,
         notifications,
         application,
-        indexPatternService,
+        dataViews,
         searchClient,
       });
 

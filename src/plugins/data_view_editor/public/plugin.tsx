@@ -22,7 +22,7 @@ export class DataViewEditorPlugin
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const { application, uiSettings, docLinks, http, notifications } = core;
-    const { data } = plugins;
+    const { data, dataViews } = plugins;
 
     return {
       /**
@@ -32,7 +32,7 @@ export class DataViewEditorPlugin
        */
       openEditor: getEditorOpener({
         core,
-        indexPatternService: data.indexPatterns,
+        dataViews,
         searchClient: data.search.search,
       }),
       /**
@@ -48,7 +48,7 @@ export class DataViewEditorPlugin
             http,
             notifications,
             application,
-            indexPatternService: data.indexPatterns,
+            dataViews,
             searchClient: data.search.search,
           }}
           {...props}

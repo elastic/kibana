@@ -46,7 +46,7 @@ export function isUserDataIndex(source: MatchedItem) {
 
 export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSources }) => {
   const {
-    services: { docLinks, application, http, searchClient, indexPatternService },
+    services: { docLinks, application, http, searchClient, dataViews },
   } = useKibana<DataViewEditorContext>();
 
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
@@ -55,9 +55,7 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
   const [goToForm, setGoToForm] = useState<boolean>(false);
 
   const hasDataIndices = allSources.some(isUserDataIndex);
-  const hasUserIndexPattern = useAsync(() =>
-    indexPatternService.hasUserDataView().catch(() => true)
-  );
+  const hasUserIndexPattern = useAsync(() => dataViews.hasUserDataView().catch(() => true));
 
   useEffect(() => {
     if (!hasDataIndices && !hasCheckedRemoteClusters) {
