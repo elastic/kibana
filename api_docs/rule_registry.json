@@ -978,6 +978,58 @@
     "functions": [
       {
         "parentPluginId": "ruleRegistry",
+        "id": "def-server.alertAuditEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "alertAuditEvent",
+        "description": [],
+        "signature": [
+          "({ action, id, outcome, error }: ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.AlertAuditEventParams",
+            "text": "AlertAuditEventParams"
+          },
+          ") => ",
+          {
+            "pluginId": "security",
+            "scope": "server",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-server.AuditEvent",
+            "text": "AuditEvent"
+          }
+        ],
+        "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.alertAuditEvent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ action, id, outcome, error }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.AlertAuditEventParams",
+                "text": "AlertAuditEventParams"
+              }
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
         "id": "def-server.createLifecycleExecutor",
         "type": "Function",
         "tags": [],
@@ -1226,7 +1278,7 @@
             "section": "def-common.WithoutReservedActionGroups",
             "text": "WithoutReservedActionGroups"
           },
-          "<TActionGroupIds, never>>) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
+          "<TActionGroupIds, never>>) => Promise<void | TState>; name: string; id: string; validate?: { params?: ",
           "AlertTypeParamsValidator",
           "<TParams> | undefined; } | undefined; actionGroups: ",
           {
@@ -1278,7 +1330,7 @@
           },
           "<TParams>; injectReferences: (params: TParams, references: ",
           "SavedObjectReference",
-          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; minimumScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; }"
+          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; minimumScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "deprecated": false,
@@ -1319,6 +1371,77 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.AlertAuditEventParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertAuditEventParams",
+        "description": [],
+        "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertAuditEventParams.action",
+            "type": "Enum",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.AlertAuditAction",
+                "text": "AlertAuditAction"
+              }
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertAuditEventParams.outcome",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outcome",
+            "description": [],
+            "signature": [
+              "\"unknown\" | \"success\" | \"failure\" | undefined"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertAuditEventParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertAuditEventParams.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | undefined"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "ruleRegistry",
         "id": "def-server.ComponentTemplateOptions",
@@ -2215,6 +2338,42 @@
       },
       {
         "parentPluginId": "ruleRegistry",
+        "id": "def-server.PersistenceAlertServiceResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "PersistenceAlertServiceResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.PersistenceAlertServiceResult",
+            "text": "PersistenceAlertServiceResult"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.PersistenceAlertServiceResult.createdAlerts",
+            "type": "Array",
+            "tags": [],
+            "label": "createdAlerts",
+            "description": [],
+            "signature": [
+              "(T & { _id: string; _index: string; })[]"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
         "id": "def-server.PersistenceServices",
         "type": "Interface",
         "tags": [],
@@ -2231,13 +2390,17 @@
             "label": "alertWithPersistence",
             "description": [],
             "signature": [
-              "(alerts: { id: string; fields: Record<string, unknown>; }[], refresh: ",
+              "<T>(alerts: { _id: string; _source: T; }[], refresh: ",
               "Refresh",
               ") => Promise<",
-              "TransportResult",
-              "<",
-              "BulkResponse",
-              ", unknown> | undefined>"
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.PersistenceAlertServiceResult",
+                "text": "PersistenceAlertServiceResult"
+              },
+              "<T>>"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
@@ -2251,7 +2414,7 @@
                 "label": "alerts",
                 "description": [],
                 "signature": [
-                  "{ id: string; fields: Record<string, unknown>; }[]"
+                  "{ _id: string; _source: T; }[]"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false
@@ -2314,6 +2477,17 @@
     "enums": [
       {
         "parentPluginId": "ruleRegistry",
+        "id": "def-server.AlertAuditAction",
+        "type": "Enum",
+        "tags": [],
+        "label": "AlertAuditAction",
+        "description": [],
+        "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
         "id": "def-server.Dataset",
         "type": "Enum",
         "tags": [],
@@ -2343,7 +2517,7 @@
             "section": "def-server.AlertType",
             "text": "AlertType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, string, string>, \"id\" | \"name\" | \"validate\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"actionVariables\" | \"minimumLicenseRequired\" | \"useSavedObjectReferences\" | \"isExportable\" | \"defaultScheduleInterval\" | \"minimumScheduleInterval\" | \"ruleTaskTimeout\"> & { executor: ",
+          "<TParams, TParams, TState, { [x: string]: unknown; }, TAlertInstanceContext, string, string>, \"name\" | \"id\" | \"validate\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"actionVariables\" | \"minimumLicenseRequired\" | \"useSavedObjectReferences\" | \"isExportable\" | \"defaultScheduleInterval\" | \"minimumScheduleInterval\" | \"ruleTaskTimeout\" | \"cancelAlertsOnRuleTimeout\"> & { executor: ",
           "AlertTypeExecutor",
           "<TState, TParams, TAlertInstanceContext, TServices>; }"
         ],
@@ -2607,13 +2781,17 @@
         "label": "PersistenceAlertService",
         "description": [],
         "signature": [
-          "(alerts: { id: string; fields: Record<string, unknown>; }[], refresh: ",
+          "<T>(alerts: { _id: string; _source: T; }[], refresh: ",
           "Refresh",
           ") => Promise<",
-          "TransportResult",
-          "<",
-          "BulkResponse",
-          ", unknown> | undefined>"
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.PersistenceAlertServiceResult",
+            "text": "PersistenceAlertServiceResult"
+          },
+          "<T>>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
@@ -2627,7 +2805,7 @@
             "label": "alerts",
             "description": [],
             "signature": [
-              "{ id: string; fields: Record<string, unknown>; }[]"
+              "{ _id: string; _source: T; }[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false
@@ -2664,7 +2842,7 @@
             "section": "def-server.AlertType",
             "text": "AlertType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TInstanceContext, TActionGroupIds, never>, \"id\" | \"name\" | \"validate\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"actionVariables\" | \"minimumLicenseRequired\" | \"useSavedObjectReferences\" | \"isExportable\" | \"defaultScheduleInterval\" | \"minimumScheduleInterval\" | \"ruleTaskTimeout\"> & { executor: (options: ",
+          "<TParams, TParams, TState, { [x: string]: unknown; }, TInstanceContext, TActionGroupIds, never>, \"name\" | \"id\" | \"validate\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"actionVariables\" | \"minimumLicenseRequired\" | \"useSavedObjectReferences\" | \"isExportable\" | \"defaultScheduleInterval\" | \"minimumScheduleInterval\" | \"ruleTaskTimeout\" | \"cancelAlertsOnRuleTimeout\"> & { executor: (options: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -2782,7 +2960,78 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.operationAlertAuditActionMap",
+        "type": "Object",
+        "tags": [],
+        "label": "operationAlertAuditActionMap",
+        "description": [],
+        "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.operationAlertAuditActionMap.WriteOperations.Update",
+            "type": "Enum",
+            "tags": [],
+            "label": "[WriteOperations.Update]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.AlertAuditAction",
+                "text": "AlertAuditAction"
+              }
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.operationAlertAuditActionMap.ReadOperations.Find",
+            "type": "Enum",
+            "tags": [],
+            "label": "[ReadOperations.Find]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.AlertAuditAction",
+                "text": "AlertAuditAction"
+              }
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.operationAlertAuditActionMap.ReadOperations.Get",
+            "type": "Enum",
+            "tags": [],
+            "label": "[ReadOperations.Get]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.AlertAuditAction",
+                "text": "AlertAuditAction"
+              }
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "ruleRegistry",
       "id": "def-server.RuleRegistryPluginSetupContract",
