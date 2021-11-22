@@ -503,15 +503,15 @@ export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps
         <p>
           <FormattedMessage
             id="interactiveSetup.forgotPasswordPopover.helpText"
-            defaultMessage="To reset the password for {username} user run the following command in
-          the Elasticsearch directory:"
+            defaultMessage="To reset the password for the {username} user, run the following command from
+          the Elasticsearch installation directory:"
             values={{
               username: <strong>{username}</strong>,
             }}
           />
         </p>
         <EuiCodeBlock language="bash" paddingSize="m" isCopyable>
-          bin/elasticsearch-reset-password -u {username}
+          bin/elasticsearch-reset-password --username {username}
         </EuiCodeBlock>
       </EuiText>
     </EuiPopover>

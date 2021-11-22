@@ -247,22 +247,16 @@ export const EnrollmentTokenHelpPopover = () => {
       <EuiText size="s" grow={false}>
         <p>
           <FormattedMessage
-            id="interactiveSetup.enrollmentTokenHelpPopover.whenHelpText"
+            id="interactiveSetup.enrollmentTokenHelpPopover.helpText"
             defaultMessage="The enrollment token is automatically generated when you start Elasticsearch for the first
-          time."
+          time. You might need to scroll back a bit in the terminal to view the enrollment token."
           />
         </p>
         <p>
           <FormattedMessage
-            id="interactiveSetup.enrollmentTokenHelpPopover.whereHelpText"
-            defaultMessage="You might need to scroll back a bit in the terminal to view the enrollment token."
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            id="interactiveSetup.enrollmentTokenHelpPopover.howHelpText"
-            defaultMessage="To generate a new enrollment token run the following command in the Elasticsearch
-          directory:"
+            id="interactiveSetup.enrollmentTokenHelpPopover.commandHelpText"
+            defaultMessage="To generate a new enrollment token, run the following command from the Elasticsearch
+          installation directory:"
           />
         </p>
         <EuiCodeBlock language="bash" paddingSize="m" isCopyable>
@@ -273,7 +267,7 @@ export const EnrollmentTokenHelpPopover = () => {
         <DocLink app="elasticsearch" doc="configuring-stack-security.html">
           <FormattedMessage
             id="interactiveSetup.enrollmentTokenHelpPopover.docLinkText"
-            defaultMessage="Learn how to setup Elastic."
+            defaultMessage="Learn how to set up Elastic."
           />
         </DocLink>
       </EuiPopoverFooter>
