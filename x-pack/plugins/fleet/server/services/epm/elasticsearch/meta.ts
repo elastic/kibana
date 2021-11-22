@@ -59,8 +59,11 @@ export function appendMetadataToIngestPipeline({
     };
   }
 
-  // For JSON content, we have a much easier time here :)
-  pipeline.contentForInstallation._meta = meta;
+  const parsedPipelineContent = JSON.parse(pipeline.contentForInstallation);
+  parsedPipelineContent._meta = meta;
 
-  return pipeline;
+  return {
+    ...pipeline,
+    contentForInstallation: parsedPipelineContent,
+  };
 }

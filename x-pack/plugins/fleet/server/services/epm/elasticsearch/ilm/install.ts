@@ -24,7 +24,7 @@ export async function installILMPolicy(
     ilmPaths.map(async (path) => {
       const body = JSON.parse(getAsset(path).toString('utf-8'));
 
-      body._meta = getESAssetMetadata({ packageName: packageInfo.name });
+      body.policy._meta = getESAssetMetadata({ packageName: packageInfo.name });
 
       const { file } = getPathParts(path);
       const name = file.substr(0, file.lastIndexOf('.'));

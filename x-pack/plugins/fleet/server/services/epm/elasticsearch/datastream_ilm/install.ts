@@ -80,11 +80,11 @@ export const installIlmForDataStream = async (
     const ilmInstallations: IlmInstallation[] = ilmPathDatasets.map(
       (ilmPathDataset: IlmPathDataset) => {
         const content = JSON.parse(getAsset(ilmPathDataset.path).toString('utf-8'));
-        content._meta = getESAssetMetadata({ packageName: installation?.name });
+        content.policy._meta = getESAssetMetadata({ packageName: installation?.name });
 
         return {
           installationName: getIlmNameForInstallation(ilmPathDataset),
-          content: getAsset(ilmPathDataset.path).toString('utf-8'),
+          content,
         };
       }
     );

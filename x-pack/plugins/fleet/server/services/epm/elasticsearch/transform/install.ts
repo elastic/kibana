@@ -74,7 +74,7 @@ export const installTransform = async (
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
       const content = JSON.parse(getAsset(path).toString('utf-8'));
-      content.meta = getESAssetMetadata({ packageName: installablePackage.name });
+      content._meta = getESAssetMetadata({ packageName: installablePackage.name });
 
       return {
         installationName: getTransformNameForInstallation(
