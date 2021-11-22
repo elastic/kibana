@@ -304,7 +304,7 @@ describe('suggestions', () => {
         state: undefined,
         keptLayerIds: ['first'],
       });
-      expect(currentSuggestions).toHaveLength(4);
+      expect(currentSuggestions).toHaveLength(5);
       expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
     });
 
@@ -324,7 +324,7 @@ describe('suggestions', () => {
         state: undefined,
         keptLayerIds: ['first'],
       });
-      expect(currentSuggestions).toHaveLength(4);
+      expect(currentSuggestions).toHaveLength(5);
       expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
     });
 

@@ -25,7 +25,8 @@ import {
 import { RenderMode } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
-import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { PartitionChartsMeta } from './partition_charts_meta';
 import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
 import {
@@ -210,7 +211,7 @@ export function PieComponent(
   });
 
   const config: RecursivePartial<PartitionConfig> = {
-    partitionLayout: CHART_NAMES[shape].partitionType,
+    partitionLayout: PartitionChartsMeta[shape].partitionType,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,
@@ -292,7 +293,7 @@ export function PieComponent(
           id="xpack.lens.pie.pieWithNegativeWarningLabel"
           defaultMessage="{chartType} charts can't render with negative values."
           values={{
-            chartType: CHART_NAMES[shape].label,
+            chartType: PartitionChartsMeta[shape].label,
           }}
         />
       </EuiText>
@@ -322,6 +323,7 @@ export function PieComponent(
                 bucketColumns.length > 1 &&
                 !isTreemapOrMosaicShape(shape)))
           }
+          flatLegend={PartitionChartsMeta[shape].flatLegend}
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}
