@@ -25,7 +25,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   const retry = getService('retry');
 
-  describe('Observability alerts / Bulk actions', function () {
+  describe.skip('Observability alerts / Bulk actions', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -84,7 +84,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('When user has all priviledges for apm app', () => {
+    describe.skip('When user has all priviledges for apm app', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -108,7 +108,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
-      describe('when checkbox is clicked', async () => {
+      describe.skip('when checkbox is clicked', async () => {
         it('shows bulk actions container', async () => {
           const apmCheckboxes =
             await observability.alerts.bulkActions.getCheckboxSelectorPerProducer('apm');
@@ -126,7 +126,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('When user has read permissions for logs', () => {
+    describe.skip('When user has read permissions for logs', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -145,7 +145,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('When user has read permissions for apm', () => {
+    describe.skip('When user has read permissions for apm', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
@@ -164,7 +164,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('When user has mixed permissions for observability apps', () => {
+    describe.skip('When user has mixed permissions for observability apps', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
