@@ -20,7 +20,6 @@ import { CoreStart } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
-// import { dataViewsPluginMock } from '../../data_views/public/mocks';
 
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 import { DataViewEditorPlugin } from './plugin';
@@ -32,7 +31,6 @@ describe('DataViewEditorPlugin', () => {
   const pluginStart = {
     data: dataPluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
-    // todo
     dataViews: dataPluginMock.createStartContract().dataViews,
   };
 
