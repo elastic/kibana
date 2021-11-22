@@ -66,12 +66,14 @@ export class SavedObjectsImporter {
     createNewCopies,
     namespace,
     overwrite,
+    supportedTypesOverride,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
       createNewCopies,
       namespace,
       overwrite,
+      supportedTypesOverride,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,

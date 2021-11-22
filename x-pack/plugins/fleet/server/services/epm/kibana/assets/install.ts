@@ -175,6 +175,7 @@ async function installKibanaSavedObjects({
       overwrite: true,
       readStream: createListStream(toBeSavedObjects),
       createNewCopies: false,
+      supportedTypesOverride: Object.values(KibanaSavedObjectTypeMapping),
     });
 
     if (errors?.length) {
