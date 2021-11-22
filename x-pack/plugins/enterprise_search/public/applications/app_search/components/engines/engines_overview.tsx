@@ -77,7 +77,7 @@ export const EnginesOverview: React.FC = () => {
         action={
           canManageEngines && (
             <EuiButtonTo
-              color="secondary"
+              color="success"
               size="s"
               iconType="plusInCircle"
               data-test-subj="appSearchEnginesEngineCreationButton"
@@ -109,7 +109,7 @@ export const EnginesOverview: React.FC = () => {
           action={
             canManageMetaEngines && (
               <EuiButtonTo
-                color="secondary"
+                color="success"
                 size="s"
                 iconType="plusInCircle"
                 data-test-subj="appSearchEnginesMetaEngineCreationButton"
