@@ -13,6 +13,8 @@ export default function ({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
+  const supertest = getService('supertest');
+  const browser = getService('browser');
 
   describe('Cluster listing', () => {
     describe('with trial license clusters', () => {
@@ -148,6 +150,39 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters'); // reset for next test
         });
+      });
+    });
+
+    describe('Alerts', () => {
+      const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
+
+      before(async () => {
+        await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
+          from: 'Aug 15, 2017 @ 21:00:00.000',
+          to: 'Aug 16, 2017 @ 00:00:00.000',
+        });
+      });
+
+      after(async () => {
+        await tearDown();
+
+        const apiResponse = await supertest.get('/api/alerts/_find?per_page=20');
+        const monitoringAlerts = apiResponse.body.data.filter(
+          ({ consumer }) => consumer === 'monitoring'
+        );
+
+        await Promise.all(
+          monitoringAlerts.map(async (alert) =>
+            supertest.delete(`/api/alerts/alert/${alert.id}`).set('kbn-xsrf', 'true').expect(204)
+          )
+        );
+
+        await browser.clearLocalStorage();
+      });
+
+      it('should show a toast when alerts are created successfully', async () => {
+        await clusterList.acceptAlertsModal();
+        expect(await testSubjects.exists('alertsCreatedToast', { timeout: 10000 })).to.be(true);
       });
     });
   });
