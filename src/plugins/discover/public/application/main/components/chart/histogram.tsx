@@ -7,21 +7,24 @@
  */
 import './histogram.scss';
 import moment, { unitOfTime } from 'moment-timezone';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiLoadingChart,
   EuiSpacer,
   EuiText,
+  EuiPanel,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import dateMath from '@elastic/datemath';
 import {
   Axis,
   BrushEndListener,
-  XYBrushEvent,
   Chart,
   ElementClickListener,
   HistogramBarSeries,
@@ -29,6 +32,7 @@ import {
   ScaleType,
   Settings,
   TooltipType,
+  XYBrushEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
 import { IUiSettingsClient } from 'kibana/public';
@@ -73,7 +77,8 @@ export function DiscoverHistogram({
 
   const uiSettings = services.uiSettings;
   const timeZone = getTimezone(uiSettings);
-  const { chartData, fetchStatus, bucketInterval } = dataState;
+  const { chartData, bucketInterval, fetchStatus, error } = dataState;
+  const [showError, setShowError] = useState(false);
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
@@ -119,6 +124,55 @@ export function DiscoverHistogram({
     [dateFormat]
   );
 
+  const renderErrorMsgButton = () => {
+    return (
+      <React.Fragment>
+        <EuiPanel color="transparent" hasBorder={false}>
+          <EuiButtonEmpty onClick={() => setShowError(!showError)}>
+            {showError ? (
+              <FormattedMessage
+                id="discover.errorLoadingChart.hideError"
+                defaultMessage="Hide error"
+              />
+            ) : (
+              <FormattedMessage
+                id="discover.errorLoadingChart.showError"
+                defaultMessage="Show error"
+              />
+            )}
+          </EuiButtonEmpty>
+          {showError && error ? (
+            <EuiCodeBlock language="json" paddingSize="s">
+              {error.message}
+            </EuiCodeBlock>
+          ) : null}
+        </EuiPanel>
+      </React.Fragment>
+    );
+  };
+
+  const renderError = () => {
+    if (!error) return null;
+    return (
+      <div className="dscChart__error">
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="visBarVertical" color="danger" size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem className="dscHistogram__errorChart">
+            <EuiText size="xs" color="danger">
+              <FormattedMessage
+                id="discover.errorLoadingChart"
+                defaultMessage="Error loading chart"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {renderErrorMsgButton()}
+      </div>
+    );
+  };
+
   const timeRangeText = useMemo(() => {
     const timeRange = {
       from: dateMath.parse(from),
@@ -137,6 +191,14 @@ export function DiscoverHistogram({
             <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading chart" />
           </EuiText>
         </div>
+      </div>
+    );
+  }
+
+  if (fetchStatus === FetchStatus.ERROR) {
+    return (
+      <div className="dscHistogram" data-test-subj="discoverChart">
+        {renderError()}
       </div>
     );
   }
