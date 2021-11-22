@@ -9,6 +9,8 @@ import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import type { ColumnHeaderOptions } from '../../../common';
 import type { TGridModel, TGridModelSettings } from './model';
 
+export type { TGridModel };
+
 export interface AutoSavedWarningMsg {
   timelineId: string | null;
   newTimelineModel: TGridModel | null;

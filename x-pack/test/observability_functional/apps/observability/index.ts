@@ -19,5 +19,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./alerts/add_to_case'));
     loadTestFile(require.resolve('./alerts/state_synchronization'));
     loadTestFile(require.resolve('./alerts/bulk_actions'));
+    loadTestFile(require.resolve('./alerts/table_storage'));
   });
 }
