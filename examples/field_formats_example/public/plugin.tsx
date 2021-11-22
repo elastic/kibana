@@ -30,7 +30,7 @@ import img from './formats.png';
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
   fieldFormats: FieldFormatsSetup;
-  indexPatternFieldEditor: IndexPatternFieldEditorSetup;
+  dataViewFieldEditor: IndexPatternFieldEditorSetup;
 }
 
 interface StartDeps {
@@ -42,7 +42,7 @@ interface StartDeps {
 export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
     registerExampleFormat(deps.fieldFormats);
-    registerExampleFormatEditor(deps.indexPatternFieldEditor);
+    registerExampleFormatEditor(deps.dataViewFieldEditor);
 
     // just for demonstration purposes:
     // opens a field editor using default index pattern and first number field
