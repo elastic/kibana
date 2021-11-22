@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockHttpValues,
-  mockFlashMessageHelpers,
-} from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { CrawlDetailLogic, CrawlDetailValues } from './crawl_detail_logic';
 import { CrawlerStatus, CrawlRequestFromServer } from './types';
@@ -38,7 +36,6 @@ const clientCrawlRequest = crawlRequestServerToClient(crawlRequestResponse);
 describe('CrawlDetailLogic', () => {
   const { mount } = new LogicMounter(CrawlDetailLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,23 +56,6 @@ describe('CrawlDetailLogic', () => {
         expect(CrawlDetailLogic.values).toEqual({
           ...DEFAULT_VALUES,
           flyoutClosed: true,
-        });
-      });
-    });
-
-    describe('fetchCrawlRequest', () => {
-      it('opens the flyout and sets loading to true', () => {
-        mount({
-          dataLoading: false,
-          flyoutClosed: true,
-        });
-
-        CrawlDetailLogic.actions.fetchCrawlRequest('12345');
-
-        expect(CrawlDetailLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: true,
-          flyoutClosed: false,
         });
       });
     });
@@ -101,6 +81,21 @@ describe('CrawlDetailLogic', () => {
 
   describe('listeners', () => {
     describe('fetchCrawlRequest', () => {
+      it('opens the flyout and sets loading to true', () => {
+        mount({
+          dataLoading: false,
+          flyoutClosed: true,
+        });
+
+        CrawlDetailLogic.actions.fetchCrawlRequest('12345');
+
+        expect(CrawlDetailLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          dataLoading: true,
+          flyoutClosed: false,
+        });
+      });
+
       it('updates logic with data that has been converted from server to client', async () => {
         mount();
         jest.spyOn(CrawlDetailLogic.actions, 'onRecieveCrawlRequest');
@@ -118,14 +113,9 @@ describe('CrawlDetailLogic', () => {
         );
       });
 
-      it('displays any errors to the user', async () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-        http.get.mockReturnValueOnce(Promise.reject('error'));
-
         CrawlDetailLogic.actions.fetchCrawlRequest('12345');
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });
