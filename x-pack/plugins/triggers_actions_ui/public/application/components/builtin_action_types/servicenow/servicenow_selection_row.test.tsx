@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ActionConnector } from '../../../../types';
-import ServiceNowSelectableRowComponent from './servicenow_dropdown_row';
+import ServiceNowSelectableRowComponent from './servicenow_selection_row';
 
 const connector: ActionConnector = {
   secrets: {},

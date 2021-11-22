@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ActionConnector, ActionTypeIndex, ActionTypeModel, AlertAction } from '../../../types';
 import { getValidConnectors } from '../common/connectors';
-import { preconfiguredMessage } from '../../../common/connectors_dropdown';
+import { preconfiguredMessage } from '../../../common/connectors_selection';
 
 interface DropdownProps {
   actionItem: AlertAction;

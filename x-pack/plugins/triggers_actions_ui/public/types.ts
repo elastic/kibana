@@ -135,7 +135,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     >
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
-  actionConnectorDropdownComponent?: React.LazyExoticComponent<
+  customConnectorSelectItemComponent?: React.LazyExoticComponent<
     ComponentType<{ actionConnector: ActionConnector }>
   >;
 }

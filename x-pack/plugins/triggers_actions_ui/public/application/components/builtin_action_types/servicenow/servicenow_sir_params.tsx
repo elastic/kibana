@@ -27,7 +27,7 @@ import { useGetChoices } from './use_get_choices';
 import { ServiceNowSIRActionParams, Fields, Choice } from './types';
 import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
 import { DeprecatedCallout } from './deprecated_callout';
-import { checkConnectorIsDeprecated } from '../../../../common/connectors_dropdown';
+import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {

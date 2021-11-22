@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { checkConnectorIsDeprecated } from './connectors_dropdown';
+import { checkConnectorIsDeprecated } from './connectors_selection';
 
 describe('Connectors select', () => {
   describe('isDeprecatedConnector', () => {

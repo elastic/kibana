@@ -51,7 +51,7 @@ import {
   connectorDeprecatedMessage,
   deprecatedMessage,
   checkConnectorIsDeprecated,
-} from '../../../../common/connectors_dropdown';
+} from '../../../../common/connectors_selection';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (

@@ -9,12 +9,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { ActionConnector } from '../../../../types';
 import {
+  deprecatedMessage,
+  preconfiguredMessage,
   connectorDeprecatedMessage,
   checkConnectorIsDeprecated,
-} from '../../../../common/connectors_dropdown';
-import { ActionConnector } from '../../../../types';
-import { deprecatedMessage, preconfiguredMessage } from '../../../../common/connectors_dropdown';
+} from '../../../../common/connectors_selection';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowSelectableRowComponent as default };

@@ -26,7 +26,7 @@ import { useGetChoices } from './use_get_choices';
 import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
 
 import * as i18n from './translations';
-import { checkConnectorIsDeprecated } from '../../../../common/connectors_dropdown';
+import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
