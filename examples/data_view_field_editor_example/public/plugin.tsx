@@ -13,7 +13,7 @@ import { IndexPatternFieldEditorStart } from '../../../src/plugins/data_view_fie
 
 interface StartDeps {
   data: DataPublicPluginStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
 }
 
 interface SetupDeps {

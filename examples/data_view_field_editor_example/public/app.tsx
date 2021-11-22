@@ -29,10 +29,10 @@ import { IndexPatternFieldEditorStart } from '../../../src/plugins/data_view_fie
 
 interface Props {
   indexPattern?: IndexPattern;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
 }
 
-const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor }: Props) => {
+const IndexPatternFieldEditorExample = ({ indexPattern, dataViewFieldEditor }: Props) => {
   const [fields, setFields] = useState<IndexPatternField[]>(
     indexPattern?.getNonScriptedFields() || []
   );
@@ -52,7 +52,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
           type: 'icon',
           'data-test-subj': 'editField',
           onClick: (fld: IndexPatternField) =>
-            indexPatternFieldEditor.openEditor({
+            dataViewFieldEditor.openEditor({
               ctx: { dataView: indexPattern! },
               fieldName: fld.name,
               onSave: refreshFields,
@@ -66,7 +66,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
           'data-test-subj': 'deleteField',
           available: (fld) => !!fld.runtimeField,
           onClick: (fld: IndexPatternField) =>
-            indexPatternFieldEditor.openDeleteModal({
+            dataViewFieldEditor.openDeleteModal({
               fieldName: fld.name,
               ctx: {
                 dataView: indexPattern!,
@@ -84,7 +84,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
       <div>
         <EuiButton
           onClick={() =>
-            indexPatternFieldEditor.openEditor({
+            dataViewFieldEditor.openEditor({
               ctx: { dataView: indexPattern! },
               onSave: refreshFields,
             })
@@ -125,18 +125,18 @@ const IndexPatternFieldEditorExample = ({ indexPattern, indexPatternFieldEditor 
 
 interface RenderAppDependencies {
   data: DataPublicPluginStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export const renderApp = async (
-  { data, indexPatternFieldEditor }: RenderAppDependencies,
+  { data, dataViewFieldEditor }: RenderAppDependencies,
   { element }: AppMountParameters
 ) => {
   const indexPattern = (await data.indexPatterns.getDefault()) || undefined;
   ReactDOM.render(
     <IndexPatternFieldEditorExample
       indexPattern={indexPattern}
-      indexPatternFieldEditor={indexPatternFieldEditor}
+      dataViewFieldEditor={dataViewFieldEditor}
     />,
     element
   );

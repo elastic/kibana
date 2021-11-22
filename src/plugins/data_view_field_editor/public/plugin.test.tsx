@@ -104,12 +104,10 @@ describe('DataViewFieldEditorPlugin', () => {
     };
     const pluginStartMocked = {
       ...pluginStart,
-      data: {
-        ...pluginStart.data,
-        indexPatterns: {
-          ...pluginStart.data.indexPatterns,
-          updateSavedObject: jest.fn(),
-        },
+      data: pluginStart.data,
+      dataViews: {
+        ...pluginStart.data.indexPatterns,
+        updateSavedObject: jest.fn(),
       },
     };
     const { openDeleteModal } = await plugin.start(coreStartMocked, pluginStartMocked);
@@ -137,7 +135,7 @@ describe('DataViewFieldEditorPlugin', () => {
     expect(removeFieldSpy).toHaveBeenCalledWith('a');
     expect(removeFieldSpy).toHaveBeenCalledWith('b');
     expect(removeFieldSpy).toHaveBeenCalledWith('c');
-    expect(pluginStartMocked.data.indexPatterns.updateSavedObject).toHaveBeenLastCalledWith(
+    expect(pluginStartMocked.dataViews.updateSavedObject).toHaveBeenLastCalledWith(
       indexPatternMock
     );
   });
