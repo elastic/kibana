@@ -8,7 +8,7 @@
 import React from 'react';
 import maki from '@elastic/maki';
 import xml2js from 'xml2js';
-import Canvg from 'canvg';
+import { Canvg } from 'canvg';
 import calcSDF from 'bitmap-sdf';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
