@@ -101,7 +101,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         <EuiButton
           key="reloadButton"
           iconType="refresh"
-          color="secondary"
+          color="success"
           data-test-subj="reloadButton"
           onClick={onReloadClick}
         >
