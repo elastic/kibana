@@ -12,9 +12,52 @@ import { LensIconChartPie } from '../assets/chart_pie';
 import { LensIconChartTreemap } from '../assets/chart_treemap';
 import { LensIconChartMosaic } from '../assets/chart_mosaic';
 
+import type { SharedPieLayerState } from '../../common/expressions';
+
+interface CategoryOption {
+  value: SharedPieLayerState['categoryDisplay'];
+  inputDisplay: string;
+}
+
 const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
   defaultMessage: 'Proportion',
 });
+
+const categoryOptions: CategoryOption[] = [
+  {
+    value: 'default',
+    inputDisplay: i18n.translate('xpack.lens.pieChart.showCategoriesLabel', {
+      defaultMessage: 'Inside or outside',
+    }),
+  },
+  {
+    value: 'inside',
+    inputDisplay: i18n.translate('xpack.lens.pieChart.fitInsideOnlyLabel', {
+      defaultMessage: 'Inside only',
+    }),
+  },
+  {
+    value: 'hide',
+    inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
+      defaultMessage: 'Hide labels',
+    }),
+  },
+];
+
+const categoryOptionsTreemap: CategoryOption[] = [
+  {
+    value: 'default',
+    inputDisplay: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
+      defaultMessage: 'Show labels',
+    }),
+  },
+  {
+    value: 'hide',
+    inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
+      defaultMessage: 'Hide labels',
+    }),
+  },
+];
 
 export const CHART_NAMES = {
   donut: {
@@ -24,6 +67,7 @@ export const CHART_NAMES = {
     }),
     partitionType: PartitionLayout.sunburst,
     groupLabel,
+    categoryOptions,
   },
   pie: {
     icon: LensIconChartPie,
@@ -32,6 +76,7 @@ export const CHART_NAMES = {
     }),
     partitionType: PartitionLayout.sunburst,
     groupLabel,
+    categoryOptions,
   },
   treemap: {
     icon: LensIconChartTreemap,
@@ -40,6 +85,7 @@ export const CHART_NAMES = {
     }),
     partitionType: PartitionLayout.treemap,
     groupLabel,
+    categoryOptions: categoryOptionsTreemap,
   },
   mosaic: {
     icon: LensIconChartMosaic,
@@ -48,6 +94,7 @@ export const CHART_NAMES = {
     }),
     partitionType: PartitionLayout.mosaic,
     groupLabel,
+    categoryOptions: [] as CategoryOption[],
   },
 };
 

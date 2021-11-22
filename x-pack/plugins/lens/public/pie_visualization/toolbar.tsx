@@ -17,12 +17,11 @@ import {
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
-import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { DEFAULT_PERCENT_DECIMALS, CHART_NAMES } from './constants';
 import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';
-import { isTreemapOrMosaicShape } from './render_helpers';
 
 const numberOptions: Array<{
   value: SharedPieLayerState['numberDisplay'];
@@ -44,48 +43,6 @@ const numberOptions: Array<{
     value: 'value',
     inputDisplay: i18n.translate('xpack.lens.pieChart.showFormatterValuesLabel', {
       defaultMessage: 'Show value',
-    }),
-  },
-];
-
-const categoryOptions: Array<{
-  value: SharedPieLayerState['categoryDisplay'];
-  inputDisplay: string;
-}> = [
-  {
-    value: 'default',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showCategoriesLabel', {
-      defaultMessage: 'Inside or outside',
-    }),
-  },
-  {
-    value: 'inside',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.fitInsideOnlyLabel', {
-      defaultMessage: 'Inside only',
-    }),
-  },
-  {
-    value: 'hide',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
-      defaultMessage: 'Hide labels',
-    }),
-  },
-];
-
-const categoryOptionsTreemap: Array<{
-  value: SharedPieLayerState['categoryDisplay'];
-  inputDisplay: string;
-}> = [
-  {
-    value: 'default',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
-      defaultMessage: 'Show labels',
-    }),
-  },
-  {
-    value: 'hide',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
-      defaultMessage: 'Hide labels',
     }),
   },
 ];
@@ -134,25 +91,27 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         groupPosition="left"
         buttonDataTestSubj="lnsLabelsButton"
       >
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
-            defaultMessage: 'Position',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiSuperSelect
-            compressed
-            valueOfSelected={layer.categoryDisplay}
-            options={isTreemapOrMosaicShape(state.shape) ? categoryOptionsTreemap : categoryOptions}
-            onChange={(option) => {
-              setState({
-                ...state,
-                layers: [{ ...layer, categoryDisplay: option }],
-              });
-            }}
-          />
-        </EuiFormRow>
+        {state.shape && CHART_NAMES[state.shape].categoryOptions.length ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
+              defaultMessage: 'Position',
+            })}
+            fullWidth
+            display="columnCompressed"
+          >
+            <EuiSuperSelect
+              compressed
+              valueOfSelected={layer.categoryDisplay}
+              options={CHART_NAMES[state.shape].categoryOptions}
+              onChange={(option) => {
+                setState({
+                  ...state,
+                  layers: [{ ...layer, categoryDisplay: option }],
+                });
+              }}
+            />
+          </EuiFormRow>
+        ) : null}
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.numberLabels', {
             defaultMessage: 'Values',
