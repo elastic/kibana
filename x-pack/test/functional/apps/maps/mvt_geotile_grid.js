@@ -191,9 +191,25 @@ export default function ({ getPageObjects, getService }) {
 
       expect(heatmapLayer.paint).to.eql({
         'heatmap-radius': 128,
-        'heatmap-color': ['/', ['get', '_count'], 1],
+        'heatmap-color': [
+          'interpolate',
+          ['linear'],
+          ['heatmap-density'],
+          0,
+          'rgba(0, 0, 255, 0)',
+          0.1,
+          'rgb(65, 105, 225)',
+          0.28,
+          'rgb(0, 256, 256)',
+          0.45999999999999996,
+          'rgb(0, 256, 0)',
+          0.64,
+          'rgb(256, 256, 0)',
+          0.82,
+          'rgb(256, 0, 0)',
+        ],
         'heatmap-opacity': 0.75,
-        'heatmap-weight': ['interpolate', ['linear'], ['get', '_count'], 0, 0, 1, 1],
+        'heatmap-weight': ['/', ['get', '_count'], 1],
       });
     });
   });
