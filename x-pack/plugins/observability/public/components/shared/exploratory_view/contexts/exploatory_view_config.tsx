@@ -7,8 +7,8 @@
 
 import React, { createContext, useContext } from 'react';
 import { AppMountParameters } from 'kibana/public';
-import { AppDataType, ConfigProps, ReportViewType, SeriesConfig } from '../types';
-import { SELECT_REPORT_TYPE } from '../series_editor/series_editor';
+import { i18n } from '@kbn/i18n';
+import type { AppDataType, ConfigProps, ReportViewType, SeriesConfig } from '../types';
 
 export type ReportConfigMap = Record<string, Array<(config: ConfigProps) => SeriesConfig>>;
 
@@ -56,3 +56,10 @@ export function useExploratoryView() {
   }
   return context;
 }
+
+export const SELECT_REPORT_TYPE = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.selectReportType',
+  {
+    defaultMessage: 'No report type selected',
+  }
+);

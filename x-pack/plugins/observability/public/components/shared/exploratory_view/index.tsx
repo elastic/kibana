@@ -23,15 +23,17 @@ import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { useTrackPageview } from '../../..';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 
+export interface ExploratoryViewPageProps {
+  useSessionStorage?: boolean;
+  saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
+  app?: { id: string; label: string };
+}
+
 export function ExploratoryViewPage({
   app,
   saveAttributes,
   useSessionStorage = false,
-}: {
-  useSessionStorage?: boolean;
-  saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
-  app?: { id: string; label: string };
-}) {
+}: ExploratoryViewPageProps) {
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
   useTrackPageview({
     app: 'observability-overview',
