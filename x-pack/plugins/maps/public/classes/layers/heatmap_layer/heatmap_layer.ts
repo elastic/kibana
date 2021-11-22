@@ -11,7 +11,7 @@ import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
 import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
-import { getVectorSourceBounds, MvtSourceData, syncMvtSourceData } from '../vector_layer';
+import { syncBoundsData, MvtSourceData, syncMvtSourceData } from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
@@ -192,7 +192,7 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   async getBounds(syncContext: DataRequestContext) {
-    return await getVectorSourceBounds({
+    return await syncBoundsData({
       layerId: this.getId(),
       syncContext,
       source: this.getSource(),
