@@ -47,7 +47,13 @@ export default function ({ getService }: FtrProviderContext) {
       await assertLogContains({
         description: 'elasticsearch logs have the same traceId',
         predicate: (record) =>
-          record.log?.logger === 'elasticsearch.query.data' && record.trace?.id === responseTraceId,
+          Boolean(
+            record.log?.logger === 'elasticsearch.query.data' &&
+              record.trace?.id === responseTraceId &&
+              // esClient.ping() request
+              record.message?.includes('HEAD /')
+          ),
+
         retry,
       });
     });
