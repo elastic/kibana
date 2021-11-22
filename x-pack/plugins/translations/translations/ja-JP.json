@@ -26051,7 +26051,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription": "コネクターを削除できません",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName": "削除",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription": "コネクター構成を修正",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isDeprecatedDescription": "このコネクターは廃止予定です。更新するか新しく作成してください。",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription": "機密情報はインポートされませんでした",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDescription": "このコネクターを実行",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription": "コネクターを実行できません",

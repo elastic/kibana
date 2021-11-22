@@ -26500,7 +26500,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription": "无法删除连接器",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName": "删除",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription": "修复连接器配置",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isDeprecatedDescription": "此连接器已过时。请进行更新，或创建新连接器。",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription": "未导入敏感信息",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDescription": "运行此连接器",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription": "无法运行连接器",
