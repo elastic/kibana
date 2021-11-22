@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
 import { TGridIntegratedProps } from '../components/t_grid/integrated';
 import { mockBrowserFields, mockDocValueFields, mockRuntimeMappings } from './browser_fields';
 import { mockDataProviders } from './mock_data_providers';
@@ -92,6 +92,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   columns: columnHeaders,
   dataProviders: mockDataProviders,
   deletedEventIds: [],
+  disabledCellActions: [],
   docValueFields: mockDocValueFields,
   end: '2021-08-19T00:30:00.000Z',
   entityType: 'alerts',
