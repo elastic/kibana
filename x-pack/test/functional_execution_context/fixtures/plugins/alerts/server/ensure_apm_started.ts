@@ -9,7 +9,5 @@ import { initApm } from '@kbn/apm-config-loader';
 import { REPO_ROOT } from '@kbn/utils';
 
 if (!apmAgent.isStarted()) {
-  // eslint-disable-next-line no-console
-  console.log('>>> Starting APM agent');
   initApm(process.argv, REPO_ROOT, false, 'test-plugin');
 }

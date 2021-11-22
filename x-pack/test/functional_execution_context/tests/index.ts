@@ -8,11 +8,10 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  // eslint-disable-next-line ban/ban
-  describe.only('Execution context', function () {
+  describe('Execution context', function () {
     this.tags('ciGroup1');
-    // loadTestFile(require.resolve('./browser'));
-    // loadTestFile(require.resolve('./server'));
+    loadTestFile(require.resolve('./browser'));
+    loadTestFile(require.resolve('./server'));
     loadTestFile(require.resolve('./log_correlation'));
   });
 }

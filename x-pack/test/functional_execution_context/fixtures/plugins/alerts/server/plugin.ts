@@ -6,7 +6,7 @@
  */
 import apmAgent from 'elastic-apm-node';
 
-import type { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
+import type { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../plugins/alerting/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
@@ -25,10 +25,9 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  constructor(private readonly ctx: PluginInitializerContext) {}
+  constructor() {}
 
   public setup(core: CoreSetup<FixtureStartDeps>, { features, alerting }: FixtureSetupDeps) {
-    const logger = this.ctx.logger.get();
     features.registerKibanaFeature({
       id: 'alertsFixture',
       name: 'Alerts',
@@ -94,6 +93,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
       async (ctx, req, res) => {
+        // Kibana might set transactiopnSampleRate < 1.0 on CI, so we need to
+        // enforce transaction creation to prevent the test from failing.
         const transaction = apmAgent.startTransaction();
         const subscription = req.events.completed$.subscribe(() => {
           setTimeout(() => {
@@ -102,23 +103,11 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           }, 1_000);
         });
 
-        logger.info('>>> emit_log_with_trace_id', {
-          // @ts-expect-error
-          started: apmAgent.isStarted(),
-          ...apmAgent.currentTraceIds,
-        });
-        // eslint-disable-next-line no-console
-        console.log('>>> apmAgent.currentTraceIds', apmAgent.isStarted(), apmAgent.currentTraceIds);
-
         await ctx.core.elasticsearch.client.asInternalUser.ping();
 
         return res.ok({
           body: {
             traceId: apmAgent.currentTraceIds['trace.id'],
-            ids: apmAgent.currentTraceIds,
-            started: apmAgent.isStarted(),
-            // @ts-expect-error
-            config: apmAgent._conf,
           },
         });
       }
