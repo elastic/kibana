@@ -15482,7 +15482,7 @@
           },
           "<T> extends Pick<",
           "SavedObject",
-          "<T>, \"type\" | \"id\" | \"version\" | \"namespaces\" | \"migrationVersion\" | \"coreMigrationVersion\" | \"error\" | \"updated_at\" | \"originId\">"
+          "<T>, \"version\" | \"type\" | \"id\" | \"namespaces\" | \"migrationVersion\" | \"coreMigrationVersion\" | \"error\" | \"updated_at\" | \"originId\">"
         ],
         "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
         "deprecated": false,
