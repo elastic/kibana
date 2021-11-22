@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CtiThreatIntelSourceRequestOptions } from '../../../../../../common';
+import { CtiDataSourceRequestOptions } from '../../../../../../common';
 
-export const buildThreatIntelSourceQuery = ({
+export const buildTiDataSourceQuery = ({
   timerange,
   defaultIndex,
-}: CtiThreatIntelSourceRequestOptions) => {
+}: CtiDataSourceRequestOptions) => {
   const filter = [];
 
   if (timerange) {

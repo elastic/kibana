@@ -30,7 +30,7 @@ import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
-import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
+import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
@@ -76,7 +76,7 @@ const OverviewComponent = () => {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const { isThreatIntelModuleEnabled, allIntegrations } = useIsThreatIntelModuleEnabled();
+  const allTiDataSources = useAllTiDataSources();
   const tiIntegrationStatus = useTiIntegrations();
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
@@ -154,14 +154,10 @@ const OverviewComponent = () => {
                       <EuiFlexItem grow={1}>
                         {tiIntegrationStatus && (
                           <ThreatIntelLinkPanel
-                            hasSomeThreatIntelData={isThreatIntelModuleEnabled}
-                            isSomeIntegrationsInstalled={
-                              tiIntegrationStatus.isSomeIntegrationsInstalled
-                            }
                             isSomeIntegrationsDisabled={
                               tiIntegrationStatus.isSomeIntegrationsDisabled
                             }
-                            allIntegrations={allIntegrations}
+                            allTiDataSources={allTiDataSources}
                             deleteQuery={deleteQuery}
                             from={from}
                             setQuery={setQuery}

@@ -7,20 +7,20 @@
 
 import { SecuritySolutionFactory } from '../../types';
 import {
-  CtiThreatIntelSourceStrategyResponse,
+  CtiDataSourceStrategyResponse,
   CtiQueries,
-  CtiThreatIntelSourceRequestOptions,
+  CtiDataSourceRequestOptions,
 } from '../../../../../../common';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 // import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { buildThreatIntelSourceQuery } from './query.threat_intel_source.dsl';
+import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
 
-export const threatIntelSource: SecuritySolutionFactory<CtiQueries.threatIntelSource> = {
-  buildDsl: (options: CtiThreatIntelSourceRequestOptions) => buildThreatIntelSourceQuery(options),
+export const dataSource: SecuritySolutionFactory<CtiQueries.dataSource> = {
+  buildDsl: (options: CtiDataSourceRequestOptions) => buildTiDataSourceQuery(options),
   parse: async (
-    options: CtiThreatIntelSourceRequestOptions,
+    options: CtiDataSourceRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<CtiThreatIntelSourceStrategyResponse> => {
+  ): Promise<CtiDataSourceStrategyResponse> => {
     // const inspect = {
     //   dsl: [inspectStringifyObject(buildThreatIntelSourceQuery(options))],
     // };
