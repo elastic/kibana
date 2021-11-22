@@ -18081,8 +18081,6 @@
     "xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel": "删除",
     "xpack.ml.trainedModels.modelsList.disableSelectableMessage": "模型有关联的管道",
     "xpack.ml.trainedModels.modelsList.expandedRow.analyticsConfigTitle": "分析配置",
-    "xpack.ml.trainedModels.modelsList.expandedRow.byPipelineTitle": "按管道",
-    "xpack.ml.trainedModels.modelsList.expandedRow.byProcessorTitle": "按处理器",
     "xpack.ml.trainedModels.modelsList.expandedRow.configTabLabel": "配置",
     "xpack.ml.trainedModels.modelsList.expandedRow.detailsTabLabel": "详情",
     "xpack.ml.trainedModels.modelsList.expandedRow.detailsTitle": "详情",
