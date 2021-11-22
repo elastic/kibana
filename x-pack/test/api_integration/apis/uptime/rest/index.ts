@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   settingsObjectId,
   settingsObjectType,
-} from '../../../../../plugins/uptime/server/lib/saved_objects';
+} from '../../../../../plugins/uptime/server/lib/saved_objects/saved_objects';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

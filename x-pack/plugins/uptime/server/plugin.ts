@@ -16,10 +16,15 @@ import {
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
 import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
-import { savedObjectsAdapter, umDynamicSettings } from './lib/saved_objects';
+import {
+  registerUptimeSavedObjects,
+  savedObjectsAdapter,
+  umDynamicSettings,
+} from './lib/saved_objects/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from './config';
+import { syntheticsMonitor } from './lib/saved_objects/synthetics_monitor';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -59,7 +64,9 @@ export class Plugin implements PluginType {
       ruleDataClient,
       this.logger
     );
-    core.savedObjects.registerType(umDynamicSettings);
+
+    registerUptimeSavedObjects(core.savedObjects);
+
     KibanaTelemetryAdapter.registerUsageCollector(
       plugins.usageCollection,
       () => this.savedObjectsClient
