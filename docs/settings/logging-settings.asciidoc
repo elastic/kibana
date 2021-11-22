@@ -79,7 +79,7 @@ The folowing table serves as a quick reference for different logging configurati
 | Specific logger instance.
 
 | `logging.loggers[].<logger>.level`
-| Specify verbosity of log messages for <logger> context. Optional and falls back to `root` level if not configured.
+| Specify verbosity of log messages for <logger> context. Optional and inherits the verbosity of any ancestor logger, up to the `root` logger `level`.
 
 | `logging.loggers[].<logger>.appenders:`
 | Specific appenders to apply for a particular logger context.
