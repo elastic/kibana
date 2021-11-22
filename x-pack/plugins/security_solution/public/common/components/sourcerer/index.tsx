@@ -166,11 +166,13 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, [defaultDataView.title, onContinueUpdateDeprecated, selectedPatterns]);
 
   const onUpdateDataView = useCallback(() => {
+    // @Angela this is where your work is for "Add index pattern"
     // update ui settings string
     // close modal and sourcerer
     setIsShowingUpdateModal(false);
     setPopoverIsOpen(false);
-    // show toaster to refresh page
+    // show toaster to refresh page when confirmed
+    // that ui settings update was successful
   }, []);
 
   const trigger = useMemo(
