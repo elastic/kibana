@@ -78,7 +78,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               }
             >
               <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.preconfiguredOutputCalloutTitle"
+                id="xpack.fleet.settings.editOutputFlyout.preconfiguredOutputCalloutDescription"
                 defaultMessage="Most actions related to this output are unavailable. Refer to your kibana config for more
                 detail."
               />

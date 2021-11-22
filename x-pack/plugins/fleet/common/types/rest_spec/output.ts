@@ -36,7 +36,7 @@ export interface PutOutputRequest {
   };
 }
 
-export interface PosttOutputRequest {
+export interface PostOutputRequest {
   body: {
     id?: string;
     type: 'elasticsearch';

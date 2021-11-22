@@ -6,7 +6,7 @@
  */
 
 import { outputRoutesService } from '../../services';
-import type { PutOutputRequest, GetOutputsResponse, PosttOutputRequest } from '../../types';
+import type { PutOutputRequest, GetOutputsResponse, PostOutputRequest } from '../../types';
 
 import { sendRequest, useRequest } from './use_request';
 
@@ -32,7 +32,7 @@ export function sendPutOutput(outputId: string, body: PutOutputRequest['body']) 
   });
 }
 
-export function sendPostOutput(body: PosttOutputRequest['body']) {
+export function sendPostOutput(body: PostOutputRequest['body']) {
   return sendRequest({
     method: 'post',
     path: outputRoutesService.getCreatePath(),
