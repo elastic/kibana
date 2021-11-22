@@ -48,11 +48,11 @@ import { Adapters } from '../../../../../../../src/plugins/inspector/common/adap
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
-type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType'>;
+type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
 
 const ES_MVT_AGGS_LAYER_NAME = 'aggs';
 
-export const MAX_GEOTILE_LEVEL = 29;
+const MAX_GEOTILE_LEVEL = 29;
 
 export const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
   defaultMessage: 'Clusters and grids',
@@ -103,6 +103,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   getSyncMeta(): ESGeoGridSourceSyncMeta {
     return {
       requestType: this._descriptor.requestType,
+      resolution: this._descriptor.resolution,
     };
   }
 
@@ -134,6 +135,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   isMvt() {
+    // heatmap uses MVT regardless of resolution because heatmap only supports counting metrics
+    if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
+      return true;
+    }
     return this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE;
   }
 
@@ -142,7 +147,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   isGeoGridPrecisionAware(): boolean {
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+    if (this.isMvt()) {
       // MVT gridded data should not bootstrap each time the precision changes
       // mapbox-gl needs to handle this
       return false;
@@ -181,6 +186,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
     if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
       return 4;
+    }
+
+    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+      return 8;
     }
 
     throw new Error(
@@ -415,10 +424,12 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     } as GeoJsonWithMeta;
   }
 
+  // TODO rename to getMvtSourceLayerName
   getLayerName(): string {
     return ES_MVT_AGGS_LAYER_NAME;
   }
 
+  // TODO rename to getMvtUrlTemplateWithMeta
   async getUrlTemplateWithMeta(
     searchFilters: VectorSourceRequestMeta
   ): Promise<ITiledSingleLayerMvtParams> {
@@ -433,11 +444,15 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
+    const requestType =
+      this._descriptor.requestType === RENDER_AS.GRID ? RENDER_AS.GRID : RENDER_AS.POINT;
+
     const urlTemplate = `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
+&gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
 &requestBody=${risonDsl}\
-&requestType=${this._descriptor.requestType}`;
+&requestType=${requestType}`;
 
     return {
       refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
@@ -449,7 +464,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   isFilterByMapBounds(): boolean {
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+    if (this.isMvt()) {
       // MVT gridded data. Should exclude bounds-filter from ES-DSL
       return false;
     } else {

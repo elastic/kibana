@@ -90,6 +90,7 @@ export function initMVTRoutes({
           index: schema.string(),
           requestType: schema.string(),
           token: schema.maybe(schema.string()),
+          gridPrecision: schema.number(),
         }),
       },
     },
@@ -117,6 +118,7 @@ export function initMVTRoutes({
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
+        gridPrecision: parseInt(query.gridPrecision, 10),
         abortController,
       });
 

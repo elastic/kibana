@@ -14,17 +14,10 @@ import { GRID_RESOLUTION } from '../../../../common/constants';
 const defaultProps = {
   resolution: GRID_RESOLUTION.COARSE,
   onChange: () => {},
-  includeSuperFine: false,
   metrics: [],
 };
 
-describe('resolution editor', () => {
-  test('should omit super-fine option', () => {
-    const component = shallow(<ResolutionEditor {...defaultProps} />);
-    expect(component).toMatchSnapshot();
-  });
-  test('should add super-fine option', () => {
-    const component = shallow(<ResolutionEditor {...defaultProps} includeSuperFine={true} />);
-    expect(component).toMatchSnapshot();
-  });
+test('render', () => {
+  const component = shallow(<ResolutionEditor {...defaultProps} />);
+  expect(component).toMatchSnapshot();
 });

@@ -15636,7 +15636,6 @@
     "xpack.maps.style.customColorPaletteLabel": "定制调色板",
     "xpack.maps.style.customColorRampLabel": "定制颜色渐变",
     "xpack.maps.style.fieldSelect.OriginLabel": "来自 {fieldOrigin} 的字段",
-    "xpack.maps.style.heatmap.resolutionStyleErrorMessage": "无法识别分辨率参数：{resolution}",
     "xpack.maps.styles.categorical.otherCategoryLabel": "其他",
     "xpack.maps.styles.categoricalDataMapping.isEnabled.local": "禁用后，从本地数据计算类别，并在数据更改时重新计算类别。在用户平移、缩放和筛选时，样式可能不一致。",
     "xpack.maps.styles.categoricalDataMapping.isEnabled.server": "从整个数据集计算类别。在用户平移、缩放和筛选时，样式保持一致。",

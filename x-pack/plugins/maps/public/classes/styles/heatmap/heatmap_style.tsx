@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { IStyle } from '../style';
 import { HeatmapStyleEditor } from './components/heatmap_style_editor';
@@ -68,11 +67,13 @@ export class HeatmapStyle implements IStyle {
     mbMap,
     layerId,
     propertyName,
+    max,
     resolution,
   }: {
     mbMap: MbMap;
     layerId: string;
     propertyName: string;
+    max: number;
     resolution: GRID_RESOLUTION;
   }) {
     let radius;
@@ -83,18 +84,11 @@ export class HeatmapStyle implements IStyle {
     } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
       radius = 32;
     } else {
-      // SUPER_FINE or any other is not supported.
-      const errorMessage = i18n.translate('xpack.maps.style.heatmap.resolutionStyleErrorMessage', {
-        defaultMessage: `Resolution param not recognized: {resolution}`,
-        values: { resolution },
-      });
-      throw new Error(errorMessage);
+      radius = 8;
     }
     mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
-    mbMap.setPaintProperty(layerId, 'heatmap-weight', {
-      type: 'identity',
-      property: propertyName,
-    });
+    const safeMax = max <= 0 ? 1 : max;
+    mbMap.setPaintProperty(layerId, 'heatmap-weight', ['/', ['get', propertyName], safeMax]);
 
     const colorStops = getOrdinalMbColorRampStops(
       this._descriptor.colorRampName,
