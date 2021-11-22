@@ -57,6 +57,7 @@ import { getColumnHeaders } from './column_headers/helpers';
 import {
   addBuildingBlockStyle,
   getEventIdToDataMapping,
+  hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
 } from './helpers';
@@ -90,6 +91,7 @@ interface OwnProps {
   bulkActions?: BulkActionsProp;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
+  disabledCellActions: string[];
   filters?: Filter[];
   filterQuery?: string;
   filterStatus?: AlertStatus;
@@ -143,9 +145,6 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
-const hasCellActions = (columnId?: string) =>
-  columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
 const transformControlColumns = ({
   columnHeaders,
   controlColumns,
@@ -171,6 +170,7 @@ const transformControlColumns = ({
   columnHeaders: ColumnHeaderOptions[];
   controlColumns: ControlColumnProps[];
   data: TimelineItem[];
+  disabledCellActions: string[];
   isEventViewer?: boolean;
   loadingEventIds: string[];
   onRowSelected: OnRowSelected;
@@ -298,6 +298,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     columnHeaders,
     data,
     defaultCellActions,
+    disabledCellActions,
     filterQuery,
     filters,
     filterStatus,
@@ -605,6 +606,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           columnHeaders,
           controlColumns,
           data,
+          disabledCellActions,
           isEventViewer,
           loadingEventIds,
           onRowSelected,
@@ -630,6 +632,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       trailingControlColumns,
       columnHeaders,
       data,
+      disabledCellActions,
       isEventViewer,
       id,
       loadingEventIds,
@@ -675,7 +678,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 },
               ],
             },
-            ...(hasCellActions(header.id)
+            ...(hasCellActions({
+              columnId: header.id,
+              disabledCellActions,
+            })
               ? {
                   cellActions:
                     header.tGridCellActions?.map(buildAction) ??
@@ -684,7 +690,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               : {}),
           };
         }),
-      [columnHeaders, defaultCellActions, browserFields, data, pageSize, id, dispatch]
+      [
+        browserFields,
+        columnHeaders,
+        data,
+        defaultCellActions,
+        disabledCellActions,
+        dispatch,
+        id,
+        pageSize,
+      ]
     );
 
     const renderTGridCellValue = useMemo(() => {

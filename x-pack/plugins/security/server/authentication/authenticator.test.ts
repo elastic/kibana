@@ -1873,6 +1873,24 @@ describe('Authenticator', () => {
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
+    it('if session does not exist and providers is empty, redirects to default logout path.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockOptions = getMockOptions({
+        providers: { basic: { basic1: { order: 0, enabled: false } } },
+      });
+      authenticator = new Authenticator(mockOptions);
+
+      await expect(authenticator.logout(request)).resolves.toEqual(
+        DeauthenticationResult.redirectTo(
+          '/mock-server-basepath/security/logged_out?msg=LOGGED_OUT'
+        )
+      );
+
+      expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+    });
+
     it('redirects to login form if session does not exist and provider name is invalid', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
       mockOptions.session.get.mockResolvedValue(null);

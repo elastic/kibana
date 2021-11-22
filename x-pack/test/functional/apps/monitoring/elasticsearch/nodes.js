@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }) {
     // FF issue: https://github.com/elastic/kibana/issues/35551
     this.tags(['skipFirefox']);
 
-    describe('with offline node', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/116533
+    describe.skip('with offline node', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
