@@ -783,7 +783,7 @@ describe('terms', () => {
       incompleteParams: {},
       dimensionGroups: [],
       groupId: 'any',
-      operationDefinitionMap: { terms: termsOperation } as Record<
+      operationDefinitionMap: { terms: termsOperation } as unknown as Record<
         string,
         GenericOperationDefinition
       >,
@@ -860,7 +860,7 @@ describe('terms', () => {
           orderDirection: 'asc',
         },
         sourceField: 'unsupported',
-      };
+      } as TermsIndexPatternColumn;
       const instance = mount(
         <InlineFieldInput
           {...defaultFieldInputProps}
@@ -893,7 +893,7 @@ describe('terms', () => {
           orderDirection: 'asc',
         },
         sourceField: 'timestamp',
-      };
+      } as TermsIndexPatternColumn;
       const instance = mount(
         <InlineFieldInput
           {...defaultFieldInputProps}
@@ -902,7 +902,7 @@ describe('terms', () => {
           columnId="col1"
           existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
-          selectedColumn={layer.columns.col1}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
           incompleteOperation="terms"
         />
       );
@@ -1570,14 +1570,15 @@ describe('terms', () => {
     });
 
     it('return error for scripted field when in multi terms mode', () => {
+      const column = layer.columns.col1 as TermsIndexPatternColumn;
       layer = {
         ...layer,
         columns: {
           col1: {
-            ...layer.columns.col1,
+            ...column,
             sourceField: 'scripted',
             params: {
-              ...layer.columns.col1.params,
+              ...column.params,
               secondaryFields: ['bytes'],
             },
           } as TermsIndexPatternColumn,
