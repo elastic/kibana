@@ -46,7 +46,7 @@ export function WaterfallChartMarkers() {
         uniqueIds = uniqueIds.filter((id) => id !== LAYOUT_SHIFT);
       }
 
-      const label = uniqueIds.map((id) => getMarkersInfo(id, theme).label ?? id).join(' / ');
+      const label = uniqueIds.map((id) => getMarkersInfo(id, theme)?.label ?? id).join(' / ');
       const id = uniqueIds[0];
       const markersInfo = getMarkersInfo(id, theme);
 
@@ -54,7 +54,7 @@ export function WaterfallChartMarkers() {
         id,
         offset,
         label,
-        field: markersInfo?.field,
+        field: markersInfo?.field ?? '',
         color: markersInfo?.color ?? theme.eui.euiColorMediumShade,
         strokeWidth: markersInfo?.strokeWidth ?? 1,
       };
@@ -101,43 +101,45 @@ export function WaterfallChartMarkers() {
 }
 
 function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
-  const markersInfo: Record<
-    string,
-    { label: string; color: string; field: string; strokeWidth: number }
-  > = {
-    domContentLoaded: {
-      label: DOCUMENT_CONTENT_LOADED_LABEL,
-      color: theme.eui.euiColorVis0,
-      field: SYNTHETICS_DCL,
-      strokeWidth: 2,
-    },
-    firstContentfulPaint: {
-      label: FCP_LABEL,
-      color: theme.eui.euiColorVis1,
-      field: SYNTHETICS_FCP,
-      strokeWidth: 2,
-    },
-    largestContentfulPaint: {
-      label: LCP_LABEL,
-      color: theme.eui.euiColorVis2,
-      field: SYNTHETICS_LCP,
-      strokeWidth: 2,
-    },
-    layoutShift: {
-      label: LAYOUT_SHIFT_LABEL,
-      color: theme.eui.euiColorVis6,
-      field: SYNTHETICS_CLS,
-      strokeWidth: 1,
-    },
-    loadEvent: {
-      label: LOAD_EVENT_LABEL,
-      color: theme.eui.euiColorVis9,
-      field: SYNTHETICS_DOCUMENT_ONLOAD,
-      strokeWidth: 2,
-    },
-  };
+  switch (id) {
+    case 'domContentLoaded':
+      return {
+        label: DOCUMENT_CONTENT_LOADED_LABEL,
+        color: theme.eui.euiColorVis0,
+        field: SYNTHETICS_DCL,
+        strokeWidth: 2,
+      };
+    case 'firstContentfulPaint':
+      return {
+        label: FCP_LABEL,
+        color: theme.eui.euiColorVis1,
+        field: SYNTHETICS_FCP,
+        strokeWidth: 2,
+      };
+    case 'largestContentfulPaint':
+      return {
+        label: LCP_LABEL,
+        color: theme.eui.euiColorVis2,
+        field: SYNTHETICS_LCP,
+        strokeWidth: 2,
+      };
+    case 'layoutShift':
+      return {
+        label: LAYOUT_SHIFT_LABEL,
+        color: theme.eui.euiColorVis6,
+        field: SYNTHETICS_CLS,
+        strokeWidth: 1,
+      };
+    case 'loadEvent':
+      return {
+        label: LOAD_EVENT_LABEL,
+        color: theme.eui.euiColorVis9,
+        field: SYNTHETICS_DOCUMENT_ONLOAD,
+        strokeWidth: 2,
+      };
+  }
 
-  return markersInfo[id];
+  return undefined;
 }
 
 const Wrapper = euiStyled.span`
