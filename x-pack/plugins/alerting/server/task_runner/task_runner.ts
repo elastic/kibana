@@ -55,7 +55,6 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
-import { isRuleEnabled } from './lib/is_rule_enabled';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -118,19 +117,22 @@ export class TaskRunner<
     this.cancelled = false;
   }
 
-  async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
+  async getDecryptedAttributes(
+    alertId: string,
+    spaceId: string
+  ): Promise<{ apiKey: string | null; enabled: boolean }> {
     const namespace = this.context.spaceIdToNamespace(spaceId);
     // Only fetch encrypted attributes here, we'll create a saved objects client
     // scoped with the API key to fetch the remaining data.
     const {
-      attributes: { apiKey },
+      attributes: { apiKey, enabled },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
       alertId,
       { namespace }
     );
 
-    return apiKey;
+    return { apiKey, enabled };
   }
 
   private getFakeKibanaRequest(spaceId: string, apiKey: RawAlert['apiKey']) {
@@ -517,12 +519,23 @@ export class TaskRunner<
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
+    let enabled: boolean;
     let apiKey: string | null;
     try {
-      apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
+      const decryptedAttributes = await this.getDecryptedAttributes(alertId, spaceId);
+      apiKey = decryptedAttributes.apiKey;
+      enabled = decryptedAttributes.enabled;
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
+
+    if (!enabled) {
+      throw new ErrorWithReason(
+        AlertExecutionStatusErrorReasons.Disabled,
+        new Error(`Rule failed to execute because rule is disabled.`)
+      );
+    }
+
     const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
     let alert: SanitizedAlert<Params>;
@@ -564,21 +577,6 @@ export class TaskRunner<
     const runDate = new Date();
     const runDateString = runDate.toISOString();
     this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
-
-    try {
-      const enabled = await isRuleEnabled(this.context, alertId, spaceId);
-      if (!enabled) {
-        this.logger.debug(
-          `skipping execution for rule ${this.alertType.id}:${alertId} at ${runDateString} because rule is disabled`
-        );
-        return {
-          state: originalState,
-          schedule: { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL },
-        };
-      }
-    } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
-    }
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;

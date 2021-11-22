@@ -32,10 +32,6 @@ import { Alert, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedAlertType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 
-jest.mock('./lib/is_rule_enabled', () => ({
-  isRuleEnabled: () => true,
-}));
-
 const ruleType: jest.Mocked<UntypedNormalizedAlertType> = {
   id: 'test',
   name: 'My test rule',
