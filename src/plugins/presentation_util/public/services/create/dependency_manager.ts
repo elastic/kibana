@@ -12,10 +12,11 @@ interface CycleDetectionResult {
 }
 
 type Graph = Record<string, string[] | null | undefined>;
+type BreadCrumbs = Record<string, boolean>;
 
 export class DependencyManager {
   static orderDependencies(graph: Graph = {}) {
-    const cycleInfo = DependencyManager.detectCycle(graph);
+    const cycleInfo = DependencyManager.getSortedDependencies(graph);
     if (cycleInfo.hasCycle) {
       const error = DependencyManager.getCyclePathError(cycleInfo.path);
       DependencyManager.throwCyclicPathError(error);
@@ -26,42 +27,50 @@ export class DependencyManager {
 
   /**
    * DFS algorithm for checking if graph is a DAG (Directed Acyclic Graph)
-   * and sorting topogy if graph is DAG
-   * @param {Graph} graph - graph of dependencies
+   * and sorting topogy (dependencies) if graph is DAG.
+   * @param {Graph} graph - graph of dependencies.
    */
-  private static detectCycle(graph: Graph = {}): CycleDetectionResult {
-    const stack: Set<string> = new Set();
-    return Object.keys(graph).reduce<CycleDetectionResult>((cycleInfo, node) => {
-      const info = DependencyManager.detectCycleFn(node, graph, {}, {}, stack);
+  private static getSortedDependencies(graph: Graph = {}): CycleDetectionResult {
+    const sortedVertices: Set<string> = new Set();
+    return Object.keys(graph).reduce<CycleDetectionResult>((cycleInfo, srcVertex) => {
+      const info = DependencyManager.sortVerticesFrom(srcVertex, graph, sortedVertices, {}, {});
       if (info.hasCycle) {
         return info;
       }
-      return cycleInfo.hasCycle ? cycleInfo : { ...cycleInfo, path: [...stack] };
+      return cycleInfo.hasCycle ? cycleInfo : { ...cycleInfo, path: [...sortedVertices] };
     }, DependencyManager.getDefaultCycleInfo());
   }
 
-  private static detectCycleFn(
-    src: string,
+  /**
+   * Modified DFS algorithm for topological sort.
+   * @param {string} srcVertex - a source vertex - the start point of dependencies ordering.
+   * @param {Graph} graph - graph of dependencies, represented in the adjacency list form.
+   * @param {Set<string>} sortedVertices - ordered dependencies path from the free to the dependent vertex.
+   * @param {BreadCrumbs} visited - record of visited vertices.
+   * @param {BreadCrumbs} inpath - record of vertices, which was met in the path. Is used for detecting cycles.
+   */
+  private static sortVerticesFrom(
+    srcVertex: string,
     graph: Graph,
-    visited: Record<string, boolean> = {},
-    inpath: Record<string, boolean> = {},
-    stack: Set<string>
+    sortedVertices: Set<string>,
+    visited: BreadCrumbs = {},
+    inpath: BreadCrumbs = {}
   ): CycleDetectionResult {
-    visited[src] = true;
-    inpath[src] = true;
-    const cycleInfo = graph[src]?.reduce<CycleDetectionResult | undefined>((info, node) => {
-      if (inpath[node]) {
-        return { hasCycle: true, path: [...Object.keys(visited), node] };
-      } else if (!visited[node]) {
-        return DependencyManager.detectCycleFn(node, graph, visited, inpath, stack);
+    visited[srcVertex] = true;
+    inpath[srcVertex] = true;
+    const cycleInfo = graph[srcVertex]?.reduce<CycleDetectionResult | undefined>((info, vertex) => {
+      if (inpath[vertex]) {
+        return { hasCycle: true, path: [...Object.keys(visited), vertex] };
+      } else if (!visited[vertex]) {
+        return DependencyManager.sortVerticesFrom(vertex, graph, sortedVertices, visited, inpath);
       }
       return info;
     }, undefined);
 
-    inpath[src] = false;
+    inpath[srcVertex] = false;
 
-    if (!stack.has(src)) {
-      stack.add(src);
+    if (!sortedVertices.has(srcVertex)) {
+      sortedVertices.add(srcVertex);
     }
 
     return cycleInfo ?? DependencyManager.getDefaultCycleInfo();

@@ -8,12 +8,18 @@
 
 import { PluginServiceProviders } from './provider';
 
-export class ProvidersMediator<Services, StartParameters> {
+export class PluginServiceProvidersMediator<Services, StartParameters> {
   constructor(private readonly providers: PluginServiceProviders<Services, StartParameters>) {}
 
-  start(params: StartParameters) {}
+  start(params: StartParameters) {
+    const providerNames = Object.keys(this.providers) as Array<keyof Services>;
+    providerNames.forEach((providerName) => this.providers[providerName].start(params));
+  }
 
-  stop() {}
+  stop() {
+    const providerNames = Object.keys(this.providers) as Array<keyof Services>;
+    providerNames.forEach((providerName) => this.providers[providerName].stop());
+  }
 
   private getOrderedProvidersByDeps() {}
   private getServicesByDeps(deps: Array<keyof Services>) {}
