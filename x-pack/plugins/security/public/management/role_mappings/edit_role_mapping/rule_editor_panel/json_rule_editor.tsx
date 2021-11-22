@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import 'react-ace';
 import 'brace/mode/json';
 import 'brace/theme/github';
 

@@ -34,10 +34,6 @@ $bottomBarHeight: $euiSize * 3;
   }
 }
 
-.painlessLab__betaLabelContainer {
-  line-height: 0;
-}
-
 // adding dev tool top bar + bottom bar height to the body offset
 $bodyOffset: $euiHeaderHeightCompensation + $bottomBarHeight;
 

@@ -132,7 +132,7 @@ export class SessionIndex {
   /**
    * Name of the index to store session information in.
    */
-  private readonly indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+  private readonly indexName: string;
 
   /**
    * Promise that tracks session index initialization process. We'll need to get rid of this as soon
@@ -142,7 +142,9 @@ export class SessionIndex {
    */
   private indexInitialization?: Promise<void>;
 
-  constructor(private readonly options: Readonly<SessionIndexOptions>) {}
+  constructor(private readonly options: Readonly<SessionIndexOptions>) {
+    this.indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+  }
 
   /**
    * Retrieves session value with the specified ID from the index. If session value isn't found
