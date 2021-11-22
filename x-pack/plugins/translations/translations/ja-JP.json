@@ -14116,7 +14116,6 @@
     "xpack.lens.editorFrame.noColorIndicatorLabel": "このディメンションには個別の色がありません",
     "xpack.lens.editorFrame.paletteColorIndicatorLabel": "このディメンションはパレットを使用しています",
     "xpack.lens.editorFrame.previewErrorLabel": "レンダリングのプレビューに失敗しました",
-    "xpack.lens.editorFrame.requiredDimensionWarningLabel": "必要な次元",
     "xpack.lens.editorFrame.suggestionPanelTitle": "提案",
     "xpack.lens.editorFrame.workspaceLabel": "ワークスペース",
     "xpack.lens.embeddable.failure": "ビジュアライゼーションを表示できませんでした",
