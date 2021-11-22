@@ -380,11 +380,6 @@ export function getMlClient(
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
       return mlClient.getTrainedModelsStats(...p);
     },
-    async getTrainedModelDeploymentStats(
-      ...p: Parameters<MlClient['getTrainedModelDeploymentStats']>
-    ) {
-      return mlClient.getTrainedModelDeploymentStats(...p);
-    },
     async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {
       return mlClient.startTrainedModelDeployment(...p);
     },
