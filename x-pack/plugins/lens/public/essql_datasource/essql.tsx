@@ -293,8 +293,33 @@ export function getEsSQLDatasource({
       );
     },
 
-    canHandleDrop: () => false,
-    onDrop: () => false,
+    onDrop: (props) => {
+      const { droppedItem, dropType } = props;
+
+      if (dropType === 'field_add') {
+        const currentLayer = props.state.layers[props.layerId];
+        const columnExists = currentLayer.columns.some((c) => c.columnId === props.columnId);
+        props.setState({
+          ...props.state,
+          layers: {
+            ...props.state.layers,
+            [props.layerId]: {
+              ...props.state.layers[props.layerId],
+              columns: columnExists
+                ? currentLayer.columns.map((c) =>
+                    c.columnId !== props.columnId ? c : { ...c, fieldName: droppedItem.field }
+                  )
+                : [
+                    ...props.state.layers[props.layerId].columns,
+                    { columnId: props.columnId, fieldName: droppedItem.field },
+                  ],
+            },
+          },
+        });
+        return true;
+      }
+      return false;
+    },
     uniqueLabels(state: EsSQLPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
@@ -311,7 +336,11 @@ export function getEsSQLDatasource({
       return columnLabelMap;
     },
 
-    getDropProps: () => undefined,
+    getDropProps: (props) => {
+      if (!props.dragging?.isSqlField) return undefined;
+
+      return { dropTypes: ['field_add'], nextLabel: props.dragging?.field };
+    },
 
     getPublicAPI({ state, layerId }: PublicAPIProps<EsSQLPrivateState>) {
       return {
