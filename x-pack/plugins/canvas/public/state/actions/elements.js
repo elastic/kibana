@@ -133,15 +133,14 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
     });
 
   const variables = getWorkpadVariablesAsObject(getState());
-  const { expressions } = pluginServices.getServices();
+  const { expressions, notify } = pluginServices.getServices();
   return expressions
     .runInterpreter(ast, context, variables, { castToRender: true })
     .then((renderable) => {
       dispatch(getAction(renderable));
     })
     .catch((err) => {
-      const notifyService = pluginServices.getServices().notify;
-      notifyService.error(err);
+      notify.error(err);
       dispatch(getAction(err));
     });
 };
@@ -181,14 +180,13 @@ export const fetchAllRenderables = createThunk(
         const argumentPath = [element.id, 'expressionRenderable'];
 
         const variables = getWorkpadVariablesAsObject(getState());
-        const { expressions } = pluginServices.getServices();
+        const { expressions, notify } = pluginServices.getServices();
 
         return expressions
           .runInterpreter(ast, null, variables, { castToRender: true })
           .then((renderable) => ({ path: argumentPath, value: renderable }))
           .catch((err) => {
-            const notifyService = pluginServices.getServices().notify;
-            notifyService.error(err);
+            notify.error(err);
             return { path: argumentPath, value: err };
           });
       });

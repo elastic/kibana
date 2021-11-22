@@ -11,11 +11,13 @@
  * 2.0.
  */
 
+import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 // @ts-expect-error untyped local
-import { getState, getStore } from '../../../state/store';
-import { getGlobalFilters, getWorkpadVariablesAsObject } from '../../../state/selectors/workpad';
+import { getState, getStore } from '../../state/store';
+import { getGlobalFilters, getWorkpadVariablesAsObject } from '../../state/selectors/workpad';
+import { CanvasStartDeps } from '../../plugin';
 // @ts-expect-error untyped local
-import { setFilter } from '../../../state/actions/elements';
+import { setFilter } from '../../state/actions/elements';
 
 export class FiltersService {
   constructor() {}
@@ -24,7 +26,7 @@ export class FiltersService {
     return getGlobalFilters(getState());
   }
 
-  setFilter(filterId: string, filterExpression: string) {
+  updateFilter(filterId: string, filterExpression: string) {
     const { dispatch } = getStore();
     dispatch(setFilter(filterExpression, filterId, true));
   }
@@ -34,3 +36,12 @@ export class FiltersService {
     return { variables };
   }
 }
+
+export type CanvasFiltersService = FiltersService;
+
+export type CanvasFiltersServiceFactory = KibanaPluginServiceFactory<
+  CanvasFiltersService,
+  CanvasStartDeps
+>;
+
+export const filtersServiceFactory: CanvasFiltersServiceFactory = () => new FiltersService();

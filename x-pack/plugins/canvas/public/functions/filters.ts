@@ -11,10 +11,12 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { pluginServices } from '../services';
 // @ts-expect-error untyped local
 import { getState } from '../state/store';
-import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selectors/workpad';
+import { getWorkpadVariablesAsObject } from '../state/selectors/workpad';
 import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from '.';
+
+const { expressions, filters: filtersService } = pluginServices.getServices();
 
 export interface Arguments {
   group: string[];
@@ -75,14 +77,12 @@ export function filtersFunctionFactory(initialize: InitializeArguments): () => F
         },
       },
       fn: (input, { group, ungrouped }) => {
-        const filterList = getFiltersByGroup(getGlobalFilters(getState()), group, ungrouped);
+        const filterList = getFiltersByGroup(filtersService.getFilters(), group, ungrouped);
 
         if (filterList && filterList.length) {
           const filterExpression = filterList.join(' | ');
           const filterAST = fromExpression(filterExpression);
-          return pluginServices
-            .getServices()
-            .expressions.interpretAst(filterAST, getWorkpadVariablesAsObject(getState()));
+          return expressions.interpretAst(filterAST, getWorkpadVariablesAsObject(getState()));
         } else {
           const filterType = initialize.types.filter;
           return filterType?.from(null, {});

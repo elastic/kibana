@@ -45,7 +45,10 @@ export class PluginServiceProvidersMediator<Services, StartParameters> {
 
   private getServicesByDeps(deps: Array<keyof Services>) {
     return deps.reduce<PluginServiceRequiredServices<Array<keyof Services>, Services>>(
-      (services, dependency) => ({ ...services, [dependency]: this.providers[dependency] }),
+      (services, dependency) => ({
+        ...services,
+        [dependency]: this.providers[dependency].getService(),
+      }),
       {} as PluginServiceRequiredServices<Array<keyof Services>, Services>
     );
   }

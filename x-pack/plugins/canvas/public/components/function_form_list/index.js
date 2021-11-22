@@ -12,6 +12,8 @@ import { pluginServices } from '../../services';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
 import { FunctionFormList as Component } from './function_form_list';
 
+const { expressions } = pluginServices.getServices();
+
 function normalizeContext(chain) {
   if (!Array.isArray(chain) || !chain.length) {
     return null;
@@ -48,8 +50,7 @@ const functionFormItems = withProps((props) => {
           args: argType.arguments,
           argType: argType.function,
           argTypeDef: argTypeDef,
-          argResolver: (argAst) =>
-            pluginServices.getServices().expressions.interpretAst(argAst, prevContext),
+          argResolver: (argAst) => expressions.interpretAst(argAst, prevContext),
           contextExpression: getExpression(prevContext),
           expressionIndex: i, // preserve the index in the AST
           nextArgType: nextArg && nextArg.function,
