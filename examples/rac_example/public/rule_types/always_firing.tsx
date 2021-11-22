@@ -22,7 +22,6 @@ import {
   ActionGroupWithCondition,
   AlertConditions,
   AlertConditionsGroup,
-  AlertTypeModel,
   AlertTypeParamsExpressionProps,
 } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 import { ObservabilityRuleTypeModel } from '../../../../x-pack/plugins/observability/public';
@@ -67,7 +66,7 @@ Reason:
 `,
       }
     ),
-    format: () => ({ reason: 'Some reason!!', link: 'some_link' }),
+    format: () => ({ reason: 'Some reason', link: 'some_link' }),
   };
 }
 
