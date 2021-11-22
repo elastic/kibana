@@ -103,6 +103,7 @@ export const SearchExamplesApp = ({
     IndexPatternField | null | undefined
   >();
   const [request, setRequest] = useState<Record<string, any>>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [selectedTab, setSelectedTab] = useState(0);
@@ -194,6 +195,7 @@ export const SearchExamplesApp = ({
 
     // Submit the search request using the `data.search` service.
     setRequest(req.params.body);
+    setIsLoading(true);
 
     data.search
       .search(req, {
@@ -204,6 +206,7 @@ export const SearchExamplesApp = ({
       .subscribe({
         next: (res) => {
           if (isCompleteResponse(res)) {
+            setIsLoading(false);
             setResponse(res);
             const avgResult: number | undefined = res.rawResponse.aggregations
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
@@ -245,6 +248,7 @@ export const SearchExamplesApp = ({
           }
         },
         error: (e) => {
+          setIsLoading(false);
           if (e instanceof AbortError) {
             notifications.toasts.addWarning({
               title: e.message,
@@ -299,6 +303,7 @@ export const SearchExamplesApp = ({
       setRequest(searchSource.getSearchRequestBody());
       const abortController = new AbortController();
       setAbortController(abortController);
+      setIsLoading(true);
       const { rawResponse: res } = await searchSource
         .fetch$({ abortSignal: abortController.signal })
         .toPromise();
@@ -326,6 +331,8 @@ export const SearchExamplesApp = ({
           text: e.message,
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -358,6 +365,7 @@ export const SearchExamplesApp = ({
 
     // Submit the search request using the `data.search` service.
     setRequest(req.params);
+    setIsLoading(true);
     data.search
       .search(req, {
         strategy: 'fibonacciStrategy',
@@ -367,16 +375,19 @@ export const SearchExamplesApp = ({
         next: (res) => {
           setResponse(res);
           if (isCompleteResponse(res)) {
+            setIsLoading(false);
             notifications.toasts.addSuccess({
               title: 'Query result',
               text: 'Query finished',
             });
           } else if (isErrorResponse(res)) {
+            setIsLoading(false);
             // TODO: Make response error status clearer
             notifications.toasts.addWarning('An error has occurred');
           }
         },
         error: (e) => {
+          setIsLoading(false);
           if (e instanceof AbortError) {
             notifications.toasts.addWarning({
               title: e.message,
@@ -399,6 +410,7 @@ export const SearchExamplesApp = ({
     if (!indexPattern || !selectedNumericField) return;
     const abortController = new AbortController();
     setAbortController(abortController);
+    setIsLoading(true);
     try {
       const res = await http.get(SERVER_SEARCH_ROUTE_PATH, {
         query: {
@@ -420,6 +432,8 @@ export const SearchExamplesApp = ({
           text: e.message,
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -768,7 +782,8 @@ export const SearchExamplesApp = ({
                 <br />
                 When executing search on the server, make sure to cancel the search in case user
                 cancels corresponding network request. This could happen in case user re-runs a
-                query or leaves the page without waiting for the result.
+                query or leaves the page without waiting for the result. Cancellation API is similar
+                on client and server and use `AbortController`.
                 <EuiSpacer />
                 <EuiButtonEmpty size="xs" onClick={onServerClickHandler} iconType="play">
                   <FormattedMessage
@@ -786,7 +801,7 @@ export const SearchExamplesApp = ({
                 onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
               />
               <EuiSpacer />
-              {currentAbortController && (
+              {currentAbortController && isLoading && (
                 <EuiButtonEmpty size="xs" onClick={() => currentAbortController?.abort()}>
                   <FormattedMessage
                     id="searchExamples.abortButtonText"

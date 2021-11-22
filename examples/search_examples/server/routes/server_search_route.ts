@@ -12,6 +12,7 @@ import { IEsSearchResponse } from 'src/plugins/data/common';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import type { IRouter } from 'src/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';
+import { getRequestAbortedSignal } from '../../../../src/plugins/data/server/';
 
 export function registerServerSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   router.get(
@@ -27,10 +28,9 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
     async (context, request, response) => {
       const { index, field } = request.query;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      // User may abort the request without waiting for the results
+      // we need to handle this scenario by aborting underlying server requests
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
         const res = await context
@@ -49,7 +49,7 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
                 },
               },
             } as IEsSearchRequest,
-            { abortSignal: abortController.signal }
+            { abortSignal }
           )
           .toPromise();
 

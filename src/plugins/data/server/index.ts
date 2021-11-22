@@ -88,6 +88,7 @@ export type {
   AsyncSearchStatusResponse,
 } from './search';
 export { shimHitsTotal, SearchSessionService, NoSearchIdInSessionError } from './search';
+export { getRequestAbortedSignal } from './lib';
 
 // Search namespace
 export const search = {
