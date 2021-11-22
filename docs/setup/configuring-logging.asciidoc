@@ -25,9 +25,9 @@ Currently we support the following log levels: _all_, _fatal_, _error_, _warn_, 
 
 Levels are ordered, so _all_ > _fatal_ > _error_ > _warn_ > _info_ > _debug_ > _trace_ > _off_.
 
-A log record is being logged by the logger if its level is higher than or equal to the level of its logger. Otherwise, the log record is ignored.
+A log record will be logged by the logger if its level is higher than or equal to the level of its logger. Otherwise, the log record is ignored.
 
-The _all_ and _off_ levels can only be used in configuration and are handy shortcuts that allow you to log every log record or disable logging entirely or for a specific logger. These levels can also be specified using <<logging-cli-migration,cli arguments>>.
+The _all_ and _off_ levels can only be used in configuration and are handy shortcuts that allow you to log every log record or disable logging entirely for a specific logger. These levels can also be specified using <<logging-cli-migration,cli arguments>>.
 
 [float]
 [[logging-layouts]]
@@ -133,7 +133,7 @@ With `json` layout log messages will be formatted as JSON strings in https://www
 
 Every logger has a unique name that follows a hierarchical naming rule. The logger is considered to be an
 ancestor of another logger if its name followed by a `.` is a prefix of the descendant logger. For example, a logger
-named `a.b` is an ancestor of logger `a.b.c`. All top-level loggers are descendants of a special `root` logger at the top of the logger hierarchy. The `root` logger always exists, is fully configured and logs to `info` level be default. The `root` logger must also be configured if any other logging configuration is specified in your `kibana.yml`.
+named `a.b` is an ancestor of logger `a.b.c`. All top-level loggers are descendants of a special `root` logger at the top of the logger hierarchy. The `root` logger always exists, is fully configured and logs to `info` level by default. The `root` logger must also be configured if any other logging configuration is specified in your `kibana.yml`.
 
 You can configure _<<log-level, log level>>_ and _appenders_ for a specific logger. If a logger only has a _log level_ configured, then the _appenders_ configuration applied to the logger is inherited from the ancestor logger, up to the `root` logger.
 

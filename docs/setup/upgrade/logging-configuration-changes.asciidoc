@@ -1,13 +1,13 @@
 [[logging-configuration-changes]]
 === Logging configuration changes
 
-WARNING: {kib} 8.0 and later uses a logging system. Be sure to read the documentation for your version of {kib} before proceeding.
+WARNING: {kib} 8.0 and later uses a new logging system. Be sure to read the documentation for your version of {kib} before proceeding.
 
 [[logging-pattern-format-old-and-new-example]]
 [options="header"]
 |===
 
-| Parameter | Platform log record in **pattern** format | Legacy Platform log record **tedocs/xt** format
+| Parameter | Log record in **pattern** format | Legacy log record in **text** format
 
 | @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`
 
@@ -25,7 +25,7 @@ WARNING: {kib} 8.0 and later uses a logging system. Be sure to read the document
 [options="header"]
 |===
 
-| Parameter | Platform log record in **json** format | Legacy Platform log record **json** format
+| Parameter | Log record in **json** format | Legacy log record **json** format
 
 | @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`
 
