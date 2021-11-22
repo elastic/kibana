@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { INDEX_PREFIX, INDEX_PREFIX_FOR_BACKING_INDICES } from '../config';
+import { INDEX_PREFIX } from '../config';
 import { IndexOptions } from './index_options';
 import { joinWithDash, joinWith } from './utils';
 
@@ -34,10 +34,7 @@ export class IndexInfo {
         )
       : joinWithDash(INDEX_PREFIX, `${registrationContext}.${dataset}`);
     this.basePattern = joinWithDash(this.baseName, '*');
-    this.baseNameForBackingIndices = joinWithDash(
-      INDEX_PREFIX_FOR_BACKING_INDICES,
-      `${registrationContext}.${dataset}`
-    );
+    this.baseNameForBackingIndices = joinWith('')(`.internal`, this.baseName);
   }
 
   /**
