@@ -5,7 +5,7 @@
 <titleabbrev>Alerting and action settings</titleabbrev>
 ++++
 
-Alerts and actions are enabled by default in {kib}, but require you configure the following in order to use them:
+Alerting and actions are enabled by default in {kib}, but require you configure the following in order to use them:
 
 . <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features}>>.
 . <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.

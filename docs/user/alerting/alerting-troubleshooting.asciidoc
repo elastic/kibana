@@ -5,7 +5,7 @@
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-The Alerting framework provides many options for diagnosing problems with Rules and Connectors.
+The {kib} Alerting framework provides many options for diagnosing problems with Rules and Connectors.
 
 [float]
 [[alerting-kibana-log]]
