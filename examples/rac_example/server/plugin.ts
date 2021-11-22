@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from 'src/core/server';
-
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
 import { defineRoutes } from './routes';
 import { AlertsDemoServerSetupDeps, BackendLibs } from '../server/types';
 import {
