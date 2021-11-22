@@ -18,6 +18,16 @@
     "collectionSource": {
       "type": "keyword"
     },
+    "cacheDetails": {
+      "properties": {
+        "dataset": {
+          "type": "boolean",
+        },
+        "cacheTimestamp": {
+          "type": "date"
+        }
+      }
+    },
     "stack_stats": {
       "properties": {
         "data": {
