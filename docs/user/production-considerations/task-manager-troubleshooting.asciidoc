@@ -988,7 +988,7 @@ Tasks marked as failed.
 
 *Solution*:
 
-Broadly speaking the alerting framework is meant to gracefully handle the cases where a task is failing by rescheduling a fresh run in the future. If this fails to happen, then that means something has gone wrong in the underlying implementation and this isn’t expected.
+Broadly speaking the {kib} Alerting framework is meant to gracefully handle the cases where a task is failing by rescheduling a fresh run in the future. If this fails to happen, then that means something has gone wrong in the underlying implementation and this isn’t expected.
 Ideally you should try and find any log lines that relate to this rule and its task, and use these to help us investigate further.
 
 [float]

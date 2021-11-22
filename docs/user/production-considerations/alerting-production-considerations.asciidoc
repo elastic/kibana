@@ -38,7 +38,7 @@ For detailed guidance, see <<alerting-troubleshooting, Alerting Troubleshooting>
 [[alerting-scaling-guidance]]
 === Scaling guidance
 
-As rules and actions leverage background tasks to perform the majority of work, scaling alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
+As rules and actions leverage background tasks to perform the majority of work, scaling {kib} Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
 
 When estimating the required task throughput, keep the following in mind:
 
