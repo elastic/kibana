@@ -25,17 +25,19 @@ import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
 import { FieldInputs } from './field_inputs';
-import { FieldInput as FieldInputBase } from '../../../dimension_panel/field_input';
+import {
+  FieldInput as FieldInputBase,
+  getErrorMessage,
+} from '../../../dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   isSortableByColumn,
+  MULTI_KEY_VISUAL_SEPARATOR,
 } from './helpers';
 
 export type { TermsIndexPatternColumn } from './types';
-
-const MULTI_KEY_VISUAL_SEPARATOR = '›';
 
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
   defaultMessage: 'Missing field',
@@ -252,20 +254,46 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       [columnId, indexPattern, layer, updateLayer]
     );
     const currentColumn = layer.columns[columnId];
+
+    const fieldErrorMessage = getErrorMessage(
+      selectedColumn,
+      Boolean(props.incompleteOperation),
+      'field',
+      props.currentFieldIsInvalid
+    );
+
     // let the default component do its job in case of incomplete informations
-    if (!currentColumn || !selectedColumn) {
+    if (
+      !currentColumn ||
+      !selectedColumn ||
+      props.incompleteOperation ||
+      (fieldErrorMessage && !selectedColumn.params?.secondaryFields?.length)
+    ) {
       return <FieldInputBase {...props} />;
     }
+
+    const showScriptedFieldError = Boolean(
+      getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern)
+    );
+
     return (
       <EuiFormRow
         data-test-subj="indexPattern-field-selection-row"
         label={i18n.translate('xpack.lens.indexPattern.terms.chooseFields', {
           defaultMessage: '{count, plural, zero {Field} other {Fields}}',
           values: {
-            count: selectedColumn.params.secondaryFields?.length || 0,
+            count: selectedColumn.params?.secondaryFields?.length || 0,
           },
         })}
         fullWidth
+        isInvalid={Boolean(showScriptedFieldError)}
+        error={
+          showScriptedFieldError
+            ? i18n.translate('xpack.lens.indexPattern.terms.scriptedFieldErrorShort', {
+                defaultMessage: 'Scripted fields are not supported when using multiple fields',
+              })
+            : []
+        }
       >
         <FieldInputs
           column={selectedColumn}

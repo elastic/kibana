@@ -163,6 +163,7 @@ export function FieldInputs({
                       title={i18n.translate('xpack.lens.indexPattern.terms.dragToReorder', {
                         defaultMessage: 'Drag to reorder',
                       })}
+                      data-test-subj={`indexPattern-terms-dragToReorder-${index}`}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={true}>
@@ -220,6 +221,7 @@ export function FieldInputs({
         onClick={() => {
           handleInputChange([...localValues, { id: generateId(), value: undefined, isNew: true }]);
         }}
+        data-test-subj={`indexPattern-terms-add-field`}
         label={i18n.translate('xpack.lens.indexPattern.terms.addaFilter', {
           defaultMessage: 'Add field',
         })}

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import 'jest-canvas-mock';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
@@ -21,10 +20,23 @@ import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
-import { termsOperation } from '../index';
+import { GenericOperationDefinition, termsOperation } from '../index';
 import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
+
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -759,6 +771,9 @@ describe('terms', () => {
   });
 
   describe('field input', () => {
+    // @ts-expect-error
+    window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
+
     const defaultFieldInputProps = {
       indexPattern: defaultProps.indexPattern,
       currentFieldIsInvalid: false,
@@ -767,7 +782,10 @@ describe('terms', () => {
       incompleteParams: {},
       dimensionGroups: [],
       groupId: 'any',
-      operationDefinitionMap: defaultProps.operationDefinitionMap,
+      operationDefinitionMap: { terms: termsOperation } as Record<
+        string,
+        GenericOperationDefinition
+      >,
     };
 
     function getExistingFields() {
@@ -798,11 +816,11 @@ describe('terms', () => {
       });
     }
 
-    it('should render the default field input for no field', () => {
+    it('should render the default field input for no field (incomplete operation)', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
-      const instance = shallow(
+      const instance = mount(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -810,15 +828,19 @@ describe('terms', () => {
           columnId="col1"
           existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
+          incompleteOperation="terms"
         />
       );
 
       // Fallback field input has no add button
       expect(instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()).toBeFalsy();
-      // check the error message too
-      expect(instance.find('[data-test-subj="indexPattern-field-selection-row"]').text()).toBe(
-        'To use this function, select a field'
-      );
+      // check the error state too
+      expect(
+        instance
+          .find('[data-test-subj="indexPattern-field-selection-row"]')
+          .first()
+          .prop('isInvalid')
+      ).toBeTruthy();
     });
 
     it('should show an error message when field is invalid', () => {
@@ -838,7 +860,7 @@ describe('terms', () => {
         },
         sourceField: 'unsupported',
       };
-      const instance = shallow(
+      const instance = mount(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
@@ -846,35 +868,334 @@ describe('terms', () => {
           columnId="col1"
           existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
+          currentFieldIsInvalid
         />
       );
-      expect(instance.find('[data-test-subj="indexPattern-field-selection-row"]').text()).toBe(
-        'Field unsupported is of the wrong type'
+      expect(
+        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+      ).toBe('Invalid field. Check your data view or pick another field.');
+    });
+
+    it('should show an error message when field is not supported', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      layer.columns.col1 = {
+        label: 'Top value of timestamp',
+        dataType: 'date',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'timestamp',
+      };
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1}
+          incompleteOperation="terms"
+        />
+      );
+      expect(
+        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+      ).toBe('This field does not work with the selected function.');
+    });
+
+    it('should render the an add button for single layer, but no other hints', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      expect(
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()
+      ).toBeTruthy();
+
+      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).toBe(0);
+    });
+
+    it('should render the multi terms specific UI', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['bytes'];
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      expect(
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()
+      ).toBeTruthy();
+      // the produced Enzyme DOM has the both the React component and the actual html
+      // tags with the same "data-test-subj" assigned. Here it is enough to check that multiple are rendered
+      expect(
+        instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length
+      ).toBeGreaterThan(1);
+      expect(
+        instance.find('[data-test-subj^="indexPattern-terms-dragToReorder-"]').length
+      ).toBeGreaterThan(1);
+    });
+
+    it('should return to single value UI when removing second item of two', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      expect(
+        instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length
+      ).toBeGreaterThan(1);
+
+      act(() => {
+        instance
+          .find('[data-test-subj="indexPattern-terms-removeField-1"]')
+          .first()
+          .simulate('click');
+      });
+
+      expect(instance.find('[data-test-subj="indexPattern-terms-removeField-"]').length).toBe(0);
+    });
+
+    it('should disable remove button and reorder drag when single value and one temporary new field', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      let instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      // add a new field
+      act(() => {
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
+      });
+
+      instance = instance.update();
+      // now two delete buttons should be visualized
+      expect(instance.find('[data-test-subj="indexPattern-terms-removeField-1"]').exists()).toBe(
+        true
+      );
+      // first button is disabled
+      expect(
+        instance
+          .find('[data-test-subj="indexPattern-terms-removeField-0"]')
+          .first()
+          .prop('isDisabled')
+      ).toBe(true);
+      // while second delete is still enabled
+      expect(
+        instance
+          .find('[data-test-subj="indexPattern-terms-removeField-1"]')
+          .first()
+          .prop('isDisabled')
+      ).toBe(false);
+    });
+
+    it('should accept scripted fields for single value', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      (layer.columns.col1 as TermsIndexPatternColumn).sourceField = 'scripted';
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      expect(
+        instance
+          .find('[data-test-subj="indexPattern-field-selection-row"]')
+          .first()
+          .prop('isInvalid')
+      ).toBeFalsy();
+    });
+
+    it('should mark scripted fields for multiple values', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      (layer.columns.col1 as TermsIndexPatternColumn).sourceField = 'scripted';
+      (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      expect(
+        instance
+          .find('[data-test-subj="indexPattern-field-selection-row"]')
+          .first()
+          .prop('isInvalid')
+      ).toBeTruthy();
+      expect(
+        instance.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+      ).toBe('Scripted fields are not supported when using multiple fields');
+    });
+
+    it('should not filter scripted fields when in single value', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      expect(
+        instance.find('[data-test-subj="indexPattern-dimension-field"]').first().prop('options')
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            options: expect.arrayContaining([
+              expect.objectContaining({ 'data-test-subj': 'lns-fieldOption-scripted' }),
+            ]),
+          }),
+        ])
       );
     });
-    it.todo('should render the default field input for incomplete column');
 
-    it.todo('should render the an add button for single layer, but no other hints');
+    it('should filter scripted fields when in multi terms mode', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
 
-    it.todo('should render the multi terms specific UI');
+      (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
+      const instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
 
-    it.todo('should return to single value UI when removing second item of two');
+      expect(
+        instance.find('[data-test-subj="indexPattern-dimension-field"]').first().prop('options')
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            options: expect.arrayContaining([
+              expect.not.objectContaining({ 'data-test-subj': 'lns-fieldOption-scripted' }),
+            ]),
+          }),
+        ])
+      );
+    });
 
-    it.todo(
-      'should disable remove button and reorder drag when single value and one temporary new field'
-    );
+    it('should filter already used fields when displaying fields list', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
 
-    it.todo('should enable fields reordering via drag and drop');
+      (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory', 'bytes'];
+      let instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
 
-    it.todo('should accept scripted fields for single value');
+      // add a new field
+      act(() => {
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
+      });
 
-    it.todo('should not filter scripted fields when in single value');
+      instance = instance.update();
 
-    it.todo('should mark scripted fields for multiple values');
-
-    it.todo('should filter scripted fields when in multi terms mode');
-
-    it.todo('should filter already used fields when displaying fields list');
+      // The value "6" is computed as the 4th input, but the top (React) component, therefore the 7th entry.
+      // Mind that for each "data-test-subj" there are two tags rendered: the React one and the html rendered one
+      expect(
+        instance.find('[data-test-subj="indexPattern-dimension-field"]').at(6).prop('options')
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            options: expect.not.arrayContaining([
+              expect.objectContaining({ label: 'memory' }),
+              expect.objectContaining({ label: 'bytes' }),
+            ]),
+          }),
+        ])
+      );
+    });
   });
 
   describe('param editor', () => {

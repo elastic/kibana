@@ -19,6 +19,10 @@ import type { FiltersIndexPatternColumn } from '../index';
 import type { TermsIndexPatternColumn } from './types';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
 
+export const MULTI_KEY_VISUAL_SEPARATOR = '›';
+
+const fullSeparatorString = ` ${MULTI_KEY_VISUAL_SEPARATOR} `;
+
 export function getMultiTermsScriptedFieldErrorMessage(
   layer: IndexPatternLayer,
   columnId: string,
@@ -38,6 +42,40 @@ export function getMultiTermsScriptedFieldErrorMessage(
       fields: scriptedFields.join(', '),
     },
   });
+}
+
+function getQueryForMultiTerms(fieldNames: string[], term: string) {
+  const terms = term.split(fullSeparatorString);
+  return fieldNames.map((fieldName, i) => `${fieldName}: "${terms[i]}"`).join(' AND ');
+}
+
+function getQueryLabel(fieldNames: string[], term: string) {
+  if (fieldNames.length === 1) {
+    return term;
+  }
+  return term
+    .split(fullSeparatorString)
+    .map(
+      (t: string) =>
+        t ??
+        i18n.translate('xpack.lens.indexPattern.filterBy.emptyFilterQuery', {
+          defaultMessage: '(empty)',
+        })
+    )
+    .join(fullSeparatorString);
+}
+
+interface MultiFieldKeyFormat {
+  keys: string[];
+}
+
+function isMultiFieldValue(term: unknown): term is MultiFieldKeyFormat {
+  return (
+    typeof term === 'object' &&
+    term != null &&
+    'keys' in term &&
+    Array.isArray((term as MultiFieldKeyFormat).keys)
+  );
 }
 
 export function getDisallowedTermsMessage(
@@ -65,21 +103,32 @@ export function getDisallowedTermsMessage(
       }),
       newState: async (core: CoreStart, frame: FrameDatasourceAPI, layerId: string) => {
         const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
-        const fieldName = currentColumn.sourceField;
+        const fieldNames = [
+          currentColumn.sourceField,
+          ...(currentColumn.params?.secondaryFields ?? []),
+        ];
         const activeDataFieldNameMatch =
           frame.activeData?.[layerId].columns.find(({ id }) => id === columnId)?.meta.field ===
-          fieldName;
+          fieldNames[0];
+
         let currentTerms = uniq(
           frame.activeData?.[layerId].rows
-            .map((row) => row[columnId] as string)
-            .filter((term) => typeof term === 'string' && term !== '__other__') || []
+            .map((row) => row[columnId] as string | MultiFieldKeyFormat)
+            .filter((term) =>
+              fieldNames.length > 1
+                ? isMultiFieldValue(term) && term.keys[0] !== '__other__'
+                : typeof term === 'string' && term !== '__other__'
+            )
+            .map((term: string | MultiFieldKeyFormat) =>
+              isMultiFieldValue(term) ? term.keys.join(fullSeparatorString) : term
+            ) || []
         );
-        if (!activeDataFieldNameMatch || currentTerms.length === 0) {
+        if ((fieldNames.length === 1 && !activeDataFieldNameMatch) || currentTerms.length === 0) {
           const response: FieldStatsResponse<string | number> = await core.http.post(
             `/api/lens/index_stats/${indexPattern.id}/field`,
             {
               body: JSON.stringify({
-                fieldName,
+                fieldName: fieldNames[0],
                 dslQuery: esQuery.buildEsQuery(
                   indexPattern,
                   frame.query,
@@ -102,7 +151,8 @@ export function getDisallowedTermsMessage(
               label: i18n.translate('xpack.lens.indexPattern.pinnedTopValuesLabel', {
                 defaultMessage: 'Filters of {field}',
                 values: {
-                  field: fieldName,
+                  field:
+                    fieldNames.length > 1 ? fieldNames.join(fullSeparatorString) : fieldNames[0],
                 },
               }),
               customLabel: true,
@@ -114,10 +164,13 @@ export function getDisallowedTermsMessage(
                   currentTerms.length > 0
                     ? currentTerms.map((term) => ({
                         input: {
-                          query: `${fieldName}: "${term}"`,
+                          query:
+                            fieldNames.length === 1
+                              ? `${fieldNames[0]}: "${term}"`
+                              : getQueryForMultiTerms(fieldNames, term),
                           language: 'kuery',
                         },
-                        label: term,
+                        label: getQueryLabel(fieldNames, term),
                       }))
                     : [
                         {
