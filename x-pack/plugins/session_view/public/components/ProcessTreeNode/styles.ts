@@ -26,7 +26,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       children = 'children',
       alerts = 'alerts',
       output = 'output',
-      userChanged = 'user'
+      userChanged = 'user',
     }
 
     const darkText: CSSObject = {
@@ -101,7 +101,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
      */
     const getHighlightColors = () => {
       let bgColor = 'none';
-      let hoverColor = '#6B5FC6';
+      const hoverColor = '#6B5FC6';
       let borderColor = 'transparent';
 
       // TODO: alerts highlight colors

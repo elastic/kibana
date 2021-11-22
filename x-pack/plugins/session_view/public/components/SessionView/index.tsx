@@ -141,11 +141,6 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     );
   };
 
-  const toggleDetailPanel = () => {
-    setIsDetailMounted(!isDetailMounted);
-    if (!isDetailOpen) setIsDetailOpen(true);
-  };
-
   if (!(isLoading || data.length)) {
     return renderNoData();
   }

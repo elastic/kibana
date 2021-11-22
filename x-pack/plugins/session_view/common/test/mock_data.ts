@@ -5,51 +5,19 @@
  * 2.0.
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EventAction, ProcessEvent } from '../../public/hooks/use_process_tree';
 import uuid from 'uuid';
+import { EventAction, ProcessEvent } from '../../public/hooks/use_process_tree';
 
 export const getStart = () => {
-  return [{
-    '@timestamp': 'Thu Oct 14 2021 12: 06: 48 GMT-0700 (Pacific Daylight Time)',
-    event: {
-      kind: 'event',
-      category: 'process',
-      action: EventAction.exec,
-    },
-    process: {
-      args: ['bash'],
-      args_count: 1,
-      command_line: 'bash',
-      entity_id: '4321',
-      executable: '/bin/bash',
-      name: 'bash',
-      interactive: true,
-      working_directory: '/home/kg',
-      pid: 3,
-      pgid: 2,
-
-      user: {
-        id: '2',
-        name: 'kg',
+  return [
+    {
+      '@timestamp': 'Thu Oct 14 2021 12: 06: 48 GMT-0700 (Pacific Daylight Time)',
+      event: {
+        kind: 'event',
+        category: 'process',
+        action: EventAction.exec,
       },
-
-      parent: {
-        args: ['/bin/sshd'],
-        args_count: 1,
-        command_line: 'sshd',
-        entity_id: '4322',
-        executable: '/bin/sshd',
-        name: 'sshd',
-        interactive: true,
-        working_directory: '/',
-        pid: 2,
-        pgid: 2,
-        user: {
-          id: '0',
-          name: 'root',
-        },
-      },
-      session: {
+      process: {
         args: ['bash'],
         args_count: 1,
         command_line: 'bash',
@@ -60,29 +28,63 @@ export const getStart = () => {
         working_directory: '/home/kg',
         pid: 3,
         pgid: 2,
+
         user: {
           id: '2',
           name: 'kg',
         },
-      },
-      entry: {
-        args: ['bash'],
-        args_count: 1,
-        command_line: 'bash',
-        entity_id: '4321',
-        executable: '/bin/bash',
-        name: 'bash',
-        interactive: true,
-        working_directory: '/home/kg',
-        pid: 3,
-        pgid: 2,
-        user: {
-          id: '2',
-          name: 'kg',
+
+        parent: {
+          args: ['/bin/sshd'],
+          args_count: 1,
+          command_line: 'sshd',
+          entity_id: '4322',
+          executable: '/bin/sshd',
+          name: 'sshd',
+          interactive: true,
+          working_directory: '/',
+          pid: 2,
+          pgid: 2,
+          user: {
+            id: '0',
+            name: 'root',
+          },
+        },
+        session: {
+          args: ['bash'],
+          args_count: 1,
+          command_line: 'bash',
+          entity_id: '4321',
+          executable: '/bin/bash',
+          name: 'bash',
+          interactive: true,
+          working_directory: '/home/kg',
+          pid: 3,
+          pgid: 2,
+          user: {
+            id: '2',
+            name: 'kg',
+          },
+        },
+        entry: {
+          args: ['bash'],
+          args_count: 1,
+          command_line: 'bash',
+          entity_id: '4321',
+          executable: '/bin/bash',
+          name: 'bash',
+          interactive: true,
+          working_directory: '/home/kg',
+          pid: 3,
+          pgid: 2,
+          user: {
+            id: '2',
+            name: 'kg',
+          },
         },
       },
     },
-  }];
+  ];
 };
 
 export const getEvent = () => {
@@ -90,94 +92,96 @@ export const getEvent = () => {
     {
       args: ['ls', '-l'],
       command_line: 'ls -l',
-      name: 'ls'
+      name: 'ls',
     },
     {
       args: ['pwd'],
       command_line: 'pwd',
-      name: 'pwd'
+      name: 'pwd',
     },
     {
       args: ['dir'],
       command_line: 'dir',
-      name: 'dir'
-    }
-  ]
+      name: 'dir',
+    },
+  ];
 
   const randomElement = random[Math.floor(Math.random() * random.length)];
 
-  return [{
-    '@timestamp': 'Thu Oct 14 2021 12: 06: 52 GMT-0700 (Pacific Daylight Time)',
-    event: {
-      kind: 'event',
-      category: 'process',
-      action: EventAction.exec,
+  return [
+    {
+      '@timestamp': 'Thu Oct 14 2021 12: 06: 52 GMT-0700 (Pacific Daylight Time)',
+      event: {
+        kind: 'event',
+        category: 'process',
+        action: EventAction.exec,
+      },
+      process: {
+        args: randomElement.args,
+        args_count: 2,
+        command_line: randomElement.command_line,
+        entity_id: uuid.v4().toString(),
+        executable: '/bin/ls',
+        name: randomElement.name,
+        interactive: true,
+        working_directory: '/home/kg',
+        pid: 4,
+        pgid: 3,
+        user: {
+          id: '2',
+          name: 'kg',
+        },
+        parent: {
+          args: ['bash'],
+          args_count: 1,
+          command_line: 'bash',
+          entity_id: '4321',
+          executable: '/bin/bash',
+          name: 'bash',
+          interactive: true,
+          working_directory: '/home/kg',
+          pid: 3,
+          pgid: 2,
+          user: {
+            id: '2',
+            name: 'kg',
+          },
+        },
+        session: {
+          args: ['bash'],
+          args_count: 1,
+          command_line: 'bash',
+          entity_id: '4321',
+          executable: '/bin/bash',
+          name: 'bash',
+          interactive: true,
+          working_directory: '/home/kg',
+          pid: 3,
+          pgid: 2,
+          user: {
+            id: '2',
+            name: 'kg',
+          },
+        },
+        entry: {
+          args: ['bash'],
+          args_count: 1,
+          command_line: 'bash',
+          entity_id: '4321',
+          executable: '/bin/bash',
+          name: 'bash',
+          interactive: true,
+          working_directory: '/home/kg',
+          pid: 3,
+          pgid: 2,
+          user: {
+            id: '2',
+            name: 'kg',
+          },
+        },
+      },
     },
-    process: {
-      args: randomElement.args,
-      args_count: 2,
-      command_line: randomElement.command_line,
-      entity_id: uuid.v4().toString(),
-      executable: '/bin/ls',
-      name: randomElement.name,
-      interactive: true,
-      working_directory: '/home/kg',
-      pid: 4,
-      pgid: 3,
-      user: {
-        id: '2',
-        name: 'kg',
-      },
-      parent: {
-        args: ['bash'],
-        args_count: 1,
-        command_line: 'bash',
-        entity_id: '4321',
-        executable: '/bin/bash',
-        name: 'bash',
-        interactive: true,
-        working_directory: '/home/kg',
-        pid: 3,
-        pgid: 2,
-        user: {
-          id: '2',
-          name: 'kg',
-        },
-      },
-      session: {
-        args: ['bash'],
-        args_count: 1,
-        command_line: 'bash',
-        entity_id: '4321',
-        executable: '/bin/bash',
-        name: 'bash',
-        interactive: true,
-        working_directory: '/home/kg',
-        pid: 3,
-        pgid: 2,
-        user: {
-          id: '2',
-          name: 'kg',
-        },
-      },
-      entry: {
-        args: ['bash'],
-        args_count: 1,
-        command_line: 'bash',
-        entity_id: '4321',
-        executable: '/bin/bash',
-        name: 'bash',
-        interactive: true,
-        working_directory: '/home/kg',
-        pid: 3,
-        pgid: 2,
-        user: {
-          id: '2',
-          name: 'kg',
-        },
-      },
-    },
-  }];
+  ];
 };
 
 export const getEnd = () => {
@@ -272,12 +276,12 @@ export const getEnd = () => {
         working_directory: '/home/kg',
         pid: 6,
         pgid: 4,
-  
+
         user: {
           id: '2',
           name: 'kg',
         },
-  
+
         parent: {
           args: ['df'],
           args_count: 1,
@@ -346,12 +350,12 @@ export const getEnd = () => {
         working_directory: '/home/kg',
         pid: 6,
         pgid: 4,
-  
+
         user: {
           id: '2',
           name: 'kg',
         },
-  
+
         parent: {
           args: ['df'],
           args_count: 1,
@@ -422,12 +426,12 @@ export const getEnd = () => {
         pgid: 4,
         end: 'Thu Oct 14 2021 12: 08: 56 GMT-0700 (Pacific Daylight Time)',
         exit_code: 137,
-  
+
         user: {
           id: '2',
           name: 'kg',
         },
-  
+
         parent: {
           args: ['df'],
           args_count: 1,
@@ -479,7 +483,7 @@ export const getEnd = () => {
       },
     },
   ];
-}
+};
 
 export const mockData: ProcessEvent[] = [
   {

@@ -47,7 +47,6 @@ export function ProcessTreeNode({
     setChildrenExpanded(isSessionLeader || process.autoExpand);
   }, [isSessionLeader, process.autoExpand]);
 
-
   const processDetails = useMemo(() => {
     return process.getDetails();
   }, [process.events.length]);
@@ -55,17 +54,17 @@ export function ProcessTreeNode({
   const hasExec = useMemo(() => {
     return process.hasExec();
   }, [process.events.length]);
-  
+
   const alerts = useMemo(() => {
     return process.getAlerts();
   }, [process.events.length]);
-  
+
   if (!processDetails) {
     return null;
   }
-  
+
   const styles = useStyles({ depth, hasAlerts: !!alerts.length });
-  
+
   useLayoutEffect(() => {
     if (searchMatched !== null && textRef.current) {
       const regex = new RegExp(searchMatched);
@@ -108,7 +107,7 @@ export function ProcessTreeNode({
 
   const getExpandedIcon = (expanded: boolean) => {
     return expanded ? 'arrowUp' : 'arrowDown';
-  }
+  };
 
   const renderButtons = () => {
     const buttons = [];
@@ -207,7 +206,7 @@ export function ProcessTreeNode({
         </EuiButton>
       );
     }
-  }
+  };
 
   const onProcessClicked = (e: MouseEvent) => {
     e.stopPropagation();
