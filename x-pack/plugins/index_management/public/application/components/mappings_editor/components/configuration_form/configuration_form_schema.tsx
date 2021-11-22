@@ -192,4 +192,12 @@ export const configurationFormSchema: FormSchema = {
       defaultValue: false,
     },
   },
+  _size: {
+    enabled: {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.routingLabel', {
+        defaultMessage: 'Index the size in bytes of the _source field',
+      }),
+      defaultValue: false,
+    },
+  },
 };

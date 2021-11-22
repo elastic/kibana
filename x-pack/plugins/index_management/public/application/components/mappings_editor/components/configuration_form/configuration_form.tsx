@@ -15,10 +15,12 @@ import { DynamicMappingSection } from './dynamic_mapping_section';
 import { SourceFieldSection } from './source_field_section';
 import { MetaFieldSection } from './meta_field_section';
 import { RoutingSection } from './routing_section';
+import { MapperSizePluginSection } from './mapper_size_plugin_section';
 import { configurationFormSchema } from './configuration_form_schema';
 
 interface Props {
   value?: MappingsConfiguration;
+  esNodesPlugins: string[];
 }
 
 const formSerializer = (formData: GenericObject) => {
@@ -35,6 +37,7 @@ const formSerializer = (formData: GenericObject) => {
     sourceField,
     metaField,
     _routing,
+    _size,
   } = formData;
 
   const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
@@ -47,6 +50,7 @@ const formSerializer = (formData: GenericObject) => {
     _source: sourceField,
     _meta: metaField,
     _routing,
+    _size,
   };
 
   return serialized;
@@ -67,6 +71,8 @@ const formDeserializer = (formData: GenericObject) => {
     },
     _meta,
     _routing,
+    // For the Mapper Size plugin
+    _size,
   } = formData;
 
   return {
@@ -84,10 +90,11 @@ const formDeserializer = (formData: GenericObject) => {
     },
     metaField: _meta ?? {},
     _routing,
+    _size,
   };
 };
 
-export const ConfigurationForm = React.memo(({ value }: Props) => {
+export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) => {
   const isMounted = useRef(false);
 
   const { form } = useForm({
@@ -99,6 +106,9 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
   });
   const dispatch = useDispatch();
   const { subscribe, submit, reset, getFormData } = form;
+
+  const isMapperSizeSectionVisible =
+    value?._size !== undefined || esNodesPlugins.includes('mapper-size');
 
   useEffect(() => {
     const subscription = subscribe(({ data, isValid, validate }) => {
@@ -150,6 +160,7 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
       <SourceFieldSection />
       <EuiSpacer size="xl" />
       <RoutingSection />
+      {isMapperSizeSectionVisible && <MapperSizePluginSection />}
     </Form>
   );
 });
