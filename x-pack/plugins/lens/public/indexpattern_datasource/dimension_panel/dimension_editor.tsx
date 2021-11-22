@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
-import type { IndexPatternColumn } from '../indexpattern';
+import type { GenericIndexPatternColumn } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -61,7 +61,7 @@ import { FieldInput } from './field_input';
 const operationPanels = getOperationDisplay();
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
-  selectedColumn?: IndexPatternColumn;
+  selectedColumn?: GenericIndexPatternColumn;
   layerType: LayerType;
   operationSupportMatrix: OperationSupportMatrix;
   currentIndexPattern: IndexPattern;

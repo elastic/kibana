@@ -17,6 +17,12 @@ import {
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 import { isEqual } from 'lodash';
+import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
+import {
+  MathIndexPatternColumn,
+  RangeIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+} from './operations/definitions';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -178,7 +184,7 @@ function testInitialState(): IndexPatternPrivateState {
               orderBy: { type: 'alphabetical' },
               orderDirection: 'asc',
             },
-          },
+          } as TermsIndexPatternColumn,
         },
       },
     },
@@ -732,7 +738,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     orderDirection: 'asc',
                     size: 5,
                   },
-                },
+                } as TermsIndexPatternColumn,
                 colb: {
                   dataType: 'number',
                   isBucketed: false,
@@ -767,7 +773,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     params: {
                       interval: 'w',
                     },
-                  },
+                  } as DateHistogramIndexPatternColumn,
                   colb: {
                     dataType: 'number',
                     isBucketed: false,
@@ -975,7 +981,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     orderDirection: 'asc',
                     size: 5,
                   },
-                },
+                } as TermsIndexPatternColumn,
               },
               columnOrder: ['cola'],
             },
@@ -1085,7 +1091,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
                   params: { interval: 'auto' },
-                },
+                } as DateHistogramIndexPatternColumn,
                 metric: {
                   label: '',
                   customLabel: true,
@@ -1217,7 +1223,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   params: { value: '0' },
                   references: [],
                   scale: 'ratio',
-                },
+                } as StaticValueIndexPatternColumn,
               },
             },
             currentLayer: {
@@ -1505,7 +1511,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   orderBy: { type: 'alphabetical' },
                   orderDirection: 'asc',
                 },
-              },
+              } as TermsIndexPatternColumn,
             },
           },
         },
@@ -1647,7 +1653,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   orderDirection: 'asc',
                   size: 5,
                 },
-              },
+              } as TermsIndexPatternColumn,
               colb: {
                 label: 'My Op',
                 customLabel: true,
@@ -1725,7 +1731,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   orderDirection: 'asc',
                   size: 5,
                 },
-              },
+              } as TermsIndexPatternColumn,
               colb: {
                 label: 'My Op',
                 customLabel: true,
@@ -1829,7 +1835,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   maxBars: 100,
                   ranges: [],
                 },
-              },
+              } as RangeIndexPatternColumn,
             },
           },
         },
@@ -1875,7 +1881,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   maxBars: 100,
                   ranges: [{ from: 1, to: 2, label: '' }],
                 },
-              },
+              } as RangeIndexPatternColumn,
             },
           },
         },
@@ -1953,7 +1959,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it("should not propose an over time suggestion if there's a top values aggregation with an high size", () => {
       const initialState = testInitialState();
-      (initialState.layers.first.columns.col1 as { params: { size: number } }).params!.size = 6;
+      (initialState.layers.first.columns.col1 as TermsIndexPatternColumn).params!.size = 6;
       const suggestions = getDatasourceSuggestionsFromCurrentState({
         ...initialState,
         indexPatterns: { 1: { ...initialState.indexPatterns['1'], timeFieldName: undefined } },
@@ -1994,7 +2000,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   orderBy: { type: 'alphabetical' },
                   orderDirection: 'asc',
                 },
-              },
+              } as TermsIndexPatternColumn,
             },
           },
         },
@@ -2079,7 +2085,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   orderBy: { type: 'alphabetical' },
                   orderDirection: 'asc',
                 },
-              },
+              } as TermsIndexPatternColumn,
               col2: {
                 label: 'My Op',
                 customLabel: true,
@@ -2093,7 +2099,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   orderBy: { type: 'alphabetical' },
                   orderDirection: 'asc',
                 },
-              },
+              } as TermsIndexPatternColumn,
               col3: {
                 label: 'My Op',
                 customLabel: true,
@@ -2107,7 +2113,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   orderBy: { type: 'alphabetical' },
                   orderDirection: 'asc',
                 },
-              },
+              } as TermsIndexPatternColumn,
               col4: {
                 label: 'My Op',
                 customLabel: true,
@@ -2216,7 +2222,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 params: {
                   interval: 'd',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
               id2: {
                 label: 'Average of field1',
                 dataType: 'number',
@@ -2347,7 +2353,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 params: {
                   interval: 'd',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
               id2: {
                 label: 'Top 5',
                 dataType: 'string',
@@ -2356,7 +2362,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 operationType: 'terms',
                 sourceField: 'dest',
                 params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
-              },
+              } as TermsIndexPatternColumn,
               id3: {
                 label: 'Average of field1',
                 dataType: 'number',
@@ -2402,7 +2408,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 operationType: 'terms',
                 sourceField: 'nonExistingField',
                 params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
-              },
+              } as TermsIndexPatternColumn,
             },
             columnOrder: ['col1', 'col2'],
           },
@@ -2538,7 +2544,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
                   params: { interval: 'auto' },
-                },
+                } as DateHistogramIndexPatternColumn,
                 ref: {
                   label: '',
                   dataType: 'number',
@@ -2628,7 +2634,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
                   params: { interval: 'auto' },
-                },
+                } as DateHistogramIndexPatternColumn,
                 metric: {
                   label: '',
                   dataType: 'number',
@@ -2680,7 +2686,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   params: {
                     tinymathAst: '',
                   },
-                },
+                } as MathIndexPatternColumn,
                 ref4: {
                   label: '',
                   dataType: 'number',
@@ -2690,7 +2696,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   params: {
                     tinymathAst: '',
                   },
-                },
+                } as MathIndexPatternColumn,
               },
             },
           },
@@ -2755,7 +2761,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: { interval: 'auto' },
-              },
+              } as DateHistogramIndexPatternColumn,
               ref: {
                 label: '',
                 dataType: 'number',
@@ -2805,7 +2811,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   tinymathAst: '',
                 },
                 references: ['metric'],
-              },
+              } as MathIndexPatternColumn,
               metric: {
                 label: '',
                 dataType: 'number',

@@ -16,7 +16,11 @@ import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { OperationMetadata } from '../../types';
 import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
 import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
-import { insertOrReplaceColumn } from '../operations';
+import {
+  insertOrReplaceColumn,
+  LastValueIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '../operations';
 import { FieldSelect } from './field_select';
 
 jest.mock('../operations');
@@ -122,7 +126,7 @@ describe('reference editor', () => {
               operationType: 'terms',
               sourceField: 'dest',
               params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'desc' },
-            },
+            } as TermsIndexPatternColumn,
           },
         }}
         validation={{
@@ -489,7 +493,7 @@ describe('reference editor', () => {
               params: {
                 sortField: 'timestamp',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
         }}
         validation={{
@@ -521,7 +525,7 @@ describe('reference editor', () => {
               params: {
                 sortField: 'timestamp',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
           incompleteColumns: {
             ref: { operationType: 'max' },

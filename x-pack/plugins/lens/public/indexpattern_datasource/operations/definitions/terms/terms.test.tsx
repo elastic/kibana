@@ -20,9 +20,10 @@ import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
-import { GenericOperationDefinition, termsOperation } from '../index';
+import { GenericOperationDefinition, termsOperation, LastValueIndexPatternColumn } from '../index';
 import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
+import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 
 // mocking random id generator function
@@ -76,7 +77,7 @@ describe('terms', () => {
             orderDirection: 'asc',
           },
           sourceField: 'source',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'Count',
           dataType: 'number',
@@ -372,7 +373,7 @@ describe('terms', () => {
               params: {
                 sortField: 'datefield',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -487,7 +488,7 @@ describe('terms', () => {
               params: {
                 sortField: 'time',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -566,7 +567,7 @@ describe('terms', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -598,7 +599,7 @@ describe('terms', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
             col1: {
               label: 'Value of timestamp',
               dataType: 'date',
@@ -610,7 +611,7 @@ describe('terms', () => {
                 interval: 'w',
               },
               sourceField: 'timestamp',
-            },
+            } as DateHistogramIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -642,7 +643,7 @@ describe('terms', () => {
                 orderDirection: 'desc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -1268,7 +1269,7 @@ describe('terms', () => {
             {
               ...layer.columns.col1,
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as TermsIndexPatternColumn).params,
                 otherBucket: true,
               },
             } as TermsIndexPatternColumn
@@ -1296,7 +1297,7 @@ describe('terms', () => {
               ...layer.columns.col1,
               sourceField: 'bytes',
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as TermsIndexPatternColumn).params,
                 otherBucket: true,
               },
             } as TermsIndexPatternColumn
@@ -1531,7 +1532,7 @@ describe('terms', () => {
             },
             scale: 'ordinal',
             sourceField: 'bytes',
-          },
+          } as TermsIndexPatternColumn,
         },
         columnOrder: [],
         indexPatternId: '',

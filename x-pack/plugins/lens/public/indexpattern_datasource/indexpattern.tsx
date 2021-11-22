@@ -12,7 +12,7 @@ import type { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -45,7 +45,7 @@ import {
 import { isColumnInvalid } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
+import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -59,10 +59,13 @@ import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/wor
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
-export type { OperationType, IndexPatternColumn } from './operations';
+export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
-export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
+export function columnToOperation(
+  column: GenericIndexPatternColumn,
+  uniqueLabel?: string
+): Operation {
   const { dataType, label, isBucketed, scale } = column;
   return {
     dataType: normalizeOperationDataType(dataType),
@@ -86,7 +89,7 @@ export function getIndexPatternDatasource({
   data,
   fieldFormats,
   charts,
-  indexPatternFieldEditor,
+  dataViewFieldEditor,
   uiActions,
 }: {
   core: CoreStart;
@@ -94,7 +97,7 @@ export function getIndexPatternDatasource({
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
   const uiSettings = core.uiSettings;
@@ -228,7 +231,7 @@ export function getIndexPatternDatasource({
             data={data}
             fieldFormats={fieldFormats}
             charts={charts}
-            indexPatternFieldEditor={indexPatternFieldEditor}
+            indexPatternFieldEditor={dataViewFieldEditor}
             {...props}
             core={core}
             uiActions={uiActions}

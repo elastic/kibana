@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { getIndexPatternDatasource, IndexPatternColumn } from './indexpattern';
+import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
@@ -15,11 +15,20 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
-import { operationDefinitionMap, getErrorMessages } from './operations';
+import {
+  operationDefinitionMap,
+  getErrorMessages,
+  TermsIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+  MathIndexPatternColumn,
+  FormulaIndexPatternColumn,
+} from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
+import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { TinymathAST } from 'packages/kbn-tinymath';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -175,7 +184,7 @@ describe('IndexPattern Data Source', () => {
       data: dataPluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
-      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
+      dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
     });
 
@@ -199,7 +208,7 @@ describe('IndexPattern Data Source', () => {
                 orderBy: { type: 'alphabetical' },
                 orderDirection: 'asc',
               },
-            },
+            } as TermsIndexPatternColumn,
           },
         },
       },
@@ -208,7 +217,7 @@ describe('IndexPattern Data Source', () => {
 
   describe('uniqueLabels', () => {
     it('appends a suffix to duplicates', () => {
-      const col: IndexPatternColumn = {
+      const col: GenericIndexPatternColumn = {
         dataType: 'number',
         isBucketed: false,
         label: 'Foo',
@@ -354,7 +363,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: '1d',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
         },
@@ -504,7 +513,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: 'auto',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
               col3: {
                 label: 'Date 2',
                 dataType: 'date',
@@ -514,7 +523,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: 'auto',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
         },
@@ -551,7 +560,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: 'auto',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
         },
@@ -600,7 +609,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: 'auto',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
         },
@@ -726,7 +735,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: 'auto',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
         },
@@ -793,7 +802,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: 'auto',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
               metric: {
                 label: 'Count of records',
                 dataType: 'number',
@@ -811,7 +820,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   window: 5,
                 },
-              },
+              } as MovingAverageIndexPatternColumn,
             },
           },
         },
@@ -849,7 +858,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: '1d',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
               bucket2: {
                 label: 'Terms',
                 dataType: 'string',
@@ -861,7 +870,7 @@ describe('IndexPattern Data Source', () => {
                   orderDirection: 'asc',
                   size: 10,
                 },
-              },
+              } as TermsIndexPatternColumn,
             },
           },
         },
@@ -901,7 +910,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: 'auto',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
         },
@@ -946,7 +955,6 @@ describe('IndexPattern Data Source', () => {
                   label: 'Reference',
                   dataType: 'number',
                   isBucketed: false,
-                  // @ts-expect-error not a valid type
                   operationType: 'testReference',
                   references: ['col1'],
                 },
@@ -982,7 +990,6 @@ describe('IndexPattern Data Source', () => {
                   label: 'Reference',
                   dataType: 'number',
                   isBucketed: false,
-                  // @ts-expect-error not a valid type
                   operationType: 'testReference',
                   references: ['col1'],
                 },
@@ -1029,7 +1036,7 @@ describe('IndexPattern Data Source', () => {
                   params: {
                     interval: 'auto',
                   },
-                },
+                } as DateHistogramIndexPatternColumn,
                 formula: {
                   label: 'Formula',
                   dataType: 'number',
@@ -1041,7 +1048,7 @@ describe('IndexPattern Data Source', () => {
                     isFormulaBroken: false,
                   },
                   references: ['math'],
-                },
+                } as FormulaIndexPatternColumn,
                 countX0: {
                   label: 'countX0',
                   dataType: 'number',
@@ -1061,8 +1068,7 @@ describe('IndexPattern Data Source', () => {
                     tinymathAst: {
                       type: 'function',
                       name: 'add',
-                      // @ts-expect-error String args are not valid tinymath, but signals something unique to Lens
-                      args: ['countX0', 'count'],
+                      args: ['countX0', 'count'] as unknown as TinymathAST[],
                       location: {
                         min: 0,
                         max: 17,
@@ -1072,7 +1078,7 @@ describe('IndexPattern Data Source', () => {
                   },
                   references: ['countX0', 'count'],
                   customLabel: true,
-                },
+                } as MathIndexPatternColumn,
               },
             },
           },
@@ -1216,7 +1222,7 @@ describe('IndexPattern Data Source', () => {
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
-                  } as IndexPatternColumn,
+                  } as GenericIndexPatternColumn,
                   col2: {
                     label: 'Cumulative sum',
                     dataType: 'number',
@@ -1225,7 +1231,7 @@ describe('IndexPattern Data Source', () => {
                     operationType: 'cumulative_sum',
                     references: ['col1'],
                     params: {},
-                  } as IndexPatternColumn,
+                  } as GenericIndexPatternColumn,
                 },
               },
             },
@@ -1267,7 +1273,7 @@ describe('IndexPattern Data Source', () => {
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
-                  } as IndexPatternColumn,
+                  } as GenericIndexPatternColumn,
                   col2: {
                     label: 'Cumulative sum',
                     dataType: 'number',
@@ -1276,7 +1282,7 @@ describe('IndexPattern Data Source', () => {
                     operationType: 'cumulative_sum',
                     references: ['col1'],
                     params: {},
-                  } as IndexPatternColumn,
+                  } as GenericIndexPatternColumn,
                 },
               },
             },
@@ -1367,7 +1373,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'date',
                 isBucketed: true,
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
               col2: {
                 operationType: 'count',
                 label: '',
@@ -1605,7 +1611,7 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   interval: '1d',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
               bucket2: {
                 label: 'Terms',
                 dataType: 'string',
@@ -1617,7 +1623,7 @@ describe('IndexPattern Data Source', () => {
                   orderDirection: 'asc',
                   size: 10,
                 },
-              },
+              } as TermsIndexPatternColumn,
             },
           },
         },

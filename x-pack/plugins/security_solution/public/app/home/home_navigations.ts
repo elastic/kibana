@@ -91,7 +91,7 @@ export const navTabs: SecurityNav = {
     name: i18n.CASE,
     href: APP_CASES_PATH,
     disabled: false,
-    urlKey: 'case',
+    urlKey: 'cases',
   },
   [SecurityPageName.administration]: {
     id: SecurityPageName.administration,

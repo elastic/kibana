@@ -26,7 +26,12 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } f
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { generateId } from '../../id_generator';
 import { IndexPatternPrivateState } from '../types';
-import { IndexPatternColumn, replaceColumn } from '../operations';
+import {
+  FiltersIndexPatternColumn,
+  GenericIndexPatternColumn,
+  replaceColumn,
+  TermsIndexPatternColumn,
+} from '../operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
@@ -107,7 +112,7 @@ const expectedIndexPatterns = {
   },
 };
 
-const bytesColumn: IndexPatternColumn = {
+const bytesColumn: GenericIndexPatternColumn = {
   label: 'Max of bytes',
   dataType: 'number',
   isBucketed: false,
@@ -132,7 +137,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   let setState: jest.Mock;
   let defaultProps: IndexPatternDimensionEditorProps;
 
-  function getStateWithColumns(columns: Record<string, IndexPatternColumn>) {
+  function getStateWithColumns(columns: Record<string, GenericIndexPatternColumn>) {
     return {
       ...state,
       layers: { first: { ...state.layers.first, columns, columnOrder: Object.keys(columns) } },
@@ -170,7 +175,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 interval: '1d',
               },
               sourceField: 'timestamp',
-            },
+            } as DateHistogramIndexPatternColumn,
           },
           incompleteColumns: {},
         },
@@ -263,7 +268,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             // Private
             operationType: 'filters',
             params: { filters: [] },
-          },
+          } as FiltersIndexPatternColumn,
         })}
       />
     );
@@ -426,7 +431,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'date_histogram',
             sourceField: '@timestamp',
             params: { interval: 'auto' },
-          },
+          } as DateHistogramIndexPatternColumn,
           col1: {
             label: 'Counter rate',
             dataType: 'number',
@@ -463,7 +468,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'date_histogram',
             sourceField: '@timestamp',
             params: { interval: 'auto' },
-          },
+          } as DateHistogramIndexPatternColumn,
           col1: {
             label: 'Cumulative sum',
             dataType: 'number',
@@ -838,7 +843,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               // Private
               operationType: 'filters',
               params: { filters: [] },
-            },
+            } as FiltersIndexPatternColumn,
           })}
         />
       );
@@ -1065,7 +1070,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   describe('time scaling', () => {
-    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1079,7 +1084,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             params: {
               interval: '1d',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -1087,7 +1092,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'count',
             sourceField: 'Records',
             ...colOverrides,
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1295,7 +1300,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   describe('time shift', () => {
-    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1309,7 +1314,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             params: {
               interval: '1d',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -1317,7 +1322,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'count',
             sourceField: 'Records',
             ...colOverrides,
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1333,7 +1338,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             label: 'Count of records',
             operationType: 'count',
             sourceField: 'Records',
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1482,7 +1487,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   describe('filtering', () => {
-    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1496,7 +1501,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             params: {
               interval: '1d',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -1504,7 +1509,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'count',
             sourceField: 'Records',
             ...colOverrides,
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1521,7 +1526,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               orderBy: { type: 'alphabetical' },
               size: 5,
             },
-          })}
+          } as TermsIndexPatternColumn)}
         />
       );
       expect(
