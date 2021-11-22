@@ -53,6 +53,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/security_api_integration/login_selector.config.ts'),
   require.resolve('../test/security_api_integration/audit.config.ts'),
   require.resolve('../test/security_api_integration/http_bearer.config.ts'),
+  require.resolve('../test/security_api_integration/http_no_auth_providers.config.ts'),
   require.resolve('../test/security_api_integration/kerberos.config.ts'),
   require.resolve('../test/security_api_integration/kerberos_anonymous_access.config.ts'),
   require.resolve('../test/security_api_integration/pki.config.ts'),
