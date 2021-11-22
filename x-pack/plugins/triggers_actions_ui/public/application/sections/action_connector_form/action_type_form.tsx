@@ -42,7 +42,7 @@ import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './act
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
-import { ConnectorsDropdown } from './connector_dropdown';
+import { ConnectorsSelection } from './connectors_selection';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -245,7 +245,7 @@ export const ActionTypeForm = ({
               ) : null
             }
           >
-            <ConnectorsDropdown
+            <ConnectorsSelection
               actionItem={actionItem}
               accordionIndex={index}
               actionTypesIndex={actionTypesIndex}

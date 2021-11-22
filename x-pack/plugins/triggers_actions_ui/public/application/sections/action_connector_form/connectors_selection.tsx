@@ -22,9 +22,9 @@ interface DropdownProps {
   onConnectorSelected: (id: string) => void;
 }
 
-export const ConnectorsDropdown = React.memo(ConnectorsDropdownComponent);
+export const ConnectorsSelection = React.memo(ConnectorsSelectionComponent);
 
-function ConnectorsDropdownComponent({
+function ConnectorsSelectionComponent({
   actionItem,
   accordionIndex,
   actionTypesIndex,

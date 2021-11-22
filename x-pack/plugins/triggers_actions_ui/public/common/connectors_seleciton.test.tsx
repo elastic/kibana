@@ -8,7 +8,7 @@
 import { checkConnectorIsDeprecated } from './connectors_selection';
 
 describe('Connectors select', () => {
-  describe('isDeprecatedConnector', () => {
+  describe('checkConnectorIsDeprecated', () => {
     const connector = {
       id: 'test',
       actionTypeId: '.webhook',
