@@ -38,6 +38,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
    * An observable which can be used to re-run the expression without destroying the component
    */
   reload$?: Observable<unknown>;
+  onRender$?: (item: number) => void;
   debounce?: number;
 }
 
@@ -66,6 +67,7 @@ export default function ReactExpressionRenderer({
   expression,
   onEvent,
   onData$,
+  onRender$,
   reload$,
   debounce,
   ...expressionLoaderOptions
@@ -155,6 +157,7 @@ export default function ReactExpressionRenderer({
             ...defaultState,
             isEmpty: false,
           }));
+          onRender$?.(item);
         })
     );
 

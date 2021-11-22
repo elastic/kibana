@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCheckableCard,
+  EuiCodeBlock,
   EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
@@ -26,6 +27,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -198,6 +200,11 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             })}
             error={form.errors.password}
             isInvalid={form.touched.password && !!form.errors.password}
+            helpText={
+              form.errors.username ? undefined : (
+                <ForgotPasswordPopover username={form.values.username} />
+              )
+            }
             fullWidth
           >
             <EuiFieldPassword
@@ -258,9 +265,9 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
               value="true"
               checked={!!form.values.caCert}
               onChange={() => {
-                const intermediateCa = certificateChain[Math.min(1, certificateChain.length - 1)];
+                const rootCa = certificateChain[certificateChain.length - 1];
                 form.setTouched('caCert');
-                form.setValue('caCert', form.values.caCert ? '' : intermediateCa.raw);
+                form.setValue('caCert', form.values.caCert ? '' : rootCa.raw);
               }}
             >
               <CertificateChain certificateChain={certificateChain} />
@@ -464,5 +471,49 @@ const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificat
         </EuiModal>
       )}
     </>
+  );
+};
+
+export interface ForgotPasswordPopoverProps {
+  username: string;
+}
+
+export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps> = ({
+  username,
+}) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const button = (
+    <EuiLink onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}>
+      <FormattedMessage
+        id="interactiveSetup.forgotPasswordPopover.buttonText"
+        defaultMessage="Forgot password?"
+      />
+    </EuiLink>
+  );
+
+  return (
+    <EuiPopover
+      button={button}
+      anchorPosition="rightCenter"
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+    >
+      <EuiText size="s" grow={false}>
+        <p>
+          <FormattedMessage
+            id="interactiveSetup.forgotPasswordPopover.helpText"
+            defaultMessage="To reset the password for the {username} user, run the following command from
+          the Elasticsearch installation directory:"
+            values={{
+              username: <strong>{username}</strong>,
+            }}
+          />
+        </p>
+        <EuiCodeBlock language="bash" paddingSize="m" isCopyable>
+          bin/elasticsearch-reset-password --username {username}
+        </EuiCodeBlock>
+      </EuiText>
+    </EuiPopover>
   );
 };

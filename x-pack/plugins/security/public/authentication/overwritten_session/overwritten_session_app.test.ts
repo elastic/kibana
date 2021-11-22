@@ -8,7 +8,7 @@
 jest.mock('./overwritten_session_page');
 
 import type { AppMount } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { securityMock } from '../../mocks';
 import { overwrittenSessionApp } from './overwritten_session_app';
@@ -56,6 +56,7 @@ describe('overwrittenSessionApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
+      theme$: themeServiceMock.createTheme$(),
     });
 
     const mockRenderApp = jest.requireMock(
