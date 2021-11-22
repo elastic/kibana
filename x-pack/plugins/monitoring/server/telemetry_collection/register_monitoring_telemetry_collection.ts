@@ -50,6 +50,10 @@ export function registerMonitoringTelemetryCollection(
           cluster_name: { type: 'keyword' },
           version: { type: 'keyword' },
           cluster_stats: {},
+          cacheDetails: {
+            isCached: { type: 'boolean' },
+            cacheTimestamp: { type: 'date' },
+          },
           stack_stats: {
             logstash: {
               versions: {

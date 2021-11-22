@@ -21,6 +21,16 @@
               "cluster_stats": {
                 "properties": {}
               },
+              "cacheDetails": {
+                "properties": {
+                  "isCached": {
+                    "type": "boolean"
+                  },
+                  "cacheTimestamp": {
+                    "type": "date"
+                  }
+                }
+              },
               "stack_stats": {
                 "properties": {
                   "logstash": {
