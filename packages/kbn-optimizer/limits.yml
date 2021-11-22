@@ -113,6 +113,6 @@ pageLoadAssetSize:
   uiActionsEnhanced: 38494
   urlDrilldown: 30063
   dataViewEditor: 12000
-  indexPatternFieldEditor: 34448
-  indexPatternManagement: 19165
+  dataViewFieldEditor: 20000
+  dataViewManagement: 5000
   reporting: 57003
