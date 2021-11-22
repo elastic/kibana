@@ -84,7 +84,7 @@ const openInKibanaAppSelector = '[data-test-subj="reportOpenInKibanaApp"]';
 
 describe('Report listing', () => {
   let testBed: ReportListingTestBed;
-  const runSetup = async (props: Props) => {
+  const runSetup = async (props: Partial<Props>) => {
     await act(async () => {
       testBed = await setup(props);
     });

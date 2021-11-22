@@ -9,4 +9,4 @@ export { mockJobs } from './constants';
 
 export { setup } from './report_listing.test.helpers';
 
-export type { TestBed, TestDependencies } from './report_listing.test.helpers';
+export type { TestBed, TestDependencies, Props } from './report_listing.test.helpers';
