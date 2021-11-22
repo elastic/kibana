@@ -57,7 +57,7 @@ import type {
 } from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
-import { observabilityFeatureId } from '../../../common';
+import { observabilityAppId, observabilityFeatureId } from '../../../common';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getDefaultCellActions } from './default_cell_actions';
@@ -422,7 +422,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      appId: observabilityFeatureId,
+      appId: observabilityAppId,
       casesOwner: observabilityFeatureId,
       casePermissions,
       type,
