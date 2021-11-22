@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { DEFAULT_RELATIVE_DATE_THRESHOLD } from '../../../../../../../common/constants';
 import { FormatUrl } from '../../../../../../common/components/link_to';
-import { PopoverItems, PopoverItemsProps } from '../../../../../../common/components/popover_items';
+import { PopoverItems } from '../../../../../../common/components/popover_items';
 import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SpacedLinkAnchor } from '../../../../../../common/components/links';
@@ -94,7 +94,7 @@ export const getAllExceptionListsColumns = (
           numberOfItemsToDisplay={RULES_TO_DISPLAY}
           popoverTitle={i18n.RULES_ASSIGNED_TO_TITLE}
           popoverButtonTitle={i18n.showMoreRules(rules.length - 1)}
-          renderItem={renderItem as PopoverItemsProps<unknown>['renderItem']}
+          renderItem={renderItem}
           dataTestPrefix="rules"
         />
       );

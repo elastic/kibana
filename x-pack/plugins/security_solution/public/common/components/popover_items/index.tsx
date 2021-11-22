@@ -110,6 +110,7 @@ const PopoverItemsComponent = <T extends unknown>({
   );
 };
 
-export const PopoverItems = React.memo(PopoverItemsComponent);
+const MemoizedPopoverItems = React.memo(PopoverItemsComponent);
+MemoizedPopoverItems.displayName = 'PopoverItems';
 
-PopoverItems.displayName = 'PopoverItems';
+export const PopoverItems = MemoizedPopoverItems as typeof PopoverItemsComponent;

@@ -25,7 +25,7 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { ActionToaster } from '../../../../../common/components/toasters';
-import { PopoverItems, PopoverItemsProps } from '../../../../../common/components/popover_items';
+import { PopoverItems } from '../../../../../common/components/popover_items';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
 import { RuleExecutionStatusBadge } from '../../../../components/rules/rule_execution_status_badge';
@@ -204,7 +204,7 @@ export const getColumns = ({
             popoverButtonTitle={tags.length.toString()}
             popoverButtonIcon="tag"
             dataTestPrefix="tags"
-            renderItem={renderItem as PopoverItemsProps<unknown>['renderItem']}
+            renderItem={renderItem}
           />
         );
       },
