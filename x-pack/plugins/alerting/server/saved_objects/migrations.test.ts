@@ -2012,16 +2012,34 @@ describe('successful migrations', () => {
       expect(migration800(alert, migrationContext)).toEqual(alert);
     });
 
-    test('add threatIndicatorPath default value to threat match rules', () => {
+    test('add threatIndicatorPath default value to threat match rules if missing', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
-      const alert = getMockData({ params: { type: 'threat_match' } }, true);
-      expect(migration800(alert, migrationContext)).toEqual({
-        ...alert,
-        attributes: {
-          ...alert.attributes,
-          params: { ...alert.attributes.params, threatIndicatorPath: 'threatintel.indicator' },
-        },
-      });
+      const alert = getMockData(
+        { params: { type: 'threat_match' }, alertTypeId: 'siem.signals' },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        'threatintel.indicator'
+      );
+    });
+
+    test('do not change threatIndicatorPath value in threat match rules if value is present', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        { params: { type: 'threat_match', threatIndicatorPath: 'custom.indicator.path' } },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        'custom.indicator.path'
+      );
+    });
+
+    test('do not change threatIndicatorPath value in other rules', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData({ params: { type: 'eql' } }, true);
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        undefined
+      );
     });
   });
 });
