@@ -176,7 +176,7 @@ Object {
           },
           Object {
             "term": Object {
-              "transaction.type": "fetch",
+              "transaction.type": "request",
             },
           },
           Object {

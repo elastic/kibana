@@ -10,21 +10,12 @@ import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
-<<<<<<< HEAD:x-pack/plugins/apm/server/routes/errors/get_error_group_sample.ts
-} from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery, kqlQuery } from '../../../../observability/server';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../../lib/helpers/setup_request';
-import { getTransaction } from '../transactions/get_transaction';
-=======
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup } from '../../helpers/setup_request';
 import { getTransaction } from '../../transactions/get_transaction';
->>>>>>> 572918a1873 (refactor errors groups endpoints):x-pack/plugins/apm/server/lib/errors/get_error_groups/get_error_group_sample.ts
+import { Setup } from '../../../lib/helpers/setup_request';
 
 export async function getErrorGroupSample({
   environment,

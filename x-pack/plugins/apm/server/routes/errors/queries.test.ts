@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
-
 import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
+import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
 
 describe('error queries', () => {
   let mock: SearchParamsMock;
@@ -61,7 +60,7 @@ describe('error queries', () => {
         sortDirection: 'asc',
         sortField: 'lastSeen',
         serviceName: 'serviceName',
-        transactionType: 'fetch',
+        transactionType: 'request',
         setup,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',

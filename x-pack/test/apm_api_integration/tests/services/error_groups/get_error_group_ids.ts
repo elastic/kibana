@@ -35,5 +35,5 @@ export async function getErrorGroupIds({
     },
   });
 
-  return take(body.error_groups.map((group) => group.group_id).sort(), count);
+  return take(body.errorGroups.map((group) => group.groupId).sort(), count);
 }

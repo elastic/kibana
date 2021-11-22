@@ -21,7 +21,6 @@ import { getServiceAgent } from './get_service_agent';
 import { getServiceAlerts } from './get_service_alerts';
 import { getServiceDependencies } from './get_service_dependencies';
 import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
-import { getServiceErrorGroupPeriods } from './get_service_error_groups/get_service_error_group_detailed_statistics';
 import { getServiceInstancesMainStatistics } from './get_service_instances/main_statistics';
 import { getServiceMetadataDetails } from './get_service_metadata_details';
 import { getServiceMetadataIcons } from './get_service_metadata_icons';
@@ -45,6 +44,7 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',

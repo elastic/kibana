@@ -10,7 +10,6 @@ import { jsonRt } from '@kbn/io-ts-utils/json_rt';
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getErrorDistribution } from './distribution/get_distribution';
-import { getErrorGroupSample } from './get_error_group_sample';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import {
   environmentRt,
@@ -19,6 +18,9 @@ import {
   comparisonRangeRt,
 } from '../default_api_types';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
+import { getServiceErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
+import { getServiceErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
+import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
 
 const errorsMainStadisticsRoute = createApmServerRoute({
   endpoint:
