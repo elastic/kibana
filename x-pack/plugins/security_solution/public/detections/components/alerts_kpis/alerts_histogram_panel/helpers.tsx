@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
