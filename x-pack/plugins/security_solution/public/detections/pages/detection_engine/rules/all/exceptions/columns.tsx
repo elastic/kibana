@@ -14,8 +14,8 @@ import { FormatUrl } from '../../../../../../common/components/link_to';
 import { PopoverItems } from '../../../../../../common/components/popover_items';
 import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
-import { SpacedLinkAnchor } from '../../../../../../common/components/links';
-
+import { LinkAnchor } from '../../../../../../common/components/links';
+import { RightSideSpacer } from '../../../../../../common/components/page';
 import * as i18n from './translations';
 import { ExceptionListInfo } from './use_all_exception_lists';
 import { ExceptionsTableItem } from './types';
@@ -71,7 +71,7 @@ export const getAllExceptionListsColumns = (
         return (
           <EuiToolTip content={name} anchorClassName="eui-textTruncate">
             <>
-              <SpacedLinkAnchor
+              <LinkAnchor
                 key={id}
                 data-test-subj="ruleNameLink"
                 onClick={(ev: { preventDefault: () => void }) => {
@@ -80,9 +80,11 @@ export const getAllExceptionListsColumns = (
                 }}
                 href={ruleHref}
               >
-                {name}
-                {index !== items.length - 1 && ','}
-              </SpacedLinkAnchor>
+                <RightSideSpacer>
+                  {name}
+                  {index !== items.length - 1 && ','}
+                </RightSideSpacer>
+              </LinkAnchor>
             </>
           </EuiToolTip>
         );

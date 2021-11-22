@@ -165,6 +165,12 @@ export const Spacer = styled.span`
 
 Spacer.displayName = 'Spacer';
 
+export const RightSideSpacer = styled.span`
+  margin-right: 5px;
+`;
+
+RightSideSpacer.displayName = 'RightSideSpacer';
+
 export const Badge = styled(EuiBadge)`
   vertical-align: top;
 ` as unknown as typeof EuiBadge;

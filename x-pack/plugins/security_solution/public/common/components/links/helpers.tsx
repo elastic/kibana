@@ -24,12 +24,6 @@ export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
 
-export const SpacedLinkAnchor = styled(LinkAnchor)`
-  margin-right: 5px;
-`;
-
-SpacedLinkAnchor.displayName = 'SpacedLinkAnchor';
-
 export const Comma = styled('span')`
   margin-right: 5px;
   margin-left: 5px;
