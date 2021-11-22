@@ -156,7 +156,7 @@ export class DocLinksService {
           luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
         },
         indexPatterns: {
-          introduction: `${KIBANA_DOCS}index-patterns.html`,
+          introduction: `${KIBANA_DOCS}data-views.html`,
           fieldFormattersNumber: `${KIBANA_DOCS}numeral.html`,
           fieldFormattersString: `${KIBANA_DOCS}field-formatters-string.html`,
           runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
@@ -225,6 +225,7 @@ export class DocLinksService {
           mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
           mappingTypesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           migrateIndexAllocationFilters: `${ELASTICSEARCH_DOCS}migrate-index-allocation-filters.html`,
+          migrationApiDeprecation: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
           releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
@@ -256,7 +257,6 @@ export class DocLinksService {
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
-          autocompleteChanges: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
         },
         search: {
           sessions: `${KIBANA_DOCS}search-sessions.html`,
@@ -348,6 +348,7 @@ export class DocLinksService {
         maps: {
           guide: `${KIBANA_DOCS}maps.html`,
           importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
+          gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
         },
         monitoring: {
           alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,
@@ -429,7 +430,7 @@ export class DocLinksService {
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
         },
         snapshotRestore: {
-          guide: `${KIBANA_DOCS}snapshot-repositories.html`,
+          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
           changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
@@ -688,7 +689,6 @@ export interface DocLinksStart {
       readonly luceneQuerySyntax: string;
       readonly percolate: string;
       readonly queryDsl: string;
-      readonly autocompleteChanges: string;
     };
     readonly date: {
       readonly dateMath: string;
@@ -737,7 +737,11 @@ export interface DocLinksStart {
       uptimeDurationAnomaly: string;
     }>;
     readonly alerting: Record<string, string>;
-    readonly maps: Record<string, string>;
+    readonly maps: Readonly<{
+      guide: string;
+      importGeospatialPrivileges: string;
+      gdalTutorial: string;
+    }>;
     readonly monitoring: Record<string, string>;
     readonly security: Readonly<{
       apiKeyServiceSettings: string;

@@ -7,7 +7,7 @@
 
 import { cloneDeep, getOr } from 'lodash/fp';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   EventHit,
   TimelineEventsQueries,

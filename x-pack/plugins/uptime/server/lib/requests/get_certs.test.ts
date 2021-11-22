@@ -212,7 +212,7 @@ describe('getCerts', () => {
                 },
               ],
             },
-            "index": "heartbeat-8*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
           },
         ],
       ]
