@@ -28,7 +28,7 @@ import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { getValidConnectors } from '../common/connectors';
-import { ConnectorsDropdown } from './connector_dropdown';
+import { ConnectorsSelection } from './connectors_selection';
 
 type AddConnectorInFormProps = {
   actionTypesIndex: ActionTypeIndex;
@@ -127,7 +127,7 @@ export const AddConnectorInline = ({
           error={connectorDropdownErrors}
           isInvalid
         >
-          <ConnectorsDropdown
+          <ConnectorsSelection
             actionItem={actionItem}
             accordionIndex={index}
             actionTypesIndex={actionTypesIndex}
