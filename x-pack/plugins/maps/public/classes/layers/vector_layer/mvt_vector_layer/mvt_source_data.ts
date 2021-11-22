@@ -51,7 +51,6 @@ export async function syncMvtSourceData({
       prevDataRequest,
       nextRequestMeta: requestMeta,
       getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
-        // TODO use meta features to determine if tiles already contain features for timeslice.
         return true;
       },
     });
