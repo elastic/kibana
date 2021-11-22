@@ -12,7 +12,7 @@ import {
   CoreStart,
   Plugin,
   Logger,
-} from '../../../src/core/server';
+} from 'src/core/server';
 
 import { defineRoutes } from './routes';
 import { AlertsDemoServerSetupDeps, BackendLibs } from '../server/types';
