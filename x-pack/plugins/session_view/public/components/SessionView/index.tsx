@@ -7,8 +7,10 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { EuiSearchBar, EuiSearchBarOnChangeArgs, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
+import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
 import { Process, ProcessEvent } from '../../hooks/use_process_tree';
 import { useStyles } from './styles';
@@ -62,7 +64,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     }
   };
 
-  const { data: getData } = useQuery<ProcessEventResults, Error>(
+  const { isLoading, data: getData } = useQuery<ProcessEventResults, Error>(
     ['process-tree', 'process_tree'],
     () =>
       http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
@@ -106,14 +108,18 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     );
   };
 
-  if (!data.length) {
-    return renderNoData();
-  }
-
-  return (
-    <>
-      <EuiSearchBar query={searchQuery} onChange={onSearch} />
-      {data && (
+  const renderProcessTree = () => {
+    if (isLoading) {
+      return (
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.sessionView.loadingProcessTree"
+            defaultMessage="Loading session…"
+          />
+        </SectionLoading>
+      );
+    } else if (data) {
+      return (
         <div css={styles.processTree}>
           <ProcessTree
             sessionEntityId={sessionEntityId}
@@ -123,7 +129,31 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
             onProcessSelected={onProcessSelected}
           />
         </div>
-      )}
+      );
+    }
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        color="danger"
+        title={<h2>Error loading Session View</h2>}
+        body={<p>There was an error loading the Session View.</p>}
+      />
+    );
+  };
+
+  const toggleDetailPanel = () => {
+    setIsDetailMounted(!isDetailMounted);
+    if (!isDetailOpen) setIsDetailOpen(true);
+  };
+
+  if (!(isLoading || data.length)) {
+    return renderNoData();
+  }
+
+  return (
+    <>
+      <EuiSearchBar query={searchQuery} onChange={onSearch} />
+      {renderProcessTree()}
     </>
   );
 };
