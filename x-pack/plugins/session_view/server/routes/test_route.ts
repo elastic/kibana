@@ -27,7 +27,7 @@ export const registerTestRoute = (router: IRouter) => {
       const { index } = request.query;
 
       const search = await client.search({
-        index: [`${index}`]
+        index: [`${index}`],
       });
 
       return response.ok({ body: search.body.hits });
@@ -59,7 +59,7 @@ export const registerTestRoute = (router: IRouter) => {
             timestamp: new Date().toISOString(),
           },
         });
-      })
+      });
 
       await Promise.all(requests);
 
@@ -76,7 +76,7 @@ export const registerTestRoute = (router: IRouter) => {
       path: INTERNAL_TEST_ROUTE,
       validate: {
         body: schema.object({
-          index: schema.string()
+          index: schema.string(),
         }),
       },
     },
@@ -84,18 +84,18 @@ export const registerTestRoute = (router: IRouter) => {
       const { index } = request.body;
       const client = context.core.elasticsearch.client.asCurrentUser;
 
-      await client.deleteByQuery({ 
+      await client.deleteByQuery({
         index,
         body: {
           query: { match_all: {} },
         },
       });
-      
+
       return response.ok({
         body: {
           message: 'ok!',
         },
       });
-    },
-  )
+    }
+  );
 };

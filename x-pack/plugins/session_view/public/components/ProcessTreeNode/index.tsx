@@ -47,7 +47,6 @@ export function ProcessTreeNode({
     setChildrenExpanded(isSessionLeader || process.autoExpand);
   }, [isSessionLeader, process.autoExpand]);
 
-
   const processDetails = useMemo(() => {
     return process.getDetails();
   }, [process.events.length]);
@@ -55,17 +54,17 @@ export function ProcessTreeNode({
   const hasExec = useMemo(() => {
     return process.hasExec();
   }, [process.events.length]);
-  
+
   const alerts = useMemo(() => {
     return process.getAlerts();
   }, [process.events.length]);
-  
+
   if (!processDetails) {
     return null;
   }
-  
+
   const styles = useStyles({ depth, hasAlerts: !!alerts.length });
-  
+
   useLayoutEffect(() => {
     if (searchMatched !== null && textRef.current) {
       const regex = new RegExp(searchMatched);
@@ -108,15 +107,21 @@ export function ProcessTreeNode({
 
   const getExpandedIcon = (expanded: boolean) => {
     return expanded ? 'arrowUp' : 'arrowDown';
-  }
+  };
 
   const renderButtons = () => {
     const buttons = [];
 
     if (!isSessionLeader && process.children.length > 0) {
       buttons.push(
-        <EuiButton css={styles.getButtonStyle(styles.ButtonType.children)} onClick={() => setChildrenExpanded(!childrenExpanded)}>
-          <FormattedMessage id="kbn.sessionView.childProcesses" defaultMessage="Child processes" />
+        <EuiButton
+          css={styles.getButtonStyle(styles.ButtonType.children)}
+          onClick={() => setChildrenExpanded(!childrenExpanded)}
+        >
+          <FormattedMessage
+            id="xpack.sessionView.childProcesses"
+            defaultMessage="Child processes"
+          />
           <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(childrenExpanded)} />
         </EuiButton>
       );
@@ -124,8 +129,11 @@ export function ProcessTreeNode({
 
     if (alerts.length) {
       buttons.push(
-        <EuiButton css={styles.getButtonStyle(styles.ButtonType.alerts)} onClick={() => setAlertsExpanded(!alertsExpanded)}>
-          <FormattedMessage id="kbn.sessionView.alerts" defaultMessage="Alerts" />
+        <EuiButton
+          css={styles.getButtonStyle(styles.ButtonType.alerts)}
+          onClick={() => setAlertsExpanded(!alertsExpanded)}
+        >
+          <FormattedMessage id="xpack.sessionView.alerts" defaultMessage="Alerts" />
           <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(alertsExpanded)} />
         </EuiButton>
       );
@@ -142,7 +150,7 @@ export function ProcessTreeNode({
       <>
         <EuiIcon type={sessionIcon} /> <b css={styles.darkText}>{name || executable}</b>
         &nbsp;
-        <FormattedMessage id="kbn.sessionView.startedBy" defaultMessage="started by" />
+        <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />
         &nbsp;
         <EuiIcon type="user" /> <b css={styles.darkText}>{user.name}</b>
       </>
@@ -189,11 +197,16 @@ export function ProcessTreeNode({
     const { user, parent } = processDetails.process;
 
     if (user.name === 'root' && user.id !== parent.user.id) {
-      return <EuiButton css={styles.getButtonStyle(styles.ButtonType.userChanged)}>
-        <FormattedMessage id="kbn.sessionView.execUserChange" defaultMessage="Root escalation" />
-      </EuiButton>
+      return (
+        <EuiButton css={styles.getButtonStyle(styles.ButtonType.userChanged)}>
+          <FormattedMessage
+            id="xpack.sessionView.execUserChange"
+            defaultMessage="Root escalation"
+          />
+        </EuiButton>
+      );
     }
-  }
+  };
 
   const onProcessClicked = (e: MouseEvent) => {
     e.stopPropagation();

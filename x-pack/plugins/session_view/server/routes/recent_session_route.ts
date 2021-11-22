@@ -32,9 +32,7 @@ export const registerRecentSessionRoute = (router: IRouter) => {
             },
           },
           size: 1,
-          sort: [
-            {'@timestamp' :'desc'}
-          ],
+          sort: [{ '@timestamp': 'desc' }],
         },
       });
 
