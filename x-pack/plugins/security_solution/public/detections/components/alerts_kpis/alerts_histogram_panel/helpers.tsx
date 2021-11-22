@@ -7,11 +7,9 @@
 
 import moment from 'moment';
 
-import { isEmpty } from 'lodash/fp';
 import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { AlertsStackByField } from '../common/types';
-import { EMPTY_VALUE_LABEL } from '../../../../common/components/charts/translation';
 
 const EMPTY_ALERTS_DATA: HistogramData[] = [];
 
@@ -20,7 +18,6 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
     alertsData?.aggregations?.alertsByGrouping?.buckets ?? [];
   return groupBuckets.reduce<HistogramData[]>((acc, { key: group, alerts }) => {
     const alertsBucket: AlertsBucket[] = alerts.buckets ?? [];
-    const formattedGroup = isEmpty(group) ? EMPTY_VALUE_LABEL : group;
 
     return [
       ...acc,
@@ -28,7 +25,7 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
       ...alertsBucket.map(({ key, doc_count }: AlertsBucket) => ({
         x: key,
         y: doc_count,
-        g: formattedGroup,
+        g: group,
       })),
     ];
   }, EMPTY_ALERTS_DATA);

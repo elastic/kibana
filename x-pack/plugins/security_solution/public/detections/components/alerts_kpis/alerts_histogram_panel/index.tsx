@@ -16,7 +16,6 @@ import uuid from 'uuid';
 import { Filter, buildEsQuery, Query } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';
-import { EMPTY_VALUE_LABEL } from '../../../../common/components/charts/translation';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
@@ -168,7 +167,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               ),
               field: selectedStackByOption,
               timelineId,
-              value: isEmpty(bucket.key) ? EMPTY_VALUE_LABEL : bucket.key,
+              value: bucket.key,
             }))
           : NO_LEGEND_DATA,
       [

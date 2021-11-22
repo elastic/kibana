@@ -6,13 +6,12 @@
  */
 
 import { ScaleType, Position } from '@elastic/charts';
-import { get, groupBy, isEmpty, map, toPairs } from 'lodash/fp';
+import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
 import { MatrixHistogramData } from '../../../../common/search_strategy';
 import { histogramDateTimeFormatter } from '../utils';
-import { EMPTY_VALUE_LABEL } from '../charts/translation';
 
 interface GetBarchartConfigsProps {
   chartHeight?: number;
@@ -99,11 +98,7 @@ export const getCustomChartData = (
   mapping?: MatrixHistogramMappingTypes
 ): ChartSeriesData[] => {
   if (!data) return [];
-  const enhancedData = map(
-    (entry) => ({ ...entry, g: isEmpty(entry.g) ? EMPTY_VALUE_LABEL : entry.g }),
-    data
-  );
-  const dataGroupedByEvent = groupBy('g', enhancedData);
+  const dataGroupedByEvent = groupBy('g', data);
   const dataGroupedEntries = toPairs(dataGroupedByEvent);
   const formattedChartData = map(formatToChartDataItem, dataGroupedEntries);
   return formattedChartData.map((item: ChartSeriesData, idx: number) => {

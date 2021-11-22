@@ -9,6 +9,7 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import type { IconType, ToolTipPositions } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash/fp';
 
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
@@ -18,6 +19,7 @@ import {
   IS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import { EMPTY_VALUE_LABEL } from '../charts/translation';
 
 export interface DefaultDraggableType {
   hideTopN?: boolean;
@@ -63,7 +65,7 @@ export const Content = React.memo<{
   field: string;
   tooltipContent?: React.ReactNode;
   tooltipPosition?: ToolTipPositions;
-  value?: string | null;
+  value?: JSX.Element;
 }>(({ children, field, tooltipContent, tooltipPosition, value }) =>
   !tooltipContentIsExplicitlyNull(tooltipContent) ? (
     <EuiToolTip
@@ -79,6 +81,15 @@ export const Content = React.memo<{
 );
 
 Content.displayName = 'Content';
+
+/**
+ * Renders the value or a placeholder in case the value is empty
+ */
+const ValueWrapper = React.memo<{ value?: string | null }>(({ value }) =>
+  isEmpty(value) ? <em data-test-subj="value-wrapper-empty">{EMPTY_VALUE_LABEL}</em> : <>{value}</>
+);
+
+ValueWrapper.displayName = 'ValueWrappper';
 
 /**
  * Draggable text (or an arbitrary visualization specified by `children`)
@@ -138,7 +149,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
             field={field}
             tooltipContent={tooltipContent}
             tooltipPosition={tooltipPosition}
-            value={value}
+            value={<ValueWrapper value={value} />}
           >
             {children}
           </Content>
