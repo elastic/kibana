@@ -81,7 +81,7 @@ const pushToServiceHandler = async ({
     res.comments = [];
     for (const currentComment of comments) {
       if (!currentComment.comment) {
-        break;
+        continue;
       }
       const comment = await externalService.createComment({
         incidentId: res.id,
