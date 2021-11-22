@@ -18,7 +18,7 @@ import {
 } from '../../common/translations';
 import { API_URLS } from '../../common/constants';
 
-export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.DYNAMIC_SETTINGS,
   validate: false,
@@ -46,7 +46,7 @@ export const validateCertsValues = (
   }
 };
 
-export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMServerLibs) => ({
   method: 'POST',
   path: API_URLS.DYNAMIC_SETTINGS,
   validate: {
