@@ -91,7 +91,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             <EuiButton
               fill
               isLoading={form.isLoading}
-              isDisabled={form.isLoading}
+              isDisabled={form.isDisabled}
               onClick={form.submit}
             >
               <FormattedMessage

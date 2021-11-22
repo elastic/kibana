@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -169,7 +169,7 @@ async function getAgentAndPolicyCount(output: Output) {
 }
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
-  const [isLoading, setIsloading] = React.useState(false);
+  const [isLoading, setIsloading] = useState(false);
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
 
@@ -199,6 +199,17 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     output?.is_default_monitoring ?? false,
     isPreconfigured || output?.is_default_monitoring
   );
+
+  const inputs = {
+    nameInput,
+    typeInput,
+    elasticsearchUrlInput,
+    additionalYamlConfigInput,
+    defaultOutputInput,
+    defaultMonitoringOutputInput,
+  };
+
+  const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
 
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
@@ -284,16 +295,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   ]);
 
   return {
-    inputs: {
-      nameInput,
-      typeInput,
-      elasticsearchUrlInput,
-      additionalYamlConfigInput,
-      defaultOutputInput,
-      defaultMonitoringOutputInput,
-    },
+    inputs,
     submit,
     isLoading,
-    isDisabled: isLoading || isPreconfigured,
+    isDisabled: isLoading || isPreconfigured || (output && !hasChanged),
   };
 }

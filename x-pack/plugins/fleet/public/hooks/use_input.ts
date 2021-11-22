@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 
@@ -16,6 +16,7 @@ export function useInput(
 ) {
   const [value, setValue] = useState<string>(defaultValue);
   const [errors, setErrors] = useState<string[] | undefined>();
+  const [hasChanged, setHasChanged] = useState(false);
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -27,6 +28,15 @@ export function useInput(
     },
     [errors, validate]
   );
+
+  useEffect(() => {
+    if (hasChanged) {
+      return;
+    }
+    if (value !== defaultValue) {
+      setHasChanged(true);
+    }
+  }, [hasChanged, value, defaultValue]);
 
   const isInvalid = errors !== undefined;
 
@@ -56,11 +66,22 @@ export function useInput(
       return true;
     },
     setValue,
+    hasChanged,
   };
 }
 
 export function useSwitchInput(defaultValue = false, disabled = false) {
   const [value, setValue] = useState<boolean>(defaultValue);
+  const [hasChanged, setHasChanged] = useState(false);
+
+  useEffect(() => {
+    if (hasChanged) {
+      return;
+    }
+    if (value !== defaultValue) {
+      setHasChanged(true);
+    }
+  }, [hasChanged, value, defaultValue]);
 
   const onChange = (e: EuiSwitchEvent) => {
     const newValue = e.target.checked;
@@ -76,6 +97,7 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
     },
     formRowProps: {},
     setValue,
+    hasChanged,
   };
 }
 
@@ -87,6 +109,19 @@ export function useComboInput(
 ) {
   const [value, setValue] = useState<string[]>(defaultValue);
   const [errors, setErrors] = useState<Array<{ message: string; index?: number }> | undefined>();
+  const [hasChanged, setHasChanged] = useState(false);
+
+  useEffect(() => {
+    if (hasChanged) {
+      return;
+    }
+    if (
+      value.length !== defaultValue.length ||
+      value.some((val, idx) => val !== defaultValue[idx])
+    ) {
+      setHasChanged(true);
+    }
+  }, [hasChanged, value, defaultValue]);
 
   const isInvalid = errors !== undefined;
 
@@ -124,5 +159,6 @@ export function useComboInput(
 
       return true;
     },
+    hasChanged,
   };
 }

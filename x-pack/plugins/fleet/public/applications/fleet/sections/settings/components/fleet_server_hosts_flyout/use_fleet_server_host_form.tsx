@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -76,7 +76,7 @@ export function useFleetServerHostsForm(
   fleetServerHostsDefaultValue: string[],
   onSuccess: () => void
 ) {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
 
@@ -136,6 +136,7 @@ export function useFleetServerHostsForm(
 
   return {
     isLoading,
+    isDisabled: isLoading || !fleetServerHostsInput.hasChanged,
     submit,
     fleetServerHostsInput,
   };
