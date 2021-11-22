@@ -23,6 +23,7 @@ import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes } from '../index_pattern/install';
 import { appContextService } from '../../../../services';
 
+const validKibanaAssetTypes = new Set(Object.values(KibanaAssetType));
 type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
   type: KibanaSavedObjectType;
 };
@@ -76,7 +77,7 @@ export async function installKibanaAssets(options: {
 }): Promise<SavedObjectsImportSuccess[]> {
   const { savedObjectsClient, kibanaAssets } = options;
   const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
-    if (!kibanaAssets[assetType as KibanaAssetType]) {
+    if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
       return [];
     }
 
