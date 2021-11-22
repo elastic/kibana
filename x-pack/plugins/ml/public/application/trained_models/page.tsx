@@ -28,14 +28,9 @@ import { ModelsList } from './models_management';
 import { TrainedModelsNavigationBar } from './navigation_bar';
 import { RefreshAnalyticsListButton } from '../data_frame_analytics/pages/analytics_management/components/refresh_analytics_list_button';
 import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
-import { useRefreshAnalyticsList } from '../data_frame_analytics/common';
-import { useRefreshInterval } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_refresh_interval';
 import { NodesList } from './nodes_overview';
 
 export const Page: FC = () => {
-  useRefreshInterval(() => {});
-
-  useRefreshAnalyticsList({ isLoading: () => {} });
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
 

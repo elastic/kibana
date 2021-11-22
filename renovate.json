@@ -55,6 +55,14 @@
       "enabled": true
     },
     {
+      "groupName": "APM",
+      "matchPackageNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
       "groupName": "babel",
       "matchPackageNames": ["@types/babel__core"],
       "matchPackagePatterns": ["^@babel", "^babel-plugin"],
