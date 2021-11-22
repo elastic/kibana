@@ -21,7 +21,7 @@ interface Props {
 export const EnabledBadge = (props: Props) => {
   return (
     <OptionalToolTip tooltipContent={props.tooltipContent}>
-      <EuiBadge data-test-subj={props['data-test-subj']} color="secondary">
+      <EuiBadge data-test-subj={props['data-test-subj']} color="success">
         <FormattedMessage id="xpack.security.management.enabledBadge" defaultMessage="Enabled" />
       </EuiBadge>
     </OptionalToolTip>

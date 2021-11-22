@@ -74,7 +74,7 @@ export const upgradeManagedPackagePolicies = async (
       if (dryRunResults.hasErrors) {
         const errors = dryRunResults.diff
           ? dryRunResults.diff?.[1].errors
-          : dryRunResults.body?.message;
+          : [dryRunResults.body?.message];
 
         appContextService
           .getLogger()
