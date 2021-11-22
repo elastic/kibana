@@ -32,7 +32,7 @@ import { PolicyTrustedAppsFlyout } from '../flyout';
 import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
-import { APP_ID, APP_UI_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { getTrustedAppsListPath } from '../../../../../common/routing';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
