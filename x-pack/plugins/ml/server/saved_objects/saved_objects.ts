@@ -24,7 +24,11 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   });
   savedObjects.registerType({
     name: ML_MODULE_SAVED_OBJECT_TYPE,
-    hidden: false,
+    hidden: true,
+    management: {
+      importableAndExportable: true,
+      visibleInManagement: false,
+    },
     namespaceType: 'agnostic',
     migrations,
     mappings: mlModule,
