@@ -6,12 +6,16 @@
  */
 
 import React from 'react';
-import { ReactWrapper, shallow } from 'enzyme';
+import { ReactWrapper, shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EuiDataGrid } from '@elastic/eui';
 import { IAggType } from 'src/plugins/data/public';
-import { IFieldFormat } from 'src/plugins/field_formats/common';
+import {
+  FieldFormatParams,
+  IFieldFormat,
+  SerializedFieldFormat,
+} from 'src/plugins/field_formats/common';
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
@@ -20,6 +24,9 @@ import { LensMultiTable } from '../../../common';
 import { DatatableProps } from '../../../common/expressions';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { IUiSettingsClient } from 'kibana/public';
+import { RenderMode } from 'src/plugins/expressions';
+
+import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
@@ -82,7 +89,7 @@ function sampleArgs() {
   return { data, args };
 }
 
-function copyData(data: LensMultiTable): LensMultiTable {
+function copyData<T>(data: T): T {
   return JSON.parse(JSON.stringify(data));
 }
 
@@ -657,5 +664,134 @@ describe('DatatableComponent', () => {
     );
 
     expect(wrapper.find('[data-test-subj="lnsDataTable-footer-c"]').exists()).toBe(false);
+  });
+
+  describe('pagination', () => {
+    it('enables pagination', async () => {
+      const { data, args } = sampleArgs();
+
+      args.pageSize = 10;
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(paginationConfig).toBeTruthy();
+      expect(paginationConfig?.pageIndex).toBe(0); // should start at 0
+      expect(paginationConfig?.pageSize).toBe(args.pageSize);
+
+      // trigger new page
+      const newIndex = 3;
+      act(() => paginationConfig?.onChangePage(newIndex));
+      wrapper.update();
+
+      const updatedConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(updatedConfig).toBeTruthy();
+      expect(updatedConfig?.pageIndex).toBe(newIndex);
+      expect(updatedConfig?.pageSize).toBe(args.pageSize);
+    });
+
+    it('disables pagination by default', async () => {
+      const { data, args } = sampleArgs();
+
+      delete args.pageSize;
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(paginationConfig).not.toBeTruthy();
+    });
+
+    it('dynamically toggles pagination', async () => {
+      const { data, args } = sampleArgs();
+
+      const argsWithPagination = copyData(args);
+      argsWithPagination.pageSize = 20;
+
+      const argsWithoutPagination = copyData(args);
+      delete argsWithoutPagination.pageSize;
+
+      const defaultProps = {
+        data,
+        formatFactory: (x?: SerializedFieldFormat<FieldFormatParams>) => x as IFieldFormat,
+        dispatchEvent: onDispatchEvent,
+        getType: jest.fn(),
+        paletteService: chartPluginMock.createPaletteRegistry(),
+        uiSettings: { get: jest.fn() } as unknown as IUiSettingsClient,
+        renderMode: 'edit' as RenderMode,
+      };
+
+      const wrapper = mount(
+        <DatatableComponent {...{ ...defaultProps, args: argsWithoutPagination }} />
+      );
+      wrapper.update();
+
+      expect(wrapper.find(EuiDataGrid).prop('pagination')).not.toBeTruthy();
+
+      wrapper.setProps({ args: argsWithPagination });
+      wrapper.update();
+
+      expect(wrapper.find(EuiDataGrid).prop('pagination')).toBeTruthy();
+
+      wrapper.setProps({ args: argsWithoutPagination });
+      wrapper.update();
+
+      expect(wrapper.find(EuiDataGrid).prop('pagination')).not.toBeTruthy();
+    });
+
+    it('dispatches event when page size changed', async () => {
+      const { data, args } = sampleArgs();
+
+      args.pageSize = 10;
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(paginationConfig).toBeTruthy();
+
+      const sizeToChangeTo = 100;
+      paginationConfig?.onChangeItemsPerPage(sizeToChangeTo);
+
+      expect(onDispatchEvent).toHaveBeenCalledTimes(1);
+      expect(onDispatchEvent).toHaveBeenCalledWith({
+        name: 'edit',
+        data: {
+          action: LENS_EDIT_PAGESIZE_ACTION,
+          size: sizeToChangeTo,
+        },
+      });
+    });
   });
 });
