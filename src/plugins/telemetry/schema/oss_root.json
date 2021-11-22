@@ -20,7 +20,7 @@
     },
     "cacheDetails": {
       "properties": {
-        "dataset": {
+        "isCached": {
           "type": "boolean"
         },
         "cacheTimestamp": {
