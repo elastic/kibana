@@ -329,6 +329,18 @@ export async function saveVisualization(
     delete savedObject.id;
   }
 
+  const {
+    visState: {
+      params: { seriesParams },
+    },
+  } = savedObject;
+  const firstSeriesType = seriesParams && seriesParams[0].type;
+  if (firstSeriesType) {
+    const stateCopy = JSON.parse(JSON.stringify(savedObject.visState));
+    stateCopy.params.type = stateCopy.type = firstSeriesType;
+    savedObject.visState = stateCopy;
+  }
+
   const attributes: SavedObjectAttributes = {
     visState: JSON.stringify(savedObject.visState),
     title: savedObject.title,
