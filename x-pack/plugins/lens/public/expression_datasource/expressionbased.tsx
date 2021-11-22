@@ -23,13 +23,14 @@ import {
   DataType,
 } from '../types';
 import { toExpression } from './to_expression';
-import { EsDSLDataPanel, EsDSLHorizontalDataPanel } from './datapanel';
+import { ExpressionBasedDataPanel, ExpressionBasedHorizontalDataPanel } from './datapanel';
 
 import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
-import { EsDSLLayer, EsDSLPrivateState, EsDSLPersistedState } from './types';
+import { ExpressionBasedLayer, ExpressionBasedPrivateState, ExpressionBasedPersistedState } from './types';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { Datasource } from '../types';
 import { esRawResponse } from '../../../../../src/plugins/data/common';
+import { ExpressionsStart } from 'src/plugins/expressions/public';
 
 async function loadIndexPatternRefs(
   indexPatternsService: DataViewsService
@@ -47,18 +48,20 @@ async function loadIndexPatternRefs(
     });
 }
 
-export function getEsDSLDatasource({
+export function getExpressionBasedDatasource({
   core,
   storage,
   data,
+  expressions,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
 }) {
   // Not stateful. State is persisted to the frame
-  const esdslDatasource: Datasource<EsDSLPrivateState, EsDSLPersistedState> = {
-    id: 'esdsl',
+  const expressionbasedDatasource: Datasource<ExpressionBasedPrivateState, ExpressionBasedPersistedState> = {
+    id: 'expressionbased',
 
     checkIntegrity: () => {
       return [];
@@ -66,7 +69,7 @@ export function getEsDSLDatasource({
     getErrorMessages: () => {
       return [];
     },
-    async initialize(state?: EsDSLPersistedState) {
+    async initialize(state?: ExpressionBasedPersistedState) {
       const initState = state || { layers: {} };
       const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(data.dataViews);
       const responses = await Promise.all(
@@ -101,13 +104,13 @@ export function getEsDSLDatasource({
       };
     },
 
-    getPersistableState({ layers }: EsDSLPrivateState) {
+    getPersistableState({ layers }: ExpressionBasedPrivateState) {
       return { state: { layers }, savedObjectReferences: [] };
     },
     isValidColumn() {
       return true;
     },
-    insertLayer(state: EsDSLPrivateState, newLayerId: string) {
+    insertLayer(state: ExpressionBasedPrivateState, newLayerId: string) {
       const removedLayer = state.removedLayers[0];
       const newRemovedList = removedLayer ? state.removedLayers.slice(1) : state.removedLayers;
       return {
@@ -125,13 +128,16 @@ export function getEsDSLDatasource({
           ...state.layers,
           [newLayerId]: removedLayer
             ? removedLayer.layer
-            : blankLayer(state.indexPatternRefs[0].id),
+            : blankLayer(
+                JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
+                  state.indexPatternRefs[0].id
+              ),
         },
         removedLayers: newRemovedList,
       };
     },
 
-    removeLayer(state: EsDSLPrivateState, layerId: string) {
+    removeLayer(state: ExpressionBasedPrivateState, layerId: string) {
       const deletedLayer = state.layers[layerId];
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
@@ -153,7 +159,7 @@ export function getEsDSLDatasource({
       };
     },
 
-    clearLayer(state: EsDSLPrivateState, layerId: string) {
+    clearLayer(state: ExpressionBasedPrivateState, layerId: string) {
       return {
         ...state,
         layers: {
@@ -163,7 +169,7 @@ export function getEsDSLDatasource({
       };
     },
 
-    getLayers(state: EsDSLPrivateState) {
+    getLayers(state: ExpressionBasedPrivateState) {
       return Object.keys(state.layers);
     },
 
@@ -182,16 +188,16 @@ export function getEsDSLDatasource({
 
     toExpression,
 
-    getMetaData(state: EsDSLPrivateState) {
+    getMetaData(state: ExpressionBasedPrivateState) {
       return {
         filterableIndexPatterns: [],
       };
     },
 
-    renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<EsDSLPrivateState>) {
+    renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<ExpressionBasedPrivateState>) {
       render(
         <I18nProvider>
-          <EsDSLDataPanel data={data} {...props} />
+          <ExpressionBasedDataPanel data={data} expressions={expressions} {...props} />
         </I18nProvider>,
         domElement
       );
@@ -199,11 +205,11 @@ export function getEsDSLDatasource({
 
     renderHorizontalDataPanel(
       domElement: Element,
-      props: DatasourceDataPanelProps<EsDSLPrivateState>
+      props: DatasourceDataPanelProps<ExpressionBasedPrivateState>
     ) {
       render(
         <I18nProvider>
-          <EsDSLHorizontalDataPanel data={data} {...props} />
+          <ExpressionBasedHorizontalDataPanel data={data} expressions={expressions} {...props} />
         </I18nProvider>,
         domElement
       );
@@ -211,7 +217,7 @@ export function getEsDSLDatasource({
 
     renderDimensionTrigger: (
       domElement: Element,
-      props: DatasourceDimensionTriggerProps<EsDSLPrivateState>
+      props: DatasourceDimensionTriggerProps<ExpressionBasedPrivateState>
     ) => {
       const selectedField = props.state.layers[props.layerId].columns.find(
         (column) => column.columnId === props.columnId
@@ -221,7 +227,7 @@ export function getEsDSLDatasource({
 
     renderDimensionEditor: (
       domElement: Element,
-      props: DatasourceDimensionEditorProps<EsDSLPrivateState>
+      props: DatasourceDimensionEditorProps<ExpressionBasedPrivateState>
     ) => {
       const fields = props.state.cachedFieldList[props.layerId].fields;
       const selectedField = props.state.layers[props.layerId].columns.find(
@@ -273,7 +279,7 @@ export function getEsDSLDatasource({
 
     renderLayerPanel: (
       domElement: Element,
-      props: DatasourceLayerPanelProps<EsDSLPrivateState>
+      props: DatasourceLayerPanelProps<ExpressionBasedPrivateState>
     ) => {
       render(
         <span>
@@ -314,7 +320,7 @@ export function getEsDSLDatasource({
       }
       return false;
     },
-    uniqueLabels(state: EsDSLPrivateState) {
+    uniqueLabels(state: ExpressionBasedPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
 
@@ -336,9 +342,9 @@ export function getEsDSLDatasource({
       return { dropTypes: ['field_add'], nextLabel: props.dragging?.field };
     },
 
-    getPublicAPI({ state, layerId }: PublicAPIProps<EsDSLPrivateState>) {
+    getPublicAPI({ state, layerId }: PublicAPIProps<ExpressionBasedPrivateState>) {
       return {
-        datasourceId: 'esdsl',
+        datasourceId: 'expressionbased',
 
         getTableSpec: () => {
           return (
@@ -358,6 +364,7 @@ export function getEsDSLDatasource({
               dataType: overwrite || (field?.meta?.type as DataType),
               label: field?.name,
               isBucketed: false,
+              noBucketInfo: true,
             };
           }
           return null;
@@ -369,7 +376,7 @@ export function getEsDSLDatasource({
     },
     getDatasourceSuggestionsFromCurrentState: (state) => {
       return Object.entries(state.layers).map(([id, layer]) => {
-        const reducedState: EsDSLPrivateState = {
+        const reducedState: ExpressionBasedPrivateState = {
           ...state,
           cachedFieldList: {
             [id]: state.cachedFieldList[id],
@@ -378,34 +385,67 @@ export function getEsDSLDatasource({
             [id]: state.layers[id],
           },
         };
-        return {
-          state: reducedState,
-          table: {
-            changeType: 'unchanged',
-            isMultiRow: !state.cachedFieldList[id].singleRow,
-            layerId: id,
-            columns: layer.columns.map((column) => {
-              const field = state.cachedFieldList[id].fields.find(
-                (f) => f.name === column.fieldName
-              )!;
-              const operation = {
-                dataType: field?.type as DataType,
-                label: field?.name,
-                isBucketed: false,
-              };
-              return {
-                columnId: column.columnId,
-                operation,
-              };
-            }),
-          },
-          keptLayerIds: [id],
-        };
+        return !state.autoMap
+          ? {
+              state: reducedState,
+              table: {
+                changeType: 'unchanged',
+                isMultiRow: !state.cachedFieldList[id].singleRow,
+                layerId: id,
+                columns: layer.columns.map((column) => {
+                  const field = state.cachedFieldList[id].fields.find(
+                    (f) => f.name === column.fieldName
+                  )!;
+                  const operation = {
+                    dataType: field?.meta.type as DataType,
+                    label: field?.name,
+                    isBucketed: false,
+                    noBucketInfo: true,
+                  };
+                  return {
+                    columnId: column.columnId,
+                    operation,
+                  };
+                }),
+              },
+              keptLayerIds: [id],
+            }
+          : {
+              state: {
+                ...reducedState,
+                layers: {
+                  [id]: {
+                    ...state.layers[id],
+                    columns: state.cachedFieldList[id].fields.map((f) => ({
+                      columnId: f.name,
+                      fieldName: f.name,
+                    })),
+                  },
+                },
+              },
+              table: {
+                changeType: 'unchanged',
+                isMultiRow: !state.cachedFieldList[id].singleRow,
+                layerId: id,
+                columns: state.cachedFieldList[id].fields.map((f) => {
+                  return {
+                    columnId: f.name,
+                    operation: {
+                      dataType: f.meta.type,
+                      label: f.name,
+                      isBucketed: false,
+                      noBucketInfo: true,
+                    },
+                  };
+                }),
+              },
+              keptLayerIds: [id],
+            };
       });
     },
   };
 
-  return esdslDatasource;
+  return expressionbasedDatasource;
 }
 
 function blankLayer(index: string) {

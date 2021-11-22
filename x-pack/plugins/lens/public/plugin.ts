@@ -86,6 +86,7 @@ import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 import { EsDSLDatasource } from './esdsl_datasource';
 import { EsSQLDatasource } from './essql_datasource';
+import { ExpressionBasedDatasource } from './expression_datasource';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -169,6 +170,7 @@ export class LensPlugin {
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
   private esdslDatasource: IndexPatternDatasourceType | undefined;
   private essqlDatasource: IndexPatternDatasourceType | undefined;
+  private expressionBasedDatasource: IndexPatternDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
   private pieVisualization: PieVisualizationType | undefined;
@@ -317,6 +319,7 @@ export class LensPlugin {
     this.indexpatternDatasource = new IndexPatternDatasource();
     this.esdslDatasource = new EsDSLDatasource();
     this.essqlDatasource = new EsSQLDatasource();
+    this.expressionBasedDatasource = new ExpressionBasedDatasource();
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
@@ -339,6 +342,7 @@ export class LensPlugin {
     this.indexpatternDatasource.setup(core, dependencies);
     this.esdslDatasource.setup(core, dependencies);
     this.essqlDatasource.setup(core, dependencies);
+    this.expressionBasedDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
