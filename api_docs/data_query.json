@@ -934,7 +934,15 @@
             "section": "def-common.SavedQueryAttributes",
             "text": "SavedQueryAttributes"
           },
-          ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<any>; updateQuery: (id: string, attributes: ",
+          ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.SavedQuery",
+            "text": "SavedQuery"
+          },
+          ">; updateQuery: (id: string, attributes: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -942,7 +950,15 @@
             "section": "def-common.SavedQueryAttributes",
             "text": "SavedQueryAttributes"
           },
-          ") => Promise<any>; getAllSavedQueries: () => Promise<",
+          ") => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.SavedQuery",
+            "text": "SavedQuery"
+          },
+          ">; getAllSavedQueries: () => Promise<",
           {
             "pluginId": "data",
             "scope": "public",
@@ -966,7 +982,7 @@
             "section": "def-public.SavedQuery",
             "text": "SavedQuery"
           },
-          ">; deleteSavedQuery: (id: string) => Promise<any>; getSavedQueryCount: () => Promise<number>; }; state$: ",
+          ">; deleteSavedQuery: (id: string) => Promise<{}>; getSavedQueryCount: () => Promise<number>; }; state$: ",
           "Observable",
           "<{ changes: ",
           {
@@ -1095,7 +1111,15 @@
                 "section": "def-common.SavedQueryAttributes",
                 "text": "SavedQueryAttributes"
               },
-              ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<any>; updateQuery: (id: string, attributes: ",
+              ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.SavedQuery",
+                "text": "SavedQuery"
+              },
+              ">; updateQuery: (id: string, attributes: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1103,7 +1127,15 @@
                 "section": "def-common.SavedQueryAttributes",
                 "text": "SavedQueryAttributes"
               },
-              ") => Promise<any>; getAllSavedQueries: () => Promise<",
+              ") => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.SavedQuery",
+                "text": "SavedQuery"
+              },
+              ">; getAllSavedQueries: () => Promise<",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1127,7 +1159,7 @@
                 "section": "def-public.SavedQuery",
                 "text": "SavedQuery"
               },
-              ">; deleteSavedQuery: (id: string) => Promise<any>; getSavedQueryCount: () => Promise<number>; }; state$: ",
+              ">; deleteSavedQuery: (id: string) => Promise<{}>; getSavedQueryCount: () => Promise<number>; }; state$: ",
               "Observable",
               "<{ changes: ",
               {
@@ -1330,7 +1362,15 @@
             "section": "def-common.SavedQueryAttributes",
             "text": "SavedQueryAttributes"
           },
-          ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<any>; updateQuery: (id: string, attributes: ",
+          ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.SavedQuery",
+            "text": "SavedQuery"
+          },
+          ">; updateQuery: (id: string, attributes: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1338,7 +1378,15 @@
             "section": "def-common.SavedQueryAttributes",
             "text": "SavedQueryAttributes"
           },
-          ") => Promise<any>; getAllSavedQueries: () => Promise<",
+          ") => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.SavedQuery",
+            "text": "SavedQuery"
+          },
+          ">; getAllSavedQueries: () => Promise<",
           {
             "pluginId": "data",
             "scope": "public",
@@ -1362,7 +1410,7 @@
             "section": "def-public.SavedQuery",
             "text": "SavedQuery"
           },
-          ">; deleteSavedQuery: (id: string) => Promise<any>; getSavedQueryCount: () => Promise<number>; }"
+          ">; deleteSavedQuery: (id: string) => Promise<{}>; getSavedQueryCount: () => Promise<number>; }"
         ],
         "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
         "deprecated": false,
@@ -1750,7 +1798,15 @@
             "section": "def-common.SavedQueryAttributes",
             "text": "SavedQueryAttributes"
           },
-          ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<any>; updateQuery: (id: string, attributes: ",
+          ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.SavedQuery",
+            "text": "SavedQuery"
+          },
+          ">; updateQuery: (id: string, attributes: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1758,7 +1814,15 @@
             "section": "def-common.SavedQueryAttributes",
             "text": "SavedQueryAttributes"
           },
-          ") => Promise<any>; getAllSavedQueries: () => Promise<",
+          ") => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.SavedQuery",
+            "text": "SavedQuery"
+          },
+          ">; getAllSavedQueries: () => Promise<",
           {
             "pluginId": "data",
             "scope": "public",
@@ -1782,7 +1846,7 @@
             "section": "def-public.SavedQuery",
             "text": "SavedQuery"
           },
-          ">; deleteSavedQuery: (id: string) => Promise<any>; getSavedQueryCount: () => Promise<number>; }; state$: ",
+          ">; deleteSavedQuery: (id: string) => Promise<{}>; getSavedQueryCount: () => Promise<number>; }; state$: ",
           "Observable",
           "<{ changes: ",
           {
@@ -1903,7 +1967,15 @@
                 "section": "def-common.SavedQueryAttributes",
                 "text": "SavedQueryAttributes"
               },
-              ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<any>; updateQuery: (id: string, attributes: ",
+              ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.SavedQuery",
+                "text": "SavedQuery"
+              },
+              ">; updateQuery: (id: string, attributes: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1911,7 +1983,15 @@
                 "section": "def-common.SavedQueryAttributes",
                 "text": "SavedQueryAttributes"
               },
-              ") => Promise<any>; getAllSavedQueries: () => Promise<",
+              ") => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.SavedQuery",
+                "text": "SavedQuery"
+              },
+              ">; getAllSavedQueries: () => Promise<",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1935,7 +2015,7 @@
                 "section": "def-public.SavedQuery",
                 "text": "SavedQuery"
               },
-              ">; deleteSavedQuery: (id: string) => Promise<any>; getSavedQueryCount: () => Promise<number>; }; state$: ",
+              ">; deleteSavedQuery: (id: string) => Promise<{}>; getSavedQueryCount: () => Promise<number>; }; state$: ",
               "Observable",
               "<{ changes: ",
               {
@@ -2555,7 +2635,15 @@
             "section": "def-common.SavedQueryAttributes",
             "text": "SavedQueryAttributes"
           },
-          ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<any>; updateQuery: (id: string, attributes: ",
+          ", { overwrite }?: { overwrite?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.SavedQuery",
+            "text": "SavedQuery"
+          },
+          ">; updateQuery: (id: string, attributes: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2563,7 +2651,15 @@
             "section": "def-common.SavedQueryAttributes",
             "text": "SavedQueryAttributes"
           },
-          ") => Promise<any>; getAllSavedQueries: () => Promise<",
+          ") => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.SavedQuery",
+            "text": "SavedQuery"
+          },
+          ">; getAllSavedQueries: () => Promise<",
           {
             "pluginId": "data",
             "scope": "public",
@@ -2587,7 +2683,7 @@
             "section": "def-public.SavedQuery",
             "text": "SavedQuery"
           },
-          ">; deleteSavedQuery: (id: string) => Promise<any>; getSavedQueryCount: () => Promise<number>; }; state$: ",
+          ">; deleteSavedQuery: (id: string) => Promise<{}>; getSavedQueryCount: () => Promise<number>; }; state$: ",
           "Observable",
           "<{ changes: ",
           {
@@ -2856,7 +2952,7 @@
         "label": "TimeHistoryContract",
         "description": [],
         "signature": [
-          "{ add: (time: ",
+          "{ get: () => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2864,7 +2960,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ") => void; get: () => ",
+          "[]; add: (time: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2872,7 +2968,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          "[]; }"
+          ") => void; }"
         ],
         "path": "src/plugins/data/public/query/timefilter/time_history.ts",
         "deprecated": false,

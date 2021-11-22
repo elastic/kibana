@@ -6,14 +6,16 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TypeOf } from '@kbn/config-schema';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { KibanaRequest } from '../../../../../../../src/core/server';
-import { EndpointAppContext, GetHostMetadataListQuery } from '../../types';
+import { EndpointAppContext } from '../../types';
 import { buildStatusesKuery } from './support/agent_status';
+import { GetMetadataListRequestSchemaV2 } from '.';
 
 /**
  * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
@@ -25,6 +27,9 @@ const IGNORED_ELASTIC_AGENT_IDS = [
 ];
 
 export interface QueryBuilderOptions {
+  page: number;
+  pageSize: number;
+  kuery?: string;
   unenrolledAgentIds?: string[];
   statusAgentIds?: string[];
 }
@@ -50,26 +55,21 @@ export const MetadataSortMethod: estypes.SearchSortContainer[] = [
 ];
 
 export async function kibanaRequestToMetadataListESQuery(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: KibanaRequest<any, any, any>,
-  endpointAppContext: EndpointAppContext,
-  queryBuilderOptions?: QueryBuilderOptions
+  queryBuilderOptions: QueryBuilderOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<Record<string, any>> {
-  const pagingProperties = await getPagingProperties(request, endpointAppContext);
-
   return {
     body: {
       query: buildQueryBody(
-        request,
+        queryBuilderOptions?.kuery,
         IGNORED_ELASTIC_AGENT_IDS.concat(queryBuilderOptions?.unenrolledAgentIds ?? []),
         queryBuilderOptions?.statusAgentIds
       ),
       track_total_hits: true,
       sort: MetadataSortMethod,
     },
-    from: pagingProperties.pageIndex * pagingProperties.pageSize,
-    size: pagingProperties.pageSize,
+    from: queryBuilderOptions.page * queryBuilderOptions.pageSize,
+    size: queryBuilderOptions.pageSize,
     index: metadataCurrentIndexPattern,
   };
 }
@@ -96,8 +96,7 @@ export async function getPagingProperties(
 }
 
 function buildQueryBody(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: KibanaRequest<any, any, any>,
+  kuery: string = '',
   unerolledAgentIds: string[] | undefined,
   statusAgentIds: string[] | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -136,8 +135,8 @@ function buildQueryBody(
     },
   };
 
-  if (request?.body?.filters?.kql) {
-    const kqlQuery = toElasticsearchQuery(fromKueryExpression(request.body.filters.kql));
+  if (kuery) {
+    const kqlQuery = toElasticsearchQuery(fromKueryExpression(kuery));
     const q = [];
     if (filterUnenrolledAgents || filterStatusAgents) {
       q.push(idFilter);
@@ -233,12 +232,17 @@ interface BuildUnitedIndexQueryResponse {
   size: number;
   index: string;
 }
+
 export async function buildUnitedIndexQuery(
-  { page = 1, pageSize = 10, filters = {} }: GetHostMetadataListQuery,
+  {
+    page = 0,
+    pageSize = 10,
+    hostStatuses = [],
+    kuery = '',
+  }: TypeOf<typeof GetMetadataListRequestSchemaV2.query>,
   endpointPolicyIds: string[] = []
 ): Promise<BuildUnitedIndexQueryResponse> {
-  const statusesToFilter = filters?.host_status ?? [];
-  const statusesKuery = buildStatusesKuery(statusesToFilter);
+  const statusesKuery = buildStatusesKuery(hostStatuses);
 
   const filterIgnoredAgents = {
     must_not: { terms: { 'agent.id': IGNORED_ELASTIC_AGENT_IDS } },
@@ -272,8 +276,8 @@ export async function buildUnitedIndexQuery(
 
   let query: BuildUnitedIndexQueryResponse['body']['query'] = idFilter;
 
-  if (statusesKuery || filters?.kql) {
-    const kqlQuery = toElasticsearchQuery(fromKueryExpression(filters.kql ?? ''));
+  if (statusesKuery || kuery) {
+    const kqlQuery = toElasticsearchQuery(fromKueryExpression(kuery ?? ''));
     const q = [];
 
     if (filterIgnoredAgents || filterEndpointPolicyAgents) {
@@ -295,7 +299,7 @@ export async function buildUnitedIndexQuery(
       track_total_hits: true,
       sort: MetadataSortMethod,
     },
-    from: (page - 1) * pageSize,
+    from: page * pageSize,
     size: pageSize,
     index: METADATA_UNITED_INDEX,
   };

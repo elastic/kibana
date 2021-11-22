@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MutableRefObject } from 'react';
+import React, { FunctionComponent, MutableRefObject, useCallback } from 'react';
 import {
   EuiEmptyPrompt,
   EuiLoadingContent,
@@ -17,16 +17,16 @@ import classnames from 'classnames';
 import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
-import { CasesNavigation, LinkButton } from '../links';
+import { LinkButton } from '../links';
 import { AllCases, Case, FilterOptions } from '../../../common';
 import * as i18n from './translations';
+import { useCreateCaseNavigation } from '../../common/navigation';
 
 interface CasesTableProps {
   columns: EuiBasicTableProps<Case>['columns']; //  CasesColumns[];
-  createCaseNavigation: CasesNavigation;
   data: AllCases;
   filterOptions: FilterOptions;
-  goToCreateCase: (e: React.MouseEvent) => void;
+  goToCreateCase?: () => void;
   handleIsLoading: (a: boolean) => void;
   isCasesLoading: boolean;
   isCommentUpdating: boolean;
@@ -76,7 +76,6 @@ const Div = styled.div`
 
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
   columns,
-  createCaseNavigation,
   data,
   filterOptions,
   goToCreateCase,
@@ -96,8 +95,21 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   tableRef,
   tableRowProps,
   userCanCrud,
-}) =>
-  isCasesLoading && isDataEmpty ? (
+}) => {
+  const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
+  const navigateToCreateCaseClick = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      if (goToCreateCase != null) {
+        goToCreateCase();
+      } else {
+        navigateToCreateCase();
+      }
+    },
+    [goToCreateCase, navigateToCreateCase]
+  );
+
+  return isCasesLoading && isDataEmpty ? (
     <Div>
       <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
     </Div>
@@ -131,8 +143,8 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
                   isDisabled={!userCanCrud}
                   fill
                   size="s"
-                  onClick={goToCreateCase}
-                  href={createCaseNavigation.href}
+                  onClick={navigateToCreateCaseClick}
+                  href={getCreateCaseUrl()}
                   iconType="plusInCircle"
                   data-test-subj="cases-table-add-case"
                 >
@@ -151,3 +163,4 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
       />
     </Div>
   );
+};
