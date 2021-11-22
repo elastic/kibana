@@ -57,7 +57,13 @@ describe('getDeprecations', () => {
         cloudSetup: { isCloudEnabled: true } as unknown as CloudSetup,
         fleet: {
           start: () => ({
-            agentPolicyService: { get: () => ({ id: 'foo' } as AgentPolicy) },
+            agentPolicyService: {
+              get: () =>
+                ({
+                  id: 'foo',
+                  package_policies: [{ package: { name: 'apm' } }],
+                } as AgentPolicy),
+            },
           }),
         } as unknown as APMRouteHandlerResources['plugins']['fleet'],
       });
