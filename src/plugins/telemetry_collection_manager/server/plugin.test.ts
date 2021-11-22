@@ -196,12 +196,34 @@ describe('Telemetry Collection Manager', () => {
             await expect(setupApi.getStats(config)).resolves.toStrictEqual([
               {
                 clusterUuid: 'clusterUuid',
-                stats: { ...basicStats, collectionSource: 'test_collection' },
+                stats: {
+                  ...basicStats,
+                  cacheDetails: { isCached: false },
+                  collectionSource: 'test_collection',
+                },
               },
             ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+          test('returns cached object on multiple calls', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await expect(setupApi.getStats(config));
+
+            await expect(setupApi.getStats(config)).resolves.toStrictEqual([
+              {
+                clusterUuid: 'clusterUuid',
+                stats: {
+                  ...basicStats,
+                  cacheDetails: { isCached: true, cacheTimestamp: expect.any(Number) },
+                  collectionSource: 'test_collection',
+                },
+              },
+            ]);
           });
         });
 

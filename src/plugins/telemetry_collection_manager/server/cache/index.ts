@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'telemetryCollectionManager';
-export const PLUGIN_NAME = 'telemetry_collection_manager';
-
-/**
- * The duration, in milliseconds, to cache stats
- * Currently 4 hours.
- */
-export const CACHE_DURATION_MS = 14400000;
+export { CacheManager } from './cache_manager';
+export type { CacheManagerConfig, CachedObject } from './cache_manager';

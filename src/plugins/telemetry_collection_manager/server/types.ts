@@ -71,6 +71,7 @@ export interface BasicStatsPayload {
 }
 
 export interface UsageStatsPayload extends BasicStatsPayload {
+  cacheTimestamp?: number;
   collectionSource: string;
 }
 

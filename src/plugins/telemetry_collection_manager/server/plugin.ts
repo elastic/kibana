@@ -32,9 +32,12 @@ import type {
   StatsCollectionContext,
   UnencryptedStatsGetterConfig,
   EncryptedStatsGetterConfig,
+  ClusterDetails,
 } from './types';
 import { encryptTelemetry } from './encryption';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
+import { CacheManager } from './cache';
+import { CACHE_DURATION_MS } from '../common';
 
 interface TelemetryCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -51,6 +54,7 @@ export class TelemetryCollectionManagerPlugin
   private savedObjectsService?: SavedObjectsServiceStart;
   private readonly isDistributable: boolean;
   private readonly version: string;
+  private readonly cacheManager = new CacheManager({ cacheDurationMs: CACHE_DURATION_MS });
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -284,6 +288,15 @@ export class TelemetryCollectionManagerPlugin
     return [];
   }
 
+  private createCacheKey(strategy: CollectionStrategy, clustersDetails: ClusterDetails[]) {
+    const clusterUUid = clustersDetails
+      .map(({ clusterUuid }) => clusterUuid)
+      .sort()
+      .join('_');
+
+    return `${strategy.title}::${clusterUUid}`;
+  }
+
   private async getUsageForCollection(
     collection: CollectionStrategy,
     statsCollectionConfig: StatsCollectionConfig
@@ -292,17 +305,33 @@ export class TelemetryCollectionManagerPlugin
       logger: this.logger.get(collection.title),
       version: this.version,
     };
-
     const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig, context);
+    this.cacheManager.unrefExpiredCacheObjects();
 
     if (clustersDetails.length === 0) {
-      // don't bother doing a further lookup.
       return [];
     }
 
-    const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig, context);
+    const cacheKey = this.createCacheKey(collection, clustersDetails);
+    const { title: collectionSource } = collection;
+    if (this.cacheManager.isCacheValid(cacheKey)) {
+      const cachedData = this.cacheManager.getFromCache<BasicStatsPayload[]>(cacheKey);
+      if (cachedData) {
+        const { data, cacheTimestamp } = cachedData;
+        return data.map((stat) => ({
+          cacheDetails: {
+            isCached: true,
+            cacheTimestamp,
+          },
+          collectionSource,
+          ...stat,
+        }));
+      }
+    }
 
-    // Add the `collectionSource` to the resulting payload
-    return stats.map((stat) => ({ collectionSource: collection.title, ...stat }));
+    const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig, context);
+    this.cacheManager.setCache(cacheKey, stats);
+
+    return stats.map((stat) => ({ collectionSource, cacheDetails: { isCached: false }, ...stat }));
   }
 }
