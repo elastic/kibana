@@ -24,22 +24,31 @@ import { useTrackPageview } from '../../..';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 
 export function ExploratoryViewPage({
+  app,
   saveAttributes,
   useSessionStorage = false,
 }: {
   useSessionStorage?: boolean;
   saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
+  app?: { id: string; label: string };
 }) {
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
-  useTrackPageview({ app: 'observability-overview', path: 'exploratory-view', delay: 15000 });
+  useTrackPageview({
+    app: 'observability-overview',
+    path: 'exploratory-view',
+    delay: 15000,
+  });
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.overview.exploratoryView', {
-        defaultMessage: 'Explore data',
-      }),
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        text: i18n.translate('xpack.observability.overview.exploratoryView', {
+          defaultMessage: 'Explore data',
+        }),
+      },
+    ],
+    app
+  );
 
   const {
     services: { uiSettings, notifications },

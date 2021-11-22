@@ -87,3 +87,10 @@ export { InspectorContextProvider } from './context/inspector/inspector_context'
 export { useInspectorContext } from './context/inspector/use_inspector_context';
 
 export { enableComparisonByDefault } from '../common/ui_settings_keys';
+export { ExploratoryViewPage } from './components/shared/exploratory_view';
+export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
+export {
+  ReportTypes,
+  REPORT_METRIC_FIELD,
+} from './components/shared/exploratory_view/configurations/constants';
+export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploatory_view_config';
