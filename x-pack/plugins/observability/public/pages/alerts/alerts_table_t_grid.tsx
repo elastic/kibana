@@ -40,7 +40,7 @@ import {
   useGetUserAlertsPermissions,
 } from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
-import { useStatusBulkActionItems } from '../../../../timelines/public';
+import { TimelineContext, useStatusBulkActionItems } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
@@ -60,7 +60,6 @@ import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
 import { translations, paths } from '../../config';
-import { TimelineContext } from '../../../../timelines/public';
 
 interface AlertsTableTGridProps {
   indexNames: string[];
@@ -388,6 +387,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       {
         id: 'expand',
         width: 120,
+        isHighlighted: ({ rowIndex }: { rowIndex: number }) => rowIndex === selectedAlertIndex,
         headerCellRender: () => {
           return <EventsThContent>{translations.alertsTable.actionsTextLabel}</EventsThContent>;
         },
@@ -403,7 +403,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         },
       },
     ];
-  }, [workflowStatus, setEventsDeleted]);
+  }, [workflowStatus, selectedAlertIndex, setEventsDeleted]);
 
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';

@@ -99,6 +99,7 @@ interface AdditionalControlColumnProps {
   eventId: string;
   id: string;
   columnId: string;
+  isHighlighted?: ({ rowIndex }: { rowIndex: number }) => boolean;
   loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
   showCheckboxes: boolean;

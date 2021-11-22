@@ -108,6 +108,7 @@ interface OwnProps {
   refetch: Refetch;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  selectedAlertIndex?: number;
   tableView: ViewSelection;
   tabType: TimelineTabs;
   totalItems: number;
@@ -164,6 +165,7 @@ const transformControlColumns = ({
   onSelectPage,
   browserFields,
   pageSize,
+  selectedAlertIndex,
   sort,
   theme,
   setEventsLoading,
@@ -187,6 +189,7 @@ const transformControlColumns = ({
   browserFields: BrowserFields;
   onSelectPage: OnSelectAll;
   pageSize: number;
+  selectedAlertIndex?: number;
   sort: SortColumnTimeline[];
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
@@ -200,7 +203,16 @@ const transformControlColumns = ({
   }) => boolean;
 }): EuiDataGridControlColumn[] =>
   controlColumns.map(
-    ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
+    (
+      {
+        id: columnId,
+        headerCellRender = EmptyHeaderCellRender,
+        isHighlighted,
+        rowCellRender,
+        width,
+      },
+      i
+    ) => ({
       id: `${columnId}`,
       headerCellRender: () => {
         const HeaderActions = headerCellRender;
@@ -238,6 +250,13 @@ const transformControlColumns = ({
         let disabled = false;
         if (rowData) {
           addBuildingBlockStyle(rowData.ecs, theme, setCellProps);
+          if (isHighlighted?.({ rowIndex })) {
+            setCellProps({
+              style: {
+                backgroundColor: theme.eui.euiColorHighlight,
+              },
+            });
+          }
           if (columnId === 'checkbox-control-column' && hasAlertsCrudPermissions != null) {
             // FUTURE ENGINEER, the assumption here is you can only have one producer and consumer at this time
             const ruleConsumers =
@@ -324,6 +343,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     refetch,
     renderCellValue,
     rowRenderers,
+    selectedAlertIndex,
     selectedEventIds,
     setSelected,
     showCheckboxes,
@@ -620,6 +640,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           loadingEventIds,
           onRowSelected,
           onRuleChange,
+          selectedAlertIndex,
           selectedEventIds,
           showCheckboxes,
           tabType,
@@ -648,6 +669,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       loadingEventIds,
       onRowSelected,
       onRuleChange,
+      selectedAlertIndex,
       selectedEventIds,
       tabType,
       isSelectAllChecked,
