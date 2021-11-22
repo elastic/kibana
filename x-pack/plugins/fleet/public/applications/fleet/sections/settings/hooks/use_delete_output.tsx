@@ -9,14 +9,9 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  sendDeleteOutput,
-  sendGetAgentPolicies,
-  sendGetAgents,
-  useStartServices,
-} from '../../../hooks';
+import { sendDeleteOutput, useStartServices } from '../../../hooks';
 import type { Output } from '../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
+import { getAgentAndPolicyCountForOutput } from '../services/agent_and_policies_count';
 
 import { useConfirmModal } from './use_confirm_modal';
 
@@ -75,33 +70,7 @@ export function useDeleteOutput(onSuccess: () => void) {
   const deleteOutput = useCallback(
     async (output: Output) => {
       try {
-        let agentPolicyCount = 0;
-        const agentPolicies = await sendGetAgentPolicies({
-          kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${output.id}" or ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${output.id}"`,
-        });
-
-        if (agentPolicies.error) {
-          throw agentPolicies.error;
-        }
-        agentPolicyCount = agentPolicies.data?.items?.length ?? 0;
-
-        let agentCount = 0;
-        if (agentPolicyCount > 0) {
-          const agents = await sendGetAgents({
-            page: 1,
-            perPage: 0, // We only need the count here
-            showInactive: false,
-            kuery: agentPolicies.data?.items
-              .map((policy) => `policy_id:"${policy.id}"`)
-              .join(' or '),
-          });
-
-          if (agents.error) {
-            throw agents.error;
-          }
-
-          agentCount = agents.data?.total ?? 0;
-        }
+        const { agentCount, agentPolicyCount } = await getAgentAndPolicyCountForOutput(output);
 
         const isConfirmed = await confirm(
           <ConfirmTitle />,

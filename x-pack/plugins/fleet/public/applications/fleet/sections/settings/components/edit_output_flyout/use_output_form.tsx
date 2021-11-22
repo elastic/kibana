@@ -18,12 +18,10 @@ import {
   useSwitchInput,
   useStartServices,
   sendPutOutput,
-  sendGetAgentPolicies,
-  sendGetAgents,
 } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../constants';
+import { getAgentAndPolicyCountForOutput } from '../../services/agent_and_policies_count';
 
 const ConfirmTitle = () => (
   <FormattedMessage
@@ -134,40 +132,6 @@ function validateName(value: string) {
   }
 }
 
-async function getAgentAndPolicyCount(output: Output) {
-  let agentPolicyCount = 0;
-  let kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${output.id}" or ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${output.id}"`;
-  if (output.is_default) {
-    kuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
-  }
-  const agentPolicies = await sendGetAgentPolicies({
-    kuery,
-  });
-
-  if (agentPolicies.error) {
-    throw agentPolicies.error;
-  }
-  agentPolicyCount = agentPolicies.data?.items?.length ?? 0;
-
-  let agentCount = 0;
-  if (agentPolicyCount > 0) {
-    const agents = await sendGetAgents({
-      page: 1,
-      perPage: 0, // We only need the count here
-      showInactive: false,
-      kuery: agentPolicies.data?.items.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
-    });
-
-    if (agents.error) {
-      throw agents.error;
-    }
-
-    agentCount = agents.data?.total ?? 0;
-  }
-
-  return { agentPolicyCount, agentCount };
-}
-
 export function useOutputForm(onSucess: () => void, output?: Output) {
   const [isLoading, setIsloading] = useState(false);
   const { notifications } = useStartServices();
@@ -231,7 +195,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       setIsloading(true);
       // Create or update
       if (output) {
-        const { agentCount, agentPolicyCount } = await getAgentAndPolicyCount(output);
+        const { agentCount, agentPolicyCount } = await getAgentAndPolicyCountForOutput(output);
         if (
           !(await confirm(
             <ConfirmTitle />,
