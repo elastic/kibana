@@ -25,6 +25,7 @@ import {
   CrawlerRules,
   CrawlerStatus,
   CrawlRule,
+  CrawlType,
 } from './types';
 import { crawlerDataServerToClient } from './utils';
 
@@ -132,6 +133,10 @@ describe('CrawlerLogic', () => {
             createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
             beganAt: null,
             completedAt: null,
+            type: CrawlType.Full,
+            crawlConfig: {
+              domainAllowlist: ['elastic.co'],
+            },
           },
         ],
         mostRecentCrawlRequest: {
