@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpResources, IBasePath, Logger } from 'src/core/server';
+import type { UsageCounter } from 'src/plugins/usage_collection/server';
 
 import type { KibanaFeature } from '../../../features/server';
 import type { SecurityLicense } from '../../common';
@@ -28,6 +29,7 @@ import { defineIndicesRoutes } from './indices';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
 import { defineSessionManagementRoutes } from './session_management';
+import { defineTelemetryRoutes } from './telemetry';
 import { defineUsersRoutes } from './users';
 import { defineViewRoutes } from './views';
 
@@ -48,6 +50,7 @@ export interface RouteDefinitionParams {
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getAuthenticationService: () => InternalAuthenticationServiceStart;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
+  usageCounter?: UsageCounter;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
@@ -62,4 +65,5 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineDeprecationsRoutes(params);
   defineAnonymousAccessRoutes(params);
   defineSecurityCheckupGetStateRoutes(params);
+  defineTelemetryRoutes(params);
 }

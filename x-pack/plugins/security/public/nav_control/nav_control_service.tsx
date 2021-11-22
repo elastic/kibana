@@ -112,7 +112,17 @@ export class SecurityNavControlService {
   private registerSecurityNavControl(
     core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'injectedMetadata' | 'application'>
   ) {
-    const currentUserPromise = this.authc.getCurrentUser();
+    const currentUserPromise = this.authc.getCurrentUser().then((authenticatedUser) => {
+      console.log('### only one time ###');
+      try {
+        core.http.post('/internal/security/telemetry/auth_type', {
+          body: JSON.stringify({ auth_type: authenticatedUser.authentication_type }),
+        });
+        // eslint-disable-next-line no-empty
+      } catch {}
+
+      return authenticatedUser;
+    });
     core.chrome.navControls.registerRight({
       order: 2000,
       mount: (el: HTMLElement) => {

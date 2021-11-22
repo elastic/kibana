@@ -286,6 +286,9 @@ export class SecurityPlugin
 
     this.registerDeprecations(core, license);
 
+    // Usage counter for telemetry
+    const usageCounter = usageCollection?.createUsageCounter('security');
+
     defineRoutes({
       router: core.http.createRouter(),
       basePath: core.http.basePath,
@@ -301,6 +304,7 @@ export class SecurityPlugin
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
+      usageCounter,
     });
 
     return Object.freeze<SecurityPluginSetup>({
