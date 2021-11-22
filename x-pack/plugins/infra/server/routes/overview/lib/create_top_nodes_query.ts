@@ -26,6 +26,7 @@ export const createTopNodesQuery = (
               [TIMESTAMP_FIELD]: {
                 gte: options.timerange.from,
                 lte: options.timerange.to,
+                format: 'epoch_millis',
               },
             },
           },

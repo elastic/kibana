@@ -60,6 +60,11 @@ const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
     padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
   }
+
+  // compensating for EuiBottomBar hiding the content
+  @media (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    margin-bottom: 100px;
+  }
 `;
 
 const CustomEuiBottomBar = styled(EuiBottomBar)`
