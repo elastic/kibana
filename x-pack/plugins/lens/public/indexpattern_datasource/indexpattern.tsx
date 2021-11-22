@@ -12,7 +12,7 @@ import type { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -91,7 +91,7 @@ export function getIndexPatternDatasource({
   data,
   fieldFormats,
   charts,
-  indexPatternFieldEditor,
+  dataViewFieldEditor,
   uiActions,
 }: {
   core: CoreStart;
@@ -99,7 +99,7 @@ export function getIndexPatternDatasource({
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
   const uiSettings = core.uiSettings;
@@ -234,7 +234,7 @@ export function getIndexPatternDatasource({
               data={data}
               fieldFormats={fieldFormats}
               charts={charts}
-              indexPatternFieldEditor={indexPatternFieldEditor}
+              indexPatternFieldEditor={dataViewFieldEditor}
               {...props}
               core={core}
               uiActions={uiActions}
