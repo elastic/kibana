@@ -126,7 +126,7 @@ export function alertInstanceSummaryFromEventLog(
 
   alertInstanceSummary.errorMessages.sort((a, b) => a.date.localeCompare(b.date));
 
-  if (eventDurations.length > 0) {
+  if (Object.entries(eventDurationsWithTimestamp).length > 0) {
     alertInstanceSummary.executionDuration = {
       average: Math.round(mean(Object.values(eventDurationsWithTimestamp))),
       valuesWithTimestamp: eventDurationsWithTimestamp,
