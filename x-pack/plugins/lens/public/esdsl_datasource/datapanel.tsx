@@ -26,7 +26,6 @@ import {
   EuiSpacer,
   EuiFormLabel,
   EuiButton,
-  EuiCodeEditor,
   EuiAccordion,
   EuiPanel,
 } from '@elastic/eui';
@@ -41,6 +40,7 @@ import { FieldButton } from '@kbn/react-field/field_button';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { LensFieldIcon } from '../indexpattern_datasource/lens_field_icon';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
+import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
 
 export type Props = DatasourceDataPanelProps<EsDSLPrivateState> & {
   data: DataPublicPluginStart;
@@ -291,7 +291,7 @@ export function EsDSLHorizontalDataPanel({
                       });
                     }}
                   />
-                  <EuiCodeEditor
+                  <CodeEditor
                     mode="json"
                     theme="github"
                     value={layer.query}

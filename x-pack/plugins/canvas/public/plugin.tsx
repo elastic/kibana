@@ -128,7 +128,7 @@ export class CanvasPlugin
       // Load application bundle
       const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
-      const canvasStore = await initializeCanvas(
+      window.canvasStore = await initializeCanvas(
         coreSetup,
         coreStart,
         setupPlugins,
@@ -170,16 +170,7 @@ export class CanvasPlugin
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
-        const canvasStore = await initializeCanvas(
-          coreSetup,
-          coreStart,
-          setupPlugins,
-          startPlugins,
-          registries,
-          this.appUpdater
-        );
-
-        const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });
+        const unmount = renderApp({ coreStart, startPlugins, params, canvasStore: window.canvasStore, pluginServices });
 
         return () => {
           unmount();

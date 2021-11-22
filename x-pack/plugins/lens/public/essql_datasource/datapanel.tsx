@@ -26,11 +26,11 @@ import {
   EuiSpacer,
   EuiFormLabel,
   EuiButton,
-  EuiCodeEditor,
   EuiAccordion,
   EuiPanel,
   EuiCheckbox,
 } from '@elastic/eui';
+import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
@@ -361,7 +361,7 @@ export function EsSQLHorizontalDataPanel({
                     }
                   }}
                 >
-                  <EuiCodeEditor
+                  <CodeEditor
                     mode="sql"
                     theme="github"
                     value={layer.query}
