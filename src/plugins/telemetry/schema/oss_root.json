@@ -21,7 +21,7 @@
     "cacheDetails": {
       "properties": {
         "dataset": {
-          "type": "boolean",
+          "type": "boolean"
         },
         "cacheTimestamp": {
           "type": "date"
