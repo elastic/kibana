@@ -6,19 +6,20 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
+import { TiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
+import { LinkPanelListItem } from '../../components/link_panel';
 import { useKibana } from '../../../common/lib/kibana';
 import { TAG_REQUEST_BODY } from './helpers';
-
-interface Integration {
-  id: string;
-  dashboardIds: string[];
-}
 
 export const useCtiDashboardLinks = ({
   to,
   from,
-  integrations = [],
-}: { to?: string; from?: string; integrations?: [] } = {}) => {
+  tiDataSources = [],
+}: {
+  to: string;
+  from: string;
+  tiDataSources?: TiDataSources[];
+}) => {
   const [installedDashboardIds, setInstalledDashboardIds] = useState<string[]>([]);
   const dashboardLocator = useKibana().services.dashboard?.locator;
   const savedObjectsClient = useKibana().services.savedObjects.client;
@@ -58,19 +59,20 @@ export const useCtiDashboardLinks = ({
     }
   }, [handleTagsReceived, savedObjectsClient]);
 
-  const listItems = integrations.map((integration) => {
-    const listItem = {
-      title: integration.name,
-      count: integration.count,
+  const listItems = tiDataSources.map((tiDataSource) => {
+    const listItem: LinkPanelListItem = {
+      title: tiDataSource.name,
+      count: tiDataSource.count,
+      path: '',
     };
 
     if (
-      integration.dashboardId &&
-      installedDashboardIds.includes(integration.dashboardId) &&
+      tiDataSource.dashboardId &&
+      installedDashboardIds.includes(tiDataSource.dashboardId) &&
       dashboardLocator
     ) {
       listItem.path = dashboardLocator.getRedirectUrl({
-        dashboardId: newIntegration.dashboardId,
+        dashboardId: tiDataSource.dashboardId,
         timeRange: {
           to,
           from,

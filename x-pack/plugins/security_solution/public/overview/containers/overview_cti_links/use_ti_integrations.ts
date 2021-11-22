@@ -29,9 +29,7 @@ export interface Integration {
 }
 
 interface TiIntegrationStatus {
-  isSomeIntegrationsInstalled: boolean | undefined;
-  isSomeIntegrationsDisabled: boolean | undefined;
-  installedIntegrations: Integration[];
+  isSomeIntegrationsDisabled: boolean;
 }
 
 export const useTiIntegrations = () => {
@@ -51,23 +49,6 @@ export const useTiIntegrations = () => {
           integration.id.startsWith(TI_INTEGRATION_PREFIX)
         );
 
-        const installedIntegrations = tiIntegrations
-          .filter(
-            (integration: IntegrationResponse) =>
-              integration.status === installationStatuses.Installed
-          )
-          .map((integration: IntegrationResponse) => {
-            const installedSavedObjects =
-              integration?.savedObject?.attributes?.installed_kibana ?? [];
-            const dashboardIds = installedSavedObjects
-              .filter((so) => so.type === 'dashboard')
-              .map((so) => so.id);
-            return {
-              id: integration.id,
-              dashboardIds,
-            };
-          });
-
         const isSomeIntegrationsDisabled = tiIntegrations.some(
           (integration: IntegrationResponse) =>
             integration.status !== installationStatuses.Installed
@@ -75,14 +56,10 @@ export const useTiIntegrations = () => {
 
         setTiIntegrationsStatus({
           isSomeIntegrationsDisabled,
-          isSomeIntegrationsInstalled: installedIntegrations.length > 0,
-          installedIntegrations,
         });
       } catch (e) {
         setTiIntegrationsStatus({
-          isSomeIntegrationsInstalled: undefined,
-          isSomeIntegrationsDisabled: undefined,
-          installedIntegrations: [],
+          isSomeIntegrationsDisabled: true,
         });
       }
     };

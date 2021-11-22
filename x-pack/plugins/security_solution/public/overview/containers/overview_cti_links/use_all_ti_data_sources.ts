@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect, useMemo } from 'react';
-import { useThreatIntelSource } from './use_threat_intel_source';
+import { useMemo } from 'react';
+import { useTiDataSources } from './use_ti_data_sources';
 
-export const useIsThreatIntelModuleEnabled = () => {
+export const useAllTiDataSources = () => {
   const { to, from } = useMemo(
     () => ({
       to: new Date().toISOString(),
@@ -16,11 +16,7 @@ export const useIsThreatIntelModuleEnabled = () => {
     []
   );
 
-  const { totalCount, integrations } = useThreatIntelSource({ to, from });
+  const { tiDataSources } = useTiDataSources({ to, from });
 
-  console.log('useIsThreatIntelModuleEnabled')
-  return {
-    isThreatIntelModuleEnabled: totalCount > 0,
-    allIntegrations: integrations,
-  };
+  return tiDataSources;
 };

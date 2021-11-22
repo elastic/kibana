@@ -72,8 +72,8 @@ import {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
-  CtiThreatIntelSourceRequestOptions,
-  CtiThreatIntelSourceStrategyResponse,
+  CtiDataSourceRequestOptions,
+  CtiDataSourceStrategyResponse,
 } from './cti';
 import {
   HostRulesRequestOptions,
@@ -181,8 +181,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? MatrixHistogramStrategyResponse
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentStrategyResponse
-  : T extends CtiQueries.threatIntelSource
-  ? CtiThreatIntelSourceStrategyResponse
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -243,8 +243,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentRequestOptions
-  : T extends CtiQueries.threatIntelSource
-  ? CtiThreatIntelSourceRequestOptions
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceRequestOptions
   : never;
 
 export interface DocValueFieldsInput {

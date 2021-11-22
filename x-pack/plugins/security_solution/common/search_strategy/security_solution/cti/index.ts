@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IEsSearchResponse, IEsSearchRequest } from 'src/plugins/data/public';
 import { FactoryQueryTypes } from '../..';
 import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../cti/constants';
@@ -13,7 +14,7 @@ import { RequestBasicOptions } from '..';
 
 export enum CtiQueries {
   eventEnrichment = 'eventEnrichment',
-  threatIntelSource = 'threatIntelSource',
+  dataSource = 'dataSource',
 }
 
 export interface CtiEventEnrichmentRequestOptions extends RequestBasicOptions {
@@ -43,10 +44,32 @@ export const validEventFields = Object.keys(EVENT_ENRICHMENT_INDICATOR_FIELD_MAP
 export const isValidEventField = (field: string): field is EventField =>
   validEventFields.includes(field as EventField);
 
-export interface CtiThreatIntelSourceRequestOptions extends IEsSearchRequest {
+export interface CtiDataSourceRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
   factoryQueryType?: FactoryQueryTypes;
   hostName?: string;
   timerange?: TimerangeInput;
 }
-export type CtiThreatIntelSourceStrategyResponse = IEsSearchResponse;
+
+export interface BucketItem {
+  key: string;
+  doc_count: number;
+}
+export interface Bucket {
+  buckets: Array<BucketItem & { bucket?: Bucket[] }>;
+}
+
+export type DatasetBucket = {
+  name?: Bucket;
+  dashboard?: Bucket;
+} & BucketItem;
+
+export interface CtiDataSourceStrategyResponse extends Omit<IEsSearchResponse, 'rawResponse'> {
+  rawResponse: {
+    aggregations?: Record<string, estypes.AggregationsAggregate> & {
+      dataset?: {
+        buckets: DatasetBucket[];
+      };
+    };
+  };
+}
