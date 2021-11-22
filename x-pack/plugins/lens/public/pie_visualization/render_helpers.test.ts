@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { Datatable } from 'src/plugins/expressions/public';
-import { getSliceValue, getFilterContext } from './render_helpers';
+import type { Datatable } from 'src/plugins/expressions/public';
+import type { PaletteDefinition, PaletteOutput } from 'src/plugins/charts/public';
+
+import {
+  getSliceValue,
+  getFilterContext,
+  byDataColorPaletteMap,
+  extractUniqTermsMap,
+} from './render_helpers';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 describe('render helpers', () => {
   describe('#getSliceValue', () => {
@@ -198,6 +206,115 @@ describe('render helpers', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('#extractUniqTermsMap', () => {
+    it('should extract map', () => {
+      const table: Datatable = {
+        type: 'datatable',
+        columns: [
+          { id: 'a', name: 'A', meta: { type: 'string' } },
+          { id: 'b', name: 'B', meta: { type: 'string' } },
+          { id: 'c', name: 'C', meta: { type: 'number' } },
+        ],
+        rows: [
+          { a: 'Hi', b: 'Two', c: 2 },
+          { a: 'Test', b: 'Two', c: 5 },
+          { a: 'Foo', b: 'Three', c: 6 },
+        ],
+      };
+      expect(extractUniqTermsMap(table, 'a')).toMatchInlineSnapshot(`
+        Object {
+          "Foo": 2,
+          "Hi": 0,
+          "Test": 1,
+        }
+      `);
+      expect(extractUniqTermsMap(table, 'b')).toMatchInlineSnapshot(`
+        Object {
+          "Three": 1,
+          "Two": 0,
+        }
+      `);
+    });
+  });
+
+  describe('#byDataColorPaletteMap', () => {
+    let datatable: Datatable;
+    let paletteDefinition: PaletteDefinition;
+    let palette: PaletteOutput;
+    const columnId = 'foo';
+
+    beforeEach(() => {
+      datatable = {
+        rows: [
+          {
+            [columnId]: '1',
+          },
+          {
+            [columnId]: '2',
+          },
+        ],
+      } as unknown as Datatable;
+      paletteDefinition = chartPluginMock.createPaletteRegistry().get('default');
+      palette = { type: 'palette' } as PaletteOutput;
+    });
+
+    it('should create byDataColorPaletteMap', () => {
+      expect(byDataColorPaletteMap(datatable, columnId, paletteDefinition, palette))
+        .toMatchInlineSnapshot(`
+        Object {
+          "getColor": [Function],
+        }
+      `);
+    });
+
+    it('should get color', () => {
+      const colorPaletteMap = byDataColorPaletteMap(
+        datatable,
+        columnId,
+        paletteDefinition,
+        palette
+      );
+
+      expect(colorPaletteMap.getColor('1')).toBe('black');
+    });
+
+    it('should return undefined in case if values not in datatable', () => {
+      const colorPaletteMap = byDataColorPaletteMap(
+        datatable,
+        columnId,
+        paletteDefinition,
+        palette
+      );
+
+      expect(colorPaletteMap.getColor('wrong')).toBeUndefined();
+    });
+
+    it('should increase rankAtDepth for each new value', () => {
+      const colorPaletteMap = byDataColorPaletteMap(
+        datatable,
+        columnId,
+        paletteDefinition,
+        palette
+      );
+      colorPaletteMap.getColor('1');
+      colorPaletteMap.getColor('2');
+
+      expect(paletteDefinition.getCategoricalColor).toHaveBeenNthCalledWith(
+        1,
+        [{ name: '1', rankAtDepth: 0, totalSeriesAtDepth: 2 }],
+        { behindText: false },
+        undefined
+      );
+
+      expect(paletteDefinition.getCategoricalColor).toHaveBeenNthCalledWith(
+        2,
+        [{ name: '2', rankAtDepth: 1, totalSeriesAtDepth: 2 }],
+        { behindText: false },
+        undefined
+      );
     });
   });
 });

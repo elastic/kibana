@@ -14304,7 +14304,6 @@
     "xpack.lens.editorFrame.noColorIndicatorLabel": "此维度没有单独的颜色",
     "xpack.lens.editorFrame.paletteColorIndicatorLabel": "此维度正在使用调色板",
     "xpack.lens.editorFrame.previewErrorLabel": "预览呈现失败",
-    "xpack.lens.editorFrame.requiredDimensionWarningLabel": "所需尺寸",
     "xpack.lens.editorFrame.suggestionPanelTitle": "建议",
     "xpack.lens.editorFrame.workspaceLabel": "工作区",
     "xpack.lens.embeddable.failure": "无法显示可视化",
