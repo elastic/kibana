@@ -122,7 +122,7 @@ export function TransactionColdstartRateChart({
     {
       data: data.currentPeriod.transactionColdstartRate,
       type: 'linemark',
-      color: theme.eui.euiColorVis6,
+      color: theme.eui.euiColorVis5,
       title: i18n.translate('xpack.apm.coldstartRate.chart.coldstartRate', {
         defaultMessage: 'Cold start rate (avg.)',
       }),
