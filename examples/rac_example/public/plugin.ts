@@ -18,7 +18,7 @@ import {
 import { RAC_EXAMPLE_APP_ID } from '../common/constants';
 import { PLUGIN_NAME } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../src/core/public';
-import { createAlwaysFiringAlertType } from './alert_types/always_firing';
+import { createAlwaysFiringAlertType } from './rule_types/always_firing';
 import image from './alerts_table.png';
 
 export class RacExamplePlugin implements RacExamplePluginClass {

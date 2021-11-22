@@ -67,34 +67,7 @@ Reason:
 `,
       }
     ),
-    format: () => ({ reason: 'Some reason', link: 'some_link' }),
-  };
-}
-
-export function getAlertType(): AlertTypeModel {
-  return {
-    id: 'example.always-firing-demo',
-    description: 'Alert when called',
-    iconClass: 'bolt',
-    documentationUrl: null,
-    alertParamsExpression: AlwaysFiringExpression,
-    validate: (alertParams: AlwaysFiringParams) => {
-      const { instances } = alertParams;
-      const validationResult = {
-        errors: {
-          instances: new Array<string>(),
-        },
-      };
-      if (instances && instances < 0) {
-        validationResult.errors.instances.push(
-          i18n.translate('AlertingExample.addAlert.error.invalidRandomInstances', {
-            defaultMessage: 'instances must be equal or greater than zero.',
-          })
-        );
-      }
-      return validationResult;
-    },
-    requiresAppContext: false,
+    format: () => ({ reason: 'Some reason!!', link: 'some_link' }),
   };
 }
 
