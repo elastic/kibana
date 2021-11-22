@@ -20,8 +20,9 @@ import { crawlRequestServerToClient } from './utils';
 
 const DEFAULT_VALUES: CrawlDetailValues = {
   dataLoading: true,
-  flyoutHidden: true,
-  request: null,
+  flyoutClosed: true,
+  crawlRequest: null,
+  crawlRequestFromServer: null,
 };
 
 const crawlRequestResponse: CrawlRequestFromServer = {
@@ -49,15 +50,15 @@ describe('CrawlDetailLogic', () => {
   });
 
   describe('reducers', () => {
-    describe('hideFlyout', () => {
+    describe('closeFlyout', () => {
       it('closes the flyout', () => {
-        mount({ flyoutHidden: false });
+        mount({ flyoutClosed: false });
 
-        CrawlDetailLogic.actions.hideFlyout();
+        CrawlDetailLogic.actions.closeFlyout();
 
         expect(CrawlDetailLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          flyoutHidden: true,
+          flyoutClosed: true,
         });
       });
     });
@@ -66,7 +67,7 @@ describe('CrawlDetailLogic', () => {
       it('opens the flyout and sets loading to true', () => {
         mount({
           dataLoading: false,
-          flyoutHidden: true,
+          flyoutClosed: true,
         });
 
         CrawlDetailLogic.actions.fetchCrawlRequest('12345');
@@ -74,7 +75,7 @@ describe('CrawlDetailLogic', () => {
         expect(CrawlDetailLogic.values).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: true,
-          flyoutHidden: false,
+          flyoutClosed: false,
         });
       });
     });
@@ -86,12 +87,13 @@ describe('CrawlDetailLogic', () => {
           request: null,
         });
 
-        CrawlDetailLogic.actions.onRecieveCrawlRequest(clientCrawlRequest);
+        CrawlDetailLogic.actions.onRecieveCrawlRequest(crawlRequestResponse);
 
         expect(CrawlDetailLogic.values).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: false,
-          request: clientCrawlRequest,
+          crawlRequestFromServer: crawlRequestResponse,
+          crawlRequest: clientCrawlRequest,
         });
       });
     });
@@ -112,7 +114,7 @@ describe('CrawlDetailLogic', () => {
           '/internal/app_search/engines/some-engine/crawler/crawl_requests/12345'
         );
         expect(CrawlDetailLogic.actions.onRecieveCrawlRequest).toHaveBeenCalledWith(
-          clientCrawlRequest
+          crawlRequestResponse
         );
       });
 

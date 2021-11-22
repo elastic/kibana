@@ -16,20 +16,14 @@ import { EuiCodeBlock, EuiFlyout } from '@elastic/eui';
 import { Loading } from '../../../../shared/loading';
 
 import { CrawlDetailValues } from '../crawl_detail_logic';
-import { CrawlerStatus } from '../types';
+import { CrawlerStatus, CrawlRequestFromServer } from '../types';
 
 import { CrawlDetailsFlyout } from './crawl_details_flyout';
 
-const MOCK_VALUES: CrawlDetailValues = {
+const MOCK_VALUES: Partial<CrawlDetailValues> = {
   dataLoading: false,
-  flyoutHidden: false,
-  request: {
-    id: '654364aed23623456',
-    status: CrawlerStatus.Pending,
-    createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
-    beganAt: null,
-    completedAt: null,
-  },
+  flyoutClosed: false,
+  crawlRequestFromServer: {} as CrawlRequestFromServer,
 };
 
 describe('CrawlDetailsFlyout', () => {
@@ -53,7 +47,7 @@ describe('CrawlDetailsFlyout', () => {
 
   it('is empty when the flyout is hidden', () => {
     setMockValues({
-      flyoutHidden: true,
+      flyoutClosed: true,
     });
 
     const wrapper = shallow(<CrawlDetailsFlyout />);

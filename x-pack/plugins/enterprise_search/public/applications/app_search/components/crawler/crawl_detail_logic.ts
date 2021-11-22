@@ -17,22 +17,25 @@ import { crawlRequestServerToClient } from './utils';
 
 export interface CrawlDetailValues {
   dataLoading: boolean;
-  flyoutHidden: boolean;
-  request: CrawlRequest | null;
+  flyoutClosed: boolean;
+  crawlRequestFromServer: CrawlRequestFromServer | null;
+  crawlRequest: CrawlRequest | null;
 }
 
 interface CrawlDetailActions {
-  hideFlyout(): void;
+  closeFlyout(): void;
   fetchCrawlRequest(requestId: string): { requestId: string };
-  onRecieveCrawlRequest(request: CrawlRequest): { request: CrawlRequest };
+  onRecieveCrawlRequest(crawlRequestFromServer: CrawlRequestFromServer): {
+    crawlRequestFromServer: CrawlRequestFromServer;
+  };
 }
 
 export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetailActions>>({
   path: ['enterprise_search', 'app_search', 'crawl_detail_logic'],
   actions: {
-    hideFlyout: true,
+    closeFlyout: true,
     fetchCrawlRequest: (requestId) => ({ requestId }),
-    onRecieveCrawlRequest: (request) => ({ request }),
+    onRecieveCrawlRequest: (crawlRequestFromServer) => ({ crawlRequestFromServer }),
   },
   reducers: {
     dataLoading: [
@@ -42,17 +45,24 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
         onRecieveCrawlRequest: () => false,
       },
     ],
-    request: [
+    crawlRequestFromServer: [
       null,
       {
-        onRecieveCrawlRequest: (_, { request }) => request,
+        onRecieveCrawlRequest: (_, { crawlRequestFromServer }) => crawlRequestFromServer,
       },
     ],
-    flyoutHidden: [
+    crawlRequest: [
+      null,
+      {
+        onRecieveCrawlRequest: (_, { crawlRequestFromServer }) =>
+          crawlRequestServerToClient(crawlRequestFromServer),
+      },
+    ],
+    flyoutClosed: [
       true,
       {
         fetchCrawlRequest: () => false,
-        hideFlyout: () => true,
+        closeFlyout: () => true,
       },
     ],
   },
@@ -66,8 +76,7 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
           `/internal/app_search/engines/${engineName}/crawler/crawl_requests/${requestId}`
         );
 
-        const crawlRequest = crawlRequestServerToClient(response);
-        actions.onRecieveCrawlRequest(crawlRequest);
+        actions.onRecieveCrawlRequest(response);
       } catch (e) {
         flashAPIErrors(e);
       }

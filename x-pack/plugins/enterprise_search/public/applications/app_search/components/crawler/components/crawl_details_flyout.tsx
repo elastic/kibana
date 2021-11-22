@@ -16,15 +16,15 @@ import { Loading } from '../../../../shared/loading';
 import { CrawlDetailLogic } from '../crawl_detail_logic';
 
 export const CrawlDetailsFlyout: React.FC = () => {
-  const { hideFlyout } = useActions(CrawlDetailLogic);
-  const { dataLoading, flyoutHidden, request } = useValues(CrawlDetailLogic);
+  const { closeFlyout } = useActions(CrawlDetailLogic);
+  const { dataLoading, flyoutClosed, crawlRequestFromServer } = useValues(CrawlDetailLogic);
 
-  if (flyoutHidden) {
+  if (flyoutClosed) {
     return null;
   }
 
   return (
-    <EuiFlyout ownFocus onClose={hideFlyout} aria-labelledby="CrawlDetailsFlyoutTitle">
+    <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="CrawlDetailsFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="CrawlDetailsFlyoutTitle">
@@ -35,7 +35,13 @@ export const CrawlDetailsFlyout: React.FC = () => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {dataLoading ? <Loading /> : <EuiCodeBlock language="json">{request}</EuiCodeBlock>}
+        {dataLoading ? (
+          <Loading />
+        ) : (
+          <EuiCodeBlock language="json">
+            {JSON.stringify(crawlRequestFromServer, null, 2)}
+          </EuiCodeBlock>
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
