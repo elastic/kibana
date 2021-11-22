@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { KibanaThemeProvider } from 'src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { VisualizationContainer } from '../../../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import { ExpressioTagcloudRendererDependencies } from '../plugin';
