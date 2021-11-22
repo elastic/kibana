@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export * from './case';
-export * from './configure';
-export * from './comment';
-export * from './status';
-export * from './user_actions';
-export * from './sub_case';
-export * from './constants';
-export * from './alerts';
-export * from './metrics';
+import { MetricsResponse } from '../../../../common';
+
+export interface MetricsHandler {
+  applyMetrics(metricsResult: MetricsResponse): Promise<MetricsResponse>;
+}

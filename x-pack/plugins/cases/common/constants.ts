@@ -55,6 +55,8 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions`;
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}`;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts`;
 
+export const CASE_DETAILS_METRICS_URL = `${CASE_DETAILS_URL}/metrics`;
+
 /**
  * Action routes
  */
