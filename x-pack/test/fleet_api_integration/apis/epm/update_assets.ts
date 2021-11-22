@@ -457,13 +457,11 @@ export default function (providerContext: FtrProviderContext) {
         ],
         name: 'all_assets',
         version: '0.2.0',
-        internal: false,
         removable: true,
         install_version: '0.2.0',
         install_status: 'installed',
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
-        keep_policies_up_to_date: false,
       });
     });
   });
