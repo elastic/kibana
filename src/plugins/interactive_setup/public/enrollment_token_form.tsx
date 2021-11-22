@@ -9,16 +9,20 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
+  EuiPopover,
+  EuiPopoverFooter,
   EuiSpacer,
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
@@ -109,7 +113,6 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
           <EuiSpacer />
         </>
       )}
-
       <EuiFormRow
         label={i18n.translate('interactiveSetup.enrollmentTokenForm.tokenLabel', {
           defaultMessage: 'Enrollment token',
@@ -120,12 +123,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
           enrollmentToken ? (
             <EnrollmentTokenDetails token={enrollmentToken} />
           ) : (
-            <DocLink app="elasticsearch" doc="configuring-stack-security.html">
-              <FormattedMessage
-                id="interactiveSetup.enrollmentTokenForm.tokenHelpText"
-                defaultMessage="Where do I find this?"
-              />
-            </DocLink>
+            <EnrollmentTokenHelpPopover />
           )
         }
         fullWidth
@@ -226,3 +224,59 @@ export function compareAddresses(a: string, b: string) {
   }
   return 0;
 }
+
+export const EnrollmentTokenHelpPopover = () => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const button = (
+    <EuiLink onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}>
+      <FormattedMessage
+        id="interactiveSetup.enrollmentTokenHelpPopover.buttonText"
+        defaultMessage="Where do I find this?"
+      />
+    </EuiLink>
+  );
+
+  return (
+    <EuiPopover
+      button={button}
+      anchorPosition="rightCenter"
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+    >
+      <EuiText size="s" grow={false}>
+        <p>
+          <FormattedMessage
+            id="interactiveSetup.enrollmentTokenHelpPopover.whenHelpText"
+            defaultMessage="The enrollment token is automatically generated when you start Elasticsearch for the first
+          time."
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="interactiveSetup.enrollmentTokenHelpPopover.whereHelpText"
+            defaultMessage="You might need to scroll back a bit in the terminal to view the enrollment token."
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="interactiveSetup.enrollmentTokenHelpPopover.howHelpText"
+            defaultMessage="To generate a new enrollment token run the following command in the Elasticsearch
+          directory:"
+          />
+        </p>
+        <EuiCodeBlock language="bash" paddingSize="m" isCopyable>
+          bin/elasticsearch-create-enrollment-token --scope kibana
+        </EuiCodeBlock>
+      </EuiText>
+      <EuiPopoverFooter>
+        <DocLink app="elasticsearch" doc="configuring-stack-security.html">
+          <FormattedMessage
+            id="interactiveSetup.enrollmentTokenHelpPopover.docLinkText"
+            defaultMessage="Learn how to setup Elastic."
+          />
+        </DocLink>
+      </EuiPopoverFooter>
+    </EuiPopover>
+  );
+};
