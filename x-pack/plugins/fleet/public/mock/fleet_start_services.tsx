@@ -52,6 +52,24 @@ export const createStartServices = (basePath: string = '/mock'): MockedFleetStar
     ...coreMock.createStart({ basePath }),
     ...createStartDepsMock(),
     storage: new Storage(createMockStore()) as jest.Mocked<Storage>,
+    authz: {
+      fleet: {
+        all: true,
+        setup: true,
+        readEnrollmentTokens: true,
+      },
+      integrations: {
+        readPackageInfo: true,
+        readInstalledPackages: true,
+        installPackages: true,
+        upgradePackages: true,
+        removePackages: true,
+        readPackageSettings: true,
+        writePackageSettings: true,
+        readIntegrationPolicies: true,
+        writeIntegrationPolicies: true,
+      },
+    },
   };
 
   configureStartServices(startServices);

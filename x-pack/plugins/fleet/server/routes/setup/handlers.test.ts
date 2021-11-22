@@ -7,7 +7,7 @@
 
 import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { PostFleetSetupResponse } from '../../../common';
+import type { FleetAuthz, PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services/app_context';
@@ -31,9 +31,28 @@ describe('FleetSetupHandler', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
   beforeEach(async () => {
+    const fleetAuthorizations: FleetAuthz = {
+      fleet: {
+        all: true,
+        setup: true,
+        readEnrollmentTokens: true,
+      },
+      integrations: {
+        readPackageInfo: true,
+        readInstalledPackages: true,
+        installPackages: true,
+        upgradePackages: true,
+        removePackages: true,
+        readPackageSettings: true,
+        writePackageSettings: true,
+        readIntegrationPolicies: true,
+        writeIntegrationPolicies: true,
+      },
+    };
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
+        authz: fleetAuthorizations,
         epm: {
           internalSoClient: savedObjectsClientMock.create(),
         },
