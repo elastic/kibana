@@ -95,6 +95,7 @@ export function fetchChart(
           chartData,
           bucketInterval,
         });
+        throw new Error('Error occured while retrieving chart');
       } catch (e) {
         charts$.next({
           fetchStatus: FetchStatus.ERROR,

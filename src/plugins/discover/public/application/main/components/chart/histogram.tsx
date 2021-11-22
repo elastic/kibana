@@ -126,50 +126,26 @@ export function DiscoverHistogram({
 
   const renderErrorMsgButton = () => {
     return (
-      <React.Fragment>
-        <EuiPanel color="transparent" hasBorder={false}>
-          <EuiButtonEmpty onClick={() => setShowError(!showError)}>
-            {showError ? (
-              <FormattedMessage
-                id="discover.errorLoadingChart.hideError"
-                defaultMessage="Hide error"
-              />
-            ) : (
-              <FormattedMessage
-                id="discover.errorLoadingChart.showError"
-                defaultMessage="Show error"
-              />
-            )}
-          </EuiButtonEmpty>
-          {showError && error ? (
-            <EuiCodeBlock language="json" paddingSize="s">
-              {error.message}
-            </EuiCodeBlock>
-          ) : null}
-        </EuiPanel>
-      </React.Fragment>
-    );
-  };
-
-  const renderError = () => {
-    if (!error) return null;
-    return (
-      <div className="dscChart__error">
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="visBarVertical" color="danger" size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem className="dscHistogram__errorChart">
-            <EuiText size="xs" color="danger">
-              <FormattedMessage
-                id="discover.errorLoadingChart"
-                defaultMessage="Error loading chart"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {renderErrorMsgButton()}
-      </div>
+      <EuiPanel color="transparent" hasBorder={false}>
+        <EuiButtonEmpty onClick={() => setShowError(!showError)}>
+          {showError ? (
+            <FormattedMessage
+              id="discover.errorLoadingChart.hideError"
+              defaultMessage="Hide error"
+            />
+          ) : (
+            <FormattedMessage
+              id="discover.errorLoadingChart.showError"
+              defaultMessage="Show error"
+            />
+          )}
+        </EuiButtonEmpty>
+        {showError && error ? (
+          <EuiCodeBlock language="json" paddingSize="s">
+            {error.message}
+          </EuiCodeBlock>
+        ) : null}
+      </EuiPanel>
     );
   };
 
@@ -195,10 +171,23 @@ export function DiscoverHistogram({
     );
   }
 
-  if (fetchStatus === FetchStatus.ERROR) {
+  if (fetchStatus === FetchStatus.ERROR && error) {
     return (
-      <div className="dscHistogram" data-test-subj="discoverChart">
-        {renderError()}
+      <div className="dscHistogram__errorChartContainer">
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="visBarVertical" color="danger" size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem className="dscHistogram__errorChart">
+            <EuiText size="xs" color="danger">
+              <FormattedMessage
+                id="discover.errorLoadingChart"
+                defaultMessage="Error loading chart"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {renderErrorMsgButton()}
       </div>
     );
   }

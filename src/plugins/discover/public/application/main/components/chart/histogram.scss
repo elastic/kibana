@@ -12,6 +12,10 @@
   min-width: $euiSize * 12;
 }
 
+.dscHistogram__errorChartContainer {
+  padding: 0 $euiSizeS 0 $euiSizeS;
+}
+
 .dscHistogram__errorChart {
   margin-left: $euiSizeXS !important;
 }
