@@ -183,7 +183,7 @@ class ProcessImpl implements Process {
 
   isUserEntered() {
     const event = this.getDetails();
-    const { interactive, pgid, parent } = event.process;
+    const { interactive, pgid, parent } = event?.process || {};
 
     return interactive && pgid !== parent.pgid;
   }
@@ -298,7 +298,7 @@ export const useProcessTree = ({
       if (process.searchMatched || process.isUserEntered()) {
         let { parent } = process;
 
-        while (parent) {
+        while (parent && parent.id !== parent.parent?.id) {
           parent.autoExpand = true;
           parent = parent.parent;
         }

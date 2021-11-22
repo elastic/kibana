@@ -48,7 +48,7 @@ export const registerProcessEventsRoute = (router: IRouter) => {
       // this should hopefully change once we update ECS or endpoint-package..
       // for demo purpose we just load all alerts, and stich it together on the frontend.
       const alerts = await client.search({
-        index: ['.siem-signals-default*'],
+        index: ['.siem-signals-default'],
         body: {
           size: PROCESS_EVENTS_PER_PAGE,
           sort: [{ '@timestamp': 'asc' }],
