@@ -44,8 +44,6 @@ export interface ImportSavedObjectsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
-  /** Optional list of supported import types, any type not in this list won't be imported */
-  supportedTypesOverride?: string[];
 }
 
 /**
@@ -63,12 +61,9 @@ export async function importSavedObjectsFromStream({
   typeRegistry,
   importHooks,
   namespace,
-  supportedTypesOverride,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportFailure[] = [];
-  const supportedTypes =
-    supportedTypesOverride ||
-    typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
+  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
   // Get the objects to import
   const collectSavedObjectsResult = await collectSavedObjects({
