@@ -63,6 +63,7 @@ export type Instruction = TypeOf<typeof instructionSchema>;
 const instructionVariantSchema = schema.object({
   id: schema.string(),
   instructions: schema.arrayOf(instructionSchema),
+  initialSelected: schema.maybe(schema.boolean()),
 });
 
 export type InstructionVariant = TypeOf<typeof instructionVariantSchema>;
