@@ -32,6 +32,13 @@ export const STANDALONE_RUN_INSTRUCTIONS = './elastic-agent install';
 removable, but it doesn't install by default. Following the table, it needs to
 be in `unremovablePackages` and in `autoUpdatePackages`, but not in
 `defaultPackages`.
+
+
+We also define "auto upgrade policies" packages below. These are packages that are considered "stack-aligned"
+and require policies to be auto-upgraded in order to properly function. Commonly, packages that ship custom policy
+editor UI's in the Kibana codebase will be included in this set of packages to avoid backwards-compatibility concerns
+in their custom policy editor implementations.
+
 */
 
 export const unremovablePackages = [
@@ -48,6 +55,8 @@ export const autoUpdatePackages = [
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
 ];
+
+export const autoUpgradePoliciesPackages = [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE];
 
 export const agentAssetTypes = {
   Input: 'input',
