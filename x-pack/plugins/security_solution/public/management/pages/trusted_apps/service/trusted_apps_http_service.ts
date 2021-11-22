@@ -41,6 +41,7 @@ import {
   newTrustedAppToCreateExceptionListItem,
   updatedTrustedAppToUpdateExceptionListItem,
 } from './mappers';
+import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../constants';
 
 export interface TrustedAppsService {
   getTrustedApp(params: GetOneTrustedAppRequestParams): Promise<GetOneTrustedAppResponse>;
@@ -79,10 +80,28 @@ const P_MAP_OPTIONS = Object.freeze<pMap.Options>({
 });
 
 export class TrustedAppsHttpService implements TrustedAppsService {
-  constructor(private http: HttpStart) {}
+  private readonly getHttpService: () => Promise<HttpStart>;
+
+  constructor(http: HttpStart) {
+    const ensureListExists = http
+      .post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+        body: JSON.stringify(TRUSTED_APPS_EXCEPTION_LIST_DEFINITION),
+      })
+      .then(() => {})
+      .catch((err) => {
+        if (err.response.status !== 409) {
+          return Promise.reject(err);
+        }
+      });
+
+    this.getHttpService = async () => {
+      await ensureListExists;
+      return http;
+    };
+  }
 
   private async getExceptionListItem(itemId: string): Promise<ExceptionListItemSchema> {
-    return this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    return (await this.getHttpService()).get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       query: {
         item_id: itemId,
         namespace_type: 'agnostic',
@@ -103,20 +122,19 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     per_page: perPage = 10,
     kuery,
   }: GetTrustedAppsListRequest): Promise<GetTrustedAppsListResponse> {
-    const itemListResults = await this.http.get<FoundExceptionListItemSchema>(
-      `${EXCEPTION_LIST_ITEM_URL}/_find`,
-      {
-        query: {
-          page,
-          per_page: perPage,
-          filter: kuery,
-          sort_field: 'name',
-          sort_order: 'asc',
-          list_id: [ENDPOINT_TRUSTED_APPS_LIST_ID],
-          namespace_type: ['agnostic'],
-        },
-      }
-    );
+    const itemListResults = await (
+      await this.getHttpService()
+    ).get<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+      query: {
+        page,
+        per_page: perPage,
+        filter: kuery,
+        sort_field: 'name',
+        sort_order: 'asc',
+        list_id: [ENDPOINT_TRUSTED_APPS_LIST_ID],
+        namespace_type: ['agnostic'],
+      },
+    });
 
     return {
       ...itemListResults,
@@ -125,7 +143,9 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   }
 
   async deleteTrustedApp(request: DeleteTrustedAppsRequestParams): Promise<void> {
-    await this.http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    await (
+      await this.getHttpService()
+    ).delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       query: {
         item_id: request.id,
         namespace_type: 'agnostic',
@@ -134,14 +154,13 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   }
 
   async createTrustedApp(request: PostTrustedAppCreateRequest) {
-    await validateTrustedAppHttpRequestBody(this.http, request);
+    await validateTrustedAppHttpRequestBody(await this.getHttpService(), request);
 
-    const createdExceptionItem = await this.http.post<ExceptionListItemSchema>(
-      EXCEPTION_LIST_ITEM_URL,
-      {
-        body: JSON.stringify(newTrustedAppToCreateExceptionListItem(request)),
-      }
-    );
+    const createdExceptionItem = await (
+      await this.getHttpService()
+    ).post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      body: JSON.stringify(newTrustedAppToCreateExceptionListItem(request)),
+    });
 
     return {
       data: exceptionListItemToTrustedApp(createdExceptionItem),
@@ -154,17 +173,16 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   ) {
     const [currentExceptionListItem] = await Promise.all([
       await this.getExceptionListItem(params.id),
-      await validateTrustedAppHttpRequestBody(this.http, updatedTrustedApp),
+      await validateTrustedAppHttpRequestBody(await this.getHttpService(), updatedTrustedApp),
     ]);
 
-    const updatedExceptionListItem = await this.http.put<ExceptionListItemSchema>(
-      EXCEPTION_LIST_ITEM_URL,
-      {
-        body: JSON.stringify(
-          updatedTrustedAppToUpdateExceptionListItem(currentExceptionListItem, updatedTrustedApp)
-        ),
-      }
-    );
+    const updatedExceptionListItem = await (
+      await this.getHttpService()
+    ).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      body: JSON.stringify(
+        updatedTrustedAppToUpdateExceptionListItem(currentExceptionListItem, updatedTrustedApp)
+      ),
+    });
 
     return {
       data: exceptionListItemToTrustedApp(updatedExceptionListItem),
@@ -172,16 +190,19 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   }
 
   async getTrustedAppsSummary(_: GetTrustedAppsSummaryRequest) {
-    return this.http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
-      query: {
-        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
-        namespace_type: 'agnostic',
-      },
-    });
+    return (await this.getHttpService()).get<ExceptionListSummarySchema>(
+      `${EXCEPTION_LIST_URL}/summary`,
+      {
+        query: {
+          list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+          namespace_type: 'agnostic',
+        },
+      }
+    );
   }
 
-  getPolicyList(options?: Parameters<typeof sendGetEndpointSpecificPackagePolicies>[1]) {
-    return sendGetEndpointSpecificPackagePolicies(this.http, options);
+  async getPolicyList(options?: Parameters<typeof sendGetEndpointSpecificPackagePolicies>[1]) {
+    return sendGetEndpointSpecificPackagePolicies(await this.getHttpService(), options);
   }
 
   /**

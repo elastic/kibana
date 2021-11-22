@@ -20,6 +20,7 @@ export type ExceptionListTypeOrUndefined = t.TypeOf<typeof exceptionListTypeOrUn
 export enum ExceptionListTypeEnum {
   DETECTION = 'detection',
   ENDPOINT = 'endpoint',
+  ENDPOINT_TRUSTED_APPS = 'endpoint',
   ENDPOINT_EVENTS = 'endpoint_events',
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS = 'endpoint_host_isolation_exceptions',
 }
