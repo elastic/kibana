@@ -301,7 +301,7 @@ function ObservabilityActions({
   );
 }
 // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-/*
+
 const FIELDS_WITHOUT_CELL_ACTIONS = [
   '@timestamp',
   'signal.rule.risk_score',
@@ -309,7 +309,6 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
   'kibana.alert.duration.us',
   'kibana.alert.reason',
 ];
-*/
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch } = props;
@@ -382,7 +381,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       deletedEventIds,
       // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
       // defaultCellActions: getDefaultCellActions({ addToQuery }),
-      // disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+      disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
       filters: [],
       hasAlertsCrudPermissions,
