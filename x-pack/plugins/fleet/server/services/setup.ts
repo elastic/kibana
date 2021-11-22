@@ -220,8 +220,15 @@ export function formatNonFatalErrors(
         name: e.error.name,
         message: e.error.message,
       };
-    } else {
+    } else if ('errors' in e) {
       return e.errors.map((upgradePackagePolicyError: any) => {
+        if (typeof upgradePackagePolicyError === 'string') {
+          return {
+            name: 'SetupNonFatalError',
+            message: upgradePackagePolicyError,
+          };
+        }
+
         return {
           name: upgradePackagePolicyError.key,
           message: upgradePackagePolicyError.message,

@@ -46,6 +46,7 @@ import {
 import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { PackagePolicy } from '../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import { FleetServerOnPremRequiredCallout } from '../../components';
 
 import { getInstallCommandForPlatform } from './install_command_utils';
 
@@ -720,6 +721,8 @@ export const OnPremInstructions: React.FC = () => {
 
   return (
     <>
+      <FleetServerOnPremRequiredCallout />
+      <EuiSpacer size="xl" />
       <EuiText>
         <h2>
           <FormattedMessage
@@ -751,8 +754,8 @@ export const OnPremInstructions: React.FC = () => {
       <EuiSteps
         className="eui-textLeft"
         steps={[
-          DownloadStep(),
           AgentPolicySelectionStep({ policyId, setPolicyId }),
+          DownloadStep(true),
           deploymentModeStep({ deploymentMode, setDeploymentMode }),
           addFleetServerHostStep({ addFleetServerHost }),
           ServiceTokenStep({
