@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
-import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import {
   basicCase,
@@ -34,7 +33,6 @@ const defaultProps = {
   caseServices: {},
   caseUserActions: [],
   connectors: [],
-  getCaseDetailHrefWithCommentId: jest.fn(),
   actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
   onRuleDetailsClick: jest.fn(),
@@ -71,9 +69,6 @@ describe(`UserActionTree`, () => {
       isLoadingIds: [],
       patchComment,
     }));
-    const formHookMock = getFormMock(sampleData);
-    useFormMock.mockImplementation(() => ({ form: formHookMock }));
-    useFormDataMock.mockImplementation(() => [{ content: sampleData.content, comment: '' }]);
 
     jest
       .spyOn(routeData, 'useParams')
@@ -260,6 +255,13 @@ describe(`UserActionTree`, () => {
       .simulate('click');
 
     wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: sampleData.content },
+      });
+
+    wrapper
       .find(
         `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-save-markdown"]`
       )
@@ -305,6 +307,13 @@ describe(`UserActionTree`, () => {
       .simulate('click');
 
     wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: sampleData.content },
+      });
+
+    wrapper
       .find(`[data-test-subj="description-action"] [data-test-subj="user-action-save-markdown"]`)
       .first()
       .simulate('click');
@@ -322,21 +331,16 @@ describe(`UserActionTree`, () => {
     });
   });
 
-  it('quotes', async () => {
-    const commentData = {
-      comment: '',
-    };
-    const setFieldValue = jest.fn();
+  it('shows quoted text in last MarkdownEditorTextArea', async () => {
+    const quoteableText = `> ${defaultProps.data.description} \n\n`;
 
-    const formHookMock = getFormMock(commentData);
-    useFormMock.mockImplementation(() => ({ form: { ...formHookMock, setFieldValue } }));
-
-    const props = defaultProps;
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...props} />
+        <UserActionTree {...defaultProps} />
       </TestProviders>
     );
+
+    expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).not.toContain(quoteableText);
 
     wrapper
       .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
@@ -347,8 +351,9 @@ describe(`UserActionTree`, () => {
       .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
       .first()
       .simulate('click');
+
     await waitFor(() => {
-      expect(setFieldValue).toBeCalledWith('comment', `> ${props.data.description} \n\n`);
+      expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).toContain(quoteableText);
     });
   });
 
