@@ -64,14 +64,16 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     }
   };
 
-  const { isLoading, data: getData } = useQuery<ProcessEventResults, Error>(
-    ['process-tree', 'process_tree'],
-    () =>
-      http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
-        query: {
-          sessionEntityId,
-        },
-      })
+  const {
+    isLoading,
+    isError,
+    data: getData,
+  } = useQuery<ProcessEventResults, Error>(['process-tree', 'process_tree'], () =>
+    http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
+      query: {
+        sessionEntityId,
+      },
+    })
   );
 
   const sortEvents = (a: ProcessEvent, b: ProcessEvent) => {
@@ -118,7 +120,18 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
           />
         </SectionLoading>
       );
-    } else if (data) {
+    }
+    if (isError) {
+      return (
+        <EuiEmptyPrompt
+          iconType="alert"
+          color="danger"
+          title={<h2>Error loading Session View</h2>}
+          body={<p>There was an error loading the Session View.</p>}
+        />
+      );
+    }
+    if (data) {
       return (
         <div css={styles.processTree}>
           <ProcessTree
@@ -131,17 +144,9 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         </div>
       );
     }
-    return (
-      <EuiEmptyPrompt
-        iconType="alert"
-        color="danger"
-        title={<h2>Error loading Session View</h2>}
-        body={<p>There was an error loading the Session View.</p>}
-      />
-    );
   };
 
-  if (!(isLoading || data.length)) {
+  if (!(isLoading || isError || data.length)) {
     return renderNoData();
   }
 
