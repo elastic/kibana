@@ -20,12 +20,19 @@ import {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  composeHttpHandlerMocks,
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../common/mock/endpoint/http_handler_mock_factory';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { POLICY_REFERENCE_PREFIX } from '../../../../common/endpoint/service/trusted_apps/mapping';
 import { getTrustedAppsListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
+import {
+  fleetGetAgentPolicyListHttpMock,
+  FleetGetAgentPolicyListHttpMockInterface,
+  fleetGetEndpointPackagePolicyListHttpMock,
+  FleetGetEndpointPackagePolicyListHttpMockInterface,
+} from './fleet_mocks';
 
 interface FindExceptionListItemSchemaQueryParams
   extends Omit<FindExceptionListItemSchema, 'page' | 'per_page'> {
@@ -174,3 +181,21 @@ export const trustedAppsPostCreateListHttpMock =
       },
     },
   ]);
+
+export type TrustedAppsAllHttpMocksInterface = FleetGetEndpointPackagePolicyListHttpMockInterface &
+  FleetGetAgentPolicyListHttpMockInterface &
+  TrustedAppsGetListHttpMocksInterface &
+  TrustedAppsGetOneHttpMocksInterface &
+  TrustedAppPutHttpMocksInterface &
+  TrustedAppPostHttpMocksInterface &
+  TrustedAppsPostCreateListHttpMockInterface;
+/** Use this HTTP mock when wanting to mock the API calls done by the Trusted Apps Http service */
+export const trustedAppsAllHttpMocks = composeHttpHandlerMocks<TrustedAppsAllHttpMocksInterface>([
+  trustedAppsGetListHttpMocks,
+  trustedAppsGetOneHttpMocks,
+  trustedAppPutHttpMocks,
+  trustedAppPostHttpMocks,
+  trustedAppsPostCreateListHttpMock,
+  fleetGetEndpointPackagePolicyListHttpMock,
+  fleetGetAgentPolicyListHttpMock,
+]);
