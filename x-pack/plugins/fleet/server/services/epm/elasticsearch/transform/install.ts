@@ -15,6 +15,8 @@ import type { EsAssetReference, InstallablePackage } from '../../../../../common
 import { getInstallation } from '../../packages';
 import { appContextService } from '../../../app_context';
 
+import { getESAssetMetadata } from '../meta';
+
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
 
@@ -71,13 +73,16 @@ export const installTransform = async (
     await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, transformRefs);
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
+      const content = JSON.parse(getAsset(path).toString('utf-8'));
+      content.meta = getESAssetMetadata({ packageName: installablePackage.name });
+
       return {
         installationName: getTransformNameForInstallation(
           installablePackage,
           path,
           installNameSuffix
         ),
-        content: getAsset(path).toString('utf-8'),
+        content,
       };
     });
 
