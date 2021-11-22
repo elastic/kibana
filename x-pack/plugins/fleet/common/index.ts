@@ -11,4 +11,5 @@
 export * from './constants';
 export * from './services';
 export * from './types';
-export { FleetAuthz, calculateAuthz } from './authz';
+export type { FleetAuthz } from './authz';
+export { calculateAuthz } from './authz';
