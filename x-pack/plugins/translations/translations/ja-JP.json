@@ -17835,8 +17835,6 @@
     "xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel": "削除",
     "xpack.ml.trainedModels.modelsList.disableSelectableMessage": "モデルにはパイプラインが関連付けられています",
     "xpack.ml.trainedModels.modelsList.expandedRow.analyticsConfigTitle": "分析構成",
-    "xpack.ml.trainedModels.modelsList.expandedRow.byPipelineTitle": "パイプライン別",
-    "xpack.ml.trainedModels.modelsList.expandedRow.byProcessorTitle": "プロセッサー別",
     "xpack.ml.trainedModels.modelsList.expandedRow.configTabLabel": "構成",
     "xpack.ml.trainedModels.modelsList.expandedRow.detailsTabLabel": "詳細",
     "xpack.ml.trainedModels.modelsList.expandedRow.detailsTitle": "詳細",
