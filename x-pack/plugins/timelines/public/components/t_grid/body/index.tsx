@@ -36,6 +36,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils/technical_field_names';
+import { Filter } from '@kbn/es-query';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -58,6 +59,7 @@ import { getColumnHeaders } from './column_headers/helpers';
 import {
   addBuildingBlockStyle,
   getEventIdToDataMapping,
+  hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
 } from './helpers';
@@ -77,7 +79,6 @@ import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/com
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { useDataGridHeightHack } from './height_hack';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import { REMOVE_COLUMN } from './column_headers/translations';
 
 const StatefulAlertStatusBulkActions = lazy(
@@ -92,6 +93,7 @@ interface OwnProps {
   createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
+  disabledCellActions: string[];
   filters?: Filter[];
   filterQuery?: string;
   filterStatus?: AlertStatus;
@@ -145,16 +147,6 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-// TODO: accept extra list of column ids without actions from callsites
-const FIELDS_WITHOUT_CELL_ACTIONS = [
-  '@timestamp',
-  'signal.rule.risk_score',
-  'signal.reason',
-  'kibana.alert.duration.us',
-  'kibana.alert.reason',
-];
-const hasCellActions = (columnId?: string) =>
-  columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
 const transformControlColumns = ({
   columnHeaders,
   controlColumns,
@@ -182,6 +174,7 @@ const transformControlColumns = ({
   controlColumns: ControlColumnProps[];
   createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
+  disabledCellActions: string[];
   isEventViewer?: boolean;
   loadingEventIds: string[];
   onRowSelected: OnRowSelected;
@@ -311,6 +304,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     createFieldComponent,
     data,
     defaultCellActions,
+    disabledCellActions,
     filterQuery,
     filters,
     filterStatus,
@@ -621,6 +615,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           controlColumns,
           createFieldComponent,
           data,
+          disabledCellActions,
           isEventViewer,
           loadingEventIds,
           onRowSelected,
@@ -647,6 +642,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       columnHeaders,
       createFieldComponent,
       data,
+      disabledCellActions,
       isEventViewer,
       id,
       loadingEventIds,
@@ -692,7 +688,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 },
               ],
             },
-            ...(hasCellActions(header.id)
+            ...(hasCellActions({
+              columnId: header.id,
+              disabledCellActions,
+            })
               ? {
                   cellActions:
                     header.tGridCellActions?.map(buildAction) ??
@@ -701,7 +700,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               : {}),
           };
         }),
-      [columnHeaders, defaultCellActions, browserFields, data, pageSize, id, dispatch]
+      [
+        browserFields,
+        columnHeaders,
+        data,
+        defaultCellActions,
+        disabledCellActions,
+        dispatch,
+        id,
+        pageSize,
+      ]
     );
 
     const renderTGridCellValue = useMemo(() => {

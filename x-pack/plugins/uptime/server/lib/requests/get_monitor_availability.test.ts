@@ -241,7 +241,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
         }
       `);
     });
@@ -387,7 +387,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
         }
       `);
 
@@ -701,7 +701,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
         }
       `);
 
@@ -799,7 +799,7 @@ describe('monitor availability', () => {
               },
               "size": 0,
             },
-            "index": "heartbeat-8*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
           },
         ]
       `);
@@ -929,7 +929,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
         }
       `);
     });

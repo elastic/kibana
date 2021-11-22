@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const searchSessions = getService('searchSessions');
 
-  describe('Search session example', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/118921
+  describe.skip('Search session example', () => {
     const appId = 'searchExamples';
 
     before(async function () {
