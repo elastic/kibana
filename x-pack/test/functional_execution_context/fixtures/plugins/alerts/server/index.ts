@@ -6,7 +6,6 @@
  */
 
 import './ensure_apm_started';
-import type { PluginInitializerContext } from 'kibana/server';
 import { FixturePlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => new FixturePlugin(ctx);
+export const plugin = () => new FixturePlugin();
