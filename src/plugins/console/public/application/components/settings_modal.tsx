@@ -44,7 +44,7 @@ export function DevToolsSettingsModal(props: Props) {
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
   const [polling, setPolling] = useState(props.settings.polling);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
-  const [historyDisabled] = useState(props.settings.historyDisabled);
+  const [historyDisabled, setHistoryDisabled] = useState(props.settings.historyDisabled);
 
   const autoCompleteCheckboxes = [
     {
@@ -217,6 +217,24 @@ export function DevToolsSettingsModal(props: Props) {
               />
             }
             onChange={(e) => setTripleQuotes(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <FormattedMessage id="console.settingsPage.historyLabel" defaultMessage="History" />
+          }
+        >
+          <EuiSwitch
+            checked={historyDisabled}
+            id="historyDisabled"
+            label={
+              <FormattedMessage
+                defaultMessage="Disable saving requests to history"
+                id="console.settingsPage.savingRequestsToHistoryMessage"
+              />
+            }
+            onChange={(e) => setHistoryDisabled(e.target.checked)}
           />
         </EuiFormRow>
 
