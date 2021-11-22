@@ -6,12 +6,12 @@
  */
 
 import moment from 'moment';
-import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { calculateAvailability } from '../calculate_availability';
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 interface Logstash {
   jvm?: {
@@ -64,29 +64,33 @@ interface Logstash {
  *  - events
  *  - config reloads
  */
-export async function getNodes(
-  req: LegacyRequest,
-  lsIndexPattern: string,
-  { clusterUuid }: { clusterUuid: string }
-) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in getNodes');
+export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUuid: string }) {
+  const dataset = 'stats';
+  const type = 'logstash_stats';
+  const moduleType = 'logstash';
+
+  const indexPatterns = getNewIndexPatterns({
+    req,
+    moduleType,
+    datasets: [dataset],
+  });
 
   const config = req.server.config();
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
   const params = {
-    index: lsIndexPattern,
+    index: indexPatterns,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
     ignore_unavailable: true,
     body: {
       query: createQuery({
-        moduleType: 'logstash',
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
         start,
         end,
         clusterUuid,
         metric: LogstashMetric.getMetricFields(),
-        types: ['stats', 'logstash_stats'],
       }),
       collapse: {
         field: 'logstash_stats.logstash.uuid',

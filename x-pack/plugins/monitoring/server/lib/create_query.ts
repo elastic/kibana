@@ -65,8 +65,8 @@ export function createTimeFilter(options: {
  * @param {Metric} options.metric - Metric instance or metric fields object @see ElasticsearchMetric.getMetricFields
  */
 export function createQuery(options: {
-  moduleType?: string;
-  types?: string[];
+  type?: string;
+  dsDataset?: string;
   dsType?: string;
   filters?: any[];
   clusterUuid: string;
@@ -76,8 +76,8 @@ export function createQuery(options: {
   metric?: { uuidField?: string; timestampField: string };
 }) {
   const {
-    moduleType,
-    types,
+    type,
+    dsDataset,
     clusterUuid,
     uuid,
     filters,
@@ -85,8 +85,6 @@ export function createQuery(options: {
   } = defaults(options, {
     filters: [],
   });
-  // TODO: improve typing instead of having this
-  if (types?.length && !moduleType) throw new Error('types must have a product type');
 
   const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
@@ -95,12 +93,11 @@ export function createQuery(options: {
       should: [{ term: { 'data_stream.type': dsType } }],
     },
   };
-  if (types && types.length) {
-    typeFilter.bool.should.push(
-      ...types.map((t) => ({ term: { 'data_stream.name': `${moduleType}.${t}` } })),
-      ...types.map((t) => ({ term: { type: t } })),
-      ...types.map((t) => ({ term: { 'metricset.name': t } }))
-    );
+  if (dsDataset) {
+    typeFilter.bool.should.push({ term: { 'data_stream.dataset': dsDataset } });
+  }
+  if (type) {
+    typeFilter.bool.should.push({ term: { type } });
   }
 
   let clusterUuidFilter;

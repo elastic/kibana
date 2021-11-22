@@ -94,12 +94,12 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
 
   const metric = ElasticsearchMetric.getMetricFields();
 
-  const datasets = ['index_recovery'];
+  const dataset = 'index_recovery';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets,
+    datasets: [dataset],
   });
 
   const legacyParams = {
@@ -110,8 +110,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
       _source: ['index_recovery.shards'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        moduleType,
-        types: datasets,
+        type: dataset,
         start,
         end,
         clusterUuid,
@@ -119,6 +118,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
       }),
     },
   };
+
   const mbParams = {
     index: indexPattern,
     size,
@@ -127,8 +127,8 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
       _source: ['elasticsearch.index.recovery', '@timestamp'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        moduleType,
-        types: datasets,
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
         start,
         end,
         clusterUuid,

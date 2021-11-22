@@ -25,8 +25,8 @@ export function createApmQuery(options: {
   const opts = {
     filters: [] as any[],
     metric: ApmMetric.getMetricFields(),
-    moduleType: 'beats',
-    types: ['stats', 'beats_stats'],
+    type: 'beats_stats',
+    dsDataset: 'beats.stats',
     ...(options ?? {}),
   };
 

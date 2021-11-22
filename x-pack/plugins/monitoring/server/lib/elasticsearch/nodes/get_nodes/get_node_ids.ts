@@ -20,12 +20,12 @@ export async function getNodeIds(
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
-  const datasets = ['node_stats'];
+  const dataset = 'node_stats';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets,
+    datasets: [dataset],
   });
 
   const params = {
@@ -35,8 +35,8 @@ export async function getNodeIds(
     filter_path: ['aggregations.composite_data.buckets'],
     body: {
       query: createQuery({
-        moduleType,
-        types: ['node_stats'],
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
         start,
         end,
         metric: ElasticsearchMetric.getMetricFields(),

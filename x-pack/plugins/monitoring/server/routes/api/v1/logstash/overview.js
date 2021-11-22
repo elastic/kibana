@@ -62,7 +62,7 @@ export function logstashOverviewRoute(server) {
               },
             },
           ]),
-          getClusterStatus(req, lsIndexPattern, { clusterUuid }),
+          getClusterStatus(req, { clusterUuid }),
         ]);
 
         return {

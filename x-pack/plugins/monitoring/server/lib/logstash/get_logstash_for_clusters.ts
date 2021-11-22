@@ -8,9 +8,9 @@
 import { get } from 'lodash';
 import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
-import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { LogstashClusterMetric } from '../metrics';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 const { MEMORY, PERSISTED } = LOGSTASH.QUEUE_TYPES;
 
@@ -38,26 +38,32 @@ const getQueueTypes = (queueBuckets: Array<Bucket & { num_pipelines: { value: nu
  */
 export function getLogstashForClusters(
   req: LegacyRequest,
-  lsIndexPattern: string,
   clusters: Array<{ cluster_uuid: string } | Cluster>
 ) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in logstash/getLogstashForClusters');
-
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
   const config = req.server.config();
+
+  const dataset = 'stats';
+  const type = 'logstash_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    req,
+    moduleType,
+    datasets: [dataset],
+  });
 
   return Promise.all(
     clusters.map((cluster) => {
       const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
       const params = {
-        index: lsIndexPattern,
+        index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
         body: {
           query: createQuery({
-            moduleType: 'logstash',
-            types: ['stats', 'logstash_stats'],
+            type,
+            dsDataset: `${moduleType}.${dataset}`,
             start,
             end,
             clusterUuid,

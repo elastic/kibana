@@ -59,12 +59,13 @@ export function getShardStats(
   cluster: ElasticsearchModifiedSource,
   { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {}
 ) {
-  const datasets = ['shard', 'shards'];
+  const dataset = 'shard'; // data_stream.dataset
+  const type = 'shards'; // legacy
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets,
+    datasets: [dataset],
   });
 
   const config = req.server.config();
@@ -106,8 +107,8 @@ export function getShardStats(
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        types: ['shard', 'shards'],
-        moduleType: 'elasticsearch',
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
         filters,
@@ -117,7 +118,6 @@ export function getShardStats(
       },
     },
   };
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then((resp) => {
     return handleResponse(resp, includeNodes, includeIndices, cluster);

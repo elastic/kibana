@@ -8,22 +8,27 @@
 import { get } from 'lodash';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
-import { checkParam } from '../error_missing_required';
 import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 function fetchPipelineVersions({
   req,
-  lsIndexPattern,
   clusterUuid,
   pipelineId,
 }: {
   req: LegacyRequest;
-  lsIndexPattern: string;
   clusterUuid: string;
   pipelineId: string;
 }) {
+  const dataset = 'node_stats';
+  const type = 'logstash_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    req,
+    moduleType,
+    datasets: [dataset],
+  });
   const config = req.server.config();
-  checkParam(lsIndexPattern, 'logstashIndexPattern in getPipelineVersions');
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
   const filters = [
@@ -39,8 +44,8 @@ function fetchPipelineVersions({
     },
   ];
   const query = createQuery({
-    moduleType: 'logstash',
-    types: ['stats', 'logstash_stats'],
+    type,
+    dsDataset: `${moduleType}.${dataset}`,
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters,
@@ -92,7 +97,7 @@ function fetchPipelineVersions({
   };
 
   const params = {
-    index: lsIndexPattern,
+    index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
     body: {
@@ -120,7 +125,6 @@ export function _handleResponse(response: any) {
 
 export async function getPipelineVersions(args: {
   req: LegacyRequest;
-  lsIndexPattern: string;
   clusterUuid: string;
   pipelineId: string;
 }) {

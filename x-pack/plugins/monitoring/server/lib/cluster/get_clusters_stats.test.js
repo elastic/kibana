@@ -28,7 +28,7 @@ describe('handleClusterStats', () => {
     expect(handleClusterStats({ hits: { hits: [{ _index: '.monitoring' }] } }, {})).toEqual([]);
   });
 
-  it('handles ccs request adding it to the cluster detail', () => {
+  it('handles ccs request by adding it to the cluster detail', () => {
     const response = {
       hits: {
         hits: [

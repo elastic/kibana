@@ -73,10 +73,11 @@ export function getIndexSummary(
     end,
   }: { clusterUuid: string; indexUuid: string; start: number; end: number }
 ) {
-  const datasets = ['index', 'index_stats'];
+  const dataset = 'index'; // data_stream.dataset
+  const type = 'index_stats'; // legacy
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    datasets,
+    datasets: [dataset],
     moduleType,
     req,
   });
@@ -99,8 +100,8 @@ export function getIndexSummary(
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        types: ['index', 'index_stats'],
-        moduleType,
+        type,
+        dsDataset: dataset,
         start,
         end,
         clusterUuid,

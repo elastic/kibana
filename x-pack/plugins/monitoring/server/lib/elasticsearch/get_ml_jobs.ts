@@ -46,12 +46,13 @@ export function getMlJobs(req: LegacyRequest) {
   const clusterUuid = req.params.clusterUuid;
   const metric = ElasticsearchMetric.getMetricFields();
 
-  const datasets = ['ml_job', 'job_stats'];
+  const dataset = 'ml_job';
+  const type = 'job_stats';
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets,
+    datasets: [dataset],
   });
 
   const params = {
@@ -78,8 +79,8 @@ export function getMlJobs(req: LegacyRequest) {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       collapse: { field: 'job_stats.job_id' },
       query: createQuery({
-        types: datasets,
-        moduleType,
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
         start,
         end,
         clusterUuid,
@@ -106,12 +107,13 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSo
     const clusterUuid = req.params.clusterUuid;
     const metric = ElasticsearchMetric.getMetricFields();
 
-    const datasets = ['ml_job', 'job_stats'];
+    const type = 'job_stats';
+    const dataset = 'ml_job';
     const moduleType = 'elasticsearch';
     const indexPatterns = getNewIndexPatterns({
       req,
       moduleType,
-      datasets,
+      datasets: [dataset],
     });
 
     const params = {
@@ -120,13 +122,19 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSo
       ignore_unavailable: true,
       filter_path: 'aggregations.jobs_count.value',
       body: {
-        query: createQuery({ moduleType, types: datasets, start, end, clusterUuid, metric }),
+        query: createQuery({
+          type,
+          dsDataset: `${moduleType}.${dataset}`,
+          start,
+          end,
+          clusterUuid,
+          metric,
+        }),
         aggs: {
           jobs_count: { cardinality: { field: 'job_stats.job_id' } },
         },
       },
     };
-
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
     return callWithRequest(req, 'search', params).then((response: ElasticsearchResponse) => {

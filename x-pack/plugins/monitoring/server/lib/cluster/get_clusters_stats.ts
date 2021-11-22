@@ -42,12 +42,12 @@ export function getClustersStats(req: LegacyRequest, clusterUuid: string) {
  * @return {Promise} Object representing each cluster.
  */
 function fetchClusterStats(req: LegacyRequest, clusterUuid: string) {
-  const datasets = ['cluster_stats'];
+  const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets,
+    datasets: [dataset],
   });
 
   const config = req.server.config();
@@ -86,8 +86,8 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string) {
     ],
     body: {
       query: createQuery({
-        moduleType,
-        types: datasets,
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
         start,
         end,
         metric,

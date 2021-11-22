@@ -64,12 +64,12 @@ export async function getNodes(
     },
   ];
 
-  const datasets = ['node_stats'];
+  const dataset = 'node_stats';
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets,
+    datasets: [dataset],
   });
 
   const params = {
@@ -78,8 +78,8 @@ export async function getNodes(
     ignore_unavailable: true,
     body: {
       query: createQuery({
-        moduleType,
-        types: datasets,
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
         start,
         end,
         clusterUuid,

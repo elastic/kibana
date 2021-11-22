@@ -12,6 +12,7 @@ import { checkParam, MissingRequiredError } from '../error_missing_required';
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const legacySource = resp.hits?.hits[0]?._source.kibana_stats;
@@ -31,13 +32,15 @@ export function handleResponse(resp: ElasticsearchResponse) {
 
 export function getKibanaInfo(
   req: LegacyRequest,
-  kbnIndexPattern: string,
   { clusterUuid, kibanaUuid }: { clusterUuid: string; kibanaUuid: string }
 ) {
-  checkParam(kbnIndexPattern, 'kbnIndexPattern in getKibanaInfo');
-
+  const moduleType = 'kibana';
+  const indexPatterns = getNewIndexPatterns({
+    req,
+    moduleType,
+  });
   const params = {
-    index: kbnIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     filter_path: [

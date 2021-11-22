@@ -99,11 +99,12 @@ export function getShardAllocation(
   const clusterUuid = req.params.clusterUuid;
   const metric = ElasticsearchMetric.getMetricFields();
 
-  const datasets = ['shard', 'shards'];
+  const dataset = 'shard'; // data_stream.dataset
+  const type = 'shards'; // legacy
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     req,
-    datasets,
+    datasets: [dataset],
     moduleType,
   });
 
@@ -113,15 +114,14 @@ export function getShardAllocation(
     ignore_unavailable: true,
     body: {
       query: createQuery({
-        types: ['shard', 'shards'],
-        moduleType,
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
         clusterUuid,
         metric,
         filters,
       }),
     },
   };
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then(handleResponse);
 }

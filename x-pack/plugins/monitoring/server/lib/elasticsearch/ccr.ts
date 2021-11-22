@@ -17,12 +17,12 @@ import { LegacyRequest } from '../../types';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export async function checkCcrEnabled(req: LegacyRequest) {
-  const datasets = ['cluster_stats'];
+  const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets,
+    datasets: [dataset],
   });
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
@@ -37,8 +37,8 @@ export async function checkCcrEnabled(req: LegacyRequest) {
     ignore_unavailable: true,
     body: {
       query: createQuery({
-        moduleType,
-        types: ['cluster_stats'],
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
         start,
         end,
         clusterUuid,

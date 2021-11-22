@@ -117,11 +117,11 @@ export function getNodeSummary(
     },
   ];
 
-  const datasets = ['node_stats'];
+  const dataset = 'node_stats';
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     req,
-    datasets,
+    datasets: [dataset],
     moduleType,
   });
 
@@ -132,8 +132,8 @@ export function getNodeSummary(
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        types: ['node_stats'],
-        moduleType,
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
         start,
         end,
         clusterUuid,

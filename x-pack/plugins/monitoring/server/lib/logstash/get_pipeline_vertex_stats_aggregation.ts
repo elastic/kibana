@@ -6,6 +6,7 @@
  */
 
 import { LegacyRequest, PipelineVersion } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
@@ -137,7 +138,6 @@ function createTimeSeriesAgg(timeSeriesIntervalInSeconds: number, ...aggsList: o
 
 function fetchPipelineVertexTimeSeriesStats({
   query,
-  logstashIndexPattern,
   pipelineId,
   version,
   vertexId,
@@ -147,7 +147,6 @@ function fetchPipelineVertexTimeSeriesStats({
   req,
 }: {
   query: object;
-  logstashIndexPattern: string;
   pipelineId: string;
   version: PipelineVersion;
   vertexId: string;
@@ -168,8 +167,13 @@ function fetchPipelineVertexTimeSeriesStats({
     ),
   };
 
+  const indexPatterns = getNewIndexPatterns({
+    req,
+    moduleType: 'logstash',
+  });
+
   const params = {
-    index: logstashIndexPattern,
+    index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
     filter_path: [
@@ -191,7 +195,6 @@ function fetchPipelineVertexTimeSeriesStats({
 
 export function getPipelineVertexStatsAggregation({
   req,
-  logstashIndexPattern,
   timeSeriesIntervalInSeconds,
   clusterUuid,
   pipelineId,
@@ -199,7 +202,6 @@ export function getPipelineVertexStatsAggregation({
   vertexId,
 }: {
   req: LegacyRequest;
-  logstashIndexPattern: string;
   timeSeriesIntervalInSeconds: number;
   clusterUuid: string;
   pipelineId: string;
@@ -226,9 +228,13 @@ export function getPipelineVertexStatsAggregation({
   const start = version.firstSeen;
   const end = version.lastSeen;
 
+  const moduleType = 'logstash';
+  const dataset = 'node_stats';
+  const type = 'logstash_stats';
+
   const query = createQuery({
-    moduleType: 'logstash',
-    types: ['stats', 'logstash_stats'],
+    type,
+    dsDataset: `${moduleType}.${dataset}`,
     start,
     end,
     metric: LogstashMetric.getMetricFields(),
@@ -240,7 +246,6 @@ export function getPipelineVertexStatsAggregation({
 
   return fetchPipelineVertexTimeSeriesStats({
     query,
-    logstashIndexPattern,
     pipelineId,
     version,
     vertexId,

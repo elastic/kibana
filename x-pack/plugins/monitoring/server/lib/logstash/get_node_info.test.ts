@@ -189,7 +189,11 @@ describe('get_logstash_info', () => {
       then: jest.fn(),
     });
     const req = {
+      payload: {},
       server: {
+        config: () => ({
+          get: () => undefined,
+        }),
         plugins: {
           elasticsearch: {
             getCluster: () => ({
@@ -199,7 +203,8 @@ describe('get_logstash_info', () => {
         },
       },
     } as unknown as LegacyRequest;
-    await getNodeInfo(req, '.monitoring-logstash-*', {
+
+    await getNodeInfo(req, {
       clusterUuid: STANDALONE_CLUSTER_CLUSTER_UUID,
       logstashUuid: 'logstash_uuid',
     });

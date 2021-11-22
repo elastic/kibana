@@ -21,6 +21,7 @@ import {
   PipelineThroughputMetricKey,
   PipelineWithMetrics,
 } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 /**
  * This function performs an optimization around the pipeline listing tables in the UI. To avoid
@@ -42,7 +43,6 @@ import {
 
 interface GetPaginatedPipelinesParams {
   req: LegacyRequest;
-  lsIndexPattern: string;
   clusterUuid: string;
   logstashUuid?: string;
   metrics: {
@@ -55,7 +55,6 @@ interface GetPaginatedPipelinesParams {
 }
 export async function getPaginatedPipelines({
   req,
-  lsIndexPattern,
   clusterUuid,
   logstashUuid,
   metrics,
@@ -70,16 +69,15 @@ export async function getPaginatedPipelines({
   const size = config.get('monitoring.ui.max_bucket_size') as unknown as number;
   let pipelines = await getLogstashPipelineIds({
     req,
-    lsIndexPattern,
     clusterUuid,
     logstashUuid,
     size,
   });
   // this is needed for sorting
   if (sortField === throughputMetric) {
-    pipelines = await getPaginatedThroughputData(pipelines, req, lsIndexPattern, throughputMetric);
+    pipelines = await getPaginatedThroughputData(pipelines, req, throughputMetric);
   } else if (sortField === nodesCountMetric) {
-    pipelines = await getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountMetric);
+    pipelines = await getPaginatedNodesData(pipelines, req, nodesCountMetric);
   }
 
   const filteredPipelines = filter(pipelines, queryText, ['id']); // We only support filtering by id right now
@@ -91,7 +89,6 @@ export async function getPaginatedPipelines({
   const response = {
     pipelines: await getPipelines({
       req,
-      lsIndexPattern,
       pipelines: pageOfPipelines,
       throughputMetric,
       nodesCountMetric,
@@ -131,9 +128,15 @@ function processPipelinesAPIResponse(
 async function getPaginatedThroughputData(
   pipelines: Pipeline[],
   req: LegacyRequest,
-  lsIndexPattern: string,
   throughputMetric: PipelineThroughputMetricKey
 ): Promise<Pipeline[]> {
+  const dataset = 'node_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    req,
+    moduleType,
+    datasets: [dataset],
+  });
   const metricSeriesData: any = Object.values(
     await Promise.all(
       pipelines.map((pipeline) => {
@@ -141,7 +144,7 @@ async function getPaginatedThroughputData(
           try {
             const data = await getMetrics(
               req,
-              lsIndexPattern,
+              indexPatterns,
               [throughputMetric],
               [
                 {
@@ -197,13 +200,19 @@ async function getPaginatedThroughputData(
 async function getPaginatedNodesData(
   pipelines: Pipeline[],
   req: LegacyRequest,
-  lsIndexPattern: string,
   nodesCountMetric: PipelineNodeCountMetricKey
 ): Promise<Pipeline[]> {
+  const dataset = 'node_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    req,
+    moduleType,
+    datasets: [dataset],
+  });
   const pipelineWithMetrics = cloneDeep(pipelines);
   const metricSeriesData = await getMetrics(
     req,
-    lsIndexPattern,
+    indexPatterns,
     [nodesCountMetric],
     [
       {
@@ -228,26 +237,31 @@ async function getPaginatedNodesData(
 
 async function getPipelines({
   req,
-  lsIndexPattern,
   pipelines,
   throughputMetric,
   nodesCountMetric,
 }: {
   req: LegacyRequest;
-  lsIndexPattern: string;
   pipelines: Pipeline[];
   throughputMetric: PipelineThroughputMetricKey;
   nodesCountMetric: PipelineNodeCountMetricKey;
 }): Promise<PipelineWithMetrics[]> {
+  const dataset = 'node_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    req,
+    moduleType,
+    datasets: [dataset],
+  });
   const throughputPipelines = await getThroughputPipelines(
     req,
-    lsIndexPattern,
+    indexPatterns,
     pipelines,
     throughputMetric
   );
   const nodeCountPipelines = await getNodePipelines(
     req,
-    lsIndexPattern,
+    indexPatterns,
     pipelines,
     nodesCountMetric
   );

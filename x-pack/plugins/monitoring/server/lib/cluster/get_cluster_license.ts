@@ -17,12 +17,12 @@ import { getNewIndexPatterns } from './get_index_patterns';
 
 // is this being used anywhere?  not called within the app
 export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
-  const datasets = ['cluster_stats'];
+  const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets,
+    datasets: [dataset],
   });
 
   const params = {
@@ -33,8 +33,8 @@ export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        moduleType,
-        types: datasets,
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
         clusterUuid,
         metric: ElasticsearchMetric.getMetricFields(),
       }),

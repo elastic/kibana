@@ -36,12 +36,6 @@ import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
-import { getKibanas } from '../kibana/get_kibanas';
-import { getNodes } from '../logstash/get_nodes';
-import { getPipelineStatsAggregation } from '../logstash/get_pipeline_stats_aggregation';
-import { getPipelineStateDocument } from '../logstash/get_pipeline_state_document';
-import { getPipelineVersions } from '../logstash/get_pipeline_versions';
-import { getPipelineVertexStatsAggregation } from '../logstash/get_pipeline_vertex_stats_aggregation';
 import { getApmInfo } from '../apm/get_apm_info';
 
 /**
@@ -58,7 +52,6 @@ export async function getClustersFromRequest(
   }: { clusterUuid: string; start: number; end: number; codePaths: string[] }
 ) {
   const {
-    esIndexPattern,
     kbnIndexPattern,
     lsIndexPattern,
     beatsIndexPattern,
@@ -189,7 +182,7 @@ export async function getClustersFromRequest(
   });
   const kibanas =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
-      ? await getKibanasForClusters(req, kbnIndexPattern, clusters)
+      ? await getKibanasForClusters(req, clusters)
       : [];
   // add the kibana data to each cluster
   kibanas.forEach((kibana) => {
@@ -202,8 +195,8 @@ export async function getClustersFromRequest(
 
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
-    const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
-    const pipelines = await getLogstashPipelineIds({ req, lsIndexPattern, clusterUuid, size: 1 });
+    const logstashes = await getLogstashForClusters(req, clusters);
+    const pipelines = await getLogstashPipelineIds({ req, clusterUuid, size: 1 });
     logstashes.forEach((logstash) => {
       const clusterIndex = clusters.findIndex(
         (cluster) =>

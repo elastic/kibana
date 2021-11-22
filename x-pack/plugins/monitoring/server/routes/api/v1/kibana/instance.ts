@@ -53,7 +53,7 @@ export function kibanaInstanceRoute(server: LegacyServer) {
       try {
         const [metrics, kibanaSummary] = await Promise.all([
           getMetrics(req, kbnIndexPattern, metricSet),
-          getKibanaInfo(req, kbnIndexPattern, { clusterUuid, kibanaUuid }),
+          getKibanaInfo(req, { clusterUuid, kibanaUuid }),
         ]);
 
         return {

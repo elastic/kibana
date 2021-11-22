@@ -35,11 +35,13 @@ async function getUnassignedShardData(req: LegacyRequest, cluster: Elasticsearch
     });
   }
 
-  const datasets = ['shard', 'shards'];
+  const dataset = 'shard'; // data_stream.dataset
+  const type = 'shards'; // legacy
+  const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     req,
-    moduleType: 'elasticsearch',
-    datasets,
+    moduleType,
+    datasets: [dataset],
   });
 
   const params = {
@@ -49,8 +51,8 @@ async function getUnassignedShardData(req: LegacyRequest, cluster: Elasticsearch
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        moduleType: 'elasticsearch',
-        types: datasets,
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
         filters,

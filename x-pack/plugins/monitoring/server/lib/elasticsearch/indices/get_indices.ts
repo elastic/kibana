@@ -114,11 +114,12 @@ export function buildGetIndicesQuery(
     });
   }
   const metricFields = ElasticsearchMetric.getMetricFields();
-  const datasets = ['index', 'index_stats'];
+  const dataset = 'index'; // data_stream.dataset
+  const type = 'index_stats'; // legacy
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     req,
-    datasets,
+    datasets: [dataset],
     moduleType,
   });
 
@@ -153,8 +154,8 @@ export function buildGetIndicesQuery(
     ],
     body: {
       query: createQuery({
-        types: datasets,
-        moduleType,
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
         start,
         end,
         clusterUuid,

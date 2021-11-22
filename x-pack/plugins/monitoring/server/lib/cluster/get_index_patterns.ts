@@ -53,8 +53,15 @@ export function getLegacyIndexPattern({ moduleType }: { moduleType: string }) {
       break;
     case 'kibana':
       indexPattern = INDEX_PATTERN_KIBANA;
+      break;
+    case 'logstash':
+      indexPattern = INDEX_PATTERN_LOGSTASH;
+      break;
+    case 'beats':
+      indexPattern = INDEX_PATTERN_BEATS;
+      break;
     default:
-      throw new Error('invalid product type to create index pattern');
+      throw new Error(`invalid module type to create index pattern: ${moduleType}`);
   }
   return indexPattern;
 }

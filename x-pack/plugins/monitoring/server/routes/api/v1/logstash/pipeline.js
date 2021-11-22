@@ -72,7 +72,7 @@ export function logstashPipelineRoute(server) {
       }
       const version = getPipelineVersion(versions, pipelineHash);
 
-      const promises = [getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, version)];
+      const promises = [getPipeline(req, config, clusterUuid, pipelineId, version)];
       if (detailVertexId) {
         promises.push(
           getPipelineVertex(
