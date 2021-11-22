@@ -942,7 +942,7 @@
               "The size of the avatar."
             ],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
+              "\"s\" | \"m\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false
@@ -1567,7 +1567,7 @@
             "section": "def-common.GetSpaceResult",
             "text": "GetSpaceResult"
           },
-          ", \"color\" | \"id\" | \"description\" | \"name\" | \"initials\" | \"imageUrl\" | \"_reserved\">"
+          ", \"name\" | \"description\" | \"id\" | \"color\" | \"initials\" | \"imageUrl\" | \"_reserved\">"
         ],
         "path": "x-pack/plugins/spaces/public/types.ts",
         "deprecated": false,
@@ -2622,7 +2622,7 @@
               },
               {
                 "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view.ts"
+                "path": "x-pack/plugins/apm/server/routes/data_view/route.ts"
               },
               {
                 "plugin": "infra",
@@ -2635,18 +2635,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/server/plugin.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/plugin.ts"
               },
               {
                 "plugin": "security",
@@ -3388,7 +3376,7 @@
             },
             {
               "plugin": "apm",
-              "path": "x-pack/plugins/apm/server/routes/data_view.ts"
+              "path": "x-pack/plugins/apm/server/routes/data_view/route.ts"
             },
             {
               "plugin": "infra",
@@ -3405,18 +3393,6 @@
             {
               "plugin": "infra",
               "path": "x-pack/plugins/infra/server/plugin.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/plugin.ts"
             }
           ]
         },
