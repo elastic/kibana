@@ -127,7 +127,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
         <TopValues
           stats={stats}
           fieldFormat={fieldFormat}
-          barColor="secondary"
+          barColor="success"
           compressed={true}
           onAddFilter={onAddFilter}
         />

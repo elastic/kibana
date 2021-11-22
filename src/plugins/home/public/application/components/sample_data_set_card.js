@@ -181,7 +181,7 @@ export class SampleDataSetCard extends React.Component {
         image={this.props.previewUrl}
         title={this.props.name}
         description={this.props.description}
-        betaBadgeLabel={this.isInstalled() ? 'INSTALLED' : null}
+        betaBadgeProps={{ label: this.isInstalled() ? 'INSTALLED' : null }}
         footer={this.renderBtn()}
         data-test-subj={`sampleDataSetCard${this.props.id}`}
       />
