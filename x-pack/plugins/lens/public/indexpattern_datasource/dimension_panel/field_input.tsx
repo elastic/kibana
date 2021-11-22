@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { insertOrReplaceColumn } from '../operations/layer_helpers';
 import { FieldSelect } from './field_select';
-import type { FieldInputProps, IndexPatternColumn, OperationType } from '../operations/definitions';
+import type {
+  FieldInputProps,
+  OperationType,
+  GenericIndexPatternColumn,
+} from '../operations/definitions';
 import type { FieldBasedIndexPatternColumn } from '../operations/definitions/column_types';
 
 export function FieldInput({
@@ -39,7 +43,7 @@ export function FieldInput({
       selectedOperationDefinition?.input !== 'managedReference') ||
       (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
     getErrorMessage(
-      selectedColumn as IndexPatternColumn,
+      selectedColumn as GenericIndexPatternColumn,
       Boolean(incompleteOperation),
       selectedOperationDefinition?.input,
       currentFieldIsInvalid
@@ -87,7 +91,7 @@ export function FieldInput({
 }
 
 export function getErrorMessage(
-  selectedColumn: IndexPatternColumn | undefined,
+  selectedColumn: GenericIndexPatternColumn | undefined,
   incompleteOperation: boolean,
   input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
   fieldInvalid: boolean

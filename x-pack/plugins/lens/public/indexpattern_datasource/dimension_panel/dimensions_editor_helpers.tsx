@@ -16,7 +16,7 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText, EuiTabs, EuiTab, EuiCallOut } from '@elastic/eui';
-import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
+import { operationDefinitionMap } from '../operations';
 import { useDebouncedValue } from '../../shared_components';
 
 export const formulaOperationName = 'formula';

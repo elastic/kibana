@@ -235,16 +235,17 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     } = props;
     const onFieldSelectChange = useCallback(
       (fields) => {
+        const column = layer.columns[columnId] as TermsIndexPatternColumn;
         updateLayer({
           ...layer,
           columns: {
             ...layer.columns,
             [columnId]: {
-              ...layer.columns[columnId],
+              ...column,
               sourceField: fields[0],
               label: ofName(indexPattern.getFieldByName(fields[0])?.displayName, fields.length - 1),
               params: {
-                ...layer.columns[columnId].params,
+                ...column.params,
                 secondaryFields: fields.length > 1 ? fields.slice(1) : undefined,
               },
             },

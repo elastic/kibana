@@ -44,7 +44,7 @@ import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types'
 import { DateRange, LayerType } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-import { RangeIndexPatternColumn, rangeOperation } from './ranges';
+import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 
 export type {
