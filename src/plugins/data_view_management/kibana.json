@@ -1,5 +1,5 @@
 {
-  "id": "indexPatternManagement",
+  "id": "dataViewManagement",
   "version": "kibana",
   "server": true,
   "ui": true,
@@ -9,5 +9,5 @@
     "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
-  "description": "Index pattern management app"
+  "description": "Data view management app"
 }

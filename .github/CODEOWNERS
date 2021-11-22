@@ -79,7 +79,7 @@
 /src/plugins/data_view_field_editor @elastic/kibana-app-services
 /src/plugins/screenshot_mode @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
-/src/plugins/index_pattern_management/ @elastic/kibana-app-services
+/src/plugins/data_view_management/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
