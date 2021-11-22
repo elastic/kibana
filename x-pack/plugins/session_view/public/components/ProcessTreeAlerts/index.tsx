@@ -49,22 +49,22 @@ export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
         <EuiFlexGroup>
           <EuiFlexItem>
             <h6>
-              <FormattedMessage id="kbn.sessionView.rule" defaultMessage="Rule" />
+              <FormattedMessage id="xpack.sessionView.rule" defaultMessage="Rule" />
             </h6>
             {name}
             <h6>
-              <FormattedMessage id="kbn.sessionView.query" defaultMessage="Query" />
+              <FormattedMessage id="xpack.sessionView.query" defaultMessage="Query" />
             </h6>
             {query}
           </EuiFlexItem>
           <EuiFlexItem>
             <h6>
-              <FormattedMessage id="kbn.sessionView.severity" defaultMessage="Severity" />
+              <FormattedMessage id="xpack.sessionView.severity" defaultMessage="Severity" />
             </h6>
             {severity}
             <h6>
               <FormattedMessage
-                id="kbn.sessionView.workflowStatus"
+                id="xpack.sessionView.workflowStatus"
                 defaultMessage="Workflow status"
               />
             </h6>
@@ -72,13 +72,13 @@ export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
           </EuiFlexItem>
           <EuiFlexItem>
             <h6>
-              <FormattedMessage id="kbn.sessionView.action" defaultMessage="Action" />
+              <FormattedMessage id="xpack.sessionView.action" defaultMessage="Action" />
             </h6>
             {event.action}
             <EuiSpacer />
             <div>
               <EuiButton size="s" href={getRuleUrl(alert)}>
-                <FormattedMessage id="kbn.sessionView.viewRule" defaultMessage="View rule" />
+                <FormattedMessage id="xpack.sessionView.viewRule" defaultMessage="View rule" />
               </EuiButton>
             </div>
           </EuiFlexItem>

@@ -76,7 +76,7 @@ export const SessionViewDetailPanel = ({
           <EuiTitle size="s">
             <span>
               <FormattedMessage
-                id="kbn.sessionView.commandDetail"
+                id="xpack.sessionView.commandDetail"
                 defaultMessage="Command detail"
               />
             </span>
@@ -110,21 +110,21 @@ export const SessionViewDetailPanel = ({
       {renderSelectedProcessEvents()}
       <EuiTitle size="s">
         <span>
-          <FormattedMessage id="kbn.sessionView.sessionDetail" defaultMessage="Session detail" />
+          <FormattedMessage id="xpack.sessionView.sessionDetail" defaultMessage="Session detail" />
         </span>
       </EuiTitle>
       {/* Add session detail */}
       <EuiSpacer size="xxl" />
       <EuiTitle size="s">
         <span>
-          <FormattedMessage id="kbn.sessionView.serverDetail" defaultMessage="Server detail" />
+          <FormattedMessage id="xpack.sessionView.serverDetail" defaultMessage="Server detail" />
         </span>
       </EuiTitle>
       {/* Add server detail */}
       <EuiSpacer size="xxl" />
       <EuiTitle size="s">
         <span>
-          <FormattedMessage id="kbn.sessionView.alertDetail" defaultMessage="Alert detail" />
+          <FormattedMessage id="xpack.sessionView.alertDetail" defaultMessage="Alert detail" />
         </span>
       </EuiTitle>
       {/* Add alert detail conditionally */}

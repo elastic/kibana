@@ -160,8 +160,8 @@ class ProcessImpl implements Process {
   }
 
   getDetails() {
-    const execsForks = this.events.filter(({ event }) =>
-      [EventAction.exec, EventAction.fork].includes(event.action)
+    const execsForks = this.events.filter(
+      ({ event }) => event.action === EventAction.exec || event.action === EventAction.fork
     );
 
     if (execsForks.length === 0) {

@@ -18,6 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
+import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
 import { Process, ProcessEvent } from '../../hooks/use_process_tree';
 import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
@@ -74,14 +75,16 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     }
   };
 
-  const { data: getData } = useQuery<ProcessEventResults, Error>(
-    ['process-tree', 'process_tree'],
-    () =>
-      http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
-        query: {
-          sessionEntityId,
-        },
-      })
+  const {
+    isLoading,
+    isError,
+    data: getData,
+  } = useQuery<ProcessEventResults, Error>(['process-tree', 'process_tree'], () =>
+    http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
+      query: {
+        sessionEntityId,
+      },
+    })
   );
 
   const sortEvents = (a: ProcessEvent, b: ProcessEvent) => {
@@ -118,12 +121,48 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     );
   };
 
+  const renderProcessTree = () => {
+    if (isLoading) {
+      return (
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.sessionView.loadingProcessTree"
+            defaultMessage="Loading session…"
+          />
+        </SectionLoading>
+      );
+    }
+    if (isError) {
+      return (
+        <EuiEmptyPrompt
+          iconType="alert"
+          color="danger"
+          title={<h2>Error loading Session View</h2>}
+          body={<p>There was an error loading the Session View.</p>}
+        />
+      );
+    }
+    if (data) {
+      return (
+        <div css={styles.processTree}>
+          <ProcessTree
+            sessionEntityId={sessionEntityId}
+            forward={data}
+            searchQuery={searchQuery}
+            selectedProcess={selectedProcess}
+            onProcessSelected={onProcessSelected}
+          />
+        </div>
+      );
+    }
+  };
+
   const toggleDetailPanel = () => {
     setIsDetailMounted(!isDetailMounted);
     if (!isDetailOpen) setIsDetailOpen(true);
   };
 
-  if (!data.length) {
+  if (!(isLoading || isError || data.length)) {
     return renderNoData();
   }
 
@@ -136,7 +175,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         <EuiFlexItem grow={false}>
           <EuiButton onClick={toggleDetailPanel} iconType="list" fill>
             <FormattedMessage
-              id="kbn.sessionView.buttonOpenDetailPanel"
+              id="xpack.sessionView.buttonOpenDetailPanel"
               defaultMessage="Detail panel"
             />
           </EuiButton>
@@ -149,17 +188,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         css={styles.outerPanel}
       >
         <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
-          {data && (
-            <div css={styles.processTree}>
-              <ProcessTree
-                sessionEntityId={sessionEntityId}
-                forward={data}
-                searchQuery={searchQuery}
-                selectedProcess={selectedProcess}
-                onProcessSelected={onProcessSelected}
-              />
-            </div>
-          )}
+          {renderProcessTree()}
         </EuiSplitPanel.Inner>
         {isDetailOpen && (
           <SessionViewDetailPanel
