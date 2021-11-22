@@ -249,7 +249,7 @@ export const EnrollmentTokenHelpPopover = () => {
           <FormattedMessage
             id="interactiveSetup.enrollmentTokenHelpPopover.helpText"
             defaultMessage="The enrollment token is automatically generated when you start Elasticsearch for the first
-          time. You might need to scroll back a bit in the terminal to view the enrollment token."
+          time. You might need to scroll back a bit in the terminal to view it."
           />
         </p>
         <p>
