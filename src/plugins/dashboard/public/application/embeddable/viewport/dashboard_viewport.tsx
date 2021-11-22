@@ -32,7 +32,7 @@ interface State {
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
-  public declare readonly context: DashboardReactContextValue;
+  public readonly context!: DashboardReactContextValue;
 
   private controlsRoot: React.RefObject<HTMLDivElement>;
 
