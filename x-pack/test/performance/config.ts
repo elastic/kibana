@@ -46,6 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           commit: process.env.GIT_COMMIT,
           mergeBase: process.env.PR_MERGE_BASE,
           targetBranch: process.env.PR_TARGET_BRANCH,
+          testRunner: process.env.TEST_RUNNER,
         })
           .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
