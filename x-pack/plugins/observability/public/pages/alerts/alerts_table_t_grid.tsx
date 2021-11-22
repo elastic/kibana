@@ -11,23 +11,14 @@
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 import {
-  ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
+  ALERT_DURATION,
+  ALERT_REASON,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
-  ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_TYPED,
-} from '@kbn/rule-data-utils';
-// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import {
-  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
-  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_NON_TYPED,
+  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
-  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
+} from '@kbn/rule-data-utils/technical_field_names';
 
 import {
   EuiButtonIcon,
@@ -60,7 +51,7 @@ import type {
 } from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
-import { observabilityFeatureId } from '../../../common';
+import { observabilityAppId, observabilityFeatureId } from '../../../common';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getDefaultCellActions } from './default_cell_actions';
@@ -68,11 +59,6 @@ import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
 import { translations, paths } from '../../config';
-
-const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
-const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_WORKFLOW_STATUS: typeof ALERT_WORKFLOW_STATUS_TYPED = ALERT_WORKFLOW_STATUS_NON_TYPED;
 
 interface AlertsTableTGridProps {
   indexNames: string[];
@@ -327,6 +313,14 @@ function ObservabilityActions({
   );
 }
 
+const FIELDS_WITHOUT_CELL_ACTIONS = [
+  '@timestamp',
+  'signal.rule.risk_score',
+  'signal.reason',
+  'kibana.alert.duration.us',
+  'kibana.alert.reason',
+];
+
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
   const prevWorkflowStatus = usePrevious(workflowStatus);
@@ -389,13 +383,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      appId: observabilityFeatureId,
+      appId: observabilityAppId,
       casesOwner: observabilityFeatureId,
       casePermissions,
       type,
       columns,
       deletedEventIds,
       defaultCellActions: getDefaultCellActions({ addToQuery }),
+      disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
       filters: [],
       hasAlertsCrudPermissions,

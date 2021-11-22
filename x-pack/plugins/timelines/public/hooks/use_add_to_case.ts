@@ -6,9 +6,8 @@
  */
 import { get, isEmpty } from 'lodash/fp';
 import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Case, SubCase } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
@@ -17,21 +16,18 @@ import { tGridActions } from '../store/t_grid';
 import { useDeepEqualSelector } from './use_selector';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';
 import { AddToCaseActionProps } from '../components/actions';
+import { CasesDeepLinkId, generateCaseViewPath } from '../../../cases/public';
 
 interface UseAddToCase {
   addNewCaseClick: () => void;
   addExistingCaseClick: () => void;
   onCaseClicked: (theCase?: Case | SubCase) => void;
-  goToCreateCase: (
-    arg: MouseEvent | React.MouseEvent<Element, MouseEvent> | null
-  ) => void | Promise<void>;
   onCaseSuccess: (theCase: Case) => Promise<void>;
   attachAlertToCase: (
     theCase: Case,
     postComment?: ((arg: PostCommentArg) => Promise<void>) | undefined,
     updateCase?: ((newCase: Case) => void) | undefined
   ) => Promise<void>;
-  createCaseUrl: string;
   isAllCaseModalOpen: boolean;
   isDisabled: boolean;
   userCanCrud: boolean;
@@ -42,27 +38,6 @@ interface UseAddToCase {
   isCreateCaseFlyoutOpen: boolean;
 }
 
-const appendSearch = (search?: string) =>
-  isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
-
-const getCreateCaseUrl = (search?: string | null) => `/create${appendSearch(search ?? undefined)}`;
-
-const getCaseDetailsUrl = ({
-  id,
-  search,
-  subCaseId,
-}: {
-  id: string;
-  search?: string | null;
-  subCaseId?: string;
-}) => {
-  if (subCaseId) {
-    return `/${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(subCaseId)}${appendSearch(
-      search ?? undefined
-    )}`;
-  }
-  return `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
-};
 interface PostCommentArg {
   caseId: string;
   data: {
@@ -78,7 +53,6 @@ interface PostCommentArg {
 
 export const useAddToCase = ({
   event,
-  useInsertTimeline,
   casePermissions,
   appId,
   owner,
@@ -111,42 +85,36 @@ export const useAddToCase = ({
     }
   }, [timelineById]);
   const {
-    application: { navigateToApp, getUrlForApp, navigateToUrl },
+    application: { navigateToApp },
     notifications: { toasts },
   } = useKibana<TimelinesStartServices>().services;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const isAlert = useMemo(() => {
+
+  const isEventSupported = useMemo(() => {
     if (event !== undefined) {
-      const data = [...event.data];
-      return data.some(({ field }) => field === 'kibana.alert.rule.uuid');
+      if (event.data.some(({ field }) => field === 'kibana.alert.rule.uuid')) {
+        return true;
+      }
+      return !isEmpty(event.ecs.signal?.rule?.id ?? event.ecs.kibana?.alert?.rule?.uuid);
     } else {
       return false;
     }
   }, [event]);
-  const isSecurityAlert = useMemo(() => {
-    return !isEmpty(event?.ecs.signal?.rule?.id ?? event?.ecs.kibana?.alert?.rule?.uuid);
-  }, [event]);
-  const isEventSupported = isSecurityAlert || isAlert;
+
   const userCanCrud = casePermissions?.crud ?? false;
   const isDisabled = !userCanCrud || !isEventSupported;
 
   const onViewCaseClick = useCallback(
     (id) => {
-      const caseDetailsUrl = getCaseDetailsUrl({ id });
-      const appUrl = getUrlForApp(appId);
-      const fullCaseUrl = `${appUrl}/cases/${caseDetailsUrl}`;
-      navigateToUrl(fullCaseUrl);
+      navigateToApp(appId, {
+        deepLinkId: CasesDeepLinkId.cases,
+        path: generateCaseViewPath({ detailName: id }),
+      });
     },
-    [navigateToUrl, appId, getUrlForApp]
-  );
-  const currentSearch = useLocation().search;
-  const urlSearch = useMemo(() => currentSearch, [currentSearch]);
-  const createCaseUrl = useMemo(
-    () => getUrlForApp('cases') + getCreateCaseUrl(urlSearch),
-    [getUrlForApp, urlSearch]
+    [navigateToApp, appId]
   );
 
   const attachAlertToCase = useCallback(
@@ -184,17 +152,6 @@ export const useAddToCase = ({
     [onViewCaseClick, toasts, dispatch, eventId]
   );
 
-  const goToCreateCase = useCallback(
-    async (ev) => {
-      ev.preventDefault();
-      return navigateToApp(appId, {
-        deepLinkId: appId === 'securitySolutionUI' ? 'case' : 'cases',
-        path: getCreateCaseUrl(urlSearch),
-      });
-    },
-    [navigateToApp, urlSearch, appId]
-  );
-
   const onCaseClicked = useCallback(
     (theCase?: Case | SubCase) => {
       /**
@@ -228,10 +185,8 @@ export const useAddToCase = ({
     addNewCaseClick,
     addExistingCaseClick,
     onCaseClicked,
-    goToCreateCase,
     onCaseSuccess,
     attachAlertToCase,
-    createCaseUrl,
     isAllCaseModalOpen,
     isDisabled,
     userCanCrud,
