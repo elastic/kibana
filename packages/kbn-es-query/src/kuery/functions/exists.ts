@@ -10,6 +10,7 @@ import type { DataViewBase, DataViewFieldBase, DslQuery, KueryQueryOptions } fro
 import type { KqlFunctionNode } from '../node_types/function';
 import type { KqlLiteralNode } from '../node_types/literal';
 import type { KqlWildcardNode } from '../node_types/wildcard';
+import type { KqlContext } from '../types';
 import * as ast from '../ast';
 
 export const KQL_FUNCTION_NAME_EXISTS = 'exists';
@@ -29,7 +30,7 @@ export function toElasticsearchQuery(
   { arguments: [fieldNameArg] }: KqlExistsFunctionNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ): DslQuery {
   const fullFieldNameArg = {
     ...fieldNameArg,

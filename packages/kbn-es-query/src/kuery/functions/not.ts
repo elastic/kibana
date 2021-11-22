@@ -8,6 +8,7 @@
 
 import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
 import type { KqlFunctionNode } from '../node_types/function';
+import type { KqlContext } from '../types';
 import { nodeTypes } from '../..';
 
 export const KQL_FUNCTION_NAME_NOT = 'not';
@@ -25,7 +26,7 @@ export function toElasticsearchQuery(
   { arguments: [node] }: KqlNotFunctionNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ): DslQuery {
   const clause = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config, context);
   return {

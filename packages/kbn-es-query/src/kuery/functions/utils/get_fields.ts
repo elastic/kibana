@@ -7,11 +7,12 @@
  */
 
 import type { DataViewBase } from '../../..';
-import type { KqlNode } from '../../node_types/types';
+import type { KqlWildcardNode } from '../../node_types/wildcard';
+import type { KqlLiteralNode } from '../../node_types/literal';
 import * as ast from '../../ast';
 import * as wildcard from '../../node_types/wildcard';
 
-export function getFields(node: KqlNode, indexPattern?: DataViewBase) {
+export function getFields(node: KqlLiteralNode | KqlWildcardNode, indexPattern?: DataViewBase) {
   if (!indexPattern) return [];
   if (node.type === 'literal') {
     const fieldName = ast.toElasticsearchQuery(node);

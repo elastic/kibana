@@ -20,7 +20,7 @@ export const toElasticsearchQuery = (...params: Parameters<typeof astToElasticse
   return astToElasticsearchQuery(...params) as estypes.QueryDslQueryContainer;
 };
 
+export type { DslQuery, KueryQueryOptions } from './types';
 export { KQLSyntaxError } from './kuery_syntax_error';
 export { nodeTypes, nodeBuilder } from './node_types';
 export { fromKueryExpression } from './ast';
-export type { DslQuery, KueryNode, KueryQueryOptions } from './types';

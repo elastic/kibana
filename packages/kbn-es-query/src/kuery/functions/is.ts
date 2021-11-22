@@ -10,6 +10,7 @@ import { isUndefined } from 'lodash';
 import type { DataViewBase, DataViewFieldBase, DslQuery, KueryQueryOptions } from '../..';
 import type { KqlFunctionNode } from '../node_types/function';
 import type { KqlLiteralNode } from '../node_types/literal';
+import type { KqlContext } from '../types';
 import { getPhraseScript } from '../../filters';
 import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
 import * as ast from '../ast';
@@ -36,7 +37,7 @@ export function toElasticsearchQuery(
   { arguments: [fieldNameArg, valueArg, isPhraseArg] }: KqlIsFunctionNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ): DslQuery {
   const isExistsQuery = valueArg.type === 'wildcard' && valueArg.value === KQL_WILDCARD_SYMBOL;
   const isAllFieldsQuery =

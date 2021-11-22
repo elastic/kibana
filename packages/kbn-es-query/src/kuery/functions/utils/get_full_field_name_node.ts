@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewBase, DataViewFieldBase } from '../../..';
+import type { KqlLiteralNode } from '../../node_types/literal';
+import type { KqlWildcardNode } from '../../node_types/wildcard';
 import { getFields } from './get_fields';
-import { DataViewBase, DataViewFieldBase, KueryNode } from '../../..';
 import { getDataViewFieldSubtypeNested } from '../../../utils';
-import { KqlLiteralNode } from '../../node_types/literal';
-import { KqlWildcardNode } from '../../node_types/wildcard';
 
 export function getFullFieldNameNode(
   rootNameNode: KqlLiteralNode | KqlWildcardNode,
   indexPattern?: DataViewBase,
   nestedPath?: string
-): KueryNode {
+): KqlLiteralNode | KqlWildcardNode {
   const fullFieldNameNode = {
     ...rootNameNode,
-    value: nestedPath ? `${nestedPath}.${rootNameNode.value}` : rootNameNode.value,
+    value: nestedPath ? `${nestedPath}.${rootNameNode.value}` : `{rootNameNode.value}`,
   };
 
   // Wildcards can easily include nested and non-nested fields. There isn't a good way to let

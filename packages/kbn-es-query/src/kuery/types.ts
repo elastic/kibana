@@ -21,6 +21,13 @@ export interface KueryParseOptions {
   parseCursor?: boolean;
 }
 
+/** @internal */
+export interface KqlContext {
+  nested?: {
+    path: string;
+  };
+}
+
 export { nodeTypes } from './node_types';
 
 /** @public */

@@ -8,7 +8,7 @@
 
 import type { DataViewBase } from '../..';
 import type { KqlNode } from '../node_types/types';
-import type { KueryParseOptions, KueryQueryOptions } from '../types';
+import type { KqlContext, KueryParseOptions, KueryQueryOptions } from '../types';
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
 import { parse } from '../grammar';
@@ -65,7 +65,7 @@ export const toElasticsearchQuery = (
   node: KqlNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context?: Record<string, any>
+  context?: KqlContext
 ) => {
   if (nodeTypes.function.isNode(node)) {
     return nodeTypes.function.toElasticsearchQuery(node, indexPattern, config, context);

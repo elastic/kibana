@@ -7,6 +7,7 @@
  */
 
 import type { DataViewBase, KueryQueryOptions } from '../..';
+import type { KqlContext } from '../types';
 import type { KqlNode } from './types';
 import {
   functions,
@@ -52,7 +53,7 @@ export function toElasticsearchQuery(
   node: KqlFunctionNode,
   indexPattern?: DataViewBase,
   config?: KueryQueryOptions,
-  context?: Record<string, any>
+  context?: KqlContext
 ) {
   if (functions.and.isNode(node)) {
     return functions.and.toElasticsearchQuery(node, indexPattern, config, context);

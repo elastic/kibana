@@ -8,6 +8,7 @@
 
 import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
 import type { KqlFunctionNode } from '../node_types/function';
+import type { KqlContext } from '../types';
 import * as ast from '../ast';
 
 export const KQL_FUNCTION_NAME_AND = 'and';
@@ -25,7 +26,7 @@ export function toElasticsearchQuery(
   { arguments: nodes = [] }: KqlAndFunctionNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ): DslQuery {
   const key = config.filtersInMustClause ? 'must' : 'filter';
   const clause = nodes.map((node) => {

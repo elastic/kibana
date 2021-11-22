@@ -9,6 +9,7 @@
 import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
 import type { KqlFunctionNode } from '../node_types/function';
 import type { KqlLiteralNode } from '../node_types/literal';
+import type { KqlContext } from '../types';
 import * as ast from '../ast';
 import { getRangeScript } from '../../filters';
 import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
@@ -31,10 +32,10 @@ export function isNode(node: KqlFunctionNode): node is KqlRangeFunctionNode {
 }
 
 export function toElasticsearchQuery(
-  { arguments: [fieldNameArg, operator, valueArg] }: KqlRangeFunctionNode,
+  { arguments: [fieldNameArg, operatorArg, valueArg] }: KqlRangeFunctionNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ): DslQuery {
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
@@ -75,7 +76,7 @@ export function toElasticsearchQuery(
     };
 
     const queryParams = {
-      [operator]: ast.toElasticsearchQuery(valueArg),
+      [`${operatorArg.value}`]: ast.toElasticsearchQuery(valueArg),
     };
 
     if (field.scripted) {

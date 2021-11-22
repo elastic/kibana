@@ -11,6 +11,7 @@
   const {
     parseCursor = false, // Whether or not to parse the location of the cursor (used for suggestions)
     cursorSymbol = '@kuery-cursor@', // The symbol representing the placement of the cursor
+    allowLeadingWildcards = true, // Whether or not to allow leading wildcards in values
     wildcardSymbol = '@kuery-wildcard@', // The symbol representing where a wildcard character is found
   } = options;
 
@@ -192,6 +193,16 @@ Value "value"
   }
   / value:UnquotedLiteral {
     if (value.type === 'cursor') return value;
+
+    if (
+      !allowLeadingWildcards
+      && value.type === 'wildcard'
+      && value.indexOf(wildcardSymbol) === 0
+      && value.length > wildcardSymbol.length
+    ) {
+      error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
+    }
+
     const isPhrase = buildLiteralNode(false);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
