@@ -55,6 +55,7 @@
             "id": "def-server.EsArchiver.save",
             "type": "Function",
             "tags": [
+              "property",
               "property"
             ],
             "label": "save",
@@ -62,7 +63,7 @@
               "\nExtract data and mappings from an elasticsearch index and store\nit in the baseDir so it can be used later to recreate the index.\n"
             ],
             "signature": [
-              "(path: string, indices: string | string[], { raw, query }?: { raw?: boolean | undefined; query?: Record<string, any> | undefined; }) => Promise<Record<string, ",
+              "(path: string, indices: string | string[], { raw, keepIndexNames, query, }?: { raw?: boolean | undefined; keepIndexNames?: boolean | undefined; query?: Record<string, any> | undefined; }) => Promise<Record<string, ",
               "IndexStats",
               ">>"
             ],
@@ -106,7 +107,7 @@
                 "id": "def-server.EsArchiver.save.$3",
                 "type": "Object",
                 "tags": [],
-                "label": "{ raw = false, query }",
+                "label": "{\n      raw = false,\n      keepIndexNames = false,\n      query,\n    }",
                 "description": [],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
@@ -117,6 +118,19 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "raw",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-archiver",
+                    "id": "def-server.EsArchiver.save.$3.keepIndexNames",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "keepIndexNames",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -148,6 +162,7 @@
             "type": "Function",
             "tags": [
               "property",
+              "property",
               "property"
             ],
             "label": "load",
@@ -155,7 +170,7 @@
               "\nLoad an index from an archive\n"
             ],
             "signature": [
-              "(path: string, { skipExisting, useCreate, }?: { skipExisting?: boolean | undefined; useCreate?: boolean | undefined; }) => Promise<Record<string, ",
+              "(path: string, { skipExisting, useCreate, docsOnly, }?: { skipExisting?: boolean | undefined; useCreate?: boolean | undefined; docsOnly?: boolean | undefined; }) => Promise<Record<string, ",
               "IndexStats",
               ">>"
             ],
@@ -183,7 +198,7 @@
                 "id": "def-server.EsArchiver.load.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      skipExisting = false,\n      useCreate = false,\n    }",
+                "label": "{\n      skipExisting = false,\n      useCreate = false,\n      docsOnly = false,\n    }",
                 "description": [],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
@@ -207,6 +222,19 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "useCreate",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-archiver",
+                    "id": "def-server.EsArchiver.load.$2.docsOnly",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "docsOnly",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
