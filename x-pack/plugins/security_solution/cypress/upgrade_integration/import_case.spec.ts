@@ -100,7 +100,7 @@ describe('Import case after upgrade', () => {
     );
   });
 
-  it('Displays the correct number of in progress cases on the cases page', () => {
+  it('Displays the correct number of closed cases on the cases page', () => {
     const EXPECTED_NUMBER_OF_CLOSED_CASES = '0';
     cy.get(ALL_CASES_CLOSED_CASES_STATS).should('have.text', EXPECTED_NUMBER_OF_CLOSED_CASES);
   });
