@@ -192,7 +192,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
       const ref = indexPatternFieldEditor.openEditor({
         ctx: {
-          indexPattern: selectedIndexPattern,
+          dataView: selectedIndexPattern,
         },
         fieldName,
         onSave: async () => {

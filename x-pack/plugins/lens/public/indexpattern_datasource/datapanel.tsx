@@ -42,7 +42,7 @@ import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { esQuery } from '../../../../../src/plugins/data/public';
-import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
@@ -522,7 +522,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
-                indexPattern: indexPatternInstance,
+                dataView: indexPatternInstance,
               },
               fieldName,
               onSave: async () => {
@@ -543,7 +543,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
               ctx: {
-                indexPattern: indexPatternInstance,
+                dataView: indexPatternInstance,
               },
               fieldName,
               onDelete: async () => {
