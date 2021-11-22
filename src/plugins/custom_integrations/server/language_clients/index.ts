@@ -151,7 +151,8 @@ export function registerLanguageClients(
       description: integration.description,
       type: 'ui_link',
       shipper: 'language_clients',
-      uiInternalPath: integration.docUrlTemplate.replace('{branch}', branch),
+      // Documentation for `main` branches is still published at a `master` URL.
+      uiInternalPath: integration.docUrlTemplate.replace('{branch}', 'master'),
       isBeta: false,
       icons,
       categories: ['elastic_stack', 'custom', 'language_client'],
