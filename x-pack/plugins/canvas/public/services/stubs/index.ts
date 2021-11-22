@@ -38,7 +38,7 @@ export { workpadServiceFactory } from './workpad';
 export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
   customElement: new PluginServiceProvider(customElementServiceFactory),
   embeddables: new PluginServiceProvider(embeddablesServiceFactory),
-  expressions: new PluginServiceProvider(expressionsServiceFactory),
+  expressions: new PluginServiceProvider(expressionsServiceFactory, ['notify']),
   labs: new PluginServiceProvider(labsServiceFactory),
   navLink: new PluginServiceProvider(navLinkServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),

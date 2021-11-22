@@ -13,12 +13,16 @@ import { CanvasStartDeps } from '../../../plugin';
 import { CoreExpressionsService } from './expressions';
 import type { Options } from './expressions';
 import { FiltersService } from './filters';
+import { CanvasNotifyService } from '../../notify';
 
 export class ExpressionsService {
   private expressionsService: CoreExpressionsService;
   private filtersService: FiltersService;
 
-  constructor(expressions: ExpressionsServiceStart) {
+  constructor(
+    expressions: ExpressionsServiceStart,
+    requiredServices: CanvasExpressionsServiceRequiredServices
+  ) {
     this.expressionsService = new CoreExpressionsService(expressions);
     this.filtersService = new FiltersService();
   }
@@ -86,10 +90,17 @@ export class ExpressionsService {
 }
 
 export type CanvasExpressionsService = ExpressionsService;
+export interface CanvasExpressionsServiceRequiredServices {
+  notify: CanvasNotifyService;
+}
+
 export type CanvasExpressionsServiceFactory = KibanaPluginServiceFactory<
   CanvasExpressionsService,
-  CanvasStartDeps
+  CanvasStartDeps,
+  CanvasExpressionsServiceRequiredServices
 >;
 
-export const expressionsServiceFactory: CanvasExpressionsServiceFactory = ({ startPlugins }) =>
-  new ExpressionsService(startPlugins.expressions);
+export const expressionsServiceFactory: CanvasExpressionsServiceFactory = (
+  { startPlugins },
+  requiredServices
+) => new ExpressionsService(startPlugins.expressions, requiredServices);

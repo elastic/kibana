@@ -18,7 +18,7 @@ import { CoreStart, AppUpdater, PluginInitializerContext } from 'src/core/public
  */
 export type PluginServiceFactory<Service, Parameters = {}, RequiredServices = {}> = (
   params: Parameters,
-  requiredServices?: RequiredServices
+  requiredServices: RequiredServices
 ) => Service;
 
 /**
@@ -41,6 +41,7 @@ export interface KibanaPluginServiceParams<Start extends {}> {
  * The `Setup` generic refers to the specific Plugin `TPluginsSetup`.
  * The `Start` generic refers to the specific Plugin `TPluginsStart`.
  */
-export type KibanaPluginServiceFactory<Service, Start extends {}> = (
-  params: KibanaPluginServiceParams<Start>
+export type KibanaPluginServiceFactory<Service, Start extends {}, RequiredServices = {}> = (
+  params: KibanaPluginServiceParams<Start>,
+  requiredServices: RequiredServices
 ) => Service;

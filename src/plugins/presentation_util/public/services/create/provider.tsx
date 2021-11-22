@@ -32,10 +32,10 @@ type ElementOfArray<ArrayType extends readonly unknown[]> = ArrayType extends Ar
   : never;
 
 export type PluginServiceRequiredServices<
-  Services,
-  RequiredServices extends Array<keyof Services>
+  RequiredServices extends Array<keyof AvailableServices>,
+  AvailableServices
 > = {
-  [K in ElementOfArray<RequiredServices>]: Services[K];
+  [K in ElementOfArray<RequiredServices>]: AvailableServices[K];
 };
 
 /**
@@ -54,7 +54,7 @@ export class PluginServiceProvider<
   private factory: PluginServiceFactory<
     Service,
     StartParameters,
-    PluginServiceRequiredServices<Services, RequiredServices>
+    PluginServiceRequiredServices<RequiredServices, Services>
   >;
   private _requiredServices?: RequiredServices;
   private context = createContext<Service | null>(null);
@@ -64,7 +64,11 @@ export class PluginServiceProvider<
   };
 
   constructor(
-    factory: PluginServiceFactory<Service, StartParameters>,
+    factory: PluginServiceFactory<
+      Service,
+      StartParameters,
+      PluginServiceRequiredServices<RequiredServices, Services>
+    >,
     requiredServices?: RequiredServices
   ) {
     this.factory = factory;
@@ -89,7 +93,7 @@ export class PluginServiceProvider<
    */
   start(
     params: StartParameters,
-    requiredServices?: PluginServiceRequiredServices<Services, RequiredServices>
+    requiredServices: PluginServiceRequiredServices<RequiredServices, Services>
   ) {
     this.pluginService = this.factory(params, requiredServices);
   }
