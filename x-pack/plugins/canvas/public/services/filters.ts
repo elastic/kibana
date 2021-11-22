@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CanvasFiltersService } from './kibana/filters';
+export type { CanvasFiltersService } from './kibana/filters';

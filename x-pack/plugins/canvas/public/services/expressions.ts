@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CanvasExpressionsService } from './kibana/expressions';
+export type { CanvasExpressionsService } from './kibana/expressions';
