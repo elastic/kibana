@@ -8,8 +8,8 @@
 
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
-import * as i18n from '../core';
-import { isPseudoLocale, translateUsingPseudoLocale } from '../core/pseudo_locale';
+import * as i18n from '@kbn/i18n';
+import { isPseudoLocale, translateUsingPseudoLocale } from '@kbn/i18n';
 
 /**
  * To translate label that includes nested `FormattedMessage` instances React Intl

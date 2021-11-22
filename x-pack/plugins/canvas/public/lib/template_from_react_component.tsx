@@ -14,7 +14,7 @@ import React, {
 } from 'react';
 import { unmountComponentAtNode, render } from 'react-dom';
 import PropTypes from 'prop-types';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 import { ArgumentHandlers, UpdatePropsRef } from '../../types/arguments';
 

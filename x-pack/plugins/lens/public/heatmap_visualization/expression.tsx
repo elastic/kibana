@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import type { IInterpreterRenderHandlers } from '../../../../../src/plugins/expressions';

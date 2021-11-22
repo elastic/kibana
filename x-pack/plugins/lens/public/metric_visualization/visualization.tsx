@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
 import { ColorMode } from '../../../../../src/plugins/charts/common';

@@ -21,7 +21,7 @@ import {
   EuiPanel,
   EuiTextColor,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
 

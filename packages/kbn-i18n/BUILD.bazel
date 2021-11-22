@@ -28,7 +28,6 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "react/package.json",
   "package.json",
   "GUIDELINE.md",
   "README.md"
@@ -38,21 +37,14 @@ RUNTIME_DEPS = [
   "@npm//intl-format-cache",
   "@npm//intl-messageformat",
   "@npm//intl-relativeformat",
-  "@npm//prop-types",
-  "@npm//react",
-  "@npm//react-intl"
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-babel-preset",
   "@npm//intl-messageformat",
   "@npm//tslib",
   "@npm//@types/intl-relativeformat",
   "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/prop-types",
-  "@npm//@types/react",
-  "@npm//@types/react-intl",
 ]
 
 jsts_transpiler(

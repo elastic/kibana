@@ -37,7 +37,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
     "//packages/kbn-dev-utils",
-    "//packages/kbn-i18n",
+    "//packages/kbn-i18n-react",
     "//packages/kbn-std",
     "//packages/kbn-utils",
     "@npm//@elastic/elasticsearch",
@@ -73,7 +73,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-dev-utils",
-  "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-utils",
   "@npm//@elastic/elasticsearch",
   "@npm//del",

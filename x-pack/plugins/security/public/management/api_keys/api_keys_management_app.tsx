@@ -12,7 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import type { CoreStart, StartServicesAccessor } from '../../../../../../src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';

@@ -3112,6 +3112,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/i18n-react@link:bazel-bin/packages/kbn-i18n-react":
+  version "0.0.0"
+  uid ""
+
 "@kbn/i18n@link:bazel-bin/packages/kbn-i18n":
   version "0.0.0"
   uid ""
@@ -5784,6 +5788,10 @@
   integrity sha512-sqm9g7mHlPY/43fcSNrCYfOeX9zkTTK+euO5E6+CVijSMm5tTjkVdwdqRkY3ljjIAf8679vps5jKUoJBCLsMDA==
 
 "@types/kbn__ace@link:bazel-bin/packages/kbn-ace/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__i18n-react@link:bazel-bin/packages/kbn-i18n-react/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { findNewUuid } from './lib/find_new_uuid';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useRequestErrorHandler } from '../../application/hooks/use_request_error_handler';

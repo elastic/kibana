@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { CoreStart, OverlayRef } from 'src/core/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import {
   createKibanaReactContext,

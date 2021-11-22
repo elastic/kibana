@@ -22,7 +22,7 @@ import React from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EnrollmentToken } from '../common';
 import { DocLink } from './doc_link';

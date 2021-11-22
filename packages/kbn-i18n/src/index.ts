@@ -9,5 +9,8 @@
 import * as i18nCore from './core';
 import * as loader from './loader';
 
-export const i18n = i18nCore;
-export const i18nLoader = loader;
+export { getDefaultLocale, getFormats, getLocale, getTranslation } from './core';
+export { isPseudoLocale, translateUsingPseudoLocale } from './core/pseudo_locale';
+
+export { i18nCore as i18n };
+export { loader as i18nLoader };

@@ -13,7 +13,7 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
