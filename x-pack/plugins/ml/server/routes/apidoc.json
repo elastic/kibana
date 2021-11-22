@@ -160,7 +160,6 @@
     "TrainedModels",
     "GetTrainedModel",
     "GetTrainedModelStats",
-    "GetTrainedModelDeploymentStats",
     "GetTrainedModelsNodesOverview",
     "GetTrainedModelPipelines",
     "StartTrainedModelDeployment",

@@ -36,10 +36,6 @@ import { useRefresh } from '../../routing/use_refresh';
 
 export type NodeItem = NodeDeploymentStatsResponse;
 
-export interface NodeItemWithStats extends NodeItem {
-  stats: any;
-}
-
 export const getDefaultNodesListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
@@ -70,6 +66,14 @@ export const NodesList: FC = () => {
     try {
       const nodesResponse = await trainedModelsApiService.getTrainedModelsNodesOverview();
       setItems(nodesResponse.nodes);
+
+      // Update expanded rows.
+      nodesResponse.nodes.forEach((node) => {
+        if (itemIdToExpandedRowMap[node.id]) {
+          itemIdToExpandedRowMap[node.id] = <ExpandedRow item={node} />;
+        }
+      });
+
       setIsLoading(false);
       refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
     } catch (e) {
@@ -80,14 +84,14 @@ export const NodesList: FC = () => {
         })
       );
     }
-  }, []);
+  }, [itemIdToExpandedRowMap]);
 
   const toggleDetails = (item: NodeItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
-      itemIdToExpandedRowMapValues[item.id] = <ExpandedRow item={item as NodeItemWithStats} />;
+      itemIdToExpandedRowMapValues[item.id] = <ExpandedRow item={item} />;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };

@@ -15,7 +15,6 @@ import {
   ModelPipelines,
   TrainedModelStat,
   NodesOverviewResponse,
-  TrainedModelDeploymentStatsResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -119,21 +118,6 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}`,
         method: 'DELETE',
-      });
-    },
-
-    getTrainedModelDeploymentStats(modelId?: string | string[]) {
-      let model = modelId ?? '*';
-      if (Array.isArray(modelId)) {
-        model = modelId.join(',');
-      }
-
-      return httpService.http<{
-        count: number;
-        deployment_stats: TrainedModelDeploymentStatsResponse[];
-      }>({
-        path: `${apiBasePath}/trained_models/${model}/deployment/_stats`,
-        method: 'GET',
       });
     },
 
