@@ -14,6 +14,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import {
   ExceptionListItemSchema,
+  ExceptionListSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -83,18 +84,22 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   private readonly getHttpService: () => Promise<HttpStart>;
 
   constructor(http: HttpStart) {
-    const ensureListExists = http
-      .post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-        body: JSON.stringify(TRUSTED_APPS_EXCEPTION_LIST_DEFINITION),
-      })
-      .then(() => {})
-      .catch((err) => {
-        if (err.response.status !== 409) {
-          return Promise.reject(err);
-        }
-      });
+    let ensureListExists: Promise<void>;
 
     this.getHttpService = async () => {
+      if (!ensureListExists) {
+        ensureListExists = http
+          .post<ExceptionListSchema>(EXCEPTION_LIST_URL, {
+            body: JSON.stringify(TRUSTED_APPS_EXCEPTION_LIST_DEFINITION),
+          })
+          .then(() => {})
+          .catch((err) => {
+            if (err.response.status !== 409) {
+              return Promise.reject(err);
+            }
+          });
+      }
+
       await ensureListExists;
       return http;
     };

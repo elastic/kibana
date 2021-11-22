@@ -324,12 +324,12 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   });
 
   it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
-    await render();
     mockUseEndpointPrivileges.mockReturnValue(
       loadedUserEndpointPrivilegesState({
         isPlatinumPlus: false,
       })
     );
+    await render();
     await toggleCardActionMenu(POLICY_SPECIFIC_CARD_INDEX);
 
     expect(renderResult.queryByTestId('policyTrustedAppsGrid-removeAction')).toBeNull();

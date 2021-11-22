@@ -19,12 +19,15 @@ import {
   TrustedAppsGetListHttpMocksInterface,
   trustedAppsGetOneHttpMocks,
   TrustedAppsGetOneHttpMocksInterface,
+  trustedAppsPostCreateListHttpMock,
+  TrustedAppsPostCreateListHttpMockInterface,
 } from '../../mocks';
 
 export type TrustedAppsPageHttpApiMocksInterface = TrustedAppsGetListHttpMocksInterface &
   TrustedAppsGetOneHttpMocksInterface &
   TrustedAppPutHttpMocksInterface &
   TrustedAppPostHttpMocksInterface &
+  TrustedAppsPostCreateListHttpMockInterface &
   FleetGetEndpointPackagePolicyListHttpMockInterface &
   FleetGetAgentPolicyListHttpMockInterface;
 
@@ -37,6 +40,7 @@ export const trustedAppsPageHttpApiMocks =
     trustedAppsGetOneHttpMocks,
     trustedAppPutHttpMocks,
     trustedAppPostHttpMocks,
+    trustedAppsPostCreateListHttpMock,
     fleetGetEndpointPackagePolicyListHttpMock,
     fleetGetAgentPolicyListHttpMock,
   ]);

@@ -17,6 +17,7 @@ import {
   UpdateExceptionListItemSchema,
   ReadExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   httpHandlerMockFactory,
@@ -24,6 +25,7 @@ import {
 } from '../../../common/mock/endpoint/http_handler_mock_factory';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { POLICY_REFERENCE_PREFIX } from '../../../../common/endpoint/service/trusted_apps/mapping';
+import { getTrustedAppsListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
 
 interface FindExceptionListItemSchemaQueryParams
   extends Omit<FindExceptionListItemSchema, 'page' | 'per_page'> {
@@ -154,3 +156,21 @@ export const trustedAppPostHttpMocks = httpHandlerMockFactory<TrustedAppPostHttp
     },
   },
 ]);
+
+export type TrustedAppsPostCreateListHttpMockInterface = ResponseProvidersInterface<{
+  trustedAppCreateList: (options: HttpFetchOptionsWithPath) => ExceptionListSchema;
+}>;
+/**
+ * HTTP mocks that support updating a single Trusted Apps
+ */
+export const trustedAppsPostCreateListHttpMock =
+  httpHandlerMockFactory<TrustedAppsPostCreateListHttpMockInterface>([
+    {
+      id: 'trustedAppCreateList',
+      path: EXCEPTION_LIST_ITEM_URL,
+      method: 'post',
+      handler: (): ExceptionListSchema => {
+        return getTrustedAppsListSchemaMock();
+      },
+    },
+  ]);
