@@ -9,7 +9,7 @@ export BUILDKITE_TOKEN
 
 echo '--- Install buildkite dependencies'
 cd '.buildkite'
-retry 5 15 yarn install
+retry 5 15 yarn install --production --pure-lockfile
 cd -
 
 node .buildkite/scripts/lifecycle/print_agent_links.js || true

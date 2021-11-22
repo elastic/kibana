@@ -12,7 +12,7 @@ import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import type {
   FieldFormatEditorFactory,
   FieldFormatEditor as InnerFieldFormatEditor,
-} from 'src/plugins/index_pattern_field_editor/public';
+} from 'src/plugins/data_view_field_editor/public';
 import type { FieldFormat } from 'src/plugins/field_formats/common';
 
 export interface FieldFormatEditorProps {

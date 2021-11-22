@@ -12,12 +12,11 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
 
 import classNames from 'classnames';
 import { get, isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { isRight } from 'fp-ts/Either';
 
@@ -58,6 +57,7 @@ import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
+import { useCaseViewParams } from '../../common/navigation';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -65,7 +65,6 @@ export interface UserActionTreeProps {
   connectors: ActionConnector[];
   data: Case;
   fetchUserActions: () => void;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
@@ -149,7 +148,6 @@ export const UserActionTree = React.memo(
     connectors,
     data: caseData,
     fetchUserActions,
-    getCaseDetailHrefWithCommentId,
     getRuleDetailsHref,
     actionsNavigation,
     isLoadingDescription,
@@ -163,15 +161,7 @@ export const UserActionTree = React.memo(
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const {
-      detailName: caseId,
-      commentId,
-      subCaseId,
-    } = useParams<{
-      detailName: string;
-      commentId?: string;
-      subCaseId?: string;
-    }>();
+    const { detailName: caseId, subCaseId, commentId } = useCaseViewParams();
     const handlerTimeoutId = useRef(0);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
@@ -325,7 +315,6 @@ export const UserActionTree = React.memo(
         actions: (
           <UserActionContentToolbar
             commentMarkdown={caseData.description}
-            getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
             id={DESCRIPTION_ID}
             editLabel={i18n.EDIT_DESCRIPTION}
             quoteLabel={i18n.QUOTE}
@@ -339,7 +328,6 @@ export const UserActionTree = React.memo(
       [
         MarkdownDescription,
         caseData,
-        getCaseDetailHrefWithCommentId,
         handleManageMarkdownEditId,
         handleManageQuote,
         isLoadingDescription,
@@ -403,7 +391,6 @@ export const UserActionTree = React.memo(
                     ),
                     actions: (
                       <UserActionContentToolbar
-                        getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
                         id={comment.id}
                         commentMarkdown={comment.comment}
                         editLabel={i18n.EDIT_COMMENT}
@@ -456,7 +443,6 @@ export const UserActionTree = React.memo(
                         getAlertAttachment({
                           action,
                           alertId,
-                          getCaseDetailHrefWithCommentId,
                           getRuleDetailsHref,
                           index: alertIndex,
                           loadingAlertData,
@@ -485,7 +471,6 @@ export const UserActionTree = React.memo(
                         getGeneratedAlertsAttachment({
                           action,
                           alertIds,
-                          getCaseDetailHrefWithCommentId,
                           getRuleDetailsHref,
                           onRuleDetailsClick,
                           renderInvestigateInTimelineActionComponent,
@@ -508,7 +493,6 @@ export const UserActionTree = React.memo(
                           comment,
                           userCanCrud,
                           isLoadingIds,
-                          getCaseDetailHrefWithCommentId,
                           actionsNavigation,
                           action,
                         }),
@@ -526,7 +510,6 @@ export const UserActionTree = React.memo(
                 getUpdateAction({
                   action,
                   label,
-                  getCaseDetailHrefWithCommentId,
                   handleOutlineComment,
                 }),
               ];
@@ -589,7 +572,6 @@ export const UserActionTree = React.memo(
                 getUpdateAction({
                   action,
                   label,
-                  getCaseDetailHrefWithCommentId,
                   handleOutlineComment,
                 }),
                 ...footers,
@@ -612,7 +594,6 @@ export const UserActionTree = React.memo(
                 getUpdateAction({
                   action,
                   label,
-                  getCaseDetailHrefWithCommentId,
                   handleOutlineComment,
                 }),
               ];
@@ -630,7 +611,6 @@ export const UserActionTree = React.memo(
         manageMarkdownEditIds,
         handleManageMarkdownEditId,
         handleSaveComment,
-        getCaseDetailHrefWithCommentId,
         actionsNavigation,
         userCanCrud,
         isLoadingIds,
