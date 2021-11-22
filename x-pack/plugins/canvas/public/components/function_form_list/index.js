@@ -12,8 +12,6 @@ import { pluginServices } from '../../services';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
 import { FunctionFormList as Component } from './function_form_list';
 
-const { expressions } = pluginServices.getServices();
-
 function normalizeContext(chain) {
   if (!Array.isArray(chain) || !chain.length) {
     return null;
@@ -45,6 +43,8 @@ const functionFormItems = withProps((props) => {
 
       // filter out argTypes that shouldn't be in the sidebar
       if (argTypeDef) {
+        const { expressions } = pluginServices.getServices();
+
         // wrap each part of the chain in ArgType, passing in the previous context
         const component = {
           args: argType.arguments,

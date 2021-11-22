@@ -16,8 +16,6 @@ import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from '.';
 
-const { expressions, filters: filtersService } = pluginServices.getServices();
-
 export interface Arguments {
   group: string[];
   ungrouped: boolean;
@@ -77,6 +75,8 @@ export function filtersFunctionFactory(initialize: InitializeArguments): () => F
         },
       },
       fn: (input, { group, ungrouped }) => {
+        const { expressions, filters: filtersService } = pluginServices.getServices();
+
         const filterList = getFiltersByGroup(filtersService.getFilters(), group, ungrouped);
 
         if (filterList && filterList.length) {
