@@ -9,7 +9,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { KibanaThemeProvider } from 'src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { ExpressionRenderDefinition } from '../../../expressions/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { ChartsPluginSetup } from '../../../charts/public';

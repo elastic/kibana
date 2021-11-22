@@ -30,7 +30,7 @@ export class MetricVisualization {
       expressions.registerRenderer(() =>
         getMetricChartRenderer(formatFactory, core.uiSettings, core.theme)
       );
-      return getMetricVisualization({ paletteService: palettes });
+      return getMetricVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }
