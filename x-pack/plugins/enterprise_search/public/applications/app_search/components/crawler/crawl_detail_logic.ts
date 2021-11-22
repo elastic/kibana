@@ -16,10 +16,10 @@ import { CrawlRequest, CrawlRequestFromServer } from './types';
 import { crawlRequestServerToClient } from './utils';
 
 export interface CrawlDetailValues {
+  crawlRequest: CrawlRequest | null;
+  crawlRequestFromServer: CrawlRequestFromServer | null;
   dataLoading: boolean;
   flyoutClosed: boolean;
-  crawlRequestFromServer: CrawlRequestFromServer | null;
-  crawlRequest: CrawlRequest | null;
 }
 
 interface CrawlDetailActions {
@@ -38,11 +38,11 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
     onRecieveCrawlRequest: (crawlRequestFromServer) => ({ crawlRequestFromServer }),
   },
   reducers: {
-    dataLoading: [
-      true,
+    crawlRequest: [
+      null,
       {
-        fetchCrawlRequest: () => true,
-        onRecieveCrawlRequest: () => false,
+        onRecieveCrawlRequest: (_, { crawlRequestFromServer }) =>
+          crawlRequestServerToClient(crawlRequestFromServer),
       },
     ],
     crawlRequestFromServer: [
@@ -51,11 +51,11 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
         onRecieveCrawlRequest: (_, { crawlRequestFromServer }) => crawlRequestFromServer,
       },
     ],
-    crawlRequest: [
-      null,
+    dataLoading: [
+      true,
       {
-        onRecieveCrawlRequest: (_, { crawlRequestFromServer }) =>
-          crawlRequestServerToClient(crawlRequestFromServer),
+        fetchCrawlRequest: () => true,
+        onRecieveCrawlRequest: () => false,
       },
     ],
     flyoutClosed: [

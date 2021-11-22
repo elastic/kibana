@@ -16,7 +16,7 @@ import { EuiCodeBlock, EuiFlyout } from '@elastic/eui';
 import { Loading } from '../../../../shared/loading';
 
 import { CrawlDetailValues } from '../crawl_detail_logic';
-import { CrawlerStatus, CrawlRequestFromServer } from '../types';
+import { CrawlRequestFromServer } from '../types';
 
 import { CrawlDetailsFlyout } from './crawl_details_flyout';
 
