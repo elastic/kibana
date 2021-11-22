@@ -27,8 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('visual builder', function describeIndexTests() {
-    this.tags('includeFirefox');
-
     before(async () => {
       await visualize.initTests();
     });
