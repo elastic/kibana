@@ -60,6 +60,11 @@ export interface StatsCollectionConfig {
   kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
 }
 
+export interface CacheDetails {
+  isCached: boolean;
+  cacheTimestamp?: number;
+}
+
 export interface BasicStatsPayload {
   timestamp: string;
   cluster_uuid: string;
@@ -71,7 +76,7 @@ export interface BasicStatsPayload {
 }
 
 export interface UsageStatsPayload extends BasicStatsPayload {
-  cacheTimestamp?: number;
+  cacheDetails: CacheDetails;
   collectionSource: string;
 }
 
