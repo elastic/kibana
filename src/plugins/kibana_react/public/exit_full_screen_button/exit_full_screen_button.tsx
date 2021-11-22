@@ -30,9 +30,10 @@ export interface ExitFullScreenButtonProps {
 import './index.scss';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
-  constructor({ toggleChrome = true, ...restProps }: ExitFullScreenButtonProps) {
-    super({ toggleChrome, ...restProps });
-  }
+  static defaultProps = {
+    toggleChrome: true,
+  };
+
   public onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
       this.props.onExitFullScreenMode();
