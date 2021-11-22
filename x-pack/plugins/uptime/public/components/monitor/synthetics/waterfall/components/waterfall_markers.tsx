@@ -14,11 +14,10 @@ import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/c
 import { MarkerItems } from '../context/waterfall_chart';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
 
-export const SYNTHETICS_CLS = 'browser.experience.cls';
-export const SYNTHETICS_LCP = 'browser.experience.lcp.us';
-export const SYNTHETICS_FCP = 'browser.experience.fcp.us';
-export const SYNTHETICS_DOCUMENT_ONLOAD = 'browser.experience.load.us';
-export const SYNTHETICS_DCL = 'browser.experience.dcl.us';
+export const FIELD_SYNTHETICS_LCP = 'browser.experience.lcp.us';
+export const FIELD_SYNTHETICS_FCP = 'browser.experience.fcp.us';
+export const FIELD_SYNTHETICS_DOCUMENT_ONLOAD = 'browser.experience.load.us';
+export const FIELD_SYNTHETICS_DCL = 'browser.experience.dcl.us';
 export const LAYOUT_SHIFT = 'layoutShift';
 
 export function WaterfallChartMarkers() {
@@ -106,35 +105,35 @@ function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
       return {
         label: DOCUMENT_CONTENT_LOADED_LABEL,
         color: theme.eui.euiColorVis0,
-        field: SYNTHETICS_DCL,
+        field: FIELD_SYNTHETICS_DCL,
         strokeWidth: 2,
       };
     case 'firstContentfulPaint':
       return {
         label: FCP_LABEL,
         color: theme.eui.euiColorVis1,
-        field: SYNTHETICS_FCP,
+        field: FIELD_SYNTHETICS_FCP,
         strokeWidth: 2,
       };
     case 'largestContentfulPaint':
       return {
         label: LCP_LABEL,
         color: theme.eui.euiColorVis2,
-        field: SYNTHETICS_LCP,
+        field: FIELD_SYNTHETICS_LCP,
         strokeWidth: 2,
       };
     case 'layoutShift':
       return {
         label: LAYOUT_SHIFT_LABEL,
         color: theme.eui.euiColorVis6,
-        field: SYNTHETICS_CLS,
+        field: '',
         strokeWidth: 1,
       };
     case 'loadEvent':
       return {
         label: LOAD_EVENT_LABEL,
         color: theme.eui.euiColorVis9,
-        field: SYNTHETICS_DOCUMENT_ONLOAD,
+        field: FIELD_SYNTHETICS_DOCUMENT_ONLOAD,
         strokeWidth: 2,
       };
   }
