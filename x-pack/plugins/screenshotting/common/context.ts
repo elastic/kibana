@@ -1,0 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export type Context = Record<string, unknown>;
+
+/**
+ * @interal
+ */
+export const SCREENSHOTTING_CONTEXT_KEY = '__SCREENSHOTTING_CONTEXT_KEY__';

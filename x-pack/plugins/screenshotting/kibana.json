@@ -9,5 +9,6 @@
   "description": "Kibana Screenshotting Plugin",
   "requiredPlugins": ["screenshotMode"],
   "configPath": ["xpack", "screenshotting"],
-  "server": true
+  "server": true,
+  "ui": true
 }

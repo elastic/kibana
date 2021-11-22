@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { Context } from '../../common';
 import type { ConditionalHeaders } from '../browsers';
 import type { LayoutInstance } from '../layouts';
 
 export { getScreenshots$ } from './observable';
+
+type Url = string;
+type UrlWithContext = [url: Url, context: Context];
+export type UrlOrUrlWithContext = Url | UrlWithContext;
 
 export interface PhaseTimeouts {
   openUrl: number;
@@ -22,7 +27,7 @@ export interface ScreenshotObservableOptions {
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
   timeouts: PhaseTimeouts;
-  urls: string[];
+  urls: UrlOrUrlWithContext[];
 }
 
 export interface AttributesMap {

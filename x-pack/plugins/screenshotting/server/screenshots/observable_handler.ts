@@ -11,7 +11,12 @@ import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { getChromiumDisconnectedError } from '../browsers';
-import type { PageSetupResults, ScreenshotObservableOptions, ScreenshotResults } from '.';
+import type {
+  PageSetupResults,
+  ScreenshotObservableOptions,
+  ScreenshotResults,
+  UrlOrUrlWithContext,
+} from '.';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
@@ -75,7 +80,7 @@ export class ScreenshotObservableHandler {
       );
   }
 
-  private openUrl(index: number, url: string) {
+  private openUrl(index: number, url: UrlOrUrlWithContext) {
     return defer(() =>
       openUrl(
         this.driver,
@@ -137,7 +142,7 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  public setupPage(index: number, url: string, apmTrans: apm.Transaction | null) {
+  public setupPage(index: number, url: UrlOrUrlWithContext, apmTrans: apm.Transaction | null) {
     return this.openUrl(index, url).pipe(
       switchMapTo(this.waitForElements()),
       switchMapTo(this.completeRender(apmTrans))
