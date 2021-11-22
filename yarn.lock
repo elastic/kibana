@@ -12600,7 +12600,7 @@ elastic-apm-http-client@^10.3.0:
     readable-stream "^3.4.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@3.24.0:
+elastic-apm-node@^3.24.0:
   version "3.24.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.24.0.tgz#d7acb3352f928a23c28ebabab2bd30098562814e"
   integrity sha512-Fmj/W2chWQa2zb1FfMYK2ypLB4TcnKNX+1klaJFbytRYDLgeSfo0EC7egvI3a+bLPZSRL5053PXOp7slVTPO6Q==

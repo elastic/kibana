@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { getFixLogsStep } from './fix_logs_step';
+export * from './fleet_server_cloud_unhealthy_callout';
+export * from './fleet_server_on_prem_unhealthy_callout';
+export * from './fleet_server_on_prem_required_callout';
