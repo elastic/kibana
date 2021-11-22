@@ -63,19 +63,6 @@ export const usePickIndexPatterns = ({
     }
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
     if (theDataView == null) {
-      // let patterns = [];
-      // const defaultDataView = kibanaDataViews.find((dataView) => dataView.id === defaultDataViewId);
-      // if (defaultDataView != null) {
-      //   const areAllPatternsInDefault = selectedPatterns.every(
-      //     (pattern) => defaultDataView.title.indexOf(pattern) > -1
-      //   );
-      //   if (areAllPatternsInDefault) {
-      //     patterns = selectedPatterns.filter((pattern) =>
-      //       defaultDataView.patternList.includes(pattern)
-      //     );
-      //   }
-      // }
-      // debugger;
       return { patternList: [], selectablePatterns: [] };
     }
     return scopeId === sourcererModel.SourcererScopeName.default

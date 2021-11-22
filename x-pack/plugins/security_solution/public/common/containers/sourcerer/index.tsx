@@ -282,13 +282,8 @@ export const useSourcererDataView = (
 
   const [indexPatternsLoading, fetchIndexReturn] = useFetchIndex(legacyPatterns);
 
-  const legacyDataView: Omit<SourcererDataView, 'id'> & { id: null } = useMemo(() => {
-    // console.log({
-    //   sourcererDataView: selectedDataView == null ? legacyDataView : selectedDataView,
-    //   selectedDataView,
-    //   legacyDataView,
-    // });
-    return {
+  const legacyDataView: Omit<SourcererDataView, 'id'> & { id: null } = useMemo(
+    () => ({
       ...fetchIndexReturn,
       runtimeMappings: {},
       title: '',
@@ -297,8 +292,9 @@ export const useSourcererDataView = (
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
-    };
-  }, [fetchIndexReturn, indexPatternsLoading]);
+    }),
+    [fetchIndexReturn, indexPatternsLoading]
+  );
 
   useEffect(() => {
     if (selectedDataView == null) {
@@ -308,11 +304,6 @@ export const useSourcererDataView = (
   }, [selectedDataView, selectedPatterns]);
 
   const sourcererDataView = useMemo(() => {
-    // console.log({
-    //   sourcererDataView: selectedDataView == null ? legacyDataView : selectedDataView,
-    //   selectedDataView,
-    //   legacyDataView,
-    // });
     return selectedDataView == null ? legacyDataView : selectedDataView;
   }, [legacyDataView, selectedDataView]);
 

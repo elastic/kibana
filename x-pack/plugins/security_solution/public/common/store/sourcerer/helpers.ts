@@ -62,26 +62,6 @@ export const validateSelectedPatterns = (
       : // 7.16 -> 8.0 this will get hit because dataView == null
         dedupePatterns;
 
-  if (selectedPatterns.length > 0 && dataView == null) {
-    // we have index patterns, but not a data view id
-    // find out if we have these index patterns in the defaultDataView
-    // debugger;
-    // const areAllPatternsInDefault = selectedPatterns.every(
-    //   (pattern) => state.defaultDataView.title.indexOf(pattern) > -1
-    // );
-    // if (areAllPatternsInDefault) {
-    //   dataView = state.defaultDataView;
-    //   selectedPatterns = selectedPatterns.filter(
-    //     (pattern) => dataView != null && dataView.patternList.includes(pattern)
-    //   );
-    // }
-  }
-  // TO DO: Steph/sourcerer If dataView is still undefined here, create temporary dataView
-  // and prompt user to go create this dataView
-  // currently UI will take the undefined dataView and default to defaultDataView anyways
-  // this is a "strategically merged" bug ;)
-  // https://github.com/elastic/security-team/issues/1921
-
   return {
     [id]: {
       ...state.sourcererScopes[id],
