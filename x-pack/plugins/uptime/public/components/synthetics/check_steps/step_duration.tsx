@@ -19,6 +19,11 @@ interface Props {
 
 export const StepDuration = ({ step }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  if (step.synthetics.step?.status === 'skipped') {
+    return '--';
+  }
+
   const button = (
     <EuiButtonEmpty onMouseEnter={() => setIsOpen(true)} iconType="visArea">
       {i18n.translate('xpack.uptime.synthetics.step.duration', {
@@ -29,6 +34,7 @@ export const StepDuration = ({ step }: Props) => {
       })}
     </EuiButtonEmpty>
   );
+
   return (
     <EuiPopover
       isOpen={isOpen}

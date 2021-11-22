@@ -28,6 +28,9 @@ describe('<WaterfallMarkerIcon />', () => {
             step: {
               index: 0,
               name: 'test-name',
+              duration: {
+                us: 9999,
+              },
             },
           },
           monitor: {

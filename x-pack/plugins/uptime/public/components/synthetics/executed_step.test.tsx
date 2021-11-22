@@ -29,6 +29,9 @@ describe('ExecutedStep', () => {
         step: {
           index: 4,
           name: 'STEP_NAME',
+          duration: {
+            us: 9999,
+          },
         },
         type: 'step/end',
       },
@@ -44,6 +47,9 @@ describe('ExecutedStep', () => {
       step: {
         index: 3,
         name: 'STEP_NAME',
+        duration: {
+          us: 9999,
+        },
       },
       type: 'step/end',
     };

@@ -35,6 +35,9 @@ describe('StepList component', () => {
           step: {
             name: 'load page',
             index: 1,
+            duration: {
+              us: 9999,
+            },
           },
         },
       },
@@ -58,6 +61,9 @@ describe('StepList component', () => {
           step: {
             name: 'go to login',
             index: 2,
+            duration: {
+              us: 9999,
+            },
           },
         },
       },
