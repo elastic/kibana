@@ -28,9 +28,9 @@ import { ErrorDistribution } from '../error_group_details/Distribution';
 import { ErrorGroupList } from './error_group_list';
 
 type ErrorGroupMainStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/main_statistics'>;
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATISTICS: {
   items: ErrorGroupMainStatistics['errorGroups'];
@@ -89,7 +89,7 @@ export function ErrorGroupOverview() {
         if (start && end) {
           return callApmApi({
             endpoint:
-              'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
+              'GET /internal/apm/services/{serviceName}/errors/main_statistics',
             params: {
               path: {
                 serviceName,
@@ -134,7 +134,7 @@ export function ErrorGroupOverview() {
       if (requestId && items.length && start && end && transactionType) {
         return callApmApi({
           endpoint:
-            'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/errors/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
