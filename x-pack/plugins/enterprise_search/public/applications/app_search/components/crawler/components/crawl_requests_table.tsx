@@ -41,16 +41,9 @@ export const CrawlRequestsTable: React.FC = () => {
       ),
       render: (id: string, event: CrawlEvent) => {
         if (event.stage === 'crawl') {
-          return (
-            <EuiLink
-              data-test-subj="CrawlRequestsTableIdLink"
-              onClick={() => fetchCrawlRequest(id)}
-            >
-              {id}
-            </EuiLink>
-          );
+          return <EuiLink onClick={() => fetchCrawlRequest(id)}>{id}</EuiLink>;
         }
-        return <span data-test-subj="CrawlRequestsTableId">{id}</span>;
+        return <span>{id}</span>;
       },
     },
     {

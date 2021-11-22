@@ -74,18 +74,18 @@ describe('CrawlRequestsTable', () => {
 
     it('renders a id column ', () => {
       expect(tableContent).toContain('Request ID');
-      expect(tableContent).toContain('618d0e66abe97bc688328900');
-      expect(tableContent).toContain('54325423aef7890543');
 
-      // TODO Use data-test-subj instead, currently not able to find inside the table
-      // expect(wrapper.find('[data-test-subj="CrawlRequestsTableId"]').children()).toContain(
-      //   '54325423aef7890543'
-      // );
-      // expect(wrapper.find('[data-test-subj="CrawlRequestsTableIdLink"]').children()).toContain(
-      //   '618d0e66abe97bc688328900'
-      // );
-      // wrapper.find('[data-test-subj="CrawlRequestsTableIdLink"]').simulate('click');
-      // expect(actions.fetchCrawlRequest).toHaveBeenCalledWith('618d0e66abe97bc688328900');
+      const table = wrapper.find(EuiBasicTable);
+      const columns = table.prop('columns');
+
+      const crawlID = shallow(columns[0].render('618d0e66abe97bc688328900', { stage: 'crawl' }));
+      expect(crawlID.text()).toContain('618d0e66abe97bc688328900');
+
+      crawlID.simulate('click');
+      expect(actions.fetchCrawlRequest).toHaveBeenCalledWith('618d0e66abe97bc688328900');
+
+      const processCrawlID = shallow(columns[0].render('54325423aef7890543', { stage: 'process' }));
+      expect(processCrawlID.text()).toContain('54325423aef7890543');
     });
 
     it('renders a created at column', () => {
