@@ -19,12 +19,12 @@ import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public'
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
 
-import { AllCasesProps } from './components/all_cases';
-import { CaseViewProps } from './components/case_view';
-import { ConfigureCasesProps } from './components/configure_cases';
-import { CreateCaseProps } from './components/create';
-import { RecentCasesProps } from './components/recent_cases';
-import { AllCasesSelectorModalProps } from './components/all_cases/selector_modal';
+import {
+  GetCasesProps,
+  GetAllCasesSelectorModalProps,
+  GetCreateCaseFlyoutProps,
+  GetRecentCasesProps,
+} from './methods';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -51,47 +51,31 @@ export type StartServices = CoreStart &
     security: SecurityPluginSetup;
   };
 
-export interface Owner {
-  owner: string[];
-}
-
 export interface CasesUiStart {
   /**
-   * Get the all cases table
-   * @param props AllCasesProps
-   * @returns A react component that displays all cases
+   * Get cases
+   * @param props GetCasesProps
+   * @return {ReactElement<GetCasesProps>}
    */
-  getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
+  getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
   /**
-   * use Modal hook for all cases selector
-   * @param props UseAllCasesSelectorModalProps
+   * Modal to select a case in a list of all owner cases
+   * @param props GetAllCasesSelectorModalProps
    * @returns A react component that is a modal for selecting a case
    */
   getAllCasesSelectorModal: (
-    props: AllCasesSelectorModalProps
-  ) => ReactElement<AllCasesSelectorModalProps>;
+    props: GetAllCasesSelectorModalProps
+  ) => ReactElement<GetAllCasesSelectorModalProps>;
   /**
-   * Get the case view component
-   * @param props CaseViewProps
-   * @returns A react component for viewing a specific case
+   * Flyout with the form to create a case for the owner
+   * @param props GetCreateCaseFlyoutProps
+   * @returns A react component that is a flyout for creating a case
    */
-  getCaseView: (props: CaseViewProps) => ReactElement<CaseViewProps>;
-  /**
-   * Get the configure case component
-   * @param props ConfigureCasesProps
-   * @returns A react component for configuring a specific case
-   */
-  getConfigureCases: (props: ConfigureCasesProps) => ReactElement<ConfigureCasesProps>;
-  /**
-   * Get the create case form
-   * @param props CreateCaseProps
-   * @returns A react component for creating a new case
-   */
-  getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
+  getCreateCaseFlyout: (props: GetCreateCaseFlyoutProps) => ReactElement<GetCreateCaseFlyoutProps>;
   /**
    * Get the recent cases component
-   * @param props RecentCasesProps
+   * @param props GetRecentCasesProps
    * @returns A react component for showing recent cases
    */
-  getRecentCases: (props: RecentCasesProps) => ReactElement<RecentCasesProps>;
+  getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
 }
