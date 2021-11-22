@@ -35,10 +35,9 @@ export async function requestOAuthClientCredentialsToken(
 ): Promise<OAuthTokenResponse> {
   return await requestOAuthToken<ClientCredentialsOAuthRequestParams>(
     tokenUrl,
-    params,
     OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
     configurationUtilities,
     logger,
-    rewriteBodyRequest
+    rewriteBodyRequest(params)
   );
 }

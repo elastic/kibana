@@ -38,10 +38,9 @@ export async function requestOAuthJWTToken(
 ): Promise<OAuthTokenResponse> {
   return await requestOAuthToken<JWTOAuthRequestParams>(
     tokenUrl,
-    params,
     OAUTH_JWT_BEARER_GRANT_TYPE,
     configurationUtilities,
     logger,
-    rewriteBodyRequest
+    rewriteBodyRequest(params)
   );
 }

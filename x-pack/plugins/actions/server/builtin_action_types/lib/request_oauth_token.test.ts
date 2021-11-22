@@ -13,7 +13,6 @@ import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { requestOAuthToken } from './request_oauth_token';
 import { actionsConfigMock } from '../../actions_config.mock';
-import { RewriteResponseCase } from '../../../../actions/common';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = jest.fn();
@@ -41,29 +40,17 @@ describe('requestOAuthToken', () => {
         expiresIn: 123,
       },
     });
-    const rewriteBodyRequest: RewriteResponseCase<TestOAuthRequestParams> = ({
-      clientId,
-      clientSecret,
-      someAdditionalParam,
-      ...res
-    }) => ({
-      ...res,
-      client_id: clientId,
-      client_secret: clientSecret,
-      some_additional_param: someAdditionalParam,
-    });
 
     await requestOAuthToken<TestOAuthRequestParams>(
       'https://test',
-      {
-        someAdditionalParam: 'test',
-        clientId: '123456',
-        clientSecret: 'secrert123',
-      },
       'test',
       configurationUtilities,
       mockLogger,
-      rewriteBodyRequest
+      {
+        client_id: '123456',
+        client_secret: 'secrert123',
+        some_additional_param: 'test',
+      }
     );
 
     expect(axiosInstanceMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -125,30 +112,18 @@ describe('requestOAuthToken', () => {
           "AADSTS70011: The provided value for the input parameter 'scope' is not valid.",
       },
     });
-    const rewriteBodyRequest: RewriteResponseCase<TestOAuthRequestParams> = ({
-      clientId,
-      clientSecret,
-      someAdditionalParam,
-      ...res
-    }) => ({
-      ...res,
-      client_id: clientId,
-      client_secret: clientSecret,
-      some_additional_param: someAdditionalParam,
-    });
 
     await expect(
       requestOAuthToken<TestOAuthRequestParams>(
         'https://test',
-        {
-          someAdditionalParam: 'test',
-          clientId: '123456',
-          clientSecret: 'secrert123',
-        },
         'test',
         configurationUtilities,
         mockLogger,
-        rewriteBodyRequest
+        {
+          client_id: '123456',
+          client_secret: 'secrert123',
+          some_additional_param: 'test',
+        }
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"{\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter \'scope\' is not valid.\\"}"'

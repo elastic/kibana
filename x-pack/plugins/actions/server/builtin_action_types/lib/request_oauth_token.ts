@@ -11,7 +11,7 @@ import stringify from 'json-stable-stringify';
 import { Logger } from '../../../../../../src/core/server';
 import { request } from './axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { RewriteResponseCase } from '../../../../actions/common';
+import { AsApiContract } from '../../../../actions/common';
 
 export interface OAuthTokenResponse {
   tokenType: string;
@@ -21,11 +21,10 @@ export interface OAuthTokenResponse {
 
 export async function requestOAuthToken<T>(
   tokenUrl: string,
-  params: T,
   grantType: string,
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
-  rewriteBodyRequest: RewriteResponseCase<T>
+  bodyRequest: AsApiContract<T>
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
 
@@ -35,7 +34,7 @@ export async function requestOAuthToken<T>(
     method: 'post',
     logger,
     data: qs.stringify({
-      ...rewriteBodyRequest(params),
+      ...bodyRequest,
       grant_type: grantType,
     }),
     headers: {
@@ -55,7 +54,7 @@ export async function requestOAuthToken<T>(
     const errString = stringify(res.data);
     logger.warn(
       `error thrown getting the access token from ${tokenUrl} for params: ${JSON.stringify(
-        params
+        bodyRequest
       )}: ${errString}`
     );
     throw new Error(errString);
