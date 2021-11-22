@@ -84,6 +84,7 @@ export async function mountManagementSection(
                 toasts={notifications.toasts}
                 dockLinks={docLinks.links}
                 uiSettings={uiSettings}
+                theme={params.theme$}
                 componentRegistry={componentRegistry}
                 trackUiMetric={trackUiMetric}
               />
