@@ -277,9 +277,9 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
 
     return (
       <WrapperFlexGroup direction="column" gutterSize="m">
-        {agentPolicy && !agentPolicy.monitoring_enabled?.includes('logs') && (
-          <AgentPolicyLogsNotEnabledCallout agentPolicy={agentPolicy} />
-        )}
+        {agentPolicy &&
+          !agentPolicy.monitoring_enabled?.includes('logs') &&
+          !agentPolicy.is_managed && <AgentPolicyLogsNotEnabledCallout agentPolicy={agentPolicy} />}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
