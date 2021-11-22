@@ -55,6 +55,7 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
+import { isRuleEnabled } from './lib/is_rule_enabled';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -115,21 +116,6 @@ export class TaskRunner<
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.cancelled = false;
-  }
-
-  async isRuleEnabled(ruleId: string, spaceId: string) {
-    const namespace = this.context.spaceIdToNamespace(spaceId);
-    // Only fetch encrypted attributes here, we'll create a saved objects client
-    // scoped with the API key to fetch the remaining data.
-    const {
-      attributes: { enabled },
-    } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-      'alert',
-      ruleId,
-      { namespace }
-    );
-
-    return enabled;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -580,7 +566,7 @@ export class TaskRunner<
     this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
 
     try {
-      const enabled = await this.isRuleEnabled(alertId, spaceId);
+      const enabled = await isRuleEnabled(this.context, alertId, spaceId);
       if (!enabled) {
         this.logger.debug(
           `skipping execution for rule ${this.alertType.id}:${alertId} at ${runDateString} because rule is disabled`

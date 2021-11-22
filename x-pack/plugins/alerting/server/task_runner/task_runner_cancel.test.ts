@@ -32,6 +32,10 @@ import { Alert, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedAlertType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 
+jest.mock('./lib/is_rule_enabled', () => ({
+  isRuleEnabled: () => true,
+}));
+
 const ruleType: jest.Mocked<UntypedNormalizedAlertType> = {
   id: 'test',
   name: 'My test rule',
@@ -79,6 +83,7 @@ describe('Task Runner Cancel', () => {
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  // const isRuleEnabled = isRuleEnabledMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -171,6 +176,7 @@ describe('Task Runner Cancel', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
