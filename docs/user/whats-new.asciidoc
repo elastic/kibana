@@ -1,6 +1,8 @@
 [[whats-new]]
 == What's new in {minor-version}
 
+coming::[7.16.0]
+
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check out the <<release-notes, release notes>>.
@@ -64,15 +66,15 @@ image::images/reference-line-7.16.png[View of all ingest options for Elastic]
 Take advantage of the field formatters from your index pattern in
 *TSVB*&mdash;or override the format for a specific visualization.
 * *Filter bar in TSVB.*
-In *TSVB* layers, you always had the ability to ignore global filters, 
+In *TSVB* layers, you always had the ability to ignore global filters,
 but now you can change the global filter.
 * *View Lens data and requests.*
 You can now view the data in visualizations and the requests that collected the data right in the *Lens* editor.
 * *View requests in Console.*
-View the requests that collect the data in visualizations in *Console*, which is especially useful 
+View the requests that collect the data in visualizations in *Console*, which is especially useful
 to inspect your *TSVB* data without having to edit the filters for each series.
-* *Auto fit rows to content.*  
-You can now specify to automatically resize *Aggregation-based* data table rows so that text and images are fully visible. 
+* *Auto fit rows to content.*
+You can now specify to automatically resize *Aggregation-based* data table rows so that text and images are fully visible.
 
 [float]
 ==== New and updated connectors
