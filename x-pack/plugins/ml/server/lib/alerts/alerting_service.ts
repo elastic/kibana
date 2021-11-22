@@ -34,6 +34,7 @@ import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/an
 import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/field_formats/common';
 import type { AwaitReturnType } from '../../../common/types/common';
+import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -172,6 +173,7 @@ export function alertingServiceProvider(
                   'bucket_span',
                   'typical',
                   'actual',
+                  'causes',
                 ],
               },
               size: 3,
@@ -284,10 +286,12 @@ export function alertingServiceProvider(
           end: new Date(timestamp + bucketSpanInSeconds * 1000 * TIME_RANGE_PADDING).toISOString(),
         },
         topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
+          const { actual, typical } = getTypicalAndActualValues(h._source);
+
           return {
             ...h._source,
-            typical: h._source.typical?.map((t: number) => formatters.numberFormatter(t)),
-            actual: h._source.actual?.map((t: number) => formatters.numberFormatter(t)),
+            typical: formatters.numberFormatter(typical),
+            actual: formatters.numberFormatter(actual),
             score: Math.floor(
               h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),
