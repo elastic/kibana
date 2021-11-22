@@ -21,15 +21,16 @@ import {
 import type { LocatorPublic, SharePluginSetup } from '../../../../../../src/plugins/share/public';
 
 import type { ILicense } from '../../../../licensing/public';
-
+import type { ReportApiJSON } from '../../../common/types';
 import { KibanaContextProvider } from '../../shared_imports';
 import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
 import { InternalApiClientProvider, ReportingAPIClient } from '../../lib/reporting_api_client';
 import { Job } from '../../lib/job';
 
-import { ListingProps as Props, ReportListing } from '../';
+import { ListingProps, ReportListing } from '../';
 import { mockJobs } from './constants';
 
+export type Props = ListingProps & { jobs: ReportApiJSON[] };
 export interface TestDependencies {
   http: ReturnType<typeof httpServiceMock.createSetupContract>;
   application: ReturnType<typeof applicationServiceMock.createStartContract>;
@@ -102,7 +103,7 @@ export const setup = async (props?: Partial<Props>) => {
 
   jest
     .spyOn(reportingAPIClient, 'list')
-    .mockImplementation(() => Promise.resolve(mockJobs.map((j) => new Job(j))));
+    .mockImplementation(() => Promise.resolve((props?.jobs ?? mockJobs).map((j) => new Job(j))));
   jest.spyOn(reportingAPIClient, 'total').mockImplementation(() => Promise.resolve(18));
   jest.spyOn(reportingAPIClient, 'migrateReportingIndicesIlmPolicy').mockImplementation(jest.fn());
 
@@ -134,6 +135,7 @@ export const setup = async (props?: Partial<Props>) => {
     actions: {
       findListTable: () => find('reportJobListing'),
       hasIlmMigrationBanner: () => exists('migrateReportingIndicesPolicyCallOut'),
+      has: () => exists('migrateReportingIndicesPolicyCallOut'),
       hasIlmPolicyLink: () => exists('ilmPolicyLink'),
       migrateIndices: async () => {
         await act(async () => {
