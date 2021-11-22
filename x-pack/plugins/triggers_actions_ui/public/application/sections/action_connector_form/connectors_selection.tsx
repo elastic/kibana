@@ -13,7 +13,7 @@ import { ActionConnector, ActionTypeIndex, ActionTypeModel, AlertAction } from '
 import { getValidConnectors } from '../common/connectors';
 import { preconfiguredMessage } from '../../../common/connectors_selection';
 
-interface DropdownProps {
+interface SelectionProps {
   actionItem: AlertAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
@@ -31,7 +31,7 @@ function ConnectorsSelectionComponent({
   actionTypeRegistered,
   connectors,
   onConnectorSelected,
-}: DropdownProps) {
+}: SelectionProps) {
   const validConnectors = useMemo(
     () => getValidConnectors(connectors, actionItem, actionTypesIndex),
     [actionItem, actionTypesIndex, connectors]
@@ -82,8 +82,8 @@ const createConnectorOptions = (
     const title = getTitle(connector);
 
     const ConnectorRow = () =>
-      actionTypeRegistered.actionConnectorDropdownComponent != null ? (
-        <actionTypeRegistered.actionConnectorDropdownComponent actionConnector={connector} />
+      actionTypeRegistered.customConnectorSelectItemComponent != null ? (
+        <actionTypeRegistered.customConnectorSelectItemComponent actionConnector={connector} />
       ) : (
         <EuiFlexItem grow={false}>
           <span>{title}</span>

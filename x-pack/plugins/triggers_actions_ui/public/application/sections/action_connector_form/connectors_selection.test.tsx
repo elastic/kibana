@@ -9,7 +9,7 @@ import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import { ConnectorsDropdown } from './connectors_selection';
+import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
@@ -91,7 +91,7 @@ describe('connectors_selection', () => {
   it('renders a super selector', () => {
     const wrapper = mountWithIntl(
       <EuiThemeProvider>
-        <ConnectorsDropdown
+        <ConnectorsSelection
           accordionIndex={0}
           actionItem={actionItem}
           actionTypesIndex={actionTypeIndex}
@@ -110,7 +110,7 @@ describe('connectors_selection', () => {
   it('renders the title of the connector', () => {
     render(
       <EuiThemeProvider>
-        <ConnectorsDropdown
+        <ConnectorsSelection
           accordionIndex={0}
           actionItem={actionItem}
           actionTypesIndex={actionTypeIndex}
