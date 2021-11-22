@@ -318,7 +318,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     };
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest) {
+  getSourceStatus(sourceDataRequest?: DataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest
       ? (sourceDataRequest.getMeta() as ESGeoLineSourceResponseMeta)
