@@ -8,7 +8,6 @@
 import * as t from 'io-ts';
 import React from 'react';
 import { casesPath } from '../../common';
-import { ExploratoryViewPage } from '../components/shared/exploratory_view';
 import { AlertsPage } from '../pages/alerts';
 import { CasesPage } from '../pages/cases';
 import { HomePage } from '../pages/home';
