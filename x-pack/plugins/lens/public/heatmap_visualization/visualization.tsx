@@ -12,7 +12,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
 import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from 'src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import type { OperationMetadata, Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';

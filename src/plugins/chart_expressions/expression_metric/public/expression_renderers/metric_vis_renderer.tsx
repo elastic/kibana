@@ -10,7 +10,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from 'src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { VisualizationContainer } from '../../../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';

@@ -10,7 +10,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { KibanaThemeProvider } from 'src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { RenderValue } from './vega_fn';
