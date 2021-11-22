@@ -26,7 +26,10 @@ export const syntheticsMonitor: SavedObjectsType = {
       type: {
         type: 'keyword',
       },
-      schedule: {
+      urls: {
+        type: 'keyword',
+      },
+      tags: {
         type: 'keyword',
       },
     },
