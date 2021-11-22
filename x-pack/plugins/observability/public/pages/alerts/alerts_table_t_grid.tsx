@@ -46,7 +46,7 @@ import type {
 } from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
-import { observabilityFeatureId } from '../../../common';
+import { observabilityAppId, observabilityFeatureId } from '../../../common';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../..';
@@ -300,6 +300,16 @@ function ObservabilityActions({
     </>
   );
 }
+// Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
+/*
+const FIELDS_WITHOUT_CELL_ACTIONS = [
+  '@timestamp',
+  'signal.rule.risk_score',
+  'signal.reason',
+  'kibana.alert.duration.us',
+  'kibana.alert.reason',
+];
+*/
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch } = props;
@@ -364,12 +374,15 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      appId: observabilityFeatureId,
+      appId: observabilityAppId,
       casesOwner: observabilityFeatureId,
       casePermissions,
       type,
       columns,
       deletedEventIds,
+      // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
+      // defaultCellActions: getDefaultCellActions({ addToQuery }),
+      // disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
       filters: [],
       hasAlertsCrudPermissions,
