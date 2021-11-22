@@ -6,20 +6,14 @@
  */
 import React from 'react';
 import { RouteParams } from '../../routes';
-import { getBucketSize } from '../../utils/get_bucket_size';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OverviewPage as OldOverviewPage } from './old_overview_page';
 import { OverviewPage as NewOverviewPage } from './overview_page';
 
+export { BucketSize } from './old_overview_page';
+
 interface Props {
   routeParams: RouteParams<'/overview'>;
-}
-
-export type BucketSize = ReturnType<typeof calculateBucketSize>;
-function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
-  if (start && end) {
-    return getBucketSize({ start, end, minInterval: '60s' });
-  }
 }
 
 export function OverviewPage(props: Props) {

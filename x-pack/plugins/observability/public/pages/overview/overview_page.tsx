@@ -13,18 +13,11 @@ import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RouteParams } from '../../routes';
-import { getBucketSize } from '../../utils/get_bucket_size';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
-}
-export type BucketSize = ReturnType<typeof calculateBucketSize>;
-function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
-  if (start && end) {
-    return getBucketSize({ start, end, minInterval: '60s' });
-  }
 }
 
 export function OverviewPage({ routeParams }: Props) {
