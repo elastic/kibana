@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { produce } from 'immer';
 import type {
   SavedObjectsFindOptionsReference,
   SavedObjectsFindOptions,
@@ -336,9 +337,9 @@ export async function saveVisualization(
   } = savedObject;
   const firstSeriesType = seriesParams && seriesParams[0].type;
   if (firstSeriesType) {
-    const stateCopy = JSON.parse(JSON.stringify(savedObject.visState));
-    stateCopy.params.type = stateCopy.type = firstSeriesType;
-    savedObject.visState = stateCopy;
+    savedObject.visState = produce(savedObject.visState, (draftState) => {
+      draftState.params.type = draftState.type = firstSeriesType;
+    });
   }
 
   const attributes: SavedObjectAttributes = {
