@@ -37,12 +37,12 @@ export class DependencyManager {
     const sortedVertices: Set<T> = new Set();
     const vertices = Object.keys(graph) as T[];
     return vertices.reduce<CycleDetectionResult<T>>((cycleInfo, srcVertex) => {
-      const info = DependencyManager.sortVerticesFrom(srcVertex, graph, sortedVertices, {}, {});
-      if (info.hasCycle) {
-        return info;
+      if (cycleInfo.hasCycle) {
+        return cycleInfo;
       }
-      return cycleInfo.hasCycle ? cycleInfo : { ...cycleInfo, path: [...sortedVertices] };
-    }, DependencyManager.getDefaultCycleInfo());
+
+      return DependencyManager.sortVerticesFrom(srcVertex, graph, sortedVertices, {}, {});
+    }, DependencyManager.createCycleInfo());
   }
 
   /**
@@ -65,7 +65,10 @@ export class DependencyManager {
     const cycleInfo = graph[srcVertex]?.reduce<CycleDetectionResult<T> | undefined>(
       (info, vertex) => {
         if (inpath[vertex]) {
-          return { hasCycle: true, path: [...(Object.keys(visited) as T[]), vertex] };
+          const path = (Object.keys(inpath) as T[]).filter(
+            (visitedVertex) => inpath[visitedVertex]
+          );
+          return DependencyManager.createCycleInfo([...path, vertex], true);
         } else if (!visited[vertex]) {
           return DependencyManager.sortVerticesFrom(vertex, graph, sortedVertices, visited, inpath);
         }
@@ -80,13 +83,14 @@ export class DependencyManager {
       sortedVertices.add(srcVertex);
     }
 
-    return cycleInfo ?? DependencyManager.getDefaultCycleInfo<T>();
+    return cycleInfo ?? DependencyManager.createCycleInfo<T>([...sortedVertices]);
   }
 
-  private static getDefaultCycleInfo<
-    T extends GraphVertex = GraphVertex
-  >(): CycleDetectionResult<T> {
-    return { hasCycle: false, path: [] };
+  private static createCycleInfo<T extends GraphVertex = GraphVertex>(
+    path: T[] = [],
+    hasCycle: boolean = false
+  ): CycleDetectionResult<T> {
+    return { hasCycle, path };
   }
 
   private static getCyclePathError<T extends GraphVertex = GraphVertex>(

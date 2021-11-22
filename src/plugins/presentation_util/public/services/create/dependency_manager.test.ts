@@ -9,7 +9,7 @@
 import { DependencyManager } from './dependency_manager';
 
 describe('DependencyManager', () => {
-  it('should sort', () => {
+  it('orderDependencies. Should sort topology by dependencies', () => {
     const graph = {
       N: [],
       R: [],
@@ -22,5 +22,34 @@ describe('DependencyManager', () => {
     };
     const sortedTopology = ['N', 'R', 'L', 'D', 'B', 'E', 'F', 'C', 'A'];
     expect(DependencyManager.orderDependencies(graph)).toEqual(sortedTopology);
+  });
+
+  it('orderDependencies. Should return base topology if no depended vertices', () => {
+    const graph = {
+      N: [],
+      R: [],
+      D: undefined,
+    };
+    const sortedTopology = ['N', 'R', 'D'];
+    expect(DependencyManager.orderDependencies(graph)).toEqual(sortedTopology);
+  });
+
+  it('orderDependencies. Should detect circular dependencies and throw error with path', () => {
+    const graph = {
+      N: ['R'],
+      R: ['A'],
+      A: ['B'],
+      B: ['C'],
+      C: ['D'],
+      D: ['E'],
+      E: ['F'],
+      F: ['L'],
+      L: ['G'],
+      G: ['N'],
+    };
+    const circularPath = ['N', 'R', 'A', 'B', 'C', 'D', 'E', 'F', 'L', 'G', 'N'].join(' -> ');
+    const errorMessage = `Circular dependency detected while setting up services: ${circularPath}`;
+
+    expect(() => DependencyManager.orderDependencies(graph)).toThrowError(errorMessage);
   });
 });
