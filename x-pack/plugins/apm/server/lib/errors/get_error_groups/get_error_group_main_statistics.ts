@@ -109,7 +109,7 @@ export async function getServiceErrorGroupMainStatistics({
     }
   );
 
-  const errorGroups =
+  return (
     response.aggregations?.error_groups.buckets.map((bucket) => ({
       groupId: bucket.key as string,
       name: getErrorName(bucket.sample.hits.hits[0]._source),
@@ -120,11 +120,6 @@ export async function getServiceErrorGroupMainStatistics({
       culprit: bucket.sample.hits.hits[0]._source.error.culprit,
       handled: bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
       type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
-    })) ?? [];
-
-  return {
-    is_aggregation_accurate:
-      (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
-    error_groups: errorGroups,
-  };
+    })) ?? []
+  );
 }

@@ -49,7 +49,7 @@ const Culprit = euiStyled.div`
 `;
 
 type ErrorGroupItem =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>['errorGroups']['error_groups'][0];
+  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>['errorGroups'][0];
 type ErrorGroupDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 

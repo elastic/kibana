@@ -28,11 +28,7 @@ export function getColumns({
   serviceName: string;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
-}): Array<
-  EuiBasicTableColumn<
-    ErrorGroupMainStatistics['errorGroups']['error_groups'][0]
-  >
-> {
+}): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['errorGroups'][0]>> {
   return [
     {
       field: 'name',

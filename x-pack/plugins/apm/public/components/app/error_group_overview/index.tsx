@@ -33,7 +33,7 @@ type ErrorGroupDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATISTICS: {
-  items: ErrorGroupMainStatistics['errorGroups']['error_groups'];
+  items: ErrorGroupMainStatistics['errorGroups'];
   requestId?: string;
 } = {
   items: [],
@@ -108,7 +108,7 @@ export function ErrorGroupOverview() {
             return {
               // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
               requestId: uuid(),
-              items: response.errorGroups.error_groups,
+              items: response.errorGroups,
             };
           });
         }

@@ -6,12 +6,13 @@
  */
 
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
-import { getErrorGroups } from './get_error_groups';
+
 import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { getServiceErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 
 describe('error queries', () => {
   let mock: SearchParamsMock;
@@ -38,10 +39,11 @@ describe('error queries', () => {
 
   it('fetches multiple error groups', async () => {
     mock = await inspectSearchParams((setup) =>
-      getErrorGroups({
+      getServiceErrorGroupMainStatistics({
         sortDirection: 'asc',
         sortField: 'foo',
         serviceName: 'serviceName',
+        transactionType: 'request',
         setup,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
@@ -53,12 +55,13 @@ describe('error queries', () => {
     expect(mock.params).toMatchSnapshot();
   });
 
-  it('fetches multiple error groups when sortField = latestOccurrenceAt', async () => {
+  it('fetches multiple error groups when sortField = lastSeen', async () => {
     mock = await inspectSearchParams((setup) =>
-      getErrorGroups({
+      getServiceErrorGroupMainStatistics({
         sortDirection: 'asc',
-        sortField: 'latestOccurrenceAt',
+        sortField: 'lastSeen',
         serviceName: 'serviceName',
+        transactionType: 'fetch',
         setup,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
