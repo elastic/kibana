@@ -228,6 +228,7 @@ The message contains some high-level information, and the corresponding log meta
 
 |===
 
+[float]
 [[logging-appenders]]
 === Appenders
 
