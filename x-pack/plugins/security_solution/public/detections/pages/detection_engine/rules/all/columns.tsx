@@ -28,7 +28,7 @@ import { ActionToaster } from '../../../../../common/components/toasters';
 import { PopoverItems, PopoverItemsProps } from '../../../../../common/components/popover_items';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
-import { RuleExecutionStatus } from '../../../../components/rules/rule_execution_status';
+import { RuleExecutionStatusBadge } from '../../../../components/rules/rule_execution_status_badge';
 import * as i18n from '../translations';
 import {
   deleteRulesAction,
@@ -250,7 +250,7 @@ export const getColumns = ({
     {
       field: 'status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: Rule['status']) => <RuleExecutionStatus status={value} />,
+      render: (value: Rule['status']) => <RuleExecutionStatusBadge status={value} />,
       width: '16%',
       truncateText: true,
     },
@@ -357,11 +357,7 @@ export const getMonitoringColumns = (
               }}
               href={formatUrl(getRuleDetailsUrl(item.id))}
             >
-              {/* Temporary fix if on upgrade a rule has a status of 'partial failure' we want to display that text as 'warning' */}
-              {/* On the next subsequent rule run, that 'partial failure' status will be re-written as a 'warning' status */}
-              {/* and this code will no longer be necessary */}
-              {/* TODO: remove this code in 8.0.0 */}
-              {value === 'partial failure' ? 'warning' : value}
+              {value}
             </LinkAnchor>
           </EuiToolTip>
         );
@@ -441,7 +437,7 @@ export const getMonitoringColumns = (
       field: 'current_status.status',
       name: i18n.COLUMN_LAST_RESPONSE,
       render: (value: RuleStatus['current_status']['status']) => (
-        <RuleExecutionStatus status={value} />
+        <RuleExecutionStatusBadge status={value} />
       ),
       width: '12%',
       truncateText: true,

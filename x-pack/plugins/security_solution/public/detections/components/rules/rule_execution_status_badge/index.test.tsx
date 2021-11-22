@@ -8,13 +8,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { RuleExecutionStatus } from '.';
+import { RuleExecutionStatusBadge } from '.';
 
-import { RuleExecutionStatus as RuleExecutionStatusType } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 describe('Component RuleExecutionStatus', () => {
   it('should render component correctly with capitalized status text', () => {
-    render(<RuleExecutionStatus status={RuleExecutionStatusType.succeeded} />);
+    render(<RuleExecutionStatusBadge status={RuleExecutionStatus.succeeded} />);
 
     expect(screen.getByText('Succeeded')).toBeInTheDocument();
   });

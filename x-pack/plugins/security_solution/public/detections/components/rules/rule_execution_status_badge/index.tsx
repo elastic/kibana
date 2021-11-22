@@ -12,17 +12,17 @@ import { HealthTruncateText } from '../../../../common/components/health_truncat
 import { getStatusColor } from '../rule_status/helpers';
 
 import { getCapitalizedRuleStatusText } from '../../../../../common/detection_engine/utils';
-import type { RuleExecutionStatus as RuleExecutionStatusType } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
-interface RuleExecutionStatusProps {
-  status: RuleExecutionStatusType | null | undefined;
+interface RuleExecutionStatusBadgeProps {
+  status: RuleExecutionStatus | null | undefined;
 }
 
 /**
  * Shows rule execution status
  * @param status - rule execution status
  */
-const RuleExecutionStatusComponent = ({ status }: RuleExecutionStatusProps) => {
+const RuleExecutionStatusBadgeComponent = ({ status }: RuleExecutionStatusBadgeProps) => {
   const displayStatus = getCapitalizedRuleStatusText(status);
   return (
     <HealthTruncateText
@@ -35,6 +35,6 @@ const RuleExecutionStatusComponent = ({ status }: RuleExecutionStatusProps) => {
   );
 };
 
-export const RuleExecutionStatus = React.memo(RuleExecutionStatusComponent);
+export const RuleExecutionStatusBadge = React.memo(RuleExecutionStatusBadgeComponent);
 
-RuleExecutionStatus.displayName = 'RuleExecutionStatus';
+RuleExecutionStatusBadge.displayName = 'RuleExecutionStatusBadge';
