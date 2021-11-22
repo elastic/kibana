@@ -57,9 +57,6 @@ export interface PluginsStart {
 export interface SpacesPluginSetup {
   /**
    * Service for interacting with spaces.
-   *
-   * @deprecated Please use the `spacesService` available on this plugin's start contract.
-   * @removeBy 7.16
    */
   spacesService: SpacesServiceSetup;
 
