@@ -34,7 +34,7 @@ import {
 } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
+import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../common/translations';
@@ -69,7 +69,6 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   disableAlerts?: boolean;
   dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
@@ -85,7 +84,6 @@ export interface GetCasesColumn {
   updateCase?: (newCase: Case) => void;
 }
 export const useCasesColumns = ({
-  caseDetailsNavigation,
   disableAlerts = false,
   dispatchUpdateCaseProperty,
   filterStatus,
@@ -179,19 +177,17 @@ export const useCasesColumns = ({
       name: i18n.NAME,
       render: (theCase: Case | SubCase) => {
         if (theCase.id != null && theCase.title != null) {
-          const caseDetailsLinkComponent =
-            caseDetailsNavigation != null ? (
-              <CaseDetailsLink
-                caseDetailsNavigation={caseDetailsNavigation}
-                detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
-                subCaseId={isSubCase(theCase) ? theCase.id : undefined}
-                title={theCase.title}
-              >
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
-            ) : (
+          const caseDetailsLinkComponent = isSelectorView ? (
+            <TruncatedText text={theCase.title} />
+          ) : (
+            <CaseDetailsLink
+              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
+              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
+              title={theCase.title}
+            >
               <TruncatedText text={theCase.title} />
-            );
+            </CaseDetailsLink>
+          );
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
           ) : (
