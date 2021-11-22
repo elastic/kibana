@@ -12,7 +12,7 @@ import * as i18n from './translations';
 import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
 import { ConnectorTypes } from '../../../common';
 import { useToasts } from '../../common/lib/kibana';
-import { useOwnerContext } from '../../components/owner_context/use_owner_context';
+import { useCasesContext } from '../../components/cases_context/use_cases_context';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];
@@ -156,7 +156,7 @@ export const initialState: State = {
 };
 
 export const useCaseConfigure = (): ReturnUseCaseConfigure => {
-  const owner = useOwnerContext();
+  const { owner } = useCasesContext();
   const [state, dispatch] = useReducer(configureCasesReducer, initialState);
   const toasts = useToasts();
   const setCurrentConfiguration = useCallback((configuration: ConnectorConfiguration) => {

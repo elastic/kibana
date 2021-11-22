@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { IndexPatternColumn, IncompleteColumn } from './operations';
+import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
 import type { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
 import type { FieldSpec } from '../../../../../src/plugins/data/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { FieldFormatParams } from '../../../../../src/plugins/field_formats/common';
 
 export type {
-  FieldBasedIndexPatternColumn,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
   OperationType,
   IncompleteColumn,
+  FieldBasedIndexPatternColumn,
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -67,7 +67,7 @@ export type IndexPatternField = FieldSpec & {
 
 export interface IndexPatternLayer {
   columnOrder: string[];
-  columns: Record<string, IndexPatternColumn>;
+  columns: Record<string, GenericIndexPatternColumn>;
   // Each layer is tied to the index pattern that created it
   indexPatternId: string;
   // Partial columns represent the temporary invalid states
