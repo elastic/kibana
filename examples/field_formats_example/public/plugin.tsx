@@ -22,7 +22,7 @@ import { registerExampleFormat } from './examples/2_creating_custom_formatter';
 import {
   IndexPatternFieldEditorStart,
   IndexPatternFieldEditorSetup,
-} from '../../../src/plugins/index_pattern_field_editor/public';
+} from '../../../src/plugins/data_view_field_editor/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { registerExampleFormatEditor } from './examples/3_creating_custom_format_editor';
 import img from './formats.png';
@@ -30,19 +30,19 @@ import img from './formats.png';
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
   fieldFormats: FieldFormatsSetup;
-  indexPatternFieldEditor: IndexPatternFieldEditorSetup;
+  dataViewFieldEditor: IndexPatternFieldEditorSetup;
 }
 
 interface StartDeps {
   fieldFormats: FieldFormatsStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   data: DataPublicPluginStart;
 }
 
 export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
     registerExampleFormat(deps.fieldFormats);
-    registerExampleFormatEditor(deps.indexPatternFieldEditor);
+    registerExampleFormatEditor(deps.dataViewFieldEditor);
 
     // just for demonstration purposes:
     // opens a field editor using default index pattern and first number field
@@ -65,9 +65,9 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
         return;
       }
 
-      plugins.indexPatternFieldEditor.openEditor({
+      plugins.dataViewFieldEditor.openEditor({
         ctx: {
-          indexPattern,
+          dataView: indexPattern,
         },
         fieldName: numberField.name,
       });

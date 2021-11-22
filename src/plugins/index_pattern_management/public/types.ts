@@ -19,7 +19,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
 import { KibanaReactContextValue } from '../../kibana_react/public';
-import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
 import { IndexPatternEditorStart } from '../../index_pattern_editor/public';
 
 export interface IndexPatternManagmentContext {
@@ -31,7 +31,7 @@ export interface IndexPatternManagmentContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];

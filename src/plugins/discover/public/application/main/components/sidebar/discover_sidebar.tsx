@@ -247,7 +247,7 @@ export function DiscoverSidebarComponent({
         ? async (fieldName: string) => {
             const ref = indexPatternFieldEditor.openDeleteModal({
               ctx: {
-                indexPattern: selectedIndexPattern,
+                dataView: selectedIndexPattern,
               },
               fieldName,
               onDelete: async () => {

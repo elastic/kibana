@@ -39,7 +39,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
 
     const { indexFieldsSearch } = useDataView();
     const {
-      indexPatternFieldEditor,
+      dataViewFieldEditor,
       data: { dataViews },
     } = useKibana().services;
 
@@ -51,8 +51,8 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
 
     const onClick = useCallback(() => {
       if (dataView) {
-        indexPatternFieldEditor?.openEditor({
-          ctx: { indexPattern: dataView },
+        dataViewFieldEditor?.openEditor({
+          ctx: { dataView },
           onSave: (field: DataViewField) => {
             // Fetch the updated list of fields
             indexFieldsSearch(selectedDataViewId);
@@ -74,7 +74,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       }
       onClickParam();
     }, [
-      indexPatternFieldEditor,
+      dataViewFieldEditor,
       dataView,
       onClickParam,
       indexFieldsSearch,
@@ -83,7 +83,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       timelineId,
     ]);
 
-    if (!indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
+    if (!dataViewFieldEditor?.userPermissions.editIndexPattern()) {
       return null;
     }
 

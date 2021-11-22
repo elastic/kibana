@@ -40,7 +40,7 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, uiSettings, notifications, overlays, http, docLinks },
-    { data, indexPatternFieldEditor, indexPatternEditor },
+    { data, dataViewFieldEditor, indexPatternEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
@@ -58,10 +58,10 @@ export async function mountManagementSection(
     http,
     docLinks,
     data,
-    indexPatternFieldEditor,
+    dataViewFieldEditor,
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
-    fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
+    fieldFormatEditors: dataViewFieldEditor.fieldFormatEditors,
     IndexPatternEditor: indexPatternEditor.IndexPatternEditorComponent,
   };
 
