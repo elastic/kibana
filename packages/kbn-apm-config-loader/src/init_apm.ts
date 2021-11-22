@@ -17,9 +17,6 @@ export const initApm = (
   const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);
   const apmConfig = apmConfigLoader.getConfig(serviceName);
 
-  // eslint-disable-next-line no-console
-  console.log('>>> apmConfig', apmConfig);
-
   // we want to only load the module when effectively used
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const apm = require('elastic-apm-node');
