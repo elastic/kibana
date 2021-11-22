@@ -327,7 +327,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       );
     });
 
-    it('8.0 does not migrate security_solution rules other than threat_match rules if threatIndicatorPath value is missing', async () => {
+    it('8.0 does not migrate security_solution (Legacy) rules other than threat_match rules if threatIndicatorPath value is missing', async () => {
       const response = await es.get<{
         alert: {
           params: {

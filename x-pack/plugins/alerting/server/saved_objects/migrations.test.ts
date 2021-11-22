@@ -2023,10 +2023,13 @@ describe('successful migrations', () => {
       );
     });
 
-    test('do not change threatIndicatorPath value in threat match rules if value is present', () => {
+    test('doesnt change threatIndicatorPath value in threat match rules if value is present', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
       const alert = getMockData(
-        { params: { type: 'threat_match', threatIndicatorPath: 'custom.indicator.path' } },
+        {
+          params: { type: 'threat_match', threatIndicatorPath: 'custom.indicator.path' },
+          alertTypeId: 'siem.signals',
+        },
         true
       );
       expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
@@ -2034,9 +2037,20 @@ describe('successful migrations', () => {
       );
     });
 
-    test('do not change threatIndicatorPath value in other rules', () => {
+    test('doesnt change threatIndicatorPath value in other rules', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
-      const alert = getMockData({ params: { type: 'eql' } }, true);
+      const alert = getMockData({ params: { type: 'eql' }, alertTypeId: 'siem.signals' }, true);
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        undefined
+      );
+    });
+
+    test('doesnt change threatIndicatorPath value if not a siem.signals rule', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        { params: { type: 'threat_match' }, alertTypeId: 'not.siem.signals' },
+        true
+      );
       expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
         undefined
       );
