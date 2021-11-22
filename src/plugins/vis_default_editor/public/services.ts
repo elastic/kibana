@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { getMetricVisRenderer } from './metric_vis_renderer';
+import { ThemeServiceStart } from 'kibana/public';
+import { createGetterSetter } from '../../kibana_utils/common';
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('ThemeService');

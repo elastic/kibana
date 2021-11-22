@@ -27,7 +27,9 @@ export class MetricVisualization {
       const { getMetricVisualization, getMetricChartRenderer } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
 
-      expressions.registerRenderer(() => getMetricChartRenderer(formatFactory, core.uiSettings));
+      expressions.registerRenderer(() =>
+        getMetricChartRenderer(formatFactory, core.uiSettings, core.theme)
+      );
       return getMetricVisualization({ paletteService: palettes });
     });
   }
