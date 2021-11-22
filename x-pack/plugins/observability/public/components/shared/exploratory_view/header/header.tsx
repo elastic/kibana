@@ -34,15 +34,7 @@ export function ExploratoryViewHeader({ lensAttributes, chartTimeRange }: Props)
             <h2>
               {i18n.translate('xpack.observability.expView.heading.label', {
                 defaultMessage: 'Explore data',
-              })}{' '}
-              <EuiBetaBadge
-                style={{
-                  verticalAlign: `middle`,
-                }}
-                label={i18n.translate('xpack.observability.expView.heading.experimental', {
-                  defaultMessage: 'Experimental',
-                })}
-              />
+              })}
             </h2>
           </EuiText>
         </EuiFlexItem>
