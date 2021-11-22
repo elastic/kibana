@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { JsonEditor, EDITOR_MODE } from '../json_editor';
 
@@ -27,16 +27,16 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
   const formattedData = limitByNumberOfLines(data, numberOfLines);
 
   return (
-    <React.Fragment>
-      <EuiTitle size="s">
+    <>
+      {/* <EuiTitle size="s">
         <h2>
           <FormattedMessage
             id="xpack.dataVisualizer.file.fileContents.fileContentsTitle"
             defaultMessage="File contents"
           />
         </h2>
-      </EuiTitle>
-
+      </EuiTitle> */}
+      <EuiSpacer size="m" />
       <div>
         <FormattedMessage
           id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
@@ -46,9 +46,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
           }}
         />
       </div>
-
-      <EuiSpacer size="s" />
-
+      <EuiSpacer size="m" />
       <JsonEditor
         mode={mode}
         readOnly={true}
@@ -56,7 +54,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
         height="200px"
         syntaxChecking={false}
       />
-    </React.Fragment>
+    </>
   );
 };
 
