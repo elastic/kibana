@@ -12,7 +12,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 
 import { ManagementSetup } from '../../management/public';
-import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
 import { IndexPatternEditorStart } from '../../index_pattern_editor/public';
 
 export interface IndexPatternManagementSetupDependencies {
@@ -22,7 +22,7 @@ export interface IndexPatternManagementSetupDependencies {
 
 export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   indexPatternEditor: IndexPatternEditorStart;
 }
 
