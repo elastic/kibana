@@ -168,6 +168,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const onUpdateDataView = useCallback(() => {
     // @Angela this is where your work is for "Add index pattern"
     // update ui settings string
+    // uiSetttings.get(DEFAULT_INDEX_KEY)
+    // uiSettings.set(DEFAULT_INDEX_KEY, [...old, ...new])
     // close modal and sourcerer
     setIsShowingUpdateModal(false);
     setPopoverIsOpen(false);
