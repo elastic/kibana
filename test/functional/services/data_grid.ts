@@ -85,14 +85,12 @@ export class DataGridService extends FtrService {
    * @param rowIndex data row index starting from 1 (1 means 1st row)
    * @param columnIndex column index starting from 1 (1 means 1st column)
    */
-  public async getCellElement(rowIndex: number, columnIndex: number) {
-    const table = await this.find.byCssSelector('.euiDataGrid');
-    const $ = await table.parseDomContent();
-    const columnNumber = $('.euiDataGridHeaderCell__content').length;
+  public async getCellElement(rowIndex: number = 0, columnIndex: number = 0) {
+    // const table = await this.find.byCssSelector('.euiDataGrid');
+    // const $ = await table.parseDomContent();
+    // const columnNumber = $('.euiDataGridHeaderCell__content').length;
     return await this.find.byCssSelector(
-      `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRowCell"]:nth-of-type(${
-        columnNumber * (rowIndex - 1) + columnIndex + 1
-      })`
+      `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${columnIndex}"]`
     );
   }
 
