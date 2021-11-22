@@ -29,7 +29,7 @@ export function defineTelemetryOnAuthTypeRoutes({ router, usageCounter }: RouteD
 
         if (!authType || (authType && authType === '')) {
           return response.badRequest({
-            body: { message: `Authentication type attributes can not be empty` },
+            body: { message: `Authentication type attribute can not be empty` },
           });
         }
 

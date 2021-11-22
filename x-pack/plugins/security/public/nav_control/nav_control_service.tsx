@@ -114,6 +114,7 @@ export class SecurityNavControlService {
     }
     this.navControlRegistered = false;
     this.stop$.next();
+    this.channel?.close();
   }
 
   private registerSecurityNavControl(
@@ -176,6 +177,7 @@ export class SecurityNavControlService {
       setTimeout(async () => {
         if (!elector.isLeader) {
           // Let's kill the non leader since we do not need to do telemetry if you are not a leader
+          // but we are keeping the leader alive to tell the other one that they won't be leader
           await elector.die();
         }
       }, 5000);
