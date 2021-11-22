@@ -16,7 +16,9 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
@@ -205,25 +207,95 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [exception, handleOnChangeComment, newComment]
     );
 
+    const detailsSection = useMemo(
+      () => (
+        <>
+          <EuiText size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.detailsSectionTitle"
+                defaultMessage="Details"
+              />
+            </h3>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <p>{ABOUT_EVENT_FILTERS}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {nameInputMemo}
+        </>
+      ),
+      [nameInputMemo]
+    );
+
+    const criteriaSection = useMemo(
+      () => (
+        <>
+          <EuiText size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.criteriaSectionTitle"
+                defaultMessage="Conditions"
+              />
+            </h3>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.criteriaSectionDescription"
+                defaultMessage="Select an operating system and add conditions."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {allowSelectOs ? (
+            <>
+              {osInputMemo}
+              <EuiSpacer />
+            </>
+          ) : null}
+          {exceptionBuilderComponentMemo}
+        </>
+      ),
+      [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo]
+    );
+
+    const commentsSection = useMemo(
+      () => (
+        <>
+          <EuiText size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.commentsSectionTitle"
+                defaultMessage="Comments"
+              />
+            </h3>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.commentsSectionDescription"
+                defaultMessage="Add a comment to your event filter."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {commentsInputMemo}
+        </>
+      ),
+      [commentsInputMemo]
+    );
+
     return !isIndexPatternLoading && exception ? (
       <EuiForm component="div">
-        {!exception || !exception.item_id ? (
-          <EuiText color="subdued" size="xs">
-            {ABOUT_EVENT_FILTERS}
-            <EuiSpacer size="m" />
-          </EuiText>
-        ) : null}
-        {nameInputMemo}
-        <EuiSpacer size="m" />
-        {allowSelectOs ? (
-          <>
-            {osInputMemo}
-            <EuiSpacer />
-          </>
-        ) : null}
-        {exceptionBuilderComponentMemo}
-        <EuiSpacer size="xl" />
-        {commentsInputMemo}
+        {detailsSection}
+        <EuiHorizontalRule />
+        {criteriaSection}
+        <EuiHorizontalRule />
+        {commentsSection}
       </EuiForm>
     ) : (
       <Loader size="xl" />
