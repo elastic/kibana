@@ -32,6 +32,10 @@ describe('Mappings configuration validator', () => {
         required: false,
       },
       dynamic: true,
+      // Mapper-size plugin
+      _size: {
+        enabled: true,
+      },
     };
 
     const { errors } = validateMappings(mappings);
