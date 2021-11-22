@@ -10,7 +10,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OverviewPage as OldOverviewPage } from './old_overview_page';
 import { OverviewPage as NewOverviewPage } from './overview_page';
 
-export { BucketSize } from './old_overview_page';
+export type { BucketSize } from './old_overview_page';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
