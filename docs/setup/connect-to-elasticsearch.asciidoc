@@ -26,9 +26,10 @@ Beats integration, use the filter on the bottom left.
 [float]
 ==== Secure your data
 
-Collect metrics and parse logs with Filebeat, Metricbeat, and Elastic Agent.
-Install the Endpoint Security integration to enable your hosts with threat
-detection and prevention via Elastic Endpoint.
+Collect security events and threat intelligence with Filebeat,
+Auditbeat, Winlogbeat, Packetbeat, and Elastic Agent.
+Install the Endpoint Security integration for Elastic Agent to
+protect your hosts with threat detection and prevention.
 
 [float]
 ==== Observe your data
