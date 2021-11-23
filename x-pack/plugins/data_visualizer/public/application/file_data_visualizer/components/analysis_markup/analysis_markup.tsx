@@ -20,7 +20,7 @@ import { FieldIcon } from '@kbn/react-field/field_icon';
 import { FindFileStructureResponse, InputOverrides } from '../../../../../../file_upload/common';
 import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
 import { splitGrok2, getGrokField } from '../../../common/util/grok_pattern';
-import { MultiRegExp2 } from './multiRegExp2';
+import { MultiRegExp2 } from './multi_reg_exp';
 import { EditFieldModal } from './edit_field';
 
 interface Props {

@@ -107,7 +107,7 @@ export const EditFieldModal: FC<DeleteModelsModalProps> = ({
                 <DocumentStatsTable config={fieldConfig} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <TopValues stats={fieldStats} barColor="secondary" />
+                <TopValues stats={fieldStats} barColor="success" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
