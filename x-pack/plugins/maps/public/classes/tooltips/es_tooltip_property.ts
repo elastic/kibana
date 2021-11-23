@@ -102,8 +102,8 @@ export class ESTooltipProperty implements ITooltipProperty {
       existsFilter.meta.negate = true;
       return [existsFilter];
     } else {
-      const values = Array.isArray(rawValue) ? rawValue as string[] : [rawValue as string];
-      return values.map(value => {
+      const values = Array.isArray(rawValue) ? (rawValue as string[]) : [rawValue as string];
+      return values.map((value) => {
         return esFilters.buildPhraseFilter(indexPatternField, value as string, this._indexPattern);
       });
     }
