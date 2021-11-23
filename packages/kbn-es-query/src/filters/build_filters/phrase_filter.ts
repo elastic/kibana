@@ -58,7 +58,7 @@ export const isPhraseFilter = (filter: Filter): filter is PhraseFilter => {
  * @public
  */
 export const isScriptedPhraseFilter = (filter: Filter): filter is ScriptedPhraseFilter =>
-  has(filter, 'script.script.params.value');
+  has(filter, 'script.script.params.value') ?? has(filter, 'query.script.script.params.value');
 
 /** @internal */
 export const getPhraseFilterField = (filter: PhraseFilter) => {
@@ -77,7 +77,8 @@ export const getPhraseFilterValue = (
     const queryValue = Object.values(queryConfig)[0];
     return isPlainObject(queryValue) ? queryValue.query : queryValue;
   } else {
-    return filter.script.script.params?.value;
+    const scriptedValue = filter.query?.script?.script?.params?.value;
+    return scriptedValue !== undefined ? scriptedValue : filter.script.script.params?.value;
   }
 };
 
