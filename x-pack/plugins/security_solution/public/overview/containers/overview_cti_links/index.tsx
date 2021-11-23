@@ -9,7 +9,13 @@ import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-type
 import { TiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { LinkPanelListItem } from '../../components/link_panel';
 import { useKibana } from '../../../common/lib/kibana';
-import { TAG_REQUEST_BODY } from './helpers';
+
+const TAG_REQUEST_BODY_SEARCH = 'threat intel';
+export const TAG_REQUEST_BODY = {
+  type: 'tag',
+  search: TAG_REQUEST_BODY_SEARCH,
+  searchFields: ['name'],
+};
 
 export const useCtiDashboardLinks = ({
   to,

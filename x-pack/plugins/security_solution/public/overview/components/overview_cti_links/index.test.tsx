@@ -19,19 +19,19 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
-import { mockTheme, mockProps, mockCtiEventCountsResponse } from './mock';
-import { useRequestEventCounts } from '../../containers/overview_cti_links/use_request_event_counts';
-import { useCtiEventCounts } from '../../containers/overview_cti_links/use_cti_event_counts';
+import { mockTheme, mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
+import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
+import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../containers/overview_cti_links/use_request_event_counts');
-const useRequestEventCountsMock = useRequestEventCounts as jest.Mock;
-useRequestEventCountsMock.mockReturnValue([true, {}]);
+jest.mock('../../containers/overview_cti_links/use_ti_data_sources');
+const useTiDataSourcesMock = useTiDataSources as jest.Mock;
+useTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../../containers/overview_cti_links/use_cti_event_counts');
-const useCTIEventCountsMock = useCtiEventCounts as jest.Mock;
-useCTIEventCountsMock.mockReturnValue(mockCtiEventCountsResponse);
+jest.mock('../../containers/overview_cti_links');
+const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
+useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 
 describe('ThreatIntelLinkPanel', () => {
   const state: State = mockGlobalState;
@@ -49,12 +49,7 @@ describe('ThreatIntelLinkPanel', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel
-              {...mockProps}
-              hasSomeThreatIntelData={true}
-              isSomeIntegrationsDisabled={true}
-              isSomeIntegrationsInstalled={true}
-            />
+            <ThreatIntelLinkPanel {...mockProps} isSomeIntegrationsDisabled={true} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -70,8 +65,7 @@ describe('ThreatIntelLinkPanel', () => {
           <ThemeProvider theme={mockTheme}>
             <ThreatIntelLinkPanel
               {...mockProps}
-              hasSomeThreatIntelData={false}
-              isSomeIntegrationsInstalled={false}
+              allTiDataSources={[]}
               isSomeIntegrationsDisabled={true}
             />
           </ThemeProvider>
@@ -80,24 +74,5 @@ describe('ThreatIntelLinkPanel', () => {
     );
 
     expect(wrapper.find('[data-test-subj="cti-disabled-module"]').length).toEqual(1);
-  });
-
-  it('renders null while Threat Intel module state is loading', () => {
-    const wrapper = mount(
-      <Provider store={store}>
-        <I18nProvider>
-          <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel
-              {...mockProps}
-              hasSomeThreatIntelData={undefined}
-              isSomeIntegrationsInstalled={false}
-              isSomeIntegrationsDisabled={true}
-            />
-          </ThemeProvider>
-        </I18nProvider>
-      </Provider>
-    );
-
-    expect(wrapper.html()).toEqual('');
   });
 });

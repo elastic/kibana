@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IEsSearchResponse, IEsSearchRequest } from 'src/plugins/data/public';
 import { FactoryQueryTypes } from '../..';
 import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../cti/constants';
-import { Inspect, TimerangeInput } from '../../common';
+import { Inspect, Maybe, TimerangeInput } from '../../common';
 import { RequestBasicOptions } from '..';
 
 export enum CtiQueries {
@@ -65,6 +65,7 @@ export type DatasetBucket = {
 } & BucketItem;
 
 export interface CtiDataSourceStrategyResponse extends Omit<IEsSearchResponse, 'rawResponse'> {
+  inspect?: Maybe<Inspect>;
   rawResponse: {
     aggregations?: Record<string, estypes.AggregationsAggregate> & {
       dataset?: {
