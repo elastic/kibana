@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// https://github.com/valoricDe/MultiRegExp2
+
 /**
  * Created by velten on 11.02.17.
  */
