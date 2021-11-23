@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression } from '@kbn/es-query';
 import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { first, get, last } from 'lodash';
@@ -31,6 +32,7 @@ import {
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
+  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
 
@@ -74,6 +76,24 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         },
       });
 
+    if (!params.filterQuery && params.filterQueryText) {
+      try {
+        fromKueryExpression(params.filterQueryText);
+      } catch (e) {
+        const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
+        const reason = buildInvalidQueryAlertReason(params.filterQueryText);
+        const alertInstance = alertInstanceFactory('*', reason);
+        alertInstance.scheduleActions(actionGroupId, {
+          group: '*',
+          alertState: stateToAlertMessage[AlertStates.ERROR],
+          reason,
+          timestamp: moment().toISOString(),
+          value: null,
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+        });
+        return {};
+      }
+    }
     const source = await libs.sources.getSourceConfiguration(
       savedObjectsClient,
       sourceId || 'default'

@@ -7,6 +7,7 @@
 
 import { first, last, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression } from '@kbn/es-query';
 import moment from 'moment';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
@@ -23,6 +24,7 @@ import {
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
+  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { createFormatter } from '../../../../common/formatters';
@@ -84,6 +86,26 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
+
+    if (!params.filterQuery && params.filterQueryText) {
+      try {
+        fromKueryExpression(params.filterQueryText);
+      } catch (e) {
+        const timestamp = moment().toISOString();
+        const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
+        const reason = buildInvalidQueryAlertReason(params.filterQueryText);
+        const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY, reason);
+        alertInstance.scheduleActions(actionGroupId, {
+          group: UNGROUPED_FACTORY_KEY,
+          alertState: stateToAlertMessage[AlertStates.ERROR],
+          reason,
+          timestamp,
+          value: null,
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+        });
+        return { groups: [], groupBy: params.groupBy, filterQuery: params.filterQuery };
+      }
+    }
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
