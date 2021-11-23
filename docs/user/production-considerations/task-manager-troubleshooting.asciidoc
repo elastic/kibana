@@ -1018,7 +1018,7 @@ server log [12:41:33.672] [info][plugins][taskManager][taskManager] Task TaskTyp
 
 This log message tells us that when Task Manager was running one of our rules, it’s task errored and, as a result, failed. In this case we can tell that the rule that failed was of type alerting:example.always-firing and that the reason it failed was Unable to load resource ‘/api/something’ . This is a contrived example, but broadly, if you see a message with this kind of format, then this tells you a lot about where the problem might be.
 
-For example, in this case, we’d expect to see a corresponding log line from the alerting framework itself, saying that the rule failed. You should look in the Kibana log for a line similar to the log line below (probably shortly before the Task Manager log line):
+For example, in this case, we’d expect to see a corresponding log line from the {kib} Alerting framework itself, saying that the rule failed. You should look in the Kibana log for a line similar to the log line below (probably shortly before the Task Manager log line):
 
 Executing Alert "27559295-44e4-4983-aa1b-94fe043ab4f9" has resulted in Error: Unable to load resource ‘/api/something’
 
