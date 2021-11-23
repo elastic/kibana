@@ -404,24 +404,6 @@ export const getGaugeVisualization = ({
       return [];
     }
 
-    const warnings = [];
-    // if (!minAccessor) {
-    //   warnings.push([
-    //     <FormattedMessage
-    //       id="xpack.lens.gaugeVisualization.missingMinAccessorShortMessage"
-    //       defaultMessage="Configuration for the minimum value is missing. Minimum value will default to 0."
-    //     />,
-    //   ]);
-    // }
-    // if (!maxAccessor) {
-    //   warnings.push([
-    //     <FormattedMessage
-    //       id="xpack.lens.gaugeVisualization.missingMaxAccessorShortMessage"
-    //       defaultMessage="Configuration for the maximum value is missing. Maximum value will be calculated automatically."
-    //     />,
-    //   ]);
-    // }
-
     const row = frame?.activeData?.[state.layerId]?.rows?.[0];
     if (!row) {
       return [];
@@ -435,34 +417,57 @@ export const getGaugeVisualization = ({
       return [
         <FormattedMessage
           id="xpack.lens.gaugeVisualization.minValueBiggerMetricShortMessage"
-          defaultMessage="Minimum value is equal to maximum value."
+          defaultMessage="Minimum value equals maximum value. Cannot render chart"
         />,
       ];
     }
-    if (minValue > metricValue) {
-      warnings.push([
-        <FormattedMessage
-          id="xpack.lens.gaugeVisualization.minValueBiggerMetricShortMessage"
-          defaultMessage="Minimum value is bigger than metric value."
-        />,
-      ]);
-    }
-    if (maxValue && minValue > maxValue) {
-      warnings.push([
-        <FormattedMessage
-          id="xpack.lens.gaugeVisualization.minValueBiggerMaximumShortMessage"
-          defaultMessage="Minimum value is bigger than maximum value."
-        />,
-      ]);
+
+    const warnings = [];
+    if (minValue) {
+      if (minValue > metricValue) {
+        warnings.push([
+          <FormattedMessage
+            id="xpack.lens.gaugeVisualization.minValueBiggerMetricShortMessage"
+            defaultMessage="Minimum value is greater than metric value."
+          />,
+        ]);
+      }
+      if (minValue > goalValue) {
+        warnings.push([
+          <FormattedMessage
+            id="xpack.lens.gaugeVisualization.goalValueBiggerMaximumShortMessage"
+            defaultMessage="Minimum value is greater than goal value."
+          />,
+        ]);
+      }
     }
 
-    if (maxValue && goalValue && goalValue > maxValue) {
-      warnings.push([
-        <FormattedMessage
-          id="xpack.lens.gaugeVisualization.goalValueBiggerMaximumShortMessage"
-          defaultMessage="Goal value is bigger than maximum value."
-        />,
-      ]);
+    if (maxValue) {
+      if (metricValue > maxValue) {
+        warnings.push([
+          <FormattedMessage
+            id="xpack.lens.gaugeVisualization.minValueBiggerMaximumShortMessage"
+            defaultMessage="Metric value is greater than maximum value."
+          />,
+        ]);
+      }
+      if (minValue > maxValue) {
+        warnings.push([
+          <FormattedMessage
+            id="xpack.lens.gaugeVisualization.minValueBiggerMaximumShortMessage"
+            defaultMessage="Minimum value is greater than maximum value."
+          />,
+        ]);
+      }
+
+      if (goalValue && goalValue > maxValue) {
+        warnings.push([
+          <FormattedMessage
+            id="xpack.lens.gaugeVisualization.goalValueBiggerMaximumShortMessage"
+            defaultMessage="Goal value is greater than maximum value."
+          />,
+        ]);
+      }
     }
 
     return warnings;
