@@ -12,7 +12,7 @@ import * as React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
 
-import * as i18n from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
 
 /**

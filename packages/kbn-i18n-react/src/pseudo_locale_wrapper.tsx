@@ -8,8 +8,7 @@
 
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
-import * as i18n from '@kbn/i18n';
-import { isPseudoLocale, translateUsingPseudoLocale } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 /**
  * To translate label that includes nested `FormattedMessage` instances React Intl
@@ -26,11 +25,11 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
   if (formattedMessageDelimiter !== null) {
     return message
       .split(formattedMessageDelimiter[0])
-      .map((part) => (part.startsWith('ELEMENT-') ? part : translateUsingPseudoLocale(part)))
+      .map((part) => (part.startsWith('ELEMENT-') ? part : i18n.translateUsingPseudoLocale(part)))
       .join(formattedMessageDelimiter[0]);
   }
 
-  return translateUsingPseudoLocale(message);
+  return i18n.translateUsingPseudoLocale(message);
 }
 
 /**
@@ -51,7 +50,7 @@ export class PseudoLocaleWrapper extends React.PureComponent {
   constructor(props: { children: React.ReactNode }, context: any) {
     super(props, context);
 
-    if (isPseudoLocale(i18n.getLocale())) {
+    if (i18n.isPseudoLocale(i18n.getLocale())) {
       const formatMessage = context.intl.formatMessage;
       context.intl.formatMessage = (...args: any[]) =>
         translateFormattedMessageUsingPseudoLocale(formatMessage(...args));

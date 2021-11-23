@@ -8,3 +8,4 @@
 
 export { formats } from './formats';
 export * from './i18n';
+export * from './pseudo_locale';
