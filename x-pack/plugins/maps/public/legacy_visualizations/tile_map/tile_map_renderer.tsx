@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { TileMapVisRenderValue } from './tile_map_fn';
-import { TileMapVisualization } from './tile_map_visualization';
+import type { TileMapVisRenderValue } from './tile_map_fn';
+import { LazyWrapper } from '../../lazy_wrapper';
 import { TILE_MAP_RENDER } from './types';
+
+const getLazyComponent = () => {
+  return lazy(() => import('./tile_map_visualization'));
+};
 
 export const tileMapRenderer = {
   name: TILE_MAP_RENDER,
@@ -20,16 +24,18 @@ export const tileMapRenderer = {
       unmountComponentAtNode(domNode);
     });
 
+    const props = {
+      onInitialRenderComplete: () => {
+        handlers.done();
+      },
+      filters,
+      query,
+      timeRange,
+      visConfig,
+    };
+
     render(
-      <TileMapVisualization
-        onInitialRenderComplete={() => {
-          handlers.done();
-        }}
-        filters={filters}
-        query={query}
-        timeRange={timeRange}
-        visConfig={visConfig}
-      />,
+      <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />,
       domNode
     );
   },
