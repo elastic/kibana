@@ -19,7 +19,6 @@ import {
   ALERTS_HEADERS_RULE_NAME,
   SIGNAL_STATUS,
   ALERTS_HEADERS_TARGET_IMPORT_HASH,
-  TIMESTAMP,
   ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
 import {
@@ -44,7 +43,6 @@ interface EventSummaryField {
 
 const defaultDisplayFields: EventSummaryField[] = [
   { id: 'kibana.alert.workflow_status', label: SIGNAL_STATUS },
-  { id: '@timestamp', label: TIMESTAMP },
   {
     id: SIGNAL_RULE_NAME_FIELD_NAME,
     linkField: 'kibana.alert.rule.uuid',

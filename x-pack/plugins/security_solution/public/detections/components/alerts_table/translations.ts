@@ -278,10 +278,3 @@ export const TRIGGERED = i18n.translate(
     defaultMessage: 'Triggered',
   }
 );
-
-export const TIMESTAMP = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.timestampTitle',
-  {
-    defaultMessage: 'Timestamp',
-  }
-);
