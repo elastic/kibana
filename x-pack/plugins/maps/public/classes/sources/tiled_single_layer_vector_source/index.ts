@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type { ITiledSingleLayerVectorSource } from './tiled_single_layer_vector_source';
+export type {
+  ITiledSingleLayerMvtParams,
+  ITiledSingleLayerVectorSource,
+} from './tiled_single_layer_vector_source';
