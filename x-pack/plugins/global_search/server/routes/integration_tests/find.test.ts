@@ -136,7 +136,7 @@ describe('POST /internal/global_search/find', () => {
 
     expect(response.body).toEqual(
       expect.objectContaining({
-        message: 'An internal server error occurred.',
+        message: 'An internal server error occurred. Check Kibana server logs for details.',
         statusCode: 500,
       })
     );
