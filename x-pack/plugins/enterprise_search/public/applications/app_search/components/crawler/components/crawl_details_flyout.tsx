@@ -56,9 +56,12 @@ export const CrawlDetailsFlyout: React.FC = () => {
           <Loading />
         ) : (
           <>
-            <EuiCodeBlock language="json">
-              {JSON.stringify(crawlRequestFromServer, null, 2)}
-            </EuiCodeBlock>
+            {selectedTab === 'preview' && <></>}
+            {selectedTab === 'json' && (
+              <EuiCodeBlock language="json">
+                {JSON.stringify(crawlRequestFromServer, null, 2)}
+              </EuiCodeBlock>
+            )}
           </>
         )}
       </EuiFlyoutBody>

@@ -35,13 +35,12 @@ describe('CrawlDetailsFlyout', () => {
     jest.clearAllMocks();
   });
 
-  it('renders a flyout containing the raw json of the crawl details', () => {
+  it('renders a flyout ', () => {
     setMockValues(MOCK_VALUES);
 
     const wrapper = shallow(<CrawlDetailsFlyout />);
 
     expect(wrapper.is(EuiFlyout)).toBe(true);
-    expect(wrapper.find(EuiCodeBlock)).toHaveLength(1);
   });
 
   it('contains a tab group to control displayed content inside the flyout', () => {
@@ -77,6 +76,12 @@ describe('CrawlDetailsFlyout', () => {
       expect(tabs.at(0).prop('isSelected')).toBe(true);
       expect(tabs.at(1).prop('isSelected')).toBe(false);
     });
+
+    it('hides the raw json of the crawl details', () => {
+      const wrapper = shallow(<CrawlDetailsFlyout />);
+
+      expect(wrapper.find(EuiCodeBlock)).toHaveLength(0);
+    });
   });
 
   describe('when the json tab is selected', () => {
@@ -93,6 +98,12 @@ describe('CrawlDetailsFlyout', () => {
 
       expect(tabs.at(0).prop('isSelected')).toBe(false);
       expect(tabs.at(1).prop('isSelected')).toBe(true);
+    });
+
+    it('shows the raw json of the crawl details', () => {
+      const wrapper = shallow(<CrawlDetailsFlyout />);
+
+      expect(wrapper.find(EuiCodeBlock)).toHaveLength(1);
     });
   });
 
