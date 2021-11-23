@@ -262,7 +262,7 @@
                     "id": "def-public.FormatEditorProps.onChange.$1.Unnamed",
                     "type": "IndexSignature",
                     "tags": [],
-                    "label": "[key: string}]: any",
+                    "label": "[key: string]: any",
                     "description": [],
                     "signature": [
                       "[key: string]:  any"

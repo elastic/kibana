@@ -33,7 +33,7 @@ export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): Api
     }
 
     // If we could include links in label names, we could just use `getSignature`.
-    label = `[${node.getKeyName()}: ${node.getKeyType().getText()}}]: ${node
+    label = `[${node.getKeyName()}: ${node.getKeyType().getText()}]: ${node
       .getReturnType()
       .getText(undefined, TypeFormatFlags.OmitParameterModifiers)}`;
   }

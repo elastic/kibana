@@ -1684,7 +1684,7 @@
             "id": "def-public.UrlGeneratorStateMapping.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: UrlGeneratorState<any, string | undefined, object | undefined>",
+            "label": "[key: string]: UrlGeneratorState<any, string | undefined, object | undefined>",
             "description": [],
             "signature": [
               "[key: string]:  ",

@@ -486,7 +486,7 @@
             "id": "def-common.DocumentCountBuckets.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: number",
+            "label": "[key: string]: number",
             "description": [],
             "signature": [
               "[key: string]:  number"

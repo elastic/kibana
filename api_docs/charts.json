@@ -944,7 +944,7 @@
             "id": "def-public.ColorMap.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: RawColorSchema",
+            "label": "[key: string]: RawColorSchema",
             "description": [],
             "signature": [
               "[key: string]:  ",
@@ -3292,7 +3292,7 @@
             "id": "def-common.ColorMap.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: RawColorSchema",
+            "label": "[key: string]: RawColorSchema",
             "description": [],
             "signature": [
               "[key: string]:  ",

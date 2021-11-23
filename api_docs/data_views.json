@@ -443,7 +443,6 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
-            "removeBy": "8.1",
             "references": [],
             "children": [
               {
@@ -511,7 +510,6 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
-            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "dataViewManagement",
@@ -564,7 +562,6 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
-            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "visTypeTimeseries",
@@ -634,7 +631,6 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
-            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "dataViewManagement",
@@ -652,7 +648,14 @@
             "label": "isTimeBased",
             "description": [],
             "signature": [
-              "() => boolean"
+              "() => this is ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.TimeBasedDataView",
+                "text": "TimeBasedDataView"
+              }
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -667,7 +670,14 @@
             "label": "isTimeNanosBased",
             "description": [],
             "signature": [
-              "() => boolean"
+              "() => this is ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.TimeBasedDataView",
+                "text": "TimeBasedDataView"
+              }
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -3873,11 +3883,11 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
@@ -5808,24 +5818,16 @@
             "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/shared_imports.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/shared_imports.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/open_editor.tsx"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/open_editor.tsx"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/open_editor.tsx"
-          },
-          {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/types.ts"
-          },
-          {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/types.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/open_editor.tsx"
           },
           {
             "plugin": "dataViewManagement",
@@ -6198,14 +6200,6 @@
           {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/target/types/public/components/field_format_editor/field_format_editor.d.ts"
-          },
-          {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/target/types/public/types.d.ts"
-          },
-          {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/target/types/public/types.d.ts"
           },
           {
             "plugin": "inputControlVis",
@@ -6470,15 +6464,15 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
@@ -7533,16 +7527,16 @@
             "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/shared_imports.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/shared_imports.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.ts"
           },
           {
             "plugin": "dataViewManagement",
@@ -7761,16 +7755,16 @@
             "path": "src/plugins/vis_default_editor/public/components/agg_params_helper.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.test.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.test.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.test.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -10458,7 +10452,7 @@
                 "id": "def-server.mergeCapabilitiesWithFields.$1.Unnamed",
                 "type": "IndexSignature",
                 "tags": [],
-                "label": "[key: string}]: any",
+                "label": "[key: string]: any",
                 "description": [],
                 "signature": [
                   "[key: string]:  any"
@@ -11999,7 +11993,6 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
-            "removeBy": "8.1",
             "references": [],
             "children": [
               {
@@ -12067,7 +12060,6 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
-            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "dataViewManagement",
@@ -12120,7 +12112,6 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
-            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "visTypeTimeseries",
@@ -12190,7 +12181,6 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
-            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "dataViewManagement",
@@ -12208,7 +12198,14 @@
             "label": "isTimeBased",
             "description": [],
             "signature": [
-              "() => boolean"
+              "() => this is ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.TimeBasedDataView",
+                "text": "TimeBasedDataView"
+              }
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -12223,7 +12220,14 @@
             "label": "isTimeNanosBased",
             "description": [],
             "signature": [
-              "() => boolean"
+              "() => this is ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.TimeBasedDataView",
+                "text": "TimeBasedDataView"
+              }
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -15144,11 +15148,11 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
@@ -17079,24 +17083,16 @@
             "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/shared_imports.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/shared_imports.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/open_editor.tsx"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/open_editor.tsx"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/open_editor.tsx"
-          },
-          {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/types.ts"
-          },
-          {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/types.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/open_editor.tsx"
           },
           {
             "plugin": "dataViewManagement",
@@ -17469,14 +17465,6 @@
           {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/target/types/public/components/field_format_editor/field_format_editor.d.ts"
-          },
-          {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/target/types/public/types.d.ts"
-          },
-          {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/target/types/public/types.d.ts"
           },
           {
             "plugin": "inputControlVis",
@@ -17741,15 +17729,15 @@
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/application/components/field_stats_table/field_stats_table.tsx"
+            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
           },
           {
             "plugin": "discover",
@@ -18804,16 +18792,16 @@
             "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/shared_imports.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/shared_imports.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.ts"
           },
           {
             "plugin": "dataViewManagement",
@@ -19032,16 +19020,16 @@
             "path": "src/plugins/vis_default_editor/public/components/agg_params_helper.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.test.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.test.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/lib/extract_time_fields.test.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -20177,7 +20165,7 @@
             "id": "def-common.FieldAttrs.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: FieldAttrSet",
+            "label": "[key: string]: FieldAttrSet",
             "description": [],
             "signature": [
               "[key: string]:  ",
@@ -23496,6 +23484,70 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-common.TimeBasedDataView",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeBasedDataView",
+        "description": [
+          "\nAn interface representing a data view that is time based."
+        ],
+        "signature": [
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.TimeBasedDataView",
+            "text": "TimeBasedDataView"
+          },
+          " extends ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          }
+        ],
+        "path": "src/plugins/data_views/common/data_views/data_view.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.TimeBasedDataView.timeFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.TimeBasedDataView.getTimeField",
+            "type": "Function",
+            "tags": [],
+            "label": "getTimeField",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-common.TypeMeta",
         "type": "Interface",
         "tags": [],
@@ -25124,28 +25176,28 @@
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/utils/observability_index_patterns.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/shared_imports.ts"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/shared_imports.ts"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/components/index_pattern_editor_flyout_content.tsx"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/components/index_pattern_editor_flyout_content.tsx"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/components/index_pattern_editor_flyout_content.tsx"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/components/index_pattern_flyout_content_container.tsx"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/components/data_view_flyout_content_container.tsx"
           },
           {
-            "plugin": "indexPatternEditor",
-            "path": "src/plugins/index_pattern_editor/public/components/index_pattern_flyout_content_container.tsx"
+            "plugin": "dataViewEditor",
+            "path": "src/plugins/data_view_editor/public/components/data_view_flyout_content_container.tsx"
           }
         ],
         "initialIsOpen": false

@@ -1824,7 +1824,7 @@
             "id": "def-common.InputOverrides.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: string | undefined",
+            "label": "[key: string]: string | undefined",
             "description": [],
             "signature": [
               "[key: string]:  string | undefined"
@@ -1925,7 +1925,7 @@
             "id": "def-common.Settings.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"

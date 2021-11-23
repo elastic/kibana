@@ -1094,7 +1094,7 @@
             "id": "def-public.MissingPrivileges.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: string[] | undefined",
+            "label": "[key: string]: string[] | undefined",
             "description": [],
             "signature": [
               "[key: string]:  string[] | undefined"
@@ -1741,7 +1741,7 @@
             "id": "def-common.MissingPrivileges.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: string[] | undefined",
+            "label": "[key: string]: string[] | undefined",
             "description": [],
             "signature": [
               "[key: string]:  string[] | undefined"

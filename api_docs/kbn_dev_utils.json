@@ -3200,7 +3200,7 @@
             "id": "def-server.CiStatsMetadata.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: string | number | boolean | string[] | undefined",
+            "label": "[key: string]: string | number | boolean | string[] | undefined",
             "description": [
               "\nArbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric\nobjects stored in the ci-stats service"
             ],
@@ -3742,7 +3742,7 @@
             "id": "def-server.Flags.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: string | boolean | string[] | undefined",
+            "label": "[key: string]: string | boolean | string[] | undefined",
             "description": [],
             "signature": [
               "[key: string]:  string | boolean | string[] | undefined"

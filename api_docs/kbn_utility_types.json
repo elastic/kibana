@@ -57,7 +57,7 @@
             "id": "def-server.JsonObject.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: JsonValue",
+            "label": "[key: string]: JsonValue",
             "description": [],
             "signature": [
               "[key: string]:  ",

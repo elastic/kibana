@@ -1622,7 +1622,7 @@
             "id": "def-public.IErrorObject.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: string | string[] | IErrorObject",
+            "label": "[key: string]: string | string[] | IErrorObject",
             "description": [],
             "signature": [
               "[key: string]:  string | string[] | ",
