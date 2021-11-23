@@ -89,6 +89,10 @@ export const packagePolicyRouteService = {
   getUpgradePath: () => {
     return PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN;
   },
+
+  getDryRunPath: () => {
+    return PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN;
+  },
 };
 
 export const agentPolicyRouteService = {

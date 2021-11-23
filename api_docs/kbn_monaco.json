@@ -132,6 +132,94 @@
             ],
             "path": "packages/kbn-monaco/src/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.CompleteLangModuleType.validation$",
+            "type": "Function",
+            "tags": [],
+            "label": "validation$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.LangValidation",
+                "text": "LangValidation"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.EditorError",
+        "type": "Interface",
+        "tags": [],
+        "label": "EditorError",
+        "description": [],
+        "path": "packages/kbn-monaco/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.EditorError.startLineNumber",
+            "type": "number",
+            "tags": [],
+            "label": "startLineNumber",
+            "description": [],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.EditorError.startColumn",
+            "type": "number",
+            "tags": [],
+            "label": "startColumn",
+            "description": [],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.EditorError.endLineNumber",
+            "type": "number",
+            "tags": [],
+            "label": "endLineNumber",
+            "description": [],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.EditorError.endColumn",
+            "type": "number",
+            "tags": [],
+            "label": "endColumn",
+            "description": [],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.EditorError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -215,6 +303,59 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.LangValidation",
+        "type": "Interface",
+        "tags": [],
+        "label": "LangValidation",
+        "description": [],
+        "path": "packages/kbn-monaco/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.LangValidation.isValidating",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValidating",
+            "description": [],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.LangValidation.isValid",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValid",
+            "description": [],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.LangValidation.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.EditorError",
+                "text": "EditorError"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.PainlessAutocompleteField",
         "type": "Interface",
         "tags": [],
@@ -274,7 +415,7 @@
             "label": "kind",
             "description": [],
             "signature": [
-              "\"keyword\" | \"type\" | \"field\" | \"property\" | \"method\" | \"class\" | \"constructor\""
+              "\"type\" | \"field\" | \"keyword\" | \"property\" | \"method\" | \"class\" | \"constructor\""
             ],
             "path": "packages/kbn-monaco/src/painless/types.ts",
             "deprecated": false
@@ -357,6 +498,40 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.SyntaxErrors",
+        "type": "Interface",
+        "tags": [],
+        "label": "SyntaxErrors",
+        "description": [],
+        "path": "packages/kbn-monaco/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.SyntaxErrors.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[modelId: string}]: EditorError[]",
+            "description": [],
+            "signature": [
+              "[modelId: string]:  ",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.EditorError",
+                "text": "EditorError"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -369,7 +544,7 @@
         "label": "PainlessCompletionKind",
         "description": [],
         "signature": [
-          "\"keyword\" | \"type\" | \"field\" | \"property\" | \"method\" | \"class\" | \"constructor\""
+          "\"type\" | \"field\" | \"keyword\" | \"property\" | \"method\" | \"class\" | \"constructor\""
         ],
         "path": "packages/kbn-monaco/src/painless/types.ts",
         "deprecated": false,
@@ -513,7 +688,38 @@
             "description": [],
             "signature": [
               "() => ",
-              "SyntaxErrors"
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.SyntaxErrors",
+                "text": "SyntaxErrors"
+              }
+            ],
+            "path": "packages/kbn-monaco/src/painless/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.PainlessLang.validation$",
+            "type": "Function",
+            "tags": [],
+            "label": "validation$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.LangValidation",
+                "text": "LangValidation"
+              },
+              ">"
             ],
             "path": "packages/kbn-monaco/src/painless/index.ts",
             "deprecated": false,

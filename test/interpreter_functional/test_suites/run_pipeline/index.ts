@@ -43,5 +43,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./metric'));
     loadTestFile(require.resolve('./esaggs'));
     loadTestFile(require.resolve('./esaggs_timeshift'));
+    loadTestFile(require.resolve('./esaggs_multiterms'));
   });
 }
