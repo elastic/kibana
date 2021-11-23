@@ -56,7 +56,9 @@ export const EventDetailsFooterComponent = React.memo(
     timelineQuery,
   }: EventDetailsFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
-      () => find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values,
+      () =>
+        find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
+        find({ category: 'kibana', field: 'kibana.alert.rule.index' }, detailsData)?.values,
       [detailsData]
     );
 
