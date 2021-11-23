@@ -105,7 +105,7 @@ function getTicksLabels(baseStops: number[]) {
       return true;
     }
 
-    return (
+    return !(
       stop - baseStops[i - 1] < tenPercentRange || baseStops[lastIndex] - stop < tenPercentRange
     );
   });

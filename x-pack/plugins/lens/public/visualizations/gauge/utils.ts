@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { scaleLinear } from 'd3-scale';
 import { DatatableRow } from 'src/plugins/expressions';
 import type { GaugeVisualizationState } from '../../../common/expressions/gauge_chart';
 
@@ -28,7 +29,6 @@ export const getValueFromAccessor = (
 
 export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
   const FALLBACK_VALUE = 100;
-  const MAX_FACTOR = 1.66;
   const currentValue = getValueFromAccessor('maxAccessor', row, state);
   if (currentValue != null) {
     return currentValue;
@@ -38,7 +38,11 @@ export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
     const metricValue = metricAccessor && row[metricAccessor];
     const goalValue = goalAccessor && row[goalAccessor];
     if (metricValue != null) {
-      return Math.round(Math.max(goalValue ?? 0, metricValue) * MAX_FACTOR) ?? FALLBACK_VALUE;
+      const minValue = getMinValue(row, state);
+      const biggerValue = Math.max(goalValue ?? 0, metricValue, 1);
+      const nicelyRoundedNumbers = scaleLinear().domain([minValue, biggerValue]).nice().ticks(4);
+      const lastNumber = nicelyRoundedNumbers[nicelyRoundedNumbers.length - 1];
+      return lastNumber + nicelyRoundedNumbers[1];
     }
   }
   return FALLBACK_VALUE;
