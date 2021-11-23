@@ -11,9 +11,14 @@ import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
 } from '../../../../common/endpoint/schema/policy';
-import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
+import {
+  getHostPolicyResponseHandler,
+  getAgentPolicySummaryHandler,
+  getPolicyListHandler,
+} from './handlers';
 import {
   AGENT_POLICY_SUMMARY_ROUTE,
+  BASE_POLICY_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
 } from '../../../../common/endpoint/constants';
 
@@ -36,5 +41,14 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       options: { authRequired: true },
     },
     getAgentPolicySummaryHandler(endpointAppContext)
+  );
+
+  router.get(
+    {
+      path: BASE_POLICY_ROUTE,
+      validate: false,
+      options: { authRequired: true },
+    },
+    getPolicyListHandler(endpointAppContext)
   );
 }

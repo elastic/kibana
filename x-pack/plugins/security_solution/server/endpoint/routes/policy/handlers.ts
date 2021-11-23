@@ -15,6 +15,7 @@ import {
 import { EndpointAppContext } from '../../types';
 import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
 import { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
+import { GetPackagePoliciesRequest } from '../../../../../fleet/common/types/rest_spec';
 
 export const getHostPolicyResponseHandler = function (): RequestHandler<
   undefined,
@@ -61,5 +62,21 @@ export const getAgentPolicySummaryHandler = function (
     return response.ok({
       body,
     });
+  };
+};
+
+export const getPolicyListHandler = function (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<undefined, GetPackagePoliciesRequest['query'], undefined> {
+  return async (context, request, response) => {
+    const soClient = context.core.savedObjects.client;
+    const packagePolicyService = endpointAppContext.service.getPackagePolicyService();
+    const doc = await packagePolicyService.list(soClient, request.query);
+    if (doc) {
+      return response.ok({
+        body: doc,
+      });
+    }
+    return response.notFound({ body: 'Failed to retrieve package policy list' });
   };
 };
