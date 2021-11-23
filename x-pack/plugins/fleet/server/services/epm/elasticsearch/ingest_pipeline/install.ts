@@ -20,6 +20,8 @@ import {
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
 
+import { appendMetadataToIngestPipeline } from '../meta';
+
 import { deletePipelineRefs } from './remove';
 
 interface RewriteSubstitution {
@@ -104,7 +106,7 @@ export const installPipelines = async (
               dataStream,
               esClient,
               paths: pipelinePaths,
-              pkgVersion: installablePackage.version,
+              installablePackage,
             })
           );
         }
@@ -118,7 +120,7 @@ export const installPipelines = async (
         dataStream: undefined,
         esClient,
         paths: topLevelPipelinePaths,
-        pkgVersion: installablePackage.version,
+        installablePackage,
       })
     );
   }
@@ -149,14 +151,14 @@ export function rewriteIngestPipeline(
 
 export async function installAllPipelines({
   esClient,
-  pkgVersion,
   paths,
   dataStream,
+  installablePackage,
 }: {
   esClient: ElasticsearchClient;
-  pkgVersion: string;
   paths: string[];
   dataStream?: RegistryDataStream;
+  installablePackage: InstallablePackage;
 }): Promise<EsAssetReference[]> {
   const pipelinePaths = dataStream
     ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
@@ -169,7 +171,7 @@ export async function installAllPipelines({
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       dataStream,
-      packageVersion: pkgVersion,
+      packageVersion: installablePackage.version,
     });
     const content = getAsset(path).toString('utf-8');
     pipelines.push({
@@ -193,7 +195,7 @@ export async function installAllPipelines({
   });
 
   const installationPromises = pipelines.map(async (pipeline) => {
-    return installPipeline({ esClient, pipeline });
+    return installPipeline({ esClient, pipeline, installablePackage });
   });
 
   return Promise.all(installationPromises);
@@ -202,20 +204,27 @@ export async function installAllPipelines({
 async function installPipeline({
   esClient,
   pipeline,
+  installablePackage,
 }: {
   esClient: ElasticsearchClient;
   pipeline: any;
+  installablePackage?: InstallablePackage;
 }): Promise<EsAssetReference> {
+  const pipelineWithMetadata = appendMetadataToIngestPipeline({
+    pipeline,
+    packageName: installablePackage?.name,
+  });
+
   const esClientParams = {
-    id: pipeline.nameForInstallation,
-    body: pipeline.contentForInstallation,
+    id: pipelineWithMetadata.nameForInstallation,
+    body: pipelineWithMetadata.contentForInstallation,
   };
 
   const esClientRequestOptions: TransportRequestOptions = {
     ignore: [404],
   };
 
-  if (pipeline.extension === 'yml') {
+  if (pipelineWithMetadata.extension === 'yml') {
     esClientRequestOptions.headers = {
       // pipeline is YAML
       'Content-Type': 'application/yaml',
@@ -226,7 +235,10 @@ async function installPipeline({
 
   await esClient.ingest.putPipeline(esClientParams, esClientRequestOptions);
 
-  return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
+  return {
+    id: pipelineWithMetadata.nameForInstallation,
+    type: ElasticsearchAssetType.ingestPipeline,
+  };
 }
 
 export async function ensureFleetFinalPipelineIsInstalled(esClient: ElasticsearchClient) {

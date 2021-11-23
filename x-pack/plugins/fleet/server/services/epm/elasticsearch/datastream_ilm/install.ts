@@ -17,6 +17,8 @@ import { getInstallation } from '../../packages';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getAsset } from '../transform/common';
 
+import { getESAssetMetadata } from '../meta';
+
 import { deleteIlmRefs, deleteIlms } from './remove';
 
 interface IlmInstallation {
@@ -77,9 +79,12 @@ export const installIlmForDataStream = async (
 
     const ilmInstallations: IlmInstallation[] = ilmPathDatasets.map(
       (ilmPathDataset: IlmPathDataset) => {
+        const content = JSON.parse(getAsset(ilmPathDataset.path).toString('utf-8'));
+        content.policy._meta = getESAssetMetadata({ packageName: installation?.name });
+
         return {
           installationName: getIlmNameForInstallation(ilmPathDataset),
-          content: getAsset(ilmPathDataset.path).toString('utf-8'),
+          content,
         };
       }
     );

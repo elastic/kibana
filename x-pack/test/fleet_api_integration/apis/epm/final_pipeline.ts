@@ -101,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
-      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(1);
+      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(2);
     });
 
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
