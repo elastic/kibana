@@ -116,7 +116,7 @@ export class VectorTileLayer extends TileLayer {
     return `${this.getId()}${DELIMITTER}${this.getSource().getTileLayerId()}${DELIMITTER}`;
   }
 
-  _generateMbSourceId(name: string) {
+  _generateMbSourceId(name: string | undefined) {
     return `${this._generateMbSourceIdPrefix()}${name}`;
   }
 
