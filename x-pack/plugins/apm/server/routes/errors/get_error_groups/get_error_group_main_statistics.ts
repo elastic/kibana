@@ -117,9 +117,9 @@ export async function getServiceErrorGroupMainStatistics({
         bucket.sample.hits.hits[0]?._source['@timestamp']
       ).getTime(),
       occurrences: bucket.doc_count,
-      culprit: bucket.sample.hits.hits[0]._source.error.culprit,
-      handled: bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
-      type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
+      culprit: bucket.sample.hits.hits[0]?._source.error.culprit,
+      handled: bucket.sample.hits.hits[0]?._source.error.exception?.[0].handled,
+      type: bucket.sample.hits.hits[0]?._source.error.exception?.[0].type,
     })) ?? []
   );
 }

@@ -82,11 +82,7 @@ export function ErrorGroupOverview() {
         const normalizedSortDirection =
           sortDirection === 'asc' ? 'asc' : 'desc';
 
-        if (!start || !end || !transactionType) {
-          return;
-        }
-
-        if (start && end) {
+        if (start && end && transactionType) {
           return callApmApi({
             endpoint:
               'GET /internal/apm/services/{serviceName}/errors/main_statistics',
