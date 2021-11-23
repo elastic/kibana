@@ -21,6 +21,7 @@ const DEFAULT_VALUES: CrawlDetailValues = {
   flyoutClosed: true,
   crawlRequest: null,
   crawlRequestFromServer: null,
+  selectedTab: 'preview',
 };
 
 const crawlRequestResponse: CrawlRequestFromServer = {
@@ -46,7 +47,7 @@ describe('CrawlDetailLogic', () => {
     expect(CrawlDetailLogic.values).toEqual(DEFAULT_VALUES);
   });
 
-  describe('reducers', () => {
+  describe('actions', () => {
     describe('closeFlyout', () => {
       it('closes the flyout', () => {
         mount({ flyoutClosed: false });
@@ -77,14 +78,28 @@ describe('CrawlDetailLogic', () => {
         });
       });
     });
-  });
 
-  describe('listeners', () => {
+    describe('setSelectedTab', () => {
+      it('sets the select tab', () => {
+        mount({
+          selectedTab: 'preview',
+        });
+
+        CrawlDetailLogic.actions.setSelectedTab('json');
+
+        expect(CrawlDetailLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          selectedTab: 'json',
+        });
+      });
+    });
+
     describe('fetchCrawlRequest', () => {
-      it('opens the flyout and sets loading to true', () => {
+      it('opens the flyout, resets the selected tab, and sets loading to true', () => {
         mount({
           dataLoading: false,
           flyoutClosed: true,
+          selectedTab: 'json',
         });
 
         CrawlDetailLogic.actions.fetchCrawlRequest('12345');
@@ -93,6 +108,7 @@ describe('CrawlDetailLogic', () => {
           ...DEFAULT_VALUES,
           dataLoading: true,
           flyoutClosed: false,
+          selectedTab: 'preview',
         });
       });
 
