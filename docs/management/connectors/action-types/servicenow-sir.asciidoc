@@ -10,7 +10,7 @@ The {sn} SecOps connector uses the https://docs.servicenow.com/bundle/orlando-ap
 [float]
 [[servicenow-sir-connector-prerequisites]]
 ==== Prerequisites
-After upgrading from {stack} version \<=7.15 to version >=7.16, you must complete the following within your {sn} instance before creating a new {sn} SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
+After upgrading from {stack} version \<=7.15.0 to version >=7.16.0, you must complete the following within your {sn} instance before creating a new {sn} SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
 
 * Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store.
 * Create a {sn} integration user and assign it the appropriate roles.
@@ -40,7 +40,7 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 . Click *New*.
 . Configure the rule as follows:
 * *Name*: Name the rule.
-* *REST API*: Set the rule to use the Elastic ITSM API by choosing `Elastic ITSM API [x_elas2_inc_int/elastic_api]`.
+* *REST API*: Set the rule to use the Elastic SecOps API by choosing `Elastic SIR API [x_elas2_sir_int/elastic_api]`.
 * *Domain*: Enter the Kibana URL.
 . Go to the *HTTP methods* tab and select *GET*.
 . Click *Submit* to create the rule.
@@ -49,12 +49,12 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 [[servicenow-sir-connector-update]]
 ==== Update a deprecated {sn} SecOps connector
 
-{sn} SecOps connectors created in {stack} version \<=7.15 are marked as deprecated after you upgrade to version >=7.16. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
+{sn} SecOps connectors created in {stack} version \<=7.15.0 are marked as deprecated after upgrading to version >=7.16.0. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
 
-IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to new rules. However, we strongly recommend updating the deprecated connector or <<creating-new-connector, creating new ones>> to ensure you have access to connector enhancements, such as updating incidents.
+IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to new rules. However, it is strongly recommended to update deprecated connectors or to <<creating-new-connector, create new ones>> to ensure you have access to connector enhancements, such as updating incidents.
 
 To update a deprecated connector:
 
