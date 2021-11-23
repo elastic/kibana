@@ -54,13 +54,13 @@ export class Plugin implements PluginType {
     });
 
     initServerWithKibana(
-      { router: core.http.createRouter() },
+      { router: core.http.createRouter(), config },
       plugins,
       ruleDataClient,
       this.logger
     );
 
-    registerUptimeSavedObjects(core.savedObjects);
+    registerUptimeSavedObjects(core.savedObjects, config);
 
     KibanaTelemetryAdapter.registerUsageCollector(
       plugins.usageCollection,
