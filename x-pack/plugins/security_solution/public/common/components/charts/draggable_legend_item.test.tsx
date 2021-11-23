@@ -59,4 +59,13 @@ describe('DraggableLegendItem', () => {
       wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).prop('hideTopN')
     ).toEqual(true);
   });
+
+  it('renders the empty value label when the value is empty', () => {
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={{ ...legendItem, value: '' }} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeTruthy();
+  });
 });
