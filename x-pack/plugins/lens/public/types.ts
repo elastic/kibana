@@ -216,6 +216,7 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceDimensionDropProps<T> & {
       groupId: string;
       dragging: DragContextState['dragging'];
+      prioritizedOperation?: string;
     }
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
@@ -476,6 +477,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   required?: boolean;
   requiredMinDimensionCount?: number;
   dataTestSubj?: string;
+  prioritizedOperation?: string;
 
   /**
    * When the dimension editor is enabled for this group, all dimensions in the group

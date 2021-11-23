@@ -36,7 +36,8 @@ const operationLabels = getOperationDisplay();
 export function getNewOperation(
   field: IndexPatternField | undefined | false,
   filterOperations: (meta: OperationMetadata) => boolean,
-  targetColumn: GenericIndexPatternColumn
+  targetColumn: GenericIndexPatternColumn,
+  prioritizedOperation?: GenericIndexPatternColumn['operationType']
 ) {
   if (!field) {
     return;
@@ -47,7 +48,12 @@ export function getNewOperation(
   }
   // Detects if we can change the field only, otherwise change field + operation
   const shouldOperationPersist = targetColumn && newOperations.includes(targetColumn.operationType);
-  return shouldOperationPersist ? targetColumn.operationType : newOperations[0];
+  if (shouldOperationPersist) {
+    return targetColumn.operationType;
+  }
+  const existsPrioritizedOperation =
+    prioritizedOperation && newOperations.includes(prioritizedOperation);
+  return existsPrioritizedOperation ? prioritizedOperation : newOperations[0];
 }
 
 export function getField(
