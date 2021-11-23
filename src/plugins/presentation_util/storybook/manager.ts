@@ -10,6 +10,9 @@ import { addons } from '@storybook/addons';
 import { create } from '@storybook/theming';
 import { PANEL_ID } from '@storybook/addon-actions';
 
+// @ts-expect-error There's probably a better way to do this.
+import { registerThemeSwitcherAddon } from '@kbn/storybook/target_node/lib/register_theme_switcher_addon';
+
 addons.setConfig({
   theme: create({
     base: 'light',
@@ -19,3 +22,5 @@ addons.setConfig({
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,
 });
+
+registerThemeSwitcherAddon();

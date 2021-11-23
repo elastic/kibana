@@ -11,6 +11,7 @@ import { PresentationLabsService } from './services/labs';
 import { PresentationControlsService } from './services/controls';
 import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import { registerExpressionsLanguage } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
@@ -19,6 +20,7 @@ export interface PresentationUtilPluginStart {
   ContextProvider: React.FC;
   labsService: PresentationLabsService;
   controlsService: PresentationControlsService;
+  registerExpressionsLanguage: typeof registerExpressionsLanguage;
 }
 
 export interface PresentationUtilPluginSetupDeps {

@@ -38,4 +38,9 @@ export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
 );
 
+/**
+ * A lazily-loaded ExpressionInput component.
+ */
+export const LazyExpressionInput = React.lazy(() => import('./expression_input'));
+
 export * from './types';

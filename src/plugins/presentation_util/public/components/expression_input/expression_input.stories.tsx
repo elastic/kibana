@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ExpressionFunction, ExpressionFunctionParameter, Style } from 'src/plugins/expressions';
+import { action } from '@storybook/addon-actions';
+import { Meta } from '@storybook/react';
 
+import { ExpressionFunction, ExpressionFunctionParameter, Style } from 'src/plugins/expressions';
 import { ExpressionInput } from '../expression_input';
-import { registerExpressionsLanguage } from '../../../../../../../src/plugins/presentation_util/public';
+import { registerExpressionsLanguage } from './language';
 
 const content: ExpressionFunctionParameter<'string'> = {
   name: 'content',
@@ -58,11 +59,36 @@ const sampleFunctionDef = {
 
 registerExpressionsLanguage([sampleFunctionDef]);
 
-storiesOf('components/ExpressionInput', module).add('default', () => (
+export default {
+  title: 'Expression Input',
+  description: '',
+  argTypes: {
+    isCompact: {
+      control: 'boolean',
+      defaultValue: false,
+    },
+  },
+  decorators: [
+    (storyFn, { globals }) => (
+      <div
+        style={{
+          padding: 40,
+          backgroundColor:
+            globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark' ? '#1D1E24' : '#FFF',
+        }}
+      >
+        {storyFn()}
+      </div>
+    ),
+  ],
+} as Meta;
+
+export const Example = ({ isCompact }: { isCompact: boolean }) => (
   <ExpressionInput
     expression="markdown"
-    isCompact={true}
+    height={300}
     onChange={action('onChange')}
     expressionFunctions={[sampleFunctionDef as any]}
+    {...{ isCompact }}
   />
-));
+);

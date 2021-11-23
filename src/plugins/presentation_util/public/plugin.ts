@@ -23,6 +23,8 @@ import {
 import { OptionsListEmbeddableFactory } from './components/controls/control_types/options_list';
 import { CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL } from '.';
 
+import { registerExpressionsLanguage } from '.';
+
 export class PresentationUtilPlugin
   implements
     Plugin<
@@ -93,6 +95,7 @@ export class PresentationUtilPlugin
       ContextProvider: pluginServices.getContextProvider(),
       controlsService,
       labsService: pluginServices.getServices().labs,
+      registerExpressionsLanguage,
     };
   }
 
