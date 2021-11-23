@@ -62,8 +62,6 @@ export function logstashPipelineRoute(server) {
       try {
         versions = await getPipelineVersions({
           req,
-          config,
-          lsIndexPattern,
           clusterUuid,
           pipelineId,
         });

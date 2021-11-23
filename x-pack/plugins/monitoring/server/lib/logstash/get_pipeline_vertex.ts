@@ -129,14 +129,11 @@ export function _enrichVertexStateWithStatsAggregation(
 export async function getPipelineVertex(
   req: LegacyRequest,
   config: { get: (key: string) => string | undefined },
-  lsIndexPattern: string,
   clusterUuid: string,
   pipelineId: string,
   version: PipelineVersion,
   vertexId: string
 ) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
-
   // Determine metrics' timeseries interval based on version's timespan
   const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
   const timeseriesInterval = calculateTimeseriesInterval(
@@ -148,14 +145,12 @@ export async function getPipelineVertex(
   const [stateDocument, statsAggregation] = await Promise.all([
     getPipelineStateDocument({
       req,
-      logstashIndexPattern: lsIndexPattern,
       clusterUuid,
       pipelineId,
       version,
     }),
     getPipelineVertexStatsAggregation({
       req,
-      logstashIndexPattern: lsIndexPattern,
       timeSeriesIntervalInSeconds: timeseriesInterval,
       clusterUuid,
       pipelineId,

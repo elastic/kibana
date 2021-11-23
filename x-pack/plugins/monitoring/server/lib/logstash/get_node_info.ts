@@ -6,7 +6,7 @@
  */
 
 import { merge } from 'lodash';
-import { checkParam, MissingRequiredError } from '../error_missing_required';
+import { MissingRequiredError } from '../error_missing_required';
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';

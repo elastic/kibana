@@ -114,7 +114,7 @@ export async function getClustersFromRequest(
   } else if (!isStandaloneCluster) {
     // get all clusters
     if (!clusters || clusters.length === 0) {
-      // we do NOT thooo 404 here so that the no-data page can use this to check for data
+      // we do NOT throw 404 here so that the no-data page can use this to check for data
       // we should look at having a standalone function for that lookup
       return [];
     }
