@@ -464,7 +464,9 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
     async setupFleet() {
       log.debug(`Setting up Fleet`);
-      await supertest.post(`/api/fleet/setup`).set(COMMON_REQUEST_HEADERS).expect(200);
+      await retry.tryForTime(2 * 60 * 1000, async () => {
+        await supertest.post(`/api/fleet/setup`).set(COMMON_REQUEST_HEADERS).expect(200);
+      });
       log.debug(` > Setup done`);
     },
 
