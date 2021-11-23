@@ -23,7 +23,7 @@ if [[ "${GITHUB_PR_LABELS:-}" == *"ci:deploy-cloud"* ]]; then
     --skip-platform-folders \
     --skip-archives \
     --docker-images \
-    --docker-tag-qualifier="$GIT_COMMIT" \
+    --docker-tag-qualifier="pr$GITHUB_PR_NUMBER" \
     --docker-push \
     --skip-docker-ubi \
     --skip-docker-centos \
