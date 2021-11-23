@@ -157,9 +157,25 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     }
   };
 
+  const renderSessionViewDetailPanel = () => {
+    if (selectedProcess && isDetailOpen) {
+      return (
+        <SessionViewDetailPanel
+          isDetailMounted={isDetailMounted}
+          height={height}
+          selectedProcess={selectedProcess}
+          setIsDetailOpen={setIsDetailOpen}
+          session={data?.[0]?.process.session}
+        />
+      );
+    }
+  };
+
   const toggleDetailPanel = () => {
     setIsDetailMounted(!isDetailMounted);
-    if (!isDetailOpen) setIsDetailOpen(true);
+    if (!isDetailOpen) {
+      setIsDetailOpen(true);
+    }
   };
 
   if (!(isLoading || isError || data.length)) {
@@ -190,15 +206,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
           {renderProcessTree()}
         </EuiSplitPanel.Inner>
-        {isDetailOpen && (
-          <SessionViewDetailPanel
-            isDetailMounted={isDetailMounted}
-            height={height}
-            selectedProcess={selectedProcess}
-            setIsDetailOpen={setIsDetailOpen}
-            session={data?.[0]?.process.session}
-          />
-        )}
+        {renderSessionViewDetailPanel()}
       </EuiSplitPanel.Outer>
     </>
   );
