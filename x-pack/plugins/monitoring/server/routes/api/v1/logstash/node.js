@@ -82,7 +82,7 @@ export function logstashNodeRoute(server) {
               },
             },
           ]),
-          getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }),
+          getNodeInfo(req, { clusterUuid, logstashUuid }),
         ]);
 
         return {
