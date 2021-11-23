@@ -30,6 +30,7 @@ import {
   getTranslationsByLocale,
   getAllTranslations,
   getAllTranslationsFromPaths,
+  getRegisteredLocales as getRegisteredLocalesForLoader,
 } from './loader';
 
 const i18n = {
@@ -56,6 +57,7 @@ const i18nLoader = {
   getTranslationsByLocale,
   getAllTranslations,
   getAllTranslationsFromPaths,
+  getRegisteredLocales: getRegisteredLocalesForLoader,
 };
 
 export { i18n, i18nLoader };
