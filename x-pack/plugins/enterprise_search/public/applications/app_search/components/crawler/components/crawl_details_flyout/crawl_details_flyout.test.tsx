@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
-import '../../../__mocks__/engine_logic.mock';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
@@ -13,12 +13,14 @@ import { shallow } from 'enzyme';
 
 import { EuiCodeBlock, EuiFlyout, EuiTab, EuiTabs } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
+import { Loading } from '../../../../../shared/loading';
 
-import { CrawlDetailActions, CrawlDetailValues } from '../crawl_detail_logic';
-import { CrawlRequestFromServer } from '../types';
+import { CrawlDetailActions, CrawlDetailValues } from '../../crawl_detail_logic';
+import { CrawlRequestFromServer } from '../../types';
 
-import { CrawlDetailsFlyout } from './crawl_details_flyout';
+import { CrawlDetailsPreview } from './crawl_details_preview';
+
+import { CrawlDetailsFlyout } from '.';
 
 const MOCK_VALUES: Partial<CrawlDetailValues> = {
   dataLoading: false,
@@ -77,10 +79,10 @@ describe('CrawlDetailsFlyout', () => {
       expect(tabs.at(1).prop('isSelected')).toBe(false);
     });
 
-    it('hides the raw json of the crawl details', () => {
+    it('shows the human readable version of the crawl details', () => {
       const wrapper = shallow(<CrawlDetailsFlyout />);
 
-      expect(wrapper.find(EuiCodeBlock)).toHaveLength(0);
+      expect(wrapper.find(CrawlDetailsPreview)).toHaveLength(1);
     });
   });
 

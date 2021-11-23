@@ -20,8 +20,10 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Loading } from '../../../../shared/loading';
-import { CrawlDetailLogic } from '../crawl_detail_logic';
+import { Loading } from '../../../../../shared/loading';
+import { CrawlDetailLogic } from '../../crawl_detail_logic';
+
+import { CrawlDetailsPreview } from './crawl_details_preview';
 
 export const CrawlDetailsFlyout: React.FC = () => {
   const { closeFlyout, setSelectedTab } = useActions(CrawlDetailLogic);
@@ -56,7 +58,7 @@ export const CrawlDetailsFlyout: React.FC = () => {
           <Loading />
         ) : (
           <>
-            {selectedTab === 'preview' && <></>}
+            {selectedTab === 'preview' && <CrawlDetailsPreview />}
             {selectedTab === 'json' && (
               <EuiCodeBlock language="json">
                 {JSON.stringify(crawlRequestFromServer, null, 2)}
