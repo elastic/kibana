@@ -1454,7 +1454,7 @@
             "id": "def-public.UIExtensionsStorage.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: Partial<Record<\"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-detail-assets\" | \"agent-enrollment-flyout\", UIExtensionPoint>>",
+            "label": "[key: string]: Partial<Record<\"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-detail-assets\" | \"agent-enrollment-flyout\", UIExtensionPoint>>",
             "description": [],
             "signature": [
               "[key: string]:  Partial<Record<\"package-policy-edit\" | \"package-policy-edit-tabs\" | \"package-detail-custom\" | \"package-policy-create\" | \"package-detail-assets\" | \"agent-enrollment-flyout\", ",
@@ -8100,7 +8100,7 @@
             "id": "def-common.AgentMetadata.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[x: string}]: any",
+            "label": "[x: string]: any",
             "description": [],
             "signature": [
               "[x: string]:  any"
@@ -10182,7 +10182,7 @@
             "id": "def-common.FleetServerAgentAction.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[k: string}]: unknown",
+            "label": "[k: string]: unknown",
             "description": [],
             "signature": [
               "[k: string]:  unknown"
@@ -10234,7 +10234,7 @@
             "id": "def-common.FleetServerAgentMetadata.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[k: string}]: any",
+            "label": "[k: string]: any",
             "description": [],
             "signature": [
               "[k: string]:  any"
@@ -10725,7 +10725,7 @@
             "id": "def-common.FullAgentPolicyInput.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -10774,7 +10774,7 @@
             "id": "def-common.FullAgentPolicyInputStream.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -10849,7 +10849,7 @@
             "id": "def-common.FullAgentPolicyOutputPermissions.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[packagePolicyName: string}]: { cluster?: string[] | undefined; indices?: { names: string[]; privileges: string[]; }[] | undefined; }",
+            "label": "[packagePolicyName: string]: { cluster?: string[] | undefined; indices?: { names: string[]; privileges: string[]; }[] | undefined; }",
             "description": [],
             "signature": [
               "[packagePolicyName: string]:  { cluster?: string[] | undefined; indices?: { names: string[]; privileges: string[]; }[] | undefined; }"
