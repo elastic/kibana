@@ -9,13 +9,13 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { IndexPatternEditorProps } from '../types';
+import { DataViewEditorProps } from '../types';
 
 const IndexPatternFlyoutContentContainer = lazy(
-  () => import('./index_pattern_flyout_content_container')
+  () => import('./data_view_flyout_content_container')
 );
 
-export const IndexPatternEditorLazy = (props: IndexPatternEditorProps) => (
+export const DataViewEditorLazy = (props: DataViewEditorProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
     <IndexPatternFlyoutContentContainer {...props} />
   </Suspense>
