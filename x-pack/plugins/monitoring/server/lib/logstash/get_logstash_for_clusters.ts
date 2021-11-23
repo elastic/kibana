@@ -44,7 +44,7 @@ export function getLogstashForClusters(
   const end = req.payload.timeRange.max;
   const config = req.server.config();
 
-  const dataset = 'stats';
+  const dataset = 'node_stats';
   const type = 'logstash_stats';
   const moduleType = 'logstash';
   const indexPatterns = getNewIndexPatterns({

@@ -88,16 +88,23 @@ export function createQuery(options: {
 
   const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
-  const typeFilter: any = {
-    bool: {
-      should: [{ term: { 'data_stream.type': dsType } }],
-    },
-  };
+  const terms = [];
+  let typeFilter: any;
   if (dsDataset) {
-    typeFilter.bool.should.push({ term: { 'data_stream.dataset': dsDataset } });
+    terms.push(
+      { term: { 'data_stream.type': dsType } },
+      { term: { 'data_stream.dataset': dsDataset } }
+    );
   }
   if (type) {
-    typeFilter.bool.should.push({ term: { type } });
+    terms.push({ term: { type } });
+  }
+  if (terms.length) {
+    typeFilter = {
+      bool: {
+        should: [...terms],
+      },
+    };
   }
 
   let clusterUuidFilter;
