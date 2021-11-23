@@ -192,17 +192,6 @@ describe('draggables', () => {
 
       expect(wrapper.find('[data-test-subj="source.bytes-tooltip"]').first().exists()).toBe(false);
     });
-
-    test('it renders the empty value label when the value is empty', () => {
-      const field = 'some-field';
-      const value = '';
-      const wrapper = mount(
-        <TestProviders>
-          <DefaultDraggable id="draggable-id" field={field} value={value} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeTruthy();
-    });
   });
 
   describe('DraggableBadge', () => {

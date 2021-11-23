@@ -1723,7 +1723,7 @@ describe('GenericRowRenderer', () => {
       );
 
       expect(removeExternalLinkText(wrapper.text())).toEqual(
-        'iot.example.comasked forlookup.example.comwith question typeA, which resolved to10.1.2.3(response code:NOERROR)viaan unknown process6.937500msOct 8, 2019 @ 10:05:23.241Oct 8, 2019 @ 10:05:23.248outbounddns177Budp1:network-community_idSource10.9.9.9:58732(22.60%)40B(77.40%)137BDestination10.1.1.1:53OceaniaAustralia🇦🇺AUempty value'
+        'iot.example.comasked forlookup.example.comwith question typeA, which resolved to10.1.2.3(response code:NOERROR)viaan unknown process6.937500msOct 8, 2019 @ 10:05:23.241Oct 8, 2019 @ 10:05:23.248outbounddns177Budp1:network-community_idSource10.9.9.9:58732(22.60%)40B(77.40%)137BDestination10.1.1.1:53OceaniaAustralia🇦🇺AU'
       );
     });
 
