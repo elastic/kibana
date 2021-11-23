@@ -7,7 +7,6 @@
 
 import boom from '@hapi/boom';
 import { get } from 'lodash';
-import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
 import { getPipelineVertexStatsAggregation } from './get_pipeline_vertex_stats_aggregation';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
