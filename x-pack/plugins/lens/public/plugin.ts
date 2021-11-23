@@ -35,7 +35,7 @@ import type { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugi
 import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
-import { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
@@ -109,7 +109,7 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
@@ -201,6 +201,8 @@ export class LensPlugin {
         plugins.fieldFormats.deserialize
       );
 
+      const visualizationMap = await this.editorFrameService!.loadVisualizations();
+
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
@@ -208,6 +210,7 @@ export class LensPlugin {
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
+        visualizationMap,
         indexPatternService: plugins.data.indexPatterns,
         uiActions: plugins.uiActions,
         usageCollection,

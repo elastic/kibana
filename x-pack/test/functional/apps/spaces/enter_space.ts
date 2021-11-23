@@ -15,8 +15,8 @@ export default function enterSpaceFunctonalTests({
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
   describe('Enter Space', function () {
-    // SKIP FLAKY TEST: These tests fail very intermittently in Firefox where the space selection
-    // popover isn't displayed. Skip Firefox testing until resolved.
+    // FLAKY: https://github.com/elastic/kibana/issues/100570
+    // These tests fail very intermittently in Firefox. Skip Firefox testing until resolved.
     // this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/spaces/enter_space');
