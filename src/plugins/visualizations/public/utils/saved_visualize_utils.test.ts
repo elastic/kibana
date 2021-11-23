@@ -203,36 +203,6 @@ describe('saved_visualize_utils', () => {
       expect(savedVisId).toBe('test');
     });
 
-    it('should set visualization type to first series type when available', async () => {
-      const seriesType = 'histogram';
-
-      const areaVis = {
-        visState: {
-          type: 'area',
-          params: {
-            type: 'area',
-            seriesParams: [{ type: seriesType }],
-          },
-        },
-        title: 'was an area chart',
-        uiStateJSON: '{}',
-        version: '1',
-        __tags: [],
-        lastSavedTitle: 'test',
-        displayName: 'test',
-        getEsType: () => 'vis',
-      } as unknown as VisSavedObject;
-
-      await saveVisualization(areaVis, {}, { savedObjectsClient, overlays });
-
-      expect(savedObjectsClient.create).toHaveBeenCalled();
-      const savedVisState = JSON.parse(
-        (savedObjectsClient.create.mock.calls[0][1] as any).visState
-      );
-      expect(savedVisState.type).toBe(seriesType);
-      expect(savedVisState.params.type).toBe(seriesType);
-    });
-
     it('should call extractSearchSourceReferences if we new vis has searchSourceFields', async () => {
       vis.searchSourceFields = { fields: [] };
       await saveVisualization(vis, {}, { savedObjectsClient, overlays });

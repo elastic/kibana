@@ -17,6 +17,7 @@
  */
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
+import { produce } from 'immer';
 import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
@@ -113,7 +114,17 @@ export class Vis<TVisParams = VisParams> {
     return defaults({}, cloneDeep(params ?? {}), cloneDeep(this.type.visConfig?.defaults ?? {}));
   }
 
-  async setState(state: PartialVisState) {
+  async setState(inState: PartialVisState) {
+    let state = inState;
+
+    const { updateVisTypeOnParamsChange } = this.type;
+    const newType = updateVisTypeOnParamsChange && updateVisTypeOnParamsChange(state.params);
+    if (newType) {
+      state = produce(inState, (draft) => {
+        draft.params.type = draft.type = newType;
+      });
+    }
+
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
       // @ts-ignore

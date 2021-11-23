@@ -137,11 +137,11 @@ export class VisualizationsPlugin
   private readonly types: TypesService = new TypesService();
   private getStartServicesOrDie?: StartServicesGetter<VisualizationsStartDeps, VisualizationsStart>;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<VisualizationsStartDeps, VisualizationsStart>,
-    { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
+    { expressions, embeddable, usageCollection }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     const start = (this.getStartServicesOrDie = createStartServicesGetter(core.getStartServices));
 
@@ -166,7 +166,6 @@ export class VisualizationsPlugin
       expressions,
       uiActions,
       embeddable,
-      savedObjects,
       spaces,
       savedObjectsTaggingOss,
     }: VisualizationsStartDeps
