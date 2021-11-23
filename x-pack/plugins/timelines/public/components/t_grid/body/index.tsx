@@ -147,16 +147,6 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-// TODO: accept extra list of column ids without actions from callsites
-const FIELDS_WITHOUT_CELL_ACTIONS = [
-  '@timestamp',
-  'signal.rule.risk_score',
-  'kibana.alert.rule.risk_score',
-  'signal.reason',
-  'kibana.alert.reason',
-  'kibana.alert.duration.us',
-];
-
 const transformControlColumns = ({
   columnHeaders,
   controlColumns,

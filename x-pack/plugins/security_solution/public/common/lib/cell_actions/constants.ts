@@ -6,4 +6,9 @@
  */
 
 /** actions are disabled for these fields in tables and popovers */
-export const FIELDS_WITHOUT_CELL_ACTIONS = ['kibana.alert.rule.risk_score', 'kibana.alert.reason'];
+export const FIELDS_WITHOUT_CELL_ACTIONS = [
+  'signal.rule.risk_score',
+  'signal.reason',
+  'kibana.alert.rule.risk_score',
+  'kibana.alert.reason',
+];
