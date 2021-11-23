@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { groupBy } from 'lodash';
 
+import type { ResolvedSimpleSavedObject } from 'src/core/public';
+
 import { Loading, Error, ExtensionWrapper } from '../../../../../components';
 
 import type { PackageInfo } from '../../../../../types';
@@ -74,19 +76,28 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           const objectsByType = await Promise.all(
             Object.entries(groupBy(objectsToGet, 'type')).map(([type, objects]) =>
               savedObjectsClient
-                .bulkGet(objects)
+                .bulkResolve(objects)
                 // Ignore privilege errors
                 .catch((e: any) => {
                   if (e?.body?.statusCode === 403) {
-                    return { savedObjects: [] };
+                    return { resolved_objects: [] };
                   } else {
                     throw e;
                   }
                 })
-                .then(({ savedObjects }) => savedObjects as AssetSavedObject[])
+                .then(
+                  ({
+                    resolved_objects: resolvedObjects,
+                  }: {
+                    resolved_objects: ResolvedSimpleSavedObject[];
+                  }) => {
+                    return resolvedObjects.map(
+                      (resolvedObject: ResolvedSimpleSavedObject) => resolvedObject.saved_object
+                    ) as AssetSavedObject[];
+                  }
+                )
             )
           );
-
           setAssetsSavedObjects(objectsByType.flat());
         } catch (e) {
           setFetchError(e);
