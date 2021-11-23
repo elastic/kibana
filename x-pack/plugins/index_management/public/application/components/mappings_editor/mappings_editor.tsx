@@ -43,7 +43,7 @@ interface MappingsEditorParsedMetadata {
   multipleMappingsDeclared: boolean;
 }
 
-interface Props {
+export interface Props {
   onChange: OnUpdateHandler;
   value?: { [key: string]: any };
   indexSettings?: IndexSettings;
