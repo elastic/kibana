@@ -471,7 +471,20 @@ export function getMlClient(
     },
     async updateDatafeed(...p: Parameters<MlClient['updateDatafeed']>) {
       await datafeedIdsCheck(p);
-      return mlClient.updateDatafeed(...p);
+
+      if (p.length === 0 || p[0] === undefined) {
+        // Temporary generic error message. This should never be triggered
+        // but is added for type correctness below
+        throw new Error('Incorrect arguments supplied');
+      }
+      const { datafeed_id: id, body } = p[0];
+
+      return client.asCurrentUser.transport.request({
+        method: 'POST',
+        path: `/_ml/datafeeds/${id}/_update`,
+        body,
+      });
+      // return mlClient.updateDatafeed(...p);
     },
     async updateFilter(...p: Parameters<MlClient['updateFilter']>) {
       return mlClient.updateFilter(...p);
