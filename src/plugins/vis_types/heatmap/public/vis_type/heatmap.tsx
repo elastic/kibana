@@ -38,7 +38,7 @@ export const getHeatmapVisTypeDefinition = ({
       enableHover: false,
       legendPosition: Position.Right,
       colorsNumber: 4,
-      colorSchema: ColorSchemas.Greens,
+      colorSchema: ColorSchemas.GreenToRed,
       setColorRange: false,
       colorsRange: [],
       invertColors: false,

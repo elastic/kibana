@@ -416,6 +416,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
       visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
       // eui color subdued
       textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+      padding: xAxisColumn?.name ? 8 : 0,
       formatter: (v: number | string) => xValuesFormatter.convert(v),
       name: xAxisColumn?.name ?? '',
     },
