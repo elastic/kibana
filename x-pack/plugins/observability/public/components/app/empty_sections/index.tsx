@@ -8,7 +8,6 @@
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { Alert } from '../../../../../alerting/common';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useHasData } from '../../../hooks/use_has_data';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -21,17 +20,9 @@ export function EmptySections() {
   const { hasDataMap } = useHasData();
 
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
-    if (id === 'alert') {
-      const { status, hasData: alerts } = hasDataMap.alert || {};
-      return (
-        status === FETCH_STATUS.FAILURE ||
-        (status === FETCH_STATUS.SUCCESS && (alerts as Alert[]).length === 0)
-      );
-    } else {
-      const app = hasDataMap[id];
-      if (app) {
-        return app.status === FETCH_STATUS.FAILURE || !app.hasData;
-      }
+    const app = hasDataMap[id];
+    if (app) {
+      return app.status === FETCH_STATUS.FAILURE || !app.hasData;
     }
     return false;
   });

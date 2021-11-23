@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../..';
-import { Alert } from '../../../../alerting/common';
 import { EmptySections } from '../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { NewsFeed } from '../../components/app/news_feed';
@@ -72,8 +71,6 @@ export function OverviewPage({ routeParams }: Props) {
     docsLink: core.docLinks.links.observability.guide,
   });
 
-  const alerts = (hasDataMap.alert?.hasData as Alert[]) || [];
-
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
   const bucketSize = calculateBucketSize({
@@ -118,10 +115,10 @@ export function OverviewPage({ routeParams }: Props) {
                     {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
                   </EuiPanel>
                 </EuiFlexItem>
-                {!!alerts.length && (
+                {hasDataMap?.alert?.hasData && (
                   <EuiFlexItem>
                     <EuiPanel hasBorder={true}>
-                      <AlertsSection alerts={alerts} />
+                      <AlertsSection />
                     </EuiPanel>
                   </EuiFlexItem>
                 )}
