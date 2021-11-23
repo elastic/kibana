@@ -29,7 +29,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
     failOnStatusCode: false,
   });
 
-export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing') =>
+export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing', enable=true) =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
@@ -45,7 +45,7 @@ export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_test
       index: rule.index,
       query: rule.customQuery,
       language: 'eql',
-      enabled: true,
+      enabled: enable,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
