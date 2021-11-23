@@ -131,7 +131,7 @@ describe('requestOAuthToken', () => {
 
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "error thrown getting the access token from https://test for params: {\\"someAdditionalParam\\":\\"test\\",\\"clientId\\":\\"123456\\",\\"clientSecret\\":\\"secrert123\\"}: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter 'scope' is not valid.\\"}",
+        "error thrown getting the access token from https://test for params: {\\"client_id\\":\\"123456\\",\\"client_secret\\":\\"secrert123\\",\\"some_additional_param\\":\\"test\\"}: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter 'scope' is not valid.\\"}",
       ]
     `);
   });
