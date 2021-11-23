@@ -53,7 +53,12 @@ exports[`Table render conflict summary modal  1`] = `
             },
           ]
         }
-        noItemsMessage="No items found"
+        noItemsMessage={
+          <EuiI18n
+            default="No items found"
+            token="euiBasicTable.noItemsMessage"
+          />
+        }
         responsive={true}
         rowHeader="firstName"
         tableCaption="Demo of EuiBasicTable"
