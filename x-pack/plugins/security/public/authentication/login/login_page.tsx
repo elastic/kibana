@@ -15,8 +15,15 @@ import { BehaviorSubject } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
+import type {
+  AppMountParameters,
+  CoreStart,
+  FatalErrorsStart,
+  HttpStart,
+  NotificationsStart,
+} from 'src/core/public';
 
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
@@ -251,10 +258,16 @@ export class LoginPage extends Component<Props, State> {
   };
 }
 
-export function renderLoginPage(i18nStart: CoreStart['i18n'], element: Element, props: Props) {
+export function renderLoginPage(
+  i18nStart: CoreStart['i18n'],
+  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
+  props: Props
+) {
   ReactDOM.render(
     <i18nStart.Context>
-      <LoginPage {...props} />
+      <KibanaThemeProvider theme$={theme$}>
+        <LoginPage {...props} />
+      </KibanaThemeProvider>
     </i18nStart.Context>,
     element
   );

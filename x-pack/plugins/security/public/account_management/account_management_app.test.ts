@@ -43,7 +43,6 @@ describe('accountManagementApp', () => {
     coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
 
     const authcMock = securityMock.createSetup().authc;
-    const containerMock = document.createElement('div');
 
     accountManagementApp.create({
       application: coreSetupMock.application,
@@ -52,14 +51,15 @@ describe('accountManagementApp', () => {
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({
-      element: containerMock,
+    const appMountParams = {
+      element: document.createElement('div'),
       appBasePath: '',
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
       theme$: themeServiceMock.createTheme$(),
-    });
+    };
+    await (mount as AppMount)(appMountParams);
 
     expect(coreStartMock.chrome.setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(coreStartMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
@@ -68,10 +68,14 @@ describe('accountManagementApp', () => {
 
     const mockRenderApp = jest.requireMock('./account_management_page').renderAccountManagementPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
-    expect(mockRenderApp).toHaveBeenCalledWith(coreStartMock.i18n, containerMock, {
-      userAPIClient: expect.any(UserAPIClient),
-      authc: authcMock,
-      notifications: coreStartMock.notifications,
-    });
+    expect(mockRenderApp).toHaveBeenCalledWith(
+      coreStartMock.i18n,
+      { element: appMountParams.element, theme$: appMountParams.theme$ },
+      {
+        userAPIClient: expect.any(UserAPIClient),
+        authc: authcMock,
+        notifications: coreStartMock.notifications,
+      }
+    );
   });
 });

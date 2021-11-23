@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
 import { EuiThemeProvider } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
+
 import type { CoreTheme } from '../../../../core/public';
 import { getColorMode } from './utils';
 
@@ -21,9 +23,9 @@ const defaultTheme: CoreTheme = {
   darkMode: false,
 };
 
-// IMPORTANT: This code has been copied to the `interactive_setup` plugin, any changes here should be applied there too.
-// That copy and this comment can be removed once https://github.com/elastic/kibana/issues/119204 is implemented.
-
+/**
+ * Copied from the `kibana_react` plugin, remove once https://github.com/elastic/kibana/issues/119204 is implemented.
+ */
 export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, children }) => {
   const theme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(theme), [theme]);

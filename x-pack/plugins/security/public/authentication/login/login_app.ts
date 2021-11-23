@@ -31,17 +31,21 @@ export const loginApp = Object.freeze({
       title: i18n.translate('xpack.security.loginAppTitle', { defaultMessage: 'Login' }),
       chromeless: true,
       appRoute: '/login',
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, theme$ }: AppMountParameters) {
         const [[coreStart], { renderLoginPage }] = await Promise.all([
           getStartServices(),
           import('./login_page'),
         ]);
-        return renderLoginPage(coreStart.i18n, element, {
-          http: coreStart.http,
-          notifications: coreStart.notifications,
-          fatalErrors: coreStart.fatalErrors,
-          loginAssistanceMessage: config.loginAssistanceMessage,
-        });
+        return renderLoginPage(
+          coreStart.i18n,
+          { element, theme$ },
+          {
+            http: coreStart.http,
+            notifications: coreStart.notifications,
+            fatalErrors: coreStart.fatalErrors,
+            loginAssistanceMessage: config.loginAssistanceMessage,
+          }
+        );
       },
     });
   },

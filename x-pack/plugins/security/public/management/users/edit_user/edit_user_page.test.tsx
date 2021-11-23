@@ -9,7 +9,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
@@ -25,6 +25,7 @@ const userMock = {
 
 describe('EditUserPage', () => {
   const coreStart = coreMock.createStart();
+  const theme$ = themeServiceMock.createTheme$();
   let history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
   const authc = securityMock.createSetup().authc;
 
@@ -46,7 +47,7 @@ describe('EditUserPage', () => {
     coreStart.http.get.mockResolvedValueOnce([]);
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
     );
@@ -66,7 +67,7 @@ describe('EditUserPage', () => {
     coreStart.http.get.mockResolvedValueOnce([]);
 
     const { findByRole, findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
     );
@@ -87,7 +88,7 @@ describe('EditUserPage', () => {
     coreStart.http.get.mockResolvedValueOnce([]);
 
     const { findByRole, findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
     );
@@ -117,7 +118,7 @@ describe('EditUserPage', () => {
     ]);
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
     );

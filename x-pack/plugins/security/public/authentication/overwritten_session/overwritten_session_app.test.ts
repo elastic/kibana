@@ -41,8 +41,6 @@ describe('overwrittenSessionApp', () => {
     coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
 
     const authcMock = securityMock.createSetup().authc;
-    const containerMock = document.createElement('div');
-
     overwrittenSessionApp.create({
       application: coreSetupMock.application,
       getStartServices: coreSetupMock.getStartServices,
@@ -50,22 +48,24 @@ describe('overwrittenSessionApp', () => {
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({
-      element: containerMock,
+    const appMountParams = {
+      element: document.createElement('div'),
       appBasePath: '',
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
       theme$: themeServiceMock.createTheme$(),
-    });
+    };
+    await (mount as AppMount)(appMountParams);
 
     const mockRenderApp = jest.requireMock(
       './overwritten_session_page'
     ).renderOverwrittenSessionPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
-    expect(mockRenderApp).toHaveBeenCalledWith(coreStartMock.i18n, containerMock, {
-      authc: authcMock,
-      basePath: coreStartMock.http.basePath,
-    });
+    expect(mockRenderApp).toHaveBeenCalledWith(
+      coreStartMock.i18n,
+      { element: appMountParams.element, theme$: appMountParams.theme$ },
+      { authc: authcMock, basePath: coreStartMock.http.basePath }
+    );
   });
 });
