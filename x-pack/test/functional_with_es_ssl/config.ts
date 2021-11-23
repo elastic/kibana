@@ -18,7 +18,6 @@ const enabledActionTypes = [
   '.pagerduty',
   '.swimlane',
   '.servicenow',
-  '.server-log',
   '.slack',
   '.webhook',
   'test.authorization',
