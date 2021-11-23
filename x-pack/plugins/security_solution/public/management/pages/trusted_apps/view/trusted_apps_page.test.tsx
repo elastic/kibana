@@ -22,9 +22,9 @@ import { forceHTMLElementOffsetWidth } from '../../../components/effected_policy
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../../common/hooks/use_license';
-import { trustedAppsPageHttpApiMocks } from '../test_utils/mocks';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { trustedAppsAllHttpMocks } from '../../mocks';
 
 // TODO: remove this mock when feature flag is removed
 jest.mock('../../../../common/hooks/use_experimental_features');
@@ -54,7 +54,7 @@ describe('When on the Trusted Apps Page', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let render: () => ReturnType<AppContextTestRender['render']>;
-  let mockedApis: ReturnType<typeof trustedAppsPageHttpApiMocks>;
+  let mockedApis: ReturnType<typeof trustedAppsAllHttpMocks>;
 
   const originalScrollTo = window.scrollTo;
   const act = reactTestingLibrary.act;
@@ -97,7 +97,7 @@ describe('When on the Trusted Apps Page', () => {
     coreStart = mockedContext.coreStart;
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
-    mockedApis = trustedAppsPageHttpApiMocks(coreStart.http);
+    mockedApis = trustedAppsAllHttpMocks(coreStart.http);
     render = () => mockedContext.render(<TrustedAppsPage />);
     reactTestingLibrary.act(() => {
       history.push('/administration/trusted_apps');
