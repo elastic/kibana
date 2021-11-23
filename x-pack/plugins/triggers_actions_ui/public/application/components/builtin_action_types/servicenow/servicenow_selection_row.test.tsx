@@ -19,7 +19,7 @@ const connector: ActionConnector = {
     usesTableApi: true,
   },
   id: 'test',
-  actionTypeId: '.test',
+  actionTypeId: '.servicenow',
   name: 'Test',
   isPreconfigured: false,
 };
