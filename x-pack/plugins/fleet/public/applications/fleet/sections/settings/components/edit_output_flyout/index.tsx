@@ -202,7 +202,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()} flush="left">
+            <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.cancelButtonLabel"
                 defaultMessage="Cancel"

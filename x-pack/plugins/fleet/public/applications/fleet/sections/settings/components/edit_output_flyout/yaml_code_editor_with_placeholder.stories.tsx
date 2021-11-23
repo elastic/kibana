@@ -28,7 +28,7 @@ export const YamlCodeEditorWithPlaceholder = ({ width, placeholder }: Args) => {
   const [value, setValue] = useState('');
 
   // This component is not renderable in tests
-  if (jest) {
+  if (typeof jest !== 'undefined') {
     return null;
   }
 

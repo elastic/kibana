@@ -9,7 +9,6 @@ import React, { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { safeLoad } from 'js-yaml';
 
 import {
   sendPostOutput,
@@ -19,9 +18,11 @@ import {
   useStartServices,
   sendPutOutput,
 } from '../../../../hooks';
-import type { Output } from '../../../../types';
+import type { Output, PostOutputRequest } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { getAgentAndPolicyCountForOutput } from '../../services/agent_and_policies_count';
+
+import { validateName, validateHosts, validateYamlConfig } from './output_form_validators';
 
 const ConfirmTitle = () => (
   <FormattedMessage
@@ -72,64 +73,19 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
   />
 );
 
-const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
-
-function validateHosts(value: string[]) {
-  const res: Array<{ message: string; index: number }> = [];
-  const urlIndexes: { [key: string]: number[] } = {};
-  value.forEach((val, idx) => {
-    if (!val.match(URL_REGEX)) {
-      res.push({
-        message: i18n.translate('xpack.fleet.settings.outputForm.elasticHostError', {
-          defaultMessage: 'Invalid URL',
-        }),
-        index: idx,
-      });
-    }
-    const curIndexes = urlIndexes[val] || [];
-    urlIndexes[val] = [...curIndexes, idx];
-  });
-
-  Object.values(urlIndexes)
-    .filter(({ length }) => length > 1)
-    .forEach((indexes) => {
-      indexes.forEach((index) =>
-        res.push({
-          message: i18n.translate('xpack.fleet.settings.outputForm.elasticHostDuplicateError', {
-            defaultMessage: 'Duplicate URL',
-          }),
-          index,
-        })
-      );
-    });
-
-  if (res.length) {
-    return res;
-  }
-}
-
-function validateYamlConfig(value: string) {
-  try {
-    safeLoad(value);
-    return;
-  } catch (error) {
-    return [
-      i18n.translate('xpack.fleet.settings.outputForm.invalidYamlFormatErrorMessage', {
-        defaultMessage: 'Invalid YAML: {reason}',
-        values: { reason: error.message },
-      }),
-    ];
-  }
-}
-
-function validateName(value: string) {
-  if (!value || value === '') {
-    return [
-      i18n.translate('xpack.fleet.settings.outputForm.nameIsRequiredErrorMessage', {
-        defaultMessage: 'Name is required',
-      }),
-    ];
-  }
+async function confirmUpdate(
+  output: Output,
+  confirm: ReturnType<typeof useConfirmModal>['confirm']
+) {
+  const { agentCount, agentPolicyCount } = await getAgentAndPolicyCountForOutput(output);
+  return confirm(
+    <ConfirmTitle />,
+    <ConfirmDescription
+      agentCount={agentCount}
+      agentPolicyCount={agentPolicyCount}
+      output={output}
+    />
+  );
 }
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
@@ -193,43 +149,30 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         return;
       }
       setIsloading(true);
-      // Create or update
+
+      const data: PostOutputRequest['body'] = {
+        name: nameInput.value,
+        type: 'elasticsearch',
+        hosts: elasticsearchUrlInput.value,
+        is_default: defaultOutputInput.value,
+        is_default_monitoring: defaultMonitoringOutputInput.value,
+        config_yaml: additionalYamlConfigInput.value,
+      };
+
       if (output) {
-        const { agentCount, agentPolicyCount } = await getAgentAndPolicyCountForOutput(output);
-        if (
-          !(await confirm(
-            <ConfirmTitle />,
-            <ConfirmDescription
-              agentCount={agentCount}
-              agentPolicyCount={agentPolicyCount}
-              output={output}
-            />
-          ))
-        ) {
+        // Update
+        if (!(await confirmUpdate(output, confirm))) {
           setIsloading(false);
           return;
         }
 
-        const res = await sendPutOutput(output.id, {
-          name: nameInput.value,
-          type: 'elasticsearch',
-          hosts: elasticsearchUrlInput.value,
-          is_default: defaultOutputInput.value,
-          is_default_monitoring: defaultMonitoringOutputInput.value,
-          config_yaml: additionalYamlConfigInput.value,
-        });
+        const res = await sendPutOutput(output.id, data);
         if (res.error) {
           throw res.error;
         }
       } else {
-        const res = await sendPostOutput({
-          name: nameInput.value,
-          type: 'elasticsearch',
-          hosts: elasticsearchUrlInput.value,
-          is_default: defaultOutputInput.value,
-          is_default_monitoring: defaultMonitoringOutputInput.value,
-          config_yaml: additionalYamlConfigInput.value,
-        });
+        // Create
+        const res = await sendPostOutput(data);
         if (res.error) {
           throw res.error;
         }
