@@ -102,7 +102,7 @@ export class TileLayer extends AbstractLayer {
         return;
       }
 
-      const mbSourceId = this._getMbSourceId();
+      const mbSourceId = this.getMbSourceId();
       mbMap.addSource(mbSourceId, {
         type: 'raster',
         tiles: [tmsSourceData.url],

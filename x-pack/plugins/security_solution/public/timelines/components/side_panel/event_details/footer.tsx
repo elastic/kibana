@@ -13,7 +13,7 @@ import { TakeActionDropdown } from '../../../../detections/components/take_actio
 import { TimelineEventsDetailsItem, TimelineId } from '../../../../../common';
 import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
 import { AddExceptionModalWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
-import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
+import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -154,7 +154,7 @@ export const EventDetailsFooterComponent = React.memo(
             />
           )}
         {isAddEventFilterModalOpen && ecsData != null && (
-          <EventFiltersModal data={ecsData} onCancel={closeAddEventFilterModal} />
+          <EventFiltersFlyout data={ecsData} onCancel={closeAddEventFilterModal} />
         )}
       </>
     );
