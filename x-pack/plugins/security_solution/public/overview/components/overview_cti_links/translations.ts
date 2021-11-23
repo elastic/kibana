@@ -78,3 +78,10 @@ export const SOME_MODULES_DISABLE_TITLE = i18n.translate(
     defaultMessage: 'Some threat intel sources are disabled',
   }
 );
+
+export const OTHER_DATA_SOURCE_TITLE = i18n.translate(
+  'xpack.securitySolution.overview.ctiDashboardOtherDatasourceTitle',
+  {
+    defaultMessage: 'Others',
+  }
+);

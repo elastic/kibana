@@ -26,6 +26,7 @@ export const buildTiDataSourceQuery = ({
   }
 
   const dslQuery = {
+    size: 0,
     index: defaultIndex,
     allow_no_indices: true,
     ignore_unavailable: true,

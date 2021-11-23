@@ -14,7 +14,7 @@ import { LinkPanel, InnerLinkPanel, LinkPanelListItem } from '../link_panel';
 import { LinkPanelViewProps } from '../link_panel/types';
 import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
 import { Link } from '../link_panel/link';
-import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
+import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { LINK_COPY } from '../overview_risky_host_links/translations';
 import { useIntegrationsPageLink } from './use_integrations_page_link';
 

@@ -21,12 +21,14 @@ import {
   CtiDataSourceRequestOptions,
 } from '../../../../common';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
-import { createIndicesFromPrefix } from '../../../transforms/utils';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { OTHER_DATA_SOURCE_TITLE } from '../../components/overview_cti_links/translations';
 
 type GetThreatIntelSourcProps = CtiDataSourceRequestOptions & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
 };
+export const ID = 'ctiEventCountQuery';
 
 export const getTiDataSources = ({
   data,
@@ -66,14 +68,19 @@ export interface TiDataSources {
   count: number;
   dashboardId?: string;
 }
+interface TiDataSourcesProps extends Partial<GlobalTimeArgs> {
+  allTiDataSources?: TiDataSources[];
+}
 
-export const useTiDataSources = (
-  timerange: { to?: string; from?: string } = {},
-  allTiDataSources?: TiDataSources[]
-) => {
+export const useTiDataSources = ({
+  to,
+  from,
+  allTiDataSources,
+  setQuery,
+  deleteQuery,
+}: TiDataSourcesProps) => {
   const [tiDataSources, setTiDataSources] = useState<TiDataSources[]>([]);
   const { data, uiSettings } = useKibana().services;
-  const { to, from } = timerange;
   const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const { result, start, loading } = useTiDataSourcesComplete();
 
@@ -86,9 +93,30 @@ export const useTiDataSources = (
   }, [to, from, start, data, defaultThreatIndices]);
 
   useEffect(() => {
+    if (!loading && result && result?.rawResponse && result?.inspect && setQuery) {
+      setQuery({
+        id: ID,
+        inspect: {
+          dsl: result?.inspect?.dsl ?? [],
+          response: [JSON.stringify(result.rawResponse, null, 2)],
+        },
+        loading,
+        refetch: () => {},
+      });
+    }
+  }, [setQuery, loading, result]);
+
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, [deleteQuery]);
+
+  useEffect(() => {
     if (!loading && result) {
       const datasets = result?.rawResponse?.aggregations?.dataset?.buckets ?? [];
-
       const getChildAggregationValue = (aggregation?: Bucket) => aggregation?.buckets?.[0]?.key;
 
       const integrationMap = datasets.reduce((acc: Record<string, TiDataSources>, dataset) => {
@@ -110,7 +138,7 @@ export const useTiDataSources = (
             ...acc,
             [otherTiDatasetKey]: {
               dataset: otherTiDatasetKey,
-              name: 'Others',
+              name: OTHER_DATA_SOURCE_TITLE,
               count: otherDatasetCount + (dataset?.doc_count ?? 0),
             },
           };

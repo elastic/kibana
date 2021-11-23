@@ -12,7 +12,7 @@ import {
   CtiDataSourceRequestOptions,
 } from '../../../../../../common';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
-// import { inspectStringifyObject } from '../../../../../utils/build_query';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
 
 export const dataSource: SecuritySolutionFactory<CtiQueries.dataSource> = {
@@ -21,13 +21,13 @@ export const dataSource: SecuritySolutionFactory<CtiQueries.dataSource> = {
     options: CtiDataSourceRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<CtiDataSourceStrategyResponse> => {
-    // const inspect = {
-    //   dsl: [inspectStringifyObject(buildThreatIntelSourceQuery(options))],
-    // };
+    const inspect = {
+      dsl: [inspectStringifyObject(buildTiDataSourceQuery(options))],
+    };
 
     return {
       ...response,
-      //   inspect,
+      inspect,
     };
   },
 };
