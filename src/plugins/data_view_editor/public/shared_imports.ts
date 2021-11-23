@@ -13,6 +13,7 @@ export type {
   IndexPatternAggRestrictions,
 } from '../../data/public';
 export { IndexPattern, IndexPatternField } from '../../data/public';
+export { DataView } from '../../data_views/public';
 
 export {
   createKibanaReactContext,

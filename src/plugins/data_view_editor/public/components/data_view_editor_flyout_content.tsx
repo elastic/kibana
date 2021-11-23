@@ -25,7 +25,7 @@ import { FlyoutPanels } from './flyout_panels';
 
 import {
   MatchedItem,
-  IndexPatternEditorContext,
+  DataViewEditorContext,
   RollupIndicesCapsResponse,
   INDEX_PATTERN_TYPE,
   IndexPatternConfig,
@@ -70,8 +70,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
   requireTimestampField = false,
 }: Props) => {
   const {
-    services: { http, indexPatternService, uiSettings, searchClient },
-  } = useKibana<IndexPatternEditorContext>();
+    services: { http, dataViews, uiSettings, searchClient },
+  } = useKibana<DataViewEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     defaultValue: {
@@ -155,13 +155,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     loadSources();
     const getTitles = async () => {
-      const indexPatternTitles = await indexPatternService.getTitles();
+      const indexPatternTitles = await dataViews.getTitles();
 
       setExistingIndexPatterns(indexPatternTitles);
       setIsLoadingIndexPatterns(false);
     };
     getTitles();
-  }, [http, indexPatternService, loadSources]);
+  }, [http, dataViews, loadSources]);
 
   // loading rollup info
   useEffect(() => {
@@ -199,9 +199,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           getFieldsOptions.rollupIndex = rollupIndex;
         }
 
-        const fields = await ensureMinimumTime(
-          indexPatternService.getFieldsForWildcard(getFieldsOptions)
-        );
+        const fields = await ensureMinimumTime(dataViews.getFieldsForWildcard(getFieldsOptions));
         timestampOptions = extractTimeFields(fields, requireTimestampField);
       }
       if (currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current) {
@@ -212,7 +210,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
     [
       existingIndexPatterns,
-      indexPatternService,
+      dataViews,
       requireTimestampField,
       rollupIndex,
       type,
@@ -392,8 +390,8 @@ const loadMatchedIndices = memoizeOne(
       searchClient,
     }: {
       isRollupIndex: (index: string) => boolean;
-      http: IndexPatternEditorContext['http'];
-      searchClient: IndexPatternEditorContext['searchClient'];
+      http: DataViewEditorContext['http'];
+      searchClient: DataViewEditorContext['searchClient'];
     }
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;
