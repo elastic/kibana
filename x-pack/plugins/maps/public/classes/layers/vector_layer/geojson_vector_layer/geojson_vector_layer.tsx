@@ -139,7 +139,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
   }
 
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
-    addGeoJsonMbSource(this._getMbSourceId(), this.getMbLayerIds(), mbMap);
+    addGeoJsonMbSource(this.getMbSourceId(), this.getMbLayerIds(), mbMap);
 
     this._syncFeatureCollectionWithMb(mbMap);
 
