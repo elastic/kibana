@@ -42,7 +42,7 @@ import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
 import type { Certificate } from '../common';
 import { DocLink } from './doc_link';
-import { formatBashCommand } from './format_bash_command';
+import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
@@ -512,7 +512,7 @@ export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps
           />
         </p>
         <EuiCodeBlock language="bash" paddingSize="m" isCopyable>
-          {formatBashCommand('elasticsearch-reset-password', `--username ${username}`)}
+          {getCommandLineSnippet('elasticsearch-reset-password', `--username ${username}`)}
         </EuiCodeBlock>
       </EuiText>
     </EuiPopover>

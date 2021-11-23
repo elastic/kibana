@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { formatBashCommand } from './format_bash_command';
+import { getCommandLineSnippet } from './get_command_line_snippet';
 
-describe('formatBashCommand', () => {
+describe('getCommandLineSnippet', () => {
   const originalNavigator = window.navigator;
 
   it('should format windows correctly', () => {
@@ -16,8 +16,8 @@ describe('formatBashCommand', () => {
       value: { userAgent: 'Windows' },
       writable: true,
     });
-    expect(formatBashCommand('kibana')).toEqual('bin\\kibana.bat');
-    expect(formatBashCommand('kibana', '--silent')).toEqual('bin\\kibana.bat --silent');
+    expect(getCommandLineSnippet('kibana')).toEqual('bin\\kibana.bat');
+    expect(getCommandLineSnippet('kibana', '--silent')).toEqual('bin\\kibana.bat --silent');
   });
 
   it('should format unix correctly', () => {
@@ -25,8 +25,8 @@ describe('formatBashCommand', () => {
       value: { userAgent: 'Linux' },
       writable: true,
     });
-    expect(formatBashCommand('kibana')).toEqual('bin/kibana');
-    expect(formatBashCommand('kibana', '--silent')).toEqual('bin/kibana --silent');
+    expect(getCommandLineSnippet('kibana')).toEqual('bin/kibana');
+    expect(getCommandLineSnippet('kibana', '--silent')).toEqual('bin/kibana --silent');
   });
 
   afterAll(function () {

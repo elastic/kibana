@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
-import { formatBashCommand } from './format_bash_command';
+import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SingleCharsField } from './single_chars_field';
 import { SubmitErrorCallout } from './submit_error_callout';
 import type { ValidationErrors } from './use_form';
@@ -119,7 +119,7 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
                   values={{
                     command: (
                       <EuiCode language="bash">
-                        {formatBashCommand('kibana-verification-code')}
+                        {getCommandLineSnippet('kibana-verification-code')}
                       </EuiCode>
                     ),
                   }}

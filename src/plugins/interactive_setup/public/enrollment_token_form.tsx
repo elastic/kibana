@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { EnrollmentToken } from '../common';
 import { DocLink } from './doc_link';
-import { formatBashCommand } from './format_bash_command';
+import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
@@ -261,7 +261,7 @@ export const EnrollmentTokenHelpPopover = () => {
           />
         </p>
         <EuiCodeBlock language="bash" paddingSize="m" isCopyable>
-          {formatBashCommand('elasticsearch-create-enrollment-token', '--scope kibana')}
+          {getCommandLineSnippet('elasticsearch-create-enrollment-token', '--scope kibana')}
         </EuiCodeBlock>
       </EuiText>
       <EuiPopoverFooter>

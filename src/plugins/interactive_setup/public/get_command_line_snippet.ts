@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export function formatBashCommand(command: string, args?: string) {
+export function getCommandLineSnippet(command: string, args?: string) {
   const isWindows = window.navigator.userAgent.includes('Win');
   return `${isWindows ? `bin\\${command}.bat` : `bin/${command}`}${args ? ` ${args}` : ''}`;
 }
