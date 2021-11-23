@@ -48,7 +48,7 @@ interface Props {
   value?: { [key: string]: any };
   indexSettings?: IndexSettings;
   docLinks: DocLinksStart;
-  // The list of ES plugins installed on the cluster nodes
+  /** List of plugins installed in the cluster nodes */
   esNodesPlugins: string[];
 }
 

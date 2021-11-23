@@ -20,6 +20,7 @@ import { configurationFormSchema } from './configuration_form_schema';
 
 interface Props {
   value?: MappingsConfiguration;
+  /** List of plugins installed in the cluster nodes */
   esNodesPlugins: string[];
 }
 
