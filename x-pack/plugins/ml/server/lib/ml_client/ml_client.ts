@@ -480,7 +480,7 @@ export function getMlClient(
       }
       const { datafeed_id: id, body } = p[0];
 
-      return client.asCurrentUser.transport.request({
+      return client.asInternalUser.transport.request({
         method: 'POST',
         path: `/_ml/datafeeds/${id}/_update`,
         body,
