@@ -9,15 +9,18 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 import { OAuthTokenResponse, requestOAuthToken } from './request_oauth_token';
 import { RewriteResponseCase } from '../../../../actions/common';
 
-export const OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE = 'client_credentials';
+// This is a standard for JSON Web Token (JWT) Profile
+// for OAuth 2.0 Client Authentication and Authorization Grants https://datatracker.ietf.org/doc/html/rfc7523#section-8.1
+export const OAUTH_JWT_BEARER_GRANT_TYPE = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
 
-export interface ClientCredentialsOAuthRequestParams {
-  scope?: string;
+interface JWTOAuthRequestParams {
+  assertion: string;
   clientId?: string;
   clientSecret?: string;
+  scope?: string;
 }
 
-const rewriteBodyRequest: RewriteResponseCase<ClientCredentialsOAuthRequestParams> = ({
+const rewriteBodyRequest: RewriteResponseCase<JWTOAuthRequestParams> = ({
   clientId,
   clientSecret,
   ...res
@@ -27,15 +30,15 @@ const rewriteBodyRequest: RewriteResponseCase<ClientCredentialsOAuthRequestParam
   client_secret: clientSecret,
 });
 
-export async function requestOAuthClientCredentialsToken(
+export async function requestOAuthJWTToken(
   tokenUrl: string,
+  params: JWTOAuthRequestParams,
   logger: Logger,
-  params: ClientCredentialsOAuthRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
 ): Promise<OAuthTokenResponse> {
-  return await requestOAuthToken<ClientCredentialsOAuthRequestParams>(
+  return await requestOAuthToken<JWTOAuthRequestParams>(
     tokenUrl,
-    OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,
+    OAUTH_JWT_BEARER_GRANT_TYPE,
     configurationUtilities,
     logger,
     rewriteBodyRequest(params)
