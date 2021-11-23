@@ -2375,7 +2375,7 @@
             "id": "def-public.ControlsPanels.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[panelId: string}]: ControlPanelState<ControlInput>",
+            "label": "[panelId: string]: ControlPanelState<ControlInput>",
             "description": [],
             "signature": [
               "[panelId: string]:  ",
