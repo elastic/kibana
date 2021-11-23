@@ -146,8 +146,10 @@ const resultToOption = (
     'data-test-subj': `nav-search-option`,
   };
 
-  if (type === 'application') option.meta = [{ text: categoryLabel }];
-  else option.meta = [{ text: cleanMeta(type) }];
+  option.meta =
+    type === 'application'
+      ? [{ text: categoryLabel }]
+      : [{ text: cleanMeta((meta.displayName as string) ?? type) }];
 
   if (getTag && tagIds.length) {
     // TODO #85189 - refactor to use TagList instead of getTag
