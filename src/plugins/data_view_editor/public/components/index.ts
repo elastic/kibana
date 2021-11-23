@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type { Props as IndexPatternEditorFlyoutContentProps } from './index_pattern_editor_flyout_content';
-export { IndexPatternEditorFlyoutContent } from './index_pattern_editor_flyout_content';
+export type { Props as IndexPatternEditorFlyoutContentProps } from './data_view_editor_flyout_content';
+export { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
 
-export { IndexPatternEditor } from './index_pattern_editor';
+export { DataViewEditor } from './data_view_editor';
 
 export { schema } from './form_schema';
 export { TimestampField, TypeField, TitleField } from './form_fields';

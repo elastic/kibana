@@ -9,6 +9,7 @@
 import React from 'react';
 import { CoreStart, OverlayRef } from 'src/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 
 import {
   createKibanaReactContext,
@@ -17,27 +18,27 @@ import {
   DataPublicPluginStart,
 } from './shared_imports';
 
-import { CloseEditor, IndexPatternEditorContext, IndexPatternEditorProps } from './types';
-import { IndexPatternEditorLazy } from './components/index_pattern_editor_lazy';
+import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
+import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 
 interface Dependencies {
   core: CoreStart;
-  indexPatternService: DataPublicPluginStart['indexPatterns'];
   searchClient: DataPublicPluginStart['search']['search'];
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export const getEditorOpener =
-  ({ core, indexPatternService, searchClient }: Dependencies) =>
-  (options: IndexPatternEditorProps): CloseEditor => {
+  ({ core, searchClient, dataViews }: Dependencies) =>
+  (options: DataViewEditorProps): CloseEditor => {
     const { uiSettings, overlays, docLinks, notifications, http, application } = core;
     const { Provider: KibanaReactContextProvider } =
-      createKibanaReactContext<IndexPatternEditorContext>({
+      createKibanaReactContext<DataViewEditorContext>({
         uiSettings,
         docLinks,
         http,
         notifications,
         application,
-        indexPatternService,
+        dataViews,
         searchClient,
       });
 
@@ -48,7 +49,7 @@ export const getEditorOpener =
       onCancel = () => {},
       defaultTypeIsRollup = false,
       requireTimestampField = false,
-    }: IndexPatternEditorProps): CloseEditor => {
+    }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
           overlayRef.close();
@@ -68,7 +69,7 @@ export const getEditorOpener =
         toMountPoint(
           <KibanaReactContextProvider>
             <I18nProvider>
-              <IndexPatternEditorLazy
+              <DataViewEditorLazy
                 onSave={onSaveIndexPattern}
                 onCancel={() => {
                   closeEditor();
