@@ -28,15 +28,15 @@ import { ErrorDistribution } from '../error_group_details/Distribution';
 import { ErrorGroupList } from './error_group_list';
 
 type ErrorGroupMainStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATISTICS: {
-  items: ErrorGroupMainStatistics['errorGroups'];
+  errorGroupMainStatistics: ErrorGroupMainStatistics['errorGroups'];
   requestId?: string;
 } = {
-  items: [],
+  errorGroupMainStatistics: [],
   requestId: undefined,
 };
 
@@ -85,7 +85,7 @@ export function ErrorGroupOverview() {
         if (start && end && transactionType) {
           return callApmApi({
             endpoint:
-              'GET /internal/apm/services/{serviceName}/errors/main_statistics',
+              'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
             params: {
               path: {
                 serviceName,
@@ -104,7 +104,7 @@ export function ErrorGroupOverview() {
             return {
               // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
               requestId: uuid(),
-              items: response.errorGroups,
+              errorGroupMainStatistics: response.errorGroups,
             };
           });
         }
@@ -121,16 +121,22 @@ export function ErrorGroupOverview() {
       ]
     );
 
-  const { requestId, items } = errorGroupListData;
+  const { requestId, errorGroupMainStatistics } = errorGroupListData;
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
   } = useFetcher(
     (callApmApi) => {
-      if (requestId && items.length && start && end && transactionType) {
+      if (
+        requestId &&
+        errorGroupMainStatistics.length &&
+        start &&
+        end &&
+        transactionType
+      ) {
         return callApmApi({
           endpoint:
-            'GET /internal/apm/services/{serviceName}/errors/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -141,7 +147,7 @@ export function ErrorGroupOverview() {
               numBuckets: 20,
               transactionType,
               groupIds: JSON.stringify(
-                items.map(({ groupId }) => groupId).sort()
+                errorGroupMainStatistics.map(({ groupId }) => groupId).sort()
               ),
               comparisonStart,
               comparisonEnd,
@@ -200,9 +206,9 @@ export function ErrorGroupOverview() {
           <EuiSpacer size="s" />
 
           <ErrorGroupList
-            items={items}
+            mainStatistics={errorGroupMainStatistics}
             serviceName={serviceName}
-            periods={errorGroupDetailedStatistics}
+            detailedStatistics={errorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}
           />
         </EuiPanel>

@@ -49,21 +49,21 @@ const Culprit = euiStyled.div`
 `;
 
 type ErrorGroupItem =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/main_statistics'>['errorGroups'][0];
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['errorGroups'][0];
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 interface Props {
-  items: ErrorGroupItem[];
+  mainStatistics: ErrorGroupItem[];
   serviceName: string;
-  periods: ErrorGroupDetailedStatistics;
+  detailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
 }
 
 function ErrorGroupList({
-  items,
+  mainStatistics,
   serviceName,
-  periods,
+  detailedStatistics,
   comparisonEnabled,
 }: Props) {
   const { urlParams } = useLegacyUrlParams();
@@ -200,9 +200,9 @@ function ErrorGroupList({
         align: RIGHT_ALIGNMENT,
         render: (_, { occurrences, groupId }) => {
           const currentPeriodTimeseries =
-            periods?.currentPeriod?.[groupId]?.timeseries;
+            detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
           const previousPeriodTimeseries =
-            periods?.previousPeriod?.[groupId]?.timeseries;
+            detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
           return (
             <SparkPlot
               color="euiColorVis7"
@@ -224,14 +224,14 @@ function ErrorGroupList({
         },
       },
     ] as Array<ITableColumn<ErrorGroupItem>>;
-  }, [serviceName, urlParams, periods, comparisonEnabled]);
+  }, [serviceName, urlParams, detailedStatistics, comparisonEnabled]);
 
   return (
     <ManagedTable
       noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
         defaultMessage: 'No errors found',
       })}
-      items={items}
+      items={mainStatistics}
       columns={columns}
       initialPageSize={25}
       initialSortField="occurrences"

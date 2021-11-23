@@ -22,7 +22,7 @@ export async function getErrorGroupIds({
   count?: number;
 }) {
   const { body } = await apmApiClient.readUser({
-    endpoint: `GET /internal/apm/services/{serviceName}/errors/main_statistics`,
+    endpoint: `GET /internal/apm/services/{serviceName}/errors/groups/main_statistics`,
     params: {
       path: { serviceName },
       query: {

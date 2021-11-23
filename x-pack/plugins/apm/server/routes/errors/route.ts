@@ -23,7 +23,8 @@ import { getServiceErrorGroupPeriods } from './get_error_groups/get_error_group_
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/errors/main_statistics',
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -74,7 +75,7 @@ const errorsMainStatisticsRoute = createApmServerRoute({
 
 const errorsDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /internal/apm/services/{serviceName}/errors/detailed_statistics',
+    'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,

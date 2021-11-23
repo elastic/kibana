@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { generateData, config } from './generate_data';
 
 type ErrorGroupsMainStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -28,11 +28,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi(
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/main_statistics'>['params']
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['params']
     >
   ) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/services/{serviceName}/errors/main_statistics`,
+      endpoint: `GET /internal/apm/services/{serviceName}/errors/groups/main_statistics`,
       params: {
         path: { serviceName, ...overrides?.path },
         query: {

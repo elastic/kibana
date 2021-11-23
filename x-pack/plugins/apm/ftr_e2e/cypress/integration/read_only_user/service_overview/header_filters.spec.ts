@@ -47,7 +47,8 @@ const apisToIntercept = [
     name: 'instancesMainStatisticsRequest',
   },
   {
-    endpoint: '/internal/apm/services/opbeans-node/errors/main_statistics?*',
+    endpoint:
+      '/internal/apm/services/opbeans-node/errors/group/main_statistics?*',
     name: 'errorGroupsMainStatisticsRequest',
   },
   {
