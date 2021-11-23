@@ -19,6 +19,7 @@ import {
   actionLicenses,
   allCases,
   basicCase,
+  basicCaseMetrics,
   basicCaseCommentPatch,
   basicCasePost,
   basicResolvedCase,
@@ -35,6 +36,7 @@ import {
   User,
   CaseStatuses,
   ResolvedCase,
+  CaseMetrics,
 } from '../../../common';
 
 export const getCase = async (
@@ -48,6 +50,9 @@ export const resolveCase = async (
   includeComments: boolean = true,
   signal: AbortSignal
 ): Promise<ResolvedCase> => Promise.resolve(basicResolvedCase);
+
+export const getCaseMetrics = async (caseId: string, signal: AbortSignal): Promise<CaseMetrics> =>
+  Promise.resolve(basicCaseMetrics);
 
 export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
   Promise.resolve(casesStatus);

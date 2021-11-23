@@ -25,6 +25,7 @@ import {
   CommentType,
   getCaseCommentsUrl,
   getCaseDetailsUrl,
+  getCaseDetailsMetricsUrl,
   getCasePushUrl,
   getCaseUserActionUrl,
   getSubCaseDetailsUrl,
@@ -37,6 +38,7 @@ import {
   SubCasesResponse,
   User,
   ResolvedCase,
+  MetricsResponse,
 } from '../../common';
 
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
@@ -48,6 +50,7 @@ import {
   AllCases,
   BulkUpdateStatus,
   Case,
+  CaseMetrics,
   CasesStatus,
   FetchCasesProps,
   SortFieldCase,
@@ -64,6 +67,7 @@ import {
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
+  decodeCaseMetricsResponse,
 } from './utils';
 
 export const getCase = async (
@@ -155,6 +159,17 @@ export const getReporters = async (signal: AbortSignal, owner: string[]): Promis
     query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
+};
+
+export const getCaseMetrics = async (caseId: string, signal: AbortSignal): Promise<CaseMetrics> => {
+  const response = await KibanaServices.get().http.fetch<MetricsResponse>(
+    getCaseDetailsMetricsUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+  return decodeCaseMetricsResponse(response) as CaseMetrics;
 };
 
 export const getCaseUserActions = async (

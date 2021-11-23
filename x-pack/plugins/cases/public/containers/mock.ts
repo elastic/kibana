@@ -27,6 +27,7 @@ import {
   SECURITY_SOLUTION_OWNER,
   UserAction,
   UserActionField,
+  CaseMetrics,
 } from '../../common';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 export { connectorsMock } from './configure/mock';
@@ -36,6 +37,7 @@ export const basicSubCaseId = 'basic-sub-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
+const basicClosedAt = '2020-02-21T15:02:57.995Z';
 const laterTime = '2020-02-28T15:02:57.995Z';
 
 export const elasticUser = {
@@ -168,6 +170,23 @@ export const basicResolvedCase: ResolvedCase = {
   case: basicCase,
   outcome: 'aliasMatch',
   aliasTargetId: `${basicCase.id}_2`,
+};
+
+export const basicCaseMetrics: CaseMetrics = {
+  alertsCount: 12,
+  alertHosts: {
+    total: 2,
+    values: [
+      { name: 'foo', count: 2 },
+      { name: 'bar', count: 10 },
+    ],
+  },
+  alertUsers: {
+    total: 1,
+    values: [{ name: 'Jon', count: 12 }],
+  },
+  connectors: [{ id: 'none', name: 'My Connector', pushCount: 3 }],
+  lifespan: { creationDate: basicCreatedAt, closeDate: basicClosedAt },
 };
 
 export const collectionCase: Case = {

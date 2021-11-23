@@ -17,6 +17,7 @@ import {
   UserAction,
   UserActionField,
   ActionConnector,
+  MetricsResponse,
 } from '../api';
 
 export interface CasesUiConfigType {
@@ -148,6 +149,8 @@ export interface AllCases extends CasesStatus {
   perPage: number;
   total: number;
 }
+
+export type CaseMetrics = MetricsResponse;
 
 export enum SortFieldCase {
   createdAt = 'createdAt',

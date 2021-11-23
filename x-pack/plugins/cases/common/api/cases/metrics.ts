@@ -22,7 +22,7 @@ export const MetricsResponseRt = rt.partial(
       rt.type({
         id: rt.string,
         name: rt.string,
-        pushCount: rt.string,
+        pushCount: rt.number,
       })
     ),
     /**

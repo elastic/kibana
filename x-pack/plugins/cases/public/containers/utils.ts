@@ -32,6 +32,8 @@ import {
   CasePatchRequest,
   CaseResolveResponse,
   CaseResolveResponseRt,
+  MetricsResponse,
+  MetricsResponseRt,
 } from '../../common';
 import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';
@@ -87,6 +89,9 @@ export const decodeCaseResolveResponse = (respCase?: CaseResolveResponse) =>
     CaseResolveResponseRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
+
+export const decodeCaseMetricsResponse = (respCase?: MetricsResponse) =>
+  pipe(MetricsResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCasesResponse = (respCase?: CasesResponse) =>
   pipe(CasesResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
