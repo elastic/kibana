@@ -312,17 +312,16 @@ export const AvailablePackages: React.FC = memo(() => {
     <>
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:endpoint:featured">
+          <TrackApplicationView viewId="integration-card:epr:app_search_web_crawler:featured">
             <EuiCard
-              data-test-subj="integration-card:epr:endpoint:featured"
-              icon={<EuiIcon type="logoSecurity" size="xxl" />}
-              href={addBasePath('/app/integrations/detail/endpoint/')}
-              title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Endpoint Security',
+              data-test-subj="integration-card:epr:app_search_web_crawler:featured"
+              icon={<EuiIcon type="logoAppSearch" size="xxl" />}
+              href={addBasePath('/app/enterprise_search/app_search/engines/new?method=crawler')}
+              title={i18n.translate('xpack.fleet.featuredSearchTitle', {
+                defaultMessage: 'Web site crawler',
               })}
-              description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
-                defaultMessage:
-                  'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+              description={i18n.translate('xpack.fleet.featuredSearchDesc', {
+                defaultMessage: 'Add search to your website with the App Search web crawler.',
               })}
             />
           </TrackApplicationView>
@@ -344,16 +343,17 @@ export const AvailablePackages: React.FC = memo(() => {
           </TrackApplicationView>
         </EuiFlexItem>
         <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:app_search_web_crawler:featured">
+          <TrackApplicationView viewId="integration-card:epr:endpoint:featured">
             <EuiCard
-              data-test-sub="integration-card:epr:app_search_web_crawler:featured"
-              icon={<EuiIcon type="logoAppSearch" size="xxl" />}
-              href={addBasePath('/app/enterprise_search/app_search/engines/new?method=crawler')}
-              title={i18n.translate('xpack.fleet.featuredSearchTitle', {
-                defaultMessage: 'Web site crawler',
+              data-test-subj="integration-card:epr:endpoint:featured"
+              icon={<EuiIcon type="logoSecurity" size="xxl" />}
+              href={addBasePath('/app/integrations/detail/endpoint/')}
+              title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
+                defaultMessage: 'Endpoint Security',
               })}
-              description={i18n.translate('xpack.fleet.featuredSearchDesc', {
-                defaultMessage: 'Add search to your website with the App Search web crawler.',
+              description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
+                defaultMessage:
+                  'Protect your hosts with threat prevention, detection, and deep security data visibility.',
               })}
             />
           </TrackApplicationView>
