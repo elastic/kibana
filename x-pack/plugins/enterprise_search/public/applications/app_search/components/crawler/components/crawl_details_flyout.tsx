@@ -8,7 +8,15 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiCodeBlock } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiCodeBlock,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -16,8 +24,9 @@ import { Loading } from '../../../../shared/loading';
 import { CrawlDetailLogic } from '../crawl_detail_logic';
 
 export const CrawlDetailsFlyout: React.FC = () => {
-  const { closeFlyout } = useActions(CrawlDetailLogic);
-  const { dataLoading, flyoutClosed, crawlRequestFromServer } = useValues(CrawlDetailLogic);
+  const { closeFlyout, setSelectedTab } = useActions(CrawlDetailLogic);
+  const { crawlRequestFromServer, dataLoading, flyoutClosed, selectedTab } =
+    useValues(CrawlDetailLogic);
 
   if (flyoutClosed) {
     return null;
@@ -33,14 +42,24 @@ export const CrawlDetailsFlyout: React.FC = () => {
             })}
           </h2>
         </EuiTitle>
+        <EuiTabs style={{ marginBottom: '-25px' }}>
+          <EuiTab isSelected={selectedTab === 'preview'} onClick={() => setSelectedTab('preview')}>
+            Preview
+          </EuiTab>
+          <EuiTab isSelected={selectedTab === 'json'} onClick={() => setSelectedTab('json')}>
+            Raw JSON
+          </EuiTab>
+        </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {dataLoading ? (
           <Loading />
         ) : (
-          <EuiCodeBlock language="json">
-            {JSON.stringify(crawlRequestFromServer, null, 2)}
-          </EuiCodeBlock>
+          <>
+            <EuiCodeBlock language="json">
+              {JSON.stringify(crawlRequestFromServer, null, 2)}
+            </EuiCodeBlock>
+          </>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>

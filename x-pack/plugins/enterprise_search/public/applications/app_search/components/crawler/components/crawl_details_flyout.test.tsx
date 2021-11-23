@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCodeBlock, EuiFlyout } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlyout, EuiTab, EuiTabs } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
 
-import { CrawlDetailValues } from '../crawl_detail_logic';
+import { CrawlDetailActions, CrawlDetailValues } from '../crawl_detail_logic';
 import { CrawlRequestFromServer } from '../types';
 
 import { CrawlDetailsFlyout } from './crawl_details_flyout';
@@ -26,7 +26,15 @@ const MOCK_VALUES: Partial<CrawlDetailValues> = {
   crawlRequestFromServer: {} as CrawlRequestFromServer,
 };
 
+const MOCK_ACTIONS: Partial<CrawlDetailActions> = {
+  setSelectedTab: jest.fn(),
+};
+
 describe('CrawlDetailsFlyout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders a flyout containing the raw json of the crawl details', () => {
     setMockValues(MOCK_VALUES);
 
@@ -34,6 +42,58 @@ describe('CrawlDetailsFlyout', () => {
 
     expect(wrapper.is(EuiFlyout)).toBe(true);
     expect(wrapper.find(EuiCodeBlock)).toHaveLength(1);
+  });
+
+  it('contains a tab group to control displayed content inside the flyout', () => {
+    setMockActions(MOCK_ACTIONS);
+    setMockValues(MOCK_VALUES);
+
+    const wrapper = shallow(<CrawlDetailsFlyout />);
+    const tabs = wrapper.find(EuiTabs).find(EuiTab);
+
+    expect(tabs).toHaveLength(2);
+
+    tabs.at(0).simulate('click');
+
+    expect(MOCK_ACTIONS.setSelectedTab).toHaveBeenCalledWith('preview');
+
+    tabs.at(1).simulate('click');
+
+    expect(MOCK_ACTIONS.setSelectedTab).toHaveBeenCalledWith('json');
+  });
+
+  describe('when the preview tab is selected', () => {
+    beforeEach(() => {
+      setMockValues({
+        ...MOCK_VALUES,
+        selectedTab: 'preview',
+      });
+    });
+
+    it('shows the correct tab is selected in the UX', () => {
+      const wrapper = shallow(<CrawlDetailsFlyout />);
+      const tabs = wrapper.find(EuiTabs).find(EuiTab);
+
+      expect(tabs.at(0).prop('isSelected')).toBe(true);
+      expect(tabs.at(1).prop('isSelected')).toBe(false);
+    });
+  });
+
+  describe('when the json tab is selected', () => {
+    beforeEach(() => {
+      setMockValues({
+        ...MOCK_VALUES,
+        selectedTab: 'json',
+      });
+    });
+
+    it('shows the correct tab is selected in the UX', () => {
+      const wrapper = shallow(<CrawlDetailsFlyout />);
+      const tabs = wrapper.find(EuiTabs).find(EuiTab);
+
+      expect(tabs.at(0).prop('isSelected')).toBe(false);
+      expect(tabs.at(1).prop('isSelected')).toBe(true);
+    });
   });
 
   it('renders a loading screen when loading', () => {

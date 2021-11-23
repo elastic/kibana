@@ -25,7 +25,7 @@ export interface CrawlDetailValues {
   selectedTab: CrawlDetailFlyoutTabs;
 }
 
-interface CrawlDetailActions {
+export interface CrawlDetailActions {
   closeFlyout(): void;
   fetchCrawlRequest(requestId: string): { requestId: string };
   onRecieveCrawlRequest(crawlRequestFromServer: CrawlRequestFromServer): {
