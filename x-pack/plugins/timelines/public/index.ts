@@ -26,7 +26,7 @@ export type {
 export { Direction } from '../common/search_strategy/common';
 export { tGridReducer } from './store/t_grid/reducer';
 export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
-export type { TGridType, SortDirection } from './types';
+export type { TGridType, SortDirection, State as TGridState, TGridModel } from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
 export {
   ARIA_COLINDEX_ATTRIBUTE,
