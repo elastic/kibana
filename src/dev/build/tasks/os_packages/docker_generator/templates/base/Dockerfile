@@ -15,7 +15,7 @@ FROM {{{baseOSImage}}} AS builder
 RUN {{packageManager}} install -y findutils tar gzip
 {{/ubi}}
 {{#ubuntu}}
-RUN {{packageManager}} update && {{packageManager}} install -y curl
+RUN {{packageManager}} update && DEBIAN_FRONTEND=noninteractive {{packageManager}} install -y curl
 {{/ubuntu}}
 
 {{#usePublicArtifact}}
