@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { mockJobs } from '../../../common/test';
+export type { PayloadMock, ReportMock } from './types';
 
-export { setup } from './report_listing.test.helpers';
-
-export type { TestBed, TestDependencies } from './report_listing.test.helpers';
+export { mockJobs } from './fixtures';

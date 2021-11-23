@@ -22,13 +22,15 @@ import type { LocatorPublic, SharePluginSetup } from '../../../../../../src/plug
 
 import type { ILicense } from '../../../../licensing/public';
 
+import { mockJobs } from '../../../common/test';
+
 import { KibanaContextProvider } from '../../shared_imports';
+
 import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
 import { InternalApiClientProvider, ReportingAPIClient } from '../../lib/reporting_api_client';
 import { Job } from '../../lib/job';
 
 import { ListingProps as Props, ReportListing } from '../';
-import { mockJobs } from './constants';
 
 export interface TestDependencies {
   http: ReturnType<typeof httpServiceMock.createSetupContract>;

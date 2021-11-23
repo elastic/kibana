@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { ReportApiJSON } from '../../../common/types';
+import { ReportApiJSON } from '../types';
 
+/** @internal */
 export interface PayloadMock {
   payload: Omit<ReportApiJSON['payload'], 'browserTimezone' | 'version' | 'layout'>;
 }
+
+/** @internal */
 export type ReportMock = Omit<
   ReportApiJSON,
   | 'index'
