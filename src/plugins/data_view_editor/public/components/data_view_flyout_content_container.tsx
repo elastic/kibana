@@ -10,22 +10,22 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { IndexPatternSpec, useKibana } from '../shared_imports';
-import { IndexPatternEditorFlyoutContent } from './index_pattern_editor_flyout_content';
-import { IndexPatternEditorContext, IndexPatternEditorProps } from '../types';
+import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
+import { DataViewEditorContext, DataViewEditorProps } from '../types';
 
 const IndexPatternFlyoutContentContainer = ({
   onSave,
   onCancel = () => {},
   defaultTypeIsRollup,
   requireTimestampField = false,
-}: IndexPatternEditorProps) => {
+}: DataViewEditorProps) => {
   const {
-    services: { indexPatternService, notifications },
-  } = useKibana<IndexPatternEditorContext>();
+    services: { dataViews, notifications },
+  } = useKibana<DataViewEditorContext>();
 
   const onSaveClick = async (indexPatternSpec: IndexPatternSpec) => {
     try {
-      const indexPattern = await indexPatternService.createAndSave(indexPatternSpec);
+      const indexPattern = await dataViews.createAndSave(indexPatternSpec);
 
       const message = i18n.translate('indexPatternEditor.saved', {
         defaultMessage: "Saved '{indexPatternTitle}'",

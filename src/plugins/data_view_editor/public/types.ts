@@ -17,26 +17,26 @@ import {
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { IndexPattern } from 'src/plugins/data/public';
+import type { DataView, DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
-export interface IndexPatternEditorContext {
+export interface DataViewEditorContext {
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;
   http: HttpSetup;
   notifications: NotificationsStart;
   application: ApplicationStart;
-  indexPatternService: DataPublicPluginStart['indexPatterns'];
+  dataViews: DataViewsPublicPluginStart;
   searchClient: DataPublicPluginStart['search']['search'];
 }
 
 /** @public */
-export interface IndexPatternEditorProps {
+export interface DataViewEditorProps {
   /**
    * Handler for the "save" footer button
    * @param indexPattern - newly created index pattern
    */
-  onSave: (indexPattern: IndexPattern) => void;
+  onSave: (dataView: DataView) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -55,10 +55,10 @@ export interface IndexPatternEditorProps {
 export interface PluginSetup {}
 
 export interface PluginStart {
-  openEditor(options: IndexPatternEditorProps): () => void;
-  IndexPatternEditorComponent: FC<IndexPatternEditorProps>;
+  openEditor(options: DataViewEditorProps): () => void;
+  IndexPatternEditorComponent: FC<DataViewEditorProps>;
   userPermissions: {
-    editIndexPattern: () => boolean;
+    editDataView: () => boolean;
   };
 }
 
@@ -67,6 +67,7 @@ export interface SetupPlugins {}
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export type CloseEditor = () => void;

@@ -12,7 +12,7 @@ import { managementPluginMock } from '../../management/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../data_view_field_editor/public/mocks';
-import { indexPatternEditorPluginMock } from '../../index_pattern_editor/public/mocks';
+import { indexPatternEditorPluginMock } from '../../data_view_editor/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,

@@ -13,7 +13,7 @@ import { UrlForwardingSetup } from '../../url_forwarding/public';
 
 import { ManagementSetup } from '../../management/public';
 import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
-import { IndexPatternEditorStart } from '../../index_pattern_editor/public';
+import { DataViewEditorStart } from '../../data_view_editor/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -23,7 +23,7 @@ export interface IndexPatternManagementSetupDependencies {
 export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
-  indexPatternEditor: IndexPatternEditorStart;
+  dataViewEditor: DataViewEditorStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
