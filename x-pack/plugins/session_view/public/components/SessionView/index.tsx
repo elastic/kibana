@@ -6,13 +6,22 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
-import { EuiSearchBar, EuiSearchBarOnChangeArgs, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiSearchBar,
+  EuiSearchBarOnChangeArgs,
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiSplitPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
 import { Process, ProcessEvent } from '../../hooks/use_process_tree';
+import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
 import { useStyles } from './styles';
 import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
 
@@ -44,6 +53,8 @@ interface ProcessEventResults {
 export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [data, setData] = useState<ProcessEvent[]>([]);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isDetailMounted, setIsDetailMounted] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
 
   const { http } = useKibana<CoreStart>().services;
@@ -91,10 +102,10 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
       return;
     }
 
-    const events: ProcessEvent[] = getData.events.hits.map(
+    const events: ProcessEvent[] = (getData.events?.hits || []).map(
       (event: any) => event._source as ProcessEvent
     );
-    const alerts: ProcessEvent[] = getData.alerts.hits.map((event: any) => {
+    const alerts: ProcessEvent[] = (getData.alerts?.hits || []).map((event: any) => {
       return event._source as ProcessEvent;
     });
     const all: ProcessEvent[] = events.concat(alerts).sort(sortEvents);
@@ -146,14 +157,57 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     }
   };
 
+  const renderSessionViewDetailPanel = () => {
+    if (selectedProcess && isDetailOpen) {
+      return (
+        <SessionViewDetailPanel
+          isDetailMounted={isDetailMounted}
+          height={height}
+          selectedProcess={selectedProcess}
+          setIsDetailOpen={setIsDetailOpen}
+          session={data?.[0]?.process.session}
+        />
+      );
+    }
+  };
+
+  const toggleDetailPanel = () => {
+    setIsDetailMounted(!isDetailMounted);
+    if (!isDetailOpen) {
+      setIsDetailOpen(true);
+    }
+  };
+
   if (!(isLoading || isError || data.length)) {
     return renderNoData();
   }
 
   return (
     <>
-      <EuiSearchBar query={searchQuery} onChange={onSearch} />
-      {renderProcessTree()}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiSearchBar query={searchQuery} onChange={onSearch} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={toggleDetailPanel} iconType="list" fill>
+            <FormattedMessage
+              id="xpack.sessionView.buttonOpenDetailPanel"
+              defaultMessage="Detail panel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSplitPanel.Outer
+        direction="row"
+        color="transparent"
+        borderRadius="none"
+        css={styles.outerPanel}
+      >
+        <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
+          {renderProcessTree()}
+        </EuiSplitPanel.Inner>
+        {renderSessionViewDetailPanel()}
+      </EuiSplitPanel.Outer>
     </>
   );
 };

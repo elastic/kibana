@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import uuid from 'uuid';
-import { EventAction, ProcessEvent } from '../../public/hooks/use_process_tree';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { EventAction, ProcessEvent, EventKind } from '../../public/hooks/use_process_tree';
 
 export const getStart = () => {
   return [
     {
-      '@timestamp': 'Thu Oct 14 2021 12: 06: 48 GMT-0700 (Pacific Daylight Time)',
+      '@timestamp': new Date('Thu Oct 14 2021 12: 06: 48 GMT-0700 (Pacific Daylight Time)'),
       event: {
         kind: 'event',
         category: 'process',
@@ -110,7 +110,7 @@ export const getEvent = () => {
 
   return [
     {
-      '@timestamp': 'Thu Oct 14 2021 12: 06: 52 GMT-0700 (Pacific Daylight Time)',
+      '@timestamp': new Date('Thu Oct 14 2021 12: 06: 52 GMT-0700 (Pacific Daylight Time)'),
       event: {
         kind: 'event',
         category: 'process',
@@ -187,7 +187,7 @@ export const getEvent = () => {
 export const getEnd = () => {
   return [
     {
-      '@timestamp': 'Thu Oct 14 2021 12: 07: 52 GMT-0700 (Pacific Daylight Time)',
+      '@timestamp': new Date('Thu Oct 14 2021 12: 07: 52 GMT-0700 (Pacific Daylight Time)'),
       event: {
         kind: 'event',
         category: 'process',
@@ -259,7 +259,7 @@ export const getEnd = () => {
       },
     },
     {
-      '@timestamp': 'Thu Oct 14 2021 12: 07: 56 GMT-0700 (Pacific Daylight Time)',
+      '@timestamp': new Date('Thu Oct 14 2021 12: 07: 56 GMT-0700 (Pacific Daylight Time)'),
       event: {
         kind: 'event',
         category: 'process',
@@ -333,7 +333,7 @@ export const getEnd = () => {
       },
     },
     {
-      '@timestamp': 'Thu Oct 14 2021 12: 07: 56 GMT-0700 (Pacific Daylight Time)',
+      '@timestamp': new Date('Thu Oct 14 2021 12: 07: 56 GMT-0700 (Pacific Daylight Time)'),
       event: {
         kind: 'event',
         category: 'process',
@@ -407,11 +407,11 @@ export const getEnd = () => {
       },
     },
     {
-      '@timestamp': 'Thu Oct 14 2021 12: 08: 56 GMT-0700 (Pacific Daylight Time)',
+      '@timestamp': new Date('Thu Oct 14 2021 12: 08: 56 GMT-0700 (Pacific Daylight Time)'),
       event: {
         kind: 'event',
         category: 'process',
-        action: EventAction.end,
+        action: EventAction.exit,
       },
       process: {
         args: ['df', 'nested'],
@@ -487,9 +487,9 @@ export const getEnd = () => {
 
 export const mockData: ProcessEvent[] = [
   {
-    '@timestamp': 'Thu Oct 14 2021 12: 06: 48 GMT-0700 (Pacific Daylight Time)',
+    '@timestamp': new Date('Thu Oct 14 2021 12: 06: 48 GMT-0700 (Pacific Daylight Time)'),
     event: {
-      kind: 'event',
+      kind: EventKind.event,
       category: 'process',
       action: EventAction.exec,
     },
@@ -561,9 +561,9 @@ export const mockData: ProcessEvent[] = [
     },
   },
   {
-    '@timestamp': 'Thu Oct 14 2021 12: 06: 52 GMT-0700 (Pacific Daylight Time)',
+    '@timestamp': new Date('Thu Oct 14 2021 12: 06: 52 GMT-0700 (Pacific Daylight Time)'),
     event: {
-      kind: 'event',
+      kind: EventKind.event,
       category: 'process',
       action: EventAction.exec,
     },
@@ -633,9 +633,9 @@ export const mockData: ProcessEvent[] = [
     },
   },
   {
-    '@timestamp': 'Thu Oct 14 2021 12: 07: 52 GMT-0700 (Pacific Daylight Time)',
+    '@timestamp': new Date('Thu Oct 14 2021 12: 07: 52 GMT-0700 (Pacific Daylight Time)'),
     event: {
-      kind: 'event',
+      kind: EventKind.event,
       category: 'process',
       action: EventAction.exec,
     },
@@ -705,9 +705,9 @@ export const mockData: ProcessEvent[] = [
     },
   },
   {
-    '@timestamp': 'Thu Oct 14 2021 12: 07: 56 GMT-0700 (Pacific Daylight Time)',
+    '@timestamp': new Date('Thu Oct 14 2021 12: 07: 56 GMT-0700 (Pacific Daylight Time)'),
     event: {
-      kind: 'event',
+      kind: EventKind.event,
       category: 'process',
       action: EventAction.fork,
     },
@@ -779,9 +779,9 @@ export const mockData: ProcessEvent[] = [
     },
   },
   {
-    '@timestamp': 'Thu Oct 14 2021 12: 07: 56 GMT-0700 (Pacific Daylight Time)',
+    '@timestamp': new Date('Thu Oct 14 2021 12: 07: 56 GMT-0700 (Pacific Daylight Time)'),
     event: {
-      kind: 'event',
+      kind: EventKind.event,
       category: 'process',
       action: EventAction.exec,
     },
@@ -853,11 +853,11 @@ export const mockData: ProcessEvent[] = [
     },
   },
   {
-    '@timestamp': 'Thu Oct 14 2021 12: 08: 56 GMT-0700 (Pacific Daylight Time)',
+    '@timestamp': new Date('Thu Oct 14 2021 12: 08: 56 GMT-0700 (Pacific Daylight Time)'),
     event: {
-      kind: 'event',
+      kind: EventKind.event,
       category: 'process',
-      action: EventAction.end,
+      action: EventAction.exit,
     },
     process: {
       args: ['df', 'nested'],

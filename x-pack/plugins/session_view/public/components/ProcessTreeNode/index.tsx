@@ -49,19 +49,18 @@ export function ProcessTreeNode({
 
   const processDetails = useMemo(() => {
     return process.getDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [process.events.length]);
 
   const hasExec = useMemo(() => {
     return process.hasExec();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [process.events.length]);
 
   const alerts = useMemo(() => {
     return process.getAlerts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [process.events.length]);
-
-  if (!processDetails) {
-    return null;
-  }
 
   const styles = useStyles({ depth, hasAlerts: !!alerts.length });
 
@@ -74,9 +73,14 @@ export function ProcessTreeNode({
         return `<span style="${styles.searchHighlight}">${match}</span>`;
       });
 
+      // eslint-disable-next-line no-unsanitized/property
       textRef.current.innerHTML = html;
     }
-  }, [searchMatched]);
+  }, [searchMatched, styles.searchHighlight]);
+
+  if (!processDetails) {
+    return null;
+  }
 
   const { interactive } = processDetails.process;
 

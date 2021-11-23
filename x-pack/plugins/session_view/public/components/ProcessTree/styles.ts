@@ -13,16 +13,12 @@ export const useStyles = () => {
 
   const cached = useMemo(() => {
     const defaultSelectionColor = euiTheme.colors.accent;
-    const padding = euiTheme.size.s;
 
     const scroller = `
       font-family: ${euiTheme.font.familyCode};
       overflow: auto;
       height: 100%;
       background-color: ${euiTheme.colors.lightestShade};
-      padding-top: ${padding};
-      padding-left: ${padding};
-      padding-bottom: ${padding};
       display: flex;
       flex-direction: column;
     `;
