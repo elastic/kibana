@@ -168,3 +168,31 @@ export const ALERTS_CHECKBOX_LABEL = i18n.translate(
     defaultMessage: 'Show only detection alerts',
   }
 );
+
+export const SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.successToastTitle',
+  {
+    defaultMessage: 'One or more settings require you to reload the page to take effect',
+  }
+);
+
+export const RELOAD_PAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.reloadPageTitle',
+  {
+    defaultMessage: 'Reload page',
+  }
+);
+
+export const FAILURE_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.failureToastTitle',
+  {
+    defaultMessage: 'Unable to add index pattern',
+  }
+);
+
+export const FAILURE_TOAST_TEXT = i18n.translate(
+  'xpack.securitySolution.indexPatterns.failureToastText',
+  {
+    defaultMessage: 'Something goes wrong here',
+  }
+);

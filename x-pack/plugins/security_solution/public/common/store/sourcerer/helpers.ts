@@ -33,7 +33,7 @@ export const getScopePatternListSelection = (
   }
 };
 
-const ensurePatternFormat = (patternList: string[]): string[] =>
+export const ensurePatternFormat = (patternList: string[]): string[] =>
   [
     ...new Set(
       patternList.reduce((acc: string[], pattern: string) => [...pattern.split(','), ...acc], [])
@@ -69,6 +69,54 @@ export const validateSelectedPatterns = (
       selectedDataViewId: dataView?.id ?? null,
       selectedPatterns,
       ...(isEmpty(selectedPatterns)
+        ? {
+            selectedPatterns: getScopePatternListSelection(
+              dataView ?? state.defaultDataView,
+              id,
+              state.signalIndexName,
+              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
+            ),
+          }
+        : {}),
+      loading: false,
+    },
+  };
+};
+
+export const getSelectedPatterns = (
+  state: SourcererModel,
+  payload: SelectedDataViewPayload
+): Partial<SourcererScopeById> => {
+  const { id, ...rest } = payload;
+
+  const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
+  // dedupe because these could come from a silly url or pre 8.0 timeline
+  const dedupePatterns = ensurePatternFormat(rest.selectedPatterns);
+
+  const selectedPatterns =
+    dataView != null
+      ? dedupePatterns.filter(
+          (pattern) =>
+            // Typescript is being mean and telling me dataView could be undefined here
+            // so redoing the dataView != null check
+            (dataView != null && dataView.patternList.includes(pattern)) ||
+            // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
+            state.signalIndexName == null ||
+            state.signalIndexName === pattern
+        )
+      : // 7.16 -> 8.0 this will get hit because dataView == null
+        dedupePatterns;
+  const missingPatterns = dedupePatterns.filter(
+    (pattern) => state?.defaultDataView?.title.indexOf(pattern) === -1
+  );
+  const newSelectedPatterns = [...selectedPatterns, ...missingPatterns];
+  return {
+    [id]: {
+      ...state.sourcererScopes[id],
+      ...rest,
+      selectedDataViewId: dataView?.id ?? null,
+      selectedPatterns: newSelectedPatterns,
+      ...(isEmpty(newSelectedPatterns)
         ? {
             selectedPatterns: getScopePatternListSelection(
               dataView ?? state.defaultDataView,

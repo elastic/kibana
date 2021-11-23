@@ -40,5 +40,6 @@ export interface SelectedDataViewPayload {
   id: SourcererScopeName;
   selectedDataViewId: SelectedDataView['dataViewId'];
   selectedPatterns: SelectedDataView['selectedPatterns'];
+  shouldValidateSelectedPatterns?: boolean;
 }
 export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');

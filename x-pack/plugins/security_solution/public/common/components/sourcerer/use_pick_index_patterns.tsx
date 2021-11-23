@@ -17,6 +17,7 @@ interface UsePickIndexPatternsProps {
   defaultDataViewId: string;
   isOnlyDetectionAlerts: boolean;
   kibanaDataViews: sourcererModel.SourcererModel['kibanaDataViews'];
+  missingPatterns: string[];
   scopeId: sourcererModel.SourcererScopeName;
   selectedPatterns: string[];
   signalIndexName: string | null;
@@ -45,6 +46,7 @@ export const usePickIndexPatterns = ({
   defaultDataViewId,
   isOnlyDetectionAlerts,
   kibanaDataViews,
+  missingPatterns,
   scopeId,
   selectedPatterns,
   signalIndexName,
@@ -68,25 +70,30 @@ export const usePickIndexPatterns = ({
     return scopeId === sourcererModel.SourcererScopeName.default
       ? {
           patternList: getPatternListWithoutSignals(
-            theDataView.title
-              .split(',')
+            [...theDataView.title.split(','), ...missingPatterns]
               // remove duplicates patterns from selector
               .filter((pattern, i, self) => self.indexOf(pattern) === i),
             signalIndexName
           ),
           selectablePatterns: getPatternListWithoutSignals(
-            theDataView.patternList,
+            [...theDataView.patternList, ...missingPatterns],
             signalIndexName
           ),
         }
       : {
-          patternList: theDataView.title
-            .split(',')
+          patternList: [...theDataView.title.split(','), ...missingPatterns]
             // remove duplicates patterns from selector
             .filter((pattern, i, self) => self.indexOf(pattern) === i),
-          selectablePatterns: theDataView.patternList,
+          selectablePatterns: [...theDataView.patternList, ...missingPatterns],
         };
-  }, [dataViewId, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]);
+  }, [
+    dataViewId,
+    isOnlyDetectionAlerts,
+    kibanaDataViews,
+    missingPatterns,
+    scopeId,
+    signalIndexName,
+  ]);
 
   const selectableOptions = useMemo(
     () => patternListToOptions(patternList, selectablePatterns),

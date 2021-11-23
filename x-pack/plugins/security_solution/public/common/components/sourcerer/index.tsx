@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
@@ -40,15 +41,25 @@ import {
 } from './helpers';
 import { DeprecatedSourcerer } from './deprecated';
 import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
+import { useKibana } from '../../lib/kibana';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { ensurePatternFormat } from '../../store/sourcerer/helpers';
 
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
 
+const StyledRefreshButton = styled(EuiButton)`
+  float: right;
+`;
+
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
+  const { uiSettings } = useKibana().services;
 
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
@@ -67,7 +78,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewId, setDataViewId] = useState<string | null>(selectedDataViewId);
-
+  const { addSuccess, addError } = useAppToasts();
+  const missingPatterns = selectedPatterns.filter(
+    (pattern) => defaultDataView.title.indexOf(pattern) === -1
+  );
   const {
     isModified,
     onChangeCombo,
@@ -80,6 +94,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     defaultDataViewId: defaultDataView.id,
     isOnlyDetectionAlerts,
     kibanaDataViews,
+    missingPatterns,
     scopeId,
     selectedPatterns,
     signalIndexName,
@@ -102,12 +117,17 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setExpandAdvancedOptions(false); // we always want setExpandAdvancedOptions collapsed by default when popover opened
   }, []);
   const onChangeDataView = useCallback(
-    (newSelectedDataView: string, newSelectedPatterns: string[]) => {
+    (
+      newSelectedDataView: string,
+      newSelectedPatterns: string[],
+      shouldValidateSelectedPatterns?: boolean
+    ) => {
       dispatch(
         sourcererActions.setSelectedDataView({
           id: scopeId,
           selectedDataViewId: newSelectedDataView,
           selectedPatterns: newSelectedPatterns,
+          shouldValidateSelectedPatterns,
         })
       );
     },
@@ -153,9 +173,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, [defaultDataView.id, defaultDataView.patternList, onChangeDataView, selectedPatterns]);
 
   const onUpdateDeprecated = useCallback(() => {
-    const missingPatterns = selectedPatterns.filter(
-      (pattern) => defaultDataView.title.indexOf(pattern) === -1
-    );
     // are all the patterns in the default?
     if (missingPatterns.length === 0) {
       onContinueUpdateDeprecated();
@@ -164,24 +181,58 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       setIsShowingUpdateModal(true);
       setMissingIndexPatterns(missingPatterns);
     }
-  }, [defaultDataView.title, onContinueUpdateDeprecated, selectedPatterns]);
+  }, [missingPatterns, onContinueUpdateDeprecated]);
 
-  const onUpdateDataView = useCallback(() => {
+  const onPageReload = useCallback(() => {
+    document.location.reload();
+  }, []);
+
+  const onUpdateDataView = useCallback(async () => {
     // @Angela this is where your work is for "Add index pattern"
     // update ui settings string
     // uiSetttings.get(DEFAULT_INDEX_KEY)
     // uiSettings.set(DEFAULT_INDEX_KEY, [...old, ...new])
     // close modal and sourcerer
+
+    const defaultIndex = await uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+    const newSelectedOptions = [...defaultIndex, ...missingIndexPatterns];
+    const isSuccess = await uiSettings.set(
+      DEFAULT_INDEX_KEY,
+      ensurePatternFormat(newSelectedOptions)
+    );
+
     setIsShowingUpdateModal(false);
     setPopoverIsOpen(false);
     // make alternate onChangeDataView/setSelectedDataView that does NOT validate, validation will happen after refresh
     // but technically sourcerer is in a "wrong" state until the refresh happens.
-    // onChangeDataView(defaultDataView.id, selectedPatterns);
-    // openToast() to refresh page
-
-    // show toaster to refresh page when confirmed
-    // that ui settings update was successful
-  }, []);
+    if (isSuccess) {
+      onChangeDataView(defaultDataView.id, newSelectedOptions, false);
+      // openToast() to refresh page
+      // show toaster to refresh page when confirmed
+      // that ui settings update was successful
+      addSuccess({
+        color: 'success',
+        title: toMountPoint(i18n.SUCCESS_TOAST_TITLE),
+        text: toMountPoint(
+          <StyledRefreshButton onClick={onPageReload}>{i18n.RELOAD_PAGE_TITLE}</StyledRefreshButton>
+        ),
+        toastLifeTimeMs: 600000,
+      });
+    } else {
+      addError(new Error(i18n.FAILURE_TOAST_TITLE), {
+        title: i18n.FAILURE_TOAST_TITLE,
+        toastMessage: i18n.FAILURE_TOAST_TEXT,
+      });
+    }
+  }, [
+    addError,
+    addSuccess,
+    defaultDataView.id,
+    missingIndexPatterns,
+    onChangeDataView,
+    onPageReload,
+    uiSettings,
+  ]);
 
   const trigger = useMemo(
     () => (

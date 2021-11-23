@@ -16,7 +16,7 @@ import {
   setDataViewLoading,
 } from './actions';
 import { initDataView, initialSourcererState, SourcererModel, SourcererScopeName } from './model';
-import { validateSelectedPatterns } from './helpers';
+import { getSelectedPatterns, validateSelectedPatterns } from './helpers';
 
 export type SourcererState = SourcererModel;
 
@@ -72,13 +72,18 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
           }),
     },
   }))
-  .case(setSelectedDataView, (state, payload) => ({
-    ...state,
-    sourcererScopes: {
-      ...state.sourcererScopes,
-      ...validateSelectedPatterns(state, payload),
-    },
-  }))
+  .case(setSelectedDataView, (state, payload) => {
+    const { shouldValidateSelectedPatterns = true, ...patternsInfo } = payload;
+    return {
+      ...state,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        ...(shouldValidateSelectedPatterns
+          ? validateSelectedPatterns(state, patternsInfo)
+          : getSelectedPatterns(state, patternsInfo)),
+      },
+    };
+  })
   .case(setDataView, (state, dataView) => ({
     ...state,
     ...(dataView.id === state.defaultDataView.id
