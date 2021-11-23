@@ -273,6 +273,7 @@ export function TransactionDistributionChart({
               // We can safely do this because all transaction values above 0 are without decimal points anyway.
               // An update for Elastic Charts is in the works to be able to customize the above "fit"
               // attribute. Once that is available we can get rid of the full workaround.
+              // Elastic Charts issue: https://github.com/elastic/elastic-charts/issues/1489
               tickFormat={(p) => `${Math.round(p)}`}
             />
           ))}
