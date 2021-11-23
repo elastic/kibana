@@ -7,7 +7,6 @@
  */
 
 import _ from 'lodash';
-import { produce } from 'immer';
 import type {
   SavedObjectsFindOptionsReference,
   SavedObjectsFindOptions,
