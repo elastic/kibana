@@ -1,4 +1,4 @@
-[[index-patterns-runtime-field-api-get]]
+[[data-views-runtime-field-api-get]]
 === Get runtime field API
 ++++
 <titleabbrev>Get runtime field</titleabbrev>
