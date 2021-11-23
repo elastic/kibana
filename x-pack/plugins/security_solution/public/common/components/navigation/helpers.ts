@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import { Location } from 'history';
 
+import type { Filter, Query } from '@kbn/es-query';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from '../url_state/constants';
@@ -17,7 +18,6 @@ import {
   replaceStateKeyInQueryString,
   getQueryStringFromLocation,
 } from '../url_state/helpers';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 
 import { SearchNavTab } from './types';
 import { SourcererUrlState } from '../../store/sourcerer/model';

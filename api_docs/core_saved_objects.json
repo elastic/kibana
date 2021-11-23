@@ -9732,12 +9732,20 @@
           {
             "parentPluginId": "core",
             "id": "def-server.SavedObjectMigrationMap.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[version: string]: SavedObjectMigrationFn<any, any>",
             "description": [],
             "signature": [
-              "any"
+              "[version: string]:  ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectMigrationFn",
+                "text": "SavedObjectMigrationFn"
+              },
+              "<any, any>"
             ],
             "path": "src/core/server/saved_objects/migrations/types.ts",
             "deprecated": false
@@ -13249,12 +13257,19 @@
           {
             "parentPluginId": "core",
             "id": "def-server.SavedObjectsMappingProperties.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[field: string]: SavedObjectsFieldMapping",
             "description": [],
             "signature": [
-              "any"
+              "[field: string]:  ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFieldMapping",
+                "text": "SavedObjectsFieldMapping"
+              }
             ],
             "path": "src/core/server/saved_objects/mappings/types.ts",
             "deprecated": false
@@ -15482,7 +15497,7 @@
           },
           "<T> extends Pick<",
           "SavedObject",
-          "<T>, \"type\" | \"id\" | \"version\" | \"namespaces\" | \"migrationVersion\" | \"coreMigrationVersion\" | \"error\" | \"updated_at\" | \"originId\">"
+          "<T>, \"version\" | \"type\" | \"id\" | \"namespaces\" | \"migrationVersion\" | \"coreMigrationVersion\" | \"error\" | \"updated_at\" | \"originId\">"
         ],
         "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
         "deprecated": false,

@@ -27,7 +27,13 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
   public readonly isContainerType = true;
   public readonly type = CONTROL_GROUP_TYPE;
 
-  constructor(private persistableStateService: EmbeddablePersistableStateService) {}
+  public inject: EmbeddablePersistableStateService['inject'];
+  public extract: EmbeddablePersistableStateService['extract'];
+
+  constructor(private persistableStateService: EmbeddablePersistableStateService) {
+    this.inject = createControlGroupInject(this.persistableStateService);
+    this.extract = createControlGroupExtract(this.persistableStateService);
+  }
 
   public isEditable = async () => false;
 
@@ -50,7 +56,4 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
     const { ControlGroupContainer } = await import('./control_group_container');
     return new ControlGroupContainer(initialInput, parent);
   };
-
-  public inject = createControlGroupInject(this.persistableStateService);
-  public extract = createControlGroupExtract(this.persistableStateService);
 }

@@ -16,7 +16,7 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText, EuiTabs, EuiTab, EuiCallOut } from '@elastic/eui';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import { useDebouncedValue } from '../../shared_components';
 
 export const formulaOperationName = 'formula';
@@ -161,7 +161,12 @@ export const DimensionEditorTabs = ({ tabs }: { tabs: DimensionEditorTab[] }) =>
     >
       {tabs.map(({ id, enabled, state, onClick, label }) => {
         return enabled ? (
-          <EuiTab isSelected={state} data-test-subj={`lens-dimensionTabs-${id}`} onClick={onClick}>
+          <EuiTab
+            key={id}
+            isSelected={state}
+            data-test-subj={`lens-dimensionTabs-${id}`}
+            onClick={onClick}
+          >
             {label}
           </EuiTab>
         ) : null;
@@ -171,7 +176,7 @@ export const DimensionEditorTabs = ({ tabs }: { tabs: DimensionEditorTab[] }) =>
 };
 
 export function getErrorMessage(
-  selectedColumn: IndexPatternColumn | undefined,
+  selectedColumn: GenericIndexPatternColumn | undefined,
   incompleteOperation: boolean,
   input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
   fieldInvalid: boolean
