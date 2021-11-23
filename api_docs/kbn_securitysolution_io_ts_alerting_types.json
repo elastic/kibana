@@ -35,12 +35,19 @@
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-alerting-types",
             "id": "def-common.SavedObjectAttributes.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string}]: SavedObjectAttribute",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-alerting-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsAlertingTypesPluginApi",
+                "section": "def-common.SavedObjectAttribute",
+                "text": "SavedObjectAttribute"
+              }
             ],
             "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
             "deprecated": false
