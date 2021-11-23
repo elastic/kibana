@@ -2,16 +2,7 @@
 == Add data
 
 The best way to add data to the Elastic Stack is to use one of our many integrations.
-Alternatively, you can add a sample data set or upload a file.
-
-[float]
-[[add-an-integration]]
-=== Add an integration
-
-Integrations are a way to add logs, metrics, traces,
-content, and more from your apps, endpoints, infrastructure, cloud, network,
-workplace tools, and other common sources in your ecosystem. All
-integrations are available in a single view, and
+All integrations are available in a single view, and
 {kib} guides you there from the Welcome screen and home page.
 
 [role="screenshot"]
@@ -24,82 +15,78 @@ To switch to a
 Beats integration, use the filter on the bottom left.
 
 [float]
-==== Secure your data
-
-Collect security events and threat intelligence with Filebeat,
-Auditbeat, Winlogbeat, Packetbeat, and Elastic Agent.
-Install the Endpoint Security integration for Elastic Agent to
-protect your hosts with threat detection and prevention.
-
-[float]
-==== Observe your data
-
-Get logs, metrics, and uptime data into the Elastic Stack.
-Integrations are available for popular services and platforms,
-such as Nginx, AWS, and MongoDB,
-and generic input types like log files.
-Refer to {observability-guide}/observability-introduction.html[What is Elastic Observability] for more information.
-
-[float]
-==== Search your data
+=== Search your data
 Discover, extract, and index your web content into App Search engines using the
 {app-search-ref}/web-crawler.html[Enterprise Search web crawler].
 Search across Google Drive, GitHub, Salesforce, and many other web services using
 {workplace-search-ref}/workplace-search-content-sources.html[Workplace Search content sources].
 
 [float]
-==== Language clients
+=== Observe your data
+
+Get logs, metrics, traces, and uptime data into the Elastic Stack.
+Integrations are available for popular services and platforms,
+such as Nginx, AWS, and MongoDB,
+and generic input types like log files.
+Refer to {observability-guide}/observability-introduction.html[What is Elastic Observability] for more information.
+
+[float]
+=== Secure your data
+
+Collect security events and threat intelligence with Filebeat,
+Auditbeat, Winlogbeat, Packetbeat, and Elastic Agent.
+Install the Endpoint Security integration for Elastic Agent
+to protect your hosts with threat detection and prevention.
+Refer to {security-guide}/ingest-data.html[Ingest data to Elastic Security] for more information.
+
+[float]
+=== Build on your data
 
 Elastic provides
 https://www.elastic.co/guide/en/elasticsearch/client/index.html[libraries for several programming languages] that
 allow you to connect your code directly to your {es} Service deployment.
 If you are running {kib} on our hosted {es} Service,
-click *View deployment details* to verify your {es} endpoint, Cloud ID, and API key authentication methods.
+click *View deployment details* on the *Integrations* view
+to verify your {es} endpoint and Cloud ID, and create API keys for integestion.
 
 [float]
-=== Add sample data
+=== Get sample data
 
 Sample data sets come with sample visualizations, dashboards, and more to help you
 explore {kib} before you ingest or upload your own data.
+In the *Integrations* view, search for *sample*, and then add the type of
+data you want.
 
-. On the home page, click *Try sample data*.
-
-. Click *Add data* for the type of data that you want to add.
-+
 [role="screenshot"]
 image::images/add-sample-data.png[eCommerce, flights, and web logs sample data sets that you can explore in Kibana]
 
 [discrete]
 [[upload-data-kibana]]
-=== Upload a file
+=== Upload your data
 
 If you have a log file or delimited CSV, TSV, or JSON file, you can upload it,
 view its fields and metrics, and optionally import it into {es}.
+In the *Integrations* view, search for *upload*, and then
+click *Upload a file*.
+By default, you can upload a file up to 100 MB. This value is configurable up to 1 GB in
+<<fileupload-maxfilesize,Advanced Settings>>.
 
 NOTE: The upload feature is not intended for use as part of a repeated production
 process, but rather for the initial exploration of your data.
 
-Required privileges:
-
-* `Data Views Management: All` {kib} feature privileges
-* `all` {kib} privileges for *Discover*
-* `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
-* `create`, `create_index`, `manage`, and `read` index privileges for the index
-
-To upload a file:
-
-. On the home page, click **Upload a file**.
-
-. Drop your file on the target.
-+
-By default, you can upload a file up to 100 MB. This value is configurable up to 1 GB in
-<<fileupload-maxfilesize,Advanced Settings>>.
-+
 [role="screenshot"]
 image::images/add-data-fv.png[Uploading a file in {kib}]
 
-. To upload a file with geospatial
-data, refer to <<import-geospatial-data,Import geospatial data>>.
+The {stack-security-features} provide roles and privileges that control which
+users can upload files. To upload a file in {kib} and import it into an {es}
+index, you'll need:
+
+* `all` {kib} privileges for *Discover*
+* `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
+* `create`, `create_index`, `manage`, and `read` index privileges for the index
+* `Data Views Management: All` {kib} feature privileges
+
+You can manage your roles, privileges, and spaces in **{stack-manage-app}**.
 
 [discrete]
 === What's next?
