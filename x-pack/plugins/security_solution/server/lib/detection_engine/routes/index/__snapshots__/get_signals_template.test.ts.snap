@@ -147,6 +147,10 @@ Object {
       "path": "signal.rule.enabled",
       "type": "alias",
     },
+    "kibana.alert.rule.execution.uuid": Object {
+      "path": "signal.rule.execution.uuid",
+      "type": "alias",
+    },
     "kibana.alert.rule.false_positives": Object {
       "path": "signal.rule.false_positives",
       "type": "alias",
@@ -613,7 +617,7 @@ Object {
     "mappings": Object {
       "_meta": Object {
         "aliases_version": 1,
-        "version": 57,
+        "version": 67,
       },
       "dynamic": false,
       "properties": Object {
@@ -2428,6 +2432,10 @@ Object {
         },
         "kibana.alert.rule.enabled": Object {
           "path": "signal.rule.enabled",
+          "type": "alias",
+        },
+        "kibana.alert.rule.execution.uuid": Object {
+          "path": "signal.rule.execution.uuid",
           "type": "alias",
         },
         "kibana.alert.rule.false_positives": Object {
@@ -4291,6 +4299,13 @@ Object {
                 },
                 "enabled": Object {
                   "type": "keyword",
+                },
+                "execution": Object {
+                  "properties": Object {
+                    "uuid": Object {
+                      "type": "keyword",
+                    },
+                  },
                 },
                 "false_positives": Object {
                   "type": "keyword",
@@ -6348,6 +6363,6 @@ Object {
       },
     },
   },
-  "version": 57,
+  "version": 67,
 }
 `;
