@@ -76,6 +76,11 @@ jest.mock('../../../../../contexts/kibana', () => ({
     },
   }),
   useNavigateToPath: () => mockNavigateToPath,
+  useNotifications: () => {
+    return {
+      toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError: jest.fn() },
+    };
+  },
 }));
 
 jest.mock('../../../../../util/index_utils', () => {
