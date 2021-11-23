@@ -33,7 +33,10 @@ export const usePreviewHistogram = ({
   query,
 }: PreviewHistogramParams) => {
   const { uiSettings } = useKibana().services;
-  const { query: queryString, filters } = query;
+  const {
+    query: { query: queryString, language },
+    filters,
+  } = query;
 
   const [filterQuery, error] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
@@ -48,7 +51,7 @@ export const usePreviewHistogram = ({
     },
     queries: [
       { query: `signal.rule.id:${previewId}`, language: 'kuery' },
-      { query: queryString, language: 'kuery' },
+      { query: queryString, language },
     ],
     filters,
   });
