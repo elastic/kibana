@@ -144,20 +144,17 @@ async function getPaginatedThroughputData(
           try {
             const data = await getMetrics(
               req,
-              indexPatterns,
+              moduleType,
               [throughputMetric],
               [
                 {
                   bool: {
                     should: [
+                      { term: { 'data_stream.type': 'metrics' } },
+                      { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
                       {
                         term: {
                           type: 'logstash_stats',
-                        },
-                      },
-                      {
-                        term: {
-                          'metricset.name': 'stats',
                         },
                       },
                     ],
@@ -217,7 +214,11 @@ async function getPaginatedNodesData(
     [
       {
         bool: {
-          should: [{ term: { type: 'logstash_stats' } }, { term: { 'metricset.name': 'stats' } }],
+          should: [
+            { term: { 'data_stream.type': 'metrics' } },
+            { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+            { term: { type: 'logstash_stats' } },
+          ],
         },
       },
     ],
@@ -246,25 +247,8 @@ async function getPipelines({
   throughputMetric: PipelineThroughputMetricKey;
   nodesCountMetric: PipelineNodeCountMetricKey;
 }): Promise<PipelineWithMetrics[]> {
-  const dataset = 'node_stats';
-  const moduleType = 'logstash';
-  const indexPatterns = getNewIndexPatterns({
-    req,
-    moduleType,
-    datasets: [dataset],
-  });
-  const throughputPipelines = await getThroughputPipelines(
-    req,
-    indexPatterns,
-    pipelines,
-    throughputMetric
-  );
-  const nodeCountPipelines = await getNodePipelines(
-    req,
-    indexPatterns,
-    pipelines,
-    nodesCountMetric
-  );
+  const throughputPipelines = await getThroughputPipelines(req, pipelines, throughputMetric);
+  const nodeCountPipelines = await getNodePipelines(req, pipelines, nodesCountMetric);
   const finalPipelines = pipelines.map(({ id }) => {
     const matchThroughputPipeline = throughputPipelines.find((p) => p.id === id);
     const matchNodesCountPipeline = nodeCountPipelines.find((p) => p.id === id);
@@ -287,30 +271,33 @@ async function getPipelines({
 
 async function getThroughputPipelines(
   req: LegacyRequest,
-  lsIndexPattern: string,
   pipelines: Pipeline[],
   throughputMetric: string
 ): Promise<PipelineWithMetrics[]> {
+  const dataset = 'node_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    req,
+    moduleType,
+    datasets: [dataset],
+  });
   const metricsResponse = await Promise.all(
     pipelines.map((pipeline) => {
       return new Promise(async (resolve, reject) => {
         try {
           const data = await getMetrics(
             req,
-            lsIndexPattern,
+            moduleType,
             [throughputMetric],
             [
               {
                 bool: {
                   should: [
+                    { term: { 'data_stream.type': 'metrics' } },
+                    { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
                     {
                       term: {
                         type: 'logstash_stats',
-                      },
-                    },
-                    {
-                      term: {
-                        'metricset.name': 'stats',
                       },
                     },
                   ],
@@ -333,18 +320,23 @@ async function getThroughputPipelines(
 
 async function getNodePipelines(
   req: LegacyRequest,
-  lsIndexPattern: string,
   pipelines: Pipeline[],
   nodesCountMetric: string
 ): Promise<PipelineWithMetrics[]> {
+  const moduleType = 'logstash';
+  const dataset = 'node_stats';
   const metricData = await getMetrics(
     req,
-    lsIndexPattern,
+    moduleType,
     [nodesCountMetric],
     [
       {
         bool: {
-          should: [{ term: { type: 'logstash_stats' } }, { term: { 'metricset.name': 'stats' } }],
+          should: [
+            { term: { 'data_stream.type': 'metrics' } },
+            { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+            { term: { type: 'logstash_stats' } },
+          ],
         },
       },
     ],

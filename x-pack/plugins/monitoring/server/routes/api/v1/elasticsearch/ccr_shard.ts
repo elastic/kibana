@@ -16,6 +16,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
 import { LegacyRequest } from '../../../../types';
+import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 
 function getFormattedLeaderIndex(leaderIndex: string) {
   let leader = leaderIndex;
@@ -102,23 +103,20 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
       const index = req.params.index;
       const shardId = req.params.shardId;
       const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const moduleType = 'elasticsearch';
+      const dataset = 'ccr';
+      const esIndexPattern = getNewIndexPatterns({ req, moduleType, datasets: [dataset] });
 
       const filters = [
         {
           bool: {
             should: [
+              { term: { 'data_stream.type': 'metrics' } },
+              { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
               {
                 term: {
                   type: {
                     value: 'ccr_stats',
-                  },
-                },
-              },
-              {
-                term: {
-                  'metricset.name': {
-                    value: 'ccr',
                   },
                 },
               },
@@ -145,14 +143,14 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
         const [metrics, ccrResponse]: [unknown, ElasticsearchResponse] = await Promise.all([
           getMetrics(
             req,
-            esIndexPattern,
+            'elasticsearch',
             [
               { keys: ['ccr_sync_lag_time'], name: 'ccr_sync_lag_time' },
               { keys: ['ccr_sync_lag_ops'], name: 'ccr_sync_lag_ops' },
             ],
             filters
           ),
-          getCcrStat(req, esIndexPattern, filters),
+          getCcrStat(req, filters),
         ]);
 
         const legacyStat = ccrResponse.hits?.hits[0]?._source.ccr_stats;

@@ -21,7 +21,7 @@ jest.mock('./get_node_ids', () => ({
 }));
 
 jest.mock('../../../details/get_metrics', () => ({
-  getNewMetrics: () => {
+  getMetrics: () => {
     return {
       foo: [
         [

@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
-import { getNewMetrics } from '../../../../lib/details/get_metrics';
+import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
@@ -41,7 +41,6 @@ export function esIndexRoute(server) {
     handler: async (req) => {
       try {
         const config = server.config();
-        const ccs = req.payload.ccs;
         const clusterUuid = req.params.clusterUuid;
         const indexUuid = req.params.id;
         const start = req.payload.timeRange.min;
@@ -69,13 +68,9 @@ export function esIndexRoute(server) {
           start,
           end,
         });
-        const metrics = await getNewMetrics(
-          req,
-          'elasticsearch',
-          metricSet,
-          [{ term: { 'index_stats.index': indexUuid } }],
-          ccs
-        );
+        const metrics = await getMetrics(req, 'elasticsearch', metricSet, [
+          { term: { 'index_stats.index': indexUuid } },
+        ]);
 
         let logs;
         let shardAllocation;

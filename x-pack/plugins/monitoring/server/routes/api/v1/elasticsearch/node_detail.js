@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardStats, getShardAllocation } from '../../../../lib/elasticsearch/shards';
-import { getNewMetrics } from '../../../../lib/details/get_metrics';
+import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
@@ -92,13 +92,9 @@ export function esNodeRoute(server) {
           start,
           end,
         });
-        const metrics = await getNewMetrics(
-          req,
-          'elasticsearch',
-          metricSet,
-          [{ term: { 'source_node.uuid': nodeUuid } }],
-          ccs
-        );
+        const metrics = await getMetrics(req, 'elasticsearch', metricSet, [
+          { term: { 'source_node.uuid': nodeUuid } },
+        ]);
         let logs;
         let shardAllocation;
         if (!isAdvanced) {

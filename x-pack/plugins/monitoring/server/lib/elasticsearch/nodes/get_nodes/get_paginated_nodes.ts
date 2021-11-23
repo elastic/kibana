@@ -12,7 +12,7 @@ import { filter } from '../../../pagination/filter';
 import { sortNodes } from './sort_nodes';
 // @ts-ignore
 import { paginate } from '../../../pagination/paginate';
-import { getNewMetrics } from '../../../details/get_metrics';
+import { getMetrics } from '../../../details/get_metrics';
 import { LegacyRequest } from '../../../../types';
 
 /**
@@ -84,7 +84,7 @@ export async function getPaginatedNodes(
     include: nodes.map((node) => node.uuid),
     size: config.get('monitoring.ui.max_bucket_size'),
   };
-  const metricSeriesData = await getNewMetrics(
+  const metricSeriesData = await getMetrics(
     req,
     'elasticsearch',
     metricSet,

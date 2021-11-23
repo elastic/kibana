@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getLastRecovery } from '../../../../lib/elasticsearch/get_last_recovery';
-import { getNewMetrics } from '../../../../lib/details/get_metrics';
+import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_overview';
@@ -36,7 +36,6 @@ export function esOverviewRoute(server) {
     },
     async handler(req) {
       const config = server.config();
-      const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const filebeatIndexPattern = prefixIndexPattern(
         config,
@@ -51,7 +50,7 @@ export function esOverviewRoute(server) {
       try {
         const [clusterStats, metrics, shardActivity, logs] = await Promise.all([
           getClusterStats(req, clusterUuid),
-          getNewMetrics(req, 'elasticsearch', metricSet, ccs),
+          getMetrics(req, 'elasticsearch', metricSet),
           getLastRecovery(req, config.get('monitoring.ui.max_bucket_size')),
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
         ]);

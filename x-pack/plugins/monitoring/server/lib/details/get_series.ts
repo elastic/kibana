@@ -114,88 +114,6 @@ function createMetricAggs(metric: Metric) {
 
 async function fetchSeries(
   req: LegacyRequest,
-  indexPattern: string,
-  metric: Metric,
-  metricOptions: any,
-  groupBy: string | Record<string, any> | null,
-  min: string | number,
-  max: string | number,
-  bucketSize: number,
-  filters: Array<Record<string, any>>
-) {
-  // if we're using a derivative metric, offset the min (also @see comment on offsetMinForDerivativeMetric function)
-  const adjustedMin = metric.derivative
-    ? offsetMinForDerivativeMetric(Number(min), bucketSize)
-    : Number(min);
-
-  let dateHistogramSubAggs = null;
-  if (metric.getDateHistogramSubAggs) {
-    dateHistogramSubAggs = metric.getDateHistogramSubAggs(metricOptions);
-  } else if (metric.dateHistogramSubAggs) {
-    dateHistogramSubAggs = metric.dateHistogramSubAggs;
-  } else {
-    dateHistogramSubAggs = {
-      metric: {
-        [metric.metricAgg]: {
-          field: metric.field,
-        },
-      },
-      ...createMetricAggs(metric),
-    };
-    if (metric.mbField) {
-      Reflect.set(dateHistogramSubAggs, 'metric_mb', {
-        [metric.metricAgg]: {
-          field: metric.mbField,
-        },
-      });
-    }
-  }
-
-  let aggs: any = {
-    check: {
-      date_histogram: {
-        field: metric.timestampField,
-        fixed_interval: bucketSize + 's',
-      },
-      aggs: {
-        ...dateHistogramSubAggs,
-      },
-    },
-  };
-
-  if (groupBy) {
-    aggs = {
-      groupBy: {
-        terms: groupBy,
-        aggs,
-      },
-    };
-  }
-
-  const params = {
-    index: indexPattern,
-    size: 0,
-    ignore_unavailable: true,
-    body: {
-      query: createQuery({
-        start: adjustedMin,
-        end: Number(max),
-        metric,
-        clusterUuid: req.params.clusterUuid,
-        // TODO: Pass in the UUID as an explicit function parameter
-        uuid: getUuid(req, metric),
-        filters,
-      }),
-      aggs,
-    },
-  };
-
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return await callWithRequest(req, 'search', params);
-}
-
-async function fetchNewSeries(
-  req: LegacyRequest,
   moduleType: string,
   metric: Metric,
   metricOptions: any,
@@ -409,47 +327,13 @@ function handleSeries(
  * TODO: This should be expanded to accept multiple metrics in a single request to allow a single date histogram to be used.
  *
  * @param {Object} req The incoming user's request.
- * @param {String} indexPattern The relevant index pattern (not just for Elasticsearch!).
+ * @param {String} moduleType The relevant module eg: elasticsearch, kibana, logstash.
  * @param {String} metricName The name of the metric being plotted.
  * @param {Array} filters Any filters that should be applied to the query.
  * @return {Promise} The object response containing the {@code timeRange}, {@code metric}, and {@code data}.
  */
+
 export async function getSeries(
-  req: LegacyRequest,
-  indexPattern: string,
-  metricName: string,
-  metricOptions: Record<string, any>,
-  filters: Array<Record<string, any>>,
-  groupBy: string | Record<string, any> | null,
-  {
-    min,
-    max,
-    bucketSize,
-    timezone,
-  }: { min: string | number; max: string | number; bucketSize: number; timezone: string }
-) {
-  checkParam(indexPattern, 'indexPattern in details/getSeries');
-
-  const metric = metrics[metricName];
-  if (!metric) {
-    throw new Error(`Not a valid metric: ${metricName}`);
-  }
-  const response = await fetchSeries(
-    req,
-    indexPattern,
-    metric,
-    metricOptions,
-    groupBy,
-    min,
-    max,
-    bucketSize,
-    filters
-  );
-
-  return handleSeries(metric, groupBy, min, max, bucketSize, timezone, response);
-}
-
-export async function getNewSeries(
   req: LegacyRequest,
   moduleType: string,
   metricName: string,
@@ -469,7 +353,7 @@ export async function getNewSeries(
   if (!metric) {
     throw new Error(`Not a valid metric: ${metricName}`);
   }
-  const response = await fetchNewSeries(
+  const response = await fetchSeries(
     req,
     moduleType,
     metric,

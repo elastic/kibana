@@ -59,27 +59,25 @@ function getMockReq(metricsBuckets = []) {
   };
 }
 
-const indexPattern = [];
-
 describe('getMetrics and getSeries', () => {
   it('should return metrics with non-derivative metric', async () => {
     const req = getMockReq(nonDerivMetricsBuckets);
     const metricSet = ['node_cpu_utilization'];
-    const result = await getMetrics(req, indexPattern, metricSet);
+    const result = await getMetrics(req, 'elasticsearch', metricSet);
     expect(result).toMatchSnapshot();
   });
 
   it('should return metrics with derivative metric', async () => {
     const req = getMockReq(derivMetricsBuckets);
     const metricSet = ['cluster_search_request_rate'];
-    const result = await getMetrics(req, indexPattern, metricSet);
+    const result = await getMetrics(req, 'elasticsearch', metricSet);
     expect(result).toMatchSnapshot();
   });
 
   it('should return metrics with metric containing custom aggs', async () => {
     const req = getMockReq(aggMetricsBuckets);
     const metricSet = ['cluster_index_latency'];
-    const result = await getMetrics(req, indexPattern, metricSet);
+    const result = await getMetrics(req, 'elasticsearch', metricSet);
     expect(result).toMatchSnapshot();
   });
 
@@ -91,14 +89,14 @@ describe('getMetrics and getSeries', () => {
         keys: ['index_mem_fixed_bit_set', 'index_mem_versions'],
       },
     ];
-    const result = await getMetrics(req, indexPattern, metricSet);
+    const result = await getMetrics(req, 'elasticsearch', metricSet);
     expect(result).toMatchSnapshot();
   });
 
   it('should return metrics with metric that uses default calculation', async () => {
     const req = getMockReq(nonDerivMetricsBuckets);
     const metricSet = ['kibana_max_response_times'];
-    const result = await getMetrics(req, indexPattern, metricSet);
+    const result = await getMetrics(req, 'elasticsearch', metricSet);
     expect(result).toMatchSnapshot();
   });
 });
