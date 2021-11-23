@@ -32,6 +32,8 @@ describe('GET role', () => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
       mockRouteDefinitionParams.authz.applicationName = application;
+      mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue([]);
+
       const mockContext = {
         core: coreMock.createRequestHandlerContext(),
         licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,

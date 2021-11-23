@@ -423,7 +423,9 @@ describe('validateKibanaPrivileges', () => {
           },
         ]
       ).validationErrors
-    ).toEqual([`Feature [foo.all] requires all spaces to be selected but received [foo-space]`]);
+    ).toEqual([
+      `Feature privilege [foo.all] requires all spaces to be selected but received [foo-space]`,
+    ]);
   });
 
   test('returns errors if disabled: true and privilege is specified', () => {
@@ -440,7 +442,7 @@ describe('validateKibanaPrivileges', () => {
           },
         ]
       ).validationErrors
-    ).toEqual([`Feature [foo.read] is disabled and cannot be specified`]);
+    ).toEqual([`Feature [foo] does not support privilege [read].`]);
   });
 
   test('returns multiple errors when necessary', () => {
@@ -458,8 +460,8 @@ describe('validateKibanaPrivileges', () => {
         ]
       ).validationErrors
     ).toEqual([
-      `Feature [foo.all] requires all spaces to be selected but received [foo-space]`,
-      `Feature [foo.read] is disabled and cannot be specified`,
+      `Feature privilege [foo.all] requires all spaces to be selected but received [foo-space]`,
+      `Feature [foo] does not support privilege [read].`,
     ]);
   });
 });

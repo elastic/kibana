@@ -262,7 +262,7 @@ describe('PUT role', () => {
           statusCode: 400,
           result: {
             message:
-              'Role cannot be updated due to validation errors: ["Feature [bar.all] requires all spaces to be selected but received [bar-space]","Feature [bar.read] is disabled and cannot be specified"]',
+              'Role cannot be updated due to validation errors: ["Feature privilege [bar.all] requires all spaces to be selected but received [bar-space]","Feature [bar] does not support privilege [read]."]',
           },
         },
       });
