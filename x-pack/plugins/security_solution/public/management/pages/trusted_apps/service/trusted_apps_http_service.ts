@@ -161,10 +161,11 @@ export class TrustedAppsHttpService implements TrustedAppsService {
   async createTrustedApp(request: PostTrustedAppCreateRequest) {
     await validateTrustedAppHttpRequestBody(await this.getHttpService(), request);
 
+    const newTrustedAppException = newTrustedAppToCreateExceptionListItem(request);
     const createdExceptionItem = await (
       await this.getHttpService()
     ).post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(newTrustedAppToCreateExceptionListItem(request)),
+      body: JSON.stringify(newTrustedAppException),
     });
 
     return {

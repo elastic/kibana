@@ -9,6 +9,7 @@ import { HttpFetchOptionsWithPath } from 'kibana/public';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import {
   ExceptionListItemSchema,
@@ -174,7 +175,7 @@ export const trustedAppsPostCreateListHttpMock =
   httpHandlerMockFactory<TrustedAppsPostCreateListHttpMockInterface>([
     {
       id: 'trustedAppCreateList',
-      path: EXCEPTION_LIST_ITEM_URL,
+      path: EXCEPTION_LIST_URL,
       method: 'post',
       handler: (): ExceptionListSchema => {
         return getTrustedAppsListSchemaMock();
