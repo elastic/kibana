@@ -10,9 +10,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const supertest = getService('supertest');
 
   const fleetPackages = ['apache', 'nginx'];
+  const installedPackages: string[] = [];
 
   describe('modules', function () {
     before(async () => {
@@ -20,15 +20,16 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
 
       // Fleet need to be setup to be able to setup packages
-      await supertest.post(`/api/fleet/setup`).set({ 'kbn-xsrf': 'some-xsrf-token' }).expect(200);
+      await ml.testResources.setupFleet();
 
       for (const fleetPackage of fleetPackages) {
-        await ml.testResources.installFleetPackage(fleetPackage);
+        const packageWithVersion = await ml.testResources.installFleetPackage(fleetPackage);
+        installedPackages.push(packageWithVersion);
       }
     });
 
     after(async () => {
-      for (const fleetPackage of fleetPackages) {
+      for (const fleetPackage of installedPackages) {
         await ml.testResources.removeFleetPackage(fleetPackage);
       }
       await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
