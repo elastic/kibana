@@ -12,6 +12,7 @@ import type { KqlLiteralNode } from '../node_types/literal';
 import type { KqlWildcardNode } from '../node_types/wildcard';
 import type { KqlContext } from '../types';
 import * as ast from '../ast';
+import { KQL_NODE_TYPE_FUNCTION } from '../node_types/function';
 
 export const KQL_FUNCTION_NAME_EXISTS = 'exists';
 
@@ -24,6 +25,15 @@ export interface KqlExistsFunctionNode extends KqlFunctionNode {
 
 export function isNode(node: KqlFunctionNode): node is KqlExistsFunctionNode {
   return node.function === KQL_FUNCTION_NAME_EXISTS;
+}
+
+export function buildNode(fieldName: string): KqlExistsFunctionNode {
+  const fieldNameNode = ast.fromLiteralExpression(fieldName);
+  return {
+    type: KQL_NODE_TYPE_FUNCTION,
+    function: KQL_FUNCTION_NAME_EXISTS,
+    arguments: [fieldNameNode],
+  };
 }
 
 export function toElasticsearchQuery(

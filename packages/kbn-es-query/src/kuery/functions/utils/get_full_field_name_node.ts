@@ -19,7 +19,7 @@ export function getFullFieldNameNode(
 ): KqlLiteralNode | KqlWildcardNode {
   const fullFieldNameNode = {
     ...rootNameNode,
-    value: nestedPath ? `${nestedPath}.${rootNameNode.value}` : `{rootNameNode.value}`,
+    value: nestedPath ? `${nestedPath}.${rootNameNode.value}` : rootNameNode.value,
   };
 
   // Wildcards can easily include nested and non-nested fields. There isn't a good way to let

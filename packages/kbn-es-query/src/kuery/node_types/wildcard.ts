@@ -7,14 +7,14 @@
  */
 
 import { KqlNode } from './types';
-import { KqlLiteralNode } from './literal';
+import { KqlLiteralNode, KqlLiteralType } from './literal';
 
 export const KQL_NODE_TYPE_WILDCARD = 'wildcard';
 export const KQL_WILDCARD_SYMBOL = '@kuery-wildcard@';
 
 export interface KqlWildcardNode extends KqlNode {
   type: typeof KQL_NODE_TYPE_WILDCARD;
-  value: string;
+  value: KqlLiteralType;
 }
 
 export function isNode(node: KqlNode): node is KqlWildcardNode {
@@ -30,7 +30,7 @@ export function buildNode(value: string): KqlWildcardNode {
 
 export function toElasticsearchQuery(node: KqlWildcardNode) {
   const { value } = node;
-  return value.split(KQL_WILDCARD_SYMBOL).join('*');
+  return `${value}`.split(KQL_WILDCARD_SYMBOL).join('*');
 }
 
 // Copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions

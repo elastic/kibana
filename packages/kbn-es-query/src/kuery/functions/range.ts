@@ -8,27 +8,49 @@
 
 import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
 import type { KqlFunctionNode } from '../node_types/function';
-import type { KqlLiteralNode } from '../node_types/literal';
+import type { KqlLiteralNode, KqlLiteralType } from '../node_types/literal';
+import type { KqlWildcardNode } from '../node_types/wildcard';
 import type { KqlContext } from '../types';
-import * as ast from '../ast';
+import { nodeTypes } from '../..';
 import { getRangeScript } from '../../filters';
 import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
+import * as ast from '../ast';
+import { KQL_NODE_TYPE_FUNCTION } from '../node_types/function';
 import { getFields } from './utils/get_fields';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 
 export const KQL_FUNCTION_NAME_RANGE = 'range';
 
+type KqlRangeFunctionArgs = [
+  KqlLiteralNode | KqlWildcardNode, // Field name
+  KqlLiteralNode, // Operator ('gt', 'gte', 'lt', 'lte')
+  KqlLiteralNode | KqlWildcardNode // Value
+];
+
 export interface KqlRangeFunctionNode extends KqlFunctionNode {
   function: typeof KQL_FUNCTION_NAME_RANGE;
-  arguments: [
-    KqlLiteralNode, // Field name
-    KqlLiteralNode, // Operator ('gt', 'gte', 'lt', 'lte')
-    KqlLiteralNode // Value
-  ];
+  arguments: KqlRangeFunctionArgs;
 }
 
 export function isNode(node: KqlFunctionNode): node is KqlRangeFunctionNode {
   return node.function === KQL_FUNCTION_NAME_RANGE;
+}
+
+export function buildNode(
+  fieldName: string,
+  operator: 'gt' | 'gte' | 'lt' | 'lte',
+  value: KqlLiteralType
+): KqlRangeFunctionNode {
+  const args: KqlRangeFunctionArgs = [
+    ast.fromLiteralExpression(fieldName),
+    nodeTypes.literal.buildNode(operator),
+    nodeTypes.literal.buildNode(value),
+  ];
+  return {
+    type: KQL_NODE_TYPE_FUNCTION,
+    function: KQL_FUNCTION_NAME_RANGE,
+    arguments: args,
+  };
 }
 
 export function toElasticsearchQuery(

@@ -10,6 +10,7 @@ import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
 import type { KqlFunctionNode } from '../node_types/function';
 import type { KqlContext } from '../types';
 import { nodeTypes } from '../..';
+import { KQL_NODE_TYPE_FUNCTION } from '../node_types/function';
 
 export const KQL_FUNCTION_NAME_NOT = 'not';
 
@@ -20,6 +21,14 @@ export interface KqlNotFunctionNode extends KqlFunctionNode {
 
 export function isNode(node: KqlFunctionNode): node is KqlNotFunctionNode {
   return node.function === KQL_FUNCTION_NAME_NOT;
+}
+
+export function buildNode(subQuery: KqlFunctionNode): KqlNotFunctionNode {
+  return {
+    type: KQL_NODE_TYPE_FUNCTION,
+    function: KQL_FUNCTION_NAME_NOT,
+    arguments: [subQuery],
+  };
 }
 
 export function toElasticsearchQuery(

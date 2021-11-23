@@ -8,6 +8,7 @@
 
 import { nodeTypes } from '../types';
 import { KqlNode } from './types';
+// import { functions } from '../functions';
 
 export const nodeBuilder = {
   is: (fieldName: string, value: string | KqlNode) => {
@@ -24,3 +25,13 @@ export const nodeBuilder = {
     return nodes.length > 1 ? nodeTypes.function.buildNode('and', nodes) : nodes[0];
   },
 };
+
+// export const kqlNodeBuilder = {
+//   and: functions.and.buildNode,
+//   exists: functions.exists.buildNode,
+//   is: functions.is.buildNode,
+//   nested: functions.nested.buildNode,
+//   not: functions.not.buildNode,
+//   or: functions.or.buildNode,
+//   range: functions.range.buildNode,
+// };

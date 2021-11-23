@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { nodeTypes } from '../node_types';
+import type { DataViewBase } from '../..';
 import { fields } from '../../filters/stubs';
-import { DataViewBase } from '../..';
-
 import * as range from './range';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 jest.mock('../grammar');
 
@@ -26,9 +23,9 @@ describe('kuery functions', () => {
       };
     });
 
-    describe('buildNodeParams', () => {
+    describe('buildNode', () => {
       test('arguments should contain the provided fieldName as a literal', () => {
-        const result = range.buildNodeParams('bytes', 'gt', 1000);
+        const result = range.buildNode('bytes', 'gt', 1000);
         const {
           arguments: [fieldName],
         } = result;
@@ -38,7 +35,7 @@ describe('kuery functions', () => {
       });
 
       test('arguments should contain the provided value as a literal', () => {
-        const result = range.buildNodeParams('bytes', 'gt', 1000);
+        const result = range.buildNode('bytes', 'gt', 1000);
         const {
           arguments: [, , valueArg],
         } = result;
@@ -64,7 +61,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', 'bytes', 'gt', 1000);
+        const node = range.buildNode('bytes', 'gt', 1000);
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -86,7 +83,7 @@ describe('kuery functions', () => {
           },
         };
 
-        const node = nodeTypes.function.buildNode('range', 'bytes', 'gt', 1000);
+        const node = range.buildNode('bytes', 'gt', 1000);
         const result = range.toElasticsearchQuery(node);
 
         expect(result).toEqual(expected);
@@ -108,19 +105,31 @@ describe('kuery functions', () => {
           },
         };
 
-        const node = nodeTypes.function.buildNode('range', 'byt*', 'gt', 1000);
+        const node = range.buildNode('byt*', 'gt', 1000);
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
 
       test('should support scripted fields', () => {
-        const node = nodeTypes.function.buildNode('range', 'script number', 'gt', 1000);
+        const node = range.buildNode('script number', 'gt', 1000);
         const result = range.toElasticsearchQuery(node, indexPattern);
 
-        expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
-          'script'
-        );
+        expect(result.bool?.should).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "script": Object {
+                "script": Object {
+                  "lang": "expression",
+                  "params": Object {
+                    "gt": 1000,
+                  },
+                  "source": "(1234)>gt",
+                },
+              },
+            },
+          ]
+        `);
       });
 
       test('should support date fields without a dateFormat provided', () => {
@@ -138,12 +147,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode(
-          'range',
-          '@timestamp',
-          'gt',
-          '2018-01-03T19:04:17'
-        );
+        const node = range.buildNode('@timestamp', 'gt', '2018-01-03T19:04:17');
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -166,12 +170,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode(
-          'range',
-          '@timestamp',
-          'gt',
-          '2018-01-03T19:04:17'
-        );
+        const node = range.buildNode('@timestamp', 'gt', '2018-01-03T19:04:17');
         const result = range.toElasticsearchQuery(node, indexPattern, config);
 
         expect(result).toEqual(expected);
@@ -192,7 +191,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', 'bytes', 'gt', 1000);
+        const node = range.buildNode('bytes', 'gt', 1000);
         const result = range.toElasticsearchQuery(
           node,
           indexPattern,
@@ -224,7 +223,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', '*doublyNested*', 'lt', 8000);
+        const node = range.buildNode('*doublyNested*', 'lt', 8000);
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);

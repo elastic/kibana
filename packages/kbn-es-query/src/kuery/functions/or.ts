@@ -10,6 +10,7 @@ import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
 import type { KqlFunctionNode } from '../node_types/function';
 import type { KqlContext } from '../types';
 import { nodeTypes } from '../..';
+import { KQL_NODE_TYPE_FUNCTION } from '../node_types/function';
 
 export const KQL_FUNCTION_NAME_OR = 'or';
 
@@ -20,6 +21,14 @@ export interface KqlOrFunctionNode extends KqlFunctionNode {
 
 export function isNode(node: KqlFunctionNode): node is KqlOrFunctionNode {
   return node.function === KQL_FUNCTION_NAME_OR;
+}
+
+export function buildNode(subQueries: KqlFunctionNode[]): KqlOrFunctionNode {
+  return {
+    type: KQL_NODE_TYPE_FUNCTION,
+    function: KQL_FUNCTION_NAME_OR,
+    arguments: subQueries,
+  };
 }
 
 export function toElasticsearchQuery(

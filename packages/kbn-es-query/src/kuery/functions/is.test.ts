@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { nodeTypes } from '../node_types';
+import type { DataViewBase } from '../..';
 import { fields } from '../../filters/stubs';
-
-import * as is from './is';
-import { DataViewBase } from '../..';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { buildNode, toElasticsearchQuery } from './is';
 
 jest.mock('../grammar');
 
@@ -26,11 +23,11 @@ describe('kuery functions', () => {
       };
     });
 
-    describe('buildNodeParams', () => {
+    describe('buildNode', () => {
       test('arguments should contain the provided fieldName and value as literals', () => {
         const {
           arguments: [fieldName, value],
-        } = is.buildNodeParams('response', 200);
+        } = buildNode('response', 200);
 
         expect(fieldName).toHaveProperty('type', 'literal');
         expect(fieldName).toHaveProperty('value', 'response');
@@ -41,7 +38,7 @@ describe('kuery functions', () => {
       test('should detect wildcards in the provided arguments', () => {
         const {
           arguments: [fieldName, value],
-        } = is.buildNodeParams('machine*', 'win*');
+        } = buildNode('machine*', 'win*');
 
         expect(fieldName).toHaveProperty('type', 'wildcard');
         expect(value).toHaveProperty('type', 'wildcard');
@@ -50,14 +47,14 @@ describe('kuery functions', () => {
       test('should default to a non-phrase query', () => {
         const {
           arguments: [, , isPhrase],
-        } = is.buildNodeParams('response', 200);
+        } = buildNode('response', 200);
         expect(isPhrase.value).toBe(false);
       });
 
       test('should allow specification of a phrase query', () => {
         const {
           arguments: [, , isPhrase],
-        } = is.buildNodeParams('response', 200, true);
+        } = buildNode('response', 200, true);
         expect(isPhrase.value).toBe(true);
       });
     });
@@ -67,8 +64,8 @@ describe('kuery functions', () => {
         const expected = {
           match_all: {},
         };
-        const node = nodeTypes.function.buildNode('is', '*', '*');
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('*', '*');
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
@@ -77,8 +74,8 @@ describe('kuery functions', () => {
         const expected = {
           match_all: {},
         };
-        const node = nodeTypes.function.buildNode('is', 'n*', '*');
-        const result = is.toElasticsearchQuery(node, {
+        const node = buildNode('n*', '*');
+        const result = toElasticsearchQuery(node, {
           ...indexPattern,
           fields: indexPattern.fields.filter((field) => field.name.startsWith('n')),
         });
@@ -90,8 +87,8 @@ describe('kuery functions', () => {
         const expected = {
           match_all: {},
         };
-        const node = nodeTypes.function.buildNode('is', '*', '*');
-        const result = is.toElasticsearchQuery(node);
+        const node = buildNode('*', '*');
+        const result = toElasticsearchQuery(node);
 
         expect(result).toEqual(expected);
       });
@@ -104,8 +101,8 @@ describe('kuery functions', () => {
             lenient: true,
           },
         };
-        const node = nodeTypes.function.buildNode('is', null, 200);
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode(null, 200);
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
@@ -116,20 +113,18 @@ describe('kuery functions', () => {
             query: 'jpg*',
           },
         };
-        const node = nodeTypes.function.buildNode('is', null, 'jpg*');
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode(null, 'jpg*');
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
 
       test('should return an ES bool query with a sub-query for each field when fieldName is "*"', () => {
-        const node = nodeTypes.function.buildNode('is', '*', 200);
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('*', 200);
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect((result.bool!.should! as estypes.QueryDslQueryContainer[]).length).toBe(
-          indexPattern.fields.length
-        );
+        expect(result.bool?.should).toHaveLength(indexPattern.fields.length);
       });
 
       test('should return an ES exists query when value is "*"', () => {
@@ -139,8 +134,8 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', '*');
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('extension', '*');
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
@@ -152,8 +147,8 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('extension', 'jpg');
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
@@ -165,8 +160,8 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
-        const result = is.toElasticsearchQuery(node);
+        const node = buildNode('extension', 'jpg');
+        const result = toElasticsearchQuery(node);
 
         expect(result).toEqual(expected);
       });
@@ -178,8 +173,8 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg', true);
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('extension', 'jpg', true);
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
@@ -198,19 +193,31 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg*');
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('extension', 'jpg*');
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
 
       test('should support scripted fields', () => {
-        const node = nodeTypes.function.buildNode('is', 'script string', 'foo');
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('script string', 'foo');
+        const result = toElasticsearchQuery(node, indexPattern);
 
-        expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
-          'script'
-        );
+        expect(result.bool!.should).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "script": Object {
+                "script": Object {
+                  "lang": "painless",
+                  "params": Object {
+                    "value": "foo",
+                  },
+                  "source": "boolean compare(Supplier s, def v) {return s.get() == v;}compare(() -> { 1234 }, params.value);",
+                },
+              },
+            },
+          ]
+        `);
       });
 
       test('should support date fields without a dateFormat provided', () => {
@@ -229,8 +236,8 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('@timestamp', '"2018-04-03T19:04:17"');
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
@@ -253,8 +260,8 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
-        const result = is.toElasticsearchQuery(node, indexPattern, config);
+        const node = buildNode('@timestamp', '"2018-04-03T19:04:17"');
+        const result = toElasticsearchQuery(node, indexPattern, config);
 
         expect(result).toEqual(expected);
       });
@@ -266,8 +273,8 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
-        const result = is.toElasticsearchQuery(
+        const node = buildNode('extension', 'jpg');
+        const result = toElasticsearchQuery(
           node,
           indexPattern,
           {},
@@ -284,8 +291,8 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'ext*', 'jpg');
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('ext*', 'jpg');
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
@@ -309,8 +316,8 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', '*doublyNested*', 'foo');
-        const result = is.toElasticsearchQuery(node, indexPattern);
+        const node = buildNode('*doublyNested*', 'foo');
+        const result = toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });

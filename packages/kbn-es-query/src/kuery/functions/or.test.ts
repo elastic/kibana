@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { nodeTypes } from '../node_types';
+import type { DataViewBase } from '../..';
 import { fields } from '../../filters/stubs';
-import { DataViewBase } from '../..';
-
 import * as ast from '../ast';
-
+import * as is from './is';
 import * as or from './or';
+
 jest.mock('../grammar');
 
-const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
-const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
+const childNode1 = is.buildNode('machine.os', 'osx');
+const childNode2 = is.buildNode('extension', 'jpg');
 
 describe('kuery functions', () => {
   describe('or', () => {
@@ -31,7 +30,7 @@ describe('kuery functions', () => {
 
     describe('buildNodeParams', () => {
       test('arguments should contain the unmodified child nodes', () => {
-        const result = or.buildNodeParams([childNode1, childNode2]);
+        const result = or.buildNode([childNode1, childNode2]);
         const {
           arguments: [actualChildNode1, actualChildNode2],
         } = result;
@@ -43,7 +42,7 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should wrap subqueries in an ES bool query's should clause", () => {
-        const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
+        const node = or.buildNode([childNode1, childNode2]);
         const result = or.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
@@ -57,7 +56,7 @@ describe('kuery functions', () => {
       });
 
       test('should require one of the clauses to match', () => {
-        const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
+        const node = or.buildNode([childNode1, childNode2]);
         const result = or.toElasticsearchQuery(node, indexPattern);
 
         expect(result.bool).toHaveProperty('minimum_should_match', 1);

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { nodeTypes } from '../node_types';
+import type { DataViewBase } from '../../es_query';
 import { fields } from '../../filters/stubs';
 import * as ast from '../ast';
 import * as and from './and';
-import { DataViewBase } from '../../es_query';
+import * as is from './is';
 
 jest.mock('../grammar');
 
-const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
-const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
+const childNode1 = is.buildNode('machine.os', 'osx');
+const childNode2 = is.buildNode('extension', 'jpg');
 
 describe('kuery functions', () => {
   describe('and', () => {
@@ -30,7 +30,7 @@ describe('kuery functions', () => {
 
     describe('buildNodeParams', () => {
       test('arguments should contain the unmodified child nodes', () => {
-        const result = and.buildNodeParams([childNode1, childNode2]);
+        const result = and.buildNode([childNode1, childNode2]);
         const {
           arguments: [actualChildNode1, actualChildNode2],
         } = result;
@@ -42,15 +42,15 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should wrap subqueries in an ES bool query's filter clause", () => {
-        const node = nodeTypes.function.buildNode('and', [childNode1, childNode2]);
+        const node = and.buildNode([childNode1, childNode2]);
         const result = and.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
         expect(Object.keys(result).length).toBe(1);
         expect(result.bool).toHaveProperty('filter');
-        expect(Object.keys(result.bool).length).toBe(1);
+        expect(Object.keys(result.bool!).length).toBe(1);
 
-        expect(result.bool.filter).toEqual(
+        expect(result.bool?.filter).toEqual(
           [childNode1, childNode2].map((childNode) =>
             ast.toElasticsearchQuery(childNode, indexPattern)
           )
@@ -58,7 +58,7 @@ describe('kuery functions', () => {
       });
 
       test("should wrap subqueries in an ES bool query's must clause for scoring if enabled", () => {
-        const node = nodeTypes.function.buildNode('and', [childNode1, childNode2]);
+        const node = and.buildNode([childNode1, childNode2]);
         const result = and.toElasticsearchQuery(node, indexPattern, {
           filtersInMustClause: true,
         });
@@ -66,9 +66,9 @@ describe('kuery functions', () => {
         expect(result).toHaveProperty('bool');
         expect(Object.keys(result).length).toBe(1);
         expect(result.bool).toHaveProperty('must');
-        expect(Object.keys(result.bool).length).toBe(1);
+        expect(Object.keys(result.bool!).length).toBe(1);
 
-        expect(result.bool.must).toEqual(
+        expect(result.bool?.must).toEqual(
           [childNode1, childNode2].map((childNode) =>
             ast.toElasticsearchQuery(childNode, indexPattern)
           )

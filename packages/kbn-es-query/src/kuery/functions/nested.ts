@@ -13,19 +13,31 @@ import type { KqlWildcardNode } from '../node_types/wildcard';
 import type { KqlContext } from '../types';
 import { nodeTypes } from '../..';
 import * as ast from '../ast';
+import { KQL_NODE_TYPE_FUNCTION } from '../node_types/function';
 
 export const KQL_FUNCTION_NAME_NESTED = 'nested';
 
+type KqlNestedFunctionArgs = [
+  KqlLiteralNode | KqlWildcardNode, // Nested path
+  KqlFunctionNode // Nested query
+];
+
 export interface KqlNestedFunctionNode extends KqlFunctionNode {
   function: typeof KQL_FUNCTION_NAME_NESTED;
-  arguments: [
-    KqlLiteralNode | KqlWildcardNode, // Nested path
-    KqlFunctionNode // Nested query
-  ];
+  arguments: KqlNestedFunctionArgs;
 }
 
 export function isNode(node: KqlFunctionNode): node is KqlNestedFunctionNode {
   return node.function === KQL_FUNCTION_NAME_NESTED;
+}
+
+export function buildNode(nestedPath: string, nestedQuery: KqlFunctionNode): KqlNestedFunctionNode {
+  const args: KqlNestedFunctionArgs = [ast.fromLiteralExpression(nestedPath), nestedQuery];
+  return {
+    type: KQL_NODE_TYPE_FUNCTION,
+    function: KQL_FUNCTION_NAME_NESTED,
+    arguments: args,
+  };
 }
 
 export function toElasticsearchQuery(

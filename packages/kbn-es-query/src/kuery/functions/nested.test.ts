@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { nodeTypes } from '../node_types';
+import type { DataViewBase } from '../..';
 import { fields } from '../../filters/stubs';
-import { DataViewBase } from '../..';
-
 import * as ast from '../ast';
-
+import * as is from './is';
 import * as nested from './nested';
 
 jest.mock('../grammar');
 
-const childNode = nodeTypes.function.buildNode('is', 'child', 'foo');
+const childNode = is.buildNode('child', 'foo');
 
 describe('kuery functions', () => {
   describe('nested', () => {
@@ -29,9 +27,9 @@ describe('kuery functions', () => {
       };
     });
 
-    describe('buildNodeParams', () => {
+    describe('buildNode', () => {
       test('arguments should contain the unmodified child nodes', () => {
-        const result = nested.buildNodeParams('nestedField', childNode);
+        const result = nested.buildNode('nestedField', childNode);
         const {
           arguments: [resultPath, resultChildNode],
         } = result;
@@ -43,7 +41,7 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test('should wrap subqueries in an ES nested query', () => {
-        const node = nodeTypes.function.buildNode('nested', 'nestedField', childNode);
+        const node = nested.buildNode('nestedField', childNode);
         const result = nested.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('nested');
@@ -54,11 +52,9 @@ describe('kuery functions', () => {
       });
 
       test('should pass the nested path to subqueries so the full field name can be used', () => {
-        const node = nodeTypes.function.buildNode('nested', 'nestedField', childNode);
+        const node = nested.buildNode('nestedField', childNode);
         const result = nested.toElasticsearchQuery(node, indexPattern);
-        const expectedSubQuery = ast.toElasticsearchQuery(
-          nodeTypes.function.buildNode('is', 'nestedField.child', 'foo')
-        );
+        const expectedSubQuery = ast.toElasticsearchQuery(is.buildNode('nestedField.child', 'foo'));
 
         expect(result.nested!.query).toEqual(expectedSubQuery);
       });

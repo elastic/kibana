@@ -9,28 +9,53 @@
 import { isUndefined } from 'lodash';
 import type { DataViewBase, DataViewFieldBase, DslQuery, KueryQueryOptions } from '../..';
 import type { KqlFunctionNode } from '../node_types/function';
-import type { KqlLiteralNode } from '../node_types/literal';
+import type { KqlLiteralNode, KqlLiteralType } from '../node_types/literal';
 import type { KqlContext } from '../types';
+import { nodeTypes } from '../..';
 import { getPhraseScript } from '../../filters';
 import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
 import * as ast from '../ast';
+import { KQL_NODE_TYPE_FUNCTION } from '../node_types/function';
 import { KQL_WILDCARD_SYMBOL, KqlWildcardNode, toQueryStringQuery } from '../node_types/wildcard';
 import { getFields } from './utils/get_fields';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 
 export const KQL_FUNCTION_NAME_IS = 'is';
 
+type KqlIsFunctionArgs = [
+  KqlLiteralNode | KqlWildcardNode, // Field name
+  KqlLiteralNode | KqlWildcardNode, // Value
+  KqlLiteralNode // Is this a "phrase" value? (surrounded in quotes)
+];
+
 export interface KqlIsFunctionNode extends KqlFunctionNode {
   function: typeof KQL_FUNCTION_NAME_IS;
-  arguments: [
-    KqlLiteralNode | KqlWildcardNode, // Field name
-    KqlLiteralNode | KqlWildcardNode, // Value
-    KqlLiteralNode // Is this a "phrase" value? (surrounded in quotes)
-  ];
+  arguments: KqlIsFunctionArgs;
 }
 
 export function isNode(node: KqlFunctionNode): node is KqlIsFunctionNode {
   return node.function === KQL_FUNCTION_NAME_IS;
+}
+
+export function buildNode(
+  fieldName: string | null,
+  value: KqlLiteralType,
+  isPhrase: boolean = false
+): KqlIsFunctionNode {
+  const fieldNameNode =
+    fieldName === null
+      ? nodeTypes.literal.buildNode(fieldName)
+      : ast.fromLiteralExpression(fieldName);
+  const valueNode =
+    typeof value !== 'string'
+      ? nodeTypes.literal.buildNode(value)
+      : ast.fromLiteralExpression(value);
+  const args: KqlIsFunctionArgs = [fieldNameNode, valueNode, nodeTypes.literal.buildNode(isPhrase)];
+  return {
+    type: KQL_NODE_TYPE_FUNCTION,
+    function: KQL_FUNCTION_NAME_IS,
+    arguments: args,
+  };
 }
 
 export function toElasticsearchQuery(

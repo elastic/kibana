@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewBase } from '../..';
 import { fromKueryExpression, fromLiteralExpression, toElasticsearchQuery } from './ast';
 import { nodeTypes } from '../node_types';
-import { DataViewBase } from '../..';
-import { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
+import { kqlNodeBuilder } from '../node_types/node_builder';
+import { KQL_WILDCARD_SYMBOL } from '../node_types/wildcard';
 
 jest.mock('../grammar');
 
@@ -26,207 +27,192 @@ describe('kuery AST API', () => {
 
   describe('fromKueryExpression', () => {
     test('should return a match all "is" function for whitespace', () => {
-      const expected = nodeTypes.function.buildNode('is', '*', '*');
+      const expected = kqlNodeBuilder.and([]);
       const actual = fromKueryExpression('  ');
       expect(actual).toEqual(expected);
     });
 
     test('should return an "is" function with a null field for single literals', () => {
-      const expected = nodeTypes.function.buildNode('is', null, 'foo');
+      const expected = kqlNodeBuilder.is(null, 'foo');
       const actual = fromKueryExpression('foo');
       expect(actual).toEqual(expected);
     });
 
     test('should ignore extraneous whitespace at the beginning and end of the query', () => {
-      const expected = nodeTypes.function.buildNode('is', null, 'foo');
+      const expected = kqlNodeBuilder.is(null, 'foo');
       const actual = fromKueryExpression('  foo ');
       expect(actual).toEqual(expected);
     });
 
     test('should not split on whitespace', () => {
-      const expected = nodeTypes.function.buildNode('is', null, 'foo bar');
+      const expected = kqlNodeBuilder.is(null, 'foo bar');
       const actual = fromKueryExpression('foo bar');
       expect(actual).toEqual(expected);
     });
 
     test('should support "and" as a binary operator', () => {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('is', null, 'bar'),
+      const expected = kqlNodeBuilder.and([
+        kqlNodeBuilder.is(null, 'foo'),
+        kqlNodeBuilder.is(null, 'bar'),
       ]);
       const actual = fromKueryExpression('foo and bar');
       expect(actual).toEqual(expected);
     });
 
     test('nbsp should be recognised as whitespace', () => {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('is', null, 'bar'),
+      const expected = kqlNodeBuilder.and([
+        kqlNodeBuilder.is(null, 'foo'),
+        kqlNodeBuilder.is(null, 'bar'),
       ]);
       const actual = fromKueryExpression('foo and\u00A0bar');
       expect(actual).toEqual(expected);
     });
 
     test('should support "or" as a binary operator', () => {
-      const expected = nodeTypes.function.buildNode('or', [
-        nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('is', null, 'bar'),
+      const expected = kqlNodeBuilder.or([
+        kqlNodeBuilder.is(null, 'foo'),
+        kqlNodeBuilder.is(null, 'bar'),
       ]);
       const actual = fromKueryExpression('foo or bar');
       expect(actual).toEqual(expected);
     });
 
     test('should not nest same-level "and"', () => {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('is', null, 'bar'),
-        nodeTypes.function.buildNode('is', null, 'baz'),
+      const expected = kqlNodeBuilder.and([
+        kqlNodeBuilder.is(null, 'foo'),
+        kqlNodeBuilder.is(null, 'bar'),
+        kqlNodeBuilder.is(null, 'baz'),
       ]);
       const actual = fromKueryExpression('foo and bar and baz');
       expect(actual).toEqual(expected);
     });
 
     test('should not nest same-level "or"', () => {
-      const expected = nodeTypes.function.buildNode('or', [
-        nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('is', null, 'bar'),
-        nodeTypes.function.buildNode('is', null, 'baz'),
+      const expected = kqlNodeBuilder.or([
+        kqlNodeBuilder.is(null, 'foo'),
+        kqlNodeBuilder.is(null, 'bar'),
+        kqlNodeBuilder.is(null, 'baz'),
       ]);
       const actual = fromKueryExpression('foo or bar or baz');
       expect(actual).toEqual(expected);
     });
 
     test('should support negation of queries with a "not" prefix', () => {
-      const expected = nodeTypes.function.buildNode(
-        'not',
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.function.buildNode('is', null, 'foo'),
-          nodeTypes.function.buildNode('is', null, 'bar'),
-        ])
+      const expected = kqlNodeBuilder.not(
+        kqlNodeBuilder.or([kqlNodeBuilder.is(null, 'foo'), kqlNodeBuilder.is(null, 'bar')])
       );
       const actual = fromKueryExpression('not (foo or bar)');
       expect(actual).toEqual(expected);
     });
 
     test('"and" should have a higher precedence than "or"', () => {
-      const expected = nodeTypes.function.buildNode('or', [
-        nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('and', [
-          nodeTypes.function.buildNode('is', null, 'bar'),
-          nodeTypes.function.buildNode('is', null, 'baz'),
-        ]),
-        nodeTypes.function.buildNode('is', null, 'qux'),
+      const expected = kqlNodeBuilder.or([
+        kqlNodeBuilder.is(null, 'foo'),
+        kqlNodeBuilder.and([kqlNodeBuilder.is(null, 'bar'), kqlNodeBuilder.is(null, 'baz')]),
+        kqlNodeBuilder.is(null, 'qux'),
       ]);
       const actual = fromKueryExpression('foo or bar and baz or qux');
       expect(actual).toEqual(expected);
     });
 
     test('should support grouping to override default precedence', () => {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.function.buildNode('is', null, 'foo'),
-          nodeTypes.function.buildNode('is', null, 'bar'),
-        ]),
-        nodeTypes.function.buildNode('is', null, 'baz'),
+      const expected = kqlNodeBuilder.and([
+        kqlNodeBuilder.or([kqlNodeBuilder.is(null, 'foo'), kqlNodeBuilder.is(null, 'bar')]),
+        kqlNodeBuilder.is(null, 'baz'),
       ]);
       const actual = fromKueryExpression('(foo or bar) and baz');
       expect(actual).toEqual(expected);
     });
 
     test('should support matching against specific fields', () => {
-      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar');
+      const expected = kqlNodeBuilder.is('foo', 'bar');
       const actual = fromKueryExpression('foo:bar');
       expect(actual).toEqual(expected);
     });
 
     test('should also not split on whitespace when matching specific fields', () => {
-      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz');
+      const expected = kqlNodeBuilder.is('foo', 'bar baz');
       const actual = fromKueryExpression('foo:bar baz');
       expect(actual).toEqual(expected);
     });
 
     test('should treat quoted values as phrases', () => {
-      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz', true);
+      const expected = kqlNodeBuilder.is('foo', 'bar baz', true);
       const actual = fromKueryExpression('foo:"bar baz"');
       expect(actual).toEqual(expected);
     });
 
     test('should support a shorthand for matching multiple values against a single field', () => {
-      const expected = nodeTypes.function.buildNode('or', [
-        nodeTypes.function.buildNode('is', 'foo', 'bar'),
-        nodeTypes.function.buildNode('is', 'foo', 'baz'),
+      const expected = kqlNodeBuilder.or([
+        kqlNodeBuilder.is('foo', 'bar'),
+        kqlNodeBuilder.is('foo', 'baz'),
       ]);
       const actual = fromKueryExpression('foo:(bar or baz)');
       expect(actual).toEqual(expected);
     });
 
     test('should support "and" and "not" operators and grouping in the shorthand as well', () => {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.function.buildNode('is', 'foo', 'bar'),
-          nodeTypes.function.buildNode('is', 'foo', 'baz'),
-        ]),
-        nodeTypes.function.buildNode('not', nodeTypes.function.buildNode('is', 'foo', 'qux')),
+      const expected = kqlNodeBuilder.and([
+        kqlNodeBuilder.or([kqlNodeBuilder.is('foo', 'bar'), kqlNodeBuilder.is('foo', 'baz')]),
+        kqlNodeBuilder.not(kqlNodeBuilder.is('foo', 'qux')),
       ]);
       const actual = fromKueryExpression('foo:((bar or baz) and not qux)');
       expect(actual).toEqual(expected);
     });
 
     test('should support exclusive range operators', () => {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('range', 'bytes', 'gt', '1000'),
-        nodeTypes.function.buildNode('range', 'bytes', 'lt', '8000'),
+      const expected = kqlNodeBuilder.and([
+        kqlNodeBuilder.range('bytes', 'gt', '1000'),
+        kqlNodeBuilder.range('bytes', 'lt', '8000'),
       ]);
       const actual = fromKueryExpression('bytes > 1000 and bytes < 8000');
       expect(actual).toEqual(expected);
     });
 
     test('should support inclusive range operators', () => {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('range', 'bytes', 'gte', '1000'),
-        nodeTypes.function.buildNode('range', 'bytes', 'lte', '8000'),
+      const expected = kqlNodeBuilder.and([
+        kqlNodeBuilder.range('bytes', 'gte', '1000'),
+        kqlNodeBuilder.range('bytes', 'lte', '8000'),
       ]);
       const actual = fromKueryExpression('bytes >= 1000 and bytes <= 8000');
       expect(actual).toEqual(expected);
     });
 
     test('should support wildcards in field names', () => {
-      const expected = nodeTypes.function.buildNode('is', 'machine*', 'osx');
+      const expected = kqlNodeBuilder.is('machine*', 'osx');
       const actual = fromKueryExpression('machine*:osx');
       expect(actual).toEqual(expected);
     });
 
     test('should support wildcards in values', () => {
-      const expected = nodeTypes.function.buildNode('is', 'foo', 'ba*');
+      const expected = kqlNodeBuilder.is('foo', 'ba*');
       const actual = fromKueryExpression('foo:ba*');
       expect(actual).toEqual(expected);
     });
 
     test('should create an exists "is" query when a field is given and "*" is the value', () => {
-      const expected = nodeTypes.function.buildNode('is', 'foo', '*');
+      const expected = kqlNodeBuilder.is('foo', '*');
       const actual = fromKueryExpression('foo:*');
       expect(actual).toEqual(expected);
     });
 
     test('should support nested queries indicated by curly braces', () => {
-      const expected = nodeTypes.function.buildNode(
-        'nested',
+      const expected = kqlNodeBuilder.nested(
         'nestedField',
-        nodeTypes.function.buildNode('is', 'childOfNested', 'foo')
+        kqlNodeBuilder.is('childOfNested', 'foo')
       );
       const actual = fromKueryExpression('nestedField:{ childOfNested: foo }');
       expect(actual).toEqual(expected);
     });
 
     test('should support nested subqueries and subqueries inside nested queries', () => {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('is', 'response', '200'),
-        nodeTypes.function.buildNode(
-          'nested',
+      const expected = kqlNodeBuilder.and([
+        kqlNodeBuilder.is('response', '200'),
+        kqlNodeBuilder.nested(
           'nestedField',
-          nodeTypes.function.buildNode('or', [
-            nodeTypes.function.buildNode('is', 'childOfNested', 'foo'),
-            nodeTypes.function.buildNode('is', 'childOfNested', 'bar'),
+          kqlNodeBuilder.or([
+            kqlNodeBuilder.is('childOfNested', 'foo'),
+            kqlNodeBuilder.is('childOfNested', 'bar'),
           ])
         ),
       ]);
@@ -237,19 +223,11 @@ describe('kuery AST API', () => {
     });
 
     test('should support nested sub-queries inside paren groups', () => {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('is', 'response', '200'),
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.function.buildNode(
-            'nested',
-            'nestedField',
-            nodeTypes.function.buildNode('is', 'childOfNested', 'foo')
-          ),
-          nodeTypes.function.buildNode(
-            'nested',
-            'nestedField',
-            nodeTypes.function.buildNode('is', 'childOfNested', 'bar')
-          ),
+      const expected = kqlNodeBuilder.and([
+        kqlNodeBuilder.is('response', '200'),
+        kqlNodeBuilder.or([
+          kqlNodeBuilder.nested('nestedField', kqlNodeBuilder.is('childOfNested', 'foo')),
+          kqlNodeBuilder.nested('nestedField', kqlNodeBuilder.is('childOfNested', 'bar')),
         ]),
       ]);
       const actual = fromKueryExpression(
@@ -259,14 +237,9 @@ describe('kuery AST API', () => {
     });
 
     test('should support nested groups inside other nested groups', () => {
-      const expected = nodeTypes.function.buildNode(
-        'nested',
+      const expected = kqlNodeBuilder.nested(
         'nestedField',
-        nodeTypes.function.buildNode(
-          'nested',
-          'nestedChild',
-          nodeTypes.function.buildNode('is', 'doublyNestedChild', 'foo')
-        )
+        kqlNodeBuilder.nested('nestedChild', kqlNodeBuilder.is('doublyNestedChild', 'foo'))
       );
       const actual = fromKueryExpression('nestedField:{ nestedChild:{ doublyNestedChild:foo } }');
       expect(actual).toEqual(expected);
@@ -344,7 +317,7 @@ describe('kuery AST API', () => {
     });
 
     test('should detect wildcards and build wildcard AST nodes', () => {
-      const expected = nodeTypes.wildcard.buildNode('foo*bar');
+      const expected = nodeTypes.wildcard.buildNode(`foo${KQL_WILDCARD_SYMBOL}bar`);
       const actual = fromLiteralExpression('foo*bar');
       expect(actual).toEqual(expected);
     });
@@ -352,7 +325,7 @@ describe('kuery AST API', () => {
 
   describe('toElasticsearchQuery', () => {
     test("should return the given node type's ES query representation", () => {
-      const node = nodeTypes.function.buildNode('exists', 'response');
+      const node = kqlNodeBuilder.exists('response');
       const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern);
       const result = toElasticsearchQuery(node, indexPattern);
       expect(result).toEqual(expected);
@@ -360,28 +333,16 @@ describe('kuery AST API', () => {
 
     test('should return an empty "and" function for undefined nodes and unknown node types', () => {
       const expected = nodeTypes.function.toElasticsearchQuery(
-        nodeTypes.function.buildNode('and', []),
+        kqlNodeBuilder.and([]),
         indexPattern
       );
 
-      expect(toElasticsearchQuery(null as unknown as KueryNode, undefined)).toEqual(expected);
-
-      const noTypeNode = nodeTypes.function.buildNode('exists', 'foo');
-
-      // @ts-expect-error
-      delete noTypeNode.type;
-      expect(toElasticsearchQuery(noTypeNode)).toEqual(expected);
-
-      const unknownTypeNode = nodeTypes.function.buildNode('exists', 'foo');
-
-      // @ts-expect-error
-      unknownTypeNode.type = 'notValid';
-      expect(toElasticsearchQuery(unknownTypeNode)).toEqual(expected);
+      expect(toElasticsearchQuery(null, undefined)).toEqual(expected);
     });
 
     test("should return the given node type's ES query representation including a time zone parameter when one is provided", () => {
       const config = { dateFormatTZ: 'America/Phoenix' };
-      const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
+      const node = kqlNodeBuilder.is('@timestamp', '"2018-04-03T19:04:17"');
       const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config);
       const result = toElasticsearchQuery(node, indexPattern, config);
       expect(result).toEqual(expected);

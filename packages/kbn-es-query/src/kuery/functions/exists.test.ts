@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 import { DataViewBase } from '../..';
+import * as exists from './exists';
 
 jest.mock('../grammar');
-
-// @ts-ignore
-import * as exists from './exists';
 
 describe('kuery functions', () => {
   describe('exists', () => {
@@ -26,18 +23,11 @@ describe('kuery functions', () => {
       };
     });
 
-    describe('buildNodeParams', () => {
-      test('should return a single "arguments" param', () => {
-        const result = exists.buildNodeParams('response');
-
-        expect(result).toHaveProperty('arguments');
-        expect(Object.keys(result).length).toBe(1);
-      });
-
+    describe('buildNode', () => {
       test('arguments should contain the provided fieldName as a literal', () => {
         const {
           arguments: [arg],
-        } = exists.buildNodeParams('response');
+        } = exists.buildNode('response');
 
         expect(arg).toHaveProperty('type', 'literal');
         expect(arg).toHaveProperty('value', 'response');
@@ -49,7 +39,7 @@ describe('kuery functions', () => {
         const expected = {
           exists: { field: 'response' },
         };
-        const existsNode = nodeTypes.function.buildNode('exists', 'response');
+        const existsNode = exists.buildNode('response');
         const result = exists.toElasticsearchQuery(existsNode, indexPattern);
 
         expect(expected).toEqual(result);
@@ -59,14 +49,14 @@ describe('kuery functions', () => {
         const expected = {
           exists: { field: 'response' },
         };
-        const existsNode = nodeTypes.function.buildNode('exists', 'response');
+        const existsNode = exists.buildNode('response');
         const result = exists.toElasticsearchQuery(existsNode);
 
         expect(expected).toEqual(result);
       });
 
       test('should throw an error for scripted fields', () => {
-        const existsNode = nodeTypes.function.buildNode('exists', 'script string');
+        const existsNode = exists.buildNode('script string');
         expect(() => exists.toElasticsearchQuery(existsNode, indexPattern)).toThrowError(
           /Exists query does not support scripted fields/
         );
@@ -76,7 +66,7 @@ describe('kuery functions', () => {
         const expected = {
           exists: { field: 'nestedField.response' },
         };
-        const existsNode = nodeTypes.function.buildNode('exists', 'response');
+        const existsNode = exists.buildNode('response');
         const result = exists.toElasticsearchQuery(
           existsNode,
           indexPattern,
