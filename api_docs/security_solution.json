@@ -272,7 +272,13 @@
         "description": [],
         "signature": [
           "Pick<",
-          "TGridModel",
+          {
+            "pluginId": "timelines",
+            "scope": "public",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-public.TGridModel",
+            "text": "TGridModel"
+          },
           ", \"columns\" | \"sort\" | \"title\" | \"version\" | \"filters\" | \"id\" | \"isLoading\" | \"filterManager\" | \"dateRange\" | \"defaultColumns\" | \"savedObjectId\" | \"unit\" | \"dataProviders\" | \"dataViewId\" | \"deletedEventIds\" | \"documentType\" | \"excludedRowRendererIds\" | \"expandedDetail\" | \"footerText\" | \"graphEventId\" | \"kqlQuery\" | \"queryFields\" | \"indexNames\" | \"isSelectAllChecked\" | \"itemsPerPage\" | \"itemsPerPageOptions\" | \"loadingEventIds\" | \"loadingText\" | \"selectAll\" | \"showCheckboxes\" | \"selectedEventIds\"> & { activeTab: ",
           {
             "pluginId": "securitySolution",
@@ -1601,12 +1607,13 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.AggregationRequest.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[aggField: string}]: AggregationsAggregationContainer",
             "description": [],
             "signature": [
-              "any"
+              "[aggField: string]:  ",
+              "AggregationsAggregationContainer"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/details/index.ts",
             "deprecated": false
@@ -1797,12 +1804,12 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.AnomalySource.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[field: string}]: any",
             "description": [],
             "signature": [
-              "any"
+              "[field: string]:  any"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/anomalies/index.ts",
             "deprecated": false
@@ -4401,12 +4408,12 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.EventSource.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[field: string}]: any",
             "description": [],
             "signature": [
-              "any"
+              "[field: string]:  any"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/events/index.ts",
             "deprecated": false
@@ -4649,12 +4656,20 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.Fields.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[x: string}]: T | Fields<T>[]",
             "description": [],
             "signature": [
-              "any"
+              "[x: string]:  T | ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.Fields",
+                "text": "Fields"
+              },
+              "<T>[]"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/events/index.ts",
             "deprecated": false

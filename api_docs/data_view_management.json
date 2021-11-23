@@ -1,5 +1,5 @@
 {
-  "id": "indexPatternManagement",
+  "id": "dataViewManagement",
   "client": {
     "classes": [],
     "functions": [],
@@ -8,26 +8,26 @@
     "misc": [],
     "objects": [],
     "setup": {
-      "parentPluginId": "indexPatternManagement",
+      "parentPluginId": "dataViewManagement",
       "id": "def-public.IndexPatternManagementSetup",
       "type": "Interface",
       "tags": [],
       "label": "IndexPatternManagementSetup",
       "description": [],
-      "path": "src/plugins/index_pattern_management/public/plugin.ts",
+      "path": "src/plugins/data_view_management/public/plugin.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
-      "parentPluginId": "indexPatternManagement",
+      "parentPluginId": "dataViewManagement",
       "id": "def-public.IndexPatternManagementStart",
       "type": "Interface",
       "tags": [],
       "label": "IndexPatternManagementStart",
       "description": [],
-      "path": "src/plugins/index_pattern_management/public/plugin.ts",
+      "path": "src/plugins/data_view_management/public/plugin.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "start",

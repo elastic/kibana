@@ -512,12 +512,20 @@
           {
             "parentPluginId": "@kbn/monaco",
             "id": "def-common.SyntaxErrors.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[modelId: string}]: EditorError[]",
             "description": [],
             "signature": [
-              "any"
+              "[modelId: string]:  ",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.EditorError",
+                "text": "EditorError"
+              },
+              "[]"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
             "deprecated": false

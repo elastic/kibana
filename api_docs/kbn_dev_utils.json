@@ -3198,14 +3198,14 @@
           {
             "parentPluginId": "@kbn/dev-utils",
             "id": "def-server.CiStatsMetadata.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string}]: string | number | boolean | string[] | undefined",
             "description": [
               "\nArbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric\nobjects stored in the ci-stats service"
             ],
             "signature": [
-              "any"
+              "[key: string]:  string | number | boolean | string[] | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
@@ -3740,12 +3740,12 @@
           {
             "parentPluginId": "@kbn/dev-utils",
             "id": "def-server.Flags.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string}]: string | boolean | string[] | undefined",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  string | boolean | string[] | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/run/flags.ts",
             "deprecated": false

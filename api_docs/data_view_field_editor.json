@@ -1,9 +1,9 @@
 {
-  "id": "indexPatternFieldEditor",
+  "id": "dataViewFieldEditor",
   "client": {
     "classes": [
       {
-        "parentPluginId": "indexPatternFieldEditor",
+        "parentPluginId": "dataViewFieldEditor",
         "id": "def-public.DefaultFormatEditor",
         "type": "Class",
         "tags": [],
@@ -11,17 +11,17 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "indexPatternFieldEditor",
+            "pluginId": "dataViewFieldEditor",
             "scope": "public",
-            "docId": "kibIndexPatternFieldEditorPluginApi",
+            "docId": "kibDataViewFieldEditorPluginApi",
             "section": "def-public.DefaultFormatEditor",
             "text": "DefaultFormatEditor"
           },
           "<P, S> extends React.PureComponent<",
           {
-            "pluginId": "indexPatternFieldEditor",
+            "pluginId": "dataViewFieldEditor",
             "scope": "public",
-            "docId": "kibIndexPatternFieldEditorPluginApi",
+            "docId": "kibDataViewFieldEditorPluginApi",
             "section": "def-public.FormatEditorProps",
             "text": "FormatEditorProps"
           },
@@ -29,21 +29,21 @@
           "FormatEditorState",
           " & S, any>"
         ],
-        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.DefaultFormatEditor.formatId",
             "type": "string",
             "tags": [],
             "label": "formatId",
             "description": [],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.DefaultFormatEditor.state",
             "type": "CompoundType",
             "tags": [],
@@ -53,11 +53,11 @@
               "FormatEditorState",
               " & S"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.DefaultFormatEditor.getDerivedStateFromProps",
             "type": "Function",
             "tags": [],
@@ -66,9 +66,9 @@
             "signature": [
               "(nextProps: ",
               {
-                "pluginId": "indexPatternFieldEditor",
+                "pluginId": "dataViewFieldEditor",
                 "scope": "public",
-                "docId": "kibIndexPatternFieldEditorPluginApi",
+                "docId": "kibDataViewFieldEditorPluginApi",
                 "section": "def-public.FormatEditorProps",
                 "text": "FormatEditorProps"
               },
@@ -78,11 +78,11 @@
               "Sample",
               "[]; }"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "indexPatternFieldEditor",
+                "parentPluginId": "dataViewFieldEditor",
                 "id": "def-public.DefaultFormatEditor.getDerivedStateFromProps.$1",
                 "type": "Object",
                 "tags": [],
@@ -90,20 +90,20 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "indexPatternFieldEditor",
+                    "pluginId": "dataViewFieldEditor",
                     "scope": "public",
-                    "docId": "kibIndexPatternFieldEditorPluginApi",
+                    "docId": "kibDataViewFieldEditorPluginApi",
                     "section": "def-public.FormatEditorProps",
                     "text": "FormatEditorProps"
                   },
                   "<{}>"
                 ],
-                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
               {
-                "parentPluginId": "indexPatternFieldEditor",
+                "parentPluginId": "dataViewFieldEditor",
                 "id": "def-public.DefaultFormatEditor.getDerivedStateFromProps.$2",
                 "type": "Object",
                 "tags": [],
@@ -112,7 +112,7 @@
                 "signature": [
                   "FormatEditorState"
                 ],
-                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -120,7 +120,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.DefaultFormatEditor.onChange",
             "type": "Function",
             "tags": [],
@@ -129,11 +129,11 @@
             "signature": [
               "(newParams?: {}) => void"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "indexPatternFieldEditor",
+                "parentPluginId": "dataViewFieldEditor",
                 "id": "def-public.DefaultFormatEditor.onChange.$1",
                 "type": "Object",
                 "tags": [],
@@ -142,7 +142,7 @@
                 "signature": [
                   "{}"
                 ],
-                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -150,7 +150,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.DefaultFormatEditor.render",
             "type": "Function",
             "tags": [],
@@ -159,7 +159,7 @@
             "signature": [
               "() => JSX.Element"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -171,7 +171,7 @@
     "functions": [],
     "interfaces": [
       {
-        "parentPluginId": "indexPatternFieldEditor",
+        "parentPluginId": "dataViewFieldEditor",
         "id": "def-public.FormatEditorProps",
         "type": "Interface",
         "tags": [],
@@ -181,29 +181,29 @@
         ],
         "signature": [
           {
-            "pluginId": "indexPatternFieldEditor",
+            "pluginId": "dataViewFieldEditor",
             "scope": "public",
-            "docId": "kibIndexPatternFieldEditorPluginApi",
+            "docId": "kibDataViewFieldEditorPluginApi",
             "section": "def-public.FormatEditorProps",
             "text": "FormatEditorProps"
           },
           "<P>"
         ],
-        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.FormatEditorProps.fieldType",
             "type": "string",
             "tags": [],
             "label": "fieldType",
             "description": [],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.FormatEditorProps.format",
             "type": "Object",
             "tags": [],
@@ -218,11 +218,11 @@
                 "text": "FieldFormat"
               }
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.FormatEditorProps.formatParams",
             "type": "CompoundType",
             "tags": [],
@@ -231,11 +231,11 @@
             "signature": [
               "{ type?: string | undefined; } & P"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.FormatEditorProps.onChange",
             "type": "Function",
             "tags": [],
@@ -244,30 +244,30 @@
             "signature": [
               "(newParams: { [key: string]: any; }) => void"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "indexPatternFieldEditor",
+                "parentPluginId": "dataViewFieldEditor",
                 "id": "def-public.FormatEditorProps.onChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "newParams",
                 "description": [],
-                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
                 "deprecated": false,
                 "children": [
                   {
-                    "parentPluginId": "indexPatternFieldEditor",
+                    "parentPluginId": "dataViewFieldEditor",
                     "id": "def-public.FormatEditorProps.onChange.$1.Unnamed",
-                    "type": "Any",
+                    "type": "IndexSignature",
                     "tags": [],
-                    "label": "Unnamed",
+                    "label": "[key: string}]: any",
                     "description": [],
                     "signature": [
-                      "any"
+                      "[key: string]:  any"
                     ],
-                    "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+                    "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
                     "deprecated": false
                   }
                 ]
@@ -276,7 +276,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.FormatEditorProps.onError",
             "type": "Function",
             "tags": [],
@@ -285,12 +285,12 @@
             "signature": [
               "(error?: string | undefined) => void"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
               {
-                "parentPluginId": "indexPatternFieldEditor",
+                "parentPluginId": "dataViewFieldEditor",
                 "id": "def-public.FormatEditorProps.onError.$1",
                 "type": "string",
                 "tags": [],
@@ -299,7 +299,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/field_format_editor.tsx",
+                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx",
                 "deprecated": false
               }
             ]
@@ -308,38 +308,38 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "indexPatternFieldEditor",
+        "parentPluginId": "dataViewFieldEditor",
         "id": "def-public.OpenFieldDeleteModalOptions",
         "type": "Interface",
         "tags": [],
         "label": "OpenFieldDeleteModalOptions",
         "description": [],
-        "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
+        "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.OpenFieldDeleteModalOptions.ctx",
             "type": "Object",
             "tags": [],
             "label": "ctx",
             "description": [],
             "signature": [
-              "{ indexPattern: ",
+              "{ dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               "; }"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
+            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
             "deprecated": false
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.OpenFieldDeleteModalOptions.onDelete",
             "type": "Function",
             "tags": [],
@@ -348,11 +348,11 @@
             "signature": [
               "((fieldNames: string[]) => void) | undefined"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
+            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "indexPatternFieldEditor",
+                "parentPluginId": "dataViewFieldEditor",
                 "id": "def-public.OpenFieldDeleteModalOptions.onDelete.$1",
                 "type": "Array",
                 "tags": [],
@@ -361,7 +361,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
+                "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -369,7 +369,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.OpenFieldDeleteModalOptions.fieldName",
             "type": "CompoundType",
             "tags": [],
@@ -378,45 +378,45 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
+            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "indexPatternFieldEditor",
+        "parentPluginId": "dataViewFieldEditor",
         "id": "def-public.OpenFieldEditorOptions",
         "type": "Interface",
         "tags": [],
         "label": "OpenFieldEditorOptions",
         "description": [],
-        "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
+        "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.OpenFieldEditorOptions.ctx",
             "type": "Object",
             "tags": [],
             "label": "ctx",
             "description": [],
             "signature": [
-              "{ indexPattern: ",
+              "{ dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               "; }"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
+            "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
             "deprecated": false
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.OpenFieldEditorOptions.onSave",
             "type": "Function",
             "tags": [],
@@ -428,16 +428,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPatternField",
-                "text": "IndexPatternField"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               ") => void) | undefined"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
+            "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "indexPatternFieldEditor",
+                "parentPluginId": "dataViewFieldEditor",
                 "id": "def-public.OpenFieldEditorOptions.onSave.$1",
                 "type": "Object",
                 "tags": [],
@@ -448,11 +448,11 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.IndexPatternField",
-                    "text": "IndexPatternField"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   }
                 ],
-                "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
+                "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -460,7 +460,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "indexPatternFieldEditor",
+            "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.OpenFieldEditorOptions.fieldName",
             "type": "string",
             "tags": [],
@@ -469,7 +469,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
+            "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
             "deprecated": false
           }
         ],
@@ -479,7 +479,7 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "indexPatternFieldEditor",
+        "parentPluginId": "dataViewFieldEditor",
         "id": "def-public.FieldFormatEditor",
         "type": "Type",
         "tags": [],
@@ -490,28 +490,28 @@
         "signature": [
           "(React.ComponentClass<",
           {
-            "pluginId": "indexPatternFieldEditor",
+            "pluginId": "dataViewFieldEditor",
             "scope": "public",
-            "docId": "kibIndexPatternFieldEditorPluginApi",
+            "docId": "kibDataViewFieldEditorPluginApi",
             "section": "def-public.FormatEditorProps",
             "text": "FormatEditorProps"
           },
           "<FormatParams>, any> & { formatId: string; }) | (React.FunctionComponent<",
           {
-            "pluginId": "indexPatternFieldEditor",
+            "pluginId": "dataViewFieldEditor",
             "scope": "public",
-            "docId": "kibIndexPatternFieldEditorPluginApi",
+            "docId": "kibDataViewFieldEditorPluginApi",
             "section": "def-public.FormatEditorProps",
             "text": "FormatEditorProps"
           },
           "<FormatParams>> & { formatId: string; })"
         ],
-        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "indexPatternFieldEditor",
+        "parentPluginId": "dataViewFieldEditor",
         "id": "def-public.FieldFormatEditorFactory",
         "type": "Type",
         "tags": [],
@@ -522,15 +522,15 @@
         "signature": [
           "(() => Promise<",
           {
-            "pluginId": "indexPatternFieldEditor",
+            "pluginId": "dataViewFieldEditor",
             "scope": "public",
-            "docId": "kibIndexPatternFieldEditorPluginApi",
+            "docId": "kibDataViewFieldEditorPluginApi",
             "section": "def-public.FieldFormatEditor",
             "text": "FieldFormatEditor"
           },
           "<FormatParams>>) & { formatId: string; }"
         ],
-        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/types.ts",
+        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [],
@@ -539,17 +539,17 @@
     ],
     "objects": [],
     "setup": {
-      "parentPluginId": "indexPatternFieldEditor",
+      "parentPluginId": "dataViewFieldEditor",
       "id": "def-public.PluginSetup",
       "type": "Interface",
       "tags": [],
       "label": "PluginSetup",
       "description": [],
-      "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+      "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
       "children": [
         {
-          "parentPluginId": "indexPatternFieldEditor",
+          "parentPluginId": "dataViewFieldEditor",
           "id": "def-public.PluginSetup.fieldFormatEditors",
           "type": "Object",
           "tags": [],
@@ -558,15 +558,15 @@
           "signature": [
             "{ register: (editor: ",
             {
-              "pluginId": "indexPatternFieldEditor",
+              "pluginId": "dataViewFieldEditor",
               "scope": "public",
-              "docId": "kibIndexPatternFieldEditorPluginApi",
+              "docId": "kibDataViewFieldEditorPluginApi",
               "section": "def-public.FieldFormatEditorFactory",
               "text": "FieldFormatEditorFactory"
             },
             "<any>) => void; }"
           ],
-          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+          "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false
         }
       ],
@@ -574,17 +574,17 @@
       "initialIsOpen": true
     },
     "start": {
-      "parentPluginId": "indexPatternFieldEditor",
+      "parentPluginId": "dataViewFieldEditor",
       "id": "def-public.PluginStart",
       "type": "Interface",
       "tags": [],
       "label": "PluginStart",
       "description": [],
-      "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+      "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
       "children": [
         {
-          "parentPluginId": "indexPatternFieldEditor",
+          "parentPluginId": "dataViewFieldEditor",
           "id": "def-public.PluginStart.openEditor",
           "type": "Function",
           "tags": [],
@@ -593,19 +593,19 @@
           "signature": [
             "(options: ",
             {
-              "pluginId": "indexPatternFieldEditor",
+              "pluginId": "dataViewFieldEditor",
               "scope": "public",
-              "docId": "kibIndexPatternFieldEditorPluginApi",
+              "docId": "kibDataViewFieldEditorPluginApi",
               "section": "def-public.OpenFieldEditorOptions",
               "text": "OpenFieldEditorOptions"
             },
             ") => () => void"
           ],
-          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+          "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
           "children": [
             {
-              "parentPluginId": "indexPatternFieldEditor",
+              "parentPluginId": "dataViewFieldEditor",
               "id": "def-public.PluginStart.openEditor.$1",
               "type": "Object",
               "tags": [],
@@ -613,14 +613,14 @@
               "description": [],
               "signature": [
                 {
-                  "pluginId": "indexPatternFieldEditor",
+                  "pluginId": "dataViewFieldEditor",
                   "scope": "public",
-                  "docId": "kibIndexPatternFieldEditorPluginApi",
+                  "docId": "kibDataViewFieldEditorPluginApi",
                   "section": "def-public.OpenFieldEditorOptions",
                   "text": "OpenFieldEditorOptions"
                 }
               ],
-              "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+              "path": "src/plugins/data_view_field_editor/public/types.ts",
               "deprecated": false,
               "isRequired": true
             }
@@ -628,7 +628,7 @@
           "returnComment": []
         },
         {
-          "parentPluginId": "indexPatternFieldEditor",
+          "parentPluginId": "dataViewFieldEditor",
           "id": "def-public.PluginStart.openDeleteModal",
           "type": "Function",
           "tags": [],
@@ -637,19 +637,19 @@
           "signature": [
             "(options: ",
             {
-              "pluginId": "indexPatternFieldEditor",
+              "pluginId": "dataViewFieldEditor",
               "scope": "public",
-              "docId": "kibIndexPatternFieldEditorPluginApi",
+              "docId": "kibDataViewFieldEditorPluginApi",
               "section": "def-public.OpenFieldDeleteModalOptions",
               "text": "OpenFieldDeleteModalOptions"
             },
             ") => () => void"
           ],
-          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+          "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
           "children": [
             {
-              "parentPluginId": "indexPatternFieldEditor",
+              "parentPluginId": "dataViewFieldEditor",
               "id": "def-public.PluginStart.openDeleteModal.$1",
               "type": "Object",
               "tags": [],
@@ -657,14 +657,14 @@
               "description": [],
               "signature": [
                 {
-                  "pluginId": "indexPatternFieldEditor",
+                  "pluginId": "dataViewFieldEditor",
                   "scope": "public",
-                  "docId": "kibIndexPatternFieldEditorPluginApi",
+                  "docId": "kibDataViewFieldEditorPluginApi",
                   "section": "def-public.OpenFieldDeleteModalOptions",
                   "text": "OpenFieldDeleteModalOptions"
                 }
               ],
-              "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+              "path": "src/plugins/data_view_field_editor/public/types.ts",
               "deprecated": false,
               "isRequired": true
             }
@@ -672,7 +672,7 @@
           "returnComment": []
         },
         {
-          "parentPluginId": "indexPatternFieldEditor",
+          "parentPluginId": "dataViewFieldEditor",
           "id": "def-public.PluginStart.fieldFormatEditors",
           "type": "Object",
           "tags": [],
@@ -681,27 +681,27 @@
           "signature": [
             "{ getAll: () => ",
             {
-              "pluginId": "indexPatternFieldEditor",
+              "pluginId": "dataViewFieldEditor",
               "scope": "public",
-              "docId": "kibIndexPatternFieldEditorPluginApi",
+              "docId": "kibDataViewFieldEditorPluginApi",
               "section": "def-public.FieldFormatEditorFactory",
               "text": "FieldFormatEditorFactory"
             },
             "<any>[]; getById: (id: string) => ",
             {
-              "pluginId": "indexPatternFieldEditor",
+              "pluginId": "dataViewFieldEditor",
               "scope": "public",
-              "docId": "kibIndexPatternFieldEditorPluginApi",
+              "docId": "kibDataViewFieldEditorPluginApi",
               "section": "def-public.FieldFormatEditorFactory",
               "text": "FieldFormatEditorFactory"
             },
             "<any> | undefined; }"
           ],
-          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+          "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false
         },
         {
-          "parentPluginId": "indexPatternFieldEditor",
+          "parentPluginId": "dataViewFieldEditor",
           "id": "def-public.PluginStart.userPermissions",
           "type": "Object",
           "tags": [],
@@ -710,11 +710,11 @@
           "signature": [
             "{ editIndexPattern: () => boolean; }"
           ],
-          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+          "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false
         },
         {
-          "parentPluginId": "indexPatternFieldEditor",
+          "parentPluginId": "dataViewFieldEditor",
           "id": "def-public.PluginStart.DeleteRuntimeFieldProvider",
           "type": "Function",
           "tags": [],
@@ -725,12 +725,12 @@
             "Props",
             ">"
           ],
-          "path": "src/plugins/index_pattern_field_editor/public/types.ts",
+          "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
             {
-              "parentPluginId": "indexPatternFieldEditor",
+              "parentPluginId": "dataViewFieldEditor",
               "id": "def-public.PluginStart.DeleteRuntimeFieldProvider.$1",
               "type": "CompoundType",
               "tags": [],
@@ -743,7 +743,7 @@
               "deprecated": false
             },
             {
-              "parentPluginId": "indexPatternFieldEditor",
+              "parentPluginId": "dataViewFieldEditor",
               "id": "def-public.PluginStart.DeleteRuntimeFieldProvider.$2",
               "type": "Any",
               "tags": [],

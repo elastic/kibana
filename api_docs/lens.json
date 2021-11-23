@@ -165,6 +165,20 @@
             ],
             "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DatatableVisualizationState.paging",
+            "type": "Object",
+            "tags": [],
+            "label": "paging",
+            "description": [],
+            "signature": [
+              "PagingState",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1095,7 +1109,7 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"pie\" | \"donut\" | \"treemap\""
+              "\"pie\" | \"donut\" | \"treemap\" | \"mosaic\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
