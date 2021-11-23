@@ -12,6 +12,9 @@ export interface PluginOrPackage {
     description?: string;
     owner: { name: string; githubTeam?: string };
     serviceFolders: readonly string[];
+    optionalPlugins?: readonly string[];
+    requiredPlugins?: readonly string[];
+    requiredBundles?: readonly string[];
   };
   isPlugin: boolean;
   directory: string;

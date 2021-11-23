@@ -8,6 +8,8 @@
 
 import { FunctionTypeNode, Node } from 'ts-morph';
 import { ToolingLog } from '@kbn/dev-utils';
+import { TypeKind } from '../types';
+import { getTypeKind } from './get_type_kind';
 import { buildClassDec } from './build_class_dec';
 import { buildFunctionDec } from './build_function_dec';
 import { isNamedNode } from '../tsmorph_utils';
@@ -31,6 +33,7 @@ export function buildApiDeclarationTopNode(
     captureReferences: boolean;
     parentApiId?: string;
     scope: ApiScope;
+    excludeTypes: boolean;
   }
 ) {
   const name = isNamedNode(node) ? node.getName() : 'Unnamed';
@@ -50,6 +53,15 @@ export function buildApiDeclarationTopNode(
  * @param opts Various options and settings
  */
 export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDeclaration {
+  const typeKind = getTypeKind(node);
+  // Don't track
+  if (
+    (opts.excludeTypes && typeKind === TypeKind.InterfaceKind) ||
+    typeKind === TypeKind.TypeKind ||
+    typeKind === TypeKind.EnumKind
+  ) {
+    return buildBasicApiDeclaration(node, opts);
+  }
   if (Node.isClassDeclaration(node)) {
     return buildClassDec(node, opts);
   } else if (Node.isInterfaceDeclaration(node)) {

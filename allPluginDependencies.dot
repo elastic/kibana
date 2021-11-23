@@ -1,0 +1,236 @@
+digraph test{
+    subgraph clusterVisEditors {
+      label="Vis Editors"
+      style=filled
+      advancedSettings [label="advancedSettings\nI: 0.92\nCe: 22 | Ca: 2" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+charts [label="charts\nI: 0.24\nCe: 5 | Ca: 16" fillcolor="#EC7063", style=filled fixedsize=true width=1 height=1]
+kibanaLegacy [label="kibanaLegacy\nI: 0\nCe: 0 | Ca: 5" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+management [label="management\nI: 0.48\nCe: 20 | Ca: 22" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+urlForwarding [label="urlForwarding\nI: 0\nCe: 0 | Ca: 7" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+visDefaultEditor [label="visDefaultEditor\nI: 0.78\nCe: 35 | Ca: 10" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visualizations [label="visualizations\nI: 0.63\nCe: 32 | Ca: 19" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+visualize [label="visualize\nI: 0.94\nCe: 34 | Ca: 2" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+expressionMetricVis [label="expressionMetricVis\nI: 1\nCe: 33 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+expressionTagcloud [label="expressionTagcloud\nI: 1\nCe: 33 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeMetric [label="visTypeMetric\nI: 1\nCe: 36 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypePie [label="visTypePie\nI: 0.97\nCe: 36 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeTable [label="visTypeTable\nI: 1\nCe: 36 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeTagcloud [label="visTypeTagcloud\nI: 1\nCe: 36 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeTimelion [label="visTypeTimelion\nI: 1\nCe: 36 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeTimeseries [label="visTypeTimeseries\nI: 0.95\nCe: 35 | Ca: 2" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeVega [label="visTypeVega\nI: 1\nCe: 37 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeVislib [label="visTypeVislib\nI: 1\nCe: 38 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+visTypeXy [label="visTypeXy\nI: 0.97\nCe: 36 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+lens [label="lens\nI: 0.86\nCe: 38 | Ca: 6" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterAppServices {
+      label="App Services"
+      style=filled
+      bfetch [label="bfetch\nI: 0.25\nCe: 1 | Ca: 3" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+data [label="data\nI: 0.14\nCe: 10 | Ca: 59" fillcolor="#E74C3C", style=filled fixedsize=true width=10 height=10]
+dataViews [label="dataViews\nI: 0.64\nCe: 7 | Ca: 4" fillcolor="#EC7063", style=filled fixedsize=true width=2.0630018529956766 height=2.0630018529956766]
+embeddable [label="embeddable\nI: 0.32\nCe: 12 | Ca: 25" fillcolor="#E74C3C", style=filled fixedsize=true width=1.4484249536751082 height=1.4484249536751082]
+expressions [label="expressions\nI: 0.13\nCe: 4 | Ca: 27" fillcolor="#F5B7B1", style=filled fixedsize=true width=6.460778258184065 height=6.460778258184065]
+fieldFormats [label="fieldFormats\nI: 0\nCe: 0 | Ca: 17" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+indexPatternEditor [label="indexPatternEditor\nI: 0.92\nCe: 12 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+indexPatternFieldEditor [label="indexPatternFieldEditor\nI: 0.75\nCe: 12 | Ca: 4" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+indexPatternManagement [label="indexPatternManagement\nI: 1\nCe: 24 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+inspector [label="inspector\nI: 0.17\nCe: 3 | Ca: 15" fillcolor="#F5B7B1", style=filled fixedsize=true width=1 height=1]
+kibanaReact [label="kibanaReact\nI: 0\nCe: 0 | Ca: 76" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+kibanaUtils [label="kibanaUtils\nI: 0\nCe: 0 | Ca: 53" fillcolor="#A3E4D7", style=filled fixedsize=true width=1.8993205682520073 height=1.8993205682520073]
+navigation [label="navigation\nI: 0.52\nCe: 11 | Ca: 10" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+screenshotMode [label="screenshotMode\nI: 0\nCe: 0 | Ca: 5" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+share [label="share\nI: 0.04\nCe: 1 | Ca: 26" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+uiActions [label="uiActions\nI: 0.12\nCe: 2 | Ca: 15" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+dashboardEnhanced [label="dashboardEnhanced\nI: 1\nCe: 36 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+dataEnhanced [label="dataEnhanced\nI: 0.85\nCe: 28 | Ca: 5" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+embeddableEnhanced [label="embeddableEnhanced\nI: 0.94\nCe: 15 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+runtimeFields [label="runtimeFields\nI: 0.92\nCe: 12 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+uiActionsEnhanced [label="uiActionsEnhanced\nI: 0.82\nCe: 14 | Ca: 3" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+urlDrilldown [label="urlDrilldown\nI: 1\nCe: 15 | Ca: 0" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterStackManagement {
+      label="Stack Management"
+      style=filled
+      console [label="console\nI: 1\nCe: 22 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+devTools [label="devTools\nI: 0.2\nCe: 1 | Ca: 4" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+esUiShared [label="esUiShared\nI: 0.26\nCe: 11 | Ca: 31" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+crossClusterReplication [label="crossClusterReplication\nI: 1\nCe: 66 | Ca: 0" fillcolor="#641E16", style=filled fixedsize=true width=1 height=1]
+grokdebugger [label="grokdebugger\nI: 1\nCe: 23 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+indexLifecycleManagement [label="indexLifecycleManagement\nI: 1\nCe: 64 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+indexManagement [label="indexManagement\nI: 0.93\nCe: 63 | Ca: 5" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+ingestPipelines [label="ingestPipelines\nI: 1\nCe: 28 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+licenseApiGuard [label="licenseApiGuard\nI: 0\nCe: 0 | Ca: 2" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+licenseManagement [label="licenseManagement\nI: 0.93\nCe: 26 | Ca: 2" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+painlessLab [label="painlessLab\nI: 1\nCe: 22 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+remoteClusters [label="remoteClusters\nI: 0.98\nCe: 64 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+rollup [label="rollup\nI: 1\nCe: 64 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+searchprofiler [label="searchprofiler\nI: 1\nCe: 23 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+snapshotRestore [label="snapshotRestore\nI: 1\nCe: 29 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+upgradeAssistant [label="upgradeAssistant\nI: 1\nCe: 62 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+watcher [label="watcher\nI: 1\nCe: 26 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterFleet {
+      label="Fleet"
+      style=filled
+      customIntegrations [label="customIntegrations\nI: 0.78\nCe: 14 | Ca: 4" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+fleet [label="fleet\nI: 0.87\nCe: 62 | Ca: 9" fillcolor="#78281F", style=filled fixedsize=true width=3.7770228536133414 height=3.7770228536133414]
+}
+subgraph clusterKibanaPresentation {
+      label="Kibana Presentation"
+      style=filled
+      dashboard [label="dashboard\nI: 0.85\nCe: 33 | Ca: 6" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+expressionError [label="expressionError\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionImage [label="expressionImage\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionMetric [label="expressionMetric\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionRepeatImage [label="expressionRepeatImage\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionRevealImage [label="expressionRevealImage\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+expressionShape [label="expressionShape\nI: 0.93\nCe: 14 | Ca: 1" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+inputControlVis [label="inputControlVis\nI: 1\nCe: 36 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+presentationUtil [label="presentationUtil\nI: 0.46\nCe: 13 | Ca: 15" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+visTypeMarkdown [label="visTypeMarkdown\nI: 1\nCe: 36 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+canvas [label="canvas\nI: 1\nCe: 49 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterDataDiscovery {
+      label="Data Discovery"
+      style=filled
+      discover [label="discover\nI: 0.73\nCe: 30 | Ca: 11" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+discoverEnhanced [label="discoverEnhanced\nI: 1\nCe: 31 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+graph1 [label="graph1\nI: 1\nCe: 28 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaCore {
+      label="Kibana Core"
+      style=filled
+      home [label="home\nI: 0.23\nCe: 19 | Ca: 65" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+kibanaOverview [label="kibanaOverview\nI: 1\nCe: 22 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+newsfeed [label="newsfeed\nI: 0.25\nCe: 1 | Ca: 3" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+savedObjects [label="savedObjects\nI: 0.41\nCe: 11 | Ca: 16" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+savedObjectsManagement [label="savedObjectsManagement\nI: 1\nCe: 27 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+savedObjectsTaggingOss [label="savedObjectsTaggingOss\nI: 0.71\nCe: 12 | Ca: 5" fillcolor="#E74C3C", style=filled fixedsize=true width=1 height=1]
+usageCollection [label="usageCollection\nI: 0.02\nCe: 1 | Ca: 61" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+banners [label="banners\nI: 1\nCe: 2 | Ca: 0" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+cloud [label="cloud\nI: 0.74\nCe: 28 | Ca: 10" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+features [label="features\nI: 0.05\nCe: 2 | Ca: 35" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+globalSearch [label="globalSearch\nI: 0.33\nCe: 2 | Ca: 4" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+globalSearchBar [label="globalSearchBar\nI: 1\nCe: 31 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+globalSearchProviders [label="globalSearchProviders\nI: 1\nCe: 3 | Ca: 0" fillcolor="#F5B7B1", style=filled fixedsize=true width=1 height=1]
+licensing [label="licensing\nI: 0.03\nCe: 1 | Ca: 32" fillcolor="#F6DDCC", style=filled fixedsize=true width=1 height=1]
+savedObjectsTagging [label="savedObjectsTagging\nI: 0.91\nCe: 29 | Ca: 3" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+core [label="core\nI: NaN\nCe: 0 | Ca: 0" fillcolor="#A3E4D7", style=filled fixedsize=true width=7.11550339715874 height=7.11550339715874]
+}
+subgraph clusterPlatformSecurity {
+      label="Platform Security"
+      style=filled
+      interactiveSetup [label="interactiveSetup\nI: NaN\nCe: 0 | Ca: 0" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+encryptedSavedObjects [label="encryptedSavedObjects\nI: 0.85\nCe: 28 | Ca: 5" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+security [label="security\nI: 0.53\nCe: 27 | Ca: 24" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+spaces [label="spaces\nI: 0.5\nCe: 25 | Ca: 25" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaTelemetry {
+      label="Kibana Telemetry"
+      style=filled
+      kibanaUsageCollection [label="kibanaUsageCollection\nI: 1\nCe: 2 | Ca: 0" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+telemetry [label="telemetry\nI: 0.56\nCe: 5 | Ca: 4" fillcolor="#EC7063", style=filled fixedsize=true width=1 height=1]
+telemetryCollectionManager [label="telemetryCollectionManager\nI: 0.5\nCe: 2 | Ca: 2" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+telemetryManagementSection [label="telemetryManagementSection\nI: 0.96\nCe: 23 | Ca: 1" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+telemetryCollectionXpack [label="telemetryCollectionXpack\nI: 1\nCe: 3 | Ca: 0" fillcolor="#F5B7B1", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterGIS {
+      label="GIS"
+      style=filled
+      mapsEms [label="mapsEms\nI: 0\nCe: 0 | Ca: 3" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+maps [label="maps\nI: 0.83\nCe: 39 | Ca: 8" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaAlerting {
+      label="Kibana Alerting"
+      style=filled
+      actions [label="actions\nI: 0.83\nCe: 30 | Ca: 6" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+alerting [label="alerting\nI: 0.69\nCe: 31 | Ca: 14" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+eventLog [label="eventLog\nI: 0.9\nCe: 26 | Ca: 3" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+stackAlerts [label="stackAlerts\nI: 1\nCe: 35 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+taskManager [label="taskManager\nI: 0.2\nCe: 2 | Ca: 8" fillcolor="#F5CBA7", style=filled fixedsize=true width=1 height=1]
+triggersActionsUi [label="triggersActionsUi\nI: 0.74\nCe: 34 | Ca: 12" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterAPMUI {
+      label="APM UI"
+      style=filled
+      apm [label="apm\nI: 1\nCe: 62 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterSecuritySolutionThreatHunting {
+      label="Security Solution Threat Hunting"
+      style=filled
+      cases [label="cases\nI: 0.94\nCe: 45 | Ca: 3" fillcolor="#78281F", style=filled fixedsize=true width=1.4700432365657814 height=1.4700432365657814]
+}
+subgraph clusterMachineLearningUI {
+      label="Machine Learning UI"
+      style=filled
+      dataVisualizer [label="dataVisualizer\nI: 0.98\nCe: 42 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+fileUpload [label="fileUpload\nI: 0.93\nCe: 28 | Ca: 2" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+ml [label="ml\nI: 0.85\nCe: 51 | Ca: 9" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+transform [label="transform\nI: 1\nCe: 52 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterEnterpriseSearch {
+      label="Enterprise Search"
+      style=filled
+      enterpriseSearch [label="enterpriseSearch\nI: 1\nCe: 62 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterLogsandMetricsUI {
+      label="Logs and Metrics UI"
+      style=filled
+      infra [label="infra\nI: 0.93\nCe: 62 | Ca: 5" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterSecuritydetectionsresponse {
+      label="Security detections response"
+      style=filled
+      lists [label="lists\nI: 0.93\nCe: 28 | Ca: 2" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterLogstash {
+      label="Logstash"
+      style=filled
+      logstash [label="logstash\nI: 1\nCe: 63 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterSecuritysolution {
+      label="Security solution"
+      style=filled
+      metricsEntities [label="metricsEntities\nI: 1\nCe: 29 | Ca: 0" fillcolor="#B03A2E", style=filled fixedsize=true width=1 height=1]
+securitySolution [label="securitySolution\nI: 1\nCe: 64 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=4.237183446571958 height=4.237183446571958]
+timelines [label="timelines\nI: 0.96\nCe: 47 | Ca: 2" fillcolor="#78281F", style=filled fixedsize=true width=2.992588017294626 height=2.992588017294626]
+}
+subgraph clusterStackMonitoring {
+      label="Stack Monitoring"
+      style=filled
+      monitoring [label="monitoring\nI: 0.98\nCe: 62 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterObservabilityUI {
+      label="Observability UI"
+      style=filled
+      observability [label="observability\nI: 0.88\nCe: 49 | Ca: 7" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterSecurityassetmanagement {
+      label="Security asset management"
+      style=filled
+      osquery [label="osquery\nI: 0.98\nCe: 62 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaReportingServices {
+      label="Kibana Reporting Services"
+      style=filled
+      reporting [label="reporting\nI: 0.97\nCe: 33 | Ca: 1" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterRAC {
+      label="RAC"
+      style=filled
+      ruleRegistry [label="ruleRegistry\nI: 0.88\nCe: 35 | Ca: 5" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterKibanaLocalization {
+      label="Kibana Localization"
+      style=filled
+      translations [label="translations\nI: NaN\nCe: 0 | Ca: 0" fillcolor="#A3E4D7", style=filled fixedsize=true width=1 height=1]
+}
+subgraph clusterUptime {
+      label="Uptime"
+      style=filled
+      uptime [label="uptime\nI: 1\nCe: 62 | Ca: 0" fillcolor="#78281F", style=filled fixedsize=true width=1 height=1]
+}
+
+     
+  }

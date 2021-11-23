@@ -29,4 +29,9 @@ export interface BuildApiDecOpts {
    * Unique id of this API item.
    */
   id: string;
+
+  /**
+   * If true, all type-only API Items will not be tracked (interfaces, etc)
+   */
+  excludeTypes: boolean;
 }

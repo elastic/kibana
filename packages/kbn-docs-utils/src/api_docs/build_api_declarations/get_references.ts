@@ -10,7 +10,7 @@ import { Node, ReferenceFindableNode } from 'ts-morph';
 import { ToolingLog } from '@kbn/dev-utils';
 import { getPluginForPath } from '../utils';
 import { getSourceForNode } from './utils';
-import { ApiDeclaration, ApiReference, PluginOrPackage } from '../types';
+import { ApiDeclaration, ApiReference, PluginOrPackage, TypeKind } from '../types';
 import { isNamedNode } from '../tsmorph_utils';
 
 interface Opts {
@@ -74,8 +74,23 @@ export function maybeCollectReferences({
   captureReferences,
 }: MaybeCollectReferencesOpt): ApiReference[] | undefined {
   if (Node.isReferenceFindableNode(node)) {
-    return captureReferences || apiDec.deprecated
+    const shouldCollectedReferences =
+      apiDec.deprecated || (captureReferences && collectReferencesForType(apiDec.type));
+    if (apiDec.parentPluginId === 'share') {
+      log.info(`captureReferences for ${apiDec.label}: ` + captureReferences);
+    }
+    return shouldCollectedReferences
       ? getReferences({ node, plugins, currentPluginId, log })
       : undefined;
   }
+}
+
+function collectReferencesForType(type: TypeKind): boolean {
+  return (
+    type === TypeKind.FunctionKind ||
+    type === TypeKind.ClassKind ||
+    type === TypeKind.ObjectKind ||
+    type === TypeKind.ArrayKind ||
+    type === TypeKind.BooleanKind
+  );
 }

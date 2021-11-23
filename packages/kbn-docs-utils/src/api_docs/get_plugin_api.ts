@@ -61,6 +61,7 @@ function getDeclarations(
       currentPluginId: plugin.manifest.id,
       scope,
       captureReferences,
+      excludeTypes: false,
     });
     // Filter out apis with the @internal flag on them.
     if (!apiDec.tags || apiDec.tags.indexOf('internal') < 0) {
