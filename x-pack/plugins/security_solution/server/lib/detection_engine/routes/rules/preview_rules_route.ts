@@ -122,6 +122,7 @@ export const previewRulesRoute = async (
           ruleTypeId: string,
           ruleTypeName: string,
           params: TParams,
+          shouldLogAndScheduleActionsForAlerts: () => boolean,
           alertInstanceFactory: (
             id: string
           ) => Pick<
@@ -157,6 +158,7 @@ export const previewRulesRoute = async (
               previousStartedAt,
               rule,
               services: {
+                shouldLogAndScheduleActionsForAlerts,
                 alertInstanceFactory,
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
@@ -191,6 +193,7 @@ export const previewRulesRoute = async (
           signalRuleAlertType.id,
           signalRuleAlertType.name,
           previewRuleParams,
+          () => true,
           alertInstanceFactoryStub
         );
 
