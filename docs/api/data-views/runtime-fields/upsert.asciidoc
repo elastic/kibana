@@ -1,4 +1,4 @@
-[[index-patterns-runtime-field-api-upsert]]
+[[data-views-runtime-field-api-upsert]]
 === Upsert runtime field API
 ++++
 <titleabbrev>Upsert runtime field</titleabbrev>
@@ -6,14 +6,14 @@
 
 experimental[] Create or update an existing runtime field
 
-[[index-patterns-runtime-field-upsert-request]]
+[[data-views-runtime-field-upsert-request]]
 ==== Request
 
 `PUT <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field`
 
 `PUT <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field`
 
-[[index-patterns-runtime-field-upsert-params]]
+[[data-views-runtime-field-upsert-params]]
 ==== Path parameters
 
 `space_id`::
@@ -22,7 +22,7 @@ experimental[] Create or update an existing runtime field
 `index_pattern_id`::
 (Required, string) The ID of the index pattern.
 
-[[index-patterns-runtime-field-upsert-body]]
+[[data-views-runtime-field-upsert-body]]
 ==== Request body
 
 `name`:: (Required, string) The name for a new runtime field or a name of an existing runtime field.
@@ -30,7 +30,7 @@ experimental[] Create or update an existing runtime field
 `runtimeField`:: (Required, object) The runtime field definition object.
 
 
-[[index-patterns-runtime-field-upsert-example]]
+[[data-views-runtime-field-upsert-example]]
 ==== Examples
 
 Create or update an existing runtime field on an index pattern:

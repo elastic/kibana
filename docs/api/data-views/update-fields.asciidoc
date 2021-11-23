@@ -1,4 +1,4 @@
-[[index-patterns-fields-api-update]]
+[[data-views-fields-api-update]]
 === Update index pattern fields API
 ++++
 <titleabbrev>Update index pattern fields metadata</titleabbrev>
@@ -8,14 +8,14 @@ experimental[] Update fields presentation metadata, such as `count`,
 `customLabel`, and `format`. You can update multiple fields in one request. Updates
 are merged with persisted metadata. To remove existing metadata, specify `null` as the value.
 
-[[index-patterns-fields-api-update-request]]
+[[data-views-fields-api-update-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/index_patterns/index_pattern/<id>/fields`
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>/fields`
 
-[[index-patterns-fields-api-update-path-params]]
+[[data-views-fields-api-update-path-params]]
 ==== Path parameters
 
 `space_id`::
@@ -24,20 +24,20 @@ are merged with persisted metadata. To remove existing metadata, specify `null` 
 `id`::
 (Required, string) The ID of the index pattern fields you want to update.
 
-[[index-patterns-fields-api-update-request-body]]
+[[data-views-fields-api-update-request-body]]
 ==== Request body
 
 `fields`::
 (Required, object) the field object
 
 
-[[index-patterns-fields-api-update-errors-codes]]
+[[data-views-fields-api-update-errors-codes]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
-[[index-patterns-fields-api-update-example]]
+[[data-views-fields-api-update-example]]
 ==== Examples
 
 Set popularity `count` for field `foo`:

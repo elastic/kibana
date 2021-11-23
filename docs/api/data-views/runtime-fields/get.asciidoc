@@ -6,14 +6,14 @@
 
 experimental[] Get a runtime field
 
-[[index-patterns-runtime-field-get-request]]
+[[data-views-runtime-field-get-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
 
-[[index-patterns-runtime-field-get-params]]
+[[data-views-runtime-field-get-params]]
 ==== Path parameters
 
 `space_id`::
@@ -26,7 +26,7 @@ experimental[] Get a runtime field
 (Required, string) The name of the runtime field you want to retrieve.
 
 
-[[index-patterns-runtime-field-get-example]]
+[[data-views-runtime-field-get-example]]
 ==== Example
 
 Retrieve a runtime field named `foo` of index pattern with the `my-pattern` ID:
