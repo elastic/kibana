@@ -21,7 +21,7 @@ $ curl -X GET api/task_manager/_health
 --------------------------------------------------
 // KIBANA
 
-Monitoring the `_health` endpoint of each {kib} instance in the cluster is the recommended method of ensuring confidence in mission critical services such as Alerting, Actions and Reporting.
+Monitoring the `_health` endpoint of each {kib} instance in the cluster is the recommended method of ensuring confidence in mission critical services such as Alerting and Actions.
 
 [float]
 [[task-manager-configuring-health-monitoring]]
