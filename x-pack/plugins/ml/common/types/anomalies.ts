@@ -38,7 +38,6 @@ export interface AnomalyRecordDoc {
   multi_bucket_impact?: number;
   over_field_name?: string;
   over_field_value?: string;
-  // TODO provide the causes resource interface.
   causes?: Array<{
     function: string;
     function_description: string;
@@ -48,6 +47,10 @@ export interface AnomalyRecordDoc {
     field_name?: string;
     over_field_name?: string;
     over_field_value?: string;
+    by_field_name?: string;
+    by_field_value?: string;
+    partition_field_name?: string;
+    partition_field_value?: string | number;
   }>;
 }
 
