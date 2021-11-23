@@ -13,7 +13,9 @@ import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { RenderValue } from './vega_fn';
-const VegaVisComponent = lazy(() => import('./components/vega_vis_component'));
+const LazyVegaVisComponent = lazy(() =>
+  import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
+);
 
 export const getVegaVisRenderer: (
   deps: VegaVisualizationDependencies
@@ -27,7 +29,7 @@ export const getVegaVisRenderer: (
 
     render(
       <VisualizationContainer handlers={handlers}>
-        <VegaVisComponent
+        <LazyVegaVisComponent
           deps={deps}
           fireEvent={handlers.event}
           renderComplete={handlers.done}
