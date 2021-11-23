@@ -29,6 +29,7 @@ import {
   AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
+  ExecutionDuration,
   AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
