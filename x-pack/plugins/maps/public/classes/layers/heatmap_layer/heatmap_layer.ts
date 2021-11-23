@@ -153,7 +153,8 @@ export class HeatmapLayer extends AbstractLayer {
     }
     const metricField = metricFields[0];
 
-    const tileMetaFeatures = this._getMetaFromTiles();
+    // do not use tile meta features from previous urlTemplate to avoid styling new tiles from previous tile meta features
+    const tileMetaFeatures = this._requiresPrevSourceCleanup(mbMap) ? [] : this._getMetaFromTiles();
     let max = 0;
     for (let i = 0; i < tileMetaFeatures.length; i++) {
       const range = metricField.pluckRangeFromTileMetaFeature(tileMetaFeatures[i]);
