@@ -10,10 +10,10 @@ import type { ISavedObjectTypeRegistry, SavedObjectsType } from 'src/core/server
 export const getSearchableTypes = (typeRegistry: ISavedObjectTypeRegistry, types?: string[]) => {
   const typeFilter = types
     ? (type: SavedObjectsType) => {
-        if (type.management?.displayName && includeIgnoreCase(types, type.management.displayName)) {
+        if (type.management?.displayName && isTypeMatching(types, type.management.displayName)) {
           return true;
         }
-        return includeIgnoreCase(types, type.name);
+        return isTypeMatching(types, type.name);
       }
     : () => true;
 
@@ -23,5 +23,7 @@ export const getSearchableTypes = (typeRegistry: ISavedObjectTypeRegistry, types
     .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
 };
 
-const includeIgnoreCase = (list: string[], item: string) =>
-  list.find((e) => e.toLowerCase() === item.toLowerCase()) !== undefined;
+const isTypeMatching = (list: string[], item: string) =>
+  list.find((e) => toCompareFormat(e) === toCompareFormat(item)) !== undefined;
+
+const toCompareFormat = (str: string) => str.trim().toLowerCase().replace(/\s/g, '-');
