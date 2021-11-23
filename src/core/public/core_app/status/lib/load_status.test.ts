@@ -37,11 +37,11 @@ const mockedResponse: StatusResponse = {
       },
     },
     plugins: {
-      '1': {
+      plugin1: {
         level: 'available',
         summary: 'Ready',
       },
-      '2': {
+      plugin2: {
         level: 'degraded',
         summary: 'Something is weird',
       },
@@ -165,39 +165,50 @@ describe('response processing', () => {
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
-  test('includes the plugin statuses', async () => {
+  test('includes core statuses', async () => {
     const data = await loadStatus({ http, notifications });
-    expect(data.statuses).toEqual([
+    expect(data.coreStatus).toEqual([
       {
-        id: 'core:elasticsearch',
+        id: 'elasticsearch',
         state: {
           id: 'available',
           title: 'Green',
           message: 'Elasticsearch is available',
           uiColor: 'success',
         },
+        original: mockedResponse.status.core.elasticsearch,
       },
       {
-        id: 'core:savedObjects',
+        id: 'savedObjects',
         state: {
           id: 'available',
           title: 'Green',
           message: 'SavedObjects service has completed migrations and is available',
           uiColor: 'success',
         },
+        original: mockedResponse.status.core.savedObjects,
       },
+    ]);
+  });
+
+  test('includes the plugin statuses', async () => {
+    const data = await loadStatus({ http, notifications });
+
+    expect(data.pluginStatus).toEqual([
       {
-        id: 'plugin:1',
+        id: 'plugin1',
         state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'success' },
+        original: mockedResponse.status.plugins.plugin1,
       },
       {
-        id: 'plugin:2',
+        id: 'plugin2',
         state: {
           id: 'degraded',
           title: 'Yellow',
           message: 'Something is weird',
           uiColor: 'warning',
         },
+        original: mockedResponse.status.plugins.plugin2,
       },
     ]);
   });
