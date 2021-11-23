@@ -114,7 +114,7 @@ export const getUpdateArtifacts = (
 export const getDoesTrustedAppExists = (state: Immutable<PolicyDetailsState>): boolean => {
   return (
     isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists) &&
-    !!state.artifacts.doesAnyTrustedAppExists.data
+    !!state.artifacts.doesAnyTrustedAppExists.data.total
   );
 };
 
@@ -191,12 +191,8 @@ export const getPolicyTrustedAppsListPagination: PolicyDetailsSelector<Paginatio
 export const getTotalPolicyTrustedAppsListPagination = (
   state: Immutable<PolicyDetailsState>
 ): number => {
-  return isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists)
-    ? state.artifacts.doesAnyTrustedAppExists.data.total
-    : isLoadingResourceState(state.artifacts.doesAnyTrustedAppExists) &&
-      state.artifacts.doesAnyTrustedAppExists.previousState &&
-      isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists.previousState)
-    ? state.artifacts.doesAnyTrustedAppExists.previousState.data.total
+  return isLoadedResourceState(state.artifacts.hasTrustedApps)
+    ? state.artifacts.hasTrustedApps.data.total
     : 0;
 };
 
@@ -219,6 +215,13 @@ export const getTrustedAppsAllPoliciesById: PolicyDetailsSelector<
     return mapById;
   }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
 });
+
+export const getHasTrustedApps: PolicyDetailsSelector<boolean> = (state) =>
+  isLoadedResourceState(state.artifacts.hasTrustedApps) &&
+  !!state.artifacts.hasTrustedApps.data.total;
+
+export const getHasTrustedAppsIsLoading: PolicyDetailsSelector<boolean> = (state) =>
+  isLoadingResourceState(state.artifacts.hasTrustedApps);
 
 export const getDoesAnyTrustedAppExists: PolicyDetailsSelector<
   PolicyDetailsState['artifacts']['doesAnyTrustedAppExists']

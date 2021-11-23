@@ -89,7 +89,10 @@ describe('Policy trusted apps layout', () => {
 
     mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
 
-    await waitForAction('policyArtifactsDeosAnyTrustedAppExists', {
+    await waitForAction('policyArtifactsHasTrustedApps', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
+    await waitForAction('assignedTrustedAppsListStateChanged', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
 
@@ -100,11 +103,14 @@ describe('Policy trusted apps layout', () => {
     const component = render();
     mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
 
+    await waitForAction('policyArtifactsHasTrustedApps', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
     await waitForAction('assignedTrustedAppsListStateChanged');
 
     mockedContext.store.dispatch({
       type: 'policyArtifactsDeosAnyTrustedAppExists',
-      payload: createLoadedResourceState(true),
+      payload: createLoadedResourceState({ data: [], total: 1 }),
     });
 
     expect(component.getByTestId('policy-trusted-apps-empty-unassigned')).not.toBeNull();
@@ -119,6 +125,9 @@ describe('Policy trusted apps layout', () => {
     const component = render();
     mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234'));
 
+    await waitForAction('policyArtifactsHasTrustedApps', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
     await waitForAction('assignedTrustedAppsListStateChanged');
 
     expect(component.getAllByTestId('policyTrustedAppsGrid-card')).toHaveLength(10);

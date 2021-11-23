@@ -136,6 +136,46 @@ const checkIfThereAreAssignableTrustedApps = async (
   }
 };
 
+const checkIfPolicyHasTrustedAppsAssigned = async (
+  store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const state = store.getState();
+  if (isLoadingResourceState(state.artifacts.hasTrustedApps)) {
+    return;
+  }
+  if (isLoadedResourceState(state.artifacts.hasTrustedApps)) {
+    store.dispatch({
+      type: 'policyArtifactsHasTrustedApps',
+      payload: createLoadingResourceState(state.artifacts.hasTrustedApps),
+    });
+  } else {
+    store.dispatch({
+      type: 'policyArtifactsHasTrustedApps',
+      payload: createLoadingResourceState<GetTrustedAppsListResponse>(),
+    });
+  }
+  try {
+    const policyId = policyIdFromParams(state);
+    const kuery = `exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all"`;
+    const trustedApps = await trustedAppsService.getTrustedAppsList({
+      page: 1,
+      per_page: 100,
+      kuery,
+    });
+
+    store.dispatch({
+      type: 'policyArtifactsHasTrustedApps',
+      payload: createLoadedResourceState(trustedApps),
+    });
+  } catch (err) {
+    store.dispatch({
+      type: 'policyArtifactsHasTrustedApps',
+      payload: createFailedResourceState<GetTrustedAppsListResponse>(err.body ?? err),
+    });
+  }
+};
+
 const checkIfAnyTrustedApp = async (
   store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
   trustedAppsService: TrustedAppsService
@@ -271,6 +311,7 @@ const fetchPolicyTrustedAppsIfNeeded = async (
     });
 
     try {
+      await checkIfPolicyHasTrustedAppsAssigned({ getState, dispatch }, trustedAppsService);
       const urlLocationData = getCurrentUrlLocationPaginationParams(state);
       const policyId = policyIdFromParams(state);
       const kuery = [

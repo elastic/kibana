@@ -105,8 +105,17 @@ describe('when rendering the PolicyTrustedAppsList', () => {
           })
         : Promise.resolve();
 
+      const checkTrustedAppDataExistsReceived = waitForLoadedState
+        ? waitForAction('policyArtifactsDeosAnyTrustedAppExists', {
+            validate({ payload }) {
+              return isLoadedResourceState(payload);
+            },
+          })
+        : Promise.resolve();
+
       renderResult = appTestContext.render(<PolicyTrustedAppsList {...componentRenderProps} />);
       await trustedAppDataReceived;
+      await checkTrustedAppDataExistsReceived;
 
       return renderResult;
     };
@@ -324,12 +333,12 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   });
 
   it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
-    await render();
     mockUseEndpointPrivileges.mockReturnValue(
       loadedUserEndpointPrivilegesState({
         isPlatinumPlus: false,
       })
     );
+    await render();
     await toggleCardActionMenu(POLICY_SPECIFIC_CARD_INDEX);
 
     expect(renderResult.queryByTestId('policyTrustedAppsGrid-removeAction')).toBeNull();

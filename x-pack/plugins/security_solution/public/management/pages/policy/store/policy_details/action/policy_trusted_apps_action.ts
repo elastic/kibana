@@ -48,6 +48,11 @@ export interface PolicyArtifactsDeosAnyTrustedAppExists {
   payload: AsyncResourceState<GetTrustedAppsListResponse>;
 }
 
+export interface PolicyArtifactsHasTrustedApps {
+  type: 'policyArtifactsHasTrustedApps';
+  payload: AsyncResourceState<GetTrustedAppsListResponse>;
+}
+
 export interface AssignedTrustedAppsListStateChanged
   extends Action<'assignedTrustedAppsListStateChanged'> {
   payload: PolicyArtifactsState['assignedList'];
@@ -78,6 +83,7 @@ export type PolicyTrustedAppsAction =
   | PolicyArtifactsAssignableListExistDataChanged
   | PolicyArtifactsAssignableListPageDataFilter
   | PolicyArtifactsDeosAnyTrustedAppExists
+  | PolicyArtifactsHasTrustedApps
   | AssignedTrustedAppsListStateChanged
   | PolicyDetailsListOfAllPoliciesStateChanged
   | PolicyDetailsTrustedAppsForceListDataRefresh
