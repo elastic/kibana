@@ -187,7 +187,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
-  const isPreviewRouteEnabled = useMemo(() => ruleType === 'threat_match', [ruleType]);
+  const isPreviewRouteEnabled = false;
   const isQueryPreviewEnabled = useMemo(
     () => ruleType !== 'machine_learning' && ruleType !== 'threat_match',
     [ruleType]

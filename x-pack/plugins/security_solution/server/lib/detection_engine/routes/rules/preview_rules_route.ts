@@ -66,6 +66,11 @@ export const previewRulesRoute = async (
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
+      if (request.body.type === 'threat_match') {
+        return response.ok({
+          body: { errors: ['Indicator Match Rule preview is disabled in v8.0'] },
+        });
+      }
       try {
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
