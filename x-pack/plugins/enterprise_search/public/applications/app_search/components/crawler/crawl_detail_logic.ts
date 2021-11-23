@@ -31,6 +31,7 @@ interface CrawlDetailActions {
   onRecieveCrawlRequest(crawlRequestFromServer: CrawlRequestFromServer): {
     crawlRequestFromServer: CrawlRequestFromServer;
   };
+  openFlyout(): void;
   setSelectedTab(selectedTab: CrawlDetailFlyoutTabs): { selectedTab: CrawlDetailFlyoutTabs };
 }
 
@@ -40,6 +41,7 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
     closeFlyout: true,
     fetchCrawlRequest: (requestId) => ({ requestId }),
     onRecieveCrawlRequest: (crawlRequestFromServer) => ({ crawlRequestFromServer }),
+    openFlyout: true,
     setSelectedTab: (selectedTab) => ({ selectedTab }),
   },
   reducers: {
@@ -66,14 +68,14 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
     flyoutClosed: [
       true,
       {
-        fetchCrawlRequest: () => false,
+        openFlyout: () => false,
         closeFlyout: () => true,
       },
     ],
     selectedTab: [
       'preview',
       {
-        fetchCrawlRequest: () => 'preview',
+        openFlyout: () => 'preview',
         setSelectedTab: (_, { selectedTab }) => selectedTab,
       },
     ],

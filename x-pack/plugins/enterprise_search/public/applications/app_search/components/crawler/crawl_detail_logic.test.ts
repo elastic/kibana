@@ -94,12 +94,27 @@ describe('CrawlDetailLogic', () => {
       });
     });
 
-    describe('fetchCrawlRequest', () => {
-      it('opens the flyout, resets the selected tab, and sets loading to true', () => {
+    describe('openFlyout', () => {
+      it('opens the flyout and resets the selected tab', () => {
         mount({
-          dataLoading: false,
           flyoutClosed: true,
           selectedTab: 'json',
+        });
+
+        CrawlDetailLogic.actions.openFlyout();
+
+        expect(CrawlDetailLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          flyoutClosed: false,
+          selectedTab: 'preview',
+        });
+      });
+    });
+
+    describe('fetchCrawlRequest', () => {
+      it('sets loading to true', () => {
+        mount({
+          dataLoading: false,
         });
 
         CrawlDetailLogic.actions.fetchCrawlRequest('12345');
@@ -107,8 +122,6 @@ describe('CrawlDetailLogic', () => {
         expect(CrawlDetailLogic.values).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: true,
-          flyoutClosed: false,
-          selectedTab: 'preview',
         });
       });
 
