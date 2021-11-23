@@ -24,7 +24,6 @@
 /x-pack/plugins/lens/ @elastic/kibana-vis-editors
 /src/plugins/advanced_settings/ @elastic/kibana-vis-editors
 /src/plugins/charts/ @elastic/kibana-vis-editors
-/src/plugins/management/ @elastic/kibana-vis-editors
 /src/plugins/kibana_legacy/ @elastic/kibana-vis-editors
 /src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/metric/ @elastic/kibana-vis-editors
@@ -77,10 +76,10 @@
 /src/plugins/navigation/ @elastic/kibana-app-services
 /src/plugins/share/ @elastic/kibana-app-services
 /src/plugins/ui_actions/ @elastic/kibana-app-services
-/src/plugins/index_pattern_field_editor @elastic/kibana-app-services
+/src/plugins/data_view_field_editor @elastic/kibana-app-services
 /src/plugins/screenshot_mode @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
-/src/plugins/index_pattern_management/ @elastic/kibana-app-services
+/src/plugins/data_view_management/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
@@ -363,6 +362,7 @@
 /src/plugins/dev_tools/ @elastic/kibana-stack-management
 /src/plugins/console/  @elastic/kibana-stack-management
 /src/plugins/es_ui_shared/  @elastic/kibana-stack-management
+/src/plugins/management/ @elastic/kibana-stack-management
 /x-pack/plugins/cross_cluster_replication/  @elastic/kibana-stack-management
 /x-pack/plugins/index_lifecycle_management/  @elastic/kibana-stack-management
 /x-pack/plugins/grokdebugger/  @elastic/kibana-stack-management
