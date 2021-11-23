@@ -58,7 +58,8 @@ export default function ({ getService }) {
       );
     });
 
-    describe('basic', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/116725
+    describe.skip('basic', () => {
       it('should return the stats without cluster_uuid with no query string params', () => {
         return supertest
           .get('/api/stats')
