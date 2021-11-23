@@ -14,18 +14,14 @@ import { within } from '@testing-library/dom';
 
 const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
 
-const renderHelper = (props: Partial<PopoverItemsProps<unknown>> = {}) =>
+const renderHelper = (props: Partial<PopoverItemsProps<string>> = {}) =>
   render(
     <TestProviders>
       <PopoverItems
         dataTestPrefix="tags"
         items={mockTags}
         popoverButtonTitle="show mocks"
-        renderItem={
-          ((item: string, index: number) => (
-            <span key={`${item}-${index}`}>{item}</span>
-          )) as PopoverItemsProps<unknown>['renderItem']
-        }
+        renderItem={(item: string, index: number) => <span key={`${item}-${index}`}>{item}</span>}
         {...props}
       />
     </TestProviders>

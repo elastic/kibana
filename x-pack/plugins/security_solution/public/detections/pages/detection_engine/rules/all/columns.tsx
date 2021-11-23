@@ -369,9 +369,9 @@ export const getMonitoringColumns = (
       field: 'current_status.bulk_create_time_durations',
       name: (
         <>
-          {i18n.COLUMN_INDEXING_TIMES}{' '}
+          {i18n.COLUMN_INDEXING_TIMES}
           <EuiToolTip content={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}>
-            <EuiIcon size="m" color="subdued" type="questionInCircle" style={{ margin: 4 }} />
+            <EuiIcon size="m" color="subdued" type="questionInCircle" style={{ marginLeft: 8 }} />
           </EuiToolTip>
         </>
       ),
@@ -387,9 +387,9 @@ export const getMonitoringColumns = (
       field: 'current_status.search_after_time_durations',
       name: (
         <>
-          {i18n.COLUMN_QUERY_TIMES}{' '}
+          {i18n.COLUMN_QUERY_TIMES}
           <EuiToolTip content={i18n.COLUMN_QUERY_TIMES_TOOLTIP}>
-            <EuiIcon size="m" color="subdued" type="questionInCircle" style={{ margin: 4 }} />
+            <EuiIcon size="m" color="subdued" type="questionInCircle" style={{ marginLeft: 8 }} />
           </EuiToolTip>
         </>
       ),
