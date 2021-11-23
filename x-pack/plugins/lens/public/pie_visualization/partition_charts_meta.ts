@@ -34,7 +34,10 @@ interface PartitionChartMeta {
   maxBuckets: number;
   isExperimental?: boolean;
   requiredMinDimensionCount?: number;
-  flatLegend?: boolean;
+  legend?: {
+    flat?: boolean;
+    showValues?: boolean;
+  };
 }
 
 const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
@@ -156,6 +159,9 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     numberOptions: [],
     maxBuckets: 1,
     isExperimental: true,
-    flatLegend: true,
+    legend: {
+      flat: true,
+      showValues: true,
+    },
   },
 };

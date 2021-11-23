@@ -323,7 +323,8 @@ export function PieComponent(
                 bucketColumns.length > 1 &&
                 !isTreemapOrMosaicShape(shape)))
           }
-          flatLegend={PartitionChartsMeta[shape].flatLegend}
+          flatLegend={PartitionChartsMeta[shape].legend?.flat}
+          showLegendExtra={PartitionChartsMeta[shape].legend?.showValues}
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}
