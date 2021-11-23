@@ -34,9 +34,6 @@ export const regionMapRenderer = {
       visConfig,
     };
 
-    render(
-      <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />,
-      domNode
-    );
+    render(<LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />, domNode);
   },
 } as ExpressionRenderDefinition<RegionMapVisRenderValue>;

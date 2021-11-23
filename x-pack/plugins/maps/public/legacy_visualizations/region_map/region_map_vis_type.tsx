@@ -16,12 +16,12 @@ export const title = i18n.translate('xpack.maps.regionMapMap.vis.title', {
   defaultMessage: 'Region Map',
 });
 
-const LazyRegionMapEditor = function(props: unknown) {
+const LazyRegionMapEditor = function (props: unknown) {
   const getLazyComponent = () => {
     return lazy(() => import('./region_map_editor'));
   };
   return <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />;
-}
+};
 
 export const regionMapVisType = {
   name: REGION_MAP_VIS_TYPE,

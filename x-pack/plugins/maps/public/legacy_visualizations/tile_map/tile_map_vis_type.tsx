@@ -16,12 +16,12 @@ export const title = i18n.translate('xpack.maps.tileMap.vis.title', {
   defaultMessage: 'Coordinate Map',
 });
 
-const LazyTileMapEditor = function(props: unknown) {
+const LazyTileMapEditor = function (props: unknown) {
   const getLazyComponent = () => {
     return lazy(() => import('./tile_map_editor'));
   };
   return <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />;
-}
+};
 
 export const tileMapVisType = {
   name: TILE_MAP_VIS_TYPE,

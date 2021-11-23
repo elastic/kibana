@@ -34,9 +34,6 @@ export const tileMapRenderer = {
       visConfig,
     };
 
-    render(
-      <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />,
-      domNode
-    );
+    render(<LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />, domNode);
   },
 } as ExpressionRenderDefinition<TileMapVisRenderValue>;
