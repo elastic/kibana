@@ -10,6 +10,9 @@ import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common';
 import { CasesClient } from '../../client';
 import { CasesClientArgs } from '../../types';
+import { AlertsCount } from './alerts_count';
+import { AlertDetails } from './alert_details';
+import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
 import { MetricsHandler } from './types';
 
@@ -29,23 +32,41 @@ export const getMetrics = async (
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Promise<MetricsResponse> => {
-  const metricsHandlers = new Map<string, MetricsHandler>([
-    ['lifespan', new Lifespan(params.caseId, casesClient)],
-  ]);
-
-  checkAndThrowIfInvalidFeatures(params, metricsHandlers, clientArgs);
+  const handlers = buildHandlers(params, casesClient, clientArgs);
+  checkAndThrowIfInvalidFeatures(params, handlers, clientArgs);
   await checkAuthorization(params, clientArgs);
 
   let metricsResult = {};
 
   for (const feature of params.features) {
-    const handler = metricsHandlers.get(feature);
+    const handler = handlers.get(feature);
     if (handler) {
-      metricsResult = handler.applyMetrics(metricsResult);
+      metricsResult = await handler.applyMetrics(metricsResult);
     }
   }
 
   return MetricsResponseRt.encode(metricsResult);
+};
+
+const buildHandlers = (
+  params: MetricsParams,
+  casesClient: CasesClient,
+  clientArgs: CasesClientArgs
+): Map<string, MetricsHandler> => {
+  const handlers = [
+    new Lifespan(params.caseId, casesClient),
+    new AlertsCount(),
+    new AlertDetails(),
+    new Connectors(),
+  ];
+
+  const handlersByFeature = new Map<string, MetricsHandler>();
+  for (const handler of handlers) {
+    // assign each feature to the handler that owns that feature
+    handler.getFeatures().forEach((value) => handlersByFeature.set(value, handler));
+  }
+
+  return handlersByFeature;
 };
 
 const checkAndThrowIfInvalidFeatures = (
@@ -55,8 +76,8 @@ const checkAndThrowIfInvalidFeatures = (
 ) => {
   const invalidFeatures = params.features.filter((feature) => !handlers.has(feature));
   if (invalidFeatures.length > 0) {
-    const invalidFeaturesAsString = invalidFeatures.join(',');
-    const validFeaturesAsString = [...handlers.keys()].join(',');
+    const invalidFeaturesAsString = invalidFeatures.join(', ');
+    const validFeaturesAsString = [...handlers.keys()].join(', ');
 
     throw createCaseError({
       logger: clientArgs.logger,

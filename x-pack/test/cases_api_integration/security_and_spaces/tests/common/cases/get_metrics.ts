@@ -17,6 +17,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
 
   describe('metrics', () => {
+    const closedCaseId = 'e49ad6e0-cf9d-11eb-a603-13e7747d215z';
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
     });
@@ -30,9 +32,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns the lifespan of the case', async () => {
-      const caseId = 'e49ad6e0-cf9d-11eb-a603-13e7747d215z';
-
-      const metrics = await getCaseMetrics({ supertest, caseId, features: ['lifespan'] });
+      const metrics = await getCaseMetrics({
+        supertest,
+        caseId: closedCaseId,
+        features: ['lifespan'],
+      });
 
       expect(metrics).to.eql({
         lifespan: {
@@ -43,11 +47,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns an error when passing invalid features', async () => {
-      const caseId = 'e49ad6e0-cf9d-11eb-a603-13e7747d215z';
-
       const errorResponse = (await getCaseMetrics({
         supertest,
-        caseId,
+        caseId: closedCaseId,
         features: ['bananas'],
         expectedHttpCode: 500,
         // casting here because we're expecting an error with a message field

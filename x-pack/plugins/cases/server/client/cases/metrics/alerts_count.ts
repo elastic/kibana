@@ -6,24 +6,17 @@
  */
 
 import { MetricsResponse } from '../../../../common';
-import { CasesClient } from '../../client';
 import { MetricsHandler } from './types';
 
-export class Lifespan implements MetricsHandler {
-  constructor(private readonly caseId: string, private readonly casesClient: CasesClient) {}
-
+export class AlertsCount implements MetricsHandler {
   public getFeatures(): Set<string> {
-    return new Set(['lifespan']);
+    return new Set(['alertsCount']);
   }
 
   public async applyMetrics(results: MetricsResponse): Promise<MetricsResponse> {
-    const caseInfo = await this.casesClient.cases.get({ id: this.caseId });
     return {
       ...results,
-      lifespan: {
-        creationDate: caseInfo.created_at,
-        closeDate: caseInfo.closed_at,
-      },
+      alertsCount: 0,
     };
   }
 }
