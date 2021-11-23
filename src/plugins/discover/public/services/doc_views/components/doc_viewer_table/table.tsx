@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import './table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
