@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
@@ -57,7 +58,7 @@ function getPutPreconfiguredPackagesMock() {
         return {
           saved_objects: [
             {
-              id: `mocked-${id}`,
+              id,
               attributes,
               type: type as string,
               score: 1,
@@ -80,8 +81,9 @@ function getPutPreconfiguredPackagesMock() {
   soClient.get.mockImplementation(async (type, id) => {
     const attributes = mockConfiguredPolicies.get(id);
     if (!attributes) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+
     return {
-      id: `mocked-${id}`,
+      id,
       attributes,
       type: type as string,
       references: [],
@@ -92,7 +94,7 @@ function getPutPreconfiguredPackagesMock() {
     const { id } = options!;
     mockConfiguredPolicies.set(id, attributes);
     return {
-      id: `mocked-${id}`,
+      id: id || uuid.v4(),
       attributes,
       type,
       references: [],
@@ -267,7 +269,7 @@ describe('policy preconfiguration', () => {
     );
 
     expect(policies.length).toEqual(1);
-    expect(policies[0].id).toBe('mocked-test-id');
+    expect(policies[0].id).toBe('test-id');
     expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
     expect(nonFatalErrors.length).toBe(0);
   });
@@ -373,7 +375,7 @@ describe('policy preconfiguration', () => {
       );
 
     expect(policiesA.length).toEqual(1);
-    expect(policiesA[0].id).toBe('mocked-test-id');
+    expect(policiesA[0].id).toBe('test-id');
     expect(nonFatalErrorsA.length).toBe(0);
 
     const { policies: policiesB, nonFatalErrors: nonFatalErrorsB } =
@@ -398,7 +400,7 @@ describe('policy preconfiguration', () => {
       );
 
     expect(policiesB.length).toEqual(1);
-    expect(policiesB[0].id).toBe('mocked-test-id');
+    expect(policiesB[0].id).toBe('test-id');
     expect(policiesB[0].updated_at).toEqual(policiesA[0].updated_at);
     expect(nonFatalErrorsB.length).toBe(0);
   });

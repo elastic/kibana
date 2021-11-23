@@ -19,6 +19,7 @@ import type {
   PreconfiguredPackage,
   PreconfigurationError,
   PreconfiguredOutput,
+  PackagePolicy,
 } from '../../common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -284,65 +285,68 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
     fulfilledPolicies.push(policyResult.value);
     const { created, policy, shouldAddIsManagedFlag } = policyResult.value;
-    if (created) {
-      try {
-        const preconfiguredAgentPolicy = policies[i];
-        const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
+    if (created || policies[i].is_managed) {
+      const preconfiguredAgentPolicy = policies[i];
+      const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
 
-        const installedPackagePolicies = await Promise.all(
-          packagePolicies.map(async ({ package: pkg, name, ...newPackagePolicy }) => {
-            const installedPackage = await getInstallation({
-              savedObjectsClient: soClient,
-              pkgName: pkg.name,
-            });
-            if (!installedPackage) {
-              const rejectedPackage = rejectedPackages.find((rp) => rp.package?.name === pkg.name);
+      const agentPolicyWithPackagePolicies = await agentPolicyService.get(
+        soClient,
+        policy!.id,
+        true
+      );
+      const installedPackagePolicies = await Promise.all(
+        packagePolicies.map(async ({ package: pkg, name, ...newPackagePolicy }) => {
+          const installedPackage = await getInstallation({
+            savedObjectsClient: soClient,
+            pkgName: pkg.name,
+          });
+          if (!installedPackage) {
+            const rejectedPackage = rejectedPackages.find((rp) => rp.package?.name === pkg.name);
 
-              if (rejectedPackage) {
-                throw new Error(
-                  i18n.translate('xpack.fleet.preconfiguration.packageRejectedError', {
-                    defaultMessage: `[{agentPolicyName}] could not be added. [{pkgName}] could not be installed due to error: [{errorMessage}]`,
-                    values: {
-                      agentPolicyName: preconfiguredAgentPolicy.name,
-                      pkgName: pkg.name,
-                      errorMessage: rejectedPackage.error.toString(),
-                    },
-                  })
-                );
-              }
-
+            if (rejectedPackage) {
               throw new Error(
-                i18n.translate('xpack.fleet.preconfiguration.packageMissingError', {
-                  defaultMessage:
-                    '[{agentPolicyName}] could not be added. [{pkgName}] is not installed, add [{pkgName}] to [{packagesConfigValue}] or remove it from [{packagePolicyName}].',
+                i18n.translate('xpack.fleet.preconfiguration.packageRejectedError', {
+                  defaultMessage: `[{agentPolicyName}] could not be added. [{pkgName}] could not be installed due to error: [{errorMessage}]`,
                   values: {
                     agentPolicyName: preconfiguredAgentPolicy.name,
-                    packagePolicyName: name,
                     pkgName: pkg.name,
-                    packagesConfigValue: 'xpack.fleet.packages',
+                    errorMessage: rejectedPackage.error.toString(),
                   },
                 })
               );
             }
-            return { name, installedPackage, ...newPackagePolicy };
-          })
-        );
-        await addPreconfiguredPolicyPackages(
-          soClient,
-          esClient,
-          policy!,
-          installedPackagePolicies!,
-          defaultOutput
-        );
-        // If ann error happens while adding a package to the policy we will delete the policy so the setup can be retried later
-      } catch (err) {
-        await soClient
-          .delete(AGENT_POLICY_SAVED_OBJECT_TYPE, policy!.id)
-          // swallow error
-          .catch((deleteErr) => logger.error(deleteErr));
 
-        throw err;
-      }
+            throw new Error(
+              i18n.translate('xpack.fleet.preconfiguration.packageMissingError', {
+                defaultMessage:
+                  '[{agentPolicyName}] could not be added. [{pkgName}] is not installed, add [{pkgName}] to [{packagesConfigValue}] or remove it from [{packagePolicyName}].',
+                values: {
+                  agentPolicyName: preconfiguredAgentPolicy.name,
+                  packagePolicyName: name,
+                  pkgName: pkg.name,
+                  packagesConfigValue: 'xpack.fleet.packages',
+                },
+              })
+            );
+          }
+          return { name, installedPackage, ...newPackagePolicy };
+        })
+      );
+
+      const packagePoliciesToAdd = installedPackagePolicies.filter((installablePackagePolicy) => {
+        return !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
+          (packagePolicy) => packagePolicy.name === installablePackagePolicy.name
+        );
+      });
+
+      await addPreconfiguredPolicyPackages(
+        soClient,
+        esClient,
+        policy!,
+        packagePoliciesToAdd!,
+        defaultOutput
+      );
+
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
         await agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });

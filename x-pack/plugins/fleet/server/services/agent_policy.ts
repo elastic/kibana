@@ -805,5 +805,8 @@ export async function addPackageToAgentPolicy(
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     bumpRevision: false,
     skipEnsureInstalled: true,
+    skipUniqueNameVerification: true,
+    overwrite: true,
+    force: true, // To add package to managed policy we need the force flag
   });
 }
