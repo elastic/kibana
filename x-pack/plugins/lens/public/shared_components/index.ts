@@ -17,3 +17,4 @@ export * from './helpers';
 export { LegendActionPopover } from './legend_action_popover';
 export { ValueLabelsSettings } from './value_labels_settings';
 export * from './static_header';
+export * from './vis_label';
