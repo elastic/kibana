@@ -740,6 +740,113 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerFactoryDefinition.inject",
+            "type": "Function",
+            "tags": [],
+            "label": "inject",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ", references: ",
+              "SavedObjectReference",
+              "[]) => ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              }
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardContainerFactoryDefinition.inject.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardContainerFactoryDefinition.inject.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  "SavedObjectReference",
+                  "[]"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerFactoryDefinition.extract",
+            "type": "Function",
+            "tags": [],
+            "label": "extract",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ") => { state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              "; references: ",
+              "SavedObjectReference",
+              "[]; }"
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardContainerFactoryDefinition.extract.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainerFactoryDefinition.Unnamed",
             "type": "Function",
             "tags": [],
@@ -963,113 +1070,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardContainerFactoryDefinition.inject",
-            "type": "Function",
-            "tags": [],
-            "label": "inject",
-            "description": [],
-            "signature": [
-              "(state: ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableStateWithType",
-                "text": "EmbeddableStateWithType"
-              },
-              ", references: ",
-              "SavedObjectReference",
-              "[]) => ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableStateWithType",
-                "text": "EmbeddableStateWithType"
-              }
-            ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainerFactoryDefinition.inject.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "P"
-                ],
-                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainerFactoryDefinition.inject.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "references",
-                "description": [],
-                "signature": [
-                  "SavedObjectReference",
-                  "[]"
-                ],
-                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardContainerFactoryDefinition.extract",
-            "type": "Function",
-            "tags": [],
-            "label": "extract",
-            "description": [],
-            "signature": [
-              "(state: ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableStateWithType",
-                "text": "EmbeddableStateWithType"
-              },
-              ") => { state: ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableStateWithType",
-                "text": "EmbeddableStateWithType"
-              },
-              "; references: ",
-              "SavedObjectReference",
-              "[]; }"
-            ],
-            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container_factory.tsx",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainerFactoryDefinition.extract.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "P"
-                ],
-                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
-              }
-            ]
           }
         ],
         "initialIsOpen": false
@@ -2870,12 +2870,19 @@
               {
                 "parentPluginId": "dashboard",
                 "id": "def-common.migratePanelsTo730.$4.Unnamed",
-                "type": "Any",
+                "type": "IndexSignature",
                 "tags": [],
-                "label": "Unnamed",
+                "label": "[key: string}]: SerializableRecord",
                 "description": [],
                 "signature": [
-                  "any"
+                  "[key: string]:  ",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
+                  }
                 ],
                 "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
                 "deprecated": false
