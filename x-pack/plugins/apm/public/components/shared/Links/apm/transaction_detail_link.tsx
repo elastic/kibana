@@ -51,7 +51,10 @@ export function TransactionDetailLink({
 }: Props) {
   const { urlParams } = useLegacyUrlParams();
   const { core } = useApmPluginContext();
-  const defaultComparisonEnabled = getComparisonEnabled({ core });
+  const defaultComparisonEnabled = getComparisonEnabled({
+    core,
+    urlComparisonEnabled: comparisonEnabled,
+  });
   const location = useLocation();
   const href = getLegacyApmHref({
     basePath: core.http.basePath,
