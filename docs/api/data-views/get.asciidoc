@@ -1,4 +1,4 @@
-[[index-patterns-api-get]]
+[[data-views-api-get]]
 === Get index pattern API
 ++++
 <titleabbrev>Get index pattern</titleabbrev>
@@ -6,14 +6,14 @@
 
 experimental[] Retrieve a single {kib} index pattern by ID.
 
-[[index-patterns-api-get-request]]
+[[data-views-api-get-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/index_patterns/index_pattern/<id>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>`
 
-[[index-patterns-api-get-params]]
+[[data-views-api-get-params]]
 ==== Path parameters
 
 `space_id`::
@@ -22,7 +22,7 @@ experimental[] Retrieve a single {kib} index pattern by ID.
 `id`::
 (Required, string) The ID of the index pattern you want to retrieve.
 
-[[index-patterns-api-get-codes]]
+[[data-views-api-get-codes]]
 ==== Response code
 
 `200`::
@@ -31,7 +31,7 @@ Indicates a successful call.
 `404`::
 The specified index pattern and ID doesn't exist.
 
-[[index-patterns-api-get-example]]
+[[data-views-api-get-example]]
 ==== Example
 
 Retrieve the index pattern object with the `my-pattern` ID:

@@ -1,4 +1,4 @@
-[[index-patterns-api-update]]
+[[data-views-api-update]]
 === Update index pattern API
 ++++
 <titleabbrev>Update index pattern</titleabbrev>
@@ -7,14 +7,14 @@
 experimental[] Update part of an index pattern. Only the specified fields are updated in the
 index pattern. Unspecified fields stay as they are persisted.
 
-[[index-patterns-api-update-request]]
+[[data-views-api-update-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/index_patterns/index_pattern/<id>`
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>`
 
-[[index-patterns-api-update-path-params]]
+[[data-views-api-update-path-params]]
 ==== Path parameters
 
 `space_id`::
@@ -23,7 +23,7 @@ index pattern. Unspecified fields stay as they are persisted.
 `id`::
   (Required, string) The ID of the index pattern you want to update.
 
-[[index-patterns-api-update-request-body]]
+[[data-views-api-update-request-body]]
 ==== Request body
 
 `refresh_fields`:: (Optional, boolean) Reloads the index pattern fields after
@@ -43,13 +43,13 @@ You can partially update the following fields:
 * `type`
 * `typeMeta`
 
-[[index-patterns-api-update-errors-codes]]
+[[data-views-api-update-errors-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[index-patterns-api-update-example]]
+[[data-views-api-update-example]]
 ==== Examples
 
 Update a title of the `<my-pattern>` index pattern:

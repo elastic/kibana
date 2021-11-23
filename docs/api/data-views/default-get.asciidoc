@@ -1,4 +1,4 @@
-[[index-patterns-api-default-get]]
+[[data-views-api-default-get]]
 === Get default index pattern API
 ++++
 <titleabbrev>Get default index pattern</titleabbrev>
@@ -6,26 +6,26 @@
 
 experimental[] Retrieve a default index pattern ID. Kibana UI uses default index pattern unless user picks a different one.
 
-[[index-patterns-api-default-get-request]]
+[[data-views-api-default-get-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/index_patterns/default`
 
 `GET <kibana host>:<port>/s/<space_id>/api/index_patterns/default`
 
-[[index-patterns-api-default-get-params]]
+[[data-views-api-default-get-params]]
 ==== Path parameters
 
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[index-patterns-api-default-get-codes]]
+[[data-views-api-default-get-codes]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
-[[index-patterns-api-default-get-example]]
+[[data-views-api-default-get-example]]
 ==== Example
 
 Retrieve the default index pattern id:
