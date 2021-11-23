@@ -153,7 +153,6 @@ describe('EventColumnView', () => {
     const wrapper = mount(
       <EventColumnView
         {...props}
-        //timelineId="timeline-test"
         leadingControlColumns={[testLeadingControlColumn, ...leadingControlColumns]}
       />,
       {
