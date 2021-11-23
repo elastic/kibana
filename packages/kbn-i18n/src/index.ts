@@ -61,4 +61,5 @@ const i18nLoader = {
 };
 
 export type { Translation } from './translation';
+export type { Formats, TranslateArguments } from './core';
 export { i18n, i18nLoader };
