@@ -17,29 +17,38 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    // TODO: Remove deprecation once defaultAppId is deleted
-    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', {
-      silent: true,
-      level: 'critical',
-    }),
     (completeConfig, rootPath, addDeprecation) => {
-      if (
-        get(completeConfig, 'kibana.defaultAppId') === undefined &&
-        get(completeConfig, 'kibana_legacy.defaultAppId') === undefined
-      ) {
+      const hasKibanaDefaultAppId = get(completeConfig, 'kibana.defaultAppId') !== undefined;
+      const hasKibanaLegacyDefaultAppId =
+        get(completeConfig, 'kibana_legacy.defaultAppId') !== undefined;
+      if (!hasKibanaDefaultAppId && !hasKibanaLegacyDefaultAppId) {
         return;
       }
+      const configPath = hasKibanaDefaultAppId
+        ? 'kibana.defaultAppId'
+        : 'kibana_legacy.defaultAppId';
       addDeprecation({
-        configPath: 'kibana.defaultAppId',
-        message: `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`,
+        configPath,
+        message: `${configPath} is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`,
         correctiveActions: {
           manualSteps: [
             'Go to Stack Management > Advanced Settings',
             'Update the "defaultRoute" setting under the General section',
-            'Remove "kibana.defaultAppId" from the kibana.yml config file',
+            `Remove "${configPath}" from the kibana.yml config file`,
           ],
         },
       });
+      if (hasKibanaDefaultAppId) {
+        return {
+          set: [
+            {
+              path: 'kibana_legacy.defaultAppId',
+              value: get(completeConfig, 'kibana.defaultAppId'),
+            },
+          ],
+          unset: [{ path: 'kibana.defaultAppId' }],
+        };
+      }
     },
   ],
 };
