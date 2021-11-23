@@ -40,7 +40,7 @@ const apisToIntercept = [
   },
   {
     endpoint:
-      '/internal/apm/services/opbeans-java/errors/detailed_statistics?*',
+      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*',
     name: 'errorGroupsDetailedRequest',
   },
   {
