@@ -1822,12 +1822,12 @@
           {
             "parentPluginId": "fileUpload",
             "id": "def-common.InputOverrides.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string}]: string | undefined",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  string | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false
@@ -1923,12 +1923,12 @@
           {
             "parentPluginId": "fileUpload",
             "id": "def-common.Settings.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string}]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false
