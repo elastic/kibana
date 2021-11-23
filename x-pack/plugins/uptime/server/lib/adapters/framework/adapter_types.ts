@@ -18,6 +18,7 @@ import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
 import { UptimeESClient } from '../../lib';
 import type { UptimeRouter } from '../../../types';
+import { UptimeConfig } from '../../../config';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: {
@@ -33,6 +34,7 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 
 export interface UptimeCoreSetup {
   router: UptimeRouter;
+  config: UptimeConfig;
 }
 
 export interface UptimeCorePlugins {

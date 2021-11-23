@@ -22,9 +22,15 @@ export interface UMSavedObjectsAdapter {
   setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
 }
 
-export const registerUptimeSavedObjects = (savedObjectsService: SavedObjectsServiceSetup) => {
+export const registerUptimeSavedObjects = (
+  savedObjectsService: SavedObjectsServiceSetup,
+  config: UptimeConfig
+) => {
   savedObjectsService.registerType(umDynamicSettings);
-  savedObjectsService.registerType(syntheticsMonitor);
+
+  if (config?.unsafe.service.enabled) {
+    savedObjectsService.registerType(syntheticsMonitor);
+  }
 };
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {

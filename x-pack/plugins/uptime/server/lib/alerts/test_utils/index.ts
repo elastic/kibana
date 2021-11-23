@@ -27,7 +27,7 @@ export const bootstrapDependencies = (customRequests?: any, customPlugins: any =
   const router = {} as UptimeRouter;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
-  const server: UptimeCoreSetup = { router };
+  const server: UptimeCoreSetup = { router, config: {} };
   const plugins: UptimeCorePlugins = customPlugins as any;
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };
