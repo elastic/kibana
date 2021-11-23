@@ -472,6 +472,7 @@ export function getMlClient(
     async updateDatafeed(...p: Parameters<MlClient['updateDatafeed']>) {
       await datafeedIdsCheck(p);
 
+      // Temporary workaround for the incorrect updateDatafeed function in the esclient
       if (p.length === 0 || p[0] === undefined) {
         // Temporary generic error message. This should never be triggered
         // but is added for type correctness below
@@ -484,6 +485,9 @@ export function getMlClient(
         path: `/_ml/datafeeds/${id}/_update`,
         body,
       });
+
+      // this should be reinstated once https://github.com/elastic/kibana/issues/118427
+      // is fixed
       // return mlClient.updateDatafeed(...p);
     },
     async updateFilter(...p: Parameters<MlClient['updateFilter']>) {
