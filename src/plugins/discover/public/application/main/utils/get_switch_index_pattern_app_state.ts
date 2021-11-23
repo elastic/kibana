@@ -40,12 +40,14 @@ export function getSwitchIndexPatternAppState(
   if (nextIndexPattern.isTimeBased() && !nextSort.length) {
     // set default sorting if it was not set
     nextSort = [[nextIndexPattern.timeFieldName, sortDirection]];
-  } else if (nextIndexPattern.isTimeBased() && currentIndexPattern.isTimeBased()) {
+  } else if (
+    nextIndexPattern.isTimeBased() &&
+    currentIndexPattern.isTimeBased() &&
+    nextIndexPattern.timeFieldName !== currentIndexPattern.timeFieldName
+  ) {
     // switch time fields
     nextSort = nextSort.map((cur) =>
-      cur[0] === currentIndexPattern.timeFieldName
-        ? [nextIndexPattern.timeFieldName, sortDirection]
-        : cur
+      cur[0] === currentIndexPattern.timeFieldName ? [nextIndexPattern.timeFieldName, cur[1]] : cur
     );
   }
 
