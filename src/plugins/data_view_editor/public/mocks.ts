@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternEditorPlugin } from './plugin';
+import { DataViewEditorPlugin } from './plugin';
 
-export type Start = jest.Mocked<ReturnType<IndexPatternEditorPlugin['start']>>;
+export type Start = jest.Mocked<ReturnType<DataViewEditorPlugin['start']>>;
 
-export type Setup = jest.Mocked<ReturnType<IndexPatternEditorPlugin['setup']>>;
+export type Setup = jest.Mocked<ReturnType<DataViewEditorPlugin['setup']>>;
 
 const createSetupContract = (): Setup => {
   return {};
@@ -21,7 +21,7 @@ const createStartContract = (): Start => {
     openEditor: jest.fn(),
     IndexPatternEditorComponent: jest.fn(),
     userPermissions: {
-      editIndexPattern: jest.fn(),
+      editDataView: jest.fn(),
     },
   };
 };

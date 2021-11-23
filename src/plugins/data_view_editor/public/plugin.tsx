@@ -9,17 +9,11 @@
 import React from 'react';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
-import {
-  PluginSetup,
-  PluginStart,
-  SetupPlugins,
-  StartPlugins,
-  IndexPatternEditorProps,
-} from './types';
+import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewEditorProps } from './types';
 import { getEditorOpener } from './open_editor';
-import { IndexPatternEditor } from './components/index_pattern_editor';
+import { DataViewEditor } from './components/data_view_editor';
 
-export class IndexPatternEditorPlugin
+export class DataViewEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>
 {
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
@@ -28,45 +22,45 @@ export class IndexPatternEditorPlugin
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const { application, uiSettings, docLinks, http, notifications } = core;
-    const { data } = plugins;
+    const { data, dataViews } = plugins;
 
     return {
       /**
-       * Index pattern editor flyout via function interface
-       * @param IndexPatternEditorProps - index pattern editor config
+       * Data view editor flyout via function interface
+       * @param DataViewEditorProps - data view editor config
        * @returns method to close editor
        */
       openEditor: getEditorOpener({
         core,
-        indexPatternService: data.indexPatterns,
+        dataViews,
         searchClient: data.search.search,
       }),
       /**
-       * Index pattern editor flyout via react component
-       * @param IndexPatternEditorProps - index pattern editor config
+       * Data view editor flyout via react component
+       * @param DataViewEditorProps - data view editor config
        * @returns JSX.Element
        */
-      IndexPatternEditorComponent: (props: IndexPatternEditorProps) => (
-        <IndexPatternEditor
+      IndexPatternEditorComponent: (props: DataViewEditorProps) => (
+        <DataViewEditor
           services={{
             uiSettings,
             docLinks,
             http,
             notifications,
             application,
-            indexPatternService: data.indexPatterns,
+            dataViews,
             searchClient: data.search.search,
           }}
           {...props}
         />
       ),
       /**
-       * Convenience method to determine whether the user can create or edit edit the index patterns.
+       * Convenience method to determine whether the user can create or edit edit data views.
        *
        * @returns boolean
        */
       userPermissions: {
-        editIndexPattern: () => {
+        editDataView: () => {
           return application.capabilities.management.kibana.indexPatterns;
         },
       },
