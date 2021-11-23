@@ -33,7 +33,6 @@ export default async function ({ readConfigFile }) {
       require.resolve('./index_pattern_field_editor_example'),
       require.resolve('./field_formats'),
       require.resolve('./partial_results'),
-      require.resolve('./rac_example'),
     ],
     services: {
       ...functionalConfig.get('services'),
