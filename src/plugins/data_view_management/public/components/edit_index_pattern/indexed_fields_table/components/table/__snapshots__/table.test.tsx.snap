@@ -17,11 +17,13 @@ exports[`Table render conflict summary modal  1`] = `
     <EuiText>
       <p>
         <FormattedMessage
-          defaultMessage="The type of the '{fieldName}' field changes across indices and might not be available for search, visualizations, and other analysis."
+          defaultMessage="The type of the {fieldName} field changes across indices and might not be available for search, visualizations, and other analysis."
           id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
           values={
             Object {
-              "fieldName": "message",
+              "fieldName": <EuiCode>
+                message
+              </EuiCode>,
             }
           }
         />
