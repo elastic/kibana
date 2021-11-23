@@ -12,6 +12,7 @@ export * from './merge_tables';
 export * from './time_scale';
 export * from './datatable';
 export * from './heatmap_chart';
+export * from './gauge_chart';
 export * from './metric_chart';
 export * from './pie_chart';
 export * from './xy_chart';
