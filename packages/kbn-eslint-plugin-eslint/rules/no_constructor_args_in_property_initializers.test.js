@@ -53,7 +53,6 @@ ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule,
   ],
 
   invalid: [
-    // no catch
     {
       code: dedent`
         class Foo {
