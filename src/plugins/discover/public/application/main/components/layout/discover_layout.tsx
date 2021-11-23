@@ -43,12 +43,9 @@ import {
   SavedSearchURLConflictCallout,
   useSavedSearchAliasMatchRedirect,
 } from '../../../../services/saved_searches';
-import { FieldStatisticsTable } from '../../../components/field_stats_table';
+import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import {
-  DOCUMENTS_VIEW_CLICK,
-  FIELD_STATISTICS_VIEW_CLICK,
-} from '../../../components/field_stats_table/constants';
+import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { DataViewType } from '../../../../../../data_views/common';
 
 /**

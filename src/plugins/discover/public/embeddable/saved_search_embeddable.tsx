@@ -47,7 +47,7 @@ import { getDefaultSort } from '../components/doc_table';
 import { SortOrder } from '../components/doc_table/components/table_header/helpers';
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
-import { FieldStatsTableSavedSearchEmbeddable } from '../application/components/field_stats_table';
+import { FieldStatsTableSavedSearchEmbeddable } from '../application/main/components/field_stats_table';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {

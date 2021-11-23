@@ -9,19 +9,19 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../data/common';
-import type { DiscoverServices } from '../../../build_services';
+import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../../data/common';
+import type { DiscoverServices } from '../../../../build_services';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   ErrorEmbeddable,
   IEmbeddable,
   isErrorEmbeddable,
-} from '../../../../../embeddable/public';
+} from '../../../../../../embeddable/public';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { SavedSearch } from '../../../services/saved_searches';
-import type { GetStateReturn } from '../../main/services/discover_state';
-import { DataRefetch$ } from '../../main/utils/use_saved_search';
+import type { SavedSearch } from '../../../../services/saved_searches';
+import type { GetStateReturn } from '../../services/discover_state';
+import { DataRefetch$ } from '../../utils/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: IndexPattern;
