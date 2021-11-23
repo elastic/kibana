@@ -165,7 +165,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
         </EventsTdContent>
       </div>
       <>
-        {timelineId !== TimelineId.active && eventType === 'signal' && (
+        {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
             key="investigate-in-timeline"

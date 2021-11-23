@@ -70,7 +70,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
-  const ACTION_BUTTON_COUNT = 3;
+  const ACTION_BUTTON_COUNT = 4;
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
   useEffect(() => {

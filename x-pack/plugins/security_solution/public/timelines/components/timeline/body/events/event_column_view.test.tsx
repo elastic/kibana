@@ -23,11 +23,18 @@ import { getActionsColumnWidth } from '../../../../../../../timelines/public';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-jest.mock('../../../../../common/hooks/use_selector');
+jest.mock('../../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+  useDeepEqualSelector: jest.fn(),
+}));
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       timelines: { ...mockTimelines },
+      data: {
+        search: jest.fn(),
+        query: jest.fn(),
+      },
       application: {
         capabilities: {
           siem: { crud_alerts: true, read_alerts: true },
@@ -146,7 +153,6 @@ describe('EventColumnView', () => {
     const wrapper = mount(
       <EventColumnView
         {...props}
-        timelineId="timeline-test"
         leadingControlColumns={[testLeadingControlColumn, ...leadingControlColumns]}
       />,
       {
