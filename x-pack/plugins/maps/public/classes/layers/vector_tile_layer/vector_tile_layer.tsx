@@ -116,7 +116,7 @@ export class VectorTileLayer extends TileLayer {
     return `${this.getId()}${DELIMITTER}${this.getSource().getTileLayerId()}${DELIMITTER}`;
   }
 
-  _generateMbSourceId(name: string) {
+  _generateMbSourceId(name: string | undefined) {
     return `${this._generateMbSourceIdPrefix()}${name}`;
   }
 
@@ -241,10 +241,11 @@ export class VectorTileLayer extends TileLayer {
         }
         const newLayerObject = {
           ...layer,
-          source:
+          source: this._generateMbSourceId(
             typeof (layer as MbLayer).source === 'string'
-              ? this._generateMbSourceId((layer as MbLayer).source as string)
-              : undefined,
+              ? ((layer as MbLayer).source as string)
+              : undefined
+          ),
           id: mbLayerId,
         };
 
