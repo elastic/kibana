@@ -53,7 +53,7 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
 
-IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to new rules. However, it is strongly recommended to update deprecated connectors or to <<creating-new-connector, create new ones>> to ensure you have access to connector enhancements, such as updating incidents.
+IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to new rules. However, it is strongly recommended to update deprecated connectors or <<creating-new-connector, create new ones>> to ensure you have access to connector enhancements, such as updating incidents.
 
 To update a deprecated connector:
 
