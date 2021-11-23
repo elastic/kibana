@@ -184,17 +184,10 @@ const checkIfAnyTrustedApp = async (
   if (getDoesAnyTrustedAppExistsIsLoading(state)) {
     return;
   }
-  if (isLoadedResourceState(state.artifacts.doesAnyTrustedAppExists)) {
-    store.dispatch({
-      type: 'policyArtifactsDeosAnyTrustedAppExists',
-      payload: createLoadingResourceState(state.artifacts.doesAnyTrustedAppExists),
-    });
-  } else {
-    store.dispatch({
-      type: 'policyArtifactsDeosAnyTrustedAppExists',
-      payload: createLoadingResourceState<GetTrustedAppsListResponse>(),
-    });
-  }
+  store.dispatch({
+    type: 'policyArtifactsDeosAnyTrustedAppExists',
+    payload: createLoadingResourceState<GetTrustedAppsListResponse>(),
+  });
   try {
     const trustedApps = await trustedAppsService.getTrustedAppsList({
       page: 1,
