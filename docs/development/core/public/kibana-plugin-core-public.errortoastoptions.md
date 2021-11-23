@@ -17,7 +17,6 @@ export interface ErrorToastOptions extends ToastOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [actions?](./kibana-plugin-core-public.errortoastoptions.actions.md) | { onCancel: () =&gt; void; onSave: () =&gt; void; } | <i>(Optional)</i> |
 |  [title](./kibana-plugin-core-public.errortoastoptions.title.md) | string | The title of the toast and the dialog when expanding the message. |
 |  [toastMessage?](./kibana-plugin-core-public.errortoastoptions.toastmessage.md) | string | <i>(Optional)</i> The message to be shown in the toast. If this is not specified the error's message will be shown in the toast instead. Overwriting that message can be used to provide more user-friendly toasts. If you specify this, the error message will still be shown in the detailed error modal. |
 

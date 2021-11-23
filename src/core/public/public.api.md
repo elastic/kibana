@@ -772,11 +772,6 @@ export { EnvironmentMode }
 
 // @public
 export interface ErrorToastOptions extends ToastOptions {
-    // (undocumented)
-    actions?: {
-        onCancel: () => void;
-        onSave: () => void;
-    };
     title: string;
     toastMessage?: string;
 }
