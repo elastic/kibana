@@ -104,7 +104,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     } else {
       const values = Array.isArray(rawValue) ? (rawValue as string[]) : [rawValue as string];
       return values.map((value) => {
-        return esFilters.buildPhraseFilter(indexPatternField, value as string, this._indexPattern);
+        return esFilters.buildPhraseFilter(indexPatternField, value, this._indexPattern);
       });
     }
   }
