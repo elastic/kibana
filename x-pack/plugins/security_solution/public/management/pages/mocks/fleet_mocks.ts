@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
@@ -12,6 +13,7 @@ import {
 import {
   AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   appRoutesService,
   CheckPermissionsResponse,
   EPM_API_ROUTES,
@@ -23,6 +25,74 @@ import {
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse, GetPolicyResponse } from '../policy/types';
 import { FleetAgentPolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_policy_generator';
+
+interface KqlArgumentType {
+  type: string;
+  function: string;
+  arguments: Array<{
+    type: string;
+    value: string | boolean;
+  }>;
+}
+
+const getPackagePoliciesFromKueryString = (kueryString: string): string[] => {
+  if (!kueryString) {
+    return [];
+  }
+
+  const kueryAst: ReturnType<typeof fromKueryExpression> & {
+    arguments?: KqlArgumentType[];
+  } = fromKueryExpression(kueryString);
+
+  // The kuery AST has a structure similar to to this:
+  // given string:
+  //    ingest-agent-policies.package_policies: (ddf6570b-9175-4a6d-b288-61a09771c647 or b8e616ae-44fc-4be7-846c-ce8fa5c082dd or 2d95bec3-b48f-4db7-9622-a2b061cc031d)
+  // output would be:
+  // {
+  //   "type": "function",
+  //   "function": "or",
+  //   "arguments": [
+  //     {
+  //       "type": "function",
+  //       "function": "is",
+  //       "arguments": [
+  //         {
+  //           "type": "literal",
+  //           "value": "ingest-agent-policies.package_policies"
+  //         },
+  //         {
+  //           "type": "literal",
+  //           "value": "ddf6570b-9175-4a6d-b288-61a09771c647"
+  //         },
+  //         {
+  //           "type": "literal",
+  //           "value": false
+  //         }
+  //       ]
+  //     },
+  //     // .... other kquery arguments here
+  //   ]
+  // }
+
+  if (kueryAst.arguments) {
+    const packagePolicyIds: string[] = [];
+
+    for (const kqlArgument of kueryAst.arguments) {
+      // If the first argument is `ingest-agent-policies.package_policies`,
+      // then grab the second argument's value (the policy id)
+      if (
+        kqlArgument.arguments[0].value === `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies` &&
+        'string' === typeof kqlArgument.arguments[1].value
+      ) {
+        packagePolicyIds.push(kqlArgument.arguments[1].value);
+      }
+    }
+
+    return packagePolicyIds;
+  }
+
+  return [];
+};
 
 export type FleetGetPackageListHttpMockInterface = ResponseProvidersInterface<{
   packageList: () => GetPackagesResponse;
@@ -99,36 +169,37 @@ export const fleetGetAgentPolicyListHttpMock =
       id: 'agentPolicy',
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
       method: 'get',
-      handler: () => {
+      handler: ({ query }) => {
         const generator = new EndpointDocGenerator('seed');
         const agentPolicyGenerator = new FleetAgentPolicyGenerator('seed');
         const endpointMetadata = generator.generateHostMetadata();
+        const requiredPolicyIds: string[] = [
+          // Make sure that the Agent policy returned from the API has the Integration Policy ID that
+          // the first endpoint metadata generated is using. This is needed especially when testing the
+          // Endpoint Details flyout where certain actions might be disabled if we know the endpoint integration policy no
+          // longer exists.
+          endpointMetadata.Endpoint.policy.applied.id,
 
-        // Make sure that the Agent policy returned from the API has the Integration Policy ID that
-        // the endpoint metadata is using. This is needed especially when testing the Endpoint Details
-        // flyout where certain actions might be disabled if we know the endpoint integration policy no
-        // longer exists.
-        const agentPolicy = agentPolicyGenerator.generate({
-          package_policies: [endpointMetadata.Endpoint.policy.applied.id],
-        });
+          // In addition, some of our UI logic looks for the existence of certain Endpoint Integration policies
+          // using the Agents Policy API (normally when checking IDs since query by ids is not supported via API)
+          // so also add the first two package policy IDs that the `fleetGetEndpointPackagePolicyListHttpMock()`
+          // method above creates (which Trusted Apps HTTP mocks also use)
+          // FIXME: remove hard-coded IDs below and get them from the new FleetPackagePolicyGenerator (#2262)
+          'ddf6570b-9175-4a6d-b288-61a09771c647',
+          'b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
+
+          // And finally, include any kql filters for package policies ids
+          ...getPackagePoliciesFromKueryString((query as { kuery?: string }).kuery ?? ''),
+        ];
 
         return {
-          items: [
-            agentPolicy,
-            // In addition, some of our UI logic looks for the existance of certain Endpoint Integration policies
-            // using the Agents Policy API (normally when checking IDs since query by ids is not supported via API)
-            // so also add the first two package policy IDs that the `fleetGetEndpointPackagePolicyListHttpMock()`
-            // method above creates (which Trusted Apps HTTP mocks also use)
-            // FIXME: remove hard-coded IDs below adn get them from the new FleetPackagePolicyGenerator (#2262)
-            agentPolicyGenerator.generate({
-              package_policies: ['ddf6570b-9175-4a6d-b288-61a09771c647'],
-            }),
-            agentPolicyGenerator.generate({
-              package_policies: ['b8e616ae-44fc-4be7-846c-ce8fa5c082dd'],
-            }),
-          ],
-          perPage: 10,
-          total: 1,
+          items: requiredPolicyIds.map((packagePolicyId) => {
+            return agentPolicyGenerator.generate({
+              package_policies: [packagePolicyId],
+            });
+          }),
+          perPage: Math.max(requiredPolicyIds.length, 10),
+          total: requiredPolicyIds.length,
           page: 1,
         };
       },
