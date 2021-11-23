@@ -231,7 +231,6 @@ export class DataView implements IIndexPattern {
    * @param fieldType
    * @param lang
    * @deprecated use runtime field instead
-   * @removeBy 8.1
    */
   async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
@@ -262,7 +261,6 @@ export class DataView implements IIndexPattern {
    * Remove scripted field from field list
    * @param fieldName
    * @deprecated use runtime field instead
-   * @removeBy 8.1
    */
 
   removeScriptedField(fieldName: string) {
@@ -274,8 +272,7 @@ export class DataView implements IIndexPattern {
 
   /**
    *
-   * @deprecated use runtime field instead
-   * @removeBy 8.1
+   * @deprecated Will be removed when scripted fields are removed
    */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
@@ -284,7 +281,6 @@ export class DataView implements IIndexPattern {
   /**
    *
    * @deprecated use runtime field instead
-   * @removeBy 8.1
    */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];
