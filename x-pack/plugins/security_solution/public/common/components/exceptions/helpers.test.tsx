@@ -35,6 +35,7 @@ import {
   OsTypeArray,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { DataViewBase } from '@kbn/es-query';
 
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
@@ -42,7 +43,10 @@ import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/
 import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import { CodeSignature } from '../../../../common/ecs/file';
-import type { DataViewBase } from '@kbn/es-query';
+import {
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
+} from '../../../../common/field_maps/field_names';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
@@ -432,7 +436,7 @@ describe('Exception helpers', () => {
           entries: [
             {
               ...getEntryMatchMock(),
-              field: 'signal.original_event.kind',
+              field: ALERT_ORIGINAL_EVENT_KIND,
             },
             getEntryMatchMock(),
           ],
@@ -442,7 +446,7 @@ describe('Exception helpers', () => {
           entries: [
             {
               ...getEntryMatchMock(),
-              field: 'signal.original_event.module',
+              field: ALERT_ORIGINAL_EVENT_MODULE,
             },
           ],
         },
