@@ -291,8 +291,8 @@ export function alertingServiceProvider(
 
           return {
             ...h._source,
-            typical: formatters.numberFormatter(typical),
-            actual: formatters.numberFormatter(actual),
+            typical: typical?.map((t) => formatters.numberFormatter(t)),
+            actual: actual?.map((a) => formatters.numberFormatter(a)),
             score: Math.floor(
               h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),

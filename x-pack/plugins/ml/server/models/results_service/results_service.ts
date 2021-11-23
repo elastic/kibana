@@ -51,27 +51,27 @@ interface Influencer {
  * @param source
  */
 export function getTypicalAndActualValues(source: AnomalyRecordDoc) {
-  const result: { actual?: number; typical?: number } = {};
+  const result: { actual?: number[]; typical?: number[] } = {};
 
   const functionDescription = source.function_description || '';
   const causes = source.causes || [];
 
   if (showActualForFunction(functionDescription)) {
     if (source.actual !== undefined) {
-      result.actual = source.actual[0];
+      result.actual = source.actual;
     } else {
       if (causes.length === 1) {
-        result.actual = causes[0].actual[0];
+        result.actual = causes[0].actual;
       }
     }
   }
 
   if (showTypicalForFunction(functionDescription)) {
     if (source.typical !== undefined) {
-      result.typical = source.typical[0];
+      result.typical = source.typical;
     } else {
       if (causes.length === 1) {
-        result.typical = causes[0].typical[0];
+        result.typical = causes[0].typical;
       }
     }
   }
