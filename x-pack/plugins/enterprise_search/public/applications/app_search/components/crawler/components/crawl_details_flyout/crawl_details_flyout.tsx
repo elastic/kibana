@@ -46,10 +46,20 @@ export const CrawlDetailsFlyout: React.FC = () => {
         </EuiTitle>
         <EuiTabs style={{ marginBottom: '-25px' }}>
           <EuiTab isSelected={selectedTab === 'preview'} onClick={() => setSelectedTab('preview')}>
-            Preview
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsFlyout.previewTabLabel',
+              {
+                defaultMessage: 'Preview',
+              }
+            )}
           </EuiTab>
           <EuiTab isSelected={selectedTab === 'json'} onClick={() => setSelectedTab('json')}>
-            Raw JSON
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsFlyout.rawJSONTabLabel',
+              {
+                defaultMessage: 'Raw JSON',
+              }
+            )}
           </EuiTab>
         </EuiTabs>
       </EuiFlyoutHeader>
