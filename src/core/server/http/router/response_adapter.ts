@@ -55,7 +55,8 @@ export class HapiResponseAdapter {
       statusCode: 500,
     });
 
-    error.output.payload.message = 'An internal server error occurred.';
+    error.output.payload.message =
+      'An internal server error occurred. Check Kibana server logs for details.';
 
     return error;
   }
