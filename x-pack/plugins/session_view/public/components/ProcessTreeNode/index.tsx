@@ -229,7 +229,12 @@ export function ProcessTreeNode({
 
   return (
     <>
-      <div data-id={id} key={id + searchMatched} css={styles.processNode}>
+      <div
+        data-id={id}
+        key={id + searchMatched}
+        css={styles.processNode}
+        data-test-subj="processTreeNode"
+      >
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div css={styles.wrapper} onClick={onProcessClicked}>
           {isSessionLeader ? renderSessionLeader() : renderProcess()}
