@@ -532,7 +532,7 @@ export class TaskRunner<
     if (!enabled) {
       throw new ErrorWithReason(
         AlertExecutionStatusErrorReasons.Disabled,
-        new Error(`Rule failed to execute because rule is disabled.`)
+        new Error(`Rule failed to execute because rule ran after it was disabled.`)
       );
     }
 
