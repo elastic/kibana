@@ -267,6 +267,13 @@ export function TransactionDistributionChart({
               yAccessors={['doc_count']}
               color={areaSeriesColors[i]}
               fit="lookahead"
+              // To make the area appear without the orphaned points technique,
+              // we changed the original data to replace values of 0 with 0.0001.
+              // To show the correct values again in tooltips, we use a custom tickFormat to round values.
+              // We can safely do this because all transaction values above 0 are without decimal points anyway.
+              // An update for Elastic Charts is in the works to be able to customize the above "fit"
+              // attribute. Once that is available we can get rid of the full workaround.
+              tickFormat={(p) => `${Math.round(p)}`}
             />
           ))}
         </Chart>
