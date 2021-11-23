@@ -87,8 +87,8 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
         await this.filterDashboardSearchWithSearchString(dashboardTitle);
         await this.selectAllDashboards();
         await this.waitForAddAndEditDashboardButtonEnabled();
+        await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
       });
-      await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
       // changing to the dashboard app might take sime time
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
       const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
