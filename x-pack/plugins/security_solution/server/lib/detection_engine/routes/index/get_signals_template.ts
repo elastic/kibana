@@ -33,7 +33,7 @@ import signalExtraFields from './signal_extra_fields.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 67;
+export const SIGNALS_TEMPLATE_VERSION = 57;
 /**
   @constant
   @type {number}

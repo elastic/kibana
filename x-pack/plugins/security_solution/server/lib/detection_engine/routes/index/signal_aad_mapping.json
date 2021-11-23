@@ -33,7 +33,6 @@
   "signal.rule.created_by": "kibana.alert.rule.created_by",
   "signal.rule.description": "kibana.alert.rule.description",
   "signal.rule.enabled": "kibana.alert.rule.enabled",
-  "signal.rule.execution.uuid": "kibana.alert.rule.execution.uuid",
   "signal.rule.false_positives": "kibana.alert.rule.false_positives",
   "signal.rule.from": "kibana.alert.rule.from",
   "signal.rule.id": "kibana.alert.rule.uuid",
