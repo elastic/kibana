@@ -9,7 +9,7 @@ get:
           schema:
             type: object
             properties:
-              list:
+              items:
                 type: array
                 items:
                   $ref: ../components/schemas/agent.yaml
@@ -20,7 +20,7 @@ get:
               perPage:
                 type: number
             required:
-              - list
+              - items
               - total
               - page
               - perPage

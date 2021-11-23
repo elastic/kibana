@@ -495,7 +495,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "list": {
+                    "items": {
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/agent"
@@ -512,7 +512,7 @@
                     }
                   },
                   "required": [
-                    "list",
+                    "items",
                     "total",
                     "page",
                     "perPage"
@@ -1305,7 +1305,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "list": {
+                    "items": {
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/enrollment_api_key"
@@ -1322,7 +1322,7 @@
                     }
                   },
                   "required": [
-                    "list",
+                    "items",
                     "page",
                     "perPage",
                     "total"

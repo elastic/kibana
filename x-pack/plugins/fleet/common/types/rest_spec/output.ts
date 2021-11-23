@@ -7,6 +7,8 @@
 
 import type { Output } from '../models';
 
+import type { ListResult } from './common';
+
 export interface GetOneOutputResponse {
   item: Output;
 }
@@ -37,9 +39,4 @@ export interface PutOutputResponse {
   item: Output;
 }
 
-export interface GetOutputsResponse {
-  items: Output[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+export type GetOutputsResponse = ListResult<Output>;

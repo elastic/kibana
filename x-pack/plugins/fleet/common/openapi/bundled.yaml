@@ -308,7 +308,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  list:
+                  items:
                     type: array
                     items:
                       $ref: '#/components/schemas/agent'
@@ -319,7 +319,7 @@ paths:
                   perPage:
                     type: number
                 required:
-                  - list
+                  - items
                   - total
                   - page
                   - perPage
@@ -795,7 +795,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  list:
+                  items:
                     type: array
                     items:
                       $ref: '#/components/schemas/enrollment_api_key'
@@ -806,7 +806,7 @@ paths:
                   total:
                     type: number
                 required:
-                  - list
+                  - items
                   - page
                   - perPage
                   - total

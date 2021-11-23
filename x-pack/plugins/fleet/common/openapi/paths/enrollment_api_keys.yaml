@@ -9,7 +9,7 @@ get:
           schema:
             type: object
             properties:
-              list:
+              items:
                 type: array
                 items:
                   $ref: ../components/schemas/enrollment_api_key.yaml
@@ -20,7 +20,7 @@ get:
               total:
                 type: number
             required:
-              - list
+              - items
               - page
               - perPage
               - total

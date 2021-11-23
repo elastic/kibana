@@ -122,7 +122,7 @@ export const getAgentsHandler: RequestHandler<
       : 0;
 
     const body: GetAgentsResponse = {
-      list: agents,
+      items: agents,
       total,
       totalInactive,
       page,
