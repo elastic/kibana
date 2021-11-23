@@ -9,7 +9,7 @@
 import * as i18nCore from './core';
 import * as loader from './loader';
 
-export { getDefaultLocale, getFormats, getLocale, getTranslation } from './core';
+export { getDefaultLocale, getFormats, getLocale, getTranslation } from './core/i18n';
 export { isPseudoLocale, translateUsingPseudoLocale } from './core/pseudo_locale';
 
 export { i18nCore as i18n };
