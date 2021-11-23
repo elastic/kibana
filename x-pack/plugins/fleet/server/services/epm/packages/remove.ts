@@ -80,14 +80,21 @@ export async function removeInstallation(options: {
   return installedAssets;
 }
 
-// TODO: this is very much like deleteKibanaSavedObjectsAssets below
-function deleteKibanaAssets(
+async function deleteKibanaAssets(
   installedObjects: KibanaAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  return installedObjects.map(async ({ id, type }) => {
+  const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
+    installedObjects
+  );
+
+  const assetsToDelete = resolvedObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
+
+  const promises = assetsToDelete.map(async ({ id, type }) => {
     return savedObjectsClient.delete(type, id);
   });
+
+  return Promise.all(promises);
 }
 
 function deleteESAssets(
@@ -145,7 +152,7 @@ async function deleteAssets(
     // then the other asset types
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
-      ...deleteKibanaAssets(installedKibana, savedObjectsClient),
+      deleteKibanaAssets(installedKibana, savedObjectsClient),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
@@ -177,7 +184,6 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
   }
 }
 
-// TODO: this is very much like deleteKibanaAssets above
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
   installedRefs: AssetReference[]
@@ -185,15 +191,12 @@ export async function deleteKibanaSavedObjectsAssets(
   if (!installedRefs.length) return;
 
   const logger = appContextService.getLogger();
-  const deletePromises = installedRefs.map(({ id, type }) => {
-    const assetType = type as AssetType;
+  const assetsToDelete = installedRefs
+    .filter(({ type }) => savedObjectTypes.includes(type as AssetType))
+    .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
 
-    if (savedObjectTypes.includes(assetType)) {
-      return savedObjectsClient.delete(assetType, id);
-    }
-  });
   try {
-    await Promise.all(deletePromises);
+    await deleteKibanaAssets(assetsToDelete, savedObjectsClient);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!savedObjectsClient.errors.isNotFoundError(err)) {
