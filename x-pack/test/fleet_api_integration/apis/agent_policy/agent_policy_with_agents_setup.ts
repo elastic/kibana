@@ -23,7 +23,7 @@ export default function (providerContext: FtrProviderContext) {
   async function getEnrollmentKeyForPolicyId(policyId: string) {
     const listRes = await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
 
-    const key = listRes.body.list.find(
+    const key = listRes.body.items.find(
       (item: { policy_id: string; id: string }) => item.policy_id === policyId
     );
 

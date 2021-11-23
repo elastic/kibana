@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(apiResponse.total).to.eql(1);
-      const agent = apiResponse.list[0];
+      const agent = apiResponse.items[0];
       expect(agent.access_api_key_id).to.eql('api-key-2');
     });
   });

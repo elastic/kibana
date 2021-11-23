@@ -53,7 +53,7 @@ export class AgentManager extends Manager {
       this.params.kibanaUrl + '/api/fleet/enrollment-api-keys',
       this.requestOptions
     );
-    const policy = apiKeys.list[1];
+    const policy = apiKeys.items[1];
 
     this.log.info('Running the agent');
 
@@ -87,7 +87,7 @@ export class AgentManager extends Manager {
         `${this.params.kibanaUrl}/api/fleet/agents`,
         this.requestOptions
       );
-      done = agents.list[0]?.status === 'online';
+      done = agents.items[0]?.status === 'online';
       if (++retries > 12) {
         this.log.error('Giving up on enrolling the agent after a minute');
         throw new Error('Agent timed out while coming online');
