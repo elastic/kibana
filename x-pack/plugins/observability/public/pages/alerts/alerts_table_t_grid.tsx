@@ -32,11 +32,8 @@ import {
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { get, pick } from 'lodash';
-import {
-  getAlertsPermissions,
-  useGetUserAlertsPermissions,
-} from '../../hooks/use_alert_permission';
+import { pick } from 'lodash';
+import { getAlertsPermissions } from '../../hooks/use_alert_permission';
 import type {
   TimelinesUIStart,
   TGridType,
@@ -44,7 +41,7 @@ import type {
   TGridModel,
   SortDirection,
 } from '../../../../timelines/public';
-import { useStatusBulkActionItems } from '../../../../timelines/public';
+
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
