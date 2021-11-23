@@ -23,6 +23,7 @@ import {
   EuiModalHeaderTitle,
   EuiText,
   EuiBasicTable,
+  EuiCode,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -283,8 +284,8 @@ export const getConflictModalContent = ({
         <p>
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
-            defaultMessage="The type of the '{fieldName}' field changes across indices and might not be available for search, visualizations, and other analysis."
-            values={{ fieldName }}
+            defaultMessage="The type of the {fieldName} field changes across indices and might not be available for search, visualizations, and other analysis."
+            values={{ fieldName: <EuiCode>{fieldName}</EuiCode> }}
           />
         </p>
         <EuiBasicTable
