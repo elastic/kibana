@@ -165,6 +165,7 @@ class ProcessImpl implements Process {
     );
 
     if (execsForks.length === 0) {
+      // eslint-disable-next-line no-debugger
       debugger;
     }
 
