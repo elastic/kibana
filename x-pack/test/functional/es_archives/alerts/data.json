@@ -492,3 +492,124 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:ece1ece2-9394-48df-a634-d5457c351ece",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test addition of default threat_indicator_path",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+            "type": "threat_match"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:fce1ece2-9394-48df-a634-d5457c351fce",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test addition of default threat_indicator_path",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+            "type": "threat_match",
+            "threatIndicatorPath": "custom.indicator.path"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:1ce1ece2-9394-48df-a634-d5457c3511ce",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "name" : "test addition of default threat_indicator_path",
+        "alertTypeId" : "siem.signals",
+        "consumer" : "alertsFixture",
+        "params" : {
+            "type": "eql"
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
