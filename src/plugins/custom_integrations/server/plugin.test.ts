@@ -38,7 +38,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/master/introduction.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/branch/introduction.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
@@ -50,7 +50,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/ruby-api/master/ruby_client.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/ruby-api/branch/ruby_client.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
@@ -62,7 +62,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/go-api/master/overview.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/go-api/branch/overview.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
@@ -74,7 +74,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/net-api/master/index.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/net-api/branch/index.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
@@ -86,7 +86,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/php-api/master/index.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/php-api/branch/index.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
@@ -98,7 +98,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/master/index.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/branch/index.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
@@ -110,7 +110,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/python-api/master/index.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/python-api/branch/index.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
@@ -122,7 +122,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/master/index.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/branch/index.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
@@ -134,7 +134,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/master/index.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/branch/index.html',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['elastic_stack', 'custom', 'language_client'],
