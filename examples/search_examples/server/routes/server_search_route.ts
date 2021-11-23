@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import { IEsSearchRequest } from 'src/plugins/data/server';
 import { schema } from '@kbn/config-schema';
 import { IEsSearchResponse } from 'src/plugins/data/common';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import type { IRouter } from 'src/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';
-import { getRequestAbortedSignal } from '../../../../src/plugins/data/server/';
 
 export function registerServerSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   router.get(
@@ -68,4 +68,10 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
       }
     }
   );
+}
+
+function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+  return controller.signal;
 }
