@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
-import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
+import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
   Operation,
@@ -455,11 +455,29 @@ describe('Datatable Visualization', () => {
   });
 
   describe('#toExpression', () => {
-    it('reorders the rendered colums based on the order from the datasource', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
+    const getDatatableExpressionArgs = (state: DatatableVisualizationState) =>
+      buildExpression(
+        datatableVisualization.toExpression(state, frame.datasourceLayers) as Ast
+      ).findFunction('lens_datatable')[0].arguments;
+
+    const defaultExpressionTableState = {
+      layerId: 'a',
+      layerType: layerTypes.DATA,
+      columns: [{ columnId: 'b' }, { columnId: 'c' }],
+    };
+
+    let datasource: DatasourceMock;
+    let frame: FramePublicAPI;
+
+    beforeEach(() => {
+      datasource = createMockDatasource('test');
       datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+
+      frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
+    });
+
+    it('reorders the rendered colums based on the order from the datasource', () => {
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         isBucketed: false, // <= make them metrics
@@ -467,11 +485,7 @@ describe('Datatable Visualization', () => {
       });
 
       const expression = datatableVisualization.toExpression(
-        {
-          layerId: 'a',
-          layerType: layerTypes.DATA,
-          columns: [{ columnId: 'b' }, { columnId: 'c' }],
-        },
+        defaultExpressionTableState,
         frame.datasourceLayers
       ) as Ast;
 
@@ -511,10 +525,6 @@ describe('Datatable Visualization', () => {
     });
 
     it('returns no expression if the metric dimension is not defined', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         isBucketed: true, // move it from the metric to the break down by side
@@ -522,15 +532,45 @@ describe('Datatable Visualization', () => {
       });
 
       const expression = datatableVisualization.toExpression(
-        {
-          layerId: 'a',
-          layerType: layerTypes.DATA,
-          columns: [{ columnId: 'b' }, { columnId: 'c' }],
-        },
+        defaultExpressionTableState,
         frame.datasourceLayers
       );
 
       expect(expression).toEqual(null);
+    });
+
+    it('sets pagination based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).pageSize).toEqual([]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          paging: { size: 20, enabled: false },
+        }).pageSize
+      ).toEqual([]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          paging: { size: 20, enabled: true },
+        }).pageSize
+      ).toEqual([20]);
+    });
+
+    it('sets fitRowToContent based on state', () => {
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).fitRowToContent
+      ).toEqual([false]);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, fitRowToContent: false })
+          .fitRowToContent
+      ).toEqual([false]);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, fitRowToContent: true })
+          .fitRowToContent
+      ).toEqual([true]);
     });
   });
 
@@ -628,6 +668,24 @@ describe('Datatable Visualization', () => {
       ).toEqual({
         ...currentState,
         columns: [{ columnId: 'saved', width: undefined }],
+      });
+    });
+
+    it('should update page size', () => {
+      const currentState: DatatableVisualizationState = {
+        layerId: 'foo',
+        layerType: layerTypes.DATA,
+        columns: [{ columnId: 'saved', width: 5000 }],
+        paging: { enabled: true, size: 10 },
+      };
+      expect(
+        datatableVisualization.onEditAction!(currentState, {
+          name: 'edit',
+          data: { action: 'pagesize', size: 30 },
+        })
+      ).toEqual({
+        ...currentState,
+        paging: { enabled: true, size: 30 },
       });
     });
   });

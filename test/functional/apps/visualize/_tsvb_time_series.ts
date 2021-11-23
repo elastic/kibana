@@ -49,147 +49,157 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickDataTab('timeSeries');
       });
 
-      it('should render all necessary components', async () => {
-        await visualBuilder.checkTimeSeriesChartIsPresent();
-        await visualBuilder.checkTimeSeriesLegendIsPresent();
-      });
+      describe('basics', () => {
+        this.tags('includeFirefox');
 
-      it('should show the correct count in the legend', async () => {
-        await retry.try(async () => {
-          const actualCount = await visualBuilder.getRhythmChartLegendValue();
-          expect(actualCount).to.be('156');
+        it('should render all necessary components', async () => {
+          await visualBuilder.checkTimeSeriesChartIsPresent();
+          await visualBuilder.checkTimeSeriesLegendIsPresent();
         });
-      });
 
-      it('should show the correct count in the legend with 2h offset', async () => {
-        await visualBuilder.clickSeriesOption();
-        await visualBuilder.enterOffsetSeries('2h');
-        const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('293');
-      });
+        it('should show the correct count in the legend', async () => {
+          await retry.try(async () => {
+            const actualCount = await visualBuilder.getRhythmChartLegendValue();
+            expect(actualCount).to.be('156');
+          });
+        });
 
-      it('should show the correct count in the legend with -2h offset', async () => {
-        await visualBuilder.clickSeriesOption();
-        await visualBuilder.enterOffsetSeries('-2h');
-        const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
-      });
+        it('should show the correct count in the legend with 2h offset', async () => {
+          await visualBuilder.clickSeriesOption();
+          await visualBuilder.enterOffsetSeries('2h');
+          const actualCount = await visualBuilder.getRhythmChartLegendValue();
+          expect(actualCount).to.be('293');
+        });
 
-      it('should open color picker, deactivate panel and clone series', async () => {
-        await visualBuilder.clickColorPicker();
-        await visualBuilder.checkColorPickerPopUpIsPresent();
-        await visualBuilder.clickColorPicker();
+        it('should show the correct count in the legend with -2h offset', async () => {
+          await visualBuilder.clickSeriesOption();
+          await visualBuilder.enterOffsetSeries('-2h');
+          const actualCount = await visualBuilder.getRhythmChartLegendValue();
+          expect(actualCount).to.be('53');
+        });
 
-        await visualBuilder.changePanelPreview();
-        await visualBuilder.checkPreviewIsDisabled();
-        await visualBuilder.changePanelPreview();
+        it('should open color picker, deactivate panel and clone series', async () => {
+          await visualBuilder.clickColorPicker();
+          await visualBuilder.checkColorPickerPopUpIsPresent();
+          await visualBuilder.clickColorPicker();
 
-        await visualBuilder.cloneSeries();
-        const legend = await visualBuilder.getLegendItems();
-        const series = await visualBuilder.getSeries();
-        expect(legend.length).to.be(2);
-        expect(series.length).to.be(2);
-      });
+          await visualBuilder.changePanelPreview();
+          await visualBuilder.checkPreviewIsDisabled();
+          await visualBuilder.changePanelPreview();
 
-      it('should show the correct count in the legend with custom numeric formatter', async () => {
-        const expectedLegendValue = '$ 156';
+          await visualBuilder.cloneSeries();
+          const legend = await visualBuilder.getLegendItems();
+          const series = await visualBuilder.getSeries();
+          expect(legend.length).to.be(2);
+          expect(series.length).to.be(2);
+        });
 
-        await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('number');
-        await visualBuilder.enterSeriesTemplate('$ {{value}}');
-        await retry.try(async () => {
+        it('should show the correct count in the legend with custom numeric formatter', async () => {
+          const expectedLegendValue = '$ 156';
+
+          await visualBuilder.clickSeriesOption();
+          await visualBuilder.changeDataFormatter('number');
+          await visualBuilder.enterSeriesTemplate('$ {{value}}');
+          await retry.try(async () => {
+            const actualCount = await visualBuilder.getRhythmChartLegendValue();
+            expect(actualCount).to.be(expectedLegendValue);
+          });
+        });
+
+        it('should show the correct count in the legend with percent formatter', async () => {
+          const expectedLegendValue = '15,600%';
+
+          await visualBuilder.clickSeriesOption();
+          await visualBuilder.changeDataFormatter('percent');
           const actualCount = await visualBuilder.getRhythmChartLegendValue();
           expect(actualCount).to.be(expectedLegendValue);
         });
-      });
 
-      it('should show the correct count in the legend with percent formatter', async () => {
-        const expectedLegendValue = '15,600%';
+        it('should show the correct count in the legend with bytes formatter', async () => {
+          const expectedLegendValue = '156B';
 
-        await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('percent');
-        const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be(expectedLegendValue);
-      });
-
-      it('should show the correct count in the legend with bytes formatter', async () => {
-        const expectedLegendValue = '156B';
-
-        await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('bytes');
-        const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be(expectedLegendValue);
-      });
-
-      it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
-        await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('duration');
-        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
-        const actualCountDefault = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCountDefault).to.be('a few seconds');
-
-        log.debug(`to: 'Human readable', from: 'Seconds'`);
-        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Seconds' });
-        const actualCountSec = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCountSec).to.be('3 minutes');
-
-        log.debug(`to: 'Human readable', from: 'Minutes'`);
-        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Minutes' });
-        const actualCountMin = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCountMin).to.be('3 hours');
-      });
-
-      describe('Dark mode', () => {
-        before(async () => {
-          await kibanaServer.uiSettings.update({
-            'theme:darkMode': true,
-          });
-        });
-
-        it(`viz should have light class when background color is white`, async () => {
-          await visualBuilder.clickPanelOptions('timeSeries');
-          await visualBuilder.setBackgroundColor('#FFFFFF');
-
-          expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
-        });
-
-        after(async () => {
-          await kibanaServer.uiSettings.update({
-            'theme:darkMode': false,
-          });
-        });
-      });
-
-      describe('Clicking on the chart', () => {
-        it(`should create a filter`, async () => {
-          await visualBuilder.setMetricsGroupByTerms('machine.os.raw', {
-            include: 'win 7',
-            exclude: 'ios',
-          });
           await visualBuilder.clickSeriesOption();
-          await testSubjects.click('visualizeSaveButton');
+          await visualBuilder.changeDataFormatter('bytes');
+          const actualCount = await visualBuilder.getRhythmChartLegendValue();
+          expect(actualCount).to.be(expectedLegendValue);
+        });
 
-          await timeToVisualize.saveFromModal('My TSVB viz 1', {
-            addToDashboard: 'new',
-            saveToLibrary: false,
+        it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
+          await visualBuilder.clickSeriesOption();
+          await visualBuilder.changeDataFormatter('duration');
+          await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
+          const actualCountDefault = await visualBuilder.getRhythmChartLegendValue();
+          expect(actualCountDefault).to.be('a few seconds');
+
+          log.debug(`to: 'Human readable', from: 'Seconds'`);
+          await visualBuilder.setDurationFormatterSettings({
+            to: 'Human readable',
+            from: 'Seconds',
+          });
+          const actualCountSec = await visualBuilder.getRhythmChartLegendValue();
+          expect(actualCountSec).to.be('3 minutes');
+
+          log.debug(`to: 'Human readable', from: 'Minutes'`);
+          await visualBuilder.setDurationFormatterSettings({
+            to: 'Human readable',
+            from: 'Minutes',
+          });
+          const actualCountMin = await visualBuilder.getRhythmChartLegendValue();
+          expect(actualCountMin).to.be('3 hours');
+        });
+
+        describe('Dark mode', () => {
+          before(async () => {
+            await kibanaServer.uiSettings.update({
+              'theme:darkMode': true,
+            });
           });
 
-          await dashboard.waitForRenderComplete();
-          const el = await elasticChart.getCanvas();
-          // click on specific coordinates
-          await browser
-            .getActions()
-            .move({ x: 105, y: 115, origin: el._webElement })
-            .click()
-            .perform();
+          it(`viz should have light class when background color is white`, async () => {
+            await visualBuilder.clickPanelOptions('timeSeries');
+            await visualBuilder.setBackgroundColor('#FFFFFF');
 
-          await retry.try(async () => {
-            await testSubjects.click('applyFiltersPopoverButton');
-            await testSubjects.missingOrFail('applyFiltersPopoverButton');
+            expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
           });
 
-          const hasMachineRawFilter = await filterBar.hasFilter('machine.os.raw', 'win 7');
-          expect(hasMachineRawFilter).to.be(true);
+          after(async () => {
+            await kibanaServer.uiSettings.update({
+              'theme:darkMode': false,
+            });
+          });
+        });
+
+        describe('Clicking on the chart', () => {
+          it(`should create a filter`, async () => {
+            await visualBuilder.setMetricsGroupByTerms('machine.os.raw', {
+              include: 'win 7',
+              exclude: 'ios',
+            });
+            await visualBuilder.clickSeriesOption();
+            await testSubjects.click('visualizeSaveButton');
+
+            await timeToVisualize.saveFromModal('My TSVB viz 1', {
+              addToDashboard: 'new',
+              saveToLibrary: false,
+            });
+
+            await dashboard.waitForRenderComplete();
+            const el = await elasticChart.getCanvas();
+            // click on specific coordinates
+            await browser
+              .getActions()
+              .move({ x: 105, y: 115, origin: el._webElement })
+              .click()
+              .perform();
+
+            await retry.try(async () => {
+              await testSubjects.click('applyFiltersPopoverButton');
+              await testSubjects.missingOrFail('applyFiltersPopoverButton');
+            });
+
+            const hasMachineRawFilter = await filterBar.hasFilter('machine.os.raw', 'win 7');
+            expect(hasMachineRawFilter).to.be(true);
+          });
         });
       });
 

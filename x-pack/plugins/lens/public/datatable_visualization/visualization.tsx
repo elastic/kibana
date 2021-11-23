@@ -24,7 +24,7 @@ import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { getStopsForFixedMode } from '../shared_components';
 import { LayerType, layerTypes } from '../../common';
-import { getDefaultSummaryLabel } from '../../common/expressions';
+import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 export interface DatatableVisualizationState {
@@ -33,6 +33,7 @@ export interface DatatableVisualizationState {
   layerType: LayerType;
   sorting?: SortingState;
   fitRowToContent?: boolean;
+  paging?: PagingState;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -397,6 +398,7 @@ export const getDatatableVisualization = ({
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
             fitRowToContent: [state.fitRowToContent ?? false],
+            pageSize: state.paging?.enabled ? [state.paging.size] : [],
           },
         },
       ],
@@ -429,10 +431,11 @@ export const getDatatableVisualization = ({
           },
         };
       case 'toggle':
+        const toggleColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === toggleColumnId) {
               return {
                 ...column,
                 hidden: !column.hidden,
@@ -444,10 +447,11 @@ export const getDatatableVisualization = ({
         };
       case 'resize':
         const targetWidth = event.data.width;
+        const resizeColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === resizeColumnId) {
               return {
                 ...column,
                 width: targetWidth,
@@ -456,6 +460,14 @@ export const getDatatableVisualization = ({
               return column;
             }
           }),
+        };
+      case 'pagesize':
+        return {
+          ...state,
+          paging: {
+            enabled: state.paging?.enabled || false,
+            size: event.data.size,
+          },
         };
       default:
         return state;
