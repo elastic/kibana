@@ -8,7 +8,12 @@
 
 import { CoreSetup, CoreStart, Logger } from 'src/core/server';
 import { RulesServiceSetupDeps, RuleRegistrationContext, DemoFeatureId } from '../types';
-import { Dataset, createLifecycleExecutor } from '../../../../x-pack/plugins/rule_registry/server';
+
+export enum Dataset {
+  alerts = 'alerts',
+  events = 'events',
+}
+
 export class RulesService {
   constructor(
     public readonly ownerFeatureId: DemoFeatureId,
@@ -30,7 +35,10 @@ export class RulesService {
       ],
     });
 
-    const createLifecycleRuleExecutor = createLifecycleExecutor(this.logger, ruleDataClient);
+    const createLifecycleRuleExecutor = setupDeps.ruleRegistry.createLifecycleExecutor(
+      this.logger,
+      ruleDataClient
+    );
 
     return {
       createLifecycleRuleExecutor,

@@ -24,6 +24,8 @@ import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import { AlertsClient } from './alert_data_client/alerts_client';
 import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 import { defineRoutes } from './routes';
+import { createLifecycleExecutor } from '../server/utils/create_lifecycle_executor';
+import { IRuleDataClient } from './rule_data_client';
 
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;
@@ -35,6 +37,7 @@ export interface RuleRegistryPluginStartDependencies {
 
 export interface RuleRegistryPluginSetupContract {
   ruleDataService: IRuleDataService;
+  createLifecycleExecutor: (logger: Logger, ruleDataClient: IRuleDataClient) => {};
 }
 
 export interface RuleRegistryPluginStartContract {
@@ -103,7 +106,7 @@ export class RuleRegistryPlugin
 
     defineRoutes(router);
 
-    return { ruleDataService: this.ruleDataService };
+    return { ruleDataService: this.ruleDataService, createLifecycleExecutor };
   }
 
   public start(
