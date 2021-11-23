@@ -40,9 +40,10 @@ export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
     if (metricValue != null) {
       const minValue = getMinValue(row, state);
       const biggerValue = Math.max(goalValue ?? 0, metricValue, 1);
-      const nicelyRoundedNumbers = scaleLinear().domain([minValue, biggerValue]).nice().ticks(4);
-      const lastNumber = nicelyRoundedNumbers[nicelyRoundedNumbers.length - 1];
-      return lastNumber + nicelyRoundedNumbers[1];
+      const nicelyRounded = scaleLinear().domain([minValue, biggerValue]).nice().ticks(4);
+      if (nicelyRounded.length > 2)
+        return nicelyRounded[nicelyRounded.length - 1] + nicelyRounded[1];
+      return minValue === biggerValue ? biggerValue + 1 : biggerValue;
     }
   }
   return FALLBACK_VALUE;
