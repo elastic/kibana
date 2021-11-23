@@ -222,6 +222,7 @@ export class DocLinksService {
           mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
           mappingTypesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           migrateIndexAllocationFilters: `${ELASTICSEARCH_DOCS}migrate-index-allocation-filters.html`,
+          migrationApiDeprecation: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
           releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,

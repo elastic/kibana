@@ -14,7 +14,10 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { APMQueryParams } from '../url_helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { TimeRangeComparisonType } from '../../../../../common/runtime_types/comparison_type_rt';
+import {
+  TimeRangeComparisonEnum,
+  TimeRangeComparisonType,
+} from '../../../../../common/runtime_types/comparison_type_rt';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -41,8 +44,8 @@ export function TransactionDetailLink({
   transactionType,
   latencyAggregationType,
   environment,
-  comparisonEnabled,
-  comparisonType,
+  comparisonEnabled = true,
+  comparisonType = TimeRangeComparisonEnum.DayBefore,
   ...rest
 }: Props) {
   const { urlParams } = useLegacyUrlParams();
