@@ -58,6 +58,7 @@ TYPES_DEPS = [
   "@npm//@storybook/node-logger",
   "@npm//@storybook/react",
   "@npm//@storybook/theming",
+  "@npm//@types/express", # necessary for storybook which is missing the types
   "@npm//@types/loader-utils",
   "@npm//@types/node",
   "@npm//@types/react",
