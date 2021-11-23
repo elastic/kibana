@@ -105,5 +105,6 @@ module.exports = {
     '@kbn/eslint/no_async_foreach': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
+    '@kbn/eslint/no_this_in_property_initializers': 'error',
   },
 };

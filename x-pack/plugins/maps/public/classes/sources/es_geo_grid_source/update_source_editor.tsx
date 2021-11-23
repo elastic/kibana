@@ -86,14 +86,6 @@ export class UpdateSourceEditor extends Component<Props, State> {
     ) {
       newLayerType =
         resolution === GRID_RESOLUTION.SUPER_FINE ? LAYER_TYPE.TILED_VECTOR : LAYER_TYPE.VECTOR;
-    } else if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
-      if (resolution === GRID_RESOLUTION.SUPER_FINE) {
-        throw new Error('Heatmap does not support SUPER_FINE resolution');
-      } else {
-        newLayerType = LAYER_TYPE.HEATMAP;
-      }
-    } else {
-      throw new Error('Unexpected layer-type');
     }
 
     await this.props.onChange(
@@ -163,7 +155,6 @@ export class UpdateSourceEditor extends Component<Props, State> {
           </EuiTitle>
           <EuiSpacer size="m" />
           <ResolutionEditor
-            includeSuperFine={this.props.currentLayerType !== LAYER_TYPE.HEATMAP}
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
             metrics={this.props.metrics}
