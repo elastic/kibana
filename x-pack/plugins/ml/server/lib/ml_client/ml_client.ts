@@ -486,7 +486,7 @@ export function getMlClient(
         body,
       });
 
-      // this should be reinstated once https://github.com/elastic/kibana/issues/118427
+      // this should be reinstated once https://github.com/elastic/elasticsearch-js/issues/1601
       // is fixed
       // return mlClient.updateDatafeed(...p);
     },
