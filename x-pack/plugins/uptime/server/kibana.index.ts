@@ -12,7 +12,7 @@ import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
-import { umDynamicSettings } from './lib/saved_objects';
+import { umDynamicSettings } from './lib/saved_objects/uptime_settings';
 import { UptimeRuleRegistry } from './plugin';
 
 export interface KibanaRouteOptions {

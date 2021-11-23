@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SimpleSavedObject } from 'kibana/public';
+
 /** Represents the average monitor duration ms at a point in time. */
 export interface MonitorDurationAveragePoint {
   /** The timeseries value for this point. */
@@ -28,3 +30,17 @@ export interface MonitorDurationResult {
 export interface MonitorIdParam {
   monitorId: string;
 }
+
+export type SyntheticsMonitorSavedObject = SimpleSavedObject<{
+  name: string;
+  runOnce: boolean;
+  urls?: string[];
+  tags?: string[];
+  schedule: string;
+  type: 'http' | 'tcp' | 'icmp' | 'browser';
+  source?: {
+    inline: {
+      script: string;
+    };
+  };
+}>;

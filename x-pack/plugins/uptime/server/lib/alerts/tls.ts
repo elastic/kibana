@@ -17,7 +17,7 @@ import { TlsTranslations } from '../../../common/translations';
 
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 
-import { savedObjectsAdapter } from '../saved_objects';
+import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { createUptimeESClient } from '../lib';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
