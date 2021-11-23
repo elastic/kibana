@@ -129,7 +129,7 @@ image::images/rule-concepts-summary.svg[Rules, connectors, alerts and actions wo
 
 This section will clarify some of the important differences in the function and intent of the two systems.
 
-Functionally, {kib} Alerting differs in that: 
+Functionally, Alerting differs in that: 
 
 * Scheduled checks are run on {kib} instead of {es}
 * {kib} <<alerting-concepts-conditions, rules hide the details of detecting conditions>> through *rule types*, whereas watches provide low-level control over inputs, conditions, and transformations.
