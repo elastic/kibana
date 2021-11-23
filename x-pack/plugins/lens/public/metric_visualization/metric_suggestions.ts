@@ -26,7 +26,8 @@ export function getSuggestions({
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.columns.length !== 1 ||
-    table.columns[0].operation.dataType !== 'number'
+    table.columns[0].operation.dataType !== 'number' ||
+    table.columns[0].operation.isStaticValue
   ) {
     return [];
   }

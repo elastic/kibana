@@ -26,7 +26,8 @@ function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisua
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    shouldRejectIntervals
+    shouldRejectIntervals ||
+    table.columns.some((col) => col.operation.isStaticValue)
   );
 }
 

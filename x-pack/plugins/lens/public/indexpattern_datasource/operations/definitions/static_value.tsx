@@ -81,6 +81,7 @@ export const staticValueOperation: OperationDefinition<
       dataType: 'number',
       isBucketed: false,
       scale: 'ratio',
+      isStaticValue: true,
     };
   },
   toExpression: (layer, columnId) => {

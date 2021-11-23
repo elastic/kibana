@@ -69,7 +69,10 @@ export function getSuggestions({
     });
   }
 
-  if (incompleteTable && state && !subVisualizationId) {
+  if (
+    (incompleteTable && state && !subVisualizationId) ||
+    table.columns.some((col) => col.operation.isStaticValue)
+  ) {
     // reject incomplete configurations if the sub visualization isn't specifically requested
     // this allows to switch chart types via switcher with incomplete configurations, but won't
     // cause incomplete suggestions getting auto applied on dropped fields

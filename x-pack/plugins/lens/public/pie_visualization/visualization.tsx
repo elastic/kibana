@@ -40,7 +40,7 @@ function newLayerState(layerId: string): PieLayerState {
 
 const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
-  !op.isBucketed && op.dataType === 'number';
+  !op.isBucketed && op.dataType === 'number' && !op.isStaticValue;
 
 const applyPaletteToColumnConfig = (
   columns: AccessorConfig[],
