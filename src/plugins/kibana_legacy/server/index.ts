@@ -16,7 +16,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     defaultAppId: true,
   },
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({}) => [
     (completeConfig, rootPath, addDeprecation) => {
       const hasKibanaDefaultAppId = get(completeConfig, 'kibana.defaultAppId') !== undefined;
       const hasKibanaLegacyDefaultAppId =
