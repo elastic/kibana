@@ -20,6 +20,7 @@ import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
+import { GetMetadataListRequestSchemaV2 } from '../../../../common/endpoint/schema/metadata';
 
 /* Filters that can be applied to the endpoint fetch route */
 export const endpointFilters = schema.object({
@@ -63,24 +64,6 @@ export const GetMetadataListRequestSchema = {
       filters: endpointFilters,
     })
   ),
-};
-
-export const GetMetadataListRequestSchemaV2 = {
-  query: schema.object({
-    page: schema.number({ defaultValue: 0 }),
-    pageSize: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-    kuery: schema.maybe(schema.string()),
-    hostStatuses: schema.arrayOf(
-      schema.oneOf([
-        schema.literal(HostStatus.HEALTHY.toString()),
-        schema.literal(HostStatus.OFFLINE.toString()),
-        schema.literal(HostStatus.UPDATING.toString()),
-        schema.literal(HostStatus.UNHEALTHY.toString()),
-        schema.literal(HostStatus.INACTIVE.toString()),
-      ]),
-      { defaultValue: [] }
-    ),
-  }),
 };
 
 export function registerEndpointRoutes(

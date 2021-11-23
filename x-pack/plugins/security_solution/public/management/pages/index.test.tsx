@@ -11,6 +11,7 @@ import { ManagementContainer } from './index';
 import '../../common/mock/match_media.ts';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { endpointPageHttpMock } from './endpoint_hosts/mocks';
 
 jest.mock('../../common/components/user_privileges');
 
@@ -19,6 +20,7 @@ describe('when in the Administration tab', () => {
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
+    endpointPageHttpMock(mockedContext.coreStart.http);
     render = () => mockedContext.render(<ManagementContainer />);
     mockedContext.history.push('/administration/endpoints');
   });

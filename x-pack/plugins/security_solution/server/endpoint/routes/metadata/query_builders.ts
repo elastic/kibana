@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TypeOf } from '@kbn/config-schema';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   metadataCurrentIndexPattern,
@@ -15,7 +14,7 @@ import {
 import { KibanaRequest } from '../../../../../../../src/core/server';
 import { EndpointAppContext } from '../../types';
 import { buildStatusesKuery } from './support/agent_status';
-import { GetMetadataListRequestSchemaV2 } from '.';
+import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 
 /**
  * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
@@ -234,14 +233,11 @@ interface BuildUnitedIndexQueryResponse {
 }
 
 export async function buildUnitedIndexQuery(
-  {
-    page = 0,
-    pageSize = 10,
-    hostStatuses = [],
-    kuery = '',
-  }: TypeOf<typeof GetMetadataListRequestSchemaV2.query>,
+  queryOptions: GetMetadataListRequestQuery,
   endpointPolicyIds: string[] = []
 ): Promise<BuildUnitedIndexQueryResponse> {
+  const { page = 0, pageSize = 10, hostStatuses = [], kuery = '' } = queryOptions || {};
+
   const statusesKuery = buildStatusesKuery(hostStatuses);
 
   const filterIgnoredAgents = {
