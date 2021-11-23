@@ -38,7 +38,8 @@
     "lens",
     "lists",
     "home",
-    "telemetry"
+    "telemetry",
+    "dataViewFieldEditor"
   ],
   "server": true,
   "ui": true,

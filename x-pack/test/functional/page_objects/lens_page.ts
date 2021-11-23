@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -129,9 +129,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const operationSelector = opts.isPreviousIncompatible
           ? `lns-indexPatternDimension-${opts.operation} incompatible`
           : `lns-indexPatternDimension-${opts.operation}`;
-        await testSubjects.click(operationSelector);
-      }
+        async function getAriaPressed() {
+          const operationSelectorContainer = await testSubjects.find(operationSelector);
+          await testSubjects.click(operationSelector);
+          const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
+          return ariaPressed;
+        }
 
+        // adding retry here as it seems that there is a flakiness of the operation click
+        // it seems that the aria-pressed attribute is updated to true when the button is clicked
+        await retry.waitFor('aria pressed to be true', async () => {
+          const ariaPressedStatus = await getAriaPressed();
+          return ariaPressedStatus === 'true';
+        });
+      }
       if (opts.field) {
         const target = await testSubjects.find('indexPattern-dimension-field');
         await comboBox.openOptionsList(target);
@@ -797,6 +808,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableHeader(index = 0) {
+      log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
           index + 1
@@ -858,7 +870,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openPalettePanel(chartType: string) {
-      await testSubjects.click(`${chartType}_dynamicColoring_trigger`);
+      await retry.try(async () => {
+        await testSubjects.click(`${chartType}_dynamicColoring_trigger`);
+        // wait for the UI to settle
+        await PageObjects.common.sleep(100);
+        await testSubjects.existOrFail('lns-indexPattern-PalettePanelContainer', { timeout: 2500 });
+      });
     },
 
     async closePalettePanel() {
@@ -897,12 +914,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async toggleColumnVisibility(dimension: string) {
+    async toggleColumnVisibility(dimension: string, no = 1) {
       await this.openDimensionEditor(dimension);
       const id = 'lns-table-column-hidden';
+      await PageObjects.common.sleep(500);
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status before the toggle = ${isChecked}`);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      await PageObjects.common.sleep(500);
+      const isChecked2 = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status after the toggle = ${isChecked2}`);
       await this.closeDimensionEditor();
+      await PageObjects.common.sleep(500);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -922,6 +945,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+    },
+
+    async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
+      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+    },
+
+    async getMetricStyle() {
+      const el = await testSubjects.find('lns_metric_value');
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
     },
 
     async assertMissingValues(option: string) {
@@ -1085,7 +1124,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         draggedOver,
         dropTarget
       );
-      await delay(150);
+      await setTimeoutAsync(150);
     },
 
     /**

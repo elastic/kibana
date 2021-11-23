@@ -31,6 +31,7 @@ import { EventFiltersListPageState, EventFiltersPageLocation } from '../types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import {
+  asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
@@ -60,9 +61,7 @@ describe('event filters selectors', () => {
   ) => {
     previousStateWhileLoading = previousState;
 
-    // will be fixed when AsyncResourceState is refactored (#830)
-    // @ts-expect-error TS2345
-    initialState.listPage.data = createLoadingResourceState(previousState);
+    initialState.listPage.data = createLoadingResourceState(asStaleResourceState(previousState));
   };
 
   beforeEach(() => {
@@ -204,9 +203,9 @@ describe('event filters selectors', () => {
       expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Loading
-      // will be fixed when AsyncResourceState is refactored (#830)
-      // @ts-expect-error TS2345
-      initialState.listPage.dataExist = createLoadingResourceState(initialState.listPage.dataExist);
+      initialState.listPage.dataExist = createLoadingResourceState(
+        asStaleResourceState(initialState.listPage.dataExist)
+      );
       expect(getListPageDoesDataExist(initialState)).toBe(false);
 
       // Set DataExists to Failure

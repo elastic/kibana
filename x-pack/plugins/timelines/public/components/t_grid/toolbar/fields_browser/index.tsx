@@ -34,6 +34,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   timelineId,
   columnHeaders,
   browserFields,
+  createFieldComponent,
   width,
 }) => {
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -140,6 +141,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       {show && (
         <FieldsBrowser
           browserFields={browserFieldsWithDefaultCategory}
+          createFieldComponent={createFieldComponent}
           columnHeaders={columnHeaders}
           filteredBrowserFields={
             filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory

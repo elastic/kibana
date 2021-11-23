@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { act } from '@testing-library/react';
+import { noop } from 'lodash';
+
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
+import type { Unmount } from 'src/plugins/management/public/types';
 
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { licenseMock } from '../../../common/licensing/index.mock';
@@ -29,20 +33,24 @@ async function mountApp(basePath: string, pathname: string) {
   const featuresStart = featuresPluginMock.createStart();
   const coreStart = coreMock.createStart();
 
-  const unmount = await rolesManagementApp
-    .create({
-      license: licenseMock.create(),
-      fatalErrors,
-      getStartServices: jest
-        .fn()
-        .mockResolvedValue([coreStart, { data: {}, features: featuresStart }]),
-    })
-    .mount({
-      basePath,
-      element: container,
-      setBreadcrumbs,
-      history: scopedHistoryMock.create({ pathname }),
-    });
+  let unmount: Unmount = noop;
+  await act(async () => {
+    unmount = await rolesManagementApp
+      .create({
+        license: licenseMock.create(),
+        fatalErrors,
+        getStartServices: jest
+          .fn()
+          .mockResolvedValue([coreStart, { data: {}, features: featuresStart }]),
+      })
+      .mount({
+        basePath,
+        element: container,
+        setBreadcrumbs,
+        history: scopedHistoryMock.create({ pathname }),
+        theme$: themeServiceMock.createTheme$(),
+      });
+  });
 
   return { unmount, container, setBreadcrumbs, docTitle: coreStart.chrome.docTitle };
 }
@@ -71,7 +79,7 @@ describe('rolesManagementApp', () => {
     const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Roles' }]);
     expect(docTitle.change).toHaveBeenCalledWith('Roles');
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
@@ -116,10 +124,7 @@ describe('rolesManagementApp', () => {
     );
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `/`, text: 'Roles' },
-      { href: `/edit/${encodeURIComponent(roleName)}`, text: roleName },
-    ]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }, { text: roleName }]);
     expect(docTitle.change).toHaveBeenCalledWith('Roles');
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
@@ -169,7 +174,6 @@ describe('rolesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Roles' },
       {
-        href: '/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20role',
         text: roleName,
       },
     ]);

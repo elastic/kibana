@@ -23,9 +23,11 @@ import type { SimpleSavedObject } from 'src/core/public';
 import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
+
 import { getNestedProperty } from '../../../../../util/object_utils';
 
-import { getIndexPatternAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
+import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
 
 const fixedPageSize: number = 8;
 
@@ -41,6 +43,7 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
 
   const [isCcsCallOut, setIsCcsCallOut] = useState(false);
   const [ccsCallOutBodyText, setCcsCallOutBodyText] = useState<string>();
+  const toastNotificationService = useToastNotificationService();
 
   const onSearchSelected = async (
     id: string,
@@ -57,8 +60,22 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
     if (type === 'index-pattern') {
       dataViewName = getNestedProperty(savedObject, 'attributes.title');
     } else if (type === 'search') {
-      const indexPatternAndSavedSearch = await getIndexPatternAndSavedSearch(id);
-      dataViewName = indexPatternAndSavedSearch.indexPattern?.title ?? '';
+      try {
+        const dataViewAndSavedSearch = await getDataViewAndSavedSearch(id);
+        dataViewName = dataViewAndSavedSearch.dataView?.title ?? '';
+      } catch (error) {
+        // an unexpected error has occurred. This could be caused by a saved search for which the data view no longer exists.
+        toastNotificationService.displayErrorToast(
+          error,
+          i18n.translate(
+            'xpack.ml.dataFrame.analytics.create.searchSelection.errorGettingDataViewTitle',
+            {
+              defaultMessage: 'Error loading data view used by the saved search',
+            }
+          )
+        );
+        return;
+      }
     }
 
     if (isCcsIndexPattern(dataViewName)) {

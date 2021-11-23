@@ -43,12 +43,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await PageObjects.security.forceLogout();
+
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
       );
-
-      // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
     });
 
     describe('global dashboard all privileges, no embeddable application privileges', () => {
@@ -498,8 +499,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/116881
-    describe.skip('no dashboard privileges', () => {
+    describe('no dashboard privileges', () => {
       before(async () => {
         await security.role.create('no_dashboard_privileges_role', {
           elasticsearch: {

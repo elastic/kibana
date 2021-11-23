@@ -723,7 +723,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; }"
+              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; }"
             ],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false
@@ -1055,7 +1055,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -1863,12 +1863,12 @@
           {
             "parentPluginId": "ml",
             "id": "def-server.AnomalyCategorizerStatsDoc.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string}]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
@@ -2031,12 +2031,12 @@
           {
             "parentPluginId": "ml",
             "id": "def-server.AnomalyRecordDoc.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string}]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
@@ -2890,7 +2890,7 @@
               },
               "<",
               "MlAnomalyDetectionAlertParams",
-              ">, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              ">, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -3359,7 +3359,7 @@
         "label": "ModuleSetupPayload",
         "description": [],
         "signature": [
-          "Readonly<{} & { moduleId: string; }> & Readonly<{ start?: number | undefined; query?: any; prefix?: string | undefined; end?: number | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; jobOverrides?: any; datafeedOverrides?: any; estimateModelMemory?: boolean | undefined; applyToAllSpaces?: boolean | undefined; } & {}>"
+          "Readonly<{} & { moduleId: string; }> & Readonly<{ query?: any; start?: number | undefined; prefix?: string | undefined; end?: number | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; jobOverrides?: any; datafeedOverrides?: any; estimateModelMemory?: boolean | undefined; applyToAllSpaces?: boolean | undefined; } & {}>"
         ],
         "path": "x-pack/plugins/ml/server/shared_services/providers/modules.ts",
         "deprecated": false,
@@ -3533,6 +3533,23 @@
             "isRequired": false
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.getDefaultCapabilities",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultCapabilities",
+        "description": [],
+        "signature": [
+          "() => ",
+          "MlCapabilities"
+        ],
+        "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

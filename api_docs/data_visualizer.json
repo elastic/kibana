@@ -484,12 +484,12 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-common.DocumentCountBuckets.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string}]: number",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  number"
             ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
@@ -560,9 +560,6 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
           },
@@ -574,7 +571,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"number\" | \"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
+              "\"number\" | \"boolean\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"keyword\" | \"text\""
             ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
@@ -602,6 +599,19 @@
         "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-common.FieldVisStats.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | undefined"
+            ],
+            "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-common.FieldVisStats.cardinality",
@@ -821,7 +831,7 @@
             "label": "topValues",
             "description": [],
             "signature": [
-              "{ key: React.ReactText; doc_count: number; }[] | undefined"
+              "{ key: string | number; doc_count: number; }[] | undefined"
             ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
@@ -1034,27 +1044,13 @@
       },
       {
         "parentPluginId": "dataVisualizer",
-        "id": "def-common.InputData",
-        "type": "Type",
-        "tags": [],
-        "label": "InputData",
-        "description": [],
-        "signature": [
-          "any[]"
-        ],
-        "path": "x-pack/plugins/data_visualizer/common/types/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataVisualizer",
         "id": "def-common.JobFieldType",
         "type": "Type",
         "tags": [],
         "label": "JobFieldType",
         "description": [],
         "signature": [
-          "\"number\" | \"boolean\" | \"keyword\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"text\""
+          "\"number\" | \"boolean\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"keyword\" | \"text\""
         ],
         "path": "x-pack/plugins/data_visualizer/common/types/job_field_type.ts",
         "deprecated": false,

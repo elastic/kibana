@@ -6,6 +6,7 @@
  */
 
 import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
+import type { DataViewBase } from '@kbn/es-query';
 import {
   ActivityLog,
   HostInfo,
@@ -20,7 +21,6 @@ import {
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../fleet/common';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { AsyncResourceState } from '../../state';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 
@@ -86,7 +86,7 @@ export interface EndpointState {
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
   /** index patterns for query bar */
-  patterns: IIndexPattern[];
+  patterns: DataViewBase[];
   /** api error from retrieving index patters for query bar */
   patternsError?: ServerApiError;
   /** Is auto-refresh enabled */

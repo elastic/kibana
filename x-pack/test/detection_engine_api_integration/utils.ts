@@ -24,6 +24,7 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { ToolingLog } from '@kbn/dev-utils';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import {
   CreateRulesSchema,
@@ -415,7 +416,8 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
  * @param supertest The supertest agent.
  */
 export const deleteAllAlerts = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
   await countDownTest(
     async () => {
@@ -440,33 +442,42 @@ export const deleteAllAlerts = async (
       return finalCheck.data.length === 0;
     },
     'deleteAllAlerts',
+    log,
     50,
     1000
   );
 };
 
-export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
-  return countDownES(async () => {
-    return es.updateByQuery(
-      {
-        index: '.kibana',
-        refresh: true,
-        wait_for_completion: true,
-        body: {
-          script: {
-            lang: 'painless',
-            source: 'ctx._source.alert.params.version--',
-          },
-          query: {
-            term: {
-              'alert.tags': `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
+export const downgradeImmutableRule = async (
+  es: Client,
+  log: ToolingLog,
+  ruleId: string
+): Promise<void> => {
+  return countDownES(
+    async () => {
+      return es.updateByQuery(
+        {
+          index: '.kibana',
+          refresh: true,
+          wait_for_completion: true,
+          body: {
+            script: {
+              lang: 'painless',
+              source: 'ctx._source.alert.params.version--',
+            },
+            query: {
+              term: {
+                'alert.tags': `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
+              },
             },
           },
         },
-      },
-      { meta: true }
-    );
-  }, 'downgradeImmutableRule');
+        { meta: true }
+      );
+    },
+    'downgradeImmutableRule',
+    log
+  );
 };
 
 /**
@@ -487,20 +498,25 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
  * Remove all rules statuses from the .kibana index
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
+ * @param log The tooling logger
  */
-export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
-  return countDownES(async () => {
-    return es.deleteByQuery(
-      {
-        index: '.kibana',
-        q: 'type:siem-detection-engine-rule-status',
-        wait_for_completion: true,
-        refresh: true,
-        body: {},
-      },
-      { meta: true }
-    );
-  }, 'deleteAllRulesStatuses');
+export const deleteAllRulesStatuses = async (es: Client, log: ToolingLog): Promise<void> => {
+  return countDownES(
+    async () => {
+      return es.deleteByQuery(
+        {
+          index: '.kibana',
+          q: 'type:siem-detection-engine-rule-status',
+          wait_for_completion: true,
+          refresh: true,
+          body: {},
+        },
+        { meta: true }
+      );
+    },
+    'deleteAllRulesStatuses',
+    log
+  );
 };
 
 /**
@@ -509,12 +525,17 @@ export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  await countDownTest(async () => {
-    await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'createSignalsIndex');
+  await countDownTest(
+    async () => {
+      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'createSignalsIndex',
+    log
+  );
 };
 
 export const createLegacyRuleAction = async (
@@ -545,12 +566,17 @@ export const createLegacyRuleAction = async (
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  await countDownTest(async () => {
-    await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'deleteSignalsIndex');
+  await countDownTest(
+    async () => {
+      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'deleteSignalsIndex',
+    log
+  );
 };
 
 /**
@@ -809,6 +835,7 @@ export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
+  log: ToolingLog,
   maxTimeout: number = 800000,
   timeoutWait: number = 250
 ): Promise<void> => {
@@ -819,8 +846,7 @@ export const waitFor = async (
     if (await functionToTest()) {
       found = true;
     } else {
-      // eslint-disable-next-line no-console
-      console.log(`Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`);
+      log.debug(`Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`);
       numberOfTries++;
     }
 
@@ -838,12 +864,14 @@ export const waitFor = async (
  * reliant.
  * @param esFunction The function to test against
  * @param esFunctionName The name of the function to print if we encounter errors
+ * @param log The tooling logger
  * @param retryCount The number of times to retry before giving up (has default)
  * @param timeoutWait Time to wait before trying again (has default)
  */
 export const countDownES = async (
   esFunction: () => Promise<TransportResult<Record<string, any>, unknown>>,
   esFunctionName: string,
+  log: ToolingLog,
   retryCount: number = 20,
   timeoutWait = 250
 ): Promise<void> => {
@@ -851,14 +879,14 @@ export const countDownES = async (
     async () => {
       const result = await esFunction();
       if (result.body.version_conflicts !== 0) {
-        // eslint-disable-next-line no-console
-        console.log(`Version conflicts for ${result.body.version_conflicts}`);
+        log.error(`Version conflicts for ${result.body.version_conflicts}`);
         return false;
       } else {
         return true;
       }
     },
     esFunctionName,
+    log,
     retryCount,
     timeoutWait
   );
@@ -881,12 +909,14 @@ export const refreshIndex = async (es: Client, index?: string) => {
  * for testing resiliency.
  * @param functionToTest The function to test against
  * @param name The name of the function to print if we encounter errors
+ * @param log The tooling logger
  * @param retryCount The number of times to retry before giving up (has default)
  * @param timeoutWait Time to wait before trying again (has default)
  */
 export const countDownTest = async (
   functionToTest: () => Promise<boolean>,
   name: string,
+  log: ToolingLog,
   retryCount: number = 20,
   timeoutWait = 250,
   ignoreThrow: boolean = false
@@ -895,30 +925,27 @@ export const countDownTest = async (
     try {
       const passed = await functionToTest();
       if (!passed) {
-        // eslint-disable-next-line no-console
-        console.log(`Failure trying to ${name}, retries left are: ${retryCount - 1}`);
+        log.error(`Failure trying to ${name}, retries left are: ${retryCount - 1}`);
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
-        await countDownTest(functionToTest, name, retryCount - 1, timeoutWait, ignoreThrow);
+        await countDownTest(functionToTest, name, log, retryCount - 1, timeoutWait, ignoreThrow);
       }
     } catch (err) {
       if (ignoreThrow) {
         throw err;
       } else {
-        // eslint-disable-next-line no-console
-        console.log(
-          `Failure trying to ${name}, with exception message of:`,
-          err.message,
-          `retries left are: ${retryCount - 1}`
+        log.error(
+          `Failure trying to ${name}, with exception message of: ${
+            err.message
+          }, retries left are: ${retryCount - 1}`
         );
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
-        await countDownTest(functionToTest, name, retryCount - 1, timeoutWait, ignoreThrow);
+        await countDownTest(functionToTest, name, log, retryCount - 1, timeoutWait, ignoreThrow);
       }
     }
   } else {
-    // eslint-disable-next-line no-console
-    console.log(`Could not ${name}, no retries are left`);
+    log.error(`Could not ${name}, no retries are left`);
   }
 };
 
@@ -929,9 +956,11 @@ export const countDownTest = async (
  * rule a second attempt. It only re-tries adding the rule if it encounters a conflict once.
  * @param supertest The supertest deps
  * @param rule The rule to create
+ * @param log The tooling logger
  */
 export const createRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   rule: CreateRulesSchema
 ): Promise<FullResponseSchema> => {
   const response = await supertest
@@ -940,13 +969,12 @@ export const createRule = async (
     .send(rule);
   if (response.status === 409) {
     if (rule.rule_id != null) {
-      // eslint-disable-next-line no-console
-      console.log(
+      log.debug(
         `Did not get an expected 200 "ok" when creating a rule (createRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
           response.body
         )}, status: ${JSON.stringify(response.status)}`
       );
-      await deleteRule(supertest, rule.rule_id);
+      await deleteRule(supertest, log, rule.rule_id);
       const secondResponseTry = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
@@ -976,18 +1004,19 @@ export const createRule = async (
  * Helper to cut down on the noise in some of the tests. Does a delete of a rule.
  * It does not check for a 200 "ok" on this.
  * @param supertest The supertest deps
- * @param id The rule id to delete
+ * @param ruleId The rule id to delete
+ * @param log The tooling logger
  */
 export const deleteRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   ruleId: string
 ): Promise<FullResponseSchema> => {
   const response = await supertest
     .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
     .set('kbn-xsrf', 'true');
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when deleting the rule (deleteRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1023,6 +1052,7 @@ export const createRuleWithAuth = async (
  */
 export const updateRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   updatedRule: UpdateRulesSchema
 ): Promise<FullResponseSchema> => {
   const response = await supertest
@@ -1030,8 +1060,7 @@ export const updateRule = async (
     .set('kbn-xsrf', 'true')
     .send(updatedRule);
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when updating a rule (updateRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1045,14 +1074,16 @@ export const updateRule = async (
  * creates a new action and expects a 200 and does not do any retries.
  * @param supertest The supertest deps
  */
-export const createNewAction = async (supertest: SuperTest.SuperTest<SuperTest.Test>) => {
+export const createNewAction = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
+) => {
   const response = await supertest
     .post('/api/actions/action')
     .set('kbn-xsrf', 'true')
     .send(getWebHookAction());
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when creating a new action. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1068,6 +1099,7 @@ export const createNewAction = async (supertest: SuperTest.SuperTest<SuperTest.T
  */
 export const findImmutableRuleById = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   ruleId: string
 ): Promise<{
   page: number;
@@ -1082,8 +1114,7 @@ export const findImmutableRuleById = async (
     .set('kbn-xsrf', 'true')
     .send();
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when finding an immutable rule by id (findImmutableRuleById). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1098,7 +1129,8 @@ export const findImmutableRuleById = async (
  * @param supertest The supertest deps
  */
 export const getPrePackagedRulesStatus = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<PrePackagedRulesAndTimelinesStatusSchema> => {
   const response = await supertest
     .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
@@ -1106,8 +1138,7 @@ export const getPrePackagedRulesStatus = async (
     .send();
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when getting a pre-packaged rule status. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1120,10 +1151,12 @@ export const getPrePackagedRulesStatus = async (
  * Helper to cut down on the noise in some of the tests. This checks for
  * an expected 200 still and does not try to any retries. Creates exception lists
  * @param supertest The supertest deps
- * @param rule The rule to create
+ * @param exceptionList The exception list to create
+ * @param log The tooling logger
  */
 export const createExceptionList = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   exceptionList: CreateExceptionListSchema
 ): Promise<ExceptionListSchema> => {
   const response = await supertest
@@ -1133,13 +1166,12 @@ export const createExceptionList = async (
 
   if (response.status === 409) {
     if (exceptionList.list_id != null) {
-      // eslint-disable-next-line no-console
-      console.log(
+      log.error(
         `When creating an exception list found an unexpected conflict (409) creating an exception list (createExceptionList), will attempt a cleanup and one time re-try. This usually indicates a bad cleanup or race condition within the tests: ${JSON.stringify(
           response.body
         )}, status: ${JSON.stringify(response.status)}`
       );
-      await deleteExceptionList(supertest, exceptionList.list_id);
+      await deleteExceptionList(supertest, log, exceptionList.list_id);
       const secondResponseTry = await supertest
         .post(EXCEPTION_LIST_URL)
         .set('kbn-xsrf', 'true')
@@ -1171,18 +1203,19 @@ export const createExceptionList = async (
  * Helper to cut down on the noise in some of the tests. Does a delete of an exception list.
  * It does not check for a 200 "ok" on this.
  * @param supertest The supertest deps
- * @param id The rule id to delete
+ * @param listId The exception list to delete
+ * @param log The tooling logger
  */
 export const deleteExceptionList = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   listId: string
 ): Promise<FullResponseSchema> => {
   const response = await supertest
     .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}`)
     .set('kbn-xsrf', 'true');
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when deleting an exception list (deleteExceptionList). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1196,10 +1229,12 @@ export const deleteExceptionList = async (
  * Helper to cut down on the noise in some of the tests. This checks for
  * an expected 200 still and does not try to any retries. Creates exception lists
  * @param supertest The supertest deps
- * @param rule The rule to create
+ * @param exceptionListItem The exception list item to create
+ * @param log The tooling logger
  */
 export const createExceptionListItem = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   exceptionListItem: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
   const response = await supertest
@@ -1208,8 +1243,7 @@ export const createExceptionListItem = async (
     .send(exceptionListItem);
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when creating an exception list item (createExceptionListItem). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1226,6 +1260,7 @@ export const createExceptionListItem = async (
  */
 export const getRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   ruleId: string
 ): Promise<RulesSchema> => {
   const response = await supertest
@@ -1233,8 +1268,7 @@ export const getRule = async (
     .set('kbn-xsrf', 'true');
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when getting a rule (getRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1245,20 +1279,24 @@ export const getRule = async (
 
 export const waitForAlertToComplete = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   id: string
 ): Promise<void> => {
-  await waitFor(async () => {
-    const response = await supertest.get(`/api/alerts/alert/${id}/state`).set('kbn-xsrf', 'true');
-    if (response.status !== 200) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `Did not get an expected 200 "ok" when waiting for an alert to complete (waitForAlertToComplete). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-          response.body
-        )}, status: ${JSON.stringify(response.status)}`
-      );
-    }
-    return response.body.previousStartedAt != null;
-  }, 'waitForAlertToComplete');
+  await waitFor(
+    async () => {
+      const response = await supertest.get(`/api/alerts/alert/${id}/state`).set('kbn-xsrf', 'true');
+      if (response.status !== 200) {
+        log.error(
+          `Did not get an expected 200 "ok" when waiting for an alert to complete (waitForAlertToComplete). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+            response.body
+          )}, status: ${JSON.stringify(response.status)}`
+        );
+      }
+      return response.body.previousStartedAt != null;
+    },
+    'waitForAlertToComplete',
+    log
+  );
 };
 
 /**
@@ -1268,40 +1306,49 @@ export const waitForAlertToComplete = async (
  */
 export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   id: string,
-  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded'
+  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded',
+  afterDate?: Date
 ): Promise<void> => {
-  await waitFor(async () => {
-    try {
-      const response = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-        .set('kbn-xsrf', 'true')
-        .send({ ids: [id] });
-      if (response.status !== 200) {
-        // eslint-disable-next-line no-console
-        console.log(
-          `Did not get an expected 200 "ok" when waiting for a rule success or status (waitForRuleSuccessOrStatus). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-            response.body
-          )}, status: ${JSON.stringify(response.status)}`
-        );
-      }
-      if (response.body[id]?.current_status?.status !== status) {
-        // eslint-disable-next-line no-console
-        console.log(
-          `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
-            response.body
-          )}, status: ${JSON.stringify(response.status)}`
-        );
-      }
+  await waitFor(
+    async () => {
+      try {
+        const response = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [id] });
+        if (response.status !== 200) {
+          log.error(
+            `Did not get an expected 200 "ok" when waiting for a rule success or status (waitForRuleSuccessOrStatus). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+              response.body
+            )}, status: ${JSON.stringify(response.status)}`
+          );
+        }
+        const currentStatus = response.body[id]?.current_status;
 
-      return response.body[id]?.current_status?.status === status;
-    } catch (e) {
-      if ((e as Error).message.includes('got 503 "Service Unavailable"')) {
-        return false;
+        if (currentStatus?.status !== status) {
+          log.debug(
+            `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
+              response.body
+            )}, status: ${JSON.stringify(response.status)}`
+          );
+        }
+        return (
+          currentStatus != null &&
+          currentStatus.status === status &&
+          (afterDate ? new Date(currentStatus.status_date) > afterDate : true)
+        );
+      } catch (e) {
+        if ((e as Error).message.includes('got 503 "Service Unavailable"')) {
+          return false;
+        }
+        throw e;
       }
-      throw e;
-    }
-  }, 'waitForRuleSuccessOrStatus');
+    },
+    'waitForRuleSuccessOrStatus',
+    log
+  );
 };
 
 /**
@@ -1312,15 +1359,17 @@ export const waitForRuleSuccessOrStatus = async (
  */
 export const waitForSignalsToBePresent = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   numberOfSignals = 1,
   signalIds: string[]
 ): Promise<void> => {
   await waitFor(
     async () => {
-      const signalsOpen = await getSignalsByIds(supertest, signalIds, numberOfSignals);
+      const signalsOpen = await getSignalsByIds(supertest, log, signalIds, numberOfSignals);
       return signalsOpen.hits.hits.length >= numberOfSignals;
     },
     'waitForSignalsToBePresent',
+    log,
     20000,
     250 // Wait 250ms between tries
   );
@@ -1332,6 +1381,7 @@ export const waitForSignalsToBePresent = async (
  */
 export const getSignalsByRuleIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   ruleIds: string[]
 ): Promise<estypes.SearchResponse<RACAlert>> => {
   const response = await supertest
@@ -1340,8 +1390,7 @@ export const getSignalsByRuleIds = async (
     .send(getQuerySignalsRuleId(ruleIds));
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when getting a signal by rule_id (getSignalsByRuleIds). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1360,6 +1409,7 @@ export const getSignalsByRuleIds = async (
  */
 export const getSignalsByIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   ids: string[],
   size?: number
 ): Promise<estypes.SearchResponse<RACAlert>> => {
@@ -1369,8 +1419,7 @@ export const getSignalsByIds = async (
     .send(getQuerySignalsId(ids, size));
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when getting a signal by id. CI issues could happen (getSignalsByIds). Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1387,6 +1436,7 @@ export const getSignalsByIds = async (
  */
 export const getSignalsById = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   id: string
 ): Promise<estypes.SearchResponse<RACAlert>> => {
   const response = await supertest
@@ -1395,8 +1445,7 @@ export const getSignalsById = async (
     .send(getQuerySignalsId([id]));
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when getting signals by id (getSignalsById). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1407,24 +1456,28 @@ export const getSignalsById = async (
 };
 
 export const installPrePackagedRules = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  await countDownTest(async () => {
-    const { status, body } = await supertest
-      .put(DETECTION_ENGINE_PREPACKAGED_URL)
-      .set('kbn-xsrf', 'true')
-      .send();
-    if (status !== 200) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `Did not get an expected 200 "ok" when installing pre-packaged rules (installPrePackagedRules) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
-          body
-        )}, status: ${JSON.stringify(status)}`
-      );
-    }
+  await countDownTest(
+    async () => {
+      const { status, body } = await supertest
+        .put(DETECTION_ENGINE_PREPACKAGED_URL)
+        .set('kbn-xsrf', 'true')
+        .send();
+      if (status !== 200) {
+        log.debug(
+          `Did not get an expected 200 "ok" when installing pre-packaged rules (installPrePackagedRules) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
+            body
+          )}, status: ${JSON.stringify(status)}`
+        );
+      }
 
-    return status === 200;
-  }, 'installPrePackagedRules');
+      return status === 200;
+    },
+    'installPrePackagedRules',
+    log
+  );
 };
 
 /**
@@ -1436,6 +1489,7 @@ export const installPrePackagedRules = async (
  */
 export const createContainerWithEndpointEntries = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   endpointEntries: Array<{
     entries: NonEmptyEntriesArray;
     osTypes: OsTypeArray | undefined;
@@ -1448,7 +1502,7 @@ export const createContainerWithEndpointEntries = async (
 
   // create the endpoint exception list container
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, {
+  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'endpoint description',
     list_id: 'endpoint_list',
     name: 'endpoint_list',
@@ -1466,16 +1520,20 @@ export const createContainerWithEndpointEntries = async (
         os_types: endpointEntry.osTypes,
         type: 'simple',
       };
-      return createExceptionListItem(supertest, exceptionListItem);
+      return createExceptionListItem(supertest, log, exceptionListItem);
     })
   );
 
   // To reduce the odds of in-determinism and/or bugs we ensure we have
   // the same length of entries before continuing.
-  await waitFor(async () => {
-    const { body } = await supertest.get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
-    return body.data.length === endpointEntries.length;
-  }, `within createContainerWithEndpointEntries ${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
+  await waitFor(
+    async () => {
+      const { body } = await supertest.get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
+      return body.data.length === endpointEntries.length;
+    },
+    `within createContainerWithEndpointEntries ${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`,
+    log
+  );
 
   return [
     {
@@ -1496,6 +1554,7 @@ export const createContainerWithEndpointEntries = async (
  */
 export const createContainerWithEntries = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   entries: NonEmptyEntriesArray[]
 ): Promise<ListArray> => {
   // If not given any endpoint entries, return without any
@@ -1504,7 +1563,7 @@ export const createContainerWithEntries = async (
   }
   // Create the rule exception list container
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, {
+  const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'some description',
     list_id: 'some-list-id',
     name: 'some name',
@@ -1521,16 +1580,20 @@ export const createContainerWithEntries = async (
         type: 'simple',
         entries: entry,
       };
-      return createExceptionListItem(supertest, exceptionListItem);
+      return createExceptionListItem(supertest, log, exceptionListItem);
     })
   );
 
   // To reduce the odds of in-determinism and/or bugs we ensure we have
   // the same length of entries before continuing.
-  await waitFor(async () => {
-    const { body } = await supertest.get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
-    return body.data.length === entries.length;
-  }, `within createContainerWithEntries ${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
+  await waitFor(
+    async () => {
+      const { body } = await supertest.get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`);
+      return body.data.length === entries.length;
+    },
+    `within createContainerWithEntries ${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${list_id}`,
+    log
+  );
 
   return [
     {
@@ -1554,6 +1617,7 @@ export const createContainerWithEntries = async (
  */
 export const createRuleWithExceptionEntries = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   rule: CreateRulesSchema,
   entries: NonEmptyEntriesArray[],
   endpointEntries?: Array<{
@@ -1561,9 +1625,10 @@ export const createRuleWithExceptionEntries = async (
     osTypes: OsTypeArray | undefined;
   }>
 ): Promise<FullResponseSchema> => {
-  const maybeExceptionList = await createContainerWithEntries(supertest, entries);
+  const maybeExceptionList = await createContainerWithEntries(supertest, log, entries);
   const maybeEndpointList = await createContainerWithEndpointEntries(
     supertest,
+    log,
     endpointEntries ?? []
   );
 
@@ -1576,15 +1641,14 @@ export const createRuleWithExceptionEntries = async (
     enabled: false,
     exceptions_list: [...maybeExceptionList, ...maybeEndpointList],
   };
-  const ruleResponse = await createRule(supertest, ruleWithException);
+  const ruleResponse = await createRule(supertest, log, ruleWithException);
   const response = await supertest
     .patch(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
     .send({ rule_id: ruleResponse.rule_id, enabled: true });
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when patching a rule with exception entries (createRuleWithExceptionEntries). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1609,11 +1673,19 @@ export const getIndexNameFromLoad = (loadResponse: Record<string, unknown>): str
  * @param esClient elasticsearch {@link Client}
  * @param index name of the index to query
  */
-export const waitForIndexToPopulate = async (es: Client, index: string): Promise<void> => {
-  await waitFor(async () => {
-    const response = await es.count({ index });
-    return response.count > 0;
-  }, `waitForIndexToPopulate: ${index}`);
+export const waitForIndexToPopulate = async (
+  es: Client,
+  log: ToolingLog,
+  index: string
+): Promise<void> => {
+  await waitFor(
+    async () => {
+      const response = await es.count({ index });
+      return response.count > 0;
+    },
+    `waitForIndexToPopulate: ${index}`,
+    log
+  );
 };
 
 export const deleteMigrations = async ({
@@ -1642,8 +1714,10 @@ interface CreateMigrationResponse {
 export const startSignalsMigration = async ({
   indices,
   supertest,
+  log,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
+  log: ToolingLog;
   indices: string[];
 }): Promise<CreateMigrationResponse[]> => {
   const response = await supertest
@@ -1655,8 +1729,7 @@ export const startSignalsMigration = async ({
     body: { indices: created },
   }: { body: { indices: CreateMigrationResponse[] } } = response;
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when starting a signals migration (startSignalsMigration). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1674,8 +1747,10 @@ interface FinalizeMigrationResponse {
 export const finalizeSignalsMigration = async ({
   migrationIds,
   supertest,
+  log,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
+  log: ToolingLog;
   migrationIds: string[];
 }): Promise<FinalizeMigrationResponse[]> => {
   const response = await supertest
@@ -1687,8 +1762,7 @@ export const finalizeSignalsMigration = async ({
     body: { migrations },
   }: { body: { migrations: FinalizeMigrationResponse[] } } = response;
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when finalizing signals migration (finalizeSignalsMigration). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -1699,13 +1773,14 @@ export const finalizeSignalsMigration = async ({
 
 export const getOpenSignals = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   es: Client,
   rule: FullResponseSchema
 ) => {
-  await waitForRuleSuccessOrStatus(supertest, rule.id);
+  await waitForRuleSuccessOrStatus(supertest, log, rule.id);
   // Critically important that we wait for rule success AND refresh the write index in that order before we
   // assert that no signals were created. Otherwise, signals could be written but not available to query yet
   // when we search, causing tests that check that signals are NOT created to pass when they should fail.
   await refreshIndex(es, '.alerts-security.alerts-default*');
-  return getSignalsByIds(supertest, [rule.id]);
+  return getSignalsByIds(supertest, log, [rule.id]);
 };

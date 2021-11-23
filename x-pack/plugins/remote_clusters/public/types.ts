@@ -23,6 +23,6 @@ export interface ClientConfigType {
   };
 }
 
-export { RegisterManagementAppArgs };
+export type { RegisterManagementAppArgs };
 
-export { I18nStart };
+export type { I18nStart };

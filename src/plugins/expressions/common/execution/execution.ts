@@ -16,7 +16,6 @@ import {
   from,
   isObservable,
   of,
-  race,
   throwError,
   Observable,
   ReplaySubject,
@@ -25,7 +24,7 @@ import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'r
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { abortSignalToPromise, now } from '../../../kibana_utils/common';
+import { now, AbortError } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
@@ -49,13 +48,6 @@ type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
   ReturnType<Function> extends ObservableLike<unknown>
     ? UnwrapObservable<ReturnType<Function>>
     : UnwrapPromiseOrReturn<ReturnType<Function>>;
-
-// type ArgumentsOf<Function extends ExpressionFunction> = Function extends ExpressionFunction<
-//   unknown,
-//   infer Arguments
-// >
-//   ? Arguments
-//   : never;
 
 /**
  * The result returned after an expression function execution.
@@ -94,6 +86,51 @@ const createAbortErrorValue = () =>
     message: 'The expression was aborted.',
     name: 'AbortError',
   });
+
+function markPartial<T>() {
+  return (source: Observable<T>) =>
+    new Observable<ExecutionResult<T>>((subscriber) => {
+      let latest: ExecutionResult<T> | undefined;
+
+      subscriber.add(
+        source.subscribe({
+          next: (result) => {
+            latest = { result, partial: true };
+            subscriber.next(latest);
+          },
+          error: (error) => subscriber.error(error),
+          complete: () => {
+            if (latest) {
+              latest.partial = false;
+            }
+
+            subscriber.complete();
+          },
+        })
+      );
+
+      subscriber.add(() => {
+        latest = undefined;
+      });
+    });
+}
+
+function takeUntilAborted<T>(signal: AbortSignal) {
+  return (source: Observable<T>) =>
+    new Observable<T>((subscriber) => {
+      const throwAbortError = () => {
+        subscriber.error(new AbortError());
+      };
+
+      subscriber.add(source.subscribe(subscriber));
+      subscriber.add(() => signal.removeEventListener('abort', throwAbortError));
+
+      signal.addEventListener('abort', throwAbortError);
+      if (signal.aborted) {
+        throwAbortError();
+      }
+    });
+}
 
 export interface ExecutionParams {
   executor: Executor;
@@ -139,18 +176,6 @@ export class Execution<
   private readonly abortController = getNewAbortController();
 
   /**
-   * Promise that rejects if/when abort controller sends "abort" signal.
-   */
-  private readonly abortRejection = abortSignalToPromise(this.abortController.signal);
-
-  /**
-   * Races a given observable against the "abort" event of `abortController`.
-   */
-  private race<T>(observable: Observable<T>): Observable<T> {
-    return race(from(this.abortRejection.promise), observable);
-  }
-
-  /**
    * Whether .start() method has been called.
    */
   private hasStarted: boolean = false;
@@ -171,8 +196,7 @@ export class Execution<
    * Contract is a public representation of `Execution` instances. Contract we
    * can return to other plugins for their consumption.
    */
-  public readonly contract: ExecutionContract<Input, Output, InspectorAdapters> =
-    new ExecutionContract<Input, Output, InspectorAdapters>(this);
+  public readonly contract: ExecutionContract<Input, Output, InspectorAdapters>;
 
   public readonly expression: string;
 
@@ -182,6 +206,8 @@ export class Execution<
 
   constructor(public readonly execution: ExecutionParams) {
     const { executor } = execution;
+
+    this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);
 
     if (!execution.ast && !execution.expression) {
       throw new TypeError('Execution params should contain at least .ast or .expression key.');
@@ -221,32 +247,9 @@ export class Execution<
 
     this.result = this.input$.pipe(
       switchMap((input) =>
-        this.race(this.invokeChain<Output>(this.state.get().ast.chain, input)).pipe(
-          (source) =>
-            new Observable<ExecutionResult<Output>>((subscriber) => {
-              let latest: ExecutionResult<Output> | undefined;
-
-              subscriber.add(
-                source.subscribe({
-                  next: (result) => {
-                    latest = { result, partial: true };
-                    subscriber.next(latest);
-                  },
-                  error: (error) => subscriber.error(error),
-                  complete: () => {
-                    if (latest) {
-                      latest.partial = false;
-                    }
-
-                    subscriber.complete();
-                  },
-                })
-              );
-
-              subscriber.add(() => {
-                latest = undefined;
-              });
-            })
+        this.invokeChain<Output>(this.state.get().ast.chain, input).pipe(
+          takeUntilAborted(this.abortController.signal),
+          markPartial()
         )
       ),
       catchError((error) => {
@@ -265,7 +268,6 @@ export class Execution<
         },
         error: (error) => this.state.transitions.setError(error),
       }),
-      finalize(() => this.abortRejection.cleanup()),
       shareReplay(1)
     );
   }
@@ -356,9 +358,9 @@ export class Execution<
           // `resolveArgs` returns an object because the arguments themselves might
           // actually have `then` or `subscribe` methods which would be treated as a `Promise`
           // or an `Observable` accordingly.
-          return this.race(this.resolveArgs(fn, currentInput, fnArgs)).pipe(
+          return this.resolveArgs(fn, currentInput, fnArgs).pipe(
             tap((args) => this.execution.params.debug && Object.assign(link.debug, { args })),
-            switchMap((args) => this.race(this.invokeFunction(fn, currentInput, args))),
+            switchMap((args) => this.invokeFunction(fn, currentInput, args)),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
             tap((output) => this.execution.params.debug && Object.assign(link.debug, { output })),
             catchError((rawError) => {
@@ -390,7 +392,7 @@ export class Execution<
   ): Observable<UnwrapReturnType<Fn['fn']>> {
     return of(input).pipe(
       map((currentInput) => this.cast(currentInput, fn.inputTypes)),
-      switchMap((normalizedInput) => this.race(of(fn.fn(normalizedInput, args, this.context)))),
+      switchMap((normalizedInput) => of(fn.fn(normalizedInput, args, this.context))),
       switchMap(
         (fnResult) =>
           (isObservable(fnResult)

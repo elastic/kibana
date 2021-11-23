@@ -57,7 +57,7 @@ export const Page: FC<Props> = ({ jobId }) => {
   ]);
 
   const mlContext = useMlContext();
-  const { currentIndexPattern } = mlContext;
+  const { currentDataView } = mlContext;
 
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { state } = createAnalyticsForm;
@@ -69,7 +69,7 @@ export const Page: FC<Props> = ({ jobId }) => {
   useEffect(() => {
     initiateWizard();
 
-    if (currentIndexPattern) {
+    if (currentDataView) {
       (async function () {
         if (jobId !== undefined) {
           const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId, true);
@@ -192,7 +192,7 @@ export const Page: FC<Props> = ({ jobId }) => {
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
                       defaultMessage="Source data view: {dataViewTitle}"
-                      values={{ dataViewTitle: currentIndexPattern.title }}
+                      values={{ dataViewTitle: currentDataView.title }}
                     />
                   </h2>
                 </EuiFlexItem>

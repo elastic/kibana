@@ -73,6 +73,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 
     async assertTotalFeatureImportanceEvaluatePanelExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-FeatureImportanceSummary');
+      await this.scrollFeatureImportanceIntoView();
       await testSubjects.existOrFail('mlTotalFeatureImportanceChart', { timeout: 30 * 1000 });
     },
 
@@ -212,6 +213,34 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
         const buttonVisible = await interactionButton.isDisplayed();
         expect(buttonVisible).to.equal(true, 'Expected data grid cell button to be visible');
       });
+    },
+
+    async scrollContentSectionIntoView(sectionId: string) {
+      await testSubjects.scrollIntoView(`mlDFExpandableSection-${sectionId}`);
+    },
+
+    async scrollAnalysisIntoView() {
+      await this.scrollContentSectionIntoView('analysis');
+    },
+
+    async scrollRegressionEvaluationIntoView() {
+      await this.scrollContentSectionIntoView('RegressionEvaluation');
+    },
+
+    async scrollClassificationEvaluationIntoView() {
+      await this.scrollContentSectionIntoView('ClassificationEvaluation');
+    },
+
+    async scrollFeatureImportanceIntoView() {
+      await this.scrollContentSectionIntoView('FeatureImportanceSummary');
+    },
+
+    async scrollScatterplotMatrixIntoView() {
+      await this.scrollContentSectionIntoView('splom');
+    },
+
+    async scrollResultsIntoView() {
+      await this.scrollContentSectionIntoView('results');
     },
   };
 }
