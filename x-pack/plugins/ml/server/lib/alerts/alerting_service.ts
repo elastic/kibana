@@ -161,6 +161,7 @@ export function alertingServiceProvider(
                   'initial_record_score',
                   'is_interim',
                   'function',
+                  'function_description',
                   'field_name',
                   'by_field_name',
                   'by_field_value',

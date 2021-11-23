@@ -61,7 +61,7 @@ export function getTypicalAndActualValues(source: AnomalyRecordDoc) {
       result.actual = source.actual[0];
     } else {
       if (causes.length === 1) {
-        result.actual = causes[0].actual;
+        result.actual = causes[0].actual[0];
       }
     }
   }
@@ -71,7 +71,7 @@ export function getTypicalAndActualValues(source: AnomalyRecordDoc) {
       result.typical = source.typical[0];
     } else {
       if (causes.length === 1) {
-        result.typical = causes[0].typical;
+        result.typical = causes[0].typical[0];
       }
     }
   }

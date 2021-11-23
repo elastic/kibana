@@ -39,7 +39,16 @@ export interface AnomalyRecordDoc {
   over_field_name?: string;
   over_field_value?: string;
   // TODO provide the causes resource interface.
-  causes?: any[];
+  causes?: Array<{
+    function: string;
+    function_description: string;
+    probability: number;
+    actual: number[];
+    typical: number[];
+    field_name?: string;
+    over_field_name?: string;
+    over_field_value?: string;
+  }>;
 }
 
 export interface AnomaliesTableRecord {
