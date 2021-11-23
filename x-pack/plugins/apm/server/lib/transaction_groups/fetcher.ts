@@ -51,6 +51,7 @@ export interface TransactionGroup {
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
   impact: number;
+  agentName: string;
 }
 
 export type ESResponse = Promise<{ items: TransactionGroup[] }>;
@@ -142,6 +143,7 @@ function getItemsWithRelativeImpact(
     avg?: number | null;
     count?: number | null;
     transactionType?: string;
+    agentName?: string;
   }>,
   start: number,
   end: number
@@ -166,6 +168,7 @@ function getItemsWithRelativeImpact(
         item.sum !== null && item.sum !== undefined
           ? ((item.sum - min) / (max - min)) * 100 || 0
           : 0,
+      agentName: item.agentName,
     };
   });
 
