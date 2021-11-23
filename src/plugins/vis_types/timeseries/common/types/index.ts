@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Filter, IndexPattern, Query } from '../../../../data/common';
+import { Filter } from '@kbn/es-query';
+import { IndexPattern, Query } from '../../../../data/common';
 import { Panel } from './panel_model';
 
 export type { Metric, Series, Panel, MetricType } from './panel_model';

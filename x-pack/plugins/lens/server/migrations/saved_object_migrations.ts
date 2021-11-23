@@ -13,7 +13,8 @@ import {
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
-import { Query, Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/public';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,

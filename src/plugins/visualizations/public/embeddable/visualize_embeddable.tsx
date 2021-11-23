@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IndexPattern,
   TimeRange,
   Query,
   esFilters,
-  Filter,
   TimefilterContract,
 } from '../../../../plugins/data/public';
 import {
