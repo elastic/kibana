@@ -10,7 +10,7 @@ import {
   GetPackagePoliciesRequest,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../fleet/common';
-import { INGEST_API_PACKAGE_POLICIES } from '../pages/policy/store/services/ingest';
+import { BASE_POLICY_ROUTE } from '../../../common/endpoint/constants';
 import { GetPolicyListResponse } from '../pages/policy/types';
 
 /**
@@ -23,7 +23,7 @@ export const sendGetEndpointSpecificPackagePolicies = (
   http: HttpStart,
   options: HttpFetchOptions & Partial<GetPackagePoliciesRequest> = {}
 ): Promise<GetPolicyListResponse> => {
-  return http.get<GetPolicyListResponse>(INGEST_API_PACKAGE_POLICIES, {
+  return http.get<GetPolicyListResponse>(BASE_POLICY_ROUTE, {
     ...options,
     query: {
       ...options.query,
