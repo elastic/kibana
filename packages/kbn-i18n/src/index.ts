@@ -50,7 +50,7 @@ const i18n = {
   translateUsingPseudoLocale,
 };
 
-const loader = {
+const i18nLoader = {
   registerTranslationFile,
   registerTranslationFiles,
   getTranslationsByLocale,
@@ -58,4 +58,4 @@ const loader = {
   getAllTranslationsFromPaths,
 };
 
-export { i18n, loader };
+export { i18n, i18nLoader };
