@@ -8,29 +8,29 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import { IndexPatternEditorLazy } from './index_pattern_editor_lazy';
-import { IndexPatternEditorContext, IndexPatternEditorProps } from '../types';
+import { DataViewEditorLazy } from './data_view_editor_lazy';
+import { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { createKibanaReactContext } from '../shared_imports';
-import './index_pattern_editor.scss';
+import './data_view_editor.scss';
 
-export interface IndexPatternEditorPropsWithServices extends IndexPatternEditorProps {
-  services: IndexPatternEditorContext;
+export interface DataViewEditorPropsWithServices extends DataViewEditorProps {
+  services: DataViewEditorContext;
 }
 
-export const IndexPatternEditor = ({
+export const DataViewEditor = ({
   onSave,
   onCancel = () => {},
   services,
   defaultTypeIsRollup = false,
   requireTimestampField = false,
-}: IndexPatternEditorPropsWithServices) => {
+}: DataViewEditorPropsWithServices) => {
   const { Provider: KibanaReactContextProvider } =
-    createKibanaReactContext<IndexPatternEditorContext>(services);
+    createKibanaReactContext<DataViewEditorContext>(services);
 
   return (
     <KibanaReactContextProvider>
       <EuiFlyout onClose={() => {}} hideCloseButton={true} size="l">
-        <IndexPatternEditorLazy
+        <DataViewEditorLazy
           onSave={onSave}
           onCancel={onCancel}
           defaultTypeIsRollup={defaultTypeIsRollup}
