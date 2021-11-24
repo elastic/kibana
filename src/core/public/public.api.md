@@ -1626,13 +1626,13 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 
 // @public
 export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
-    constructor(parentHistory: History_2, basePath: string);
+    constructor(parentHistory: History_2<HistoryLocationState>, basePath: string);
     get action(): Action;
     block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;
-    createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+    createSubHistory: (basePath: string) => ScopedHistory<HistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;
     goForward: () => void;
