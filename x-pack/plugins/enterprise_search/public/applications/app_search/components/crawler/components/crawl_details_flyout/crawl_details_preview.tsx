@@ -7,4 +7,33 @@
 
 import React from 'react';
 
-export const CrawlDetailsPreview: React.FC = () => null;
+import { useValues } from 'kea';
+
+import { i18n } from '@kbn/i18n';
+
+import { CrawlDetailLogic } from '../../crawl_detail_logic';
+
+import { AccordionList } from './accordion_list';
+
+export const CrawlDetailsPreview: React.FC = () => {
+  const { crawlRequest } = useValues(CrawlDetailLogic);
+
+  if (crawlRequest === null) {
+    return null;
+  }
+
+  return (
+    <>
+      <AccordionList
+        title={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.domainsTitle',
+          {
+            defaultMessage: 'Domains',
+          }
+        )}
+        iconType="globe"
+        items={crawlRequest.crawlConfig.domainAllowlist}
+      />
+    </>
+  );
+};

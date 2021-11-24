@@ -4,17 +4,55 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
+import { CrawlerStatus, CrawlType } from '../../types';
+
+import { AccordionList } from './accordion_list';
 import { CrawlDetailsPreview } from './crawl_details_preview';
 
-describe('CrawlDetailsPreview', () => {
-  it('is empty', () => {
-    const wrapper = shallow(<CrawlDetailsPreview />);
+const MOCK_VALUES = {
+  crawlRequest: {
+    id: '507f1f77bcf86cd799439011',
+    status: CrawlerStatus.Pending,
+    createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+    beganAt: null,
+    completedAt: null,
+    type: CrawlType.Full,
+    crawlConfig: {
+      domainAllowlist: ['https://www.elastic.co', 'https://www.swiftype.com'],
+    },
+  },
+};
 
+describe('CrawlDetailsPreview', () => {
+  it('is empty when a crawl request has not been loaded', () => {
+    setMockValues({
+      crawlRequest: null,
+    });
+
+    const wrapper = shallow(<CrawlDetailsPreview />);
     expect(wrapper.isEmptyRender()).toBe(true);
+  });
+
+  describe('when a crawl request has been loaded', () => {
+    let wrapper: ShallowWrapper;
+
+    beforeAll(() => {
+      setMockValues(MOCK_VALUES);
+      wrapper = shallow(<CrawlDetailsPreview />);
+    });
+
+    it('contains a list of domains', () => {
+      const domainList = wrapper.find(AccordionList).at(0);
+
+      expect(domainList.prop('items')).toEqual(
+        MOCK_VALUES.crawlRequest.crawlConfig.domainAllowlist
+      );
+    });
   });
 });
