@@ -191,7 +191,6 @@ export class MlServerPlugin
         () => this.dataViews
       ),
       mlLicense: this.mlLicense,
-      sharedServicesProviders,
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -218,7 +217,7 @@ export class MlServerPlugin
       resolveMlCapabilities,
     });
     trainedModelsRoutes(routeInit);
-    alertingRoutes(routeInit);
+    alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });
 

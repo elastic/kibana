@@ -8,12 +8,12 @@
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import { mlAnomalyDetectionAlertPreviewRequest } from './schemas/alerting_schema';
+import type { SharedServices } from '../shared_services';
 
-export function alertingRoutes({
-  router,
-  routeGuard,
-  sharedServicesProviders,
-}: RouteInitialization) {
+export function alertingRoutes(
+  { router, routeGuard }: RouteInitialization,
+  sharedServicesProviders: SharedServices
+) {
   /**
    * @apiGroup Alerting
    *
