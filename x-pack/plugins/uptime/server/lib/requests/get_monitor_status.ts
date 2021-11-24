@@ -189,6 +189,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     monitors = monitors.concat(monitorRes);
   } while (afterKey !== undefined);
 
+  // @ts-expect-error 4.3.5 upgrade
   return monitors
     .filter((monitor) => monitor?.doc_count >= numTimes)
     .map(({ key, doc_count: count, fields }) => ({
