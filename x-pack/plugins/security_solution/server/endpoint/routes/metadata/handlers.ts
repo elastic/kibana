@@ -27,11 +27,7 @@ import { getPagingProperties, kibanaRequestToMetadataListESQuery } from './query
 import { PackagePolicy } from '../../../../../fleet/common/types/models';
 import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
-import {
-  GetMetadataListRequestSchema,
-  GetMetadataListRequestSchemaV2,
-  GetMetadataRequestSchema,
-} from './index';
+import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
 import { findAgentIdsByStatus } from './support/agent_status';
@@ -41,6 +37,11 @@ import { queryResponseToHostListResult } from './support/query_strategies';
 import { EndpointError, NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import {
+  ENDPOINT_DEFAULT_PAGE,
+  ENDPOINT_DEFAULT_PAGE_SIZE,
+} from '../../../../common/endpoint/constants';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -163,15 +164,12 @@ export function getMetadataListRequestHandlerV2(
   logger: Logger
 ): RequestHandler<
   unknown,
-  TypeOf<typeof GetMetadataListRequestSchemaV2.query>,
+  GetMetadataListRequestQuery,
   unknown,
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
-    if (!endpointMetadataService) {
-      throw new EndpointError('endpoint metadata service not available');
-    }
 
     let doesUnitedIndexExist = false;
     let didUnitedIndexError = false;
@@ -208,8 +206,8 @@ export function getMetadataListRequestHandlerV2(
       body = {
         data: legacyResponse.hosts,
         total: legacyResponse.total,
-        page: request.query.page,
-        pageSize: request.query.pageSize,
+        page: request.query.page || ENDPOINT_DEFAULT_PAGE,
+        pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
       };
       return response.ok({ body });
     }
@@ -224,8 +222,8 @@ export function getMetadataListRequestHandlerV2(
       body = {
         data,
         total,
-        page: request.query.page,
-        pageSize: request.query.pageSize,
+        page: request.query.page || ENDPOINT_DEFAULT_PAGE,
+        pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
       };
     } catch (error) {
       return errorHandler(logger, response, error);
@@ -396,7 +394,7 @@ async function legacyListMetadataQuery(
   endpointAppContext: EndpointAppContext,
   logger: Logger,
   endpointPolicies: PackagePolicy[],
-  queryOptions: TypeOf<typeof GetMetadataListRequestSchemaV2.query>
+  queryOptions: GetMetadataListRequestQuery
 ): Promise<HostResultList> {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const agentService = endpointAppContext.service.getAgentService()!;
@@ -422,13 +420,13 @@ async function legacyListMetadataQuery(
   const statusAgentIds = await findAgentIdsByStatus(
     agentService,
     context.core.elasticsearch.client.asCurrentUser,
-    queryOptions.hostStatuses
+    queryOptions?.hostStatuses || []
   );
 
   const queryParams = await kibanaRequestToMetadataListESQuery({
-    page: queryOptions.page,
-    pageSize: queryOptions.pageSize,
-    kuery: queryOptions.kuery,
+    page: queryOptions?.page || ENDPOINT_DEFAULT_PAGE,
+    pageSize: queryOptions?.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
+    kuery: queryOptions?.kuery || '',
     unenrolledAgentIds,
     statusAgentIds,
   });
