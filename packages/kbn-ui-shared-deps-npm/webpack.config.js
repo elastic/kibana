@@ -48,7 +48,6 @@ module.exports = (_, argv) => {
         '@babel/runtime/helpers/assertThisInitialized',
         '@babel/runtime/helpers/classCallCheck',
         '@babel/runtime/helpers/classPrivateFieldGet',
-        '@babel/runtime/helpers/classPrivateFieldInitSpec',
         '@babel/runtime/helpers/classPrivateFieldSet',
         '@babel/runtime/helpers/createSuper',
         '@babel/runtime/helpers/defineProperty',
