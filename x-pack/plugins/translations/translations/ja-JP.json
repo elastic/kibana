@@ -15040,8 +15040,6 @@
     "xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel": "グローバル検索をレイヤーデータに適用",
     "xpack.maps.filterEditor.applyGlobalTimeCheckboxLabel": "グローバル時刻をレイヤーデータに適用",
     "xpack.maps.filterEditor.applyGlobalTimeHelp": "有効にすると、結果がグローバル時刻で絞り込まれます",
-    "xpack.maps.fitToData.fitAriaLabel": "データバウンドに合わせる",
-    "xpack.maps.fitToData.fitButtonLabel": "データバウンドに合わせる",
     "xpack.maps.geoGrid.resolutionLabel": "グリッド解像度",
     "xpack.maps.geometryFilterForm.geometryLabelLabel": "ジオメトリラベル",
     "xpack.maps.geometryFilterForm.relationLabel": "空間関係",

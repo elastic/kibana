@@ -92,10 +92,16 @@ export function updateMapSetting(
   settingKey: string,
   settingValue: string | boolean | number | object
 ) {
-  return {
-    type: UPDATE_MAP_SETTING,
-    settingKey,
-    settingValue,
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch({
+      type: UPDATE_MAP_SETTING,
+      settingKey,
+      settingValue,
+    });
+
+    if (settingKey === 'autoFitToDataBounds' && typeof settingValue === 'boolean' && settingValue) {
+      dispatch(autoFitToBounds());
+    }
   };
 }
 
