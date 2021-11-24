@@ -44,6 +44,16 @@ export const CrawlDetailsPreview: React.FC = () => {
         iconType="crosshairs"
         items={crawlRequest.crawlConfig.seedUrls}
       />
+      <AccordionList
+        title={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.sitemapUrlsTitle',
+          {
+            defaultMessage: 'Sitemap URLs',
+          }
+        )}
+        iconType="visMapRegion"
+        items={crawlRequest.crawlConfig.sitemapUrls}
+      />
     </>
   );
 };

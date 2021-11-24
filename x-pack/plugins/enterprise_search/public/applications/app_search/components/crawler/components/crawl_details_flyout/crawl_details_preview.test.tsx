@@ -67,5 +67,14 @@ describe('CrawlDetailsPreview', () => {
         'https://www.swiftype.com/documentation',
       ]);
     });
+
+    it('contains a list of sitemap urls', () => {
+      const domainList = wrapper.find(AccordionList).at(2);
+
+      expect(domainList.prop('items')).toEqual([
+        'https://www.elastic.co/sitemap.xml',
+        'https://www.swiftype.com/sitemap.xml',
+      ]);
+    });
   });
 });
