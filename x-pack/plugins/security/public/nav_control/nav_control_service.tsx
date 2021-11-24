@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { BroadcastChannel as BroadcastChannelType } from 'broadcast-channel';
-import { createLeaderElection } from 'broadcast-channel';
 import { sortBy } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -43,11 +41,7 @@ export interface SecurityNavControlServiceStart {
   addUserMenuLinks: (newUserMenuLink: UserMenuLink[]) => void;
 }
 
-const USER_IN_SESSION = 'user_in_session';
-
 export class SecurityNavControlService {
-  private channel?: BroadcastChannelType<{ userInSession: boolean }>;
-
   private securityLicense!: SecurityLicense;
   private authc!: AuthenticationServiceSetup;
   private logoutUrl!: string;
@@ -75,7 +69,6 @@ export class SecurityNavControlService {
         if (shouldRegisterNavControl) {
           this.registerSecurityNavControl(core);
         }
-        this.telemetryOnAuthType(core);
       }
     );
 
@@ -114,7 +107,6 @@ export class SecurityNavControlService {
     }
     this.navControlRegistered = false;
     this.stop$.next();
-    this.channel?.close();
   }
 
   private registerSecurityNavControl(
@@ -148,41 +140,5 @@ export class SecurityNavControlService {
 
   private sortUserMenuLinks(userMenuLinks: UserMenuLink[]) {
     return sortBy(userMenuLinks, 'order');
-  }
-
-  private async telemetryOnAuthType(core: Pick<CoreStart, 'http'>) {
-    try {
-      const { BroadcastChannel } = await import('broadcast-channel');
-      const authenticatedUser = await this.authc.getCurrentUser();
-
-      if (!this.channel) {
-        const tenant = core.http.basePath.serverBasePath;
-        this.channel = new BroadcastChannel(`${tenant}/${USER_IN_SESSION}`, {
-          webWorkerSupport: false,
-        });
-      }
-
-      const elector = createLeaderElection(this.channel, {
-        fallbackInterval: 0, // optional configuration for how often will renegotiation for leader occur -> no need of renegotiation
-        responseTime: 1000, // optional configuration for how long will instances have to respond
-      });
-      elector.awaitLeadership().then(() => {
-        if (elector.isLeader) {
-          core.http.post('/internal/security/telemetry/auth_type', {
-            body: JSON.stringify({ auth_type: authenticatedUser.authentication_type }),
-          });
-        }
-      });
-
-      setTimeout(async () => {
-        if (!elector.isLeader) {
-          // Let's kill the non leader since we do not need to do telemetry if you are not a leader
-          // but we are keeping the leader alive to tell the other one that they won't be leader
-          await elector.die();
-        }
-      }, 5000);
-
-      // eslint-disable-next-line no-empty
-    } catch {}
   }
 }

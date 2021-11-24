@@ -28,6 +28,7 @@ import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
+import { SecurityTelemetryService } from './telemetry';
 import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
 
@@ -63,6 +64,7 @@ export class SecurityPlugin
   private readonly managementService = new ManagementService();
   private readonly securityCheckupService: SecurityCheckupService;
   private readonly anonymousAccessService = new AnonymousAccessService();
+  private readonly securityTelemetryService = new SecurityTelemetryService();
   private authc!: AuthenticationServiceSetup;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -163,6 +165,11 @@ export class SecurityPlugin
     if (share) {
       this.anonymousAccessService.start({ http: core.http });
     }
+
+    this.authc.getCurrentUser().then(() => {
+      // Only start the telemetry when you are log in
+      this.securityTelemetryService.start({ http: core.http });
+    });
 
     return {
       uiApi: getUiApi({ core }),
