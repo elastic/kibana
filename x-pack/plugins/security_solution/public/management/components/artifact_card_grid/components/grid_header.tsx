@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { CommonProps, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
@@ -28,7 +29,16 @@ export const GridHeader = memo<GridHeaderProps>(
     const expandToggleElement = useMemo(
       () => (
         <EuiButtonIcon
-          data-test-subj={getTestId('expandCollapsePlaceHolder')}
+          data-test-subj={getTestId('expandCollapseAllButton')}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.artifactCardGrid.expandCollapseLabel',
+            {
+              defaultMessage: '{action} all cards',
+              values: {
+                action: 'unfold' ? 'Expand' : 'Collapse',
+              },
+            }
+          )}
           iconType={expandAllIconType}
           onClick={() => onExpandCollapseAll()}
           style={{ marginLeft: '-5px' }}
