@@ -6,11 +6,13 @@
  */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { TileMetaFeature } from '../../../common/descriptor_types';
 // @ts-expect-error
 import { RGBAImage } from './image_utils';
 import { isGlDrawLayer } from './sort_layers';
 import { ILayer } from '../../classes/layers/layer';
 import { EmsSpriteSheet } from '../../classes/layers/vector_tile_layer/vector_tile_layer';
+import { ES_MVT_META_LAYER_NAME } from '../../classes/layers/vector_layer/mvt_vector_layer/mvt_vector_layer';
 
 export function removeOrphanedSourcesAndLayers(
   mbMap: MbMap,
@@ -118,4 +120,27 @@ export function addSpriteSheetToMapFromImageData(
     RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
     mbMap.addImage(imageId, data, { pixelRatio, sdf });
   }
+}
+
+export function getTileMetaFeatures(mbMap: MbMap, mbSourceId: string): TileMetaFeature[] {
+  // querySourceFeatures can return duplicated features when features cross tile boundaries.
+  // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
+  const mbFeatures = mbMap.querySourceFeatures(mbSourceId, {
+    sourceLayer: ES_MVT_META_LAYER_NAME,
+  });
+
+  return mbFeatures
+    .map((mbFeature) => {
+      try {
+        return {
+          type: 'Feature',
+          id: mbFeature?.id,
+          geometry: mbFeature?.geometry, // this getter might throw with non-conforming geometries
+          properties: mbFeature?.properties,
+        } as TileMetaFeature;
+      } catch (e) {
+        return null;
+      }
+    })
+    .filter((mbFeature) => mbFeature !== null) as TileMetaFeature[];
 }
