@@ -24,7 +24,12 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 import { lensPluginMock } from '../../../../../lens/public/mocks';
 import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
 import { IndexPatternContext, IndexPatternContextProvider } from './hooks/use_app_index_pattern';
-import { AllSeries, SeriesContextValue, UrlStorageContext } from './hooks/use_series_storage';
+import {
+  AllSeries,
+  reportTypeKey,
+  SeriesContextValue,
+  UrlStorageContext,
+} from './hooks/use_series_storage';
 
 import * as fetcherHook from '../../../hooks/use_fetcher';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
@@ -42,6 +47,8 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { casesPluginMock } from '../../../../../cases/public/mocks';
+import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
+import { ExploratoryViewContextProvider } from './contexts/exploatory_view_config';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -194,9 +201,17 @@ export function render<ExtraCore>(
   return {
     ...reactTestLibRender(
       <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
-        <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
-          {ui}
-        </UrlStorageContext.Provider>
+        <ExploratoryViewContextProvider
+          reportTypes={reportTypesList}
+          dataTypes={dataTypes}
+          indexPatterns={{}}
+          reportConfigMap={obsvReportConfigMap}
+          setHeaderActionMenu={jest.fn()}
+        >
+          <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
+            {ui}
+          </UrlStorageContext.Provider>
+        </ExploratoryViewContextProvider>
       </MockRouter>,
       renderOptions
     ),
@@ -301,7 +316,13 @@ function mockSeriesStorageContext({
     firstSeries: mockDataSeries[0],
     allSeries: mockDataSeries,
     setReportType: jest.fn(),
-    storage: { get: jest.fn().mockReturnValue(mockDataSeries) } as any,
+    storage: {
+      get: jest
+        .fn()
+        .mockImplementation((key: string) =>
+          key === reportTypeKey ? 'data-distribution' : mockDataSeries
+        ),
+    } as any,
   } as SeriesContextValue;
 }
 
