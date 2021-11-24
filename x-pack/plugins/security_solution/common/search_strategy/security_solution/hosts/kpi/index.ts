@@ -20,6 +20,7 @@ export enum HostsKpiQueries {
   kpiHosts = 'hostsKpiHosts',
   kpiHostsEntities = 'hostsKpiHostsEntities',
   kpiUniqueIps = 'hostsKpiUniqueIps',
+  kpiRiskyHosts = 'hostsKpiRiskyHosts',
   kpiUniqueIpsEntities = 'hostsKpiUniqueIpsEntities',
 }
 

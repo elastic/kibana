@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';

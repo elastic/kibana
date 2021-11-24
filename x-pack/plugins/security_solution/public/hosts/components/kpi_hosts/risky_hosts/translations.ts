@@ -16,16 +16,12 @@ export const HOSTS_COUNT = (quantity: number) =>
   });
 
 export const RISKY_HOSTS = i18n.translate('xpack.securitySolution.kpiHosts.riskyHosts.label', {
-  defaultMessage: 'risky hosts',
+  defaultMessage: 'Risky Hosts',
 });
 
-// export const HOSTS_RISK_CRITICAL = i18n.translate(
-//   'xpack.securitySolution.kpiHosts.riskyHosts.critical',
-//   {
-//     defaultMessage: 'Critical',
-//   }
-// );
-
-// export const HOSTS_RISK_HIGH = i18n.translate('xpack.securitySolution.kpiHosts.riskyHosts.high', {
-//   defaultMessage: 'High',
-// });
+export const ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.kpiHosts.riskyHosts.errorMessage',
+  {
+    defaultMessage: 'Error Fetching Risky Hosts API',
+  }
+);
