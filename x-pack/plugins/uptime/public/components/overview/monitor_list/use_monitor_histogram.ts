@@ -46,7 +46,7 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
   );
 
   const histogramBuckets = data?.aggregations?.histogram.buckets ?? [];
-  // @ts-expect-error 4.3.5 upgrade
+  // @ts-ignore 4.3.5 upgrade
   const simplified = histogramBuckets.map((histogramBucket) => {
     const byId: { [key: string]: number } = {};
     histogramBucket.by_id.buckets.forEach((idBucket) => {
