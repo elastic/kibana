@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import React, { Component, ReactElement } from 'react';
 import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import url from 'url';
