@@ -39,6 +39,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       windowsCommand={windowsCommand}
       installAgentLink={docLinks.links.fleet.installElasticAgent}
       troubleshootLink={docLinks.links.fleet.troubleshooting}
+      isK8s={false}
     />
   );
 };

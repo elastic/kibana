@@ -19,6 +19,7 @@ interface Props {
   windowsCommand: string;
   installAgentLink: string;
   troubleshootLink: string;
+  isK8s: boolean;
 }
 
 // Otherwise the copy button is over the text
@@ -31,57 +32,71 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   windowsCommand,
   installAgentLink,
   troubleshootLink,
+  isK8s,
 }) => {
   const { platform, setPlatform } = usePlatform();
 
   return (
     <>
       <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.enrollmentInstructions.descriptionText"
-          defaultMessage="From the agent directory, run the appropriate command to install, enroll, and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
-        />
+        {isK8s ? (
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
+            defaultMessage="From the directory where the Kubernetes manifest is downloaded, run the apply command."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.stepRunAgentDescription"
+            defaultMessage="From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges."
+          />
+        )}
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiButtonGroup
-        options={PLATFORM_OPTIONS}
-        idSelected={platform}
-        onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
-        legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
-          defaultMessage: 'Platform',
-        })}
-      />
-      <EuiSpacer size="s" />
-      {platform === 'linux-mac' && (
+      {isK8s ? (
         <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
           <CommandCode>{linuxMacCommand}</CommandCode>
         </EuiCodeBlock>
-      )}
-      {platform === 'windows' && (
-        <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-          <CommandCode>{windowsCommand}</CommandCode>
-        </EuiCodeBlock>
-      )}
-
-      {platform === 'rpm-deb' && (
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
-            defaultMessage="See the {link} for RPM / DEB deploy instructions."
-            values={{
-              link: (
-                <EuiLink target="_blank" external href={installAgentLink}>
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
-                    defaultMessage="Elastic Agent docs"
-                  />
-                </EuiLink>
-              ),
-            }}
+      ) : (
+        <>
+          <EuiButtonGroup
+            options={PLATFORM_OPTIONS}
+            idSelected={platform}
+            onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
+            legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
+              defaultMessage: 'Platform',
+            })}
           />
-        </EuiText>
+          <EuiSpacer size="s" />
+          {platform === 'linux-mac' && (
+            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+              <CommandCode>{linuxMacCommand}</CommandCode>
+            </EuiCodeBlock>
+          )}
+          {platform === 'windows' && (
+            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+              <CommandCode>{windowsCommand}</CommandCode>
+            </EuiCodeBlock>
+          )}
+          {platform === 'rpm-deb' && (
+            <EuiText>
+              <FormattedMessage
+                id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
+                defaultMessage="See the {link} for RPM / DEB deploy instructions."
+                values={{
+                  link: (
+                    <EuiLink target="_blank" external href={installAgentLink}>
+                      <FormattedMessage
+                        id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
+                        defaultMessage="Elastic Agent docs"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          )}
+        </>
       )}
-
       <EuiSpacer size="l" />
       <EuiText>
         <FormattedMessage

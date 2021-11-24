@@ -178,19 +178,6 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
       />
     );
 
-  const applyMsg =
-    isK8s === 'IS_KUBERNETES' ? (
-      <FormattedMessage
-        id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
-        defaultMessage="From the directory where the Kubernetes manifest is downloaded, run the apply command."
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.fleet.agentEnrollment.stepRunAgentDescription"
-        defaultMessage="From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges."
-      />
-    );
-
   const steps = [
     !agentPolicy
       ? AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId, excludeFleetServer: true })
@@ -242,6 +229,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
           windowsCommand={windowsCommand}
           installAgentLink={docLinks.links.fleet.installElasticAgentStandalone}
           troubleshootLink={docLinks.links.fleet.troubleshooting}
+          isK8s={isK8s === 'IS_KUBERNETES'}
         />
       ),
     },
