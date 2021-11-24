@@ -28,11 +28,9 @@ import { FleetAgentPolicyGenerator } from '../../../../common/endpoint/data_gene
 
 interface KqlArgumentType {
   type: string;
-  function: string;
-  arguments: Array<{
-    type: string;
-    value: string | boolean;
-  }>;
+  value?: string | boolean;
+  function?: string;
+  arguments?: KqlArgumentType[];
 }
 
 const getPackagePoliciesFromKueryString = (kueryString: string): string[] => {
@@ -50,7 +48,7 @@ const getPackagePoliciesFromKueryString = (kueryString: string): string[] => {
   // output would be:
   // {
   //   "type": "function",
-  //   "function": "or",
+  //   "function": "or",  // this would not be here if no `OR` was found in the string
   //   "arguments": [
   //     {
   //       "type": "function",
@@ -73,18 +71,37 @@ const getPackagePoliciesFromKueryString = (kueryString: string): string[] => {
   //     // .... other kquery arguments here
   //   ]
   // }
+  //
 
+  // Because there could be be many combinations of OR/AND, we just look for any defined literal that
+  // looks ot have a value for package_policies.
   if (kueryAst.arguments) {
     const packagePolicyIds: string[] = [];
+    const kqlArgumentQueue = [...kueryAst.arguments];
 
-    for (const kqlArgument of kueryAst.arguments) {
-      // If the first argument is `ingest-agent-policies.package_policies`,
-      // then grab the second argument's value (the policy id)
-      if (
-        kqlArgument.arguments[0].value === `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies` &&
-        'string' === typeof kqlArgument.arguments[1].value
-      ) {
-        packagePolicyIds.push(kqlArgument.arguments[1].value);
+    while (kqlArgumentQueue.length > 0) {
+      const kqlArgument = kqlArgumentQueue.shift();
+
+      if (kqlArgument) {
+        if (kqlArgument.arguments) {
+          kqlArgumentQueue.push(...kqlArgument.arguments);
+        }
+
+        if (
+          kqlArgument.type === 'literal' &&
+          kqlArgument.value === `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies`
+        ) {
+          // If the next argument looks to be a value, then user it
+          const nextArgument = kqlArgumentQueue[0];
+          if (
+            nextArgument &&
+            nextArgument.type === 'literal' &&
+            'string' === typeof nextArgument.value
+          ) {
+            packagePolicyIds.push(nextArgument.value);
+            kqlArgumentQueue.shift();
+          }
+        }
       }
     }
 
