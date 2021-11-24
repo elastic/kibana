@@ -25,7 +25,7 @@ import {
 
 import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DUPLICATE_DOCS_URL } from '../../../../routes';
 import { DataPanel } from '../../../data_panel';

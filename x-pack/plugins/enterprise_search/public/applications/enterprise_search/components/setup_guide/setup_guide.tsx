@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { NATIVE_AUTH_DOCS_URL, STANDARD_AUTH_DOCS_URL } from '../../../app_search/routes';

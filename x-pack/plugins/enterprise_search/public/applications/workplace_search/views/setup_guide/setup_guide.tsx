@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiSpacer, EuiTitle, EuiText, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';

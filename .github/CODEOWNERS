@@ -24,7 +24,6 @@
 /x-pack/plugins/lens/ @elastic/kibana-vis-editors
 /src/plugins/advanced_settings/ @elastic/kibana-vis-editors
 /src/plugins/charts/ @elastic/kibana-vis-editors
-/src/plugins/kibana_legacy/ @elastic/kibana-vis-editors
 /src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/metric/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/table/ @elastic/kibana-vis-editors
@@ -68,7 +67,7 @@
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/expressions/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
-/src/plugins/index_pattern_editor/ @elastic/kibana-app-services
+/src/plugins/data_view_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/kibana_react/ @elastic/kibana-app-services
 /src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
@@ -79,7 +78,7 @@
 /src/plugins/data_view_field_editor @elastic/kibana-app-services
 /src/plugins/screenshot_mode @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
-/src/plugins/index_pattern_management/ @elastic/kibana-app-services
+/src/plugins/data_view_management/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services

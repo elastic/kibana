@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 import { UrlGeneratorsDefinition } from 'src/plugins/share/public';
