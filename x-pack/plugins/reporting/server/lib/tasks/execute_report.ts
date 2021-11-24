@@ -11,6 +11,7 @@ import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { finished, Writable } from 'stream';
 import { promisify } from 'util';
+import { REPORTING_EXECUTE_TYPE } from '../../../common/constants';
 import { getContentStream, LevelLogger } from '../';
 import { ReportingCore } from '../../';
 import {
@@ -25,13 +26,7 @@ import { ReportingConfigType } from '../../config';
 import { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
 import { Report, ReportDocument, ReportingStore, SavedReport } from '../store';
 import { ReportFailedFields, ReportProcessingFields } from '../store/store';
-import {
-  ReportingTask,
-  ReportingTaskStatus,
-  REPORTING_EXECUTE_TYPE,
-  ReportTaskParams,
-  TaskRunResult,
-} from './';
+import { ReportingTask, ReportingTaskStatus, ReportTaskParams, TaskRunResult } from './';
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;

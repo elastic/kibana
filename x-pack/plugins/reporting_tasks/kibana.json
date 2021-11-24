@@ -1,0 +1,14 @@
+{
+  "id": "reportingTasks",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Kibana Reporting Services",
+    "githubTeam": "kibana-reporting-services"
+  },
+  "description": "Registers Reporting's task types when Reporting is disabled",
+  "optionalPlugins": ["reporting"],
+  "requiredPlugins": ["taskManager"],
+  "server": true,
+  "ui": false
+}

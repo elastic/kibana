@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { REPORTING_MONITOR_TYPE } from '../../../common/constants';
 import { LevelLogger, ReportingStore } from '../';
 import { ReportingCore } from '../../';
 import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../../task_manager/server';
@@ -13,7 +14,7 @@ import { numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
 import { statuses } from '../statuses';
 import { SavedReport } from '../store';
-import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from './';
+import { ReportingTask, ReportingTaskStatus, ReportTaskParams } from './';
 
 /*
  * Task for finding the ReportingRecords left in the ReportingStore (.reporting index) and stuck in
