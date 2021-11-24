@@ -8,5 +8,6 @@
 import { MetricsResponse } from '../../../../common';
 
 export interface MetricsHandler {
+  getFeatures(): Set<string>;
   applyMetrics(metricsResult: MetricsResponse): Promise<MetricsResponse>;
 }

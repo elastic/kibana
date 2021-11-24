@@ -439,6 +439,113 @@
           },
           {
             "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.inject",
+            "type": "Function",
+            "tags": [],
+            "label": "inject",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ", references: ",
+              "SavedObjectReference",
+              "[]) => ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              }
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainerFactory.inject.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainerFactory.inject.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  "SavedObjectReference",
+                  "[]"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ControlGroupContainerFactory.extract",
+            "type": "Function",
+            "tags": [],
+            "label": "extract",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ") => { state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              "; references: ",
+              "SavedObjectReference",
+              "[]; }"
+            ],
+            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ControlGroupContainerFactory.extract.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
             "id": "def-public.ControlGroupContainerFactory.Unnamed",
             "type": "Function",
             "tags": [],
@@ -620,113 +727,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ControlGroupContainerFactory.inject",
-            "type": "Function",
-            "tags": [],
-            "label": "inject",
-            "description": [],
-            "signature": [
-              "(state: ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableStateWithType",
-                "text": "EmbeddableStateWithType"
-              },
-              ", references: ",
-              "SavedObjectReference",
-              "[]) => ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableStateWithType",
-                "text": "EmbeddableStateWithType"
-              }
-            ],
-            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.ControlGroupContainerFactory.inject.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "P"
-                ],
-                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.ControlGroupContainerFactory.inject.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "references",
-                "description": [],
-                "signature": [
-                  "SavedObjectReference",
-                  "[]"
-                ],
-                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ControlGroupContainerFactory.extract",
-            "type": "Function",
-            "tags": [],
-            "label": "extract",
-            "description": [],
-            "signature": [
-              "(state: ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableStateWithType",
-                "text": "EmbeddableStateWithType"
-              },
-              ") => { state: ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableStateWithType",
-                "text": "EmbeddableStateWithType"
-              },
-              "; references: ",
-              "SavedObjectReference",
-              "[]; }"
-            ],
-            "path": "src/plugins/presentation_util/public/components/controls/control_group/embeddable/control_group_container_factory.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.ControlGroupContainerFactory.extract.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "P"
-                ],
-                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
-              }
-            ]
           }
         ],
         "initialIsOpen": false
@@ -2373,12 +2373,16 @@
           {
             "parentPluginId": "presentationUtil",
             "id": "def-public.ControlsPanels.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[panelId: string}]: ControlPanelState<ControlInput>",
             "description": [],
             "signature": [
-              "any"
+              "[panelId: string]:  ",
+              "ControlPanelState",
+              "<",
+              "ControlInput",
+              ">"
             ],
             "path": "src/plugins/presentation_util/common/controls/control_group/types.ts",
             "deprecated": false

@@ -12,6 +12,10 @@ import { MetricsHandler } from './types';
 export class Lifespan implements MetricsHandler {
   constructor(private readonly caseId: string, private readonly casesClient: CasesClient) {}
 
+  public getFeatures(): Set<string> {
+    return new Set(['lifespan']);
+  }
+
   public async applyMetrics(results: MetricsResponse): Promise<MetricsResponse> {
     const caseInfo = await this.casesClient.cases.get({ id: this.caseId });
     return {
