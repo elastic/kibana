@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../kibana_react/public';
 
 const AUTOCOMPLETE_FTUE_POPOVER_STORAGE_KEY = 'data.autocompleteFtuePopover';
