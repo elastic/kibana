@@ -11,12 +11,14 @@ import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { PERCENTILE } from '../configurations/constants';
 import { ReportMetricOptions } from './report_metric_options';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
 
 describe('ReportMetricOptions', function () {
   const dataViewSeries = getDefaultConfigs({
+    dataType: 'ux',
     reportType: 'kpi-over-time',
     indexPattern: mockIndexPattern,
-    dataType: 'ux',
+    reportConfigMap: obsvReportConfigMap,
   });
 
   it('should render properly', async function () {
