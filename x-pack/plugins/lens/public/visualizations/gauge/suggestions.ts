@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Visualization } from '../../types';
+import type { TableSuggestion, Visualization } from '../../types';
 import { layerTypes } from '../../../common';
-import { LensIconChartGaugeHorizontal } from '../../assets/chart_gauge';
 import {
   GaugeShape,
   GaugeShapes,
@@ -17,28 +16,34 @@ import {
   GaugeVisualizationState,
 } from '../../../common/expressions/gauge_chart';
 
+const isNotNumericMetric = (table: TableSuggestion) =>
+  table.columns?.[0]?.operation.dataType !== 'number' ||
+  table.columns.some((col) => col.operation.isBucketed);
+
+const hasLayerMismatch = (keptLayerIds: string[], table: TableSuggestion) =>
+  keptLayerIds.length > 1 || (keptLayerIds.length && table.layerId !== keptLayerIds[0]);
+
 export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggestions'] = ({
   table,
   state,
   keptLayerIds,
   subVisualizationId,
 }) => {
-  const isCurrentVisGauge =
-    state && (state.minAccessor || state.maxAccessor || state.goalAccessor || state.metricAccessor);
+  const isGauge = Boolean(
+    state && (state.minAccessor || state.maxAccessor || state.goalAccessor || state.metricAccessor)
+  );
 
   const isShapeChange =
     (subVisualizationId === GaugeShapes.horizontalBullet ||
       subVisualizationId === GaugeShapes.verticalBullet) &&
-    isCurrentVisGauge &&
+    isGauge &&
     subVisualizationId !== state?.shape;
 
   if (
-    keptLayerIds.length > 1 ||
-    (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-    (!isShapeChange && table.columns.length > 1) ||
-    table.columns?.[0]?.operation.dataType !== 'number' ||
-    (isCurrentVisGauge && table.changeType !== 'extended' && table.changeType !== 'unchanged') ||
-    table.columns.some((col) => col.operation.isBucketed)
+    hasLayerMismatch(keptLayerIds, table) ||
+    isNotNumericMetric(table) ||
+    (!isGauge && table.columns.length > 1) ||
+    (isGauge && table.changeType === 'initial')
   ) {
     return [];
   }
@@ -62,9 +67,10 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
       defaultMessage: 'Gauge',
     }),
     previewIcon: 'empty',
-    score: 0.1,
-    hide: !isShapeChange, // only display for gauges for beta
+    score: 0.5,
+    hide: !isGauge, // only display for gauges for beta
   };
+
   const suggestions = isShapeChange
     ? [
         {
@@ -80,18 +86,15 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
         },
       ]
     : [
+        { ...baseSuggestion, hide: true },
         {
           ...baseSuggestion,
           state: {
             ...baseSuggestion.state,
-            shape,
-          },
-        },
-        {
-          ...baseSuggestion,
-          state: {
-            ...baseSuggestion.state,
-            shape: GaugeShapes.verticalBullet,
+            shape:
+              state?.shape === GaugeShapes.verticalBullet
+                ? GaugeShapes.horizontalBullet
+                : GaugeShapes.verticalBullet,
           },
         },
       ];

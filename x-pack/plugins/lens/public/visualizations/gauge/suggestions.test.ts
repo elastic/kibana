@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the Elastic License
-//  * 2.0; you may not use this file except in compliance with the Elastic License
-//  * 2.0.
-//  */
-
 import { getSuggestions } from './suggestions';
 import { GaugeShapes, GaugeVisualizationState } from '../../../common/expressions';
 import { layerTypes } from '../../../common';
@@ -77,8 +70,8 @@ describe('gauge suggestions', () => {
           table: {
             layerId: 'first',
             isMultiRow: true,
-            columns: [], // TODO
-            changeType: 'extended',
+            columns: [metricColumn],
+            changeType: 'initial',
           },
           state: {
             shape: GaugeShapes.horizontalBullet,
@@ -164,13 +157,13 @@ describe('shows suggestions', () => {
         title: 'Gauge',
         hide: true,
         previewIcon: 'empty',
-        score: 0.1,
+        score: 0.5,
       },
       {
         hide: true,
         previewIcon: 'empty',
         title: 'Gauge',
-        score: 0.1,
+        score: 0.5,
         state: {
           layerId: 'first',
           layerType: 'data',
@@ -212,8 +205,8 @@ describe('shows suggestions', () => {
         },
         previewIcon: 'empty',
         title: 'Gauge',
-        hide: false,
-        score: 0.1,
+        hide: false, // shows suggestion when current is gauge
+        score: 0.5,
       },
     ]);
   });
