@@ -32,7 +32,6 @@ export async function getSharingData(
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
   );
 
-  searchSource.removeField('filter');
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
@@ -55,11 +54,11 @@ export async function getSharingData(
 
   return {
     getSearchSource: (absoluteTime?: boolean): SearchSourceFields => {
-      const filter = absoluteTime
+      const timeFilter = absoluteTime
         ? data.query.timefilter.timefilter.createFilter(index)
         : data.query.timefilter.timefilter.createRelativeFilter(index);
 
-      searchSource.setField('filter', filter);
+      searchSource.setField('filter', [timeFilter, ...searchSource.getField('filter')]);
 
       return searchSource.getSerializedFields(true);
     },
