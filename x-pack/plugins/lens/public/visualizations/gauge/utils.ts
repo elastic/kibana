@@ -6,7 +6,14 @@
  */
 
 import { scaleLinear } from 'd3-scale';
+import {
+  ChartColorConfiguration,
+  PaletteDefinition,
+  PaletteRegistry,
+  SeriesLayer,
+} from 'src/plugins/charts/public';
 import { DatatableRow } from 'src/plugins/expressions';
+import Color from 'color';
 import type { GaugeVisualizationState } from '../../../common/expressions/gauge_chart';
 
 type GaugeAccessors = 'maxAccessor' | 'minAccessor' | 'goalAccessor' | 'metricAccessor';
@@ -83,4 +90,24 @@ export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState
   const minValue = getMinValue(row, state);
   const maxValue = getMaxValue(row, state);
   return Math.round((minValue + maxValue) * 0.8);
+};
+
+export const transparentizePalettes = (palettes: PaletteRegistry) => {
+  const addAlpha = (c: string | null) => (c ? new Color(c).hex() + `80` : `000000`);
+  const transparentizePalette = (palette: PaletteDefinition<unknown>) => ({
+    ...palette,
+    getCategoricalColor: (
+      series: SeriesLayer[],
+      chartConfiguration?: ChartColorConfiguration,
+      state?: unknown
+    ) => addAlpha(palette.getCategoricalColor(series, chartConfiguration, state)),
+    getCategoricalColors: (size: number, state?: unknown): string[] =>
+      palette.getCategoricalColors(size, state).map(addAlpha),
+  });
+
+  return {
+    ...palettes,
+    get: (name: string) => transparentizePalette(palettes.get(name)),
+    getAll: () => palettes.getAll().map((singlePalette) => transparentizePalette(singlePalette)),
+  };
 };

@@ -72,7 +72,7 @@ export const gauge: ExpressionFunctionDefinition<
     goalAccessor: {
       types: ['string'],
       help: i18n.translate('xpack.lens.gauge.goalAccessor.help', {
-        defaultMessage: 'Goal value',
+        defaultMessage: 'Goal Value',
       }),
     },
     colorMode: {

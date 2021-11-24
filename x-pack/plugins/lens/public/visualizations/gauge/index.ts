@@ -8,13 +8,9 @@
 import type { CoreSetup } from 'kibana/public';
 import type { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import type { EditorFrameSetup } from '../../types';
-import type {
-  ChartsPluginSetup,
-  ChartColorConfiguration,
-  PaletteDefinition,
-  SeriesLayer,
-} from '../../../../../../src/plugins/charts/public';
+import type { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
 import type { FormatFactory } from '../../../common';
+import { transparentizePalettes } from './utils';
 
 export interface GaugeVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
@@ -23,19 +19,6 @@ export interface GaugeVisualizationPluginSetupPlugins {
   charts: ChartsPluginSetup;
 }
 
-const transparentize = (color: string | null) => (color ? color + `80` : `000000`);
-
-const paletteModifier = (palette: PaletteDefinition<unknown>) => ({
-  ...palette,
-  getCategoricalColor: (
-    series: SeriesLayer[],
-    chartConfiguration?: ChartColorConfiguration,
-    state?: unknown
-  ) => transparentize(palette.getCategoricalColor(series, chartConfiguration, state)),
-  getCategoricalColors: (size: number, state: unknown): string[] =>
-    palette.getCategoricalColors(size, state).map(transparentize),
-});
-
 export class GaugeVisualization {
   setup(
     core: CoreSetup,
@@ -43,14 +26,7 @@ export class GaugeVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const { getGaugeVisualization, getGaugeRenderer } = await import('../../async_services');
-      const initialPalettes = await charts.palettes.getPalettes();
-
-      const palettes = {
-        ...initialPalettes,
-        get: (name: string) => paletteModifier(initialPalettes.get(name)),
-        getAll: () =>
-          initialPalettes.getAll().map((singlePalette) => paletteModifier(singlePalette)),
-      };
+      const palettes = transparentizePalettes(await charts.palettes.getPalettes());
 
       expressions.registerRenderer(
         getGaugeRenderer({

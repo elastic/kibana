@@ -218,7 +218,7 @@ export const getGaugeVisualization = ({
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.metricAccessor,
           required: true,
-          dataTestSubj: 'lnsGauge_minDimensionPanel',
+          dataTestSubj: 'lnsGauge_maxDimensionPanel',
           enableDimensionEditor: true,
         },
         {
@@ -257,7 +257,7 @@ export const getGaugeVisualization = ({
           layerId: state.layerId,
           groupId: GROUP_ID.GOAL,
           groupLabel: i18n.translate('xpack.lens.gauge.goalValueLabel', {
-            defaultMessage: 'Goal value',
+            defaultMessage: 'Goal Value',
           }),
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,
@@ -413,7 +413,7 @@ export const getGaugeVisualization = ({
     const minValue = minAccessor && row[minAccessor];
     const goalValue = goalAccessor && row[goalAccessor];
 
-    if (minValue != null && minValue === maxValue) {
+    if (typeof minValue === 'number' && minValue === maxValue) {
       return [
         <FormattedMessage
           id="xpack.lens.gaugeVisualization.minValueEqualMaxShortMessage"
@@ -423,11 +423,11 @@ export const getGaugeVisualization = ({
     }
 
     const warnings = [];
-    if (minValue) {
+    if (typeof minValue === 'number') {
       if (minValue > metricValue) {
         warnings.push([
           <FormattedMessage
-            id="xpack.lens.gaugeVisualization.minValueBiggerMetricShortMessage"
+            id="xpack.lens.gaugeVisualization.minValueGreaterMetricShortMessage"
             defaultMessage="Minimum value is greater than metric value."
           />,
         ]);
@@ -435,18 +435,18 @@ export const getGaugeVisualization = ({
       if (minValue > goalValue) {
         warnings.push([
           <FormattedMessage
-            id="xpack.lens.gaugeVisualization.goalValueBiggerMaximumShortMessage"
+            id="xpack.lens.gaugeVisualization.goalValueGreaterMaximumShortMessage"
             defaultMessage="Minimum value is greater than goal value."
           />,
         ]);
       }
     }
 
-    if (maxValue) {
+    if (typeof maxValue === 'number') {
       if (metricValue > maxValue) {
         warnings.push([
           <FormattedMessage
-            id="xpack.lens.gaugeVisualization.minValueBiggerMaximumShortMessage"
+            id="xpack.lens.gaugeVisualization.metricValueGreaterMaximumShortMessage"
             defaultMessage="Metric value is greater than maximum value."
           />,
         ]);
@@ -454,16 +454,16 @@ export const getGaugeVisualization = ({
       if (minValue > maxValue) {
         warnings.push([
           <FormattedMessage
-            id="xpack.lens.gaugeVisualization.minValueBiggerMaximumShortMessage"
+            id="xpack.lens.gaugeVisualization.minValueGreaterMaximumShortMessage"
             defaultMessage="Minimum value is greater than maximum value."
           />,
         ]);
       }
 
-      if (goalValue && goalValue > maxValue) {
+      if (typeof goalValue === 'number' && goalValue > maxValue) {
         warnings.push([
           <FormattedMessage
-            id="xpack.lens.gaugeVisualization.goalValueBiggerMaximumShortMessage"
+            id="xpack.lens.gaugeVisualization.goalValueGreaterMaximumShortMessage"
             defaultMessage="Goal value is greater than maximum value."
           />,
         ]);
