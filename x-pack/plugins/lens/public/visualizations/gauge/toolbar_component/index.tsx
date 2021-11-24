@@ -56,7 +56,7 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
             >
               <VisLabel
                 header={i18n.translate('xpack.lens.label.gauge.title.header', {
-                  defaultMessage: 'title',
+                  defaultMessage: 'Title',
                 })}
                 label={inputValue.visTitle || ''}
                 mode={inputValue.visTitleMode}

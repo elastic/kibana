@@ -416,7 +416,7 @@ export const getGaugeVisualization = ({
     if (minValue != null && minValue === maxValue) {
       return [
         <FormattedMessage
-          id="xpack.lens.gaugeVisualization.minValueBiggerMetricShortMessage"
+          id="xpack.lens.gaugeVisualization.minValueEqualMaxShortMessage"
           defaultMessage="Minimum value equals maximum value. Cannot render chart"
         />,
       ];

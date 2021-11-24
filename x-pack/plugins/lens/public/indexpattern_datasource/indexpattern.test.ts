@@ -1250,6 +1250,7 @@ describe('IndexPattern Data Source', () => {
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,
+          isStaticValue: false,
         } as Operation);
       });
 
