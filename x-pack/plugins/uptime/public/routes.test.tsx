@@ -17,30 +17,6 @@ import '@testing-library/jest-dom';
 
 import { PageRouter } from './routes';
 
-jest.mock('../../../../src/plugins/kibana_react/public', () => ({
-  ...jest.requireActual('../../../../src/plugins/kibana_react/public'),
-  useKibana: () => ({
-    services: {
-      observability: {
-        navigation: {
-          PageTemplate: ({
-            children,
-            pageHeader,
-          }: {
-            children: React.ReactNode;
-            pageHeader: { pageTitle: React.ReactNode };
-          }) => (
-            <div>
-              <h1>{pageHeader.pageTitle}</h1>
-              {children}
-            </div>
-          ),
-        },
-      },
-    },
-  }),
-}));
-
 describe('PageRouter', () => {
   beforeEach(() => {
     jest.spyOn(telemetry, 'useUptimeTelemetry').mockImplementation(() => {});

@@ -181,7 +181,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
         rightSideItems: [],
       },
     },
-    ...(config?.ui?.unsafe?.monitorManagement?.enabled
+    ...(config.ui?.unsafe?.monitorManagement?.enabled
       ? [
           {
             title: i18n.translate('xpack.uptime.monitorRoute.title', {
@@ -236,7 +236,7 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
   return null;
 };
 
-export const PageRouter: FC<PageRouterProps> = ({ config }) => {
+export const PageRouter: FC<PageRouterProps> = ({ config = {} }) => {
   const routes = getRoutes(config);
   const { addInspectorRequest } = useInspectorContext();
 
