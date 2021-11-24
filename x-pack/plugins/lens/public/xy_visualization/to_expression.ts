@@ -12,7 +12,7 @@ import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
-import { layerTypes } from '../../common';
+import { layerTypes, CustomPaletteParams } from '../../common';
 import { hasIcon } from './xy_config_panel/reference_line_panel';
 import { defaultReferenceLineColor } from './color_assignment';
 
@@ -108,6 +108,16 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
     default:
       return ScaleType.Linear;
   }
+}
+
+function computePaletteParams(params: CustomPaletteParams) {
+  return {
+    ...params,
+    // rewrite colors and stops as two distinct arguments
+    colors: (params?.colorTerms || []).map(({ color }) => color),
+    terms: params?.name === 'custom' ? (params?.colorTerms || []).map(({ term }) => term) : [],
+    reverse: false, // managed at UI level
+  };
 }
 
 export const buildExpression = (
@@ -375,7 +385,11 @@ export const buildExpression = (
                                     default: [
                                       paletteService
                                         .get(layer.palette.name)
-                                        .toExpression(layer.palette.params),
+                                        .toExpression(
+                                          computePaletteParams(
+                                            (layer.palette?.params || {}) as CustomPaletteParams
+                                          )
+                                        ),
                                     ],
                                   },
                                 },

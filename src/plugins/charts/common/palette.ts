@@ -16,6 +16,7 @@ export interface CustomPaletteArguments {
   gradient: boolean;
   reverse?: boolean;
   stop?: number[];
+  term?: string[];
   range?: 'number' | 'percent';
   rangeMin?: number;
   rangeMax?: number;
@@ -26,6 +27,7 @@ export interface CustomPaletteState {
   colors: string[];
   gradient: boolean;
   stops: number[];
+  terms?: string[];
   range: 'number' | 'percent';
   rangeMin: number;
   rangeMax: number;
@@ -104,6 +106,15 @@ export function palette(): ExpressionFunctionDefinition<
         }),
         required: false,
       },
+      term: {
+        multi: true,
+        types: ['string'],
+        help: i18n.translate('charts.functions.palette.args.termHelpText', {
+          defaultMessage:
+            'The palette color terns. When used, it must be associated with each color.',
+        }),
+        required: false,
+      },
       continuity: {
         types: ['string'],
         options: ['above', 'below', 'all', 'none'],
@@ -142,11 +153,16 @@ export function palette(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const { color, continuity, reverse, gradient, stop, range, rangeMin, rangeMax } = args;
+      const { color, continuity, reverse, gradient, stop, range, rangeMin, rangeMax, term } = args;
       const colors = ([] as string[]).concat(color || defaultCustomColors);
       const stops = ([] as number[]).concat(stop || []);
+      const terms = ([] as string[]).concat(term || []);
       if (stops.length > 0 && colors.length !== stops.length) {
         throw Error('When stop is used, each color must have an associated stop value.');
+      }
+
+      if (terms.length > 0 && colors.length !== terms.length) {
+        throw Error('When term is used, each color must have an associated term value.');
       }
 
       // If the user has defined stops, choose rangeMin/Max, provided by user or range,
@@ -165,6 +181,7 @@ export function palette(): ExpressionFunctionDefinition<
         name: 'custom',
         params: {
           colors: reverse ? colors.reverse() : colors,
+          terms,
           stops,
           range: range ?? 'percent',
           gradient,

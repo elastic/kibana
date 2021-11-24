@@ -41,6 +41,15 @@ function getCustomPaletteConfig(
       };
     }
   }
+  if (activePalette?.params?.colorTerms) {
+    return {
+      value: id,
+      title,
+      type: FIXED_PROGRESSION,
+      palette: (activePalette?.params?.colorTerms || []).map(({ color }) => color),
+      'data-test-subj': `custom-palette`,
+    };
+  }
   // if not possible just show some text
   if (!activePalette?.params?.stops) {
     return { value: id, title, type: 'text' as const, 'data-test-subj': `custom-palette` };

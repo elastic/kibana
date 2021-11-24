@@ -172,6 +172,7 @@ function buildCustomPalette(): PaletteDefinition {
         gradient: boolean;
         /** Stops values mark where colors end (non-inclusive value) */
         stops: number[];
+        terms: string[];
         /** Important: specify rangeMin/rangeMax if custom stops are defined! */
         rangeMax: number;
         rangeMin: number;
@@ -205,11 +206,19 @@ function buildCustomPalette(): PaletteDefinition {
         gradient,
         stepped,
         stops,
-      }: { colors: string[]; gradient: boolean; stepped: boolean; stops: number[] } = {
+        terms,
+      }: {
+        colors: string[];
+        gradient: boolean;
+        stepped: boolean;
+        stops: number[];
+        terms: string[];
+      } = {
         colors: [],
         gradient: false,
         stepped: false,
         stops: [],
+        terms: [],
       }
     ) => {
       if (stepped) {
@@ -225,6 +234,7 @@ function buildCustomPalette(): PaletteDefinition {
       colors,
       gradient,
       stops = [],
+      terms = [],
       rangeMax,
       rangeMin,
       rangeType = 'percent',
@@ -234,6 +244,7 @@ function buildCustomPalette(): PaletteDefinition {
       colors: string[];
       gradient: boolean;
       stops: number[];
+      terms: string[];
       rangeMax?: number;
       rangeMin?: number;
       rangeType: 'percent' | 'number';
@@ -251,6 +262,7 @@ function buildCustomPalette(): PaletteDefinition {
             reverse: [reverse],
             continuity: [continuity],
             stop: stops,
+            term: terms,
             range: [rangeType],
             rangeMax: rangeMax == null ? [] : [rangeMax],
             rangeMin: rangeMin == null ? [] : [rangeMin],

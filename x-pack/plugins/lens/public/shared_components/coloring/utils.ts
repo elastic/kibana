@@ -17,7 +17,7 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from './constants';
-import type { CustomPaletteParams, ColorStop } from '../../../common';
+import type { CustomPaletteParams, ColorStop, ColorTerm } from '../../../common';
 
 /**
  * Some name conventions here:
@@ -169,6 +169,16 @@ export function reversePalette(paletteColorRepresentation: ColorStop[] = []) {
     .reverse();
 }
 
+export function reverseTermsPalette(paletteColorRepresentation: ColorTerm[] = []) {
+  const terms = paletteColorRepresentation.map(({ term }) => term);
+  return paletteColorRepresentation
+    .map(({ color }, i) => ({
+      color,
+      term: terms[paletteColorRepresentation.length - i - 1],
+    }))
+    .reverse();
+}
+
 export function mergePaletteParams(
   activePalette: PaletteOutput<CustomPaletteParams>,
   newParams: CustomPaletteParams
@@ -221,6 +231,33 @@ export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[]
     step = diffToMax > 0 ? diffToMax : 1;
   }
   return step;
+}
+
+export function getSwitchToCustomParamsForTermsPalette(
+  palettes: PaletteRegistry,
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  newParams: CustomPaletteParams
+) {
+  // if it's already a custom palette just return the params
+  if (activePalette?.params?.name === CUSTOM_PALETTE) {
+    return mergePaletteParams(activePalette, {
+      ...newParams,
+    });
+  }
+  // prepare everything to switch to custom palette
+  const newPaletteParams = {
+    ...activePalette.params,
+    ...newParams,
+    name: CUSTOM_PALETTE,
+  };
+
+  return mergePaletteParams(
+    { name: CUSTOM_PALETTE, type: 'palette' },
+    {
+      ...newPaletteParams,
+      colorTerms: newParams.colorTerms,
+    }
+  );
 }
 
 export function getSwitchToCustomParams(

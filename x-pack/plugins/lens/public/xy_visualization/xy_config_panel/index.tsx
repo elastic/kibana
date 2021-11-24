@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import {
@@ -14,8 +14,10 @@ import {
   EuiFlexItem,
   EuiFormRow,
   htmlIdGenerator,
+  EuiButtonEmpty,
+  EuiColorPaletteDisplay,
 } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry, PaletteOutput } from 'src/plugins/charts/public';
 import type {
   VisualizationLayerWidgetProps,
   VisualizationToolbarProps,
@@ -23,7 +25,7 @@ import type {
   FramePublicAPI,
 } from '../../types';
 import { State, visualizationTypes, XYState } from '../types';
-import { FormatFactory, layerTypes } from '../../../common';
+import { FormatFactory, layerTypes, CustomPaletteParams } from '../../../common';
 import {
   SeriesType,
   YAxisMode,
@@ -32,14 +34,21 @@ import {
 } from '../../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { LegendSettingsPopover } from '../../shared_components';
+import {
+  LegendSettingsPopover,
+  PalettePanelContainer,
+  CustomizableTermsPalette,
+  FIXED_PROGRESSION,
+  DEFAULT_COLOR_STEPS,
+  CUSTOM_PALETTE,
+} from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { getAxesConfiguration, GroupsConfiguration } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
-import { PalettePicker, TooltipWrapper } from '../../shared_components';
+import { TooltipWrapper } from '../../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -561,32 +570,106 @@ export const XyToolbar = memo(function XyToolbar(
 
 export const idPrefix = htmlIdGenerator()();
 
+const getPaletteDisplayConfig = (
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  paletteService: PaletteRegistry
+) => {
+  const currentPalette = paletteService.get(activePalette.name);
+  const colors =
+    activePalette.name !== CUSTOM_PALETTE
+      ? currentPalette.getCategoricalColors(
+          activePalette?.params?.steps || DEFAULT_COLOR_STEPS,
+          activePalette?.params
+        )
+      : (activePalette?.params?.colorTerms || []).map(({ color }) => color);
+  return activePalette.params?.reverse ? colors.reverse() : colors;
+};
+
 export function DimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
   }
 ) {
-  const { state, setState, layerId, accessor } = props;
+  const { state, setState, layerId, accessor, activeData } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
   const isHorizontal = isHorizontalChart(state.layers);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const axisMode =
     (layer.yConfig &&
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
+  const activePalette = (layer.palette as PaletteOutput<CustomPaletteParams>) ?? {
+    name: 'default',
+    type: 'palette',
+  };
+  // move to utils
+  const splitAccessor = layer.splitAccessor;
+  const terms: string[] = [];
+  if (splitAccessor) {
+    activeData?.[layerId].rows.map((row) => {
+      const column = activeData?.[layerId].columns.find((col) => col.id === splitAccessor);
+      const formattedValue = column
+        ? props.formatFactory(column.meta.params).convert(row[splitAccessor])
+        : row[splitAccessor];
+      if (!terms.includes(formattedValue)) {
+        terms.push(formattedValue);
+      }
+    });
+  }
 
   if (props.groupId === 'breakdown') {
     return (
-      <>
-        <PalettePicker
-          palettes={props.paletteService}
-          activePalette={layer.palette}
-          setPalette={(newPalette) => {
-            setState(updateLayer(state, { ...layer, palette: newPalette }, index));
-          }}
-        />
-      </>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        className="lnsDynamicColoringClickable"
+      >
+        <EuiFlexItem>
+          <EuiColorPaletteDisplay
+            data-test-subj="lnsXY_dynamicColoring_palette"
+            palette={getPaletteDisplayConfig(activePalette, props.paletteService)}
+            type={FIXED_PROGRESSION}
+            onClick={() => {
+              setIsPaletteOpen(!isPaletteOpen);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="lnsXY_dynamicColoring_trigger"
+            aria-label={i18n.translate('xpack.lens.paletteXYGradient.customizeLong', {
+              defaultMessage: 'Edit palette',
+            })}
+            iconType="controlsHorizontal"
+            onClick={() => {
+              setIsPaletteOpen(!isPaletteOpen);
+            }}
+            size="xs"
+            flush="both"
+          >
+            {i18n.translate('xpack.lens.paletteXYGradient.customize', {
+              defaultMessage: 'Edit',
+            })}
+          </EuiButtonEmpty>
+          <PalettePanelContainer
+            siblingRef={props.panelRef}
+            isOpen={isPaletteOpen}
+            handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+          >
+            <CustomizableTermsPalette
+              palettes={props.paletteService}
+              activePalette={activePalette}
+              terms={terms}
+              setPalette={(newPalette) => {
+                setState(updateLayer(state, { ...layer, palette: newPalette }, index));
+              }}
+            />
+          </PalettePanelContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

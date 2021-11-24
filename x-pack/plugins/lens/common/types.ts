@@ -46,6 +46,11 @@ export interface ColorStop {
   stop: number;
 }
 
+export interface ColorTerm {
+  color: string;
+  term: string;
+}
+
 export interface CustomPaletteParams {
   name?: string;
   reverse?: boolean;
@@ -56,6 +61,7 @@ export interface CustomPaletteParams {
   rangeMax?: number;
   stops?: ColorStop[];
   colorStops?: ColorStop[];
+  colorTerms?: ColorTerm[];
   steps?: number;
 }
 export type CustomPaletteParamsConfig = CustomPaletteParams & {

@@ -453,6 +453,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   accessor: string;
   setState(newState: T | ((currState: T) => T)): void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
+  activeData?: Record<string, Datatable>;
 };
 
 export interface AccessorConfig {

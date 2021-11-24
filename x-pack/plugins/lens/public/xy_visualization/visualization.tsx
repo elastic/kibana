@@ -420,6 +420,13 @@ export const getXyVisualization = ({
         }
       ).length < 2;
 
+    const palette =
+      layer.palette?.name !== 'custom'
+        ? paletteService
+            .get(layer.palette?.name || 'default')
+            .getCategoricalColors(10, layer.palette?.params)
+        : (layer.palette?.params?.colorTerms || []).map(({ color }) => color);
+
     return {
       groups: [
         {
@@ -450,9 +457,7 @@ export const getXyVisualization = ({
                 {
                   columnId: layer.splitAccessor,
                   triggerIcon: 'colorBy',
-                  palette: paletteService
-                    .get(layer.palette?.name || 'default')
-                    .getCategoricalColors(10, layer.palette?.params),
+                  palette,
                 },
               ]
             : [],
