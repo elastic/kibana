@@ -9,6 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CrawlDetailLogic } from '../../crawl_detail_logic';
@@ -34,6 +35,7 @@ export const CrawlDetailsPreview: React.FC = () => {
         iconType="globe"
         items={crawlRequest.crawlConfig.domainAllowlist}
       />
+      <EuiSpacer size="s" />
       <AccordionList
         title={i18n.translate(
           'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.seedUrlsTitle',
@@ -44,6 +46,7 @@ export const CrawlDetailsPreview: React.FC = () => {
         iconType="crosshairs"
         items={crawlRequest.crawlConfig.seedUrls}
       />
+      <EuiSpacer size="s" />
       <AccordionList
         title={i18n.translate(
           'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.sitemapUrlsTitle',
