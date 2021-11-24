@@ -26,8 +26,6 @@ const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
   }
 
   .group-entries {
-    margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
-
     & > * {
       margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
 
@@ -96,7 +94,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
             ))}
           </div>
           <div>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiButton
               size="s"
               iconType="plusInCircle"
