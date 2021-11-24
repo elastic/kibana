@@ -192,25 +192,21 @@ export const getHostEndpoint = async (
   const logger = endpointContext.logFactory.get('metadata');
 
   try {
-    const agentService = endpointContext.service.getAgentService();
+    const fleetServices = endpointContext.service.getScopedFleetServices(request);
+    const endpointMetadataService = endpointContext.service.getEndpointMetadataService();
 
-    if (!agentService) {
-      throw new Error('agentService not available');
-    }
-
-    const endpointData = await endpointContext.service
-      .getEndpointMetadataService()
+    const endpointData = await endpointMetadataService
       // Using `internalUser` ES client below due to the fact that Fleet data has been moved to
       // system indices (`.fleet*`). Because this is a readonly action, this should be ok to do
       // here until proper RBOC controls are implemented
-      .getEnrichedHostMetadata(esClient.asInternalUser, request, id);
+      .getEnrichedHostMetadata(esClient.asInternalUser, fleetServices, id);
 
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
 
     const pendingActions = fleetAgentId
       ? getPendingActionCounts(
           esClient.asInternalUser,
-          endpointContext.service.getEndpointMetadataService(),
+          endpointMetadataService,
           [fleetAgentId],
           endpointContext.experimentalFeatures.pendingActionResponsesWithAck
         )
