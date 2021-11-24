@@ -97,7 +97,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     <EuiBadge
       iconType="bell"
       color={inSetupMode ? 'default' : 'danger'}
-      data-test-subject="alertsBadge"
+      data-test-subj="alertsBadge"
       onClickAriaLabel={
         inSetupMode ? numberOfRulesLabel(alertCount) : numberOfAlertsLabel(alertCount)
       }

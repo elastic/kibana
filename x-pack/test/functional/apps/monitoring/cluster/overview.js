@@ -11,7 +11,7 @@ import { getLifecycleMethods } from '../_get_lifecycle_methods';
 export default function ({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['monitoring', 'common']);
+  const PageObjects = getPageObjects(['monitoring', 'common', 'timePicker']);
   const supertest = getService('supertest');
   const browser = getService('browser');
   const setupMode = getService('monitoringSetupMode');
@@ -201,10 +201,12 @@ export default function ({ getService, getPageObjects }) {
           expect(await testSubjects.exists('alertsCreatedToast', { timeout: 10000 })).to.be(true);
         });
 
-        it.skip('should show badges when entering setup mode', async () => {
+        it('should show badges when entering setup mode', async () => {
           await setupMode.clickSetupModeBtn();
-          await PageObjects.common.sleep(50000);
+          await PageObjects.timePicker.startAutoRefresh(1);
+
           expect(await testSubjects.exists('alertsBadge')).to.be(true);
+          await PageObjects.timePicker.pauseAutoRefresh();
         });
       });
     });
