@@ -24,7 +24,6 @@ import { AgentKeysTable } from './agent_keys_table';
 
 const INITIAL_DATA = {
   areApiKeysEnabled: false,
-  isAdmin: false,
   canManage: false,
 };
 
@@ -57,7 +56,7 @@ export function AgentKeys() {
 
 function AgentKeysContent() {
   const {
-    data: { areApiKeysEnabled, isAdmin, canManage } = INITIAL_DATA,
+    data: { areApiKeysEnabled, canManage } = INITIAL_DATA,
     status: privilegesStatus,
   } = useFetcher(
     (callApmApi) => {
