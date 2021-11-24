@@ -67,8 +67,7 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
             ...req.body,
             indexPatternsService: await data.indexPatterns.indexPatternsServiceFactory(
               savedObjectsClient,
-              esClient,
-              req
+              esClient
             ),
             context,
             includeFrozen,
