@@ -15,12 +15,14 @@ import type { EsAssetReference, InstallablePackage } from '../../../../../common
 import { getInstallation } from '../../packages';
 import { appContextService } from '../../../app_context';
 
+import { getESAssetMetadata } from '../meta';
+
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
 
 interface TransformInstallation {
   installationName: string;
-  content: string;
+  content: any;
 }
 
 export const installTransform = async (
@@ -71,13 +73,16 @@ export const installTransform = async (
     await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, transformRefs);
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
+      const content = JSON.parse(getAsset(path).toString('utf-8'));
+      content._meta = getESAssetMetadata({ packageName: installablePackage.name });
+
       return {
         installationName: getTransformNameForInstallation(
           installablePackage,
           path,
           installNameSuffix
         ),
-        content: getAsset(path).toString('utf-8'),
+        content,
       };
     });
 
@@ -123,7 +128,6 @@ async function handleTransformInstall({
     await esClient.transform.putTransform({
       transform_id: transform.installationName,
       defer_validation: true,
-      // @ts-expect-error expect object, but given a string
       body: transform.content,
     });
   } catch (err) {
