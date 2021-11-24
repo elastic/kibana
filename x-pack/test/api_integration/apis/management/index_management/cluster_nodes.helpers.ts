@@ -7,7 +7,7 @@
 
 import { API_BASE_PATH } from './constants';
 
-export const registerHelpers = ({ supertest }) => {
+export const registerHelpers = ({ supertest }: { supertest: any }) => {
   const getNodesPlugins = () => supertest.get(`${API_BASE_PATH}/nodes/plugins`);
 
   return {

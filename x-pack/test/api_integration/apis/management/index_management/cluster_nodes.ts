@@ -7,9 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { registerHelpers } from './cluster_nodes.helpers';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const { getNodesPlugins } = registerHelpers({ supertest });
