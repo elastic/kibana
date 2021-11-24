@@ -10,6 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form } from '../../shared_imports';
 import { GenericObject, MappingsConfiguration } from '../../types';
+import { MapperSizePluginId } from '../../constants';
 import { useDispatch } from '../../mappings_state_context';
 import { DynamicMappingSection } from './dynamic_mapping_section';
 import { SourceFieldSection } from './source_field_section';
@@ -109,7 +110,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
   const { subscribe, submit, reset, getFormData } = form;
 
   const isMapperSizeSectionVisible =
-    value?._size !== undefined || esNodesPlugins.includes('mapper-size');
+    value?._size !== undefined || esNodesPlugins.includes(MapperSizePluginId);
 
   useEffect(() => {
     const subscription = subscribe(({ data, isValid, validate }) => {

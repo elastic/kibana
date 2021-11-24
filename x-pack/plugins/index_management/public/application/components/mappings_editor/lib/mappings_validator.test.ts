@@ -7,6 +7,7 @@
 
 import { isPlainObject } from 'lodash';
 
+import { MapperSizePluginId } from '../constants';
 import { validateMappings, validateProperties } from './mappings_validator';
 
 describe('Mappings configuration validator', () => {
@@ -38,7 +39,7 @@ describe('Mappings configuration validator', () => {
       },
     };
 
-    const { errors } = validateMappings(mappings);
+    const { errors } = validateMappings(mappings, [MapperSizePluginId]);
     expect(errors).toBe(undefined);
   });
 
@@ -76,9 +77,14 @@ describe('Mappings configuration validator', () => {
         excludes: ['abc'],
       },
       properties: 'abc',
+      // We add the Mapper Size plugin "_size" param but don't provide
+      // the plugin when calling validateMappings(..., <listOfNodesPlugins>)
+      _size: {
+        enabled: true,
+      },
     };
 
-    const { value, errors } = validateMappings(mappings);
+    const { value, errors } = validateMappings(mappings, []);
 
     expect(value).toEqual({
       dynamic: true,
@@ -91,6 +97,7 @@ describe('Mappings configuration validator', () => {
       { code: 'ERR_CONFIG', configName: '_source' },
       { code: 'ERR_CONFIG', configName: 'dynamic_date_formats' },
       { code: 'ERR_CONFIG', configName: 'numeric_detection' },
+      { code: 'ERR_CONFIG', configName: '_size' },
     ]);
   });
 });

@@ -83,7 +83,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                <LoadMappingsFromJsonButton onJson={onJsonLoaded} />
+                <LoadMappingsFromJsonButton onJson={onJsonLoaded} esNodesPlugins={esNodesPlugins} />
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>

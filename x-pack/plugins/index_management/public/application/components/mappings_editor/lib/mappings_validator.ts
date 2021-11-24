@@ -12,7 +12,7 @@ import { toArray } from 'fp-ts/lib/Set';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
 
 import { errorReporter } from './error_reporter';
-import { ALL_DATA_TYPES, PARAMETERS_DEFINITION } from '../constants';
+import { ALL_DATA_TYPES, PARAMETERS_DEFINITION, MapperSizePluginId } from '../constants';
 import { FieldMeta } from '../types';
 import { getFieldMeta } from './utils';
 
@@ -285,7 +285,29 @@ export const validateMappingsConfiguration = (
   return { value: copyOfMappingsConfig, errors };
 };
 
-export const validateMappings = (mappings: unknown = {}): MappingsValidatorResponse => {
+const validatePluginsParameters = (
+  mappingsConfiguration: GenericObject,
+  esNodesPlugins: string[]
+): { value: any; errors: MappingsValidationError[] } => {
+  const copyOfMappingsConfig = { ...mappingsConfiguration };
+  const errors: MappingsValidationError[] = [];
+
+  // Mapper size plugin parameters
+  if ('_size' in copyOfMappingsConfig && !esNodesPlugins.includes(MapperSizePluginId)) {
+    errors.push({
+      code: 'ERR_CONFIG',
+      configName: '_size',
+    });
+    delete copyOfMappingsConfig._size;
+  }
+
+  return { value: copyOfMappingsConfig, errors };
+};
+
+export const validateMappings = (
+  mappings: unknown = {},
+  esNodesPlugins: string[] = []
+): MappingsValidatorResponse => {
   if (!isPlainObject(mappings)) {
     return { value: {} };
   }
@@ -296,15 +318,18 @@ export const validateMappings = (mappings: unknown = {}): MappingsValidatorRespo
     ...mappingsConfiguration
   } = mappings as GenericObject;
 
-  const { value: parsedConfiguration, errors: configurationErrors } =
+  const { value: parsedConfiguration1, errors: configurationErrors } =
     validateMappingsConfiguration(mappingsConfiguration);
+  const { value: parsedConfiguration2, errors: pluginsErrors } = validatePluginsParameters(
+    parsedConfiguration1,
+    esNodesPlugins
+  );
   const { value: parsedProperties, errors: propertiesErrors } = validateProperties(properties);
-
-  const errors = [...configurationErrors, ...propertiesErrors];
+  const errors = [...configurationErrors, ...propertiesErrors, ...pluginsErrors];
 
   return {
     value: {
-      ...parsedConfiguration,
+      ...parsedConfiguration2,
       properties: parsedProperties,
       dynamic_templates: dynamicTemplates ?? [],
     },
