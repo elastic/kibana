@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ReactQueryDevtools } from 'react-query/devtools';
 import React from 'react';
 import { MANAGEMENT_PATH } from '../../common/constants';
 import { ManagementContainer } from './pages';
@@ -17,6 +18,10 @@ import { CurrentLicense } from '../common/components/current_license';
 const ManagementRoutes = () => (
   <CurrentLicense>
     <ManagementContainer />
+    <ReactQueryDevtools
+      initialIsOpen={false}
+      toggleButtonProps={{ style: { width: '25px', height: '25px', left: '1rem', bottom: '1rem' } }}
+    />
   </CurrentLicense>
 );
 

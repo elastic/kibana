@@ -18,6 +18,7 @@ import { ContextMenuItemNavByRouterProps } from '../../../../components/context_
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
+import { useIsolationPrivileges } from '../../../../../common/hooks/endpoint/use_isolate_privileges';
 
 /**
  * Returns a list (array) of actions for an individual endpoint
@@ -26,6 +27,8 @@ import { isIsolationSupported } from '../../../../../../common/endpoint/service/
 export const useEndpointActionItems = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): ContextMenuItemNavByRouterProps[] => {
+  const { isIsolationAllowed, isUnisolationAllowed } = useIsolationPrivileges();
+
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
@@ -65,6 +68,7 @@ export const useEndpointActionItems = (
         // Un-isolate is always available to users regardless of license level
         isolationActions.push({
           'data-test-subj': 'unIsolateLink',
+          disabled: !isUnisolationAllowed,
           icon: 'logoSecurity',
           key: 'unIsolateHost',
           navigateAppId: APP_UI_ID,
@@ -83,6 +87,7 @@ export const useEndpointActionItems = (
         // For Platinum++ licenses, users also have ability to isolate
         isolationActions.push({
           'data-test-subj': 'isolateLink',
+          disabled: !isIsolationAllowed,
           icon: 'logoSecurity',
           key: 'isolateHost',
           navigateAppId: APP_UI_ID,
@@ -192,5 +197,13 @@ export const useEndpointActionItems = (
     }
 
     return [];
-  }, [allCurrentUrlParams, endpointMetadata, fleetAgentPolicies, getAppUrl, isPlatinumPlus]);
+  }, [
+    allCurrentUrlParams,
+    endpointMetadata,
+    fleetAgentPolicies,
+    getAppUrl,
+    isPlatinumPlus,
+    isIsolationAllowed,
+    isUnisolationAllowed,
+  ]);
 };

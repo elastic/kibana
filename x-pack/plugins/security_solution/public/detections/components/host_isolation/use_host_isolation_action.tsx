@@ -62,7 +62,7 @@ export const useHostIsolationAction = ({
     capabilities,
   });
 
-  const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
+  const { isIsolationAllowed } = useIsolationPrivileges();
 
   const isolateHostHandler = useCallback(() => {
     closePopover();

@@ -5,36 +5,46 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-import { userCanIsolate } from '../../../../common/endpoint/actions';
+import { useQuery } from 'react-query';
 import { useKibana } from '../../lib/kibana';
 import { useLicense } from '../use_license';
+import { AuthenticatedUser } from '../../../../../security/common';
 
-interface IsolationPriviledgesStatus {
-  isLoading: boolean;
-  isAllowed: boolean;
+interface IsolationPrivilegesStatus {
+  isUnisolationAllowed: boolean;
+  isIsolationAllowed: boolean;
+  isViewActivityLogAllowed: boolean;
 }
 
 /*
  * Host isolation requires superuser privileges and at least a platinum license
  */
-export const useIsolationPrivileges = (): IsolationPriviledgesStatus => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [canIsolate, setCanIsolate] = useState(false);
-
+export const useIsolationPrivileges = (): IsolationPrivilegesStatus => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const services = useKibana().services;
+  const pluginUserPrivileges = services.application.capabilities.securitySolutionEndpoint;
+  const hasIsolationPrivilege = !!pluginUserPrivileges.writeIsolationActions;
 
-  useEffect(() => {
-    setIsLoading(true);
-    const user = services.security.authc.getCurrentUser();
-    if (user) {
-      user.then((authenticatedUser) => {
-        setCanIsolate(userCanIsolate(authenticatedUser.roles));
-        setIsLoading(false);
-      });
+  const { data: user } = useQuery<AuthenticatedUser>(
+    'authenticatedUserInfo',
+    () => services.security.authc.getCurrentUser(),
+    {
+      refetchOnMount: true,
     }
-  }, [services.security.authc]);
+  );
+  if (typeof user !== 'undefined') {
+    // if logged in user data exists
+    // verify if also has write privileges for isolation/unisolation
+    return {
+      isUnisolationAllowed: hasIsolationPrivilege,
+      isIsolationAllowed: hasIsolationPrivilege && isPlatinumPlus, // also check if has platinumPlus license
+      isViewActivityLogAllowed: !!pluginUserPrivileges.readIsolationActionsAndResponses,
+    };
+  }
 
-  return { isLoading, isAllowed: canIsolate && isPlatinumPlus ? true : false };
+  return {
+    isUnisolationAllowed: false,
+    isIsolationAllowed: false,
+    isViewActivityLogAllowed: false,
+  };
 };

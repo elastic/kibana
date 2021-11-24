@@ -19,7 +19,7 @@ import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react
 import { useKibana } from '../../../common/lib/kibana';
 
 jest.mock('../../../common/hooks/endpoint/use_isolate_privileges', () => ({
-  useIsolationPrivileges: jest.fn().mockReturnValue({ isAllowed: true }),
+  useIsolationPrivileges: jest.fn().mockReturnValue({ isIsolationAllowed: true }),
 }));
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
