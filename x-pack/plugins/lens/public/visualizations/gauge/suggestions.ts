@@ -61,7 +61,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',
     }),
-    previewIcon: LensIconChartGaugeHorizontal,
+    previewIcon: 'empty',
     score: 0.1,
     hide: !isShapeChange, // only display for gauges for beta
   };
