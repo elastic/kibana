@@ -26,16 +26,18 @@ export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_meta
 };
 
 export function transformElasticsearchRoleToRole(
-  features: KibanaFeature[],
   elasticsearchRole: Omit<ElasticsearchRole, 'name'>,
   name: string,
-  application: string
+  application: string,
+  features?: KibanaFeature[]
 ): Role {
-  const kibanaTransformResult = transformRoleApplicationsToKibanaPrivileges(
-    features,
-    elasticsearchRole.applications,
-    application
-  );
+  const kibanaTransformResult = features
+    ? transformRoleApplicationsToKibanaPrivileges(
+        elasticsearchRole.applications,
+        application,
+        features
+      )
+    : transformRoleApplicationsToKibanaPrivileges(elasticsearchRole.applications, application);
 
   return {
     name,
@@ -56,9 +58,9 @@ export function transformElasticsearchRoleToRole(
 }
 
 function transformRoleApplicationsToKibanaPrivileges(
-  features: KibanaFeature[],
   roleApplications: ElasticsearchRole['applications'],
-  application: string
+  application: string,
+  features?: KibanaFeature[]
 ) {
   const roleKibanaApplications = roleApplications.filter(
     (roleApplication) =>
@@ -190,6 +192,7 @@ function transformRoleApplicationsToKibanaPrivileges(
 
   // if a feature privilege requires all spaces, but is assigned to other spaces, we won't transform these
   if (
+    features &&
     roleKibanaApplications.some(
       (entry) =>
         !entry.resources.includes(GLOBAL_RESOURCE) &&
@@ -211,6 +214,7 @@ function transformRoleApplicationsToKibanaPrivileges(
 
   // if a feature privilege has been disabled we won't transform these
   if (
+    features &&
     roleKibanaApplications.some((entry) =>
       features.some((f) =>
         Object.values(f.privileges ?? {}).some((featurePrivilege) => featurePrivilege.disabled)

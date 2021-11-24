@@ -28,11 +28,11 @@ export function defineGetAllRolesRoutes({ router, authz, getFeatures }: RouteDef
           body: Object.entries(elasticsearchRoles)
             .map(([roleName, elasticsearchRole]) =>
               transformElasticsearchRoleToRole(
-                features,
                 // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
                 elasticsearchRole,
                 roleName,
-                authz.applicationName
+                authz.applicationName,
+                features
               )
             )
             .sort((roleA, roleB) => {
