@@ -9,7 +9,7 @@
 import type { Capabilities } from 'kibana/public';
 import type { IUiSettingsClient } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { ISearchSource, SearchSourceFields } from 'src/plugins/data/common';
+import type { Filter, ISearchSource, SearchSourceFields } from 'src/plugins/data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
 import type { SavedSearch, SortOrder } from '../services/saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';
@@ -26,12 +26,14 @@ export async function getSharingData(
   const { uiSettings: config, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
+  const existingFilter = searchSource.getField('filter');
 
   searchSource.setField(
     'sort',
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
   );
 
+  searchSource.removeField('filter');
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
@@ -58,7 +60,16 @@ export async function getSharingData(
         ? data.query.timefilter.timefilter.createFilter(index)
         : data.query.timefilter.timefilter.createRelativeFilter(index);
 
-      searchSource.setField('filter', [timeFilter, ...searchSource.getField('filter')]);
+      if (existingFilter && timeFilter) {
+        searchSource.setField(
+          'filter',
+          Array.isArray(existingFilter)
+            ? [timeFilter, ...existingFilter]
+            : ([timeFilter, existingFilter] as Filter[])
+        );
+      } else {
+        searchSource.setField('filter', timeFilter);
+      }
 
       return searchSource.getSerializedFields(true);
     },
