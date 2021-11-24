@@ -9,7 +9,8 @@ import './expression.scss';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -29,7 +30,8 @@ export type { MetricChartProps, MetricState, MetricConfig } from '../../common/e
 
 export const getMetricChartRenderer = (
   formatFactory: FormatFactory,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  theme: ThemeServiceStart
 ): ExpressionRenderDefinition<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
   displayName: 'Metric chart',
@@ -38,9 +40,11 @@ export const getMetricChartRenderer = (
   reuseDomNode: true,
   render: (domNode: Element, config: MetricChartProps, handlers: IInterpreterRenderHandlers) => {
     ReactDOM.render(
-      <I18nProvider>
-        <MetricChart {...config} formatFactory={formatFactory} uiSettings={uiSettings} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <MetricChart {...config} formatFactory={formatFactory} uiSettings={uiSettings} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode,
       () => {
         handlers.done();
