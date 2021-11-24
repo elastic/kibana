@@ -112,6 +112,12 @@ export type WrappedLifecycleRuleState<State extends AlertTypeState> = AlertTypeS
   wrapped: State | void;
   trackedAlerts: Record<string, TrackedLifecycleAlertState>;
 };
+type LifecycleRuleExecutorCreator = ReturnType<typeof createLifecycleExecutor>;
+
+export type LifecycleExecutor = (
+  logger: Logger,
+  ruleDataClient: PublicContract<IRuleDataClient>
+) => LifecycleRuleExecutorCreator;
 
 export const createLifecycleExecutor =
   (logger: Logger, ruleDataClient: PublicContract<IRuleDataClient>) =>
