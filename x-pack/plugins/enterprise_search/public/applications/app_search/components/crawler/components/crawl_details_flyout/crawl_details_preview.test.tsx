@@ -26,7 +26,7 @@ const MOCK_VALUES: Partial<CrawlDetailValues> = {
     type: CrawlType.Full,
     crawlConfig: {
       domainAllowlist: ['https://www.elastic.co', 'https://www.swiftype.com'],
-      seedUrls: [],
+      seedUrls: ['https://www.elastic.co/docs', 'https://www.swiftype.com/documentation'],
     },
   },
 };
@@ -55,6 +55,15 @@ describe('CrawlDetailsPreview', () => {
       expect(domainList.prop('items')).toEqual([
         'https://www.elastic.co',
         'https://www.swiftype.com',
+      ]);
+    });
+
+    it('contains a list of seed urls', () => {
+      const domainList = wrapper.find(AccordionList).at(1);
+
+      expect(domainList.prop('items')).toEqual([
+        'https://www.elastic.co/docs',
+        'https://www.swiftype.com/documentation',
       ]);
     });
   });

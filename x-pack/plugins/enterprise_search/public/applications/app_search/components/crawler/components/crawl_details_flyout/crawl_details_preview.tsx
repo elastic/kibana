@@ -34,6 +34,16 @@ export const CrawlDetailsPreview: React.FC = () => {
         iconType="globe"
         items={crawlRequest.crawlConfig.domainAllowlist}
       />
+      <AccordionList
+        title={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.seedUrlsTitle',
+          {
+            defaultMessage: 'Seed URLs',
+          }
+        )}
+        iconType="crosshairs"
+        items={crawlRequest.crawlConfig.seedUrls}
+      />
     </>
   );
 };
