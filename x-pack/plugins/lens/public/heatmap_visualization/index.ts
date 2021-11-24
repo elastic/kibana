@@ -19,7 +19,8 @@ export class HeatmapVisualization {
     editorFrame.registerVisualization(async () => {
       const { getHeatmapVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
-      return getHeatmapVisualization({ paletteService: palettes });
+
+      return getHeatmapVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }

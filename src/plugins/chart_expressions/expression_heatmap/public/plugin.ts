@@ -35,7 +35,7 @@ export class ExpressionHeatmapPlugin {
     expressions.registerFunction(heatmapFunction);
     expressions.registerFunction(heatmapLegendConfig);
     expressions.registerFunction(heatmapGridConfig);
-    expressions.registerRenderer(heatmapRenderer());
+    expressions.registerRenderer(heatmapRenderer({ theme: core.theme }));
   }
 
   public start(core: CoreStart, { fieldFormats }: ExpressionHeatmapPluginStart) {

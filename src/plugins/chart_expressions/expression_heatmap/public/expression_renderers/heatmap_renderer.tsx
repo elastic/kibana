@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { PersistedState } from '../../../../visualizations/public';
+import { ThemeServiceStart } from '../../../../../core/public';
+import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -23,7 +25,13 @@ import HeatmapComponent from '../components/heatmap_component';
 import './index.scss';
 const MemoizedChart = memo(HeatmapComponent);
 
-export const heatmapRenderer = (): ExpressionRenderDefinition<HeatmapExpressionProps> => ({
+interface ExpressioHeatmapRendererDependencies {
+  theme: ThemeServiceStart;
+}
+
+export const heatmapRenderer: (
+  deps: ExpressioHeatmapRendererDependencies
+) => ExpressionRenderDefinition<HeatmapExpressionProps> = ({ theme }) => ({
   name: EXPRESSION_HEATMAP_NAME,
   displayName: i18n.translate('expressionHeatmap.visualizationName', {
     defaultMessage: 'Heatmap',
@@ -42,18 +50,20 @@ export const heatmapRenderer = (): ExpressionRenderDefinition<HeatmapExpressionP
 
     const timeZone = getTimeZone(getUISettings());
     render(
-      <div className="heatmap-container" data-test-subj="heatmapChart">
-        <MemoizedChart
-          {...config}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-          timeZone={timeZone}
-          formatFactory={getFormatService().deserialize}
-          chartsThemeService={getThemeService()}
-          paletteService={getPaletteService()}
-          uiState={handlers.uiState as PersistedState}
-        />
-      </div>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <div className="heatmap-container" data-test-subj="heatmapChart">
+          <MemoizedChart
+            {...config}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
+            timeZone={timeZone}
+            formatFactory={getFormatService().deserialize}
+            chartsThemeService={getThemeService()}
+            paletteService={getPaletteService()}
+            uiState={handlers.uiState as PersistedState}
+          />
+        </div>
+      </KibanaThemeProvider>,
       domNode,
       () => {
         handlers.done();
