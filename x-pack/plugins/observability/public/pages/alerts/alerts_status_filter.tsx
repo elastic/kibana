@@ -8,15 +8,21 @@
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AlertStatus, AlertStatusFilter } from '../../../common/typings';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+} from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { AlertStatusFilterButton } from '../../../common/typings';
+import { AlertStatusFilter } from '../../../common/typings';
 
 export interface AlertStatusFilterProps {
-  status: AlertStatus;
+  status: AlertStatusFilterButton;
   onChange: (id: string, value: string) => void;
 }
 
 export const allAlerts: AlertStatusFilter = {
-  status: AlertStatus.All,
+  status: '',
   query: '',
   label: i18n.translate('xpack.observability.alerts.alertStatusFilter.showAll', {
     defaultMessage: 'Show all',
@@ -24,16 +30,16 @@ export const allAlerts: AlertStatusFilter = {
 };
 
 export const activeAlerts: AlertStatusFilter = {
-  status: AlertStatus.Active,
-  query: `kibana.alert.status : "active"`,
+  status: ALERT_STATUS_ACTIVE,
+  query: `${ALERT_STATUS}: "${ALERT_STATUS_ACTIVE}"`,
   label: i18n.translate('xpack.observability.alerts.alertStatusFilter.active', {
     defaultMessage: 'Active',
   }),
 };
 
 export const recoveredAlerts: AlertStatusFilter = {
-  status: AlertStatus.Recovered,
-  query: `kibana.alert.status : "recovered"`,
+  status: ALERT_STATUS_RECOVERED,
+  query: `${ALERT_STATUS}: "${ALERT_STATUS_RECOVERED}"`,
   label: i18n.translate('xpack.observability.alerts.alertStatusFilter.recovered', {
     defaultMessage: 'Recovered',
   }),

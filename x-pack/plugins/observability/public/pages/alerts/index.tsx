@@ -11,8 +11,9 @@ import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import { AlertStatus } from '@kbn/rule-data-utils/alerts_as_data_status';
+import { AlertStatusFilterButton } from '../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
-import { AlertStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
@@ -44,7 +45,7 @@ const ALERT_STATUS_REGEX =
 
 function AlertsPage() {
   const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
-  const [alertFilterStatus, setAlertFilterStatus] = useState(AlertStatus.All);
+  const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
   const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
@@ -127,22 +128,15 @@ function AlertsPage() {
 
   const syncAlertStatusFilterStatus = (query: string) => {
     const [, alertStatus] = /\s*kibana\.alert\.status\s*:\s*"(.*?)"/.exec(query) || [];
-    if (!alertStatus) return;
-    switch (alertStatus.toLowerCase()) {
-      case 'active':
-        setAlertFilterStatus(AlertStatus.Active);
-        break;
-      case 'recovered':
-        setAlertFilterStatus(AlertStatus.Recovered);
-        break;
-      default:
-        setAlertFilterStatus(AlertStatus.All);
-        break;
+    if (!alertStatus) {
+      setAlertFilterStatus('');
+      return;
     }
+    setAlertFilterStatus(alertStatus.toLowerCase() as AlertStatus);
   };
   const setAlertStatusFilter = useCallback(
     (id: string, query: string) => {
-      setAlertFilterStatus(id as AlertStatus);
+      setAlertFilterStatus(id as AlertStatusFilterButton);
       // Updating the KQL query bar alongside with user inputs is tricky.
       // To avoid issue, this function always remove the AlertFilter and add it
       // at the end of the query, each time the filter is added/updated/removed (Show All)
