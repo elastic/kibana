@@ -184,7 +184,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
     ...(config.ui?.unsafe?.monitorManagement?.enabled
       ? [
           {
-            title: i18n.translate('xpack.uptime.monitorRoute.title', {
+            title: i18n.translate('xpack.uptime.addMonitorRoute.title', {
               defaultMessage: 'Add Monitor | {baseTitle}',
               values: { baseTitle },
             }),
@@ -202,7 +202,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
             },
           },
           {
-            title: i18n.translate('xpack.uptime.monitorRoute.title', {
+            title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
               defaultMessage: 'Edit Monitor | {baseTitle}',
               values: { baseTitle },
             }),
