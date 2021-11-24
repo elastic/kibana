@@ -80,3 +80,6 @@ export function ExploratoryViewPage({
 const Wrapper = euiStyled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.l};
 `;
+
+// eslint-disable-next-line import/no-default-export
+export default ExploratoryViewPage;
