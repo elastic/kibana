@@ -10,7 +10,6 @@ import {
   OVERVIEW_CTI_LINKS,
   OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL,
   OVERVIEW_CTI_LINKS_INFO_INNER_PANEL,
-  OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL,
   OVERVIEW_CTI_TOTAL_EVENT_COUNT,
   OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON,
 } from '../../screens/overview';
@@ -48,7 +47,6 @@ describe('CTI Link Panel', () => {
       loginAndWaitForPage(
         `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
       );
-      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('exist');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 indicators');
     });
@@ -72,11 +70,10 @@ describe('CTI Link Panel', () => {
       });
 
       loginAndWaitForPage(OVERVIEW_URL);
-      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL}`).should('not.exist');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON}`).should('exist');
       cy.get(OVERVIEW_CTI_LINKS).should('not.contain.text', 'Anomali');
-      cy.get(OVERVIEW_CTI_LINKS).should('contain.text', 'AbuseCH');
+      cy.get(OVERVIEW_CTI_LINKS).should('contain.text', 'AbuseCH malware');
       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 indicator');
     });
   });
