@@ -4669,12 +4669,12 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatParams.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[param: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[param: string]:  any"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false
