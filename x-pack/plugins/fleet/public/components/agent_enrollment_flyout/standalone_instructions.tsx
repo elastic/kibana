@@ -36,8 +36,11 @@ import type { PackagePolicy } from '../../../common';
 import {
   FLEET_KUBERNETES_PACKAGE,
   KUBERNETES_RUN_INSTRUCTIONS,
-  STANDALONE_RUN_INSTRUCTIONS,
+  STANDALONE_RUN_INSTRUCTIONS_LINUXMAC,
+  STANDALONE_RUN_INSTRUCTIONS_WINDOWS,
 } from '../../../common';
+
+import { PlatformSelector } from '../enrollment_instructions/manual/platform_selector';
 
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import type { BaseProps } from './types';
@@ -55,8 +58,11 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
     'IS_LOADING'
   );
   const [yaml, setYaml] = useState<string | string>('');
-  const runInstructions =
-    isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS;
+  const linuxMacCommand =
+    isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_LINUXMAC;
+  const windowsCommand =
+    isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_WINDOWS;
+  const { docLinks } = useStartServices();
 
   useEffect(() => {
     async function checkifK8s() {
@@ -231,24 +237,12 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
         defaultMessage: 'Start the agent',
       }),
       children: (
-        <>
-          <EuiText>
-            <>{applyMsg}</>
-            <EuiSpacer size="m" />
-            <EuiCodeBlock fontSize="m">{runInstructions}</EuiCodeBlock>
-            <EuiSpacer size="m" />
-            <EuiCopy textToCopy={runInstructions}>
-              {(copy) => (
-                <EuiButton onClick={copy} iconType="copyClipboard">
-                  <FormattedMessage
-                    id="xpack.fleet.agentEnrollment.copyRunInstructionsButton"
-                    defaultMessage="Copy to clipboard"
-                  />
-                </EuiButton>
-              )}
-            </EuiCopy>
-          </EuiText>
-        </>
+        <PlatformSelector
+          linuxMacCommand={linuxMacCommand}
+          windowsCommand={windowsCommand}
+          installAgentLink={docLinks.links.fleet.installElasticAgentStandalone}
+          troubleshootLink={docLinks.links.fleet.troubleshooting}
+        />
       ),
     },
     {
