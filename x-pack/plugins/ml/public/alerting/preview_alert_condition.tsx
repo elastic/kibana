@@ -88,7 +88,18 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
                       <EuiCode transparentBackground>
                         {i.function}({i.field_name})
                       </EuiCode>{' '}
-                      {i.by_field_value} {i.over_field_value} {i.partition_field_value} [{i.score}]
+                      {i.by_field_value} {i.over_field_value} {i.partition_field_value} [{i.score}];
+                      (
+                      <FormattedMessage
+                        id="xpack.ml.previewAlert.typicalLabel"
+                        defaultMessage="Typical:"
+                      />{' '}
+                      {i.typical ?? '-'},{' '}
+                      <FormattedMessage
+                        id="xpack.ml.previewAlert.actualLabel"
+                        defaultMessage="Actual:"
+                      />{' '}
+                      {i.actual ?? '-'})
                     </li>
                   ))}
                 </ul>
