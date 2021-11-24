@@ -6,9 +6,9 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { DataType, SuggestionRequest } from '../types';
 import { suggestions } from './suggestions';
-import { PieVisualizationState } from '../../common/expressions';
+import type { DataType, SuggestionRequest } from '../types';
+import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { layerTypes } from '../../common';
 
 describe('suggestions', () => {
@@ -144,6 +144,38 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
+    it('should not reject histogram operations in case of switching between partition charts', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'b',
+                operation: {
+                  label: 'Durations',
+                  dataType: 'number' as DataType,
+                  isBucketed: true,
+                  scale: 'interval',
+                },
+              },
+              {
+                columnId: 'c',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            shape: 'mosaic',
+            layers: [{} as PieLayerState],
+          },
+          keptLayerIds: ['first'],
+        }).length
+      ).toBeGreaterThan(0);
+    });
+
     it('should reject when there are too many buckets', () => {
       expect(
         suggestions({
@@ -272,7 +304,7 @@ describe('suggestions', () => {
         state: undefined,
         keptLayerIds: ['first'],
       });
-      expect(currentSuggestions).toHaveLength(3);
+      expect(currentSuggestions).toHaveLength(4);
       expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
     });
 
@@ -292,7 +324,7 @@ describe('suggestions', () => {
         state: undefined,
         keptLayerIds: ['first'],
       });
-      expect(currentSuggestions).toHaveLength(3);
+      expect(currentSuggestions).toHaveLength(4);
       expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
     });
 
@@ -719,6 +751,174 @@ describe('suggestions', () => {
           },
         })
       );
+    });
+  });
+
+  describe('mosaic', () => {
+    it('should reject when currently active and unchanged data', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [],
+            changeType: 'unchanged',
+          },
+          state: {
+            shape: 'mosaic',
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                groups: [],
+                metric: 'a',
+
+                numberDisplay: 'hidden',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+              },
+            ],
+          },
+          keptLayerIds: ['first'],
+        })
+      ).toHaveLength(0);
+    });
+
+    it('mosaic type should be added only in case of 2 groups', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'a',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'b',
+                operation: { label: 'Top 6', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'c',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'unchanged',
+          },
+          state: {
+            shape: 'treemap',
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                groups: ['a', 'b'],
+                metric: 'c',
+
+                numberDisplay: 'hidden',
+                categoryDisplay: 'inside',
+                legendDisplay: 'show',
+                percentDecimals: 0,
+                legendMaxLines: 1,
+                truncateLegend: true,
+                nestedLegend: true,
+              },
+            ],
+          },
+          keptLayerIds: ['first'],
+        }).filter(({ hide, state }) => !hide && state.shape === 'mosaic')
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "hide": false,
+            "previewIcon": "bullseye",
+            "score": 0.6,
+            "state": Object {
+              "layers": Array [
+                Object {
+                  "categoryDisplay": "default",
+                  "groups": Array [
+                    "a",
+                    "b",
+                  ],
+                  "layerId": "first",
+                  "layerType": "data",
+                  "legendDisplay": "show",
+                  "legendMaxLines": 1,
+                  "metric": "c",
+                  "nestedLegend": true,
+                  "numberDisplay": "hidden",
+                  "percentDecimals": 0,
+                  "truncateLegend": true,
+                },
+              ],
+              "palette": undefined,
+              "shape": "mosaic",
+            },
+            "title": "As Mosaic",
+          },
+        ]
+      `);
+    });
+
+    it('mosaic type should be added only in case of 2 groups (negative test)', () => {
+      const meta: Parameters<typeof suggestions>[0] = {
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'c',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'unchanged',
+        },
+        state: {
+          shape: 'pie',
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              groups: ['a', 'b'],
+              metric: 'c',
+
+              numberDisplay: 'hidden',
+              categoryDisplay: 'inside',
+              legendDisplay: 'show',
+              percentDecimals: 0,
+              legendMaxLines: 1,
+              truncateLegend: true,
+              nestedLegend: true,
+            },
+          ],
+        },
+        keptLayerIds: ['first'],
+      };
+
+      // test with 1 group
+      expect(
+        suggestions(meta).filter(({ hide, state }) => !hide && state.shape === 'mosaic')
+      ).toMatchInlineSnapshot(`Array []`);
+
+      meta.table.columns.push({
+        columnId: 'b',
+        operation: { label: 'Top 6', dataType: 'string' as DataType, isBucketed: true },
+      });
+
+      meta.table.columns.push({
+        columnId: 'c',
+        operation: { label: 'Top 7', dataType: 'string' as DataType, isBucketed: true },
+      });
+
+      // test with 3 groups
+      expect(
+        suggestions(meta).filter(({ hide, state }) => !hide && state.shape === 'mosaic')
+      ).toMatchInlineSnapshot(`Array []`);
     });
   });
 });
