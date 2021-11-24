@@ -12,7 +12,7 @@ import type { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -46,7 +46,10 @@ import { isColumnInvalid, isDraggedField, normalizeOperationDataType } from './u
 import { LayerPanel } from './layerpanel';
 import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
@@ -88,7 +91,7 @@ export function getIndexPatternDatasource({
   data,
   fieldFormats,
   charts,
-  indexPatternFieldEditor,
+  dataViewFieldEditor,
   uiActions,
 }: {
   core: CoreStart;
@@ -96,7 +99,7 @@ export function getIndexPatternDatasource({
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
   const uiSettings = core.uiSettings;
@@ -224,18 +227,20 @@ export function getIndexPatternDatasource({
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
     ) {
       render(
-        <I18nProvider>
-          <IndexPatternDataPanel
-            changeIndexPattern={handleChangeIndexPattern}
-            data={data}
-            fieldFormats={fieldFormats}
-            charts={charts}
-            indexPatternFieldEditor={indexPatternFieldEditor}
-            {...props}
-            core={core}
-            uiActions={uiActions}
-          />
-        </I18nProvider>,
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <IndexPatternDataPanel
+              changeIndexPattern={handleChangeIndexPattern}
+              data={data}
+              fieldFormats={fieldFormats}
+              charts={charts}
+              indexPatternFieldEditor={dataViewFieldEditor}
+              {...props}
+              core={core}
+              uiActions={uiActions}
+            />
+          </I18nProvider>
+        </KibanaThemeProvider>,
         domElement
       );
     },
@@ -285,21 +290,26 @@ export function getIndexPatternDatasource({
       const columnLabelMap = indexPatternDatasource.uniqueLabels(props.state);
 
       render(
-        <I18nProvider>
-          <KibanaContextProvider
-            services={{
-              appName: 'lens',
-              storage,
-              uiSettings,
-              data,
-              fieldFormats,
-              savedObjects: core.savedObjects,
-              docLinks: core.docLinks,
-            }}
-          >
-            <IndexPatternDimensionTrigger uniqueLabel={columnLabelMap[props.columnId]} {...props} />
-          </KibanaContextProvider>
-        </I18nProvider>,
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                appName: 'lens',
+                storage,
+                uiSettings,
+                data,
+                fieldFormats,
+                savedObjects: core.savedObjects,
+                docLinks: core.docLinks,
+              }}
+            >
+              <IndexPatternDimensionTrigger
+                uniqueLabel={columnLabelMap[props.columnId]}
+                {...props}
+              />
+            </KibanaContextProvider>
+          </I18nProvider>
+        </KibanaThemeProvider>,
         domElement
       );
     },
@@ -311,30 +321,32 @@ export function getIndexPatternDatasource({
       const columnLabelMap = indexPatternDatasource.uniqueLabels(props.state);
 
       render(
-        <I18nProvider>
-          <KibanaContextProvider
-            services={{
-              appName: 'lens',
-              storage,
-              uiSettings,
-              data,
-              fieldFormats,
-              savedObjects: core.savedObjects,
-              docLinks: core.docLinks,
-              http: core.http,
-            }}
-          >
-            <IndexPatternDimensionEditor
-              uiSettings={uiSettings}
-              storage={storage}
-              savedObjectsClient={core.savedObjects.client}
-              http={core.http}
-              data={data}
-              uniqueLabel={columnLabelMap[props.columnId]}
-              {...props}
-            />
-          </KibanaContextProvider>
-        </I18nProvider>,
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                appName: 'lens',
+                storage,
+                uiSettings,
+                data,
+                fieldFormats,
+                savedObjects: core.savedObjects,
+                docLinks: core.docLinks,
+                http: core.http,
+              }}
+            >
+              <IndexPatternDimensionEditor
+                uiSettings={uiSettings}
+                storage={storage}
+                savedObjectsClient={core.savedObjects.client}
+                http={core.http}
+                data={data}
+                uniqueLabel={columnLabelMap[props.columnId]}
+                {...props}
+              />
+            </KibanaContextProvider>
+          </I18nProvider>
+        </KibanaThemeProvider>,
         domElement
       );
     },
@@ -344,21 +356,23 @@ export function getIndexPatternDatasource({
       props: DatasourceLayerPanelProps<IndexPatternPrivateState>
     ) => {
       render(
-        <LayerPanel
-          onChangeIndexPattern={(indexPatternId) => {
-            changeLayerIndexPattern({
-              indexPatternId,
-              setState: props.setState,
-              state: props.state,
-              layerId: props.layerId,
-              onError: onIndexPatternLoadError,
-              replaceIfPossible: true,
-              storage,
-              indexPatternsService,
-            });
-          }}
-          {...props}
-        />,
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <LayerPanel
+            onChangeIndexPattern={(indexPatternId) => {
+              changeLayerIndexPattern({
+                indexPatternId,
+                setState: props.setState,
+                state: props.state,
+                layerId: props.layerId,
+                onError: onIndexPatternLoadError,
+                replaceIfPossible: true,
+                storage,
+                indexPatternsService,
+              });
+            }}
+            {...props}
+          />
+        </KibanaThemeProvider>,
         domElement
       );
     },

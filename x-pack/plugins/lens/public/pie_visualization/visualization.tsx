@@ -10,7 +10,14 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
-import type { Visualization, OperationMetadata, AccessorConfig } from '../types';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import type {
+  Visualization,
+  OperationMetadata,
+  AccessorConfig,
+  VisualizationDimensionGroupConfig,
+} from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { layerTypes } from '../../common';
@@ -35,10 +42,30 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
 
+const applyPaletteToColumnConfig = (
+  columns: AccessorConfig[],
+  { shape, palette }: PieVisualizationState,
+  paletteService: PaletteRegistry
+) => {
+  const colorPickerIndex = shape === 'mosaic' ? columns.length - 1 : 0;
+
+  if (colorPickerIndex >= 0) {
+    columns[colorPickerIndex] = {
+      columnId: columns[colorPickerIndex].columnId,
+      triggerIcon: 'colorBy',
+      palette: paletteService
+        .get(palette?.name || 'default')
+        .getCategoricalColors(10, palette?.params),
+    };
+  }
+};
+
 export const getPieVisualization = ({
   paletteService,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
 
@@ -61,6 +88,13 @@ export const getPieVisualization = ({
       label: CHART_NAMES.treemap.label,
       groupLabel: CHART_NAMES.treemap.groupLabel,
     },
+    {
+      id: 'mosaic',
+      icon: CHART_NAMES.mosaic.icon,
+      label: CHART_NAMES.mosaic.label,
+      showExperimentalBadge: true,
+      groupLabel: CHART_NAMES.mosaic.groupLabel,
+    },
   ],
 
   getVisualizationTypeId(state) {
@@ -79,13 +113,7 @@ export const getPieVisualization = ({
   },
 
   getDescription(state) {
-    if (state.shape === 'treemap') {
-      return CHART_NAMES.treemap;
-    }
-    if (state.shape === 'donut') {
-      return CHART_NAMES.donut;
-    }
-    return CHART_NAMES.pie;
+    return CHART_NAMES[state.shape] ?? CHART_NAMES.pie;
   },
 
   switchVisualizationType: (visualizationTypeId, state) => ({
@@ -122,76 +150,58 @@ export const getPieVisualization = ({
     const sortedColumns: AccessorConfig[] = Array.from(
       new Set(originalOrder.concat(layer.groups))
     ).map((accessor) => ({ columnId: accessor }));
-    if (sortedColumns.length > 0) {
-      sortedColumns[0] = {
-        columnId: sortedColumns[0].columnId,
-        triggerIcon: 'colorBy',
-        palette: paletteService
-          .get(state.palette?.name || 'default')
-          .getCategoricalColors(10, state.palette?.params),
-      };
+
+    if (sortedColumns.length) {
+      applyPaletteToColumnConfig(sortedColumns, state, paletteService);
     }
 
-    if (state.shape === 'treemap') {
-      return {
-        groups: [
-          {
-            groupId: 'groups',
+    const getSliceByGroup = (): VisualizationDimensionGroupConfig => {
+      const baseProps = {
+        required: true,
+        groupId: 'groups',
+        accessors: sortedColumns,
+        enableDimensionEditor: true,
+        filterOperations: bucketedOperations,
+      };
+
+      switch (state.shape) {
+        case 'mosaic':
+        case 'treemap':
+          return {
+            ...baseProps,
             groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
               defaultMessage: 'Group by',
             }),
-            layerId,
-            accessors: sortedColumns,
             supportsMoreColumns: sortedColumns.length < MAX_TREEMAP_BUCKETS,
-            filterOperations: bucketedOperations,
-            required: true,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
-            enableDimensionEditor: true,
-          },
-          {
-            groupId: 'metric',
-            groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
-              defaultMessage: 'Size by',
+            requiredMinDimensionCount: state.shape === 'mosaic' ? 2 : undefined,
+          };
+        default:
+          return {
+            ...baseProps,
+            groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
+              defaultMessage: 'Slice by',
             }),
-            layerId,
-            accessors: layer.metric ? [{ columnId: layer.metric }] : [],
-            supportsMoreColumns: !layer.metric,
-            filterOperations: numberMetricOperations,
-            required: true,
-            dataTestSubj: 'lnsPie_sizeByDimensionPanel',
-          },
-        ],
-      };
-    }
+            supportsMoreColumns: sortedColumns.length < MAX_PIE_BUCKETS,
+            dataTestSubj: 'lnsPie_sliceByDimensionPanel',
+          };
+      }
+    };
+
+    const getMetricGroup = (): VisualizationDimensionGroupConfig => ({
+      groupId: 'metric',
+      groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
+        defaultMessage: 'Size by',
+      }),
+      accessors: layer.metric ? [{ columnId: layer.metric }] : [],
+      supportsMoreColumns: !layer.metric,
+      filterOperations: numberMetricOperations,
+      required: true,
+      dataTestSubj: 'lnsPie_sizeByDimensionPanel',
+    });
 
     return {
-      groups: [
-        {
-          groupId: 'groups',
-          groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
-            defaultMessage: 'Slice by',
-          }),
-          layerId,
-          accessors: sortedColumns,
-          supportsMoreColumns: sortedColumns.length < MAX_PIE_BUCKETS,
-          filterOperations: bucketedOperations,
-          required: true,
-          dataTestSubj: 'lnsPie_sliceByDimensionPanel',
-          enableDimensionEditor: true,
-        },
-        {
-          groupId: 'metric',
-          groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
-            defaultMessage: 'Size by',
-          }),
-          layerId,
-          accessors: layer.metric ? [{ columnId: layer.metric }] : [],
-          supportsMoreColumns: !layer.metric,
-          filterOperations: numberMetricOperations,
-          required: true,
-          dataTestSubj: 'lnsPie_sizeByDimensionPanel',
-        },
-      ],
+      groups: [getSliceByGroup(), getMetricGroup()],
     };
   },
 
@@ -226,9 +236,11 @@ export const getPieVisualization = ({
   },
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <DimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -254,9 +266,11 @@ export const getPieVisualization = ({
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <PieToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <PieToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
