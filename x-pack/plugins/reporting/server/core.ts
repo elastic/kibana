@@ -328,11 +328,7 @@ export class ReportingCore {
     const savedObjectsClient = savedObjects.getScopedClient(request);
     const { indexPatterns } = await this.getDataService();
     const { asCurrentUser: esClient } = (await this.getEsClient()).asScoped(request);
-    const dataViews = await indexPatterns.dataViewsServiceFactory(
-      savedObjectsClient,
-      esClient,
-      request
-    );
+    const dataViews = await indexPatterns.dataViewsServiceFactory(savedObjectsClient, esClient);
 
     return dataViews;
   }
