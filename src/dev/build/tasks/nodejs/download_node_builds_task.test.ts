@@ -24,7 +24,7 @@ expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
 const { getNodeDownloadInfo } = jest.requireMock('./node_download_info');
 const { getNodeShasums } = jest.requireMock('./node_shasums');
-const { download } = jest.requireMock('../../lib/download');
+const { downloadToDisk } = jest.requireMock('../../lib/download');
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
@@ -55,7 +55,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     'win32:downloadName': 'win32:sha256',
   });
 
-  download.mockImplementation(({ url }: any) => {
+  downloadToDisk.mockImplementation(({ url }: any) => {
     if (url === failOnUrl) {
       throw new Error('Download failed for reasons');
     }
@@ -69,13 +69,13 @@ it('downloads node builds for each platform', async () => {
 
   await DownloadNodeBuilds.run(config, log, []);
 
-  expect(download.mock.calls).toMatchInlineSnapshot(`
+  expect(downloadToDisk.mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
         Object {
           "destination": "linux:downloadPath",
           "log": <ToolingLog>,
-          "retries": 3,
+          "maxAttempts": 3,
           "shaAlgorithm": "sha256",
           "shaChecksum": "linux:sha256",
           "url": "linux:url",
@@ -85,7 +85,7 @@ it('downloads node builds for each platform', async () => {
         Object {
           "destination": "linux:downloadPath",
           "log": <ToolingLog>,
-          "retries": 3,
+          "maxAttempts": 3,
           "shaAlgorithm": "sha256",
           "shaChecksum": "linux:sha256",
           "url": "linux:url",
@@ -95,7 +95,7 @@ it('downloads node builds for each platform', async () => {
         Object {
           "destination": "darwin:downloadPath",
           "log": <ToolingLog>,
-          "retries": 3,
+          "maxAttempts": 3,
           "shaAlgorithm": "sha256",
           "shaChecksum": "darwin:sha256",
           "url": "darwin:url",
@@ -105,7 +105,7 @@ it('downloads node builds for each platform', async () => {
         Object {
           "destination": "darwin:downloadPath",
           "log": <ToolingLog>,
-          "retries": 3,
+          "maxAttempts": 3,
           "shaAlgorithm": "sha256",
           "shaChecksum": "darwin:sha256",
           "url": "darwin:url",
@@ -115,7 +115,7 @@ it('downloads node builds for each platform', async () => {
         Object {
           "destination": "win32:downloadPath",
           "log": <ToolingLog>,
-          "retries": 3,
+          "maxAttempts": 3,
           "shaAlgorithm": "sha256",
           "shaChecksum": "win32:sha256",
           "url": "win32:url",
