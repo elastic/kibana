@@ -34,14 +34,14 @@ export TEST_BROWSER_HEADLESS=1
 
 export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
+export ELASTIC_APM_SERVER_URL=https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io
+export ELASTIC_APM_SECRET_TOKEN=7YKhoXsO4MzjhXjx2c
 
 if is_pr; then
   if [[ "${GITHUB_PR_LABELS:-}" == *"ci:collect-apm"* ]]; then
     export ELASTIC_APM_ACTIVE=true
-    export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
   else
-    export ELASTIC_APM_ACTIVE=true
-    export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=true
+    export ELASTIC_APM_ACTIVE=false
   fi
 
   if [[ "${GITHUB_STEP_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
@@ -63,7 +63,6 @@ if is_pr; then
   export PR_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
 else
   export ELASTIC_APM_ACTIVE=true
-  export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
   export CHECKS_REPORTER_ACTIVE=false
 fi
 

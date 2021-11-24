@@ -9,11 +9,11 @@ import { Action } from 'redux';
 import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import {
-  HostResultList,
   HostInfo,
   GetHostPolicyResponse,
   HostIsolationRequestBody,
   ISOLATION_ACTIONS,
+  MetadataListResponse,
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
@@ -21,7 +21,7 @@ import { EndpointState } from '../types';
 
 export interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';
-  payload: HostResultList;
+  payload: MetadataListResponse;
 }
 
 export interface ServerFailedToReturnEndpointList {

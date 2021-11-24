@@ -8,5 +8,4 @@
 
 export { getConfiguration } from './config_loader';
 export { initApm } from './init_apm';
-export { shouldInstrumentClient } from './rum_agent_configuration';
 export type { ApmConfiguration } from './config';
