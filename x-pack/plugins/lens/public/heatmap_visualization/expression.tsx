@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { IInterpreterRenderHandlers } from '../../../../../src/plugins/expressions';
 import type { LensBrushEvent, LensFilterEvent } from '../types';
 import type { FormatFactory } from '../../common';
@@ -22,6 +24,7 @@ export const getHeatmapRenderer = (dependencies: {
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
   timeZone: string;
+  kibanaTheme: ThemeServiceStart;
 }) => ({
   name: LENS_HEATMAP_RENDERER,
   displayName: i18n.translate('xpack.lens.heatmap.visualizationName', {
@@ -43,19 +46,21 @@ export const getHeatmapRenderer = (dependencies: {
     };
 
     ReactDOM.render(
-      <I18nProvider>
-        {
-          <HeatmapChartReportable
-            {...config}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-            timeZone={dependencies.timeZone}
-            formatFactory={dependencies.formatFactory}
-            chartsThemeService={dependencies.chartsThemeService}
-            paletteService={dependencies.paletteService}
-          />
-        }
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={dependencies.kibanaTheme.theme$}>
+        <I18nProvider>
+          {
+            <HeatmapChartReportable
+              {...config}
+              onClickValue={onClickValue}
+              onSelectRange={onSelectRange}
+              timeZone={dependencies.timeZone}
+              formatFactory={dependencies.formatFactory}
+              chartsThemeService={dependencies.chartsThemeService}
+              paletteService={dependencies.paletteService}
+            />
+          }
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode,
       () => {
         handlers.done();

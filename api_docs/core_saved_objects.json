@@ -9734,7 +9734,7 @@
             "id": "def-server.SavedObjectMigrationMap.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[version: string}]: SavedObjectMigrationFn<any, any>",
+            "label": "[version: string]: SavedObjectMigrationFn<any, any>",
             "description": [],
             "signature": [
               "[version: string]:  ",
@@ -13259,7 +13259,7 @@
             "id": "def-server.SavedObjectsMappingProperties.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[field: string}]: SavedObjectsFieldMapping",
+            "label": "[field: string]: SavedObjectsFieldMapping",
             "description": [],
             "signature": [
               "[field: string]:  ",
