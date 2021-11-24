@@ -27,7 +27,7 @@ export const DownloadCloudDependencies: Task = {
         destination,
         shaChecksum: checksum.split(' ')[0],
         shaAlgorithm: 'sha512',
-        retries: 3,
+        maxAttempts: 3,
       });
     };
 
