@@ -17,7 +17,7 @@ interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
   versionQualifier?: string;
-  dockerTagQualifier: string;
+  dockerTagQualifier: string | null;
   dockerPush: boolean;
 }
 
@@ -63,7 +63,7 @@ export class Config {
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
-    private readonly dockerTagQualifier: string,
+    private readonly dockerTagQualifier: string | null,
     private readonly dockerPush: boolean,
     public readonly isRelease: boolean
   ) {}

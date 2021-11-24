@@ -52,7 +52,7 @@ export function readCliArgs(argv: string[]) {
       deb: null,
       'docker-images': null,
       'docker-push': false,
-      'docker-tag-qualifier': '',
+      'docker-tag-qualifier': null,
       'version-qualifier': '',
     },
     unknown: (flag) => {
