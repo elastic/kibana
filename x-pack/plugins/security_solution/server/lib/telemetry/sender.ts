@@ -265,7 +265,7 @@ export class TelemetryEventsSender {
         headers: {
           'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': clusterUuid,
-          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.10.0',
+          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
       });
