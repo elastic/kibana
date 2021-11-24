@@ -244,6 +244,9 @@ export default function ({ getService }: FtrProviderContext) {
         },
       } = (await getHealth()).stats;
 
+      // eslint-disable-next-line no-console
+      console.log('drift_by_type', JSON.stringify(drift_by_type));
+
       expect(isNaN(Date.parse(polling.last_successful_poll as string))).to.eql(false);
       expect(isNaN(Date.parse(polling.last_polling_delay as string))).to.eql(false);
       expect(typeof polling.result_frequency_percent_as_number.NoTasksClaimed).to.eql('number');
