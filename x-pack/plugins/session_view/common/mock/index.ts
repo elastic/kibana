@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './app_context_render';
+export { AppContextTestRender, createAppRootMockRenderer } from './app_context_render';
