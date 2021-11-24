@@ -52,14 +52,15 @@ import {
 } from '../../../../../common/constants';
 import { TransformStats } from '../types';
 import {
+  HOST_METADATA_LIST_ROUTE,
   metadataTransformPrefix,
   METADATA_UNITED_TRANSFORM,
 } from '../../../../../common/endpoint/constants';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
   return {
@@ -170,6 +171,10 @@ describe('when on the endpoint list page', () => {
   });
 
   it('should NOT display timeline', async () => {
+    setEndpointListApiMockImplementation(coreStart.http, {
+      endpointsResults: [],
+    });
+
     const renderResult = render();
     const timelineFlyout = renderResult.queryByTestId('flyoutOverlay');
     expect(timelineFlyout).toBeNull();
@@ -243,7 +248,7 @@ describe('when on the endpoint list page', () => {
           total: 4,
         });
         setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.hosts,
+          endpointsResults: mockedEndpointListData.data,
           totalAgentsUsingEndpoint: 5,
         });
       });
@@ -260,7 +265,7 @@ describe('when on the endpoint list page', () => {
           total: 5,
         });
         setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.hosts,
+          endpointsResults: mockedEndpointListData.data,
           totalAgentsUsingEndpoint: 5,
         });
       });
@@ -277,7 +282,7 @@ describe('when on the endpoint list page', () => {
           total: 6,
         });
         setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.hosts,
+          endpointsResults: mockedEndpointListData.data,
           totalAgentsUsingEndpoint: 5,
         });
       });
@@ -291,6 +296,10 @@ describe('when on the endpoint list page', () => {
 
   describe('when there is no selected host in the url', () => {
     it('should not show the flyout', () => {
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [],
+      });
+
       const renderResult = render();
       expect.assertions(1);
       return renderResult.findByTestId('endpointDetailsFlyout').catch((e) => {
@@ -307,7 +316,7 @@ describe('when on the endpoint list page', () => {
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const mockedEndpointData = mockEndpointResultList({ total: 5 });
-          const hostListData = mockedEndpointData.hosts;
+          const hostListData = mockedEndpointData.data;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
           firstPolicyRev = hostListData[0].metadata.Endpoint.policy.applied.endpoint_policy_version;
@@ -518,7 +527,7 @@ describe('when on the endpoint list page', () => {
   describe.skip('when polling on Endpoint List', () => {
     beforeEach(() => {
       reactTestingLibrary.act(() => {
-        const hostListData = mockEndpointResultList({ total: 4 }).hosts;
+        const hostListData = mockEndpointResultList({ total: 4 }).data;
 
         setEndpointListApiMockImplementation(coreStart.http, {
           endpointsResults: hostListData,
@@ -546,7 +555,7 @@ describe('when on the endpoint list page', () => {
       expect(total[0].textContent).toEqual('4 Hosts');
 
       setEndpointListApiMockImplementation(coreStart.http, {
-        endpointsResults: mockEndpointResultList({ total: 1 }).hosts,
+        endpointsResults: mockEndpointResultList({ total: 1 }).data,
       });
 
       await reactTestingLibrary.act(async () => {
@@ -1090,7 +1099,7 @@ describe('when on the endpoint list page', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
         coreStart.http.post.mockImplementation(async (requestOptions) => {
-          if (requestOptions.path === '/api/endpoint/metadata') {
+          if (requestOptions.path === HOST_METADATA_LIST_ROUTE) {
             return mockEndpointResultList({ total: 0 });
           }
           throw new Error(`POST to '${requestOptions.path}' does not have a mock response!`);
@@ -1377,7 +1386,7 @@ describe('when on the endpoint list page', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
 
     const mockEndpointListApi = () => {
-      const { hosts } = mockEndpointResultList();
+      const { data: hosts } = mockEndpointResultList();
       hostInfo = {
         host_status: hosts[0].host_status,
         metadata: {
