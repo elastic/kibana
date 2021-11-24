@@ -21,11 +21,7 @@ import type {
   PreconfiguredOutput,
   PackagePolicy,
 } from '../../common';
-import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  SO_SEARCH_LIMIT,
-  normalizeHostsForAgents,
-} from '../../common';
+import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
@@ -344,7 +340,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         esClient,
         policy!,
         packagePoliciesToAdd!,
-        defaultOutput
+        defaultOutput,
+        !created
       );
 
       // Add the is_managed flag after configuring package policies to avoid errors
@@ -412,7 +409,8 @@ async function addPreconfiguredPolicyPackages(
       inputs?: InputsOverride[];
     }
   >,
-  defaultOutput: Output
+  defaultOutput: Output,
+  bumpAgentPolicyRevison = false
 ) {
   // Add packages synchronously to avoid overwriting
   for (const { installedPackage, name, description, inputs } of installedPackagePolicies) {
@@ -430,7 +428,8 @@ async function addPreconfiguredPolicyPackages(
       defaultOutput,
       name,
       description,
-      (policy) => overridePackageInputs(policy, packageInfo, inputs)
+      (policy) => overridePackageInputs(policy, packageInfo, inputs),
+      bumpAgentPolicyRevison
     );
   }
 }
