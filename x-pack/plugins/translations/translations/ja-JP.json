@@ -20052,7 +20052,6 @@
     "xpack.reporting.listing.ilmPolicyCallout.migrationNeededDescription": "レポートが一貫して管理されることを保証するために、すべてのレポートインデックスは{ilmPolicyName}ポリシーを使用します。",
     "xpack.reporting.listing.ilmPolicyCallout.migrationNeededTitle": "レポートの新しいライフサイクルポリシーを適用",
     "xpack.reporting.listing.infoPanel.attemptsInfo": "試行",
-    "xpack.reporting.listing.infoPanel.browserTypeInfo": "ブラウザータイプ",
     "xpack.reporting.listing.infoPanel.completedAtInfo": "完了日時",
     "xpack.reporting.listing.infoPanel.contentTypeInfo": "コンテンツタイプ",
     "xpack.reporting.listing.infoPanel.createdAtInfo": "作成日時：",

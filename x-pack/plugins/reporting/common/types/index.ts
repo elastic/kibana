@@ -67,7 +67,6 @@ export interface ReportSource {
    */
   kibana_name?: string; // for troubleshooting
   kibana_id?: string; // for troubleshooting
-  browser_type?: string; // no longer used since chromium is the only option (used to allow phantomjs)
   timeout?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.queue.timeout
   max_attempts?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.capture.maxAttempts
   started_at?: string; // timestamp in UTC

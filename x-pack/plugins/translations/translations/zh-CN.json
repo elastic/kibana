@@ -20344,7 +20344,6 @@
     "xpack.reporting.listing.ilmPolicyCallout.migrationNeededDescription": "为了确保得到一致的管理，所有报告索引应使用 {ilmPolicyName} 策略。",
     "xpack.reporting.listing.ilmPolicyCallout.migrationNeededTitle": "为报告应用新的生命周期策略",
     "xpack.reporting.listing.infoPanel.attemptsInfo": "尝试次数",
-    "xpack.reporting.listing.infoPanel.browserTypeInfo": "浏览器类型",
     "xpack.reporting.listing.infoPanel.completedAtInfo": "完成时间",
     "xpack.reporting.listing.infoPanel.contentTypeInfo": "内容类型",
     "xpack.reporting.listing.infoPanel.createdAtInfo": "创建于",
