@@ -36,10 +36,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FieldCodeEditor } from './field_code_editor';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
 import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
-import { EuiCodeEditor } from '../../../../../es_ui_shared/public';
 
 interface FieldProps {
   setting: FieldSetting;
@@ -291,26 +291,13 @@ export class Field extends PureComponent<FieldProps> {
       case 'json':
         return (
           <div data-test-subj={`advancedSetting-editField-${name}`}>
-            <EuiCodeEditor
-              {...a11yProps}
-              name={`advancedSetting-editField-${name}-editor`}
-              mode={type}
-              theme="textmate"
+            <FieldCodeEditor
               value={currentValue}
               onChange={this.onCodeEditorChange}
-              width="100%"
-              height="auto"
-              minLines={6}
-              maxLines={30}
+              type={type}
               isReadOnly={isOverridden || !enableSaving}
-              setOptions={{
-                showLineNumbers: false,
-                tabSize: 2,
-              }}
-              editorProps={{
-                $blockScrolling: Infinity,
-              }}
-              showGutter={false}
+              a11yProps={a11yProps}
+              name={`advancedSetting-editField-${name}-editor`}
             />
           </div>
         );
