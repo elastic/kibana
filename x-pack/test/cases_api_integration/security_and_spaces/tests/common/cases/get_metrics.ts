@@ -14,20 +14,21 @@ import { deleteAllCaseItems, getCaseMetrics } from '../../../../common/lib/utils
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('metrics', () => {
     const closedCaseId = 'e49ad6e0-cf9d-11eb-a603-13e7747d215z';
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/cases.json'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
-    });
-
-    afterEach(async () => {
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/cases.json'
+      );
       await deleteAllCaseItems(es);
     });
 
