@@ -7,31 +7,44 @@
 
 import React, { useCallback } from 'react';
 import { EuiPortal } from '@elastic/eui';
-import { Router, Route, Switch, useHistory } from 'react-router-dom';
+import { Router, Route, Switch, useHistory, Redirect } from 'react-router-dom';
 
-import { useBreadcrumbs, useGetSettings } from '../../hooks';
+import { useBreadcrumbs, useGetOutputs, useGetSettings } from '../../hooks';
 import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { Loading } from '../../components';
 
 import { SettingsPage } from './components/settings_page';
-import { ConfirmModalProvider } from './hooks/use_confirm_modal';
+import { withConfirmModalProvider } from './hooks/use_confirm_modal';
 import { FleetServerHostsFlyout } from './components/fleet_server_hosts_flyout';
+import { EditOutputFlyout } from './components/edit_output_flyout';
+import { useDeleteOutput } from './hooks/use_delete_output';
+import { FEATURE_ADD_OUTPUT_ENABLED } from './constants';
 
-export const SettingsApp = () => {
+export const SettingsApp = withConfirmModalProvider(() => {
   useBreadcrumbs('settings');
   const history = useHistory();
 
   const settings = useGetSettings();
+  const outputs = useGetOutputs();
+
+  const { deleteOutput } = useDeleteOutput(outputs.resendRequest);
 
   const resendSettingsRequest = settings.resendRequest;
+  const resendOutputRequest = outputs.resendRequest;
 
   const onCloseCallback = useCallback(() => {
     resendSettingsRequest();
+    resendOutputRequest();
     history.replace(pagePathGetters.settings()[1]);
-  }, [history, resendSettingsRequest]);
+  }, [history, resendSettingsRequest, resendOutputRequest]);
 
-  if (settings.isLoading || !settings.data?.item) {
+  if (
+    (settings.isLoading && settings.isInitialRequest) ||
+    !settings.data?.item ||
+    (outputs.isLoading && outputs.isInitialRequest) ||
+    !outputs.data?.items
+  ) {
     return (
       <DefaultLayout section="settings">
         <Loading />
@@ -41,21 +54,45 @@ export const SettingsApp = () => {
 
   return (
     <DefaultLayout section="settings">
-      <ConfirmModalProvider>
-        <Router history={history}>
-          <Switch>
-            <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
+      <Router history={history}>
+        <Switch>
+          <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
+            <EuiPortal>
+              <FleetServerHostsFlyout
+                onClose={onCloseCallback}
+                fleetServerHosts={settings.data?.item.fleet_server_hosts ?? []}
+              />
+            </EuiPortal>
+          </Route>
+          {FEATURE_ADD_OUTPUT_ENABLED && (
+            <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
               <EuiPortal>
-                <FleetServerHostsFlyout
-                  onClose={onCloseCallback}
-                  fleetServerHosts={settings.data?.item.fleet_server_hosts ?? []}
-                />
+                <EditOutputFlyout onClose={onCloseCallback} />
               </EuiPortal>
             </Route>
-          </Switch>
-        </Router>
-        <SettingsPage settings={settings.data.item} />
-      </ConfirmModalProvider>
+          )}
+          <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
+            {(route: { match: { params: { outputId: string } } }) => {
+              const output = outputs.data?.items.find((o) => route.match.params.outputId === o.id);
+
+              if (!output) {
+                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+              }
+
+              return (
+                <EuiPortal>
+                  <EditOutputFlyout onClose={onCloseCallback} output={output} />
+                </EuiPortal>
+              );
+            }}
+          </Route>
+        </Switch>
+      </Router>
+      <SettingsPage
+        settings={settings.data.item}
+        outputs={outputs.data.items}
+        deleteOutput={deleteOutput}
+      />
     </DefaultLayout>
   );
-};
+});
