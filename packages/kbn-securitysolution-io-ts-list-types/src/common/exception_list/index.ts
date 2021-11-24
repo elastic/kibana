@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 export const exceptionListType = t.keyof({
   detection: null,
   endpoint: null,
+  endpoint_trusted_apps: null,
   endpoint_events: null,
   endpoint_host_isolation_exceptions: null,
 });
