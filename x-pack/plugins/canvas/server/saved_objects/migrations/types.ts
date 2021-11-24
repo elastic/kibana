@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ExpressionsService } from 'src/plugins/expressions/public';
 
-import { demodata } from './demodata';
-import { pointseries } from './pointseries';
-import { filters } from './filters';
-
-export const functions = [filters, demodata, pointseries];
+export interface CanvasSavedObjectTypeMigrationsDeps {
+  expressions: ExpressionsService;
+}

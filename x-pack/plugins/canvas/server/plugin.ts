@@ -23,7 +23,7 @@ import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
-import { customElementType, workpadType, workpadTemplateType } from './saved_objects';
+import { customElementType, workpadTypeFactory, workpadTemplateType } from './saved_objects';
 import { initializeTemplates } from './templates';
 import { essqlSearchStrategyProvider } from './lib/essql_strategy';
 import { getUISettings } from './ui_settings';
@@ -53,9 +53,16 @@ export class CanvasPlugin implements Plugin {
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup) {
     const expressionsFork = plugins.expressions.fork();
 
+    setupInterpreter(expressionsFork, {
+      embeddablePersistableStateService: {
+        extract: plugins.embeddable.extract,
+        inject: plugins.embeddable.inject,
+      },
+    });
+
     coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType);
-    coreSetup.savedObjects.registerType(workpadType);
+    coreSetup.savedObjects.registerType(workpadTypeFactory({ expressions: expressionsFork }));
     coreSetup.savedObjects.registerType(workpadTemplateType);
 
     plugins.features.registerKibanaFeature(getCanvasFeature(plugins));
@@ -83,13 +90,6 @@ export class CanvasPlugin implements Plugin {
     // we need the kibana index for the Canvas usage collector
     const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
     registerCanvasUsageCollector(plugins.usageCollection, kibanaIndex);
-
-    setupInterpreter(expressionsFork, {
-      embeddablePersistableStateService: {
-        extract: plugins.embeddable.extract,
-        inject: plugins.embeddable.inject,
-      },
-    });
 
     coreSetup.getStartServices().then(([_, depsStart]) => {
       const strategy = essqlSearchStrategyProvider();

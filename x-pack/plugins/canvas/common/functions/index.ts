@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { demodata } from './demodata';
-import { pointseries } from './pointseries';
-import { filters } from './filters';
-
-export const functions = [filters, demodata, pointseries];
+export type { FiltersFunction } from './filters';
+export { buildFiltersFunction } from './filters';

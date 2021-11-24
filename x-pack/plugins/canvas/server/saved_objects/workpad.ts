@@ -7,9 +7,12 @@
 
 import { SavedObjectsType } from 'src/core/server';
 import { CANVAS_TYPE } from '../../common/lib/constants';
-import { removeAttributesId } from './migrations/remove_attributes_id';
+import { migrationsFactory } from './migrations';
+import type { CanvasSavedObjectTypeMigrationsDeps } from './migrations';
 
-export const workpadType: SavedObjectsType = {
+export const workpadTypeFactory = (
+  deps: CanvasSavedObjectTypeMigrationsDeps
+): SavedObjectsType => ({
   name: CANVAS_TYPE,
   hidden: false,
   namespaceType: 'multiple-isolated',
@@ -29,9 +32,7 @@ export const workpadType: SavedObjectsType = {
       '@created': { type: 'date' },
     },
   },
-  migrations: {
-    '7.0.0': removeAttributesId,
-  },
+  migrations: migrationsFactory(deps),
   management: {
     importableAndExportable: true,
     icon: 'canvasApp',
@@ -46,4 +47,4 @@ export const workpadType: SavedObjectsType = {
       };
     },
   },
-};
+});
