@@ -34,7 +34,7 @@ import { DiscoverStartPlugins } from './plugin';
 import { getHistory } from './kibana_services';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
-import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
 import { FieldFormatsStart } from '../../field_formats/public';
 import { EmbeddableStart } from '../../embeddable/public';
 
@@ -105,7 +105,7 @@ export function buildServices(
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
-    indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    indexPatternFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
   };
