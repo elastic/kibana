@@ -13,6 +13,8 @@ import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  dockerPush: boolean;
+  dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
   downloadCloudDependencies: boolean;
   initialize: boolean;

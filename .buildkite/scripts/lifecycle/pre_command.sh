@@ -72,6 +72,12 @@ export GITHUB_TOKEN
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
 
+KIBANA_DOCKER_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_USERNAME
+
+KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_PASSWORD
+
 # Setup Failed Test Reporter Elasticsearch credentials
 {
   TEST_FAILURES_ES_CLOUD_ID=$(retry 5 5 vault read -field=cloud_id secret/kibana-issues/dev/failed_tests_reporter_es)
