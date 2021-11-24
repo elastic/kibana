@@ -58,7 +58,7 @@ export const DANGER_BODY = i18n.translate(
 );
 
 export const DANGER_BUTTON = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardDangerPanelButton',
+  'xpack.securitySolution.overview.ctiDashboardDangerButton',
   {
     defaultMessage: 'Enable sources',
   }

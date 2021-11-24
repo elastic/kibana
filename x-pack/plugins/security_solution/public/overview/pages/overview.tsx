@@ -76,8 +76,10 @@ const OverviewComponent = () => {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const allTiDataSources = useAllTiDataSources();
+  const { tiDataSources: allTiDataSources, isInitialyLoaded: allTiDataSourcesLoaded } =
+    useAllTiDataSources();
   const tiIntegrationStatus = useTiIntegrations();
+  const isTiLoaded = tiIntegrationStatus && allTiDataSourcesLoaded;
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
@@ -152,7 +154,7 @@ const OverviewComponent = () => {
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup direction="row">
                       <EuiFlexItem grow={1}>
-                        {tiIntegrationStatus && (
+                        {isTiLoaded && (
                           <ThreatIntelLinkPanel
                             isSomeIntegrationsDisabled={
                               tiIntegrationStatus.isSomeIntegrationsDisabled

@@ -16,7 +16,7 @@ export const useAllTiDataSources = () => {
     []
   );
 
-  const { tiDataSources } = useTiDataSources({ to, from });
+  const { tiDataSources, isInitialyLoaded } = useTiDataSources({ to, from });
 
-  return tiDataSources;
+  return { tiDataSources, isInitialyLoaded };
 };
