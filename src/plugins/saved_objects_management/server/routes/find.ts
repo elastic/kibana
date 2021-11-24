@@ -61,19 +61,17 @@ export const registerFindRoute = (
       );
 
       const client = getClient({ includedHiddenTypes });
-      const searchFields = new Set<string>();
 
+      const searchFields: Record<string, string[]> = {};
       importAndExportableTypes.forEach((type) => {
-        const searchField = managementService.getDefaultSearchField(type);
-        if (searchField) {
-          searchFields.add(searchField);
-        }
+        const searchField = managementService.getDefaultSearchField(type) ?? 'id';
+        searchFields[type] = [searchField];
       });
 
       const findResponse = await client.find<any>({
         ...query,
         fields: undefined,
-        searchFields: [...searchFields],
+        searchFields,
       });
 
       const enhancedSavedObjects = findResponse.saved_objects

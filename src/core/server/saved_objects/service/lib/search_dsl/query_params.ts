@@ -7,6 +7,7 @@
  */
 
 import * as esKuery from '@kbn/es-query';
+
 type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
@@ -132,7 +133,7 @@ interface QueryParams {
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   search?: string;
   defaultSearchOperator?: SearchOperator;
-  searchFields?: string[];
+  searchFields?: string[] | Record<string, string[]>;
   rootSearchFields?: string[];
   hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
   hasReferenceOperator?: SearchOperator;
@@ -212,6 +213,20 @@ export function getQueryParams({
     hasReference = [hasReference];
   }
 
+  const allSearchFields =
+    !searchFields || Array.isArray(searchFields)
+      ? searchFields
+      : [...new Set(Object.values(searchFields).flat())];
+
+  const searchFieldMap = Array.isArray(searchFields)
+    ? types.reduce((record, t) => {
+        return {
+          ...record,
+          [t]: searchFields as string[],
+        };
+      }, {} as Record<string, string[]>)
+    : searchFields;
+
   const bool: any = {
     filter: [
       ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
@@ -235,7 +250,7 @@ export function getQueryParams({
     const simpleQueryStringClause = getSimpleQueryStringClause({
       search,
       types,
-      searchFields,
+      searchFields: allSearchFields,
       rootSearchFields,
       defaultSearchOperator,
     });
@@ -243,7 +258,7 @@ export function getQueryParams({
     if (useMatchPhrasePrefix) {
       bool.should = [
         simpleQueryStringClause,
-        ...getMatchPhrasePrefixClauses({ search, searchFields, types, registry }),
+        ...getMatchPhrasePrefixClauses({ search, searchFields: searchFieldMap, types, registry }),
       ];
       bool.minimum_should_match = 1;
     } else {
@@ -267,7 +282,7 @@ const getMatchPhrasePrefixClauses = ({
   types,
 }: {
   search: string;
-  searchFields?: string[];
+  searchFields?: Record<string, string[]>;
   types: string[];
   registry: ISavedObjectTypeRegistry;
 }) => {
@@ -292,34 +307,28 @@ interface FieldWithBoost {
 }
 
 const getMatchPhrasePrefixFields = ({
-  searchFields = [],
+  searchFields = {},
   types,
   registry,
 }: {
-  searchFields?: string[];
+  searchFields?: Record<string, string[]>;
   types: string[];
   registry: ISavedObjectTypeRegistry;
 }): FieldWithBoost[] => {
-  const output: FieldWithBoost[] = [];
-
-  searchFields = searchFields.filter((field) => field !== '*');
-  let fields: string[];
-  if (searchFields.length === 0) {
-    fields = types.reduce((typeFields, type) => {
+  let allFields: string[] = [];
+  for (const type of types) {
+    let typeFields = (searchFields[type] ?? []).filter((field) => field !== '*');
+    if (typeFields.length === 0) {
       const defaultSearchField = registry.getType(type)?.management?.defaultSearchField;
       if (defaultSearchField) {
-        return [...typeFields, `${type}.${defaultSearchField}`];
+        typeFields = [defaultSearchField];
       }
-      return typeFields;
-    }, [] as string[]);
-  } else {
-    fields = [];
-    for (const field of searchFields) {
-      fields = fields.concat(types.map((type) => `${type}.${field}`));
     }
+    allFields = [...allFields, ...typeFields.map((typeField) => `${type}.${typeField}`)];
   }
 
-  fields.forEach((rawField) => {
+  const output: FieldWithBoost[] = [];
+  allFields.forEach((rawField) => {
     const [field, rawBoost] = rawField.split('^');
     let boost: number = 1;
     if (rawBoost) {
@@ -337,6 +346,7 @@ const getMatchPhrasePrefixFields = ({
       boost,
     });
   });
+
   return output;
 };
 

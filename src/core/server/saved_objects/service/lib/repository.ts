@@ -892,10 +892,6 @@ export class SavedObjectsRepository {
       return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
 
-    if (searchFields && !Array.isArray(searchFields)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('options.searchFields must be an array');
-    }
-
     if (fields && !Array.isArray(fields)) {
       throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
     }

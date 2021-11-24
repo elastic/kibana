@@ -7,6 +7,7 @@
  */
 
 import * as esKuery from '@kbn/es-query';
+
 type KueryNode = any;
 
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
@@ -432,19 +433,27 @@ describe('#getQueryParams', () => {
       });
 
       describe('`searchFields` and `rootSearchFields` parameters', () => {
-        const getExpectedFields = (searchFields: string[], typeOrTypes: string | string[]) => {
+        const getExpectedFields = (
+          searchFields: string[] | Record<string, string[]>,
+          typeOrTypes: string | string[]
+        ) => {
           const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-          return searchFields.map((x) => types.map((y) => `${y}.${x}`)).flat();
+          const allSearchFields = Array.isArray(searchFields)
+            ? searchFields
+            : [...new Set(Object.values(searchFields).flat())];
+          return allSearchFields.map((x) => types.map((y) => `${y}.${x}`)).flat();
         };
 
         const test = ({
           searchFields,
           rootSearchFields,
+          typeSubsets = ALL_TYPE_SUBSETS,
         }: {
-          searchFields?: string[];
+          searchFields?: string[] | Record<string, string[]>;
           rootSearchFields?: string[];
+          typeSubsets?: Array<string | string[]>;
         }) => {
-          for (const typeOrTypes of ALL_TYPE_SUBSETS) {
+          for (const typeOrTypes of typeSubsets) {
             const result = getQueryParams({
               registry,
               type: typeOrTypes,
@@ -520,6 +529,10 @@ describe('#getQueryParams', () => {
         it('supports search fields and raw search fields', () => {
           test({ searchFields: ['title'], rootSearchFields: ['_id'] });
         });
+
+        it('supports per-type searchFields', () => {
+          test({ searchFields: { pending: ['title'], saved: ['desc'] }, typeSubsets: [ALL_TYPES] });
+        });
       });
 
       describe('`defaultSearchOperator` parameter', () => {
@@ -559,7 +572,7 @@ describe('#getQueryParams', () => {
         type,
       }: {
         search?: string;
-        searchFields?: string[];
+        searchFields?: string[] | Record<string, string[]>;
         type?: string[];
       }) =>
         getQueryParams({
@@ -599,7 +612,7 @@ describe('#getQueryParams', () => {
         const mppClauses = shouldClauses.slice(1);
 
         expect(mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])).toEqual(
-          ['saved.title', 'pending.title', 'saved.desc', 'pending.desc']
+          ['saved.title', 'saved.desc', 'pending.title', 'pending.desc']
         );
       });
 
@@ -665,6 +678,45 @@ describe('#getQueryParams', () => {
           { 'saved.title': { query: 'foo', boost: 3 } },
           { 'saved.description': { query: 'foo', boost: 1 } },
         ]);
+      });
+
+      it('supports specifying per-type searchFields ', () => {
+        const result = getQueryParamForSearch({
+          search: searchQuery,
+          type: ['saved', 'pending'],
+          searchFields: {
+            saved: ['title', 'desc'],
+            pending: ['title'],
+          },
+        });
+        const shouldClauses = result.query.bool.should;
+
+        expect(shouldClauses.length).toBe(4);
+
+        const mppClauses = shouldClauses.slice(1);
+
+        expect(mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])).toEqual(
+          ['saved.title', 'saved.desc', 'pending.title']
+        );
+      });
+
+      it('fallbacks to `defaultSearchField` when fields are not specified for a type', () => {
+        const result = getQueryParamForSearch({
+          search: searchQuery,
+          type: ['saved', 'pending'],
+          searchFields: {
+            saved: ['desc'],
+          },
+        });
+        const shouldClauses = result.query.bool.should;
+
+        expect(shouldClauses.length).toBe(3);
+
+        const mppClauses = shouldClauses.slice(1);
+
+        expect(mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])).toEqual(
+          ['saved.desc', 'pending.title']
+        );
       });
     });
   });

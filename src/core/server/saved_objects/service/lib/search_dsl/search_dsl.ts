@@ -22,7 +22,7 @@ interface GetSearchDslOptions {
   type: string | string[];
   search?: string;
   defaultSearchOperator?: SearchOperator;
-  searchFields?: string[];
+  searchFields?: string[] | Record<string, string[]>;
   rootSearchFields?: string[];
   searchAfter?: estypes.Id[];
   sortField?: string;

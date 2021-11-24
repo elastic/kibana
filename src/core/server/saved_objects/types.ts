@@ -90,8 +90,12 @@ export interface SavedObjectsFindOptions {
   fields?: string[];
   /** Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information */
   search?: string;
-  /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
-  searchFields?: string[];
+  /**
+   * The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information
+   * Can be either an array of string, in which case the fields will be used for all specified types, or a record specifying
+   * the search fields per type.
+   */
+  searchFields?: string[] | Record<string, string[]>;
   /**
    * Use the sort values from the previous page to retrieve the next page of results.
    */
@@ -371,6 +375,8 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
   visibleInManagement?: boolean;
   /**
    * The default search field to use for this type. Defaults to `id`.
+   *
+   * @remarks the field must be mapped as `text` and not `keyword`
    */
   defaultSearchField?: string;
   /**
