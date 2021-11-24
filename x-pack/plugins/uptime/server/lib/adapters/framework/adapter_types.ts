@@ -12,7 +12,6 @@ import type {
   IScopedClusterClient,
 } from 'src/core/server';
 import { ObservabilityPluginSetup } from '../../../../../observability/server';
-import { PluginSetupContract as AlertingPLuginSetupContract } from '../../../../../alerting/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -47,7 +46,7 @@ export interface UptimeCoreSetup {
 
 export interface UptimeCorePluginsSetup {
   features: PluginSetupContract;
-  alerting: AlertingPLuginSetupContract;
+  alerting: any;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
