@@ -105,6 +105,7 @@ export class RuleDataService implements IRuleDataService {
 
     this.installCommonResources = Promise.resolve(right('ok'));
     this.isInitialized = false;
+    this.disabledRegistrationContexts = options.disabledRegistrationContexts;
   }
 
   public getResourcePrefix(): string {
@@ -117,6 +118,10 @@ export class RuleDataService implements IRuleDataService {
 
   public isWriteEnabled(): boolean {
     return this.options.isWriteEnabled;
+  }
+
+  public isRegistrationContextDisabled(registrationContext): boolean {
+    return this.options.disabledRegistrationContexts.includes(registrationContext);
   }
 
   /**
@@ -150,7 +155,7 @@ export class RuleDataService implements IRuleDataService {
         'Rule data service is not initialized. Make sure to call initializeService() in the rule registry plugin setup phase'
       );
     }
-
+    const { registrationContext } = this.indexOptions;
     const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: this.options.kibanaVersion });
 
     const indicesAssociatedWithFeature = this.indicesByFeatureId.get(indexOptions.feature) ?? [];
@@ -195,7 +200,8 @@ export class RuleDataService implements IRuleDataService {
     return new RuleDataClient({
       indexInfo,
       resourceInstaller: this.resourceInstaller,
-      isWriteEnabled: this.isWriteEnabled(),
+      isWriteEnabled:
+        this.isWriteEnabled() && !this.isRegistrationContextDisabled(registrationContext),
       isWriterCacheEnabled: this.isWriterCacheEnabled(),
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
