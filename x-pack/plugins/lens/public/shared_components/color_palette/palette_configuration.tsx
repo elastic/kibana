@@ -54,7 +54,9 @@ function getColorRanges(palettes, colorStops, activePalette, dataBounds) {
       end:
         index < colorStopsToShow.length - 1
           ? colorStopsToShow[index + 1].stop
-          : activePalette.params?.rangeMax || Infinity,
+          : activePalette.params?.rangeMax === colorStop.stop
+          ? Infinity
+          : activePalette.params?.rangeMax,
     };
   });
 }
@@ -236,11 +238,21 @@ export function NewCustomizablePalette({
           rangeType={activePalette.params?.rangeType}
           dataBounds={dataBounds}
           onChange={(colorStops, upperMax) => {
+            let continuity: CustomPaletteParams['continuity'] = 'none';
+            if (!isFinite(upperMax) && !isFinite(colorStops[0]?.stop)) {
+              continuity = 'all';
+            } else if (!isFinite(upperMax)) {
+              continuity = 'above';
+            } else if (!isFinite(colorStops[0]?.stop)) {
+              continuity = 'below';
+            }
+
             const newParams = getSwitchToCustomParams(
               palettes,
               activePalette,
               {
                 colorStops,
+                continuity,
                 steps: activePalette.params?.steps || DEFAULT_COLOR_STEPS,
                 reverse: !activePalette.params?.reverse,
                 rangeMin: colorStops[0]?.stop,

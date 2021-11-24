@@ -82,7 +82,7 @@ export function ColorRanges(props) {
               ({ start: startA }, { start: startB }) => Number(startA) - Number(startB)
             );
             const lastRange = newColorRanges[newColorRanges.length - 1];
-            if (Number(lastRange.start) > Number(lastRange.end)) {
+            if (isFinite(lastRange.end) && Number(lastRange.start) > Number(lastRange.end)) {
               setValid(false);
             }
 
@@ -173,6 +173,10 @@ export function ColorRanges(props) {
                   }
                 )}
                 onClick={() => {
+                  if (index !== 0 && index !== colorRanges.length - 1) {
+                    colorRanges[index - 1].end = colorRanges[index + 1].start;
+                  }
+
                   const newColorRanges = colorRanges.filter((_, i) => i !== index);
                   setColorRanges(newColorRanges);
                 }}
