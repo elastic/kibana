@@ -208,27 +208,17 @@ export interface CrawlConfig {
 export interface CrawlConfigFromServer {
   domain_allowlist: string[];
 }
-export interface CrawlEventFromServer {
-  id: string;
+export type CrawlEventFromServer = CrawlRequestFromServer & {
   stage: CrawlEventStage;
-  status: CrawlerStatus;
-  created_at: string;
-  began_at: string | null;
-  completed_at: string | null;
   type: CrawlType;
   crawl_config: CrawlConfigFromServer;
-}
+};
 
-export interface CrawlEvent {
-  id: string;
+export type CrawlEvent = CrawlRequest & {
   stage: CrawlEventStage;
-  status: CrawlerStatus;
-  createdAt: string;
-  beganAt: string | null;
-  completedAt: string | null;
   type: CrawlType;
   crawlConfig: CrawlConfig;
-}
+};
 
 export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
   [CrawlerStatus.Pending]: i18n.translate(

@@ -51,7 +51,7 @@ const values: { events: CrawlEvent[] } = {
 };
 
 const actions = {
-  fetchCrawlRequest: jest.fn(),
+  fetchCrawlEvent: jest.fn(),
   openFlyout: jest.fn(),
 };
 
@@ -84,7 +84,7 @@ describe('CrawlRequestsTable', () => {
       expect(crawlID.text()).toContain('618d0e66abe97bc688328900');
 
       crawlID.simulate('click');
-      expect(actions.fetchCrawlRequest).toHaveBeenCalledWith('618d0e66abe97bc688328900');
+      expect(actions.fetchCrawlEvent).toHaveBeenCalledWith('618d0e66abe97bc688328900');
       expect(actions.openFlyout).toHaveBeenCalled();
 
       // @ts-expect-error 4.3.5 upgrade

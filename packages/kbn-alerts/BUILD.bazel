@@ -37,8 +37,9 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-i18n",
+  "//packages/kbn-i18n:npm_module_types",
   "@npm//@elastic/eui",
+  "@npm//tslib",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",
