@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import typeDetect from 'type-detect';
-
 import { i18n } from '@kbn/i18n';
 
 export enum CrawlerPolicies {
