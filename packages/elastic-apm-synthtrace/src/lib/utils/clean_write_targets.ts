@@ -7,7 +7,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { Logger } from './logger';
+import { Logger } from './create_logger';
 
 export async function cleanWriteTargets({
   targets,
