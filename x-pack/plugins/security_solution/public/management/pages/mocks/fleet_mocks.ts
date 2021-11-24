@@ -42,36 +42,41 @@ const getPackagePoliciesFromKueryString = (kueryString: string): string[] => {
     arguments?: KqlArgumentType[];
   } = fromKueryExpression(kueryString);
 
-  // The kuery AST has a structure similar to to this:
-  // given string:
-  //    ingest-agent-policies.package_policies: (ddf6570b-9175-4a6d-b288-61a09771c647 or b8e616ae-44fc-4be7-846c-ce8fa5c082dd or 2d95bec3-b48f-4db7-9622-a2b061cc031d)
-  // output would be:
-  // {
-  //   "type": "function",
-  //   "function": "or",  // this would not be here if no `OR` was found in the string
-  //   "arguments": [
-  //     {
-  //       "type": "function",
-  //       "function": "is",
-  //       "arguments": [
-  //         {
-  //           "type": "literal",
-  //           "value": "ingest-agent-policies.package_policies"
-  //         },
-  //         {
-  //           "type": "literal",
-  //           "value": "ddf6570b-9175-4a6d-b288-61a09771c647"
-  //         },
-  //         {
-  //           "type": "literal",
-  //           "value": false
-  //         }
-  //       ]
-  //     },
-  //     // .... other kquery arguments here
-  //   ]
-  // }
-  //
+  /**
+   * # ABOUT THE STRUCTURE RETURNED BY THE KQL PARSER:
+   *
+   * The kuery AST has a structure similar to to this:
+   * given string:
+   *
+   *    ingest-agent-policies.package_policies: (ddf6570b-9175-4a6d-b288-61a09771c647 or b8e616ae-44fc-4be7-846c-ce8fa5c082dd or 2d95bec3-b48f-4db7-9622-a2b061cc031d)
+   *
+   * output would be:
+   * {
+   *   "type": "function",
+   *   "function": "or",  // this would not be here if no `OR` was found in the string
+   *   "arguments": [
+   *     {
+   *       "type": "function",
+   *       "function": "is",
+   *       "arguments": [
+   *         {
+   *           "type": "literal",
+   *           "value": "ingest-agent-policies.package_policies"
+   *         },
+   *         {
+   *           "type": "literal",
+   *           "value": "ddf6570b-9175-4a6d-b288-61a09771c647"
+   *         },
+   *         {
+   *           "type": "literal",
+   *           "value": false
+   *         }
+   *       ]
+   *     },
+   *     // .... other kquery arguments here
+   *   ]
+   * }
+   */
 
   // Because there could be be many combinations of OR/AND, we just look for any defined literal that
   // looks ot have a value for package_policies.
