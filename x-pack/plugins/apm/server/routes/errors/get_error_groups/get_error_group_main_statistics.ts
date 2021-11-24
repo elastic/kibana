@@ -22,7 +22,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { Setup } from '../../../lib/helpers/setup_request';
 
-export async function getServiceErrorGroupMainStatistics({
+export async function getErrorGroupMainStatistics({
   kuery,
   serviceName,
   setup,

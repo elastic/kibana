@@ -18,8 +18,8 @@ import {
   comparisonRangeRt,
 } from '../default_api_types';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
-import { getServiceErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
-import { getServiceErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
+import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
+import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
@@ -57,7 +57,7 @@ const errorsMainStatisticsRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    const errorGroups = await getServiceErrorGroupMainStatistics({
+    const errorGroups = await getErrorGroupMainStatistics({
       environment,
       kuery,
       serviceName,
@@ -112,7 +112,7 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
       },
     } = params;
 
-    return getServiceErrorGroupPeriods({
+    return getErrorGroupPeriods({
       environment,
       kuery,
       serviceName,

@@ -10,7 +10,7 @@ import {
   inspectSearchParams,
 } from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getServiceErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
+import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
 
 describe('error queries', () => {
@@ -38,7 +38,7 @@ describe('error queries', () => {
 
   it('fetches multiple error groups', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServiceErrorGroupMainStatistics({
+      getErrorGroupMainStatistics({
         sortDirection: 'asc',
         sortField: 'foo',
         serviceName: 'serviceName',
@@ -56,7 +56,7 @@ describe('error queries', () => {
 
   it('fetches multiple error groups when sortField = lastSeen', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServiceErrorGroupMainStatistics({
+      getErrorGroupMainStatistics({
         sortDirection: 'asc',
         sortField: 'lastSeen',
         serviceName: 'serviceName',
