@@ -87,7 +87,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('Authorization', `Bearer ${token.value}`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
-      const enrollmentApiKeyId = response.body.list[0].id;
+      const enrollmentApiKeyId = response.body.items[0].id;
       await supertestWithoutAuth
         .get(`/api/fleet/enrollment-api-keys/${enrollmentApiKeyId}`)
         .set('Authorization', `Bearer ${token.value}`)

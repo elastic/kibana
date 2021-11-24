@@ -151,7 +151,7 @@ const endpointListApiPathHandlerMocks = ({
     [INGEST_API_FLEET_AGENTS]: (): GetAgentsResponse => {
       return {
         total: totalAgentsUsingEndpoint,
-        list: [],
+        items: [],
         totalInactive: 0,
         page: 1,
         perPage: 10,
