@@ -13,6 +13,7 @@ import {
   setSyntheticsServiceApiKey,
   syntheticsServiceApiKey,
 } from '../saved_objects/service_api_key';
+import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 
 export const getAPIKeyForSyntheticsService = async ({
   encryptedSavedObject,
@@ -24,7 +25,7 @@ export const getAPIKeyForSyntheticsService = async ({
   request: KibanaRequest;
   security: SecurityPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
-}) => {
+}): Promise<SyntheticsServiceApiKey | Error | undefined> => {
   const encryptedClient = encryptedSavedObject.getClient({
     includedHiddenTypes: [syntheticsServiceApiKey.name],
   });
@@ -33,7 +34,7 @@ export const getAPIKeyForSyntheticsService = async ({
   if (apiKey) {
     return apiKey;
   }
-  return generateAndSaveAPIKey({ request, security, savedObjectsClient });
+  return await generateAndSaveAPIKey({ request, security, savedObjectsClient });
 };
 
 export const generateAndSaveAPIKey = async ({
@@ -49,7 +50,7 @@ export const generateAndSaveAPIKey = async ({
     const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
     if (!isApiKeysEnabled) {
-      return;
+      return new Error('Please enable API keys in kibana to use synthetics service.');
     }
 
     const apiKeyResult = await security.authc.apiKeys?.create(request, {
@@ -59,17 +60,22 @@ export const generateAndSaveAPIKey = async ({
           cluster: ['monitor', 'read_ilm', 'read_pipeline'],
           index: [
             {
-              names: ['synthetics-*', 'heartbeat-*'],
-              privileges: ['view_index_metadata', 'create_doc'],
+              names: ['synthetics-*'],
+              privileges: ['view_index_metadata', 'create_doc', 'auto_configure'],
             },
           ],
         },
+      },
+      metadata: {
+        description:
+          'Created for synthetics service to be passed to the heartbeat to communicate with ES',
       },
     });
 
     if (apiKeyResult) {
       const { id, name, api_key: apiKey } = apiKeyResult;
       const apiKeyObject = { id, name, apiKey };
+      // discard decoded key and rest of the keys
       await setSyntheticsServiceApiKey(savedObjectsClient, apiKeyObject);
       return apiKeyObject;
     }

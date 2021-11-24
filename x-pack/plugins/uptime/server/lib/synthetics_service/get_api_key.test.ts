@@ -45,11 +45,15 @@ describe('getAPIKeyTest', function () {
             cluster: ['monitor', 'read_ilm', 'read_pipeline'],
             index: [
               {
-                names: ['synthetics-*', 'heartbeat-*'],
-                privileges: ['view_index_metadata', 'create_doc'],
+                names: ['synthetics-*'],
+                privileges: ['view_index_metadata', 'create_doc', 'auto_configure'],
               },
             ],
           },
+        },
+        metadata: {
+          description:
+            'Created for synthetics service to be passed to the heartbeat to communicate with ES',
         },
       }
     );
