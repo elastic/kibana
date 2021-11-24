@@ -1027,7 +1027,7 @@ describe('test endpoint routes', () => {
         expect(endpointResultList.pageSize).toEqual(10);
       });
 
-      it.only('test find the latest of all endpoints with paging and filters properties', async () => {
+      it('test find the latest of all endpoints with paging and filters properties', async () => {
         const mockRequest = httpServerMock.createKibanaRequest({
           query: {
             page: 1,
