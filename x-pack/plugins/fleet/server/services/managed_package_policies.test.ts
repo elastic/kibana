@@ -8,7 +8,6 @@
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { Installation, PackageInfo } from '../../common';
-import { AUTO_UPDATE_PACKAGES } from '../../common';
 
 import { shouldUpgradePolicies, upgradeManagedPackagePolicies } from './managed_package_policies';
 import { packagePolicyService } from './package_policy';
@@ -227,50 +226,6 @@ describe('upgradeManagedPackagePolicies', () => {
 });
 
 describe('shouldUpgradePolicies', () => {
-  describe('package is marked as AUTO_UPDATE', () => {
-    describe('keep_policies_up_to_date is true', () => {
-      it('returns false', () => {
-        const packageInfo = {
-          version: '1.0.0',
-          keepPoliciesUpToDate: true,
-          name: AUTO_UPDATE_PACKAGES[0].name,
-        };
-
-        const installedPackage = {
-          version: '1.0.0',
-        };
-
-        const result = shouldUpgradePolicies(
-          packageInfo as PackageInfo,
-          installedPackage as Installation
-        );
-
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('keep_policies_up_to_date is false', () => {
-      it('returns false', () => {
-        const packageInfo = {
-          version: '1.0.0',
-          keepPoliciesUpToDate: false,
-          name: AUTO_UPDATE_PACKAGES[0].name,
-        };
-
-        const installedPackage = {
-          version: '1.0.0',
-        };
-
-        const result = shouldUpgradePolicies(
-          packageInfo as PackageInfo,
-          installedPackage as Installation
-        );
-
-        expect(result).toBe(false);
-      });
-    });
-  });
-
   describe('package policy is up-to-date', () => {
     describe('keep_policies_up_to_date is true', () => {
       it('returns false', () => {

@@ -181,4 +181,68 @@ describe('take action dropdown', () => {
       });
     });
   });
+
+  describe('should correctly enable/disable the "Add Endpoint event filter" button', () => {
+    let wrapper: ReactWrapper;
+
+    const getEcsDataWithAgentType = (agentType: string) => ({
+      ...mockEcsDataWithAlert,
+      agent: {
+        type: [agentType],
+      },
+    });
+
+    const modifiedMockDetailsData = mockAlertDetailsData
+      .map((obj) => {
+        if (obj.field === 'kibana.alert.rule.uuid') {
+          return null;
+        }
+        if (obj.field === 'event.kind') {
+          return {
+            category: 'event',
+            field: 'event.kind',
+            values: ['event'],
+            originalValue: 'event',
+          };
+        }
+        return obj;
+      })
+      .filter((obj) => obj) as TimelineEventsDetailsItem[];
+
+    test('should enable the "Add Endpoint event filter" button if provided endpoint event', async () => {
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown
+            {...defaultProps}
+            detailsData={modifiedMockDetailsData}
+            ecsData={getEcsDataWithAgentType('endpoint')}
+          />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+        ).toBeEnabled();
+      });
+    });
+
+    test('should disable the "Add Endpoint event filter" button if provided non-event or non-endpoint', async () => {
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown
+            {...defaultProps}
+            detailsData={modifiedMockDetailsData}
+            ecsData={getEcsDataWithAgentType('filesbeat')}
+          />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+        ).toBeDisabled();
+      });
+    });
+  });
 });

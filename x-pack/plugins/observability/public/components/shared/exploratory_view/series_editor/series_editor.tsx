@@ -7,9 +7,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { rgba } from 'polished';
-import { euiStyled } from './../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { AppDataType, ReportViewType, BuilderItem } from '../types';
 import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
 import { IndexPatternState, useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
@@ -115,19 +115,25 @@ export const SeriesEditor = React.memo(function () {
 
   return (
     <Wrapper>
-      <div>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow label={REPORT_TYPE_LABEL} display="columnCompressed">
-              <ReportTypesSelect />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ViewActions onApply={() => setItemIdToExpandedRowMap({})} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <SectionHeaderBackground />
+      <StickyFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            css={{ alignItems: 'center' }}
+            aria-label={REPORT_TYPE_ARIA_LABEL}
+            id="report-type-label"
+            isDisabled={true}
+          >
+            <ReportTypesSelect prepend={REPORT_TYPE_LABEL} />
+          </EuiFormRow>
+        </EuiFlexItem>
 
-        <EuiHorizontalRule margin="s" />
+        <EuiFlexItem>
+          <ViewActions onApply={() => setItemIdToExpandedRowMap({})} />
+        </EuiFlexItem>
+      </StickyFlexGroup>
+
+      <EditorRowsWrapper>
         {editorItems.map((item) => (
           <div key={item.id}>
             <Series
@@ -138,8 +144,7 @@ export const SeriesEditor = React.memo(function () {
             <EuiSpacer size="s" />
           </div>
         ))}
-        <EuiSpacer size="s" />
-      </div>
+      </EditorRowsWrapper>
     </Wrapper>
   );
 });
@@ -181,6 +186,28 @@ const Wrapper = euiStyled.div`
   }
 `;
 
+const SectionHeaderBackground = euiStyled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 56px;
+  background-color: ${({ theme }) => theme.eui.euiPageBackgroundColor};
+  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  z-index: 90;
+`;
+
+const StickyFlexGroup = euiStyled(EuiFlexGroup)`
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0;
+`;
+
+const EditorRowsWrapper = euiStyled.div`
+  margin: ${({ theme }) => theme.eui.paddingSizes.m} 0;
+`;
+
 export const LOADING_VIEW = i18n.translate(
   'xpack.observability.expView.seriesBuilder.loadingView',
   {
@@ -195,13 +222,16 @@ export const SELECT_REPORT_TYPE = i18n.translate(
   }
 );
 
-export const RESET_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.reset', {
-  defaultMessage: 'Reset',
-});
-
 export const REPORT_TYPE_LABEL = i18n.translate(
   'xpack.observability.expView.seriesBuilder.reportType',
   {
     defaultMessage: 'Report type',
+  }
+);
+
+export const REPORT_TYPE_ARIA_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.reportType.aria',
+  {
+    defaultMessage: 'This select allows you to choose the type of report you wish to create',
   }
 );

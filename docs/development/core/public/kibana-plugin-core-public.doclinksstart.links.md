@@ -163,7 +163,6 @@ readonly links: {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
-            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -212,7 +211,11 @@ readonly links: {
             uptimeDurationAnomaly: string;
         }>;
         readonly alerting: Record<string, string>;
-        readonly maps: Record<string, string>;
+        readonly maps: Readonly<{
+            guide: string;
+            importGeospatialPrivileges: string;
+            gdalTutorial: string;
+        }>;
         readonly monitoring: Record<string, string>;
         readonly security: Readonly<{
             apiKeyServiceSettings: string;
@@ -237,7 +240,6 @@ readonly links: {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
-            datastreamsILM: string;
             beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
