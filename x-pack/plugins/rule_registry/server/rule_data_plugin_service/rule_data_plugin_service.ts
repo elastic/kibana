@@ -155,7 +155,7 @@ export class RuleDataService implements IRuleDataService {
         'Rule data service is not initialized. Make sure to call initializeService() in the rule registry plugin setup phase'
       );
     }
-    const { registrationContext } = this.indexOptions;
+    const { registrationContext } = indexOptions;
     const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: this.options.kibanaVersion });
 
     const indicesAssociatedWithFeature = this.indicesByFeatureId.get(indexOptions.feature) ?? [];
