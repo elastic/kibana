@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fromKueryExpression } from '@kbn/es-query';
 import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { first, get, last } from 'lodash';
@@ -78,6 +77,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
     if (!params.filterQuery && params.filterQueryText) {
       try {
+        const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able

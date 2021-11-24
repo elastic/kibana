@@ -7,7 +7,6 @@
 
 import { first, last, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { fromKueryExpression } from '@kbn/es-query';
 import moment from 'moment';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
@@ -89,6 +88,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     if (!params.filterQuery && params.filterQueryText) {
       try {
+        const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
         const timestamp = moment().toISOString();
