@@ -84,7 +84,6 @@ export const logEntriesSearchStrategyProvider = ({
             data.indexPatterns.indexPatternsServiceFactory(
               dependencies.savedObjectsClient,
               dependencies.esClient.asCurrentUser
-              // todo does this need request?
             ),
           ]).pipe(
             concatMap(([sourceConfiguration, indexPatternsService]) =>
