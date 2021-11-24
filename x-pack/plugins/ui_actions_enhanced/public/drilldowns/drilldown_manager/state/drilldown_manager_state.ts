@@ -128,9 +128,6 @@ export class DrilldownManagerState {
   public lastCloneRecord: null | { time: number; templateIds: string[] } = null;
 
   constructor(public readonly deps: DrilldownManagerStateDeps) {
-    this.events$ = new BehaviorSubject<DrilldownTableItem[]>(
-      this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
-    );
     const hideWelcomeMessage = deps.storage.get(helloMessageStorageKey);
     this.hideWelcomeMessage$ = new BehaviorSubject<boolean>(hideWelcomeMessage ?? false);
     this.canUnlockMoreDrilldowns = deps.actionFactories.some(

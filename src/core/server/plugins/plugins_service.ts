@@ -100,8 +100,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
 
   constructor(private readonly coreContext: CoreContext) {
-    this.prebootPluginsSystem = new PluginsSystem(coreContext, PluginType.preboot);
-    this.standardPluginsSystem = new PluginsSystem(coreContext, PluginType.standard);
     this.log = coreContext.logger.get('plugins-service');
     this.configService = coreContext.configService;
     this.config$ = coreContext.configService
