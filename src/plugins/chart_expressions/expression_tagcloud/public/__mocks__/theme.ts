@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getMetricVisRenderer } from './metric_vis_renderer';
+import { from } from 'rxjs';
+
+export const theme = {
+  theme$: from([{ darkMode: false }]),
+};
