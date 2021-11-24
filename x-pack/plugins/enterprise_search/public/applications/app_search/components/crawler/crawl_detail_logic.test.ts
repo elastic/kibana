@@ -34,6 +34,7 @@ const crawlRequestResponse: CrawlRequestWithDetailsFromServer = {
   crawl_config: {
     domain_allowlist: [],
     seed_urls: [],
+    sitemap_urls: [],
   },
 };
 

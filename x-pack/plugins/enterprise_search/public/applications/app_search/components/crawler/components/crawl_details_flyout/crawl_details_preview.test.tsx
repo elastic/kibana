@@ -27,6 +27,7 @@ const MOCK_VALUES: Partial<CrawlDetailValues> = {
     crawlConfig: {
       domainAllowlist: ['https://www.elastic.co', 'https://www.swiftype.com'],
       seedUrls: ['https://www.elastic.co/docs', 'https://www.swiftype.com/documentation'],
+      sitemapUrls: ['https://www.elastic.co/sitemap.xml', 'https://www.swiftype.com/sitemap.xml'],
     },
   },
 };

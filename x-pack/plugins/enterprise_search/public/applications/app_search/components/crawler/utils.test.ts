@@ -140,6 +140,7 @@ describe('crawlRequestWithDetailsServerToClient', () => {
       crawl_config: {
         domain_allowlist: [],
         seed_urls: [],
+        sitemap_urls: [],
       },
     };
 
@@ -153,6 +154,7 @@ describe('crawlRequestWithDetailsServerToClient', () => {
       crawlConfig: {
         domainAllowlist: [],
         seedUrls: [],
+        sitemapUrls: [],
       },
     };
 
@@ -188,6 +190,7 @@ describe('crawlEventServerToClient', () => {
       crawl_config: {
         domain_allowlist: [],
         seed_urls: [],
+        sitemap_urls: [],
       },
       stage: 'crawl',
     };
@@ -202,6 +205,7 @@ describe('crawlEventServerToClient', () => {
       crawlConfig: {
         domainAllowlist: [],
         seedUrls: [],
+        sitemapUrls: [],
       },
       stage: 'crawl',
     };
@@ -269,6 +273,7 @@ describe('crawlerDataServerToClient', () => {
           crawl_config: {
             domain_allowlist: ['https://www.elastic.co'],
             seed_urls: [],
+            sitemap_urls: [],
           },
         },
       ],
@@ -323,6 +328,7 @@ describe('crawlerDataServerToClient', () => {
         crawlConfig: {
           domainAllowlist: ['https://www.elastic.co'],
           seedUrls: [],
+          sitemapUrls: [],
         },
       },
     ]);
