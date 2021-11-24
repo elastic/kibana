@@ -28,7 +28,7 @@ export const ForceStopModelConfirmDialog: FC<ForceStopModelConfirmDialogProps> =
       title={
         <FormattedMessage
           id="xpack.ml.trainedModels.modelsList.forceStopDialog.title"
-          defaultMessage="Force stop model {modelId}?"
+          defaultMessage="Stop model {modelId}?"
           values={{ modelId: model.model_id }}
         />
       }
@@ -50,7 +50,7 @@ export const ForceStopModelConfirmDialog: FC<ForceStopModelConfirmDialogProps> =
     >
       <FormattedMessage
         id="xpack.ml.trainedModels.modelsList.forceStopDialog.pipelinesWarning"
-        defaultMessage="Selected model has associated pipelines: "
+        defaultMessage="You can't use these ingest pipelines until you restart the model:"
       />
       <ul>
         {Object.keys(model.pipelines!)
