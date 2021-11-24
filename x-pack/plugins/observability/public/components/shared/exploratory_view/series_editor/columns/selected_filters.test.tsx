@@ -11,6 +11,7 @@ import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../
 import { SelectedFilters } from './selected_filters';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
+import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 describe('SelectedFilters', function () {
   mockAppIndexPattern();
@@ -19,6 +20,7 @@ describe('SelectedFilters', function () {
     reportType: 'data-distribution',
     indexPattern: mockIndexPattern,
     dataType: 'ux',
+    reportConfigMap: obsvReportConfigMap,
   });
 
   it('should render properly', async function () {

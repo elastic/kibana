@@ -38,7 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
-    describe('query', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/86602
+    describe.skip('query', function () {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
