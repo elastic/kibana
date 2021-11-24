@@ -38,7 +38,7 @@ import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
-import { getColumns, getMonitoringColumns } from './columns';
+import { getColumns, getMonitoringColumns, RuleStatusRowItemType } from './columns';
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -265,12 +265,10 @@ export const RulesTables = React.memo<RulesTableProps>(
       [updateOptions, setLastRefreshDate]
     );
 
-    const rulesColumns = useMemo(() => {
-      return getColumns({
+    const [rulesColumns, monitoringColumns] = useMemo(() => {
+      const commonProps = {
         dispatch,
-        dispatchToaster,
         formatUrl,
-        history,
         hasMlPermissions,
         hasPermissions,
         loadingRuleIds:
@@ -279,10 +277,21 @@ export const RulesTables = React.memo<RulesTableProps>(
             ? loadingRuleIds
             : [],
         navigateToApp,
-        reFetchRules,
-        refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges: hasActionsPrivileges,
-      });
+      };
+      return [
+        getColumns({
+          ...commonProps,
+          dispatchToaster,
+          history,
+          reFetchRules,
+          refetchPrePackagedRulesStatus,
+        }),
+        getMonitoringColumns({
+          ...commonProps,
+          docLinks,
+        }),
+      ];
     }, [
       dispatch,
       dispatchToaster,
@@ -296,12 +305,13 @@ export const RulesTables = React.memo<RulesTableProps>(
       loadingRulesAction,
       navigateToApp,
       reFetchRules,
+      docLinks,
     ]);
 
-    const monitoringColumns = useMemo(
-      () => getMonitoringColumns(navigateToApp, formatUrl, docLinks),
-      [navigateToApp, formatUrl, docLinks]
-    );
+    // const monitoringColumns = useMemo(
+    //   () => getMonitoringColumns(navigateToApp, formatUrl, docLinks, loadingRuleIds),
+    //   [navigateToApp, formatUrl, docLinks, loadingRuleIds]
+    // );
 
     useEffect(() => {
       setRefreshRulesData(reFetchRules);
@@ -331,9 +341,10 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, selectedRuleIds);
 
     const euiBasicTableSelectionProps = useMemo(
-      () => ({
-        selectable: (item: Rule) => !loadingRuleIds.includes(item.id),
-        onSelectionChange: (selected: Rule[]) => {
+      <T extends RuleStatusRowItemType | Rule>() => ({
+        selectable: (item: T) => !loadingRuleIds.includes(item.id),
+        initialSelected: selectedRuleIds.map((id) => ({ id })) as T[],
+        onSelectionChange: (selected: T[]) => {
           /**
            * EuiBasicTable doesn't provide declarative API to control selected rows.
            * This limitation requires us to synchronize selection state manually using setSelection().
@@ -350,7 +361,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           }
         },
       }),
-      [loadingRuleIds, dispatch]
+      [selectedRuleIds, loadingRuleIds, dispatch]
     );
 
     const toggleSelectAll = useCallback(() => {
@@ -446,6 +457,17 @@ export const RulesTables = React.memo<RulesTableProps>(
         !initLoading,
       [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
     );
+
+    // update rules statuses with rules to avoid having stale rule object in ruleStatus
+    // happens because ruleStatuses retrieved asyncronously from _find_statuses API
+    const ruleStatusesItems = useMemo(() => {
+      const rulesMap = new Map(rules.map((item) => [item.id, item]));
+
+      return rulesStatuses.map((ruleStatus) => ({
+        ...ruleStatus,
+        rule: rulesMap.get(ruleStatus.id) ?? ruleStatus.rule,
+      }));
+    }, [rulesStatuses, rules]);
 
     return (
       <>
@@ -543,7 +565,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               pagination={paginationMemo}
               rules={rules}
               rulesColumns={rulesColumns}
-              rulesStatuses={rulesStatuses}
+              rulesStatuses={ruleStatusesItems}
               sorting={sorting}
               tableOnChangeCallback={tableOnChangeCallback}
               tableRef={tableRef}

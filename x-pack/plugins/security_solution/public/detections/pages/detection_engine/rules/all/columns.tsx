@@ -120,30 +120,79 @@ export const getActions = (
   },
 ];
 
+export type RuleRowItem = RuleStatus & Rule;
+
 export type RuleStatusRowItemType = RuleStatus & {
   name: string;
   id: string;
+  rule: Rule;
 };
+
 export type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 export type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
 type FormatUrl = (path: string) => string;
-interface GetColumns {
+type HasReadActionsPrivileges =
+  | boolean
+  | Readonly<{
+      [x: string]: boolean;
+    }>;
+
+interface CommonColumnsProps {
   dispatch: React.Dispatch<RulesTableAction>;
-  dispatchToaster: Dispatch<ActionToaster>;
   formatUrl: FormatUrl;
-  history: H.History;
   hasMlPermissions: boolean;
   hasPermissions: boolean;
   loadingRuleIds: string[];
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+  hasReadActionsPrivileges: HasReadActionsPrivileges;
+}
+interface GetColumns extends CommonColumnsProps {
+  dispatchToaster: Dispatch<ActionToaster>;
+  history: H.History;
   reFetchRules: () => Promise<void>;
   refetchPrePackagedRulesStatus: () => Promise<void>;
-  hasReadActionsPrivileges:
-    | boolean
-    | Readonly<{
-        [x: string]: boolean;
-      }>;
 }
+
+interface EnableSwitcherProps
+  extends Pick<
+    CommonColumnsProps,
+    | 'hasMlPermissions'
+    | 'hasReadActionsPrivileges'
+    | 'hasPermissions'
+    | 'loadingRuleIds'
+    | 'dispatch'
+  > {
+  rule: Rule;
+}
+
+const EnableSwitcher = ({
+  rule,
+  dispatch,
+  hasMlPermissions,
+  hasReadActionsPrivileges,
+  hasPermissions,
+  loadingRuleIds,
+}: EnableSwitcherProps) => {
+  return (
+    <EuiToolTip
+      position="top"
+      content={getToolTipContent(rule, hasMlPermissions, hasReadActionsPrivileges)}
+    >
+      <RuleSwitch
+        data-test-subj="enabled"
+        dispatch={dispatch}
+        id={rule.id}
+        enabled={rule.enabled}
+        isDisabled={
+          !canEditRuleWithActions(rule, hasReadActionsPrivileges) ||
+          !hasPermissions ||
+          (isMlRule(rule.type) && !hasMlPermissions && !rule.enabled)
+        }
+        isLoading={loadingRuleIds.includes(rule.id)}
+      />
+    </EuiToolTip>
+  );
+};
 
 export const getColumns = ({
   dispatch,
@@ -292,24 +341,15 @@ export const getColumns = ({
       align: 'center',
       field: 'enabled',
       name: i18n.COLUMN_ACTIVATE,
-      render: (value: Rule['enabled'], item: Rule) => (
-        <EuiToolTip
-          position="top"
-          content={getToolTipContent(item, hasMlPermissions, hasReadActionsPrivileges)}
-        >
-          <RuleSwitch
-            data-test-subj="enabled"
-            dispatch={dispatch}
-            id={item.id}
-            enabled={item.enabled}
-            isDisabled={
-              !canEditRuleWithActions(item, hasReadActionsPrivileges) ||
-              !hasPermissions ||
-              (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
-            }
-            isLoading={loadingRuleIds.includes(item.id)}
-          />
-        </EuiToolTip>
+      render: (_, item: Rule) => (
+        <EnableSwitcher
+          rule={item}
+          hasMlPermissions={hasMlPermissions}
+          hasPermissions={hasPermissions}
+          hasReadActionsPrivileges={hasReadActionsPrivileges}
+          loadingRuleIds={loadingRuleIds}
+          dispatch={dispatch}
+        />
       ),
       sortable: true,
       width: '95px',
@@ -334,11 +374,20 @@ export const getColumns = ({
   return hasPermissions ? [...cols, ...actions] : cols;
 };
 
-export const getMonitoringColumns = (
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
-  formatUrl: FormatUrl,
-  docLinks: DocLinksStart
-): RulesStatusesColumns[] => {
+interface GetMonitoringColumns extends CommonColumnsProps {
+  docLinks: DocLinksStart;
+}
+
+export const getMonitoringColumns = ({
+  docLinks,
+  dispatch,
+  formatUrl,
+  hasMlPermissions,
+  hasPermissions,
+  loadingRuleIds,
+  navigateToApp,
+  hasReadActionsPrivileges,
+}: GetMonitoringColumns): RulesStatusesColumns[] => {
   const cols: RulesStatusesColumns[] = [
     {
       field: 'name',
@@ -463,10 +512,15 @@ export const getMonitoringColumns = (
     {
       field: 'activate',
       name: i18n.COLUMN_ACTIVATE,
-      render: (value: Rule['enabled']) => (
-        <EuiText data-test-subj="search_after_time_durations" size="s">
-          {value ? i18n.ACTIVE : i18n.INACTIVE}
-        </EuiText>
+      render: (_, item) => (
+        <EnableSwitcher
+          rule={item.rule}
+          hasMlPermissions={hasMlPermissions}
+          hasPermissions={hasPermissions}
+          hasReadActionsPrivileges={hasReadActionsPrivileges}
+          loadingRuleIds={loadingRuleIds}
+          dispatch={dispatch}
+        />
       ),
       width: '95px',
     },

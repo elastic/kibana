@@ -101,6 +101,7 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
               activate: rule.enabled,
               name: rule.name,
               ...ruleStatusesResponse[rule.id],
+              rule,
             }))
           );
         }
