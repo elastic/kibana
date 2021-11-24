@@ -17,5 +17,11 @@ cd x-pack/plugins/session_view
 Then run jest with:
 
 ```bash
-npm run test:jest
+yarn test:jest
+```
+
+Or if running from kibana root, you can specify the `-i` to specify the path:
+
+```bash
+yarn test:jest -i x-pack/plugins/session_view/
 ```
