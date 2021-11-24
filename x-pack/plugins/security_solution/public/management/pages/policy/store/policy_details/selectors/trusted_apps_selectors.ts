@@ -132,7 +132,7 @@ export const getCurrentPolicyAssignedTrustedAppsState: PolicyDetailsSelector<
   return state.artifacts.assignedList;
 };
 
-/** Returns curreent filter value */
+/** Returns current filter value */
 export const getCurrentPolicyArtifactsFilter: PolicyDetailsSelector<string> = (state) => {
   return state.artifacts.location.filter;
 };
@@ -193,6 +193,10 @@ export const getTotalPolicyTrustedAppsListPagination = (
 ): number => {
   return isLoadedResourceState(state.artifacts.hasTrustedApps)
     ? state.artifacts.hasTrustedApps.data.total
+    : isLoadingResourceState(state.artifacts.hasTrustedApps) &&
+      state.artifacts.hasTrustedApps.previousState &&
+      isLoadedResourceState(state.artifacts.hasTrustedApps.previousState)
+    ? state.artifacts.hasTrustedApps.previousState.data.total
     : 0;
 };
 

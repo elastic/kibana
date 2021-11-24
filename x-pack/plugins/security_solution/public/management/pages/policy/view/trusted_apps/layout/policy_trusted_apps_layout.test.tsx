@@ -18,6 +18,7 @@ import { getMockListResponse } from '../../../test_utils';
 import { createLoadedResourceState, isLoadedResourceState } from '../../../../../state';
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
+import { GetTrustedAppsListRequest } from '../../../../../../../common/endpoint/types';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
@@ -131,6 +132,35 @@ describe('Policy trusted apps layout', () => {
     await waitForAction('assignedTrustedAppsListStateChanged');
 
     expect(component.getAllByTestId('policyTrustedAppsGrid-card')).toHaveLength(10);
+  });
+
+  it('should renders layout with data but no results', async () => {
+    TrustedAppsHttpServiceMock.mockImplementation(() => {
+      return {
+        getTrustedAppsList: (params: GetTrustedAppsListRequest) => {
+          const hasAnyQuery =
+            'exception-list-agnostic.attributes.tags:"policy:1234" OR exception-list-agnostic.attributes.tags:"policy:all"';
+          if (params.kuery === hasAnyQuery) {
+            return getMockListResponse();
+          } else {
+            return { data: [], total: 0 };
+          }
+        },
+      };
+    });
+
+    const component = render();
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { filter: 'search' }));
+
+    await waitForAction('policyArtifactsHasTrustedApps', {
+      validate: (action) => isLoadedResourceState(action.payload),
+    });
+
+    await waitForAction('assignedTrustedAppsListStateChanged');
+
+    expect(component.queryAllByTestId('policyTrustedAppsGrid-card')).toHaveLength(0);
+    expect(component.queryByTestId('policy-trusted-apps-empty-unassigned')).toBeNull();
+    expect(component.queryByTestId('policy-trusted-apps-empty-unexisting')).toBeNull();
   });
 
   it('should hide assign button on empty state with unassigned policies when downgraded to a gold or below license', async () => {

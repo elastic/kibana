@@ -99,7 +99,7 @@ export interface PolicyArtifactsState {
   trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
   /** Represents if there is any trusted app existing  */
   doesAnyTrustedAppExists: AsyncResourceState<GetTrustedAppsListResponse>;
-  /** Represents if there is any trusted app existing assigned to the policy (wuthout filters)  */
+  /** Represents if there is any trusted app existing assigned to the policy (without filters)  */
   hasTrustedApps: AsyncResourceState<GetTrustedAppsListResponse>;
   /** List of artifacts currently assigned to the policy (body specific and global) */
   assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;

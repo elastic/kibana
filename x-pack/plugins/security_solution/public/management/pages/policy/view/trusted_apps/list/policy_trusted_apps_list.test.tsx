@@ -343,4 +343,19 @@ describe('when rendering the PolicyTrustedAppsList', () => {
 
     expect(renderResult.queryByTestId('policyTrustedAppsGrid-removeAction')).toBeNull();
   });
+
+  it('should handle search changes', async () => {
+    await render();
+
+    expect(appTestContext.history.location.search).not.toBeTruthy();
+
+    act(() => {
+      fireEvent.change(renderResult.getByTestId('searchField'), {
+        target: { value: 'search' },
+      });
+      fireEvent.submit(renderResult.getByTestId('searchField'));
+    });
+
+    expect(appTestContext.history.location.search).toMatch('?filter=search');
+  });
 });

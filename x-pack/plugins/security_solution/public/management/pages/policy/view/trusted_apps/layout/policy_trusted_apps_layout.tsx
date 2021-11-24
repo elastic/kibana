@@ -115,7 +115,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
 
   return policyItem ? (
     <div>
-      {!hasAssignedTrustedApps.loading && !displaysEmptyState ? (
+      {!displaysEmptyState ? (
         <>
           <EuiPageHeader alignItems="center">
             <EuiPageHeaderSection>

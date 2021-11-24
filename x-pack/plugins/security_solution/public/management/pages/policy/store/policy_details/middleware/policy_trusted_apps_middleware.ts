@@ -226,7 +226,9 @@ const searchTrustedApps = async (
 
     if (filter) {
       const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
-      if (filterKuery) kuery.push(filterKuery);
+      if (filterKuery) {
+        kuery.push(filterKuery);
+      }
     }
 
     const trustedApps = await trustedAppsService.getTrustedAppsList({
@@ -314,7 +316,9 @@ const fetchPolicyTrustedAppsIfNeeded = async (
       if (urlLocationData.filter) {
         const filterKuery =
           parseQueryFilterToKQL(urlLocationData.filter, SEARCHABLE_FIELDS) || undefined;
-        if (filterKuery) kuery.push(filterKuery);
+        if (filterKuery) {
+          kuery.push(filterKuery);
+        }
       }
       const fetchResponse = await trustedAppsService.getTrustedAppsList({
         page: urlLocationData.page_index + 1,
