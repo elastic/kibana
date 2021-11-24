@@ -33,7 +33,7 @@ import {
   PutTrustedAppUpdateResponse,
   TrustedApp,
 } from '../../../../../common/endpoint/types';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies';
+import { sendGetEndpointSpecificPackagePolicies } from '../../policy/store/services/ingest';
 import { isGlobalEffectScope } from '../state/type_guards';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import { validateTrustedAppHttpRequestBody } from './validate_trusted_app_http_request_body';
