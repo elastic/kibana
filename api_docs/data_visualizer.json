@@ -484,12 +484,12 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-common.DocumentCountBuckets.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: number",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  number"
             ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
