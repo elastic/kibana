@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import {
-  EuiFormRow,
-  htmlIdGenerator,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperSelect,
-  EuiIcon,
-  EuiIconTip,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from '../coloring/palette_picker';
 
-import { defaultPaletteParams, CUSTOM_PALETTE, DEFAULT_COLOR_STEPS } from '../coloring/constants';
+import { CUSTOM_PALETTE, DEFAULT_COLOR_STEPS } from '../coloring/constants';
 import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
 import {
   getColorStops,
@@ -31,7 +20,6 @@ import {
   getDataMinMax,
   remapStopsByNewInterval,
   getSwitchToCustomParams,
-  reversePalette,
   roundStopValues,
 } from '../coloring/utils';
 
@@ -56,7 +44,9 @@ const idPrefix = htmlIdGenerator()();
  */
 
 function getColorRanges(palettes, colorStops, activePalette, dataBounds) {
-  const colorStopsToShow = getColorStops(palettes, colorStops || [], activePalette, dataBounds);
+  const colorStopsToShow = roundStopValues(
+    getColorStops(palettes, colorStops || [], activePalette, dataBounds)
+  );
   return colorStopsToShow.map((colorStop, index) => {
     return {
       color: colorStop.color,
@@ -74,13 +64,11 @@ export function NewCustomizablePalette({
   activePalette,
   setPalette,
   dataBounds,
-  showContinuity = true,
 }: {
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds?: { min: number; max: number };
-  showContinuity?: boolean;
 }) {
   if (!dataBounds || !activePalette) {
     return null;
@@ -139,7 +127,6 @@ export function NewCustomizablePalette({
             }}
             showCustomPalette
             showDynamicColorOnly
-            dataBounds={dataBounds}
           />
         </EuiFormRow>
         <EuiFormRow

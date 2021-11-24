@@ -15,12 +15,10 @@ import {
   defaultPaletteParams,
 } from './constants';
 import type { CustomPaletteParams } from '../../../common';
-import { getStopsForFixedMode } from './utils';
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,
-  activePalette: PaletteOutput<CustomPaletteParams> | undefined,
-  dataBounds
+  activePalette: PaletteOutput<CustomPaletteParams> | undefined
 ) {
   const { id, title } = palettes.get(CUSTOM_PALETTE);
 
@@ -47,8 +45,6 @@ function getCustomPaletteConfig(
     return { value: id, title, type: 'text' as const, 'data-test-subj': `custom-palette` };
   }
 
-  // getStopsForFixedMode(activePalette.params.stops, activePalette.params.colorStops, dataBounds),
-
   // full custom palette
   return {
     value: id,
@@ -67,7 +63,6 @@ export function PalettePicker({
   setPalette,
   showCustomPalette,
   showDynamicColorOnly,
-  dataBounds,
   ...rest
 }: {
   palettes: PaletteRegistry;
@@ -95,7 +90,7 @@ export function PalettePicker({
       };
     });
   if (showCustomPalette) {
-    palettesToShow.push(getCustomPaletteConfig(palettes, activePalette, dataBounds));
+    palettesToShow.push(getCustomPaletteConfig(palettes, activePalette));
   }
   return (
     <EuiColorPalettePicker
