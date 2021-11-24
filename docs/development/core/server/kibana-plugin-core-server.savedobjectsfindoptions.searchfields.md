@@ -4,10 +4,10 @@
 
 ## SavedObjectsFindOptions.searchFields property
 
-The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information
+The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information Can be either an array of string, in which case the fields will be used for all specified types, or a record specifying the search fields per type.
 
 <b>Signature:</b>
 
 ```typescript
-searchFields?: string[];
+searchFields?: string[] | Record<string, string[]>;
 ```

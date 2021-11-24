@@ -1428,7 +1428,7 @@ export interface SavedObjectsFindOptions {
     rootSearchFields?: string[];
     search?: string;
     searchAfter?: estypes.Id[];
-    searchFields?: string[];
+    searchFields?: string[] | Record<string, string[]>;
     // (undocumented)
     sortField?: string;
     // (undocumented)

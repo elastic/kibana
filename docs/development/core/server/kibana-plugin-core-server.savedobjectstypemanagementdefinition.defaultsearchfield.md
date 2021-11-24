@@ -11,3 +11,8 @@ The default search field to use for this type. Defaults to `id`<!-- -->.
 ```typescript
 defaultSearchField?: string;
 ```
+
+## Remarks
+
+the field must be mapped as `text` and not `keyword`
+
