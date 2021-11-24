@@ -23,6 +23,7 @@ import {
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { OTHER_DATA_SOURCE_TITLE } from '../../components/overview_cti_links/translations';
+import { OTHER_TI_DATASET_KEY } from '../../../../common/cti/constants';
 
 type GetThreatIntelSourcProps = CtiDataSourceRequestOptions & {
   data: DataPublicPluginStart;
@@ -80,6 +81,7 @@ export const useTiDataSources = ({
   deleteQuery,
 }: TiDataSourcesProps) => {
   const [tiDataSources, setTiDataSources] = useState<TiDataSources[]>([]);
+  const [isInitialyLoaded, setIsInitialyLoaded] = useState(false);
   const { data, uiSettings } = useKibana().services;
   const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const { result, start, loading } = useTiDataSourcesComplete();
@@ -93,7 +95,7 @@ export const useTiDataSources = ({
   }, [to, from, start, data, defaultThreatIndices]);
 
   useEffect(() => {
-    if (!loading && result && result?.rawResponse && result?.inspect && setQuery) {
+    if (!loading && result?.rawResponse && result?.inspect && setQuery) {
       setQuery({
         id: ID,
         inspect: {
@@ -115,6 +117,12 @@ export const useTiDataSources = ({
   }, [deleteQuery]);
 
   useEffect(() => {
+    if (result && !isInitialyLoaded) {
+      setIsInitialyLoaded(true);
+    }
+  }, [isInitialyLoaded, result]);
+
+  useEffect(() => {
     if (!loading && result) {
       const datasets = result?.rawResponse?.aggregations?.dataset?.buckets ?? [];
       const getChildAggregationValue = (aggregation?: Bucket) => aggregation?.buckets?.[0]?.key;
@@ -132,7 +140,7 @@ export const useTiDataSources = ({
             },
           };
         } else {
-          const otherTiDatasetKey = '_others_ti_';
+          const otherTiDatasetKey = OTHER_TI_DATASET_KEY;
           const otherDatasetCount = acc[otherTiDatasetKey]?.count ?? 0;
           return {
             ...acc,
@@ -162,5 +170,5 @@ export const useTiDataSources = ({
 
   const totalCount = tiDataSources.reduce((acc, val) => acc + val.count, 0);
 
-  return { tiDataSources, totalCount };
+  return { tiDataSources, totalCount, isInitialyLoaded };
 };

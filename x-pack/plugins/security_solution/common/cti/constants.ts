@@ -59,3 +59,4 @@ export const DEFAULT_EVENT_ENRICHMENT_FROM = 'now-30d';
 export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
 
 export const TI_INTEGRATION_PREFIX = 'ti';
+export const OTHER_TI_DATASET_KEY = '_others_ti_';
