@@ -12,7 +12,7 @@ import {
   FieldFormatEditor,
   FieldFormatEditorFactory,
   IndexPatternFieldEditorSetup,
-} from '../../../../src/plugins/index_pattern_field_editor/public';
+} from '../../../../src/plugins/data_view_field_editor/public';
 import { ExampleCurrencyFormat } from './2_creating_custom_formatter';
 
 // 1. Create an editor component

@@ -1623,10 +1623,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@39.0.2":
-  version "39.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-39.0.2.tgz#5533fc57c4ceed4c5ae826cd9a13c55cc03c55e5"
-  integrity sha512-jjdZSV6PGKsjA2qDAwEw+SjHWq5/Rm9FQk9lrmxrX+0rc7TlsPyr840RT1BAfkDDoo8+o3WWbfg+r61Y0FQ1Pg==
+"@elastic/charts@40.0.0":
+  version "40.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-40.0.0.tgz#aa79a34c160086bff3a4ade5f6c48bfdf4c7eab5"
+  integrity sha512-81gq7/loJO5znr3jUxKKUiXPvOFewsdFAGI/yIsbJJCMJ+1MR63A8V1h4ZzqVYoVne4S4btl/beIx0s/JFN+aw==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -1697,10 +1697,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@40.1.0":
-  version "40.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-40.1.0.tgz#d5ad63e9ed4ae482037a637e9b3f2598712c9e94"
-  integrity sha512-xlmbu4ZjdKtpgkQZ6GNMWCyyjSJaNFPMj97pLs11UEag2L1W0IwISlGF9+K45Qp4KLatR6iphwiyLFGmqGOOTA==
+"@elastic/eui@41.0.0":
+  version "41.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-41.0.0.tgz#64d7efef5a15d5495f2db1eebd5384e412296e06"
+  integrity sha512-+cExohPqWzahLW6Z6X6dc0voaDkYQ4ruHMSFe0H78YhTECrbu+f9mWDx841C7WDtvKKJVPbCZ/dyTeB2Ogwabw==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1718,7 +1718,6 @@
     mdast-util-to-hast "^10.0.0"
     numeral "^2.0.6"
     prop-types "^15.6.0"
-    react-ace "^7.0.5"
     react-beautiful-dnd "^13.0.0"
     react-dropzone "^11.2.0"
     react-focus-on "^3.5.0"
@@ -5387,6 +5386,10 @@
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
   integrity sha512-fj1hi+ZSW0xPLrJJD+YNwIh9GZbyaIepG26E/gXvp8nCa2pYokxUYO1sK9qjGxp2g8ryZYuon7wmjpwE2cyASQ==
 
+"@types/elastic__apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/elastic__datemath@link:bazel-bin/packages/elastic-datemath/npm_module_types":
   version "0.0.0"
   uid ""
@@ -5779,6 +5782,17 @@
   version "0.0.30"
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.30.tgz#44cb52f32a809734ca562e685c6473b5754a7818"
   integrity sha512-sqm9g7mHlPY/43fcSNrCYfOeX9zkTTK+euO5E6+CVijSMm5tTjkVdwdqRkY3ljjIAf8679vps5jKUoJBCLsMDA==
+
+"@types/jsonwebtoken@^8.5.6":
+  version "8.5.6"
+  resolved "https://registry.yarnpkg.com/@types/jsonwebtoken/-/jsonwebtoken-8.5.6.tgz#1913e5a61e70a192c5a444623da4901a7b1a9d42"
+  integrity sha512-+P3O/xC7nzVizIi5VbF34YtqSonFsdnbXBnWUCYRiKOi1f9gA4sEFvXkrGr/QVV23IbMYvcoerI7nnhDUiWXRQ==
+  dependencies:
+    "@types/node" "*"
+
+"@types/kbn__ace@link:bazel-bin/packages/kbn-ace/npm_module_types":
+  version "0.0.0"
+  uid ""
 
 "@types/keyv@*":
   version "3.1.1"
@@ -9710,9 +9724,9 @@ cheerio@^1.0.0-rc.10, cheerio@^1.0.0-rc.3:
     tslib "^2.2.0"
 
 chokidar@3.4.3, chokidar@^2.0.0, chokidar@^2.0.4, chokidar@^2.1.1, chokidar@^2.1.2, chokidar@^2.1.8, chokidar@^3.2.2, chokidar@^3.4.0, chokidar@^3.4.1, chokidar@^3.4.3:
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.3.tgz#c1df38231448e45ca4ac588e6c79573ba6a57d5b"
-  integrity sha512-DtM3g7juCXQxFVSNPNByEC2+NImtBuxQQvWlHunpJIS5Ocr0lG306cC7FCi7cEA0fzmybPUIl4txBIobk1gGOQ==
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.5.1.tgz#ee9ce7bbebd2b79f49f304799d5468e31e14e68a"
+  integrity sha512-9+s+Od+W0VJJzawDma/gvBNQqkTiqYTWLuZoyAsivsI4AaWTCzHG06/TMjsf1cYe9Cb97UCEhjz7HvnPk2p/tw==
   dependencies:
     anymatch "~3.1.1"
     braces "~3.0.2"
@@ -9722,7 +9736,7 @@ chokidar@3.4.3, chokidar@^2.0.0, chokidar@^2.0.4, chokidar@^2.1.1, chokidar@^2.1
     normalize-path "~3.0.0"
     readdirp "~3.5.0"
   optionalDependencies:
-    fsevents "~2.1.2"
+    fsevents "~2.3.1"
 
 chownr@^1.1.1:
   version "1.1.4"
@@ -12589,7 +12603,7 @@ elastic-apm-http-client@^10.3.0:
     readable-stream "^3.4.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@3.24.0:
+elastic-apm-node@^3.24.0:
   version "3.24.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.24.0.tgz#d7acb3352f928a23c28ebabab2bd30098562814e"
   integrity sha512-Fmj/W2chWQa2zb1FfMYK2ypLB4TcnKNX+1klaJFbytRYDLgeSfo0EC7egvI3a+bLPZSRL5053PXOp7slVTPO6Q==
@@ -14599,10 +14613,10 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
-fsevents@^2.1.2, fsevents@~2.1.2:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.1.2.tgz#4c0a1fb34bc68e543b4b82a9ec392bfbda840805"
-  integrity sha512-R4wDiBwZ0KzpgOWetKDug1FZcYhqYnUYKtfZYt4mD5SBz76q0KR4Q9o7GIPamsVPGmW3EYPPJ0dOOjvx32ldZA==
+fsevents@^2.1.2, fsevents@~2.3.1:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
+  integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
 
 fsu@^1.0.2:
   version "1.1.1"
