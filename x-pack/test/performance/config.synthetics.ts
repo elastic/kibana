@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import Url from 'url';
 import { FtrConfigProviderContext } from '@kbn/test';
-
-import { services } from './services';
-import { pageObjects } from './page_objects';
+import { run as playwrightRun } from '@elastic/synthetics';
 
 // These "secret" values are intentionally written in the source. We would make the APM server accept annonymous traffic if we could
 const APM_SERVER_URL = 'https://2fad4006bf784bb8a54e52f4a5862609.apm.us-west1.gcp.cloud.es.io:443';
@@ -18,16 +17,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    testFiles: [require.resolve('./tests/index.ts')],
-    services,
-    pageObjects,
-    servers: functionalConfig.get('servers'),
+    ...functionalConfig.getAll(),
     esTestCluster: functionalConfig.get('esTestCluster'),
-    apps: functionalConfig.get('apps'),
-    screenshots: functionalConfig.get('screenshots'),
-    junit: {
-      reportName: 'Performance Tests',
-    },
+    junit: { reportName: 'Performance Tests' },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       env: {
@@ -46,12 +38,35 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           commit: process.env.GIT_COMMIT,
           mergeBase: process.env.PR_MERGE_BASE,
           targetBranch: process.env.PR_TARGET_BRANCH,
+          testRunner: process.env.TEST_RUNNER,
         })
           .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
       },
       // delay shutdown by 15 seconds to ensure that APM can report the data it collects during test execution
       delayShutdown: 15_000,
+    },
+    testRunner: async ({ getService }: any) => {
+      const config = getService('config');
+
+      const kibanaUrl = Url.format({
+        protocol: config.get('servers.kibana.protocol'),
+        hostname: config.get('servers.kibana.hostname'),
+        port: config.get('servers.kibana.port'),
+      });
+
+      const result = await playwrightRun({
+        params: { kibanaUrl },
+        playwrightOptions: {
+          headless: true,
+          chromiumSandbox: false,
+          timeout: 60 * 1000,
+        },
+      });
+
+      if (result && result.perf_login_and_home.status !== 'succeeded') {
+        throw new Error('Tests failed');
+      }
     },
   };
 }

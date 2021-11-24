@@ -10,7 +10,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('performance', function () {
     this.tags('ciGroup8');
+    const { TEST_RUNNER } = process.env;
 
-    loadTestFile(require.resolve('./home'));
+    if (TEST_RUNNER === 'FTR') {
+      loadTestFile(require.resolve('./ftr/index.ts'));
+    } else if (TEST_RUNNER === 'SYNTHETICS') {
+      loadTestFile(require.resolve('./synthetics/index.ts'));
+    }
   });
 }
