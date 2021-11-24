@@ -17,7 +17,7 @@ import { LEGACY_PIE_CHARTS_LIBRARY } from '../../pie/common/index';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import { visLibVisTypeDefinitions, pieVisTypeDefinition } from './vis_type_vislib_vis_types';
-import { setFormatService, setDataActions } from './services';
+import { setFormatService, setDataActions, setTheme } from './services';
 import { getVislibVisRenderer } from './vis_renderer';
 
 /** @internal */
@@ -60,5 +60,6 @@ export class VisTypeVislibPlugin
   public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
+    setTheme(core.theme);
   }
 }
