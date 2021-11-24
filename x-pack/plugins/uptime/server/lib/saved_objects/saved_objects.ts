@@ -28,7 +28,7 @@ export const registerUptimeSavedObjects = (
 ) => {
   savedObjectsService.registerType(umDynamicSettings);
 
-  if (config?.unsafe.service.enabled) {
+  if (config?.unsafe?.service.enabled) {
     savedObjectsService.registerType(syntheticsMonitor);
   }
 };
