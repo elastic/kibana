@@ -13,7 +13,10 @@ import { i18n } from '@kbn/i18n';
 import type { FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../src/plugins/kibana_react/public';
 import type { SecurityLicense } from '../../../common/licensing';
 import {
   Breadcrumb,
@@ -39,7 +42,7 @@ export const rolesManagementApp = Object.freeze({
       id: this.id,
       order: 20,
       title,
-      async mount({ element, setBreadcrumbs, history }) {
+      async mount({ element, theme$, setBreadcrumbs, history }) {
         const [
           [startServices, { data, features, spaces }],
           { RolesGridPage },
@@ -116,27 +119,29 @@ export const rolesManagementApp = Object.freeze({
         render(
           <KibanaContextProvider services={startServices}>
             <i18nStart.Context>
-              <Router history={history}>
-                <BreadcrumbsProvider
-                  onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
-                >
-                  <Breadcrumb text={title} href="/">
-                    <Route path={['/', '']} exact={true}>
-                      <RolesGridPage
-                        notifications={notifications}
-                        rolesAPIClient={rolesAPIClient}
-                        history={history}
-                      />
-                    </Route>
-                    <Route path="/edit/:roleName?">
-                      <EditRolePageWithBreadcrumbs action="edit" />
-                    </Route>
-                    <Route path="/clone/:roleName">
-                      <EditRolePageWithBreadcrumbs action="clone" />
-                    </Route>
-                  </Breadcrumb>
-                </BreadcrumbsProvider>
-              </Router>
+              <KibanaThemeProvider theme$={theme$}>
+                <Router history={history}>
+                  <BreadcrumbsProvider
+                    onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
+                  >
+                    <Breadcrumb text={title} href="/">
+                      <Route path={['/', '']} exact={true}>
+                        <RolesGridPage
+                          notifications={notifications}
+                          rolesAPIClient={rolesAPIClient}
+                          history={history}
+                        />
+                      </Route>
+                      <Route path="/edit/:roleName?">
+                        <EditRolePageWithBreadcrumbs action="edit" />
+                      </Route>
+                      <Route path="/clone/:roleName">
+                        <EditRolePageWithBreadcrumbs action="clone" />
+                      </Route>
+                    </Breadcrumb>
+                  </BreadcrumbsProvider>
+                </Router>
+              </KibanaThemeProvider>
             </i18nStart.Context>
           </KibanaContextProvider>,
           element
