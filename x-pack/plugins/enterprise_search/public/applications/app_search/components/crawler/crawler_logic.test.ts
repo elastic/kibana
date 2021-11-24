@@ -137,6 +137,7 @@ describe('CrawlerLogic', () => {
             crawlConfig: {
               domainAllowlist: ['elastic.co'],
               seedUrls: [],
+              sitemapUrls: [],
             },
           },
         ],
