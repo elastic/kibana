@@ -73,6 +73,7 @@ export const ADD_CONFLUENCE_SERVER_PATH = `${SOURCES_PATH}/add/confluence_server
 export const ADD_DROPBOX_PATH = `${SOURCES_PATH}/add/dropbox`;
 export const ADD_GITHUB_ENTERPRISE_PATH = `${SOURCES_PATH}/add/github_enterprise_server`;
 export const ADD_GITHUB_PATH = `${SOURCES_PATH}/add/github`;
+export const ADD_GITHUB_APP_PATH = `${SOURCES_PATH}/add/github_app`;
 export const ADD_GMAIL_PATH = `${SOURCES_PATH}/add/gmail`;
 export const ADD_GOOGLE_DRIVE_PATH = `${SOURCES_PATH}/add/google_drive`;
 export const ADD_JIRA_PATH = `${SOURCES_PATH}/add/jira_cloud`;
