@@ -86,7 +86,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
     ],
   },
