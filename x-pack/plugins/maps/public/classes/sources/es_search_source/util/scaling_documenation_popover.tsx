@@ -97,7 +97,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
           <p style={{ fontStyle: 'italic' }}>
             <FormattedMessage
               id="xpack.maps.scalingDocs.maxResultWindow"
-              defaultMessage="{maxResultWindow} constraint provided by 'max_result_window' index level setting."
+              defaultMessage="{maxResultWindow} constraint provided by 'max_result_window' index setting."
               values={{ maxResultWindow: this.props.maxResultWindow }}
             />
           </p>
