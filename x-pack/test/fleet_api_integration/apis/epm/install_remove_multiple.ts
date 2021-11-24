@@ -61,14 +61,7 @@ export default function (providerContext: FtrProviderContext) {
     const uninstallingPackagesPromise = pkgs.map((pkg) => uninstallPackage(pkg));
     return Promise.all(uninstallingPackagesPromise);
   };
-  const expectPkgFieldToExist = (fields: any[], fieldName: string, exists: boolean = true) => {
-    const fieldExists = fields.find((field: { name: string }) => field.name === fieldName);
-    if (exists) {
-      expect(fieldExists).not.to.be(undefined);
-    } else {
-      expect(fieldExists).to.be(undefined);
-    }
-  };
+
   describe('installs and uninstalls multiple packages side effects', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
