@@ -201,10 +201,12 @@ export interface CrawlRequest {
 
 export interface CrawlConfig {
   domainAllowlist: string[];
+  seedUrls: string[];
 }
 
 export interface CrawlConfigFromServer {
   domain_allowlist: string[];
+  seed_urls: string[];
 }
 
 export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {

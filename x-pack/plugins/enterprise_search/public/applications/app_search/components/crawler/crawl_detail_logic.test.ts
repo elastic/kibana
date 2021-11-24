@@ -33,6 +33,7 @@ const crawlRequestResponse: CrawlRequestWithDetailsFromServer = {
   type: CrawlType.Full,
   crawl_config: {
     domain_allowlist: [],
+    seed_urls: [],
   },
 };
 

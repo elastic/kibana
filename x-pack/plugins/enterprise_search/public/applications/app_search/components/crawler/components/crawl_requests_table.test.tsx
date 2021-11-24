@@ -33,6 +33,7 @@ const values: { events: CrawlEvent[] } = {
       type: CrawlType.Full,
       crawlConfig: {
         domainAllowlist: ['https://www.elastic.co'],
+        seedUrls: [],
       },
     },
     {
@@ -45,6 +46,7 @@ const values: { events: CrawlEvent[] } = {
       type: CrawlType.Full,
       crawlConfig: {
         domainAllowlist: ['https://www.elastic.co'],
+        seedUrls: [],
       },
     },
   ],

@@ -136,6 +136,7 @@ describe('CrawlerLogic', () => {
             type: CrawlType.Full,
             crawlConfig: {
               domainAllowlist: ['elastic.co'],
+              seedUrls: [],
             },
           },
         ],

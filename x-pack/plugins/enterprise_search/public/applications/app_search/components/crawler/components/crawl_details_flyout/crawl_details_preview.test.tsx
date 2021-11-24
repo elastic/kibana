@@ -10,12 +10,13 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { CrawlDetailValues } from '../../crawl_detail_logic';
 import { CrawlerStatus, CrawlType } from '../../types';
 
 import { AccordionList } from './accordion_list';
 import { CrawlDetailsPreview } from './crawl_details_preview';
 
-const MOCK_VALUES = {
+const MOCK_VALUES: Partial<CrawlDetailValues> = {
   crawlRequest: {
     id: '507f1f77bcf86cd799439011',
     status: CrawlerStatus.Pending,
@@ -25,6 +26,7 @@ const MOCK_VALUES = {
     type: CrawlType.Full,
     crawlConfig: {
       domainAllowlist: ['https://www.elastic.co', 'https://www.swiftype.com'],
+      seedUrls: [],
     },
   },
 };
@@ -50,9 +52,10 @@ describe('CrawlDetailsPreview', () => {
     it('contains a list of domains', () => {
       const domainList = wrapper.find(AccordionList).at(0);
 
-      expect(domainList.prop('items')).toEqual(
-        MOCK_VALUES.crawlRequest.crawlConfig.domainAllowlist
-      );
+      expect(domainList.prop('items')).toEqual([
+        'https://www.elastic.co',
+        'https://www.swiftype.com',
+      ]);
     });
   });
 });
