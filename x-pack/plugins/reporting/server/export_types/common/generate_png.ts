@@ -11,7 +11,7 @@ import { finalize, map, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger } from '../../lib';
-import { LayoutParams, LayoutSelectorDictionary, PreserveLayout } from '../../lib/layouts';
+import { LayoutParams, LayoutSelectorDictionary, PngLayout } from '../../lib/layouts';
 import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
 import { ConditionalHeaders } from '../common';
 
@@ -32,7 +32,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
-    const layout = new PreserveLayout(layoutParams.dimensions, layoutParams.selectors);
+    const layout = new PngLayout(layoutParams.dimensions, layoutParams.selectors);
 
     if (apmLayout) apmLayout.end();
 

@@ -56,6 +56,7 @@ export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 export const LAYOUT_TYPES = {
   CANVAS: 'canvas',
   PRESERVE_LAYOUT: 'preserve_layout',
+  PNG: 'png',
   PRINT: 'print',
 };
 
