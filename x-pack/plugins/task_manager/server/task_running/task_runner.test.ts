@@ -1496,7 +1496,7 @@ describe('TaskManagerRunner', () => {
         primaryTerm: 32,
         runAt: new Date(),
         scheduledAt: new Date(),
-        startedAt: null,
+        startedAt: new Date(),
         retryAt: null,
         attempts: 0,
         params: {},

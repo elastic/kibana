@@ -9,6 +9,7 @@ import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
+import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
 import type { Logger, ExecutionContextStart } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
@@ -54,6 +55,7 @@ export type TaskPollingLifecycleOpts = {
   middleware: Middleware;
   elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
+  usageCounter?: UsageCounter;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -87,6 +89,8 @@ export class TaskPollingLifecycle {
 
   private middleware: Middleware;
 
+  private usageCounter?: UsageCounter;
+
   /**
    * Initializes the task manager, preventing any further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
@@ -103,12 +107,14 @@ export class TaskPollingLifecycle {
     taskStore,
     definitions,
     executionContext,
+    usageCounter,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
     this.store = taskStore;
     this.executionContext = executionContext;
+    this.usageCounter = usageCounter;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -230,6 +236,7 @@ export class TaskPollingLifecycle {
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
+      usageCounter: this.usageCounter,
     });
   };
 
