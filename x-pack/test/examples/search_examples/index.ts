@@ -13,7 +13,7 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
   const kibanaServer = getService('kibanaServer');
 
   describe('search examples', function () {
-    this.tags('ciGroup13');
+    this.tags('ciGroup27');
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
