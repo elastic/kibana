@@ -18,7 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { HttpSetup } from '../../http';
 import { NotificationsSetup } from '../../notifications';
 import { loadStatus, ProcessedServerResponse } from './lib';

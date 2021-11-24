@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiButton, EuiEmptyPrompt, EuiBasicTableColumn } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { attemptLoadDashboardByTitle } from '../lib';

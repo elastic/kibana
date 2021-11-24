@@ -9,7 +9,7 @@
 import React, { Fragment } from 'react';
 import './field_name.scss';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '../../../../../kibana_react/public';
 import { getFieldTypeName } from './field_type_name';
