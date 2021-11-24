@@ -12,7 +12,6 @@ import {
   SavedObjectsServiceStart,
 } from 'kibana/server';
 
-import { TypeOf } from '@kbn/config-schema';
 import { TransportResult } from '@elastic/elasticsearch';
 import { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -57,7 +56,7 @@ import { createInternalReadonlySoClient } from '../../utils/create_internal_read
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
-import { GetMetadataListRequestSchemaV2 } from '../../routes/metadata';
+import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -403,7 +402,7 @@ export class EndpointMetadataService {
    */
   async getHostMetadataList(
     esClient: ElasticsearchClient,
-    queryOptions: TypeOf<typeof GetMetadataListRequestSchemaV2.query>
+    queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
     const endpointPolicies = await getAllEndpointPackagePolicies(
       this.packagePolicyService,
