@@ -106,10 +106,9 @@ class PackagePolicyService {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
       });
 
-      // Check that the name does not exist already
-      if (existingPoliciesWithName.items.length > 0) {
-        throw new IngestManagerError('There is already a package with the same name');
-      }
+    // Check that the name does not exist already
+    if (existingPoliciesWithName.items.length > 0) {
+      throw new IngestManagerError('There is already an integration policy with the same name');
     }
     let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
@@ -370,7 +369,7 @@ class PackagePolicyService {
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
-      throw new IngestManagerError('There is already a package with the same name');
+      throw new IngestManagerError('There is already an integration policy with the same name');
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
