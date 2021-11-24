@@ -90,25 +90,14 @@ export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): C
   };
 }
 
-export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
-  const {
-    id,
-    stage,
-    status,
-    created_at: createdAt,
-    began_at: beganAt,
-    completed_at: completedAt,
-    type,
-    crawl_config: crawlConfig,
-  } = event;
+export function crawlEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
+  const clientCrawlRequest = crawlRequestServerToClient(event as CrawlRequestFromServer);
+
+  const { stage, type, crawl_config: crawlConfig } = event;
 
   return {
-    id,
+    ...clientCrawlRequest,
     stage,
-    status,
-    createdAt,
-    beganAt,
-    completedAt,
     type,
     crawlConfig: crawlConfigServerToClient(crawlConfig),
   };
@@ -119,7 +108,7 @@ export function crawlerDataServerToClient(payload: CrawlerDataFromServer): Crawl
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
-    events: events.map((event) => crawlerEventServerToClient(event)),
+    events: events.map((event) => crawlEventServerToClient(event)),
     mostRecentCrawlRequest:
       mostRecentCrawlRequest && crawlRequestServerToClient(mostRecentCrawlRequest),
   };
