@@ -9,16 +9,29 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { LabelDynamicOptions } from '../../../../../common/descriptor_types';
 import { RawValue } from '../../../../../common/constants';
+import { IESAggField } from '../../../fields/agg';
 
 export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOptions> {
   syncTextFieldWithMb(mbLayerId: string, mbMap: MbMap) {
     if (this._field && this._field.isValid()) {
       const targetName = this.getMbPropertyName();
-      mbMap.setLayoutProperty(mbLayerId, 'text-field', [
-        'coalesce',
-        [this.getMbLookupFunction(), targetName],
-        '',
-      ]);
+
+      if (
+        typeof (this._field as IESAggField).isCount === 'function' &&
+        (this._field as IESAggField).isCount()
+      ) {
+        mbMap.setLayoutProperty(mbLayerId, 'text-field', [
+          'number-format',
+          [this.getMbLookupFunction(), targetName],
+          { locale: navigator.language },
+        ]);
+      } else {
+        mbMap.setLayoutProperty(mbLayerId, 'text-field', [
+          'coalesce',
+          [this.getMbLookupFunction(), targetName],
+          '',
+        ]);
+      }
     } else {
       if (typeof mbMap.getLayoutProperty(mbLayerId, 'text-field') !== 'undefined') {
         mbMap.setLayoutProperty(mbLayerId, 'text-field', undefined);

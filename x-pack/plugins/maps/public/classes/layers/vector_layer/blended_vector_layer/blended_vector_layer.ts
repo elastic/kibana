@@ -46,7 +46,7 @@ import { isSearchSourceAbortError } from '../../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
-function getAggType(
+function _getAggType(
   dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>
 ): AGG_TYPE.AVG | AGG_TYPE.TERMS {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
@@ -68,7 +68,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     },
     ...documentStyle.getDynamicPropertiesArray().map((dynamicProperty) => {
       return {
-        type: getAggType(dynamicProperty),
+        type: _getAggType(dynamicProperty),
         field: dynamicProperty.getFieldName(),
       };
     }),
@@ -139,7 +139,7 @@ function getClusterStyleDescriptor(
             ? {
                 ...options.field,
                 name: clusterSource.getAggKey(
-                  getAggType(styleProperty as IDynamicStyleProperty<DynamicStylePropertyOptions>),
+                  _getAggType(styleProperty as IDynamicStyleProperty<DynamicStylePropertyOptions>),
                   options.field.name
                 ),
               }
