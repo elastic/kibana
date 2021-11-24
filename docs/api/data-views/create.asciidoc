@@ -1,10 +1,10 @@
 [[data-views-api-create]]
-=== Create index pattern API
+=== Create data view API
 ++++
-<titleabbrev>Create index pattern</titleabbrev>
+<titleabbrev>Create data view</titleabbrev>
 ++++
 
-experimental[] Create {kib} index patterns.
+experimental[] Create data views.
 
 [[data-views-api-create-request]]
 ==== Request
@@ -22,13 +22,13 @@ experimental[] Create {kib} index patterns.
 [[data-views-api-create-body-params]]
 ==== Request body
 
-`override`:: (Optional, boolean) Overrides an existing index pattern if an
-index pattern with the provided title already exists. The default is `false`.
+`override`:: (Optional, boolean) Overrides an existing data view if a
+data view with the provided title already exists. The default is `false`.
 
-`refresh_fields`:: (Optional, boolean) Reloads index pattern fields after
-the index pattern is stored. The default is `false`.
+`refresh_fields`:: (Optional, boolean) Reloads data view fields after
+the data view is stored. The default is `false`.
 
-`index_pattern`:: (Required, object) The index pattern object. All fields are optional.
+`index_pattern`:: (Required, object) The data view object. All fields are optional.
 
 [[data-views-api-create-request-codes]]
 ==== Response code
@@ -39,7 +39,7 @@ the index pattern is stored. The default is `false`.
 [[data-views-api-create-example]]
 ==== Examples
 
-Create an index pattern with a custom title:
+Create a data view with a custom title:
 
 [source,sh]
 --------------------------------------------------
@@ -67,7 +67,7 @@ $ curl -X POST api/index_patterns/index_pattern
 --------------------------------------------------
 // KIBANA
 
-At creation, all index pattern fields are optional:
+At creation, all data view fields are optional:
 
 [source,sh]
 --------------------------------------------------
@@ -92,7 +92,7 @@ $ curl -X POST api/index_patterns/index_pattern
 // KIBANA
 
 
-The API returns the index pattern object:
+The API returns the data view object:
 
 [source,sh]
 --------------------------------------------------

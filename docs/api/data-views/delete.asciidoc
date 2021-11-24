@@ -1,12 +1,12 @@
 [[data-views-api-delete]]
-=== Delete index pattern API
+=== Delete data view API
 ++++
-<titleabbrev>Delete index pattern</titleabbrev>
+<titleabbrev>Delete data view</titleabbrev>
 ++++
 
-experimental[] Delete {kib} index patterns.
+experimental[] Delete data viewss.
 
-WARNING: Once you delete an index pattern, _it cannot be recovered_.
+WARNING: Once you delete a data view, _it cannot be recovered_.
 
 [[data-views-api-delete-request]]
 ==== Request
@@ -22,17 +22,17 @@ WARNING: Once you delete an index pattern, _it cannot be recovered_.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `id`::
-  (Required, string) The ID of the index pattern you want to delete.
+  (Required, string) The ID of the data view you want to delete.
 
 [[data-views-api-delete-response-codes]]
 ==== Response code
 
 `200`::
-  Indicates that index pattern is deleted. Returns an empty response body. 
+  Indicates that data view is deleted. Returns an empty response body. 
 
 ==== Example
 
-Delete an index pattern object with the `my-pattern` ID:
+Delete a data view object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------

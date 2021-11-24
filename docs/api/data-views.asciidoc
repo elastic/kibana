@@ -1,20 +1,20 @@
 [[data-views-api]]
 == Data views API
 
-experimental[] Manage {kib} data views, formerly known as index patterns.
+experimental[] Manage data views, formerly known as {kib} index patterns.
 
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
-WARNING: Use the data views APIs for managing {kib} data views instead of lower-level <<saved-objects-api, saved objects API>>.
+WARNING: Use the data views APIs for managing data views instead of lower-level <<saved-objects-api, saved objects API>>.
 
 The following data views APIs are available: 
 
 * Data views
-    ** <<data-views-api-get, Get data view API>> to retrieve a single {kib} data view
-    ** <<data-views-api-create, Create data view API>> to create {kib} data view
-    ** <<data-views-api-update, Update data view API>> to partially updated {kib} data view
-    ** <<data-views-api-delete, Delete data view API>> to delete {kib} data view
+    ** <<data-views-api-get, Get data view API>> to retrieve a single data view
+    ** <<data-views-api-create, Create data view API>> to create data view
+    ** <<data-views-api-update, Update data view API>> to partially updated data view
+    ** <<data-views-api-delete, Delete data view API>> to delete a data view
 * Default data views
     ** <<data-views-api-default-get, Get default data view API>> to retrieve a default data view
     ** <<data-views-api-default-set, Set default data view API>> to set a default data view

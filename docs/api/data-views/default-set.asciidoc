@@ -1,10 +1,10 @@
 [[data-views-api-default-set]]
-=== Set default index pattern API
+=== Set default data view API
 ++++
-<titleabbrev>Set default index pattern</titleabbrev>
+<titleabbrev>Set default data view</titleabbrev>
 ++++
 
-experimental[] Set a default index pattern ID. Kibana UI will use default index pattern unless user picks a different one. 
+experimental[] Set a default data view ID. Kibana UI will use the default data view unless user picks a different one. 
 The API doesn't validate if given `index_pattern_id` is a valid id. 
 
 [[data-views-api-default-set-request]]
@@ -23,9 +23,9 @@ The API doesn't validate if given `index_pattern_id` is a valid id.
 [[data-views-api-default-set-body]]
 ==== Request body
 
-`index_pattern_id`:: (Required, `string` or `null`) Sets a default index pattern id. Use `null` to unset a default index pattern.
+`index_pattern_id`:: (Required, `string` or `null`) Sets a default data view id. Use `null` to unset a default data view.
 
-`force`:: (Optional, boolean) Updates existing default index pattern id. The default is `false`.
+`force`:: (Optional, boolean) Updates existing default data view id. The default is `false`.
 
 
 [[data-views-api-default-set-codes]]
@@ -37,7 +37,7 @@ Indicates a successful call.
 [[data-views-api-default-set-example]]
 ==== Example
 
-Set the default index pattern id if none is set:
+Set the default data view id if none is set:
 
 [source,sh]
 --------------------------------------------------
@@ -49,7 +49,7 @@ $ curl -X POST api/index_patterns/default
 // KIBANA
 
 
-Upsert the default index pattern:
+Upsert the default data view:
 
 [source,sh]
 --------------------------------------------------
@@ -61,7 +61,7 @@ $ curl -X POST api/index_patterns/default
 --------------------------------------------------
 // KIBANA
 
-Unset the default index pattern:
+Unset the default data view:
 
 [source,sh]
 --------------------------------------------------

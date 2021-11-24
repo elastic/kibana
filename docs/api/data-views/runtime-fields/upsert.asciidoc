@@ -20,7 +20,7 @@ experimental[] Create or update an existing runtime field
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `index_pattern_id`::
-(Required, string) The ID of the index pattern.
+(Required, string) The ID of the data view.
 
 [[data-views-runtime-field-upsert-body]]
 ==== Request body
@@ -33,7 +33,7 @@ experimental[] Create or update an existing runtime field
 [[data-views-runtime-field-upsert-example]]
 ==== Examples
 
-Create or update an existing runtime field on an index pattern:
+Create or update an existing runtime field on a data view:
 
 [source,sh]
 --------------------------------------------------
@@ -50,7 +50,7 @@ $ curl -X PUT api/index_patterns/index_pattern/<index_pattern_id>/runtime_field
 --------------------------------------------------
 // KIBANA
 
-The API returns created or updated runtime field object and updated index pattern object:
+The API returns created or updated runtime field object and updated data view object:
 
 [source,sh]
 --------------------------------------------------

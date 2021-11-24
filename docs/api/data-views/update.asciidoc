@@ -1,11 +1,11 @@
 [[data-views-api-update]]
-=== Update index pattern API
+=== Update data view API
 ++++
-<titleabbrev>Update index pattern</titleabbrev>
+<titleabbrev>Update data view</titleabbrev>
 ++++
 
-experimental[] Update part of an index pattern. Only the specified fields are updated in the
-index pattern. Unspecified fields stay as they are persisted.
+experimental[] Update part of an data view. Only the specified fields are updated in the
+data view. Unspecified fields stay as they are persisted.
 
 [[data-views-api-update-request]]
 ==== Request
@@ -21,16 +21,16 @@ index pattern. Unspecified fields stay as they are persisted.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `id`::
-  (Required, string) The ID of the index pattern you want to update.
+  (Required, string) The ID of the data view you want to update.
 
 [[data-views-api-update-request-body]]
 ==== Request body
 
-`refresh_fields`:: (Optional, boolean) Reloads the index pattern fields after
-the index pattern is updated. The default is `false`.
+`refresh_fields`:: (Optional, boolean) Reloads the data view fields after
+the data view is updated. The default is `false`.
 
 `index_pattern`::
-  (Required, object) The index patterns fields you want to update.
+  (Required, object) The data view fields you want to update.
 +
 
 You can partially update the following fields:
@@ -52,7 +52,7 @@ You can partially update the following fields:
 [[data-views-api-update-example]]
 ==== Examples
 
-Update a title of the `<my-pattern>` index pattern:
+Update a title of the `<my-pattern>` data view:
 
 [source,sh]
 --------------------------------------------------
@@ -100,7 +100,7 @@ $ curl -X POST api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
-The API returns the updated index pattern object:
+The API returns the updated data view object:
 
 [source,sh]
 --------------------------------------------------

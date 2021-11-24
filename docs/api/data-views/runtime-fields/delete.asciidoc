@@ -28,7 +28,7 @@ experimental[] Delete a runtime field from a data view.
 
 ==== Example
 
-Delete a runtime field from an index pattern:
+Delete a runtime field from a data view:
 
 [source,sh]
 --------------------------------------------------

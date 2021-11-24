@@ -20,7 +20,7 @@ experimental[] Update an existing runtime field
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `index_pattern_id`::
-(Required, string) The ID of the index pattern.
+(Required, string) The ID of the data view.
 
 `name`::
 (Required, string) The name of the runtime field you want to update.
@@ -40,7 +40,7 @@ You can update following fields:
 [[data-views-runtime-field-update-example]]
 ==== Examples
 
-Update an existing runtime field on an index pattern:
+Update an existing runtime field on a data view:
 
 [source,sh]
 --------------------------------------------------
@@ -55,7 +55,7 @@ $ curl -X POST api/index_patterns/index_pattern/<index_pattern_id>/runtime_field
 --------------------------------------------------
 // KIBANA
 
-The API returns updated runtime field object and updated index pattern object:
+The API returns updated runtime field object and updated data view object:
 
 [source,sh]
 --------------------------------------------------

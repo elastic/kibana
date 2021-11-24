@@ -1,10 +1,10 @@
 [[data-views-api-default-get]]
-=== Get default index pattern API
+=== Get default data view API
 ++++
-<titleabbrev>Get default index pattern</titleabbrev>
+<titleabbrev>Get default data view</titleabbrev>
 ++++
 
-experimental[] Retrieve a default index pattern ID. Kibana UI uses default index pattern unless user picks a different one.
+experimental[] Retrieve a default data view ID. Kibana UI uses default data view unless user picks a different one.
 
 [[data-views-api-default-get-request]]
 ==== Request
@@ -28,7 +28,7 @@ Indicates a successful call.
 [[data-views-api-default-get-example]]
 ==== Example
 
-Retrieve the default index pattern id:
+Retrieve the default data view id:
 
 [source,sh]
 --------------------------------------------------
@@ -36,7 +36,7 @@ $ curl -X GET api/index_patterns/default
 --------------------------------------------------
 // KIBANA
 
-The API returns an ID of a default index pattern:
+The API returns an ID of a default data view:
 
 [source,sh]
 --------------------------------------------------
@@ -45,7 +45,7 @@ The API returns an ID of a default index pattern:
 }
 --------------------------------------------------
 
-In case there is no default index pattern, the API returns:
+In case there is no default data view, the API returns:
 
 [source,sh]
 --------------------------------------------------
