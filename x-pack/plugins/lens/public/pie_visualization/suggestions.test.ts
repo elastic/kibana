@@ -921,4 +921,133 @@ describe('suggestions', () => {
       ).toMatchInlineSnapshot(`Array []`);
     });
   });
+
+  describe('waffle', () => {
+    it('should reject when currently active and unchanged data', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [],
+            changeType: 'unchanged',
+          },
+          state: {
+            shape: 'waffle',
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                groups: [],
+                metric: 'a',
+
+                numberDisplay: 'hidden',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+              },
+            ],
+          },
+          keptLayerIds: ['first'],
+        })
+      ).toHaveLength(0);
+    });
+
+    it('waffle type should be added only in case of 1 group', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'a',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'b',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'unchanged',
+          },
+          state: {
+            shape: 'waffle',
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                groups: ['a', 'b'],
+                metric: 'c',
+
+                numberDisplay: 'hidden',
+                categoryDisplay: 'inside',
+                legendDisplay: 'show',
+                percentDecimals: 0,
+                legendMaxLines: 1,
+                truncateLegend: true,
+                nestedLegend: true,
+              },
+            ],
+          },
+          keptLayerIds: ['first'],
+        }).filter(({ hide, state }) => !hide && state.shape === 'waffle')
+      ).toMatchInlineSnapshot(`Array []`);
+    });
+
+    it('waffle type should be added only in case of 1 group (negative test)', () => {
+      const meta: Parameters<typeof suggestions>[0] = {
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'c',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'unchanged',
+        },
+        state: {
+          shape: 'pie',
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              groups: ['a', 'b'],
+              metric: 'c',
+
+              numberDisplay: 'hidden',
+              categoryDisplay: 'inside',
+              legendDisplay: 'show',
+              percentDecimals: 0,
+              legendMaxLines: 1,
+              truncateLegend: true,
+              nestedLegend: true,
+            },
+          ],
+        },
+        keptLayerIds: ['first'],
+      };
+
+      // test with no group
+      expect(
+        suggestions(meta).filter(({ hide, state }) => !hide && state.shape === 'waffle')
+      ).toMatchInlineSnapshot(`Array []`);
+
+      meta.table.columns.push({
+        columnId: 'b',
+        operation: { label: 'Top 6', dataType: 'string' as DataType, isBucketed: true },
+      });
+
+      meta.table.columns.push({
+        columnId: 'c',
+        operation: { label: 'Top 7', dataType: 'string' as DataType, isBucketed: true },
+      });
+
+      // test with 2 groups
+      expect(
+        suggestions(meta).filter(({ hide, state }) => !hide && state.shape === 'waffle')
+      ).toMatchInlineSnapshot(`Array []`);
+    });
+  });
 });
