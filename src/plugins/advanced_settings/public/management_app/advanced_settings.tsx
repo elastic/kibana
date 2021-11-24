@@ -19,6 +19,7 @@ import {
   DocLinksStart,
   ToastsStart,
   ScopedHistory,
+  ThemeServiceStart,
 } from '../../../../core/public';
 import { url } from '../../../kibana_utils/public';
 
@@ -41,6 +42,7 @@ interface AdvancedSettingsProps {
   uiSettings: IUiSettingsClient;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+  theme: ThemeServiceStart['theme$'];
   componentRegistry: ComponentRegistry['start'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
@@ -270,6 +272,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           toasts={this.props.toasts}
           trackUiMetric={this.props.trackUiMetric}
           queryText={query.text}
+          theme={this.props.theme}
         />
         <PageFooter
           toasts={this.props.toasts}

@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition } from '../../../expressions/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import type { PersistedState } from '../../../visualizations/public';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VisTypePieDependencies } from './plugin';
 
 import { RenderValue, vislibPieName } from './pie_fn';
@@ -43,19 +44,21 @@ export const getPieVisRenderer: (
 
     render(
       <I18nProvider>
-        <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-          <PieComponent
-            chartsThemeService={theme}
-            palettesRegistry={palettesRegistry}
-            visParams={visConfig}
-            visData={visData}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-            uiState={handlers.uiState as PersistedState}
-            services={services.data}
-            syncColors={syncColors}
-          />
-        </VisualizationContainer>
+        <KibanaThemeProvider theme$={services.kibanaTheme.theme$}>
+          <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+            <PieComponent
+              chartsThemeService={theme}
+              palettesRegistry={palettesRegistry}
+              visParams={visConfig}
+              visData={visData}
+              renderComplete={handlers.done}
+              fireEvent={handlers.event}
+              uiState={handlers.uiState as PersistedState}
+              services={services.data}
+              syncColors={syncColors}
+            />
+          </VisualizationContainer>
+        </KibanaThemeProvider>
       </I18nProvider>,
       domNode
     );

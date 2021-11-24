@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, DocLinksStart } from 'src/core/public';
+import { CoreSetup, DocLinksStart, ThemeServiceStart } from 'src/core/public';
 import { VisualizationsSetup } from '../../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { ChartsPluginSetup } from '../../../charts/public';
@@ -35,7 +35,11 @@ export interface VisTypePiePluginStartDependencies {
 export interface VisTypePieDependencies {
   theme: ChartsPluginSetup['theme'];
   palettes: ChartsPluginSetup['palettes'];
-  getStartDeps: () => Promise<{ data: DataPublicPluginStart; docLinks: DocLinksStart }>;
+  getStartDeps: () => Promise<{
+    data: DataPublicPluginStart;
+    docLinks: DocLinksStart;
+    kibanaTheme: ThemeServiceStart;
+  }>;
 }
 
 export class VisTypePiePlugin {
@@ -49,6 +53,7 @@ export class VisTypePiePlugin {
         return {
           data: deps.data,
           docLinks: coreStart.docLinks,
+          kibanaTheme: coreStart.theme,
         };
       };
       const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_pie');

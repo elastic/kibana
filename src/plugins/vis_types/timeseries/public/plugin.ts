@@ -56,6 +56,7 @@ export class MetricsPlugin implements Plugin<void, void> {
     expressions.registerRenderer(
       getTimeseriesVisRenderer({
         uiSettings: core.uiSettings,
+        theme: core.theme,
       })
     );
     setUISettings(core.uiSettings);

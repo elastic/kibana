@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { ColorMode } from '../../../../../src/plugins/charts/common';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { getSuggestions } from './metric_suggestions';
@@ -73,8 +75,10 @@ const toExpression = (
 };
 export const getMetricVisualization = ({
   paletteService,
+  theme,
 }: {
   paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
 }): Visualization<MetricState> => ({
   id: 'lnsMetric',
 
@@ -191,9 +195,11 @@ export const getMetricVisualization = ({
 
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <MetricDimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <MetricDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },

@@ -12,7 +12,11 @@ import { map } from 'rxjs/operators';
 import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 
-import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
+import {
+  KibanaThemeProvider,
+  MarkdownSimple,
+  toMountPoint,
+} from '../../../../../kibana_react/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
 import { esFilters, connectToQueryState } from '../../../../../data/public';
 import {
@@ -121,7 +125,11 @@ export const useVisualizeAppState = (
               title: i18n.translate('visualize.visualizationLoadingFailedErrorMessage', {
                 defaultMessage: 'Failed to load the visualization',
               }),
-              text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+              text: toMountPoint(
+                <KibanaThemeProvider theme$={services.theme.theme$}>
+                  <MarkdownSimple>{error.message}</MarkdownSimple>
+                </KibanaThemeProvider>
+              ),
             });
 
             services.history.replace(
