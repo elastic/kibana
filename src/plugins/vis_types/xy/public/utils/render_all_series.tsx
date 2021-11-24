@@ -108,7 +108,7 @@ export const renderAllSeries = (
           );
         });
       }
-      const isStacked = mode === 'normal';
+      const isStacked = mode === 'stacked';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
       // needed to seperate stacked and non-stacked bars into unique pseudo groups
       const pseudoGroupId = isStacked ? `__pseudo_stacked_group-${groupId}__` : groupId;
