@@ -16,7 +16,7 @@ import type {
   Datatable,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import type { DateRange, LayerType } from '../common';
+import type { CustomPaletteParams, DateRange, LayerType } from '../common';
 import type { Query, Filter } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
@@ -626,7 +626,7 @@ export interface Visualization<T = unknown> {
    */
   initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
 
-  getMainPalette?: (state: T) => undefined | PaletteOutput;
+  getMainPalette?: (state: T) => undefined | PaletteOutput<CustomPaletteParams>;
 
   /**
    * Visualizations must provide at least one type for the chart switcher,

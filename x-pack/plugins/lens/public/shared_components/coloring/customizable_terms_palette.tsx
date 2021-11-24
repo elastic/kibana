@@ -14,25 +14,7 @@ import { CUSTOM_PALETTE } from './constants';
 import { reverseTermsPalette, getSwitchToCustomParamsForTermsPalette } from './utils';
 import { ColorTerms } from './color_terms';
 
-import './palette_configuration.scss';
 import type { CustomPaletteParams } from '../../../common';
-
-/**
- * Some name conventions here:
- * * `displayStops` => It's an additional transformation of `stops` into a [0, N] domain for the EUIPaletteDisplay component.
- * * `stops` => final steps used to table coloring. It is a rightShift of the colorStops
- * * `colorStops` => user's color stop inputs.  Used to compute range min.
- *
- * When the user inputs the colorStops, they are designed to be the initial part of the color segment,
- * so the next stops indicate where the previous stop ends.
- * Both table coloring logic and EuiPaletteDisplay format implementation works differently than our current `colorStops`,
- * by having the stop values at the end of each color segment rather than at the beginning: `stops` values are computed by a rightShift of `colorStops`.
- * EuiPaletteDisplay has an additional requirement as it is always mapped against a domain [0, N]: from `stops` the `displayStops` are computed with
- * some continuity enrichment and a remap against a [0, 100] domain to make the palette component work ok.
- *
- * These naming conventions would be useful to track the code flow in this feature as multiple transformations are happening
- * for a single change.
- */
 
 export function CustomizableTermsPalette({
   palettes,
@@ -45,15 +27,36 @@ export function CustomizableTermsPalette({
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   terms: string[];
 }) {
-  const selectedPalette = activePalette ?? {
+  let selectedPalette = activePalette ?? {
     name: 'default',
     type: 'palette',
   };
-  const colors = palettes.get(selectedPalette?.name).getCategoricalColors(terms.length);
-  const colorTerms = terms.map((term, i) => ({
-    color: colors[i],
-    term,
-  }));
+  let colorTerms = [];
+  if (selectedPalette.name !== CUSTOM_PALETTE) {
+    const colors = palettes.get(selectedPalette.name).getCategoricalColors(terms.length);
+    colorTerms = terms.map((term, i) => ({
+      color: colors[i],
+      term,
+    }));
+  } else {
+    const userColors = selectedPalette.params?.colorTerms?.map((colorTerm) => colorTerm.color);
+    const colors = palettes.get(selectedPalette.name).getCategoricalColors(terms.length, {
+      terms,
+      colors: userColors,
+      gradient: true,
+    });
+    colorTerms = terms.map((term, i) => ({
+      color: colors[i],
+      term,
+    }));
+  }
+  selectedPalette = {
+    ...selectedPalette,
+    params: {
+      ...selectedPalette.params,
+      colorTerms,
+    },
+  };
 
   return (
     <>
@@ -95,7 +98,6 @@ export function CustomizableTermsPalette({
               });
             }}
             showCustomPalette
-            // showDynamicColorOnly
           />
         </EuiFormRow>
         <EuiFormRow
@@ -114,7 +116,7 @@ export function CustomizableTermsPalette({
                     palettes,
                     selectedPalette,
                     {
-                      colorTerms: reverseTermsPalette(colorTerms),
+                      colorTerms: reverseTermsPalette(selectedPalette?.params?.colorTerms),
                       reverse: !selectedPalette?.params?.reverse, // Store the reverse state
                     }
                   );

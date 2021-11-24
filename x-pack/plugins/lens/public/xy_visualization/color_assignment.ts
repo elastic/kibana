@@ -13,11 +13,12 @@ import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory, LayerType, layerTypes } from '../../common';
 import type { XYLayerConfig } from '../../common/expressions';
+import type { CustomPaletteParams } from '../../common/types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
 interface LayerColorConfig {
-  palette?: PaletteOutput;
+  palette?: PaletteOutput<CustomPaletteParams>;
   splitAccessor?: string;
   accessors: string[];
   layerId: string;
@@ -107,7 +108,10 @@ export function getAccessorColorConfig(
   paletteService: PaletteRegistry
 ): AccessorConfig[] {
   const layerContainsSplits = Boolean(layer.splitAccessor);
-  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
+  const currentPalette: PaletteOutput<CustomPaletteParams> = layer.palette || {
+    type: 'palette',
+    name: 'default',
+  };
   const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
   return layer.accessors.map((accessor) => {
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);

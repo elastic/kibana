@@ -227,6 +227,13 @@ function buildCustomPalette(): PaletteDefinition {
         const finalStops = [...stops.map((stop) => (stop - offset) / range)];
         return chroma.scale(colors).domain(finalStops).colors(size);
       }
+      if (terms && terms.length > 0) {
+        const actualColors = gradient ? chroma.scale(colors).colors(terms.length) : colors;
+        return terms.map((term, index) => {
+          const outputColor = actualColors[index % actualColors.length];
+          return outputColor;
+        });
+      }
       return gradient ? chroma.scale(colors).colors(size) : colors;
     },
     canDynamicColoring: false,
