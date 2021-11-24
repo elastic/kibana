@@ -48,13 +48,6 @@ export interface AppContextTestRender {
   render: UiRender;
 }
 
-/**
- * Creates a mocked endpoint app context custom renderer that can be used to render
- * component that depend upon the application's surrounding context providers.
- * Factory also returns the content that was used to create the custom renderer, allowing
- * for further customization.
- */
-
 const createCoreStartMock = (
   history: MemoryHistory<never>
 ): ReturnType<typeof coreMock.createStart> => {
@@ -100,6 +93,13 @@ const AppRootProvider = memo<{
 });
 
 AppRootProvider.displayName = 'AppRootProvider';
+
+/**
+ * Creates a mocked app context custom renderer that can be used to render
+ * component that depend upon the application's surrounding context providers.
+ * Factory also returns the content that was used to create the custom renderer, allowing
+ * for further customization.
+ */
 
 export const createAppRootMockRenderer = (): AppContextTestRender => {
   const history = createMemoryHistory<never>();
