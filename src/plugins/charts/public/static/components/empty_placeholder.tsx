@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const EmptyPlaceholder = (props: { icon: IconType }) => (
   <>
