@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers/layer_wizard_registry';

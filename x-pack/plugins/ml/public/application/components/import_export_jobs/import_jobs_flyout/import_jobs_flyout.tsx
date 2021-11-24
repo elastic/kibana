@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 

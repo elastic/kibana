@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { getServices } from '../../../../kibana_services';

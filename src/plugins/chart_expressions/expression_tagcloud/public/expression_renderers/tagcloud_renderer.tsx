@@ -8,7 +8,7 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { VisualizationContainer } from '../../../../visualizations/public';

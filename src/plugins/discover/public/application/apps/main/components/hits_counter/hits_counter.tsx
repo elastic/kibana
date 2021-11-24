@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DataTotalHits$, DataTotalHitsMsg } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';

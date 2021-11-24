@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import type { StoryContext } from '@storybook/react';
 import { createBrowserHistory } from 'history';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { ScopedHistory } from '../../../../../src/core/public';
 import { getStorybookContextProvider } from '../../../../../src/plugins/custom_integrations/storybook';

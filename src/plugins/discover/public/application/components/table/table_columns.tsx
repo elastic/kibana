@@ -8,7 +8,7 @@
 
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldName } from '../field_name/field_name';
 import { FieldRecord } from './table';
 import { TableActions } from './table_cell_actions';

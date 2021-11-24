@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@elastic/datemath';
 import {
   Axis,

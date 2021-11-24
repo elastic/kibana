@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { pairwise, startWith } from 'rxjs/operators';
 
 import { InternalChromeStart } from '../chrome';

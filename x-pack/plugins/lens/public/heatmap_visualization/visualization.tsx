@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';

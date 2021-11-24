@@ -9,7 +9,7 @@ import './suggestion_panel.scss';
 
 import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiIcon,
   EuiTitle,

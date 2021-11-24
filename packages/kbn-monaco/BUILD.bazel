@@ -39,9 +39,11 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-i18n",
+  "//packages/kbn-i18n:npm_module_types",
   "@npm//antlr4ts",
   "@npm//monaco-editor",
+  "@npm//rxjs",
+  "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/node",
 ]
