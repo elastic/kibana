@@ -7,7 +7,7 @@
  */
 
 import * as path from 'path';
-import { StorybookConfig } from '@storybook/core/types';
+import { StorybookConfig } from '@storybook/core-common';
 import { Configuration } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './constants';
@@ -19,6 +19,9 @@ export const defaultConfig: StorybookConfig = {
   stories: ['../**/*.stories.tsx'],
   typescript: {
     reactDocgen: false,
+  },
+  features: {
+    postcss: false,
   },
   webpackFinal: (config, options) => {
     if (process.env.CI) {

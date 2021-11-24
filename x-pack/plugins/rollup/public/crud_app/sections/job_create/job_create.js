@@ -10,13 +10,13 @@ import PropTypes from 'prop-types';
 import { cloneDeep, debounce, first, mapValues } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 import {
   EuiCallOut,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
   EuiPageContentBody,
   EuiPageHeader,
@@ -494,7 +494,7 @@ export class JobCreateUi extends Component {
     if (isSaving) {
       savingFeedback = (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

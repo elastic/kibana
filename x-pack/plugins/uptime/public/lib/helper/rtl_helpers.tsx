@@ -12,7 +12,7 @@ import { render as reactTestLibRender, RenderOptions } from '@testing-library/re
 import { Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from 'src/core/public/mocks';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
@@ -83,7 +83,7 @@ const createMockStore = () => {
 const mockAppUrls: Record<string, string> = {
   uptime: '/app/uptime',
   observability: '/app/observability',
-  '/integrations/detail/synthetics/overview': '/integrations/detail/synthetics/overview',
+  '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
 };
 
 /* default mock core */
