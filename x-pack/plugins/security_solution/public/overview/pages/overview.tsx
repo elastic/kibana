@@ -157,7 +157,7 @@ const OverviewComponent = () => {
                         {isTiLoaded && (
                           <ThreatIntelLinkPanel
                             isSomeIntegrationsDisabled={
-                              tiIntegrationStatus.isSomeIntegrationsDisabled
+                              tiIntegrationStatus?.isSomeIntegrationsDisabled
                             }
                             allTiDataSources={allTiDataSources}
                             deleteQuery={deleteQuery}
