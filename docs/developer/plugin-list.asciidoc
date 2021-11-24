@@ -166,10 +166,6 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |The plugin provides UI and APIs for the interactive setup mode.
 
 
-|{kib-repo}blob/{branch}/src/plugins/kibana_legacy/README.md[kibanaLegacy]
-|This plugin contains several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
-
-
 |{kib-repo}blob/{branch}/src/plugins/kibana_overview/README.md[kibanaOverview]
 |An overview page highlighting Kibana apps
 
