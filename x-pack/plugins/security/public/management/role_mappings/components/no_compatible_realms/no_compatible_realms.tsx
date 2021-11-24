@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 

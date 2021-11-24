@@ -9,7 +9,7 @@
 import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AnnotationRow } from './annotation_row';
 import { collectionActions, CollectionActionsProps } from './lib/collection_actions';

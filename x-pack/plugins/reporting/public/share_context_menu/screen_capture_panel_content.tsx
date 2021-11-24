@@ -6,7 +6,7 @@
  */
 
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import { LayoutParams } from '../../common/types';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';

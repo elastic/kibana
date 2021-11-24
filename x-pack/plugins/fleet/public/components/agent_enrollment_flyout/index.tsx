@@ -20,7 +20,7 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetSettings, sendGetOneAgentPolicy, useFleetStatus } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';

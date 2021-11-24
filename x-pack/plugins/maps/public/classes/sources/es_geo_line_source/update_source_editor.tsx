@@ -7,7 +7,7 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';

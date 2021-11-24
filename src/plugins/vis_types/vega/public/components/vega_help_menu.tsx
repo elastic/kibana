@@ -8,7 +8,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { getDocLinks } from '../services';

@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { parseInterval } from '../../common/util/parse_interval';
 import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';

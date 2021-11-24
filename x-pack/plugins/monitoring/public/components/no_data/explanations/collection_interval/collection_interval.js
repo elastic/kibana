@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { WhatIs } from '../../blurbs';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class ExplainCollectionInterval extends React.Component {
   constructor(props) {

@@ -10,7 +10,7 @@ import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiHorizontalRule,
   EuiFlexItem,

@@ -15,7 +15,7 @@ import React, { Component } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiForm, EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class EditDescriptionPopover extends Component {
   static displayName = 'EditDescriptionPopover';

@@ -11,7 +11,7 @@ import React from 'react';
 import { History } from 'history';
 import { Provider } from 'react-redux';
 import { first } from 'rxjs/operators';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';

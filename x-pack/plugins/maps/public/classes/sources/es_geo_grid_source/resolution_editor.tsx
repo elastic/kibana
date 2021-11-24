@@ -7,7 +7,7 @@
 
 import React, { ChangeEvent, Component } from 'react';
 import { EuiConfirmModal, EuiSelect, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { AGG_TYPE, GRID_RESOLUTION } from '../../../../common/constants';

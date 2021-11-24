@@ -8,7 +8,7 @@
 import React, { useRef, useEffect, FC, ReactNode } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TagsCapabilities, TagWithRelations } from '../../../common';
 import { TagBadge } from '../../components';
 import { TagAction } from '../actions';

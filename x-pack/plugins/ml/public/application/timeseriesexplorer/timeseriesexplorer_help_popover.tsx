@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { HelpPopover, HelpPopoverButton } from '../components/help_popover/help_popover';
 
 export const TimeSeriesExplorerHelpPopover = () => {

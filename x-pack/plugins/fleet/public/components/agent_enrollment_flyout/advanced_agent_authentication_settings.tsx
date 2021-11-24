@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiButton, EuiCallOut, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { SO_SEARCH_LIMIT } from '../../applications/fleet/constants';

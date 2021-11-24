@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useState, useEffect, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
   EuiModal,

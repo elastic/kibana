@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 
 interface Props {

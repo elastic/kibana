@@ -24,7 +24,7 @@ import {
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
 import { formatDateTimeLocal } from '../../../../common/formatting';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AlertsCallout } from '../../../alerts/callout';
 

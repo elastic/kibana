@@ -10,8 +10,8 @@ import { mount, ReactWrapper } from 'enzyme';
 import { TestProviders } from '../../common/mock';
 import { UserActionTimestamp } from './user_action_timestamp';
 
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn();
   FormattedRelative.mockImplementationOnce(() => '2 days ago');
   FormattedRelative.mockImplementation(() => '20 hours ago');

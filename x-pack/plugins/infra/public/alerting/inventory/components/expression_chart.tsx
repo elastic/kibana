@@ -9,7 +9,7 @@ import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/cha
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';

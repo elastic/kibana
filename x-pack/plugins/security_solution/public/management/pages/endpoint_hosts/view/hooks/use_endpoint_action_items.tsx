@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { pagePathGetters } from '../../../../../../../fleet/public';
 import { getEndpointDetailsPath } from '../../../../common/routing';

@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LogIndexNameReference } from '../../../../common/log_sources';

@@ -9,7 +9,7 @@ import './management_app.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 

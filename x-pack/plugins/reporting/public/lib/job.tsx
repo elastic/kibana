@@ -7,7 +7,7 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
 import { JOB_STATUSES } from '../../common/constants';

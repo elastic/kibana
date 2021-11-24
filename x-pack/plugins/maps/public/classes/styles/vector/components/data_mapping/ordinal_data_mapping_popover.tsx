@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { DataMappingPopover } from './data_mapping_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';

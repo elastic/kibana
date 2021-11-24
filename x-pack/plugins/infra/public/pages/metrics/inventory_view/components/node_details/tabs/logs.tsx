@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';

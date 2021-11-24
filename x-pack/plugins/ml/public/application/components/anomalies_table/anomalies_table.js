@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getColumns } from './anomalies_table_columns';
 

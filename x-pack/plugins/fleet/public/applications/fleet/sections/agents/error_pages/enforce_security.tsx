@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 import { NoDataLayout } from './components/no_data_layout';
 

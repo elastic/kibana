@@ -26,7 +26,7 @@ import {
 
 import { Pager } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { MatchedItem, Tag } from '../../../types';
 
 interface IndicesListProps {

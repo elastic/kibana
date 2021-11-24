@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';

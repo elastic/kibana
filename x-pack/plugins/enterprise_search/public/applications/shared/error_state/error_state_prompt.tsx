@@ -10,7 +10,7 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KibanaLogic } from '../kibana';
 import { EuiButtonTo } from '../react_router_helpers';

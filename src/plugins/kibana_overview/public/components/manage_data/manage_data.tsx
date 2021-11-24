@@ -9,7 +9,7 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 import { RedirectAppLinks, useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';

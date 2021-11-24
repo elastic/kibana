@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';

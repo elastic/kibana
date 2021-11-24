@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ResultLinks } from '../job_actions';
 import { MultiJobActionsMenu } from './actions_menu';
 import { GroupSelector } from './group_selector';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class MultiJobActions extends Component {
   constructor(props) {

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
 import {

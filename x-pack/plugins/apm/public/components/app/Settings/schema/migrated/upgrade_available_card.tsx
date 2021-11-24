@@ -7,7 +7,7 @@
 
 import { EuiCard, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useUpgradeApmPackagePolicyHref } from '../../../../shared/Links/kibana';
 import { CardFooterContent } from './card_footer_content';

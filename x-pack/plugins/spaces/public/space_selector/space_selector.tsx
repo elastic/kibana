@@ -26,7 +26,7 @@ import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { AppMountParameters, CoreStart } from 'src/core/public';
 
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';

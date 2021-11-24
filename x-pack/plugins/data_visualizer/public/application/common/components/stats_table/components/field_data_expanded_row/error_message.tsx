@@ -6,7 +6,7 @@
  */
 
 import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { DVErrorObject } from '../../../../../index_data_visualizer/utils/error_utils';
 

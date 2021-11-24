@@ -12,7 +12,7 @@ import 'react-resizable/css/styles.css';
 // @ts-ignore
 import sizeMe from 'react-sizeme';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';

@@ -6,7 +6,7 @@
  */
 
 import { EuiText, EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import * as i18n from './translations';

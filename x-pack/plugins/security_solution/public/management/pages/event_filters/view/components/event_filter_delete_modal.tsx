@@ -16,7 +16,7 @@ import {
   EuiModalHeaderTitle,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { i18n } from '@kbn/i18n';

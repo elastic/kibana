@@ -8,7 +8,7 @@
 import React, { FC, Fragment } from 'react';
 import { EuiCallOut, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { FieldDataRowProps } from '../../types/field_data_row';

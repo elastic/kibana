@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Immutable, OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { BehaviorProtectionOSes, OS } from '../../../types';
 import { ConfigForm } from '../../components/config_form';

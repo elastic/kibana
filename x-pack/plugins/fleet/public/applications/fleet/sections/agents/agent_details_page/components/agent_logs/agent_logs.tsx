@@ -22,7 +22,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { fromKueryExpression } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';

@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { HttpStart } from '../../../../../src/core/public';
 import { useTrialStatus } from '../hooks/use_trial_status';

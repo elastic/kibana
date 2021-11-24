@@ -79,8 +79,8 @@ module.exports = {
         },
         {
           from: 'react-intl',
-          to: '@kbn/i18n/react',
-          disallowedMessage: `import from @kbn/i18n/react instead`
+          to: '@kbn/i18n-react',
+          disallowedMessage: `import from @kbn/i18n-react instead`
         },
         {
           from: 'styled-components',

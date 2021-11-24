@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiTitle, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLink } from '../../../../hooks';
 import type { Output } from '../../../../types';

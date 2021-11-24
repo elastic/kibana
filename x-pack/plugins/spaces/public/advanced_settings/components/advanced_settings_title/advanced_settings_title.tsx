@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../common';
 import { getSpaceAvatarComponent } from '../../../space_avatar';

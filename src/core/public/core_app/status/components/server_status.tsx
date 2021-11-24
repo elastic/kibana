@@ -8,7 +8,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { StatusState } from '../lib';
 import { StatusBadge } from './status_badge';
 

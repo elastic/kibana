@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 import { Switch, Route, Redirect, Router } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart, ScopedHistory } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaFeature } from '../../../features/common';
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';

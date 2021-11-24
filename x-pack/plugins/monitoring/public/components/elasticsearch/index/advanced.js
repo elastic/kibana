@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { IndexDetailStatus } from '../index_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsCallout } from '../../../alerts/callout';
 
 export const AdvancedIndex = ({ indexSummary, metrics, alerts, ...props }) => {

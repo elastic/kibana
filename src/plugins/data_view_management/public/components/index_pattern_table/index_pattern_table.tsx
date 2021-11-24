@@ -15,7 +15,7 @@ import {
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';

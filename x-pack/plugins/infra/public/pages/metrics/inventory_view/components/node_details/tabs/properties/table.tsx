@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Row {
   name: string;

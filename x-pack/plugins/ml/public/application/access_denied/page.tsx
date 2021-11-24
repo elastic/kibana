@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { NavigationMenu } from '../components/navigation_menu';

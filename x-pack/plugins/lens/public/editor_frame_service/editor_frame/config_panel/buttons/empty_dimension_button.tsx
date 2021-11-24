@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../../id_generator';
 import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';

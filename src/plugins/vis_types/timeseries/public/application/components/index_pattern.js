@@ -29,7 +29,7 @@ import { LastValueModePopover } from './last_value_mode_popover';
 import { KBN_FIELD_TYPES } from '../../../../../data/public';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';

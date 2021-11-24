@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { Store } from 'redux';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';

@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { StartServicesAccessor } from 'src/core/public';
 
 import { KibanaContextProvider } from '../../../kibana_react/public';

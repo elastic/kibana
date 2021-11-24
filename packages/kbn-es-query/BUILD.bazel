@@ -38,13 +38,13 @@ RUNTIME_DEPS = [
   "@npm//load-json-file",
   "@npm//lodash",
   "@npm//moment-timezone",
-  "@npm//tslib",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-utility-types",
-  "//packages/kbn-i18n",
+  "//packages/kbn-i18n:npm_module_types",
   "@npm//@elastic/elasticsearch",
+  "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/moment-timezone",

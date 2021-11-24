@@ -10,7 +10,7 @@ import { get, find } from 'lodash';
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { search, AggParamOption } from '../../../../data/public';
 import { AggParamEditorProps } from '../agg_param_props';

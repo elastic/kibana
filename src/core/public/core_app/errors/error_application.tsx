@@ -10,7 +10,7 @@ import React, { ReactChild, useState, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { History } from 'history';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 import { UrlOverflowUi } from './url_overflow_ui';

@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { ACTION } from '../../../../common/constants/detector_rule';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ActionsSection({ actions, onSkipResultChange, onSkipModelUpdateChange }) {
   return (

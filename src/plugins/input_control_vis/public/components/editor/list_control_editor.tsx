@@ -8,7 +8,7 @@
 
 import React, { PureComponent, ComponentType } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';

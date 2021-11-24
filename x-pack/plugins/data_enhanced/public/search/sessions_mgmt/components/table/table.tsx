@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';

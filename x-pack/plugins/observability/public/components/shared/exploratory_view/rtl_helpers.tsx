@@ -13,7 +13,7 @@ import { render as reactTestLibRender, RenderOptions } from '@testing-library/re
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from 'src/core/public/mocks';
 import {
   KibanaContextProvider,

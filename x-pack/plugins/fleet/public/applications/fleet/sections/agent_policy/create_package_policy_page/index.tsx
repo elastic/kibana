@@ -10,7 +10,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiButton,

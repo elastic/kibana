@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import {

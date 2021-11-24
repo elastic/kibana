@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';

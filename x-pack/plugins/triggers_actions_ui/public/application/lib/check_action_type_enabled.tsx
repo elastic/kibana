@@ -8,7 +8,7 @@
 import React from 'react';
 import { upperFirst } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCard, EuiLink } from '@elastic/eui';
 import { ActionType, ActionConnector } from '../../types';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../common/constants';

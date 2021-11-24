@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';

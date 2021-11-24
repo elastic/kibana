@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useContext } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';

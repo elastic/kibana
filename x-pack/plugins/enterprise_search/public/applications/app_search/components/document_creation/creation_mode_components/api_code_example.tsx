@@ -26,7 +26,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';

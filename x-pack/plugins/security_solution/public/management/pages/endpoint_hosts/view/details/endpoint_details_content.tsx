@@ -16,7 +16,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isPolicyOutOfDate } from '../../utils';
 import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';

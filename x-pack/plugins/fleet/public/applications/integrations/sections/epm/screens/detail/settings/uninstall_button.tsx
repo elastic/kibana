@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { InstallStatus } from '../../../../../types';
 import type { PackageInfo } from '../../../../../types';

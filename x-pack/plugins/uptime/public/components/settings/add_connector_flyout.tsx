@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';

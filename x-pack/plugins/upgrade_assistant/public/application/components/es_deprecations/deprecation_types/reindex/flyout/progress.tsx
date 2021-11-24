@@ -8,7 +8,7 @@
 import React, { ReactNode } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { CancelLoadingState } from '../../../../types';

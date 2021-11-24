@@ -18,8 +18,8 @@ import {
 import type { ReactElement } from 'react';
 import React, { Component, lazy, Suspense } from 'react';
 
-import type { InjectedIntl } from '@kbn/i18n/react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import type { ApplicationStart, Capabilities } from 'src/core/public';
 
 import type { Space } from '../../../common';

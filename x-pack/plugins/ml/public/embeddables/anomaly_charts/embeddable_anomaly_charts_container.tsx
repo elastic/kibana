@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';

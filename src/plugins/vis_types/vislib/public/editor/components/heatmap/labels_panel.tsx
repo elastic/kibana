@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 
 import { EuiColorPicker, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { SwitchOption } from '../../../../../../vis_default_editor/public';

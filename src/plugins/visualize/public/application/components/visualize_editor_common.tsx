@@ -8,7 +8,7 @@
 
 import './visualize_editor.scss';
 import React, { RefObject, useCallback, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';

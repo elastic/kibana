@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 import { get, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiDescriptionList,

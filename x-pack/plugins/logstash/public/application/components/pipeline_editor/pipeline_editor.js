@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import 'brace/mode/plain_text';

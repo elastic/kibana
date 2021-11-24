@@ -27,7 +27,7 @@ import {
   EuiContextMenuProps,
 } from '@elastic/eui';
 import moment from 'moment';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { parsePath } from 'history';
 import { BrowserRouter as Router, useHistory } from 'react-router-dom';

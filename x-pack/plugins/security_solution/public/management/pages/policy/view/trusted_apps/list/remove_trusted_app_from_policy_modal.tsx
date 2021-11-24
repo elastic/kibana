@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';

@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';

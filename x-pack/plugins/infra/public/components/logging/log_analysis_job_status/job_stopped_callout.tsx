@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const JobStoppedCallout: React.FC = () => (
   <EuiCallOut color="primary" title={jobStoppedTitle}>

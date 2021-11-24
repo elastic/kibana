@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
 import { GroupByExpression } from './group_by_over';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 describe('group by expression', () => {
   it('renders with builtin group by types', () => {

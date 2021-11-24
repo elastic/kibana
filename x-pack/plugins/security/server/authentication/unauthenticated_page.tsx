@@ -11,7 +11,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { IBasePath } from 'src/core/server';
 
 import { PromptPage } from '../prompt_page';

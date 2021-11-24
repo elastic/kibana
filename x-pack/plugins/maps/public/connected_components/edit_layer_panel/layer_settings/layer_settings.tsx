@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Attribution } from '../../../../common/descriptor_types';
 import { MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';

@@ -17,7 +17,7 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DefaultFormatEditor } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';

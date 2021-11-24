@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';

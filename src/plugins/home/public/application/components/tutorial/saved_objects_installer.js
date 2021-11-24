@@ -8,7 +8,7 @@
 
 /* eslint-disable no-multi-str*/
 
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n-react';
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';

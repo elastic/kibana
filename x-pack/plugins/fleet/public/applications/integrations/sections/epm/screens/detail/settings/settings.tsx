@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
 import {

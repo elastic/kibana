@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { getSeverityColor } from '../../../../common/anomaly_detection';
 import {

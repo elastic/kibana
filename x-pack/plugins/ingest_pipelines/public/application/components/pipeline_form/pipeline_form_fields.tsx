@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { Processor } from '../../../../common/types';

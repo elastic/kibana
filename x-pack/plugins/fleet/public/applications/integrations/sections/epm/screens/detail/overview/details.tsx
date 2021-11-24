@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,

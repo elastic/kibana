@@ -10,7 +10,7 @@
 
 import * as React from 'react';
 import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PATH_TO_ADVANCED_SETTINGS, PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { HttpSetup } from '../../../../core/public';

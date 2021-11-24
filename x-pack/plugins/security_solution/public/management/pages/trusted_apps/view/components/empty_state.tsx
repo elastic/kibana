@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
 
 export const EmptyState = memo<{

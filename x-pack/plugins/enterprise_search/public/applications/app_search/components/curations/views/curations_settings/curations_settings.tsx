@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 import { LicensingLogic } from '../../../../../shared/licensing';

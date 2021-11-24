@@ -9,7 +9,7 @@ import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useLocation } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiEmptyPrompt,

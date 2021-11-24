@@ -19,7 +19,7 @@ import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
 import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getValueOrEmpty } from '../../../../../common/empty_label';

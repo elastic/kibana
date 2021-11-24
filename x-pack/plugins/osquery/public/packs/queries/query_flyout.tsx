@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { Form, getUseField, Field, useFormData } from '../../shared_imports';

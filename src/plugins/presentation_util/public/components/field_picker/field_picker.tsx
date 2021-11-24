@@ -9,7 +9,7 @@
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field/field_icon';
 import { FieldButton } from '@kbn/react-field/field_button';

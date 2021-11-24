@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Rule } from '../../model';
 import { AllRule, FieldRule } from '../../model';
