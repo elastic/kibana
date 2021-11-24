@@ -21,7 +21,4 @@ export interface LogRecord {
   error?: Error;
   meta?: LogMeta;
   pid: number;
-  spanId?: string;
-  traceId?: string;
-  transactionId?: string;
 }

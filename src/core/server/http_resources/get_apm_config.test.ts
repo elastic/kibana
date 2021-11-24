@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  getConfigurationMock,
-  agentMock,
-  shouldInstrumentClientMock,
-} from './get_apm_config.test.mocks';
+import { getConfigurationMock, agentMock } from './get_apm_config.test.mocks';
 import { getApmConfig } from './get_apm_config';
 
 const defaultApmConfig = {
@@ -21,7 +17,6 @@ const defaultApmConfig = {
 describe('getApmConfig', () => {
   beforeEach(() => {
     getConfigurationMock.mockReturnValue(defaultApmConfig);
-    shouldInstrumentClientMock.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -30,7 +25,12 @@ describe('getApmConfig', () => {
   });
 
   it('returns null if apm is disabled', () => {
-    shouldInstrumentClientMock.mockReturnValue(false);
+    getConfigurationMock.mockReturnValue({
+      active: false,
+    });
+    expect(getApmConfig('/path')).toBeNull();
+
+    getConfigurationMock.mockReturnValue(undefined);
     expect(getApmConfig('/path')).toBeNull();
   });
 
