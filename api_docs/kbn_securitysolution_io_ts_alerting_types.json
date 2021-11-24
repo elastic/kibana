@@ -37,7 +37,7 @@
             "id": "def-common.SavedObjectAttributes.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: SavedObjectAttribute",
+            "label": "[key: string]: SavedObjectAttribute",
             "description": [],
             "signature": [
               "[key: string]:  ",
