@@ -55,13 +55,14 @@ function getQueryLabel(fieldNames: string[], term: string) {
   }
   return term
     .split(fullSeparatorString)
-    .map(
-      (t: string) =>
-        t ??
-        i18n.translate('xpack.lens.indexPattern.filterBy.emptyFilterQuery', {
+    .map((t: string, index: number) => {
+      if (t == null) {
+        return i18n.translate('xpack.lens.indexPattern.filterBy.emptyFilterQuery', {
           defaultMessage: '(empty)',
-        })
-    )
+        });
+      }
+      return `${fieldNames[index]}: ${t}`;
+    })
     .join(fullSeparatorString);
 }
 
@@ -123,26 +124,35 @@ export function getDisallowedTermsMessage(
               isMultiFieldValue(term) ? term.keys.join(fullSeparatorString) : term
             ) || []
         );
-        if ((fieldNames.length === 1 && !activeDataFieldNameMatch) || currentTerms.length === 0) {
-          const response: FieldStatsResponse<string | number> = await core.http.post(
-            `/api/lens/index_stats/${indexPattern.id}/field`,
-            {
-              body: JSON.stringify({
-                fieldName: fieldNames[0],
-                dslQuery: esQuery.buildEsQuery(
-                  indexPattern,
-                  frame.query,
-                  frame.filters,
-                  esQuery.getEsQueryConfig(core.uiSettings)
-                ),
-                fromDate: frame.dateRange.fromDate,
-                toDate: frame.dateRange.toDate,
-                size: currentColumn.params.size,
-              }),
-            }
-          );
-          currentTerms = response.topValues?.buckets.map(({ key }) => String(key)) || [];
+        if (!activeDataFieldNameMatch || currentTerms.length === 0) {
+          if (fieldNames.length === 1) {
+            const response: FieldStatsResponse<string | number> = await core.http.post(
+              `/api/lens/index_stats/${indexPattern.id}/field`,
+              {
+                body: JSON.stringify({
+                  fieldName: fieldNames[0],
+                  dslQuery: esQuery.buildEsQuery(
+                    indexPattern,
+                    frame.query,
+                    frame.filters,
+                    esQuery.getEsQueryConfig(core.uiSettings)
+                  ),
+                  fromDate: frame.dateRange.fromDate,
+                  toDate: frame.dateRange.toDate,
+                  size: currentColumn.params.size,
+                }),
+              }
+            );
+            currentTerms = response.topValues?.buckets.map(({ key }) => String(key)) || [];
+          }
         }
+        // when multi terms the meta.field will always be undefined, so limit the check to no data
+        if (fieldNames.length > 1 && currentTerms.length === 0) {
+          // this will produce a query like `field1: * AND field2: * ...etc`
+          // which is the best we can do for multiple terms when no data is available
+          currentTerms = [Array(fieldNames.length).fill('*').join(fullSeparatorString)];
+        }
+
         return {
           ...layer,
           columns: {
