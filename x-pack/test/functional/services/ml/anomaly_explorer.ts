@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProviderContext) {
+export function MachineLearningAnomalyExplorerProvider({
+  getPageObject,
+  getService,
+}: FtrProviderContext) {
+  const dashboardPage = getPageObject('dashboard');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -83,11 +87,15 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     },
 
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
-      await retry.tryForTime(20 * 1000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         await this.filterDashboardSearchWithSearchString(dashboardTitle);
         await this.selectAllDashboards();
         await this.waitForAddAndEditDashboardButtonEnabled();
         await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
+
+        // make sure the dashboard page actually loaded
+        const dashboardItemCount = await dashboardPage.getSharedItemsCount();
+        expect(dashboardItemCount).to.not.eql(undefined);
       });
       // changing to the dashboard app might take sime time
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
