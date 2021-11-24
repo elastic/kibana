@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should start search, save session, restore session using "restore" button', async () => {
       await comboBox.setCustom('indexPatternSelector', 'logstash-*');
+      await comboBox.setCustom('searchMetricField', 'bytes');
       await testSubjects.clickWhenNotDisabled('startSearch');
       await testSubjects.find('searchResults-1');
       await searchSessions.expectState('completed');

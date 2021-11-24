@@ -314,6 +314,7 @@ export const SearchSessionsExampleApp = ({
                       setNumericFieldName(fld?.name);
                     }}
                     sortMatchesBy="startsWith"
+                    data-test-subj="searchMetricField"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
