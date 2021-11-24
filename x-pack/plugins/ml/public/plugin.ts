@@ -25,7 +25,6 @@ import type { SpacesPluginStart } from '../../spaces/public';
 
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
 import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
@@ -54,7 +53,6 @@ import type {
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
@@ -109,7 +107,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             data: pluginsStart.data,
             share: pluginsStart.share,
-            kibanaLegacy: pluginsStart.kibanaLegacy,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,

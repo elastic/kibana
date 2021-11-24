@@ -39,7 +39,6 @@
     { "path": "../../../src/plugins/expression_shape/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/inspector/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/presentation_util/tsconfig.json" },
