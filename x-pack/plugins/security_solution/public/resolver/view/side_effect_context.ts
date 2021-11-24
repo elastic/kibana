@@ -6,7 +6,6 @@
  */
 
 import { createContext, Context } from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
 import { SideEffectors } from '../types';
 
 /**
@@ -20,7 +19,6 @@ const sideEffectors: SideEffectors = {
   cancelAnimationFrame(...args) {
     return window.cancelAnimationFrame(...args);
   },
-  ResizeObserver,
   writeTextToClipboard(text: string): Promise<void> {
     return navigator.clipboard.writeText(text);
   },

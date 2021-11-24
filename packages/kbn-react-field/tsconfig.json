@@ -9,8 +9,7 @@
     "sourceRoot": "../../../../../packages/kbn-react-field/src",
     "types": [
       "jest",
-      "node",
-      "resize-observer-polyfill"
+      "node"
     ]
   },
   "include": [

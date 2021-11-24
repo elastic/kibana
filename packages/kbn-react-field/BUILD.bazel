@@ -49,8 +49,7 @@ TYPES_DEPS = [
   "@npm//@types/prop-types",
   "@npm//@types/classnames",
   "@npm//@types/react",
-  "@npm//@elastic/eui",
-  "@npm//resize-observer-polyfill",
+  "@npm//@elastic/eui"
 ]
 
 jsts_transpiler(

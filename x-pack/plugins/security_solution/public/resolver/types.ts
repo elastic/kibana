@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type ResizeObserver from 'resize-observer-polyfill';
 import type React from 'react';
 import { Store, Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
