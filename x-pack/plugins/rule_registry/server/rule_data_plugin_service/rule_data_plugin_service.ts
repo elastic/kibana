@@ -83,6 +83,7 @@ interface ConstructorOptions {
   kibanaVersion: string;
   isWriteEnabled: boolean;
   isWriterCacheEnabled: boolean;
+  disabledRegistrationContexts: string[];
 }
 
 export class RuleDataService implements IRuleDataService {
@@ -105,7 +106,6 @@ export class RuleDataService implements IRuleDataService {
 
     this.installCommonResources = Promise.resolve(right('ok'));
     this.isInitialized = false;
-    this.disabledRegistrationContexts = options.disabledRegistrationContexts;
   }
 
   public getResourcePrefix(): string {
@@ -120,7 +120,7 @@ export class RuleDataService implements IRuleDataService {
     return this.options.isWriteEnabled;
   }
 
-  public isRegistrationContextDisabled(registrationContext): boolean {
+  public isRegistrationContextDisabled(registrationContext: string): boolean {
     return this.options.disabledRegistrationContexts.includes(registrationContext);
   }
 
