@@ -43,26 +43,11 @@ export function getLensAttributeService(
       return { id: savedDoc.savedObjectId };
     },
     unwrapMethod: async (savedObjectId: string): Promise<ResolvedLensSavedObjectAttributes> => {
-      const {
-        saved_object: savedObject,
-        outcome,
-        alias_target_id: aliasTargetId,
-      } = await savedObjectStore.load(savedObjectId);
-      const { attributes, references, id } = savedObject;
-      const document = {
+      const { saved_object: savedObject } = await savedObjectStore.load(savedObjectId);
+      const { attributes, references } = savedObject;
+      return {
         ...attributes,
         references,
-      };
-
-      const sharingSavedObjectProps = {
-        aliasTargetId,
-        outcome,
-        sourceId: id,
-      };
-
-      return {
-        sharingSavedObjectProps,
-        ...document,
       };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {

@@ -67,14 +67,11 @@ export function getMapAttributeService(): MapAttributeService {
       return { id: savedObject.id };
     },
     unwrapMethod: async (savedObjectId: string): Promise<MapDoc> => {
-      const {
-        saved_object: savedObject,
-        outcome,
-        alias_target_id: aliasTargetId,
-      } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
-        MAP_SAVED_OBJECT_TYPE,
-        savedObjectId
-      );
+      const { saved_object: savedObject } =
+        await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
+          MAP_SAVED_OBJECT_TYPE,
+          savedObjectId
+        );
 
       if (savedObject.error) {
         throw savedObject.error;
@@ -84,11 +81,6 @@ export function getMapAttributeService(): MapAttributeService {
       return {
         ...attributes,
         references: savedObject.references,
-        sharingSavedObjectProps: {
-          aliasTargetId,
-          outcome,
-          sourceId: savedObjectId,
-        },
       };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
