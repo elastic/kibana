@@ -13,7 +13,6 @@ import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 // @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
 import { LegacyRequest } from '../../../../types';
 import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
@@ -99,10 +98,8 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
       },
     },
     async handler(req: LegacyRequest) {
-      const config = server.config();
       const index = req.params.index;
       const shardId = req.params.shardId;
-      const ccs = req.payload.ccs;
       const moduleType = 'elasticsearch';
       const dataset = 'ccr';
       const esIndexPattern = getNewIndexPatterns({ req, moduleType, datasets: [dataset] });

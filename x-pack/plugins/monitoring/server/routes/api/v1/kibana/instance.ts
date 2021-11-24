@@ -13,7 +13,6 @@ import { handleError } from '../../../../lib/errors';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 // @ts-ignore
 import { metricSet } from './metric_set_instance';
-import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
 import { LegacyRequest, LegacyServer } from '../../../../types';
 
 /**

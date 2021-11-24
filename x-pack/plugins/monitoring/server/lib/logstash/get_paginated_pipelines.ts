@@ -132,11 +132,6 @@ async function getPaginatedThroughputData(
 ): Promise<Pipeline[]> {
   const dataset = 'node_stats';
   const moduleType = 'logstash';
-  const indexPatterns = getNewIndexPatterns({
-    req,
-    moduleType,
-    datasets: [dataset],
-  });
   const metricSeriesData: any = Object.values(
     await Promise.all(
       pipelines.map((pipeline) => {
@@ -276,11 +271,6 @@ async function getThroughputPipelines(
 ): Promise<PipelineWithMetrics[]> {
   const dataset = 'node_stats';
   const moduleType = 'logstash';
-  const indexPatterns = getNewIndexPatterns({
-    req,
-    moduleType,
-    datasets: [dataset],
-  });
   const metricsResponse = await Promise.all(
     pipelines.map((pipeline) => {
       return new Promise(async (resolve, reject) => {
