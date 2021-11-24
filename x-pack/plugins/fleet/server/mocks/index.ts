@@ -18,7 +18,7 @@ import { licensingMock } from '../../../../plugins/licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
-import type { AgentPolicyServiceInterface } from '../services';
+import type { AgentPolicyServiceInterface, PackageService } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
@@ -136,3 +136,10 @@ export const createMockAgentService = () => agentServiceMock.create();
  * Creates a mock AgentClient
  */
 export const createMockAgentClient = () => agentServiceMock.createClient();
+
+export const createMockPackageService = (): PackageService => {
+  return {
+    getInstallation: jest.fn(),
+    ensureInstalledPackage: jest.fn(),
+  };
+};

@@ -25,7 +25,6 @@ import { EndpointError } from '../../errors';
 import { HostMetadata } from '../../../../common/endpoint/types';
 import { Agent } from '../../../../../fleet/common';
 import { AgentPolicyServiceInterface } from '../../../../../fleet/server/services';
-import { KibanaRequest } from '../../../../../../../src/core/server';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;
@@ -120,7 +119,7 @@ describe('EndpointMetadataService', () => {
       esClient.search.mockResolvedValue(esMockResponse);
       const metadataListResponse = metadataService.getHostMetadataList(
         esClient,
-        {} as KibanaRequest,
+        testMockedContext.fleetServices,
         {
           page: 0,
           pageSize: 10,
@@ -181,7 +180,7 @@ describe('EndpointMetadataService', () => {
       const queryOptions = { page: 1, pageSize: 10, kuery: '', hostStatuses: [] };
       const metadataListResponse = await metadataService.getHostMetadataList(
         esClient,
-        {} as KibanaRequest,
+        testMockedContext.fleetServices,
         queryOptions
       );
       const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, packagePolicyIds);
