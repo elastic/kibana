@@ -12,14 +12,14 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { CrawlEvent, CrawlEventFromServer } from './types';
-import { crawlEventServerToClient } from './utils';
+import { CrawlRequest, CrawlRequestFromServer } from './types';
+import { crawlRequestServerToClient } from './utils';
 
 type CrawlDetailFlyoutTabs = 'preview' | 'json';
 
 export interface CrawlDetailValues {
-  crawlEvent: CrawlEvent | null;
-  crawlEventFromServer: CrawlEventFromServer | null;
+  crawlRequest: CrawlRequest | null;
+  crawlRequestFromServer: CrawlRequestFromServer | null;
   dataLoading: boolean;
   flyoutClosed: boolean;
   selectedTab: CrawlDetailFlyoutTabs;
@@ -27,9 +27,9 @@ export interface CrawlDetailValues {
 
 export interface CrawlDetailActions {
   closeFlyout(): void;
-  fetchCrawlEvent(requestId: string): { requestId: string };
-  onRecieveCrawlEvent(crawlEventFromServer: CrawlEventFromServer): {
-    crawlEventFromServer: CrawlEventFromServer;
+  fetchCrawlRequest(requestId: string): { requestId: string };
+  onRecieveCrawlRequest(crawlRequestFromServer: CrawlRequestFromServer): {
+    crawlRequestFromServer: CrawlRequestFromServer;
   };
   openFlyout(): void;
   setSelectedTab(selectedTab: CrawlDetailFlyoutTabs): { selectedTab: CrawlDetailFlyoutTabs };
@@ -39,30 +39,30 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
   path: ['enterprise_search', 'app_search', 'crawler', 'crawl_detail_logic'],
   actions: {
     closeFlyout: true,
-    fetchCrawlEvent: (requestId) => ({ requestId }),
-    onRecieveCrawlEvent: (crawlEventFromServer) => ({ crawlEventFromServer }),
+    fetchCrawlRequest: (requestId) => ({ requestId }),
+    onRecieveCrawlRequest: (crawlRequestFromServer) => ({ crawlRequestFromServer }),
     openFlyout: true,
     setSelectedTab: (selectedTab) => ({ selectedTab }),
   },
   reducers: {
-    crawlEvent: [
+    crawlRequest: [
       null,
       {
-        onRecieveCrawlEvent: (_, { crawlEventFromServer }) =>
-          crawlEventServerToClient(crawlEventFromServer),
+        onRecieveCrawlRequest: (_, { crawlRequestFromServer }) =>
+          crawlRequestServerToClient(crawlRequestFromServer),
       },
     ],
-    crawlEventFromServer: [
+    crawlRequestFromServer: [
       null,
       {
-        onRecieveCrawlEvent: (_, { crawlEventFromServer }) => crawlEventFromServer,
+        onRecieveCrawlRequest: (_, { crawlRequestFromServer }) => crawlRequestFromServer,
       },
     ],
     dataLoading: [
       true,
       {
-        fetchCrawlEvent: () => true,
-        onRecieveCrawlEvent: () => false,
+        fetchCrawlRequest: () => true,
+        onRecieveCrawlRequest: () => false,
       },
     ],
     flyoutClosed: [
@@ -81,16 +81,16 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
     ],
   },
   listeners: ({ actions }) => ({
-    fetchCrawlEvent: async ({ requestId }) => {
+    fetchCrawlRequest: async ({ requestId }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get<CrawlEventFromServer>(
+        const response = await http.get<CrawlRequestFromServer>(
           `/internal/app_search/engines/${engineName}/crawler/crawl_requests/${requestId}`
         );
 
-        actions.onRecieveCrawlEvent(response);
+        actions.onRecieveCrawlRequest(response);
       } catch (e) {
         flashAPIErrors(e);
       }
