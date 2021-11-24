@@ -36,3 +36,5 @@ export * from './significant_terms_fn';
 export * from './significant_terms';
 export * from './terms_fn';
 export * from './terms';
+export * from './multi_terms_fn';
+export * from './multi_terms';
