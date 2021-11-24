@@ -65,6 +65,9 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
   }
 }
 
+/**
+ * The set of Fleet services used by Endpoint
+ */
 export interface EndpointFleetServicesInterface {
   agent: AgentClient;
   agentPolicy: AgentPolicyServiceInterface;
