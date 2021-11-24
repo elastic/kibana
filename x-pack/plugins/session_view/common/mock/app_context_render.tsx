@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo, ReactNode, useMemo } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
+import { Router } from 'react-router-dom';
+import { History } from 'history';
+import useObservable from 'react-use/lib/useObservable';
+import { I18nProvider } from '@kbn/i18n/react';
 import { coreMock } from '../../../../../src/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { AppRootProvider } from './app_root_provider';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { CoreStart } from '../../../../../src/core/public';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -49,43 +54,6 @@ export interface AppContextTestRender {
  * Factory also returns the content that was used to create the custom renderer, allowing
  * for further customization.
  */
-export const createAppRootMockRenderer = (): AppContextTestRender => {
-  const history = createMemoryHistory<never>();
-  const coreStart = createCoreStartMock(history);
-
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        // turns retries off
-        retry: false,
-        // prevent jest did not exit errors
-        cacheTime: Infinity,
-      },
-    },
-  });
-
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
-    <KibanaContextProvider>
-      <AppRootProvider history={history} coreStart={coreStart}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </AppRootProvider>
-    </KibanaContextProvider>
-  );
-
-  const render: UiRender = (ui, options) => {
-    return reactRender(ui, {
-      wrapper: AppWrapper as React.ComponentType,
-      ...options,
-    });
-  };
-
-  return {
-    history,
-    coreStart,
-    AppWrapper,
-    render,
-  };
-};
 
 const createCoreStartMock = (
   history: MemoryHistory<never>
@@ -108,4 +76,63 @@ const createCoreStartMock = (
   });
 
   return coreStart;
+};
+
+const AppRootProvider = memo<{
+  history: History;
+  coreStart: CoreStart;
+  children: ReactNode | ReactNode[];
+}>(({ history, coreStart: { http, notifications, uiSettings, application }, children }) => {
+  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+  const services = useMemo(
+    () => ({ http, notifications, application }),
+    [application, http, notifications]
+  );
+  return (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <EuiThemeProvider darkMode={isDarkMode}>
+          <Router history={history}>{children}</Router>
+        </EuiThemeProvider>
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+});
+
+AppRootProvider.displayName = 'AppRootProvider';
+
+export const createAppRootMockRenderer = (): AppContextTestRender => {
+  const history = createMemoryHistory<never>();
+  const coreStart = createCoreStartMock(history);
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        // turns retries off
+        retry: false,
+        // prevent jest did not exit errors
+        cacheTime: Infinity,
+      },
+    },
+  });
+
+  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+    <AppRootProvider history={history} coreStart={coreStart}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </AppRootProvider>
+  );
+
+  const render: UiRender = (ui, options = {}) => {
+    return reactRender(ui, {
+      wrapper: AppWrapper as React.ComponentType,
+      ...options,
+    });
+  };
+
+  return {
+    history,
+    coreStart,
+    AppWrapper,
+    render,
+  };
 };
