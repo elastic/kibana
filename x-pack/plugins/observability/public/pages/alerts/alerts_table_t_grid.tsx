@@ -377,7 +377,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       {
         id: 'expand',
         width: 120,
-        showCheckboxes: false,
         headerCellRender: () => {
           return <EventsThContent>{translations.alertsTable.actionsTextLabel}</EventsThContent>;
         },
