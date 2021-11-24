@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import apmAgent from 'elastic-apm-node';
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../plugins/alerting/server/plugin';
@@ -82,32 +81,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         await coreStart.elasticsearch.client.asInternalUser.ping();
       },
     });
-
-    const router = core.http.createRouter();
-    router.get(
-      {
-        path: '/emit_log_with_trace_id',
-        validate: false,
-        options: {
-          authRequired: false,
-        },
-      },
-      async (ctx, req, res) => {
-        const transaction = apmAgent.startTransaction();
-        const subscription = req.events.completed$.subscribe(() => {
-          transaction?.end();
-          subscription.unsubscribe();
-        });
-
-        await ctx.core.elasticsearch.client.asInternalUser.ping();
-
-        return res.ok({
-          body: {
-            traceId: apmAgent.currentTraceIds['trace.id'],
-          },
-        });
-      }
-    );
   }
 
   public start() {}

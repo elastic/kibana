@@ -17,8 +17,7 @@ import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-r
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 const DEFAULT_CONFIG: AgentConfigOptions = {
-  active: true,
-  contextPropagationOnly: true,
+  active: false,
   environment: 'development',
   logUncaughtExceptions: true,
   globalLabels: {},
@@ -75,8 +74,6 @@ export class ApmConfiguration {
 
   private getBaseConfig() {
     if (!this.baseConfig) {
-      const configFromSources = this.getConfigFromAllSources();
-
       this.baseConfig = merge(
         {
           serviceVersion: this.kibanaVersion,
@@ -85,7 +82,9 @@ export class ApmConfiguration {
         this.getUuidConfig(),
         this.getGitConfig(),
         this.getCiConfig(),
-        configFromSources
+        this.getConfigFromKibanaConfig(),
+        this.getDevConfig(),
+        this.getConfigFromEnv()
       );
 
       /**
@@ -116,12 +115,6 @@ export class ApmConfiguration {
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
-    }
-
-    if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'true') {
-      config.contextPropagationOnly = true;
-    } else if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'false') {
-      config.contextPropagationOnly = false;
     }
 
     if (process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV) {
@@ -259,29 +252,5 @@ export class ApmConfiguration {
     } catch {
       return {};
     }
-  }
-
-  /**
-   * Reads APM configuration from different sources and merges them together.
-   */
-  private getConfigFromAllSources(): AgentConfigOptions {
-    const config = merge(
-      {},
-      this.getConfigFromKibanaConfig(),
-      this.getDevConfig(),
-      this.getConfigFromEnv()
-    );
-
-    if (config.active === false && config.contextPropagationOnly !== false) {
-      throw new Error(
-        'APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false'
-      );
-    }
-
-    if (config.active === true) {
-      config.contextPropagationOnly = config.contextPropagationOnly ?? false;
-    }
-
-    return config;
   }
 }
