@@ -38,6 +38,18 @@ describe('xy_suggestions', () => {
     };
   }
 
+  function staticValueCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number',
+        label: `Static value: ${columnId}`,
+        isBucketed: false,
+        isStaticValue: true,
+      },
+    };
+  }
+
   function strCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
@@ -118,6 +130,21 @@ describe('xy_suggestions', () => {
         expect(suggestions).toHaveLength(10);
       })
     );
+  });
+
+  test('rejects the configuration when metric isStaticValue', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [staticValueCol('value'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(suggestions).toHaveLength(0);
   });
 
   test('rejects incomplete configurations if there is a state already but no sub visualization id', () => {
