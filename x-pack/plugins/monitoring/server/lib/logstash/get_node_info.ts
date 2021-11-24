@@ -42,7 +42,7 @@ export function getNodeInfo(
     ? standaloneClusterFilter
     : { term: { cluster_uuid: clusterUuid } };
 
-  const dataset = 'stats';
+  const dataset = 'node_stats';
   const moduleType = 'logstash';
   const indexPatterns = getNewIndexPatterns({
     req,

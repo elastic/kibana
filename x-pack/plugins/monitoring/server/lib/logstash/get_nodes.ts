@@ -65,7 +65,7 @@ interface Logstash {
  *  - config reloads
  */
 export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUuid: string }) {
-  const dataset = 'stats';
+  const dataset = 'node_stats';
   const type = 'logstash_stats';
   const moduleType = 'logstash';
 
