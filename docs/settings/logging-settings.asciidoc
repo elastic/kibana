@@ -4,7 +4,9 @@
 <titleabbrev>Logging settings</titleabbrev>
 ++++
 
-You do not need to configure any additional settings to use the logging features in {kib}. Logging is enabled by default and will log at `info` level with a `pattern` layout.
+You do not need to configure any additional settings to use the logging features in {kib}. Logging is enabled by default and will log at `info` level using the `pattern` layout, which outputs logs to `stdout`.
+
+However, if you are planning to ingest your logs using Elasticsearch or another tool, we recommend using the `json` layout, which produces logs in ECS format. In general, `pattern` layout is recommended when raw logs will be read by a human, and `json` layout when logs will be read by a machine.
 
 NOTE: The logging configuration is validated against the predefined schema and if there are any issues with it, {kib} will fail to start with the detailed error message.
 
@@ -14,7 +16,7 @@ NOTE: The logging configuration is validated against the predefined schema and i
 - Loggers define what logging settings, such as the level of verbosity and the appenders, to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, `metrics.ops` or `elasticsearch.query`.
 - Root is a logger that applies to all the log entries in {kib}.
 
-The folowing table serves as a quick reference for different logging configuration keys. Note that these are not stand-alone settings and may require additional logging configuration. See the <<logging-configuration, Configure Logging in {kib}>> guide and complete <<log-settings-examples, examples>> for common configuration use cases. 
+The following table serves as a quick reference for different logging configuration keys. Note that these are not stand-alone settings and may require additional logging configuration. See the <<logging-configuration, Configure Logging in {kib}>> guide and complete <<log-settings-examples, examples>> for common configuration use cases. 
 
 [cols="2*<"]
 |===
@@ -28,7 +30,7 @@ The folowing table serves as a quick reference for different logging configurati
 | Allows you to specify a fileName to write log records to disk. To write <<log-to-file-example,all log records to file>>, add the file appender to `root.appenders`. If configured, you also need to specify <<log-to-file-example, `logging.appenders.file.pathName`>>.
 
 | `logging.appenders[].rolling-file:`
-| Similar to Log4j's `RollingFileAppender`, this appender will log into a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: `size-limit` and `time-interval`.
+| Similar to Log4j's `RollingFileAppender`, this appender will log to a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: `size-limit` and `time-interval`.
 
 | `logging.appenders[].<appender-name>.type`
 | The appender type determines where the log messages are sent. Options are `console`, `file`, `rewrite`, `rolling-file`. Required.
@@ -61,7 +63,7 @@ The folowing table serves as a quick reference for different logging configurati
 | The maximum number of files to keep. Optional. Default is `7`.
 
 | `logging.appenders[].<appender-name>.layout.type`
-| Determines how the log messages are displayed. Options are `pattern` or `json`. Required.
+| Determines how the log messages are displayed. Options are `pattern`, which provides human-readable output, or `json`, which provides ECS-compliant output. Required.
 
 | `logging.appenders[].<appender-name>.layout.highlight`
 | Optional boolean to highlight log messages in color. Applies to `pattern` layout only. Default is `false`.
@@ -80,9 +82,6 @@ The folowing table serves as a quick reference for different logging configurati
 
 | `logging.loggers[].<logger>.level`
 | Specify verbosity of log messages for <logger> context. Optional and inherits the verbosity of any ancestor logger, up to the `root` logger `level`.
-
-| `logging.loggers[].<logger>.appenders:`
-| Specific appenders to apply for a particular logger context.
 
 | `logging.loggers[].<logger>.appenders`
 | Determines the appender to apply to a specific logger context as an array. Optional and falls back to the appender(s) of the `root` logger if not specified.
