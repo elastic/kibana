@@ -188,7 +188,7 @@ logging:
 ==== Configure log rotation with the rolling-file appender
 *Details:* Previously log rotation would be enabled when `logging.rotate.enabled` was true.
 
-*Impact:* To restore the previous behavior, in `kibana.yml` use the kibana-ref}/logging-configuration.html#rolling-file-appender[`rolling-file`] appender.
+*Impact:* To restore the previous behavior, in `kibana.yml` use the {kibana-ref}/logging-configuration.html#rolling-file-appender[`rolling-file`] appender.
 
 [source,yaml]
 -------------------
