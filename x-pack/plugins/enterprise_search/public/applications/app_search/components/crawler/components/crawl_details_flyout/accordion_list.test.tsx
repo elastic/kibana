@@ -50,4 +50,10 @@ describe('AccordionList', () => {
 
     expect(table.prop('columns')[0].render({ item: 'first item' })).toEqual('first item');
   });
+
+  it('is disabled when there are no items', () => {
+    const disabledWrapper = shallow(<AccordionList {...{ ...MOCK_PROPS, items: [] }} />);
+
+    expect(disabledWrapper.prop('arrowProps').isDisabled).toEqual(true);
+  });
 });

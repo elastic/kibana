@@ -32,6 +32,9 @@ export const AccordionList: React.FC<Props> = ({ iconType, items, title }) => {
 
   return (
     <EuiAccordion
+      arrowProps={{
+        isDisabled: items.length === 0,
+      }}
       buttonContent={
         <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
