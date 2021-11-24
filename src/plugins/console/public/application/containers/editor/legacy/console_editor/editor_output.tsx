@@ -85,6 +85,11 @@ function EditorOutputUI() {
             if (readOnlySettings.tripleQuotes && isJSONContentType(contentType)) {
               return safeExpandLiteralStrings(value as string);
             }
+            if (contentType.includes('application/vnd.mapbox-vector-tile')) {
+              return i18n.translate('console.outputCannotPreviewBinaryData', {
+                defaultMessage: 'Cannot preview binary data.',
+              });
+            }
             return value;
           })
           .join('\n'),
