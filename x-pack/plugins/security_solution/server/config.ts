@@ -119,12 +119,6 @@ export const configSchema = schema.object({
   }),
 
   /**
-   * Host Endpoint Configuration
-   */
-  endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
-  endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
-
-  /**
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),

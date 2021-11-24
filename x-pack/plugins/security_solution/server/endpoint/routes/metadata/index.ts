@@ -17,6 +17,8 @@ import {
 } from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
+  ENDPOINT_DEFAULT_PAGE,
+  ENDPOINT_DEFAULT_PAGE_SIZE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
@@ -52,12 +54,18 @@ export const GetMetadataListRequestSchema = {
              * the number of results to return for this request per page
              */
             schema.object({
-              page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
+              page_size: schema.number({
+                defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE,
+                min: 1,
+                max: 10000,
+              }),
             }),
             /**
              * the zero based page index of the the total number of pages of page size
              */
-            schema.object({ page_index: schema.number({ defaultValue: 0, min: 0 }) }),
+            schema.object({
+              page_index: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE, min: 0 }),
+            }),
           ])
         )
       ),

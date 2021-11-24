@@ -38,6 +38,10 @@ import { EndpointError, NotFoundError } from '../../errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import {
+  ENDPOINT_DEFAULT_PAGE,
+  ENDPOINT_DEFAULT_PAGE_SIZE,
+} from '../../../../common/endpoint/constants';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -185,9 +189,6 @@ export function getMetadataListRequestHandlerV2(
       didUnitedIndexError = true;
     }
 
-    const { endpointResultListDefaultPageSize, endpointResultListDefaultFirstPageIndex } =
-      await endpointAppContext.config();
-
     // If no unified Index present, then perform a search using the legacy approach
     if (!doesUnitedIndexExist || didUnitedIndexError) {
       const endpointPolicies = await getAllEndpointPackagePolicies(
@@ -205,8 +206,8 @@ export function getMetadataListRequestHandlerV2(
       body = {
         data: legacyResponse.hosts,
         total: legacyResponse.total,
-        page: request.query.page || endpointResultListDefaultFirstPageIndex,
-        pageSize: request.query.pageSize || endpointResultListDefaultPageSize,
+        page: request.query.page || ENDPOINT_DEFAULT_PAGE,
+        pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
       };
       return response.ok({ body });
     }
@@ -221,8 +222,8 @@ export function getMetadataListRequestHandlerV2(
       body = {
         data,
         total,
-        page: request.query.page || endpointResultListDefaultFirstPageIndex,
-        pageSize: request.query.pageSize || endpointResultListDefaultPageSize,
+        page: request.query.page || ENDPOINT_DEFAULT_PAGE,
+        pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
       };
     } catch (error) {
       return errorHandler(logger, response, error);
@@ -422,11 +423,9 @@ async function legacyListMetadataQuery(
     queryOptions?.hostStatuses || []
   );
 
-  const { endpointResultListDefaultPageSize, endpointResultListDefaultFirstPageIndex } =
-    await endpointAppContext.config();
   const queryParams = await kibanaRequestToMetadataListESQuery({
-    page: queryOptions?.page || endpointResultListDefaultFirstPageIndex,
-    pageSize: queryOptions?.pageSize || endpointResultListDefaultPageSize,
+    page: queryOptions?.page || ENDPOINT_DEFAULT_PAGE,
+    pageSize: queryOptions?.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
     kuery: queryOptions?.kuery || '',
     unenrolledAgentIds,
     statusAgentIds,

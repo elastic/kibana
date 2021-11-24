@@ -8,6 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
+  ENDPOINT_DEFAULT_PAGE,
+  ENDPOINT_DEFAULT_PAGE_SIZE,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
@@ -78,7 +80,6 @@ export async function getPagingProperties(
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext
 ) {
-  const config = await endpointAppContext.config();
   const pagingProperties: { page_size?: number; page_index?: number } = {};
   if (request?.body?.paging_properties) {
     for (const property of request.body.paging_properties) {
@@ -89,8 +90,8 @@ export async function getPagingProperties(
     }
   }
   return {
-    pageSize: pagingProperties.page_size || config.endpointResultListDefaultPageSize,
-    pageIndex: pagingProperties.page_index ?? config.endpointResultListDefaultFirstPageIndex,
+    pageSize: pagingProperties.page_size || ENDPOINT_DEFAULT_PAGE_SIZE,
+    pageIndex: pagingProperties.page_index || ENDPOINT_DEFAULT_PAGE,
   };
 }
 
@@ -236,7 +237,12 @@ export async function buildUnitedIndexQuery(
   queryOptions: GetMetadataListRequestQuery,
   endpointPolicyIds: string[] = []
 ): Promise<BuildUnitedIndexQueryResponse> {
-  const { page = 0, pageSize = 10, hostStatuses = [], kuery = '' } = queryOptions || {};
+  const {
+    page = ENDPOINT_DEFAULT_PAGE,
+    pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
+    hostStatuses = [],
+    kuery = '',
+  } = queryOptions || {};
 
   const statusesKuery = buildStatusesKuery(hostStatuses);
 
