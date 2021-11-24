@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import rison from 'rison-node';
 import { Duration } from 'moment/moment';
 import { memoize } from 'lodash';
+import type { MlDatafeed } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -32,9 +33,14 @@ import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/al
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
-import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/field_formats/common';
+import {
+  FIELD_FORMAT_IDS,
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '../../../../../../src/plugins/field_formats/common';
 import type { AwaitReturnType } from '../../../common/types/common';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
+import type { GetDataViewsService } from '../data_views_utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -65,17 +71,52 @@ const resultTypeScoreMapping = {
 export function alertingServiceProvider(
   mlClient: MlClient,
   datafeedsService: DatafeedsService,
-  getFieldsFormatRegistry: FieldFormatsRegistryProvider
+  getFieldsFormatRegistry: FieldFormatsRegistryProvider,
+  getDataViewsService: GetDataViewsService
 ) {
   type FieldFormatters = AwaitReturnType<ReturnType<typeof getFormatters>>;
 
-  const getFormatters = memoize(async () => {
+  /**
+   * Provides formatters based on the data view of the datafeed index pattern
+   * and set of default formatters for fallback.
+   */
+  const getFormatters = memoize(async (datafeed: MlDatafeed) => {
     const fieldFormatsRegistry = await getFieldsFormatRegistry();
     const numberFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.NUMBER });
+
+    const fieldFormatMap = await getFieldsFormatMap(datafeed.indices[0]);
+
+    const fieldFormatters = fieldFormatMap
+      ? Object.entries(fieldFormatMap).reduce((acc, [fieldName, config]) => {
+          const formatter = fieldFormatsRegistry.deserialize(config);
+          acc[fieldName] = formatter.convert.bind(formatter);
+          return acc;
+        }, {} as Record<string, IFieldFormat['convert']>)
+      : {};
+
     return {
       numberFormatter: numberFormatter.convert.bind(numberFormatter),
+      fieldFormatters,
     };
   });
+
+  /**
+   * Attempts to find a data view based on the index pattern
+   */
+  const getFieldsFormatMap = memoize(
+    async (indexPattern: string): Promise<Record<string, SerializedFieldFormat> | undefined> => {
+      try {
+        const dataViewsService = await getDataViewsService();
+
+        const dataView = (await dataViewsService.find(indexPattern, 1))[0];
+        if (!dataView) return;
+
+        return dataView.fieldFormatMap;
+      } catch (e) {
+        return;
+      }
+    }
+  );
 
   const getAggResultsLabel = (resultType: AnomalyResultType) => {
     return {
@@ -289,10 +330,13 @@ export function alertingServiceProvider(
         topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
           const { actual, typical } = getTypicalAndActualValues(h._source);
 
+          const formatter =
+            formatters.fieldFormatters[h._source.field_name] ?? formatters.numberFormatter;
+
           return {
             ...h._source,
-            typical: typical?.map((t) => formatters.numberFormatter(t)),
-            actual: actual?.map((a) => formatters.numberFormatter(a)),
+            typical: typical?.map((t) => formatter(t)),
+            actual: actual?.map((a) => formatter(a)),
             score: Math.floor(
               h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),
@@ -359,6 +403,8 @@ export function alertingServiceProvider(
 
     const jobIds = jobsResponse.map((v) => v.job_id);
 
+    const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+
     const requestBody = {
       size: 0,
       query: {
@@ -418,7 +464,7 @@ export function alertingServiceProvider(
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const fieldsFormatters = await getFormatters();
+    const fieldsFormatters = await getFormatters(datafeeds![0]!);
 
     const formatter = getResultsFormatter(
       params.resultType,
@@ -580,7 +626,7 @@ export function alertingServiceProvider(
       prev.max_score.value > current.max_score.value ? prev : current
     );
 
-    const formatters = await getFormatters();
+    const formatters = await getFormatters(datafeeds![0]);
 
     return getResultsFormatter(params.resultType, false, formatters)(topResult);
   };
