@@ -166,7 +166,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
-    describe('with farequote', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/118472
+    describe.skip('with farequote', function () {
       // Run tests on full farequote index.
       it(`${farequoteDataViewTestData.suiteTitle} loads the data visualizer selector page`, async () => {
         // Start navigation from the base of the ML app.
