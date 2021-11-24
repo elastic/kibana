@@ -6,13 +6,14 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ENDPOINT_DEFAULT_PAGE, ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
 import { HostStatus } from '../types';
 
 export const GetMetadataListRequestSchemaV2 = {
   query: schema.object(
     {
-      page: schema.number({ defaultValue: 0, min: 0 }),
-      pageSize: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
+      page: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE, min: 0 }),
+      pageSize: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE, min: 1, max: 10000 }),
       kuery: schema.maybe(schema.string()),
       hostStatuses: schema.maybe(
         schema.arrayOf(
@@ -26,7 +27,7 @@ export const GetMetadataListRequestSchemaV2 = {
         )
       ),
     },
-    { defaultValue: { page: 0, pageSize: 10 } }
+    { defaultValue: { page: ENDPOINT_DEFAULT_PAGE, pageSize: ENDPOINT_DEFAULT_PAGE_SIZE } }
   ),
 };
 
