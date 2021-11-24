@@ -13,7 +13,7 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { RECENT_SESSION_ROUTE, BASE_PATH } from '../../../common/constants';
 
-import { SessionView } from '../session_view';
+import { SessionView } from '../SessionView';
 import { ProcessEvent } from '../../hooks/use_process_tree';
 
 interface RecentSessionResults {

@@ -10,7 +10,7 @@ import React from 'react';
 import { sessionViewProcessEventsMock } from '../../../common/schemas/responses/session_view_process_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock';
 import { getSessionViewProcessEvents } from './service';
-import { SessionView } from './session_view';
+import { SessionView } from './index';
 
 jest.mock('./service');
 

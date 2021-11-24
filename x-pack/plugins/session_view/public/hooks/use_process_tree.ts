@@ -164,10 +164,6 @@ class ProcessImpl implements Process {
       ({ event }) => event.action === EventAction.exec || event.action === EventAction.fork
     );
 
-    if (execsForks.length === 0) {
-      // debugger;
-    }
-
     return execsForks[execsForks.length - 1];
   }
 
