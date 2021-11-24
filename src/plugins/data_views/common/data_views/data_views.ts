@@ -35,7 +35,7 @@ import { META_FIELDS, SavedObject } from '../../common';
 import { SavedObjectNotFound } from '../../../kibana_utils/common';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
-import { DuplicateDataViewError, SaveDataViewFailedLacksPermissionsError } from '../errors';
+import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
@@ -562,8 +562,7 @@ export class DataViewsService {
 
   async createSavedObject(indexPattern: DataView, override = false) {
     if (!(await this.getCanSave())) {
-      // todo different error
-      throw new SaveDataViewFailedLacksPermissionsError('hi');
+      throw new DataViewInsufficientAccessError();
     }
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
     if (dupe) {
@@ -604,8 +603,7 @@ export class DataViewsService {
   ): Promise<void | Error> {
     if (!indexPattern.id) return;
     if (!(await this.getCanSave())) {
-      // todo log index pattern id and name
-      throw new SaveDataViewFailedLacksPermissionsError('name');
+      throw new DataViewInsufficientAccessError(indexPattern.id);
     }
 
     // get the list of attributes
@@ -691,8 +689,7 @@ export class DataViewsService {
    */
   async delete(indexPatternId: string) {
     if (!(await this.getCanSave())) {
-      // todo different error
-      throw new SaveDataViewFailedLacksPermissionsError('err');
+      throw new DataViewInsufficientAccessError(indexPatternId);
     }
     this.dataViewCache.clear(indexPatternId);
     return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export class SaveDataViewFailedLacksPermissionsError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'SaveDataViewFailedLacksPermissionsError';
+export class DataViewInsufficientAccessError extends Error {
+  constructor(savedObjectId?: string) {
+    super(`Operation failed due to insufficient access, id: ${savedObjectId}`);
+    this.name = 'DataViewInsufficientAccessError';
   }
 }
