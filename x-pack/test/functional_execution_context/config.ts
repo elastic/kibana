@@ -55,6 +55,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--logging.loggers[1].name=execution_context',
         '--logging.loggers[1].level=debug',
         `--logging.loggers[1].appenders=${JSON.stringify(['file'])}`,
+
+        '--logging.loggers[2].name=http.server.response',
+        '--logging.loggers[2].level=all',
+        `--logging.loggers[2].appenders=${JSON.stringify(['file'])}`,
       ],
     },
   };
