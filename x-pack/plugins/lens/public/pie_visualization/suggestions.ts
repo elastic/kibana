@@ -7,17 +7,26 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SuggestionRequest, VisualizationSuggestion } from '../types';
+import type { SuggestionRequest, TableSuggestionColumn, VisualizationSuggestion } from '../types';
 import { layerTypes } from '../../common';
 import type { PieVisualizationState } from '../../common/expressions';
-import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import { CHART_NAMES, MAX_MOSAIC_BUCKETS, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import { isPartitionShape, isTreemapOrMosaicShape } from './render_helpers';
 
-function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizationState>) {
+function hasIntervalScale(columns: TableSuggestionColumn[]) {
+  return columns.some((col) => col.operation.scale === 'interval');
+}
+
+function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
+  // Histograms are not good for pi. But we should not reject them on switching between partition charts.
+  const shouldRejectIntervals =
+    state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
+
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    table.columns.some((col) => col.operation.scale === 'interval') // Histograms are not good for pie
+    shouldRejectIntervals
   );
 }
 
@@ -52,7 +61,7 @@ export function suggestions({
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
-  if (groups.length <= MAX_PIE_BUCKETS && subVisualizationId !== 'treemap') {
+  if (groups.length <= MAX_PIE_BUCKETS && !isTreemapOrMosaicShape(subVisualizationId!)) {
     let newShape: PieVisualizationState['shape'] =
       (subVisualizationId as PieVisualizationState['shape']) || 'donut';
     if (groups.length !== 1 && !subVisualizationId) {
@@ -65,7 +74,7 @@ export function suggestions({
         values: { chartName: CHART_NAMES[newShape].label },
         description: 'chartName is already translated',
       }),
-      score: state && state.shape !== 'treemap' ? 0.6 : 0.4,
+      score: state && !isTreemapOrMosaicShape(state.shape) ? 0.6 : 0.4,
       state: {
         shape: newShape,
         palette: mainPalette || state?.palette,
@@ -92,7 +101,10 @@ export function suggestions({
       },
       previewIcon: 'bullseye',
       // dont show suggestions for same type
-      hide: table.changeType === 'reduced' || (state && state.shape !== 'treemap'),
+      hide:
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && !isTreemapOrMosaicShape(state.shape)),
     };
 
     results.push(baseSuggestion);
@@ -153,7 +165,54 @@ export function suggestions({
       },
       previewIcon: 'bullseye',
       // hide treemap suggestions from bottom bar, but keep them for chart switcher
-      hide: table.changeType === 'reduced' || !state || (state && state.shape === 'treemap'),
+      hide:
+        table.changeType === 'reduced' ||
+        !state ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === 'treemap'),
+    });
+  }
+
+  if (
+    groups.length <= MAX_MOSAIC_BUCKETS &&
+    (!subVisualizationId || subVisualizationId === 'mosaic')
+  ) {
+    results.push({
+      title: i18n.translate('xpack.lens.pie.mosaicSuggestionLabel', {
+        defaultMessage: 'As Mosaic',
+      }),
+      score: state?.shape === 'mosaic' ? 0.7 : 0.5,
+      state: {
+        shape: 'mosaic',
+        palette: mainPalette || state?.palette,
+        layers: [
+          state?.layers[0]
+            ? {
+                ...state.layers[0],
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                categoryDisplay: 'default',
+                layerType: layerTypes.DATA,
+              }
+            : {
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                numberDisplay: 'percent',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+                nestedLegend: false,
+                layerType: layerTypes.DATA,
+              },
+        ],
+      },
+      previewIcon: 'bullseye',
+      hide:
+        groups.length !== 2 ||
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === 'mosaic'),
     });
   }
 
