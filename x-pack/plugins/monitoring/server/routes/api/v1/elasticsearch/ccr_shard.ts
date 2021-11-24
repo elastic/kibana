@@ -150,7 +150,7 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
             ],
             filters
           ),
-          getCcrStat(req, filters),
+          getCcrStat(req, esIndexPattern, filters),
         ]);
 
         const legacyStat = ccrResponse.hits?.hits[0]?._source.ccr_stats;
