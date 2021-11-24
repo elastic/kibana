@@ -11,6 +11,7 @@ import { layerTypes } from '../../common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { FramePublicAPI } from '../types';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 jest.mock('../id_generator');
 
@@ -18,6 +19,7 @@ const LAYER_ID = 'l1';
 
 const pieVisualization = getPieVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
+  kibanaTheme: themeServiceMock.createStartContract(),
 });
 
 function getExampleState(): PieVisualizationState {

@@ -242,7 +242,7 @@
             "id": "def-public.Index.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -505,7 +505,7 @@
             "id": "def-server.Index.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -782,7 +782,7 @@
             "id": "def-common.Aliases.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -1568,7 +1568,7 @@
             "id": "def-common.Index.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -1620,7 +1620,7 @@
             "id": "def-common.IndexSettings.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -1760,7 +1760,7 @@
             "id": "def-common.Mappings.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
