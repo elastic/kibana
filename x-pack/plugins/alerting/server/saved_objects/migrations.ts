@@ -97,6 +97,13 @@ export function getMigrations(
     pipeMigrations(restructureConnectorsThatSupportIncident)
   );
 
+  const migrateRules712 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> =>
+      doc.attributes.alertTypeId === 'metrics.alert.inventory.threshold',
+    pipeMigrations(fixInventoryThresholdGroupId)
+  );
+
   const migrationSecurityRules713 = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSiemSignalsRuleType(doc),
@@ -136,6 +143,7 @@ export function getMigrations(
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
     '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
+    '7.12.0': executeMigrationWithErrorHandling(migrateRules712, '7.12.0'),
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
@@ -749,6 +757,36 @@ function removePreconfiguredConnectorsFromReferences(
     };
   }
   return doc;
+}
+
+// This fixes an issue whereby metrics.alert.inventory.threshold rules had the
+// group for actions incorrectly spelt as metrics.invenotry_threshold.fired vs metrics.inventory_threshold.fired
+function fixInventoryThresholdGroupId(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: { actions },
+  } = doc;
+
+  const updatedActions = actions.map((action) => {
+    // Wrong spelling
+    if (action.group === 'metrics.invenotry_threshold.fired') {
+      return {
+        ...action,
+        group: 'metrics.inventory_threshold.fired',
+      };
+    } else {
+      return action;
+    }
+  });
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      actions: [...updatedActions],
+    },
+  };
 }
 
 function getCorrespondingAction(
