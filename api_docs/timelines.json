@@ -7824,7 +7824,7 @@
             "id": "def-common.EventSource.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[field: string}]: any",
+            "label": "[field: string]: any",
             "description": [],
             "signature": [
               "[field: string]:  any"
@@ -8019,7 +8019,7 @@
             "id": "def-common.Fields.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[x: string}]: T | Fields<T>[]",
+            "label": "[x: string]: T | Fields<T>[]",
             "description": [],
             "signature": [
               "[x: string]:  T | ",
