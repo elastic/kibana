@@ -12,6 +12,7 @@ import { HostsKpiAuthentications } from './authentications';
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
 import { HostsKpiProps } from './types';
+import { RiskyHosts } from './risky_hosts';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
@@ -27,8 +28,8 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
           skip={skip}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <HostsKpiAuthentications
+      <EuiFlexItem grow={1}>
+        <RiskyHosts
           filterQuery={filterQuery}
           from={from}
           indexNames={indexNames}

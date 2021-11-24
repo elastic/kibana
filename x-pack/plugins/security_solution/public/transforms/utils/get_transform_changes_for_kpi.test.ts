@@ -26,18 +26,6 @@ describe('get_transform_changes_for_kpi', () => {
     });
   });
 
-  test('it gets a transform change for kpiAuthentications', () => {
-    expect(
-      getTransformChangesForKpi({
-        factoryQueryType: HostsKpiQueries.kpiAuthentications,
-        settings: getTransformConfigSchemaMock().settings[0],
-      })
-    ).toEqual<ReturnTypeGetTransformChangesForKpi>({
-      factoryQueryType: HostsKpiQueries.kpiAuthenticationsEntities,
-      indices: ['.estc_all_user_ent*'],
-    });
-  });
-
   test('it gets a transform change for kpiUniqueIps', () => {
     expect(
       getTransformChangesForKpi({
