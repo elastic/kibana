@@ -35,6 +35,7 @@ export type {
   EmbeddableEditorState,
   EmbeddablePackageState,
   EmbeddableRendererProps,
+  EmbeddableContainerContext,
 } from './lib';
 export {
   ACTION_ADD_PANEL,
@@ -72,7 +73,6 @@ export {
   EmbeddableStateTransfer,
   EmbeddableRenderer,
   useEmbeddableFactory,
-  EmbeddableContainerContext,
 } from './lib';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
