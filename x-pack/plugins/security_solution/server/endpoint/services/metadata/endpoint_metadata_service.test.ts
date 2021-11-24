@@ -21,10 +21,10 @@ import {
   getESQueryHostMetadataByFleetAgentIds,
   buildUnitedIndexQuery,
 } from '../../routes/metadata/query_builders';
-import { EndpointError } from '../../errors';
 import { HostMetadata } from '../../../../common/endpoint/types';
 import { Agent } from '../../../../../fleet/common';
 import { AgentPolicyServiceInterface } from '../../../../../fleet/server/services';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;

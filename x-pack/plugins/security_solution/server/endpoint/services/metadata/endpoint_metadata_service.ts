@@ -51,12 +51,12 @@ import {
   fleetAgentStatusToEndpointHostStatus,
   wrapErrorIfNeeded,
 } from '../../utils';
-import { EndpointError } from '../../errors';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];

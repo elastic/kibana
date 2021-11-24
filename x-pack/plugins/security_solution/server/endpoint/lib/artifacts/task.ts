@@ -18,7 +18,7 @@ import { isEmptyManifestDiff, Manifest } from './manifest';
 import { InvalidInternalManifestError } from '../../services/artifacts/errors';
 import { ManifestManager } from '../../services';
 import { wrapErrorIfNeeded } from '../../utils';
-import { EndpointError } from '../../errors';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
