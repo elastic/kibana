@@ -53,7 +53,7 @@ describe('ESGeoGridSource', () => {
       metrics: [],
       resolution: GRID_RESOLUTION.COARSE,
       type: SOURCE_TYPES.ES_GEO_GRID,
-      requestType: RENDER_AS.HEATMAP,
+      requestType: RENDER_AS.POINT,
     },
     {}
   );
@@ -316,7 +316,7 @@ describe('ESGeoGridSource', () => {
       expect(urlTemplateWithMeta.minSourceZoom).toBe(0);
       expect(urlTemplateWithMeta.maxSourceZoom).toBe(24);
       expect(urlTemplateWithMeta.urlTemplate).toEqual(
-        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':())))&requestType=heatmap"
+        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&gridPrecision=8&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':())))&requestType=point"
       );
     });
   });

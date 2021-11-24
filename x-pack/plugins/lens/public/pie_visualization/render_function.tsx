@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import {
@@ -16,7 +16,6 @@ import {
   Partition,
   PartitionConfig,
   PartitionLayer,
-  PartitionLayout,
   PartitionFillLabel,
   RecursivePartial,
   Position,
@@ -29,7 +28,13 @@ import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
-import { getSliceValue, getFilterContext } from './render_helpers';
+import {
+  getSliceValue,
+  getFilterContext,
+  isTreemapOrMosaicShape,
+  byDataColorPaletteMap,
+  extractUniqTermsMap,
+} from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import {
@@ -110,6 +115,22 @@ export function PieComponent(
     })
   ).length;
 
+  const shouldUseByDataPalette = !syncColors && ['mosaic'].includes(shape) && bucketColumns[1]?.id;
+  let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
+  if (shouldUseByDataPalette) {
+    byDataPalette = byDataColorPaletteMap(
+      firstTable,
+      bucketColumns[1].id,
+      paletteService.get(palette.name),
+      palette
+    );
+  }
+
+  let sortingMap: Record<string, number>;
+  if (shape === 'mosaic') {
+    sortingMap = extractUniqTermsMap(firstTable, bucketColumns[0].id);
+  }
+
   const layers: PartitionLayer[] = bucketColumns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
@@ -124,13 +145,29 @@ export function PieComponent(
         return String(d);
       },
       fillLabel,
+      sortPredicate:
+        shape === 'mosaic'
+          ? ([name1, node1], [, node2]) => {
+              // Sorting for first group
+              if (bucketColumns.length === 1 || (node1.children.length && name1 in sortingMap)) {
+                return sortingMap[name1];
+              }
+              // Sorting for second group
+              return node2.value - node1.value;
+            }
+          : undefined,
       shape: {
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];
 
+          // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
+          // therefore change it for dask mode
+          const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
+
           // Color is determined by round-robin on the index of the innermost slice
           // This has to be done recursively until we get to the slice index
           let tempParent: typeof d | typeof d['parent'] = d;
+
           while (tempParent.parent && tempParent.depth > 0) {
             seriesLayers.unshift({
               name: String(tempParent.parent.children[tempParent.sortIndex][0]),
@@ -140,12 +177,14 @@ export function PieComponent(
             tempParent = tempParent.parent;
           }
 
-          if (shape === 'treemap') {
+          if (byDataPalette && seriesLayers[1]) {
+            return byDataPalette.getColor(seriesLayers[1].name) || defaultColor;
+          }
+
+          if (isTreemapOrMosaicShape(shape)) {
             // Only highlight the innermost color of the treemap, as it accurately represents area
             if (layerIndex < bucketColumns.length - 1) {
-              // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
-              // therefore change it for dask mode
-              return isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
+              return defaultColor;
             }
             // only use the top level series layer for coloring
             if (seriesLayers.length > 1) {
@@ -164,14 +203,14 @@ export function PieComponent(
             palette.params
           );
 
-          return outputColor || 'rgba(0,0,0,0)';
+          return outputColor || defaultColor;
         },
       },
     };
   });
 
   const config: RecursivePartial<PartitionConfig> = {
-    partitionLayout: shape === 'treemap' ? PartitionLayout.treemap : PartitionLayout.sunburst,
+    partitionLayout: CHART_NAMES[shape].partitionType,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,
@@ -191,7 +230,7 @@ export function PieComponent(
     sectorLineWidth: 1.5,
     circlePadding: 4,
   };
-  if (shape === 'treemap') {
+  if (isTreemapOrMosaicShape(shape)) {
     if (hideLabels || categoryDisplay === 'hide') {
       config.fillLabel = { textColor: 'rgba(0,0,0,0)' };
     }
@@ -224,13 +263,6 @@ export function PieComponent(
     },
   });
 
-  const [isReady, setIsReady] = useState(false);
-  // It takes a cycle for the chart to render. This prevents
-  // reporting from printing a blank chart placeholder.
-  useEffect(() => {
-    setIsReady(true);
-  }, []);
-
   const hasNegative = firstTable.rows.some((row) => {
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
@@ -247,11 +279,7 @@ export function PieComponent(
 
   if (isEmpty) {
     return (
-      <VisualizationContainer
-        reportTitle={props.args.title}
-        reportDescription={props.args.description}
-        className="lnsPieExpression__container"
-      >
+      <VisualizationContainer className="lnsPieExpression__container">
         <EmptyPlaceholder icon={LensIconChartDonut} />
       </VisualizationContainer>
     );
@@ -278,12 +306,7 @@ export function PieComponent(
   };
 
   return (
-    <VisualizationContainer
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-      className="lnsPieExpression__container"
-      isReady={isReady}
-    >
+    <VisualizationContainer className="lnsPieExpression__container">
       <Chart>
         <Settings
           tooltip={{ boundary: document.getElementById('app-fixed-viewport') ?? undefined }}
@@ -295,7 +318,9 @@ export function PieComponent(
           showLegend={
             !hideLabels &&
             (legendDisplay === 'show' ||
-              (legendDisplay === 'default' && bucketColumns.length > 1 && shape !== 'treemap'))
+              (legendDisplay === 'default' &&
+                bucketColumns.length > 1 &&
+                !isTreemapOrMosaicShape(shape)))
           }
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}

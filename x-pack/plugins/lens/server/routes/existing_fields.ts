@@ -53,8 +53,12 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
       },
     },
     async (context, req, res) => {
-      const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
+      const [{ savedObjects, elasticsearch, uiSettings }, { data }] =
+        await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
+      const includeFrozen: boolean = await uiSettings
+        .asScopedToClient(savedObjectsClient)
+        .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
       const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
       try {
         return res.ok({
@@ -67,6 +71,7 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
               req
             ),
             context,
+            includeFrozen,
           }),
         });
       } catch (e) {
@@ -104,6 +109,7 @@ async function fetchFieldExistence({
   fromDate,
   toDate,
   timeFieldName,
+  includeFrozen,
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
@@ -112,6 +118,7 @@ async function fetchFieldExistence({
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
+  includeFrozen: boolean;
 }) {
   const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
   const indexPattern = await indexPatternsService.get(indexPatternId);
@@ -125,6 +132,7 @@ async function fetchFieldExistence({
     index: indexPattern.title,
     timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
+    includeFrozen,
   });
 
   return {
@@ -159,6 +167,7 @@ async function fetchIndexPatternStats({
   fromDate,
   toDate,
   fields,
+  includeFrozen,
 }: {
   client: ElasticsearchClient;
   index: string;
@@ -167,6 +176,7 @@ async function fetchIndexPatternStats({
   fromDate?: string;
   toDate?: string;
   fields: Field[];
+  includeFrozen: boolean;
 }) {
   const filter =
     timeFieldName && fromDate && toDate
@@ -194,6 +204,7 @@ async function fetchIndexPatternStats({
   const { body: result } = await client.search(
     {
       index,
+      ...(includeFrozen ? { ignore_throttled: false } : {}),
       body: {
         size: SAMPLE_SIZE,
         query,

@@ -234,7 +234,7 @@ export class DataViewsService {
    * @param force
    */
   setDefault = async (id: string | null, force = false) => {
-    if (force || !this.config.get('defaultIndex')) {
+    if (force || !(await this.config.get('defaultIndex'))) {
       await this.config.set('defaultIndex', id);
     }
   };

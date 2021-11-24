@@ -21,6 +21,7 @@ import { first, map } from 'rxjs/operators';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
+import { HomeServerPluginSetup } from '../../../home/server';
 import { PluginStart } from '../../../data/server';
 import { IndexPatternsService } from '../../../data/common';
 import { visDataRoutes } from './routes/vis';
@@ -47,6 +48,7 @@ export interface LegacySetup {
 
 interface VisTypeTimeseriesPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
+  home?: HomeServerPluginSetup;
 }
 
 interface VisTypeTimeseriesPluginStartDependencies {
@@ -129,7 +131,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     fieldsRoutes(router, framework);
 
     if (plugins.usageCollection) {
-      registerTimeseriesUsageCollector(plugins.usageCollection);
+      registerTimeseriesUsageCollector(plugins.usageCollection, plugins.home);
     }
 
     return {

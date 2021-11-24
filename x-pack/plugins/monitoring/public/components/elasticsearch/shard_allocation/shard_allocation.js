@@ -24,7 +24,7 @@ export const ShardAllocation = (props) => {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.replicaLabel', {
         defaultMessage: 'Replica',
       }),
-      color: 'secondary',
+      color: 'success',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.relocatingLabel', {

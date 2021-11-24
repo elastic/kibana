@@ -33,7 +33,7 @@ import {
   addIdToEntries,
   ExceptionsBuilderExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { AlertData, Flattened } from './types';
 
@@ -44,6 +44,7 @@ import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
 import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
+import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 
 export const filterIndexPatterns = (
   patterns: DataViewBase,
@@ -145,7 +146,7 @@ export const prepareExceptionItemsForBulkClose = (
         return {
           ...itemEntry,
           field: itemEntry.field.startsWith('event.')
-            ? itemEntry.field.replace(/^event./, 'signal.original_event.')
+            ? itemEntry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
             : itemEntry.field,
         };
       });

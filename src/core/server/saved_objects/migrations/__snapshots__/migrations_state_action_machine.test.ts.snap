@@ -86,7 +86,22 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
                       },
                     },
                     Object {
@@ -227,7 +242,22 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
                       },
                     },
                     Object {
@@ -372,7 +402,22 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
                       },
                     },
                     Object {
@@ -521,7 +566,22 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
                       },
                     },
                     Object {
@@ -707,7 +767,22 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
                       },
                     },
                     Object {
@@ -859,7 +934,22 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
                       },
                     },
                     Object {

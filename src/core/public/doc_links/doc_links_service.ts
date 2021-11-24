@@ -118,6 +118,7 @@ export class DocLinksService {
           range: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-range-aggregation.html`,
           significant_terms: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-significantterms-aggregation.html`,
           terms: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-terms-aggregation.html`,
+          terms_doc_count_error: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-terms-aggregation.html#_per_bucket_document_count_error`,
           avg: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-avg-aggregation.html`,
           avg_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-avg-bucket-aggregation.html`,
           max_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-max-bucket-aggregation.html`,
@@ -155,7 +156,7 @@ export class DocLinksService {
           luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
         },
         indexPatterns: {
-          introduction: `${KIBANA_DOCS}index-patterns.html`,
+          introduction: `${KIBANA_DOCS}data-views.html`,
           fieldFormattersNumber: `${KIBANA_DOCS}numeral.html`,
           fieldFormattersString: `${KIBANA_DOCS}field-formatters-string.html`,
           runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
@@ -224,6 +225,7 @@ export class DocLinksService {
           mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
           mappingTypesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           migrateIndexAllocationFilters: `${ELASTICSEARCH_DOCS}migrate-index-allocation-filters.html`,
+          migrationApiDeprecation: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
           releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
@@ -255,7 +257,6 @@ export class DocLinksService {
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
-          autocompleteChanges: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
         },
         search: {
           sessions: `${KIBANA_DOCS}search-sessions.html`,
@@ -347,6 +348,7 @@ export class DocLinksService {
         maps: {
           guide: `${KIBANA_DOCS}maps.html`,
           importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
+          gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
         },
         monitoring: {
           alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,
@@ -428,7 +430,7 @@ export class DocLinksService {
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
         },
         snapshotRestore: {
-          guide: `${KIBANA_DOCS}snapshot-repositories.html`,
+          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
           changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
@@ -494,7 +496,6 @@ export class DocLinksService {
           elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
           beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
           datastreams: `${FLEET_DOCS}data-streams.html`,
-          datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
@@ -613,6 +614,7 @@ export interface DocLinksStart {
       readonly range: string;
       readonly significant_terms: string;
       readonly terms: string;
+      readonly terms_doc_count_error: string;
       readonly avg: string;
       readonly avg_bucket: string;
       readonly max_bucket: string;
@@ -686,7 +688,6 @@ export interface DocLinksStart {
       readonly luceneQuerySyntax: string;
       readonly percolate: string;
       readonly queryDsl: string;
-      readonly autocompleteChanges: string;
     };
     readonly date: {
       readonly dateMath: string;
@@ -735,7 +736,11 @@ export interface DocLinksStart {
       uptimeDurationAnomaly: string;
     }>;
     readonly alerting: Record<string, string>;
-    readonly maps: Record<string, string>;
+    readonly maps: Readonly<{
+      guide: string;
+      importGeospatialPrivileges: string;
+      gdalTutorial: string;
+    }>;
     readonly monitoring: Record<string, string>;
     readonly security: Readonly<{
       apiKeyServiceSettings: string;
@@ -760,7 +765,6 @@ export interface DocLinksStart {
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{
-      datastreamsILM: string;
       beatsAgentComparison: string;
       guide: string;
       fleetServer: string;

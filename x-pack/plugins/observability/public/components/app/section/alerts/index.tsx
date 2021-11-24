@@ -16,14 +16,19 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiButton,
+  EuiLoadingSpinner,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { uniqBy } from 'lodash';
-import { Alert } from '../../../../../../alerting/common';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { getObservabilityAlerts } from '../../../../services/get_observability_alerts';
+import { paths } from '../../../../config';
 
 const ALL_TYPES = 'ALL_TYPES';
 const allTypes = {
@@ -33,20 +38,64 @@ const allTypes = {
   }),
 };
 
-interface Props {
-  alerts: Alert[];
-}
-
-export function AlertsSection({ alerts }: Props) {
+export function AlertsSection() {
   const { config, core } = usePluginContext();
   const [filter, setFilter] = useState(ALL_TYPES);
   const manageLink = config.unsafe.alertingExperience.enabled
-    ? core.http.basePath.prepend(`/app/observability/alerts`)
-    : core.http.basePath.prepend(`/app/management/insightsAndAlerting/triggersActions/rules`);
-  const filterOptions = uniqBy(alerts, (alert) => alert.consumer).map(({ consumer }) => ({
-    value: consumer,
-    text: consumer,
-  }));
+    ? core.http.basePath.prepend(paths.observability.alerts)
+    : core.http.basePath.prepend(paths.management.rules);
+
+  const { data, status } = useFetcher(() => {
+    return getObservabilityAlerts({ core });
+  }, [core]);
+
+  const alerts = useMemo(() => data ?? [], [data]);
+
+  const filterOptions = useMemo(() => {
+    if (!alerts) {
+      return [];
+    }
+    return uniqBy(alerts, (alert) => alert.consumer).map(({ consumer }) => ({
+      value: consumer,
+      text: consumer,
+    }));
+  }, [alerts]);
+
+  const isError = status === FETCH_STATUS.FAILURE;
+  const isLoading = status !== FETCH_STATUS.SUCCESS && !isError;
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (isError) {
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate('xpack.observability.overview.alert.errorTitle', {
+              defaultMessage: "We couldn't load the alert data",
+            })}
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.observability.overview.alert.errorMessage"
+                defaultMessage="There was an error loading the alert data. Try again later."
+              />
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <div>
@@ -89,9 +138,7 @@ export function AlertsSection({ alerts }: Props) {
               <EuiFlexGroup direction="column" gutterSize="s" key={alert.id}>
                 <EuiFlexItem grow={false}>
                   <EuiLink
-                    href={core.http.basePath.prepend(
-                      `/app/management/insightsAndAlerting/triggersActions/alert/${alert.id}`
-                    )}
+                    href={core.http.basePath.prepend(paths.management.alertDetails(alert.id))}
                   >
                     <EuiText size="s">{alert.name}</EuiText>
                   </EuiLink>
