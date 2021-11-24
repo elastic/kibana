@@ -15,19 +15,24 @@ import { EngineLogic } from '../engine';
 import { CrawlRequest, CrawlRequestFromServer } from './types';
 import { crawlRequestServerToClient } from './utils';
 
+type CrawlDetailFlyoutTabs = 'preview' | 'json';
+
 export interface CrawlDetailValues {
   crawlRequest: CrawlRequest | null;
   crawlRequestFromServer: CrawlRequestFromServer | null;
   dataLoading: boolean;
   flyoutClosed: boolean;
+  selectedTab: CrawlDetailFlyoutTabs;
 }
 
-interface CrawlDetailActions {
+export interface CrawlDetailActions {
   closeFlyout(): void;
   fetchCrawlRequest(requestId: string): { requestId: string };
   onRecieveCrawlRequest(crawlRequestFromServer: CrawlRequestFromServer): {
     crawlRequestFromServer: CrawlRequestFromServer;
   };
+  openFlyout(): void;
+  setSelectedTab(selectedTab: CrawlDetailFlyoutTabs): { selectedTab: CrawlDetailFlyoutTabs };
 }
 
 export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetailActions>>({
@@ -36,6 +41,8 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
     closeFlyout: true,
     fetchCrawlRequest: (requestId) => ({ requestId }),
     onRecieveCrawlRequest: (crawlRequestFromServer) => ({ crawlRequestFromServer }),
+    openFlyout: true,
+    setSelectedTab: (selectedTab) => ({ selectedTab }),
   },
   reducers: {
     crawlRequest: [
@@ -61,8 +68,15 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
     flyoutClosed: [
       true,
       {
-        fetchCrawlRequest: () => false,
+        openFlyout: () => false,
         closeFlyout: () => true,
+      },
+    ],
+    selectedTab: [
+      'preview',
+      {
+        openFlyout: () => 'preview',
+        setSelectedTab: (_, { selectedTab }) => selectedTab,
       },
     ],
   },
