@@ -1,22 +1,22 @@
 {
-  "id": "indexPatternEditor",
+  "id": "dataViewEditor",
   "client": {
     "classes": [],
     "functions": [],
     "interfaces": [
       {
-        "parentPluginId": "indexPatternEditor",
-        "id": "def-public.IndexPatternEditorProps",
+        "parentPluginId": "dataViewEditor",
+        "id": "def-public.DataViewEditorProps",
         "type": "Interface",
         "tags": [],
-        "label": "IndexPatternEditorProps",
+        "label": "DataViewEditorProps",
         "description": [],
-        "path": "src/plugins/index_pattern_editor/public/types.ts",
+        "path": "src/plugins/data_view_editor/public/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "indexPatternEditor",
-            "id": "def-public.IndexPatternEditorProps.onSave",
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.onSave",
             "type": "Function",
             "tags": [],
             "label": "onSave",
@@ -24,38 +24,36 @@
               "\nHandler for the \"save\" footer button"
             ],
             "signature": [
-              "(indexPattern: ",
+              "(dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               ") => void"
             ],
-            "path": "src/plugins/index_pattern_editor/public/types.ts",
+            "path": "src/plugins/data_view_editor/public/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "indexPatternEditor",
-                "id": "def-public.IndexPatternEditorProps.onSave.$1",
+                "parentPluginId": "dataViewEditor",
+                "id": "def-public.DataViewEditorProps.onSave.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "indexPattern",
-                "description": [
-                  "- newly created index pattern"
-                ],
+                "label": "dataView",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.IndexPattern",
-                    "text": "IndexPattern"
+                    "section": "def-common.DataView",
+                    "text": "DataView"
                   }
                 ],
-                "path": "src/plugins/index_pattern_editor/public/types.ts",
+                "path": "src/plugins/data_view_editor/public/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -63,8 +61,8 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "indexPatternEditor",
-            "id": "def-public.IndexPatternEditorProps.onCancel",
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.onCancel",
             "type": "Function",
             "tags": [],
             "label": "onCancel",
@@ -74,14 +72,14 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/plugins/index_pattern_editor/public/types.ts",
+            "path": "src/plugins/data_view_editor/public/types.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
           },
           {
-            "parentPluginId": "indexPatternEditor",
-            "id": "def-public.IndexPatternEditorProps.defaultTypeIsRollup",
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.defaultTypeIsRollup",
             "type": "CompoundType",
             "tags": [],
             "label": "defaultTypeIsRollup",
@@ -91,12 +89,12 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/index_pattern_editor/public/types.ts",
+            "path": "src/plugins/data_view_editor/public/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "indexPatternEditor",
-            "id": "def-public.IndexPatternEditorProps.requireTimestampField",
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.requireTimestampField",
             "type": "CompoundType",
             "tags": [],
             "label": "requireTimestampField",
@@ -106,7 +104,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/index_pattern_editor/public/types.ts",
+            "path": "src/plugins/data_view_editor/public/types.ts",
             "deprecated": false
           }
         ],
@@ -117,17 +115,17 @@
     "misc": [],
     "objects": [],
     "start": {
-      "parentPluginId": "indexPatternEditor",
+      "parentPluginId": "dataViewEditor",
       "id": "def-public.PluginStart",
       "type": "Interface",
       "tags": [],
       "label": "PluginStart",
       "description": [],
-      "path": "src/plugins/index_pattern_editor/public/types.ts",
+      "path": "src/plugins/data_view_editor/public/types.ts",
       "deprecated": false,
       "children": [
         {
-          "parentPluginId": "indexPatternEditor",
+          "parentPluginId": "dataViewEditor",
           "id": "def-public.PluginStart.openEditor",
           "type": "Function",
           "tags": [],
@@ -136,19 +134,19 @@
           "signature": [
             "(options: ",
             {
-              "pluginId": "indexPatternEditor",
+              "pluginId": "dataViewEditor",
               "scope": "public",
-              "docId": "kibIndexPatternEditorPluginApi",
-              "section": "def-public.IndexPatternEditorProps",
-              "text": "IndexPatternEditorProps"
+              "docId": "kibDataViewEditorPluginApi",
+              "section": "def-public.DataViewEditorProps",
+              "text": "DataViewEditorProps"
             },
             ") => () => void"
           ],
-          "path": "src/plugins/index_pattern_editor/public/types.ts",
+          "path": "src/plugins/data_view_editor/public/types.ts",
           "deprecated": false,
           "children": [
             {
-              "parentPluginId": "indexPatternEditor",
+              "parentPluginId": "dataViewEditor",
               "id": "def-public.PluginStart.openEditor.$1",
               "type": "Object",
               "tags": [],
@@ -156,14 +154,14 @@
               "description": [],
               "signature": [
                 {
-                  "pluginId": "indexPatternEditor",
+                  "pluginId": "dataViewEditor",
                   "scope": "public",
-                  "docId": "kibIndexPatternEditorPluginApi",
-                  "section": "def-public.IndexPatternEditorProps",
-                  "text": "IndexPatternEditorProps"
+                  "docId": "kibDataViewEditorPluginApi",
+                  "section": "def-public.DataViewEditorProps",
+                  "text": "DataViewEditorProps"
                 }
               ],
-              "path": "src/plugins/index_pattern_editor/public/types.ts",
+              "path": "src/plugins/data_view_editor/public/types.ts",
               "deprecated": false,
               "isRequired": true
             }
@@ -171,7 +169,7 @@
           "returnComment": []
         },
         {
-          "parentPluginId": "indexPatternEditor",
+          "parentPluginId": "dataViewEditor",
           "id": "def-public.PluginStart.IndexPatternEditorComponent",
           "type": "Function",
           "tags": [],
@@ -180,20 +178,20 @@
           "signature": [
             "React.FunctionComponent<",
             {
-              "pluginId": "indexPatternEditor",
+              "pluginId": "dataViewEditor",
               "scope": "public",
-              "docId": "kibIndexPatternEditorPluginApi",
-              "section": "def-public.IndexPatternEditorProps",
-              "text": "IndexPatternEditorProps"
+              "docId": "kibDataViewEditorPluginApi",
+              "section": "def-public.DataViewEditorProps",
+              "text": "DataViewEditorProps"
             },
             ">"
           ],
-          "path": "src/plugins/index_pattern_editor/public/types.ts",
+          "path": "src/plugins/data_view_editor/public/types.ts",
           "deprecated": false,
           "returnComment": [],
           "children": [
             {
-              "parentPluginId": "indexPatternEditor",
+              "parentPluginId": "dataViewEditor",
               "id": "def-public.PluginStart.IndexPatternEditorComponent.$1",
               "type": "CompoundType",
               "tags": [],
@@ -206,7 +204,7 @@
               "deprecated": false
             },
             {
-              "parentPluginId": "indexPatternEditor",
+              "parentPluginId": "dataViewEditor",
               "id": "def-public.PluginStart.IndexPatternEditorComponent.$2",
               "type": "Any",
               "tags": [],
@@ -221,16 +219,16 @@
           ]
         },
         {
-          "parentPluginId": "indexPatternEditor",
+          "parentPluginId": "dataViewEditor",
           "id": "def-public.PluginStart.userPermissions",
           "type": "Object",
           "tags": [],
           "label": "userPermissions",
           "description": [],
           "signature": [
-            "{ editIndexPattern: () => boolean; }"
+            "{ editDataView: () => boolean; }"
           ],
-          "path": "src/plugins/index_pattern_editor/public/types.ts",
+          "path": "src/plugins/data_view_editor/public/types.ts",
           "deprecated": false
         }
       ],
