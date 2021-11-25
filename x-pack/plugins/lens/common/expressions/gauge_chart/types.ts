@@ -64,5 +64,5 @@ export type GaugeExpressionArgs = SharedGaugeLayerState & {
   description?: string;
   shape: GaugeShape;
   colorMode: GaugeColorMode;
-  palette: PaletteOutput<CustomPaletteState>;
+  palette?: PaletteOutput<CustomPaletteState>;
 };

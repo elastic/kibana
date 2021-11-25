@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   CustomPaletteState,
   ChartsPluginSetup,
@@ -124,7 +124,7 @@ function getTicks(
     return [
       ...Array(TICKS_NO)
         .fill(null)
-        .map((_, i) => min + step * i),
+        .map((_, i) => Number((min + step * i).toFixed(2))),
       max,
     ];
   } else {
@@ -140,9 +140,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
 }) => {
   const {
     shape: subtype,
-    goalAccessor,
-    maxAccessor,
-    minAccessor,
     metricAccessor,
     palette,
     colorMode,
@@ -151,7 +148,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     visTitleMode,
     ticksPosition,
   } = args;
-
   if (!metricAccessor) {
     return <VisualizationContainer className="lnsGaugeExpression__container" />;
   }
@@ -178,7 +174,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   const goal = getValueFromAccessor('goalAccessor', row, args);
   const min = getMinValue(row, args);
   const max = getMaxValue(row, args);
-
   if (min === max) {
     return (
       <EmptyPlaceholder
@@ -193,11 +188,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     );
   }
 
-  const colors = (palette?.params as CustomPaletteState)?.colors ?? undefined;
-  const ranges = (palette?.params as CustomPaletteState)
-    ? shiftAndNormalizeStops(args.palette?.params as CustomPaletteState, { min, max })
-    : [min, max];
-
   const formatter = formatFactory(
     metricColumn?.meta?.params?.params
       ? metricColumn?.meta?.params
@@ -208,6 +198,10 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
           },
         }
   );
+  const colors = (palette?.params as CustomPaletteState)?.colors ?? undefined;
+  const ranges = (palette?.params as CustomPaletteState)
+    ? shiftAndNormalizeStops(args.palette?.params as CustomPaletteState, { min, max })
+    : [min, max];
 
   return (
     <Chart>

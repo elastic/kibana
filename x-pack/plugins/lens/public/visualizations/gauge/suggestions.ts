@@ -33,6 +33,11 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     state && (state.minAccessor || state.maxAccessor || state.goalAccessor || state.metricAccessor)
   );
 
+  const numberOfAccessors =
+    state &&
+    [state.minAccessor, state.maxAccessor, state.goalAccessor, state.metricAccessor].filter(Boolean)
+      .length;
+
   const isShapeChange =
     (subVisualizationId === GaugeShapes.horizontalBullet ||
       subVisualizationId === GaugeShapes.verticalBullet) &&
@@ -43,7 +48,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     hasLayerMismatch(keptLayerIds, table) ||
     isNotNumericMetric(table) ||
     (!isGauge && table.columns.length > 1) ||
-    (isGauge && table.changeType === 'initial')
+    (isGauge && numberOfAccessors !== table.columns.length)
   ) {
     return [];
   }

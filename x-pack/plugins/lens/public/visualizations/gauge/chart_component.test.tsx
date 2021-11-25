@@ -1,22 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { Settings } from '@elastic/charts';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { Chart, Goal } from '@elastic/charts';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import type { LensMultiTable } from '../../common';
+import type { ColorStop, CustomPaletteParams, LensMultiTable } from '../../../common';
 import { fieldFormatsServiceMock } from '../../../../../../src/plugins/field_formats/public/mocks';
-import { EmptyPlaceholder } from '../../shared_components';
-import { GaugeExpressionArgs, GaugeExpressionProps } from '../../../common/expressions/gauge_chart';
+import { GaugeExpressionArgs, GaugeTitleMode } from '../../../common/expressions/gauge_chart';
 import { GaugeComponent, GaugeRenderProps } from './chart_component';
+import { DatatableColumn, DatatableRow } from 'src/plugins/expressions/common';
+import { VisualizationContainer } from '../../visualization_container';
+import { PaletteOutput } from 'src/plugins/charts/common';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -27,72 +26,57 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
+const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
+  id,
+  name: 'Count of records',
+  meta: {
+    type: 'number',
+    index: 'kibana_sample_data_ecommerce',
+    params: {
+      id: 'number',
+    },
+  },
+});
+
+const createData = (
+  row: DatatableRow = { 'metric-accessor': 3, 'min-accessor': 0, 'max-accessor': 10 }
+): LensMultiTable => {
+  return {
+    type: 'lens_multitable',
+    tables: {
+      layerId: {
+        type: 'datatable',
+        rows: [row],
+        columns: Object.keys(row).map((key) => numberColumn(key)),
+      },
+    },
+  };
+};
+
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const formatService = fieldFormatsServiceMock.createStartContract();
-const args: GaugeExpressionProps = {
-  percentageMode: false,
-  legend: {
-    isVisible: true,
-    position: 'top',
-    type: 'heatmap_legend',
-  },
-  gridConfig: {
-    isCellLabelVisible: true,
-    isYAxisLabelVisible: true,
-    isXAxisLabelVisible: true,
-    type: 'heatmap_grid',
-  },
-  palette: {
-    type: 'palette',
-    name: '',
-    params: {
-      colors: ['rgb(0, 0, 0)', 'rgb(112, 38, 231)'],
-      stops: [0, 150],
-      gradient: false,
-      rangeMin: 0,
-      rangeMax: 150,
-      range: 'number',
-    },
-  },
-  showTooltip: true,
-  highlightInHover: false,
-  xAccessor: 'col-1-2',
-  valueAccessor: 'col-0-1',
+const args: GaugeExpressionArgs = {
+  title: 'Gauge',
+  description: 'vis description',
+  metricAccessor: 'metric-accessor',
+  minAccessor: '',
+  maxAccessor: '',
+  goalAccessor: '',
+  shape: 'verticalBullet',
+  colorMode: 'none',
+  ticksPosition: 'auto',
+  visTitleMode: 'auto',
 };
-const data: LensMultiTable = {
-  type: 'datatable',
-  rows: [
-    { 'col-0-1': 0, 'col-1-2': 'a' },
-    { 'col-0-1': 148, 'col-1-2': 'b' },
-  ],
-  columns: [
-    { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
-    { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
-  ],
-};
-
-const mockState = new Map();
-const uiState = {
-  get: jest
-    .fn()
-    .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
-  set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
-  emit: jest.fn(),
-  setSilent: jest.fn(),
-} as any;
 
 describe('GaugeComponent', function () {
   let wrapperProps: GaugeRenderProps;
 
   beforeAll(() => {
     wrapperProps = {
-      data,
+      data: createData(),
       chartsThemeService,
       args,
-      uiState,
-      onClickValue: jest.fn(),
-      onSelectRange: jest.fn(),
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
     };
@@ -100,33 +84,166 @@ describe('GaugeComponent', function () {
 
   it('renders the chart', () => {
     const component = shallowWithIntl(<GaugeComponent {...wrapperProps} />);
-    expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+    expect(component.find(Chart)).toMatchSnapshot();
   });
 
   it('shows empty placeholder when metricAccessor is not provided', async () => {
-    const component = mountWithIntl(<GaugeComponent {...wrapperProps} />);
-    await act(async () => {
-      expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
-    });
+    const customProps = {
+      ...wrapperProps,
+      args: {
+        ...wrapperProps.args,
+        metricAccessor: undefined,
+        minAccessor: 'min-accessor',
+        maxAccessor: 'max-accessor',
+      },
+      data: createData({ 'min-accessor': 0, 'max-accessor': 10 }),
+    };
+    const component = shallowWithIntl(<GaugeComponent {...customProps} />);
+    expect(component.find(VisualizationContainer)).toHaveLength(1);
   });
 
   it('shows empty placeholder when minimum accessor equals maximum accessor', async () => {
-    const newProps = { ...wrapperProps, uiState: undefined } as unknown as GaugeExpressionProps;
-    const component = mountWithIntl(<GaugeComponent {...newProps} />);
-    await act(async () => {
-      expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(0);
+    const customProps = {
+      ...wrapperProps,
+      args: {
+        ...wrapperProps.args,
+        metricAccessor: 'metric-accessor',
+        minAccessor: 'min-accessor',
+        maxAccessor: 'max-accessor',
+      },
+      data: createData({ 'metric-accessor': 0, 'min-accessor': 0, 'max-accessor': 0 }),
+    };
+    const component = shallowWithIntl(<GaugeComponent {...customProps} />);
+    expect(component.find('EmptyPlaceholder')).toHaveLength(1);
+  });
+
+  describe('title and subtitle settings', () => {
+    it('displays no title and no subtitle when no passed', () => {
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          visTitleMode: 'none' as GaugeTitleMode,
+          subtitle: '',
+        },
+      };
+      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('labelMajor')).toEqual('');
+      expect(goal.prop('labelMinor')).toEqual('');
+    });
+    it('displays custom title and subtitle when passed', () => {
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          visTitleMode: 'custom' as GaugeTitleMode,
+          visTitle: 'custom title',
+          subtitle: 'custom subtitle',
+        },
+      };
+      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('labelMajor')).toEqual('custom title   ');
+      expect(goal.prop('labelMinor')).toEqual('custom subtitle  ');
+    });
+    it('displays auto title', () => {
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          visTitleMode: 'auto' as GaugeTitleMode,
+          visTitle: '',
+        },
+      };
+      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('labelMajor')).toEqual('Count of records   ');
     });
   });
 
-  it('rounds to 0,0.0 for range smaller than 10', async () => {
-    const component = mountWithIntl(<GaugeComponent {...wrapperProps} />);
-    await act(async () => {
-      expect(component.find(Settings).prop('legendColorPicker')).toBeDefined();
+  describe('ticks', () => {
+    it('displays auto ticks', () => {
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+        },
+      };
+      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('ticks')).toEqual([0, 1.33, 2.67, 4]);
+    });
+    it('spreads auto ticks over the color domain if bigger than min/max domain', () => {
+      const palette = {
+        type: 'palette' as const,
+        name: 'custom',
+        params: {
+          colors: ['#aaa', '#bbb', '#ccc', '#ddd', '#eee'],
+          gradient: false,
+          stops: [20, 40, 60, 80, 100] as unknown as ColorStop[],
+          range: 'number',
+          rangeMin: 0,
+          rangeMax: 4,
+        },
+      };
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          palette,
+        },
+      } as GaugeRenderProps;
+      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('ticks')).toEqual([0, 33.33, 66.67, 100]);
+    });
+    it('passes number bands from color palette', () => {
+      const palette = {
+        type: 'palette' as const,
+        name: 'custom',
+        params: {
+          colors: ['#aaa', '#bbb', '#ccc', '#ddd', '#eee'],
+          gradient: false,
+          stops: [20, 60, 80, 100],
+          range: 'number',
+          rangeMin: 0,
+          rangeMax: 120,
+        },
+      };
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          colorMode: 'palette',
+          palette,
+          ticksPosition: 'bands',
+        },
+      } as GaugeRenderProps;
+      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('ticks')).toEqual([0, 20, 60, 80, 100]);
+      expect(goal.prop('bands')).toEqual([0, 20, 60, 80, 100, 100]);
+    });
+    it('passes percent bands from color palette', () => {
+      const palette = {
+        type: 'palette' as const,
+        name: 'custom',
+        params: {
+          colors: ['#aaa', '#bbb', '#ccc', '#ddd', '#eee'],
+          gradient: false,
+          stops: [20, 60, 80],
+          range: 'percent',
+          rangeMin: 0,
+          rangeMax: 4,
+        },
+      };
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          colorMode: 'palette',
+          palette,
+          ticksPosition: 'bands',
+        },
+      } as GaugeRenderProps;
+      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('ticks')).toEqual([0, 0.8, 2.4, 3.2, 4]);
+      expect(goal.prop('bands')).toEqual([0, 0.8, 2.4, 3.2, 4]);
     });
   });
-
-  describe('title and subtitle settings', () => {});
-
-  describe('colors ranges', () => {});
-  describe('ticks', () => {});
 });
