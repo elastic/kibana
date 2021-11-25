@@ -16,7 +16,7 @@ import { EuiButtonIcon, EuiIcon, EuiInMemoryTable, EuiText, EuiToolTip } from '@
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 function getColumns(viewForecast) {
   return [
