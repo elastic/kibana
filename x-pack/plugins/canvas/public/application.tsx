@@ -17,7 +17,10 @@ import { includes, remove } from 'lodash';
 
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
 
-import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../src/plugins/kibana_react/public';
 import { PluginServices } from '../../../../src/plugins/presentation_util/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
@@ -77,9 +80,11 @@ export const renderApp = ({
         <LegacyServicesProvider providers={services}>
           <presentationUtil.ContextProvider>
             <I18nProvider>
-              <Provider store={canvasStore}>
-                <App history={params.history} />
-              </Provider>
+              <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+                <Provider store={canvasStore}>
+                  <App history={params.history} />
+                </Provider>
+              </KibanaThemeProvider>
             </I18nProvider>
           </presentationUtil.ContextProvider>
         </LegacyServicesProvider>
