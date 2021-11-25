@@ -10,8 +10,8 @@ import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { I18nProvider } from '@kbn/i18n/react';
-import { IUiSettingsClient } from 'kibana/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
 
 import { VisualizationContainer, PersistedState } from '../../../visualizations/public';
 
@@ -21,6 +21,7 @@ import { isVisTableData } from '../common/vis_data_utils';
 import type { TimeseriesVisParams } from './types';
 import type { ExpressionRenderDefinition } from '../../../expressions/common';
 import type { TimeseriesRenderValue } from './metrics_fn';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -37,7 +38,8 @@ const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVis
 
 export const getTimeseriesVisRenderer: (deps: {
   uiSettings: IUiSettingsClient;
-}) => ExpressionRenderDefinition<TimeseriesRenderValue> = ({ uiSettings }) => ({
+  theme: ThemeServiceStart;
+}) => ExpressionRenderDefinition<TimeseriesRenderValue> = ({ uiSettings, theme }) => ({
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
@@ -54,22 +56,24 @@ export const getTimeseriesVisRenderer: (deps: {
 
     render(
       <I18nProvider>
-        <VisualizationContainer
-          data-test-subj="timeseriesVis"
-          handlers={handlers}
-          showNoResult={showNoResult}
-          error={get(visData, [model.id, 'error'])}
-        >
-          <TimeseriesVisualization
-            // it is mandatory to bind uiSettings because of "this" usage inside "get" method
-            getConfig={uiSettings.get.bind(uiSettings)}
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <VisualizationContainer
+            data-test-subj="timeseriesVis"
             handlers={handlers}
-            model={model}
-            visData={visData as TimeseriesVisData}
-            syncColors={syncColors}
-            uiState={handlers.uiState! as PersistedState}
-          />
-        </VisualizationContainer>
+            showNoResult={showNoResult}
+            error={get(visData, [model.id, 'error'])}
+          >
+            <TimeseriesVisualization
+              // it is mandatory to bind uiSettings because of "this" usage inside "get" method
+              getConfig={uiSettings.get.bind(uiSettings)}
+              handlers={handlers}
+              model={model}
+              visData={visData as TimeseriesVisData}
+              syncColors={syncColors}
+              uiState={handlers.uiState! as PersistedState}
+            />
+          </VisualizationContainer>
+        </KibanaThemeProvider>
       </I18nProvider>,
       domNode,
       () => {
