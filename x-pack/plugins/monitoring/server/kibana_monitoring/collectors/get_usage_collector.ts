@@ -126,12 +126,10 @@ export function getMonitoringUsageCollector(
         });
       }
 
-      const usage = {
+      return {
         hasMonitoringData: usageClusters.length > 0,
         clusters: usageClusters,
       };
-
-      return usage;
     },
   });
 }

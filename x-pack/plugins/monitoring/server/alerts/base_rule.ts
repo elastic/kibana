@@ -32,7 +32,7 @@ import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { parseDuration } from '../../../alerting/common/parse_duration';
+import { parseDuration } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 
 type ExecutedState =
@@ -124,8 +124,7 @@ export class BaseRule {
     });
 
     if (existingRuleData.total > 0) {
-      const existingRule = existingRuleData.data[0] as Alert;
-      return existingRule;
+      return existingRuleData.data[0] as Alert;
     }
 
     const ruleActions = [];
