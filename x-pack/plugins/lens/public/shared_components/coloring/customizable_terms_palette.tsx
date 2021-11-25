@@ -21,12 +21,14 @@ import { ColorTerms } from './color_terms';
 import type { CustomPaletteParams } from '../../../common';
 
 export function CustomizableTermsPalette({
+  libraryPalettes,
   palettes,
   activePalette,
   setPalette,
   savePaletteToLibrary,
   terms,
 }: {
+  libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
@@ -68,6 +70,7 @@ export function CustomizableTermsPalette({
           <PalettePicker
             data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"
             palettes={palettes}
+            libraryPalettes={libraryPalettes}
             activePalette={selectedPalette}
             setPalette={(newPalette) => {
               const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
@@ -98,8 +101,8 @@ export function CustomizableTermsPalette({
         </EuiFormRow>
         <EuiFormRow
           display="rowCompressed"
-          label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsLabel', {
-            defaultMessage: 'Color stops',
+          label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorTermsLabel', {
+            defaultMessage: 'Color terms',
           })}
           labelAppend={
             <EuiText size="xs">

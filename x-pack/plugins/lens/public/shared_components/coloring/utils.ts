@@ -187,6 +187,12 @@ export const getTermsPaletteColors = (
   let colors;
   if (activePalette.name !== CUSTOM_PALETTE) {
     colors = paletteService.get(activePalette.name).getCategoricalColors(terms.length);
+    if (colors.length < terms.length) {
+      for (let i = colors.length; i < terms.length; i++) {
+        colors.push(colors[terms.length - i - 1]);
+      }
+      colors[terms.length + 1] = colors[0];
+    }
   } else {
     const termsColors = activePalette.params?.colorTerms?.map((colorTerm) => colorTerm.color);
     colors = paletteService.get(activePalette.name).getCategoricalColors(terms.length, {

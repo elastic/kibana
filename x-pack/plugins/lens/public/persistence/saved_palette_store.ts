@@ -10,14 +10,13 @@ import {
   SavedObjectsClientContract,
   ResolvedSimpleSavedObject,
 } from 'kibana/public';
-import { PALETTE_DOC_TYPE } from '../../common';
+import { PALETTE_DOC_TYPE, CustomPaletteParams } from '../../common';
 
 export interface PaletteDocument {
   savedObjectId?: string;
   name?: string;
   type?: string;
-  title: string;
-  params?: unknown;
+  params?: CustomPaletteParams;
 }
 
 export interface PaletteSaver {
@@ -41,7 +40,7 @@ export class SavedObjectPaletteStore implements SavedPaletteStore {
     const { type, ...rest } = palette;
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
-    const attributes = rest as unknown as SavedObjectAttributes;
+    const attributes = rest as CustomPaletteParams as SavedObjectAttributes;
 
     const result = await this.client.create(PALETTE_DOC_TYPE, attributes, {
       overwrite: true,

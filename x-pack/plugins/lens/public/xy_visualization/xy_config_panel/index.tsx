@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import {
@@ -584,8 +584,33 @@ export function DimensionEditor(
 
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
+  const paletteStore = useMemo(
+    () => new SavedObjectPaletteStore(savedObjectsClient),
+    [savedObjectsClient]
+  );
+  // const paletteStore = new SavedObjectPaletteStore(savedObjectsClient);
   const isHorizontal = isHorizontalChart(state.layers);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [libraryPalettes, setLibraryPalettes] =
+    useState<Array<PaletteOutput<CustomPaletteParams>>>();
+
+  useEffect(() => {
+    const getPalettesFromLibrary = () => {
+      paletteStore.getAll().then((response) => {
+        const palettes = response.savedObjects.map((palette) => {
+          const attributes = palette.attributes as PaletteOutput<CustomPaletteParams>;
+          return {
+            type: palette.type,
+            name: attributes.name,
+            params: attributes.params,
+          };
+        }) as Array<PaletteOutput<CustomPaletteParams>>;
+        setLibraryPalettes(palettes);
+      });
+    };
+    getPalettesFromLibrary();
+  }, [paletteStore]);
+
   const axisMode =
     (layer.yConfig &&
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
@@ -608,24 +633,19 @@ export function DimensionEditor(
       }
     });
   }
-  const paletteStore = new SavedObjectPaletteStore(savedObjectsClient);
-  const getPalettesFromLibrary = () => {
-    paletteStore.getAll().then((response) => {
-      // console.dir(response);
-    });
-  };
 
   const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
     const paletteToSave = {
       ...palette,
-      title,
+      params: {
+        ...palette.params,
+        title,
+      },
     };
     paletteStore.save(paletteToSave).then((response) => {
       // console.dir(response);
     });
   };
-
-  getPalettesFromLibrary();
 
   if (props.groupId === 'breakdown') {
     return (
@@ -668,6 +688,7 @@ export function DimensionEditor(
             handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
           >
             <CustomizableTermsPalette
+              libraryPalettes={libraryPalettes}
               palettes={props.paletteService}
               activePalette={activePalette}
               terms={terms}

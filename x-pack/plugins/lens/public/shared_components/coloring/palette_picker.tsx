@@ -68,6 +68,7 @@ function getCustomPaletteConfig(
 // Note: this is a special palette picker different from the one in the root shared folder
 // ideally these should be merged together, but as for now this holds some custom logic hard to remove
 export function PalettePicker({
+  libraryPalettes,
   palettes,
   activePalette,
   setPalette,
@@ -75,6 +76,7 @@ export function PalettePicker({
   showDynamicColorOnly,
   ...rest
 }: {
+  libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput) => void;
@@ -101,6 +103,19 @@ export function PalettePicker({
     });
   if (showCustomPalette) {
     palettesToShow.push(getCustomPaletteConfig(palettes, activePalette));
+  }
+  if (libraryPalettes) {
+    const savedPalettes = libraryPalettes.map((palette) => {
+      const colors = palette.params?.colorTerms?.map(({ color }) => color);
+      return {
+        value: palette.params?.title ?? palette.name,
+        title: palette.params?.title ?? palette.name,
+        type: FIXED_PROGRESSION,
+        palette: colors ?? [],
+        'data-test-subj': `${palette.params?.title}-palette`,
+      };
+    });
+    palettesToShow.push(...savedPalettes);
   }
   return (
     <EuiColorPalettePicker

@@ -66,7 +66,7 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
   return {
     id: 'default',
     getCategoricalColor: getColor,
-    getCategoricalColors: () => euiPaletteColorBlind(),
+    getCategoricalColors: () => colors,
     toExpression: () => ({
       type: 'expression',
       chain: [
