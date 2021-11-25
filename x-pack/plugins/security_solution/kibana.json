@@ -20,6 +20,7 @@
     "inspector",
     "licensing",
     "maps",
+    "observability",
     "ruleRegistry",
     "taskManager",
     "timelines",

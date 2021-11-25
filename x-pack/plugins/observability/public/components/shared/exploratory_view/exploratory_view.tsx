@@ -21,6 +21,7 @@ import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
 import type { ChartTimeRange } from './header/last_updated';
+import { useExploratoryView } from './contexts/exploatory_view_config';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
 
@@ -49,6 +50,8 @@ export function ExploratoryView({
   const { firstSeries, allSeries, lastRefresh, reportType } = useSeriesStorage();
 
   const lensAttributesT = useLensAttributes();
+
+  const { asPanel } = useExploratoryView();
 
   const setHeightOffset = () => {
     if (seriesBuilderRef?.current && wrapperRef.current) {
@@ -93,8 +96,10 @@ export function ExploratoryView({
     }
   };
 
+  const WrapperC = asPanel ? PanelWrapper : Wrapper;
+
   return (
-    <Wrapper>
+    <WrapperC>
       {lens ? (
         <>
           <ExploratoryViewHeader
@@ -158,7 +163,7 @@ export function ExploratoryView({
           <h2>{LENS_NOT_AVAILABLE}</h2>
         </EuiTitle>
       )}
-    </Wrapper>
+    </WrapperC>
   );
 }
 const LensWrapper = styled.div<{ height: string }>`
@@ -177,7 +182,20 @@ const ResizableContainer = styled(EuiResizableContainer)`
   }
 `;
 
-const Wrapper = styled(EuiPanel)`
+const Wrapper = styled.div`
+  max-width: 1800px;
+  min-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+
+  .echLegendItem__action {
+    display: none;
+  }
+`;
+
+const PanelWrapper = styled(EuiPanel)`
   max-width: 1800px;
   min-width: 800px;
   margin: 0 auto;

@@ -91,6 +91,7 @@ export { enableComparisonByDefault } from '../common/ui_settings_keys';
 export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
 export {
   ReportTypes,
+  FILTER_RECORDS,
   REPORT_METRIC_FIELD,
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploatory_view_config';

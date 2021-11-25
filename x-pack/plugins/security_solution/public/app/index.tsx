@@ -12,6 +12,7 @@ import { Route, Switch } from 'react-router-dom';
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
 import { RenderAppProps } from './types';
+import { SecurityExploratoryView } from './exploratory_view/security_exploratory_view';
 
 export const renderApp = ({
   element,
@@ -35,6 +36,9 @@ export const renderApp = ({
     >
       <ApplicationUsageTrackingProvider>
         <Switch>
+          <Route key="/exploratory-view/" path="/exploratory-view/" exact={true}>
+            <SecurityExploratoryView setHeaderActionMenu={setHeaderActionMenu} />
+          </Route>
           {subPluginRoutes.map((route, index) => {
             return <Route key={`route-${index}`} {...route} />;
           })}

@@ -20,6 +20,7 @@ interface ExploratoryViewContextValue {
   }>;
   indexPatterns: Record<string, string>;
   reportConfigMap: ReportConfigMap;
+  asPanel?: boolean;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
@@ -34,8 +35,10 @@ export function ExploratoryViewContextProvider({
   indexPatterns,
   reportConfigMap,
   setHeaderActionMenu,
+  asPanel = true,
 }: { children: JSX.Element } & ExploratoryViewContextValue) {
   const value = {
+    asPanel,
     reportTypes,
     dataTypes,
     indexPatterns,
