@@ -22,7 +22,7 @@ export const MapperSizePluginSection = () => {
       })}
       description={
         <FormattedMessage
-          id="xpack.idxMgmt.mappingsEditor.routingDescription"
+          id="xpack.idxMgmt.mappingsEditor.sizeDescription"
           defaultMessage="The Mapper Size plugin can index the size of the original {_source} field. {docsLink}"
           values={{
             docsLink: (
