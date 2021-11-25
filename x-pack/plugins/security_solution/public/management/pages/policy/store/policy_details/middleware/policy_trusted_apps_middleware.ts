@@ -164,6 +164,13 @@ const checkIfPolicyHasTrustedAppsAssigned = async (
       kuery,
     });
 
+    if (
+      !trustedApps.total &&
+      isUninitialisedResourceState(state.artifacts.doesAnyTrustedAppExists)
+    ) {
+      await checkIfAnyTrustedApp(store, trustedAppsService);
+    }
+
     store.dispatch({
       type: 'policyArtifactsHasTrustedApps',
       payload: createLoadedResourceState(trustedApps),
@@ -271,6 +278,7 @@ const updateTrustedApps = async (
       policyId,
       trustedApps
     );
+    await checkIfPolicyHasTrustedAppsAssigned(store, trustedAppsService);
 
     store.dispatch({
       type: 'policyArtifactsUpdateTrustedAppsChanged',
@@ -306,7 +314,9 @@ const fetchPolicyTrustedAppsIfNeeded = async (
     });
 
     try {
-      await checkIfPolicyHasTrustedAppsAssigned({ getState, dispatch }, trustedAppsService);
+      if (isUninitialisedResourceState(state.artifacts.hasTrustedApps)) {
+        await checkIfPolicyHasTrustedAppsAssigned({ getState, dispatch }, trustedAppsService);
+      }
       const urlLocationData = getCurrentUrlLocationPaginationParams(state);
       const policyId = policyIdFromParams(state);
       const kuery = [
@@ -333,12 +343,6 @@ const fetchPolicyTrustedAppsIfNeeded = async (
           artifacts: fetchResponse,
         }),
       });
-      if (
-        !fetchResponse.total ||
-        isUninitialisedResourceState(state.artifacts.doesAnyTrustedAppExists)
-      ) {
-        await checkIfAnyTrustedApp({ getState, dispatch }, trustedAppsService);
-      }
     } catch (error) {
       dispatch({
         type: 'assignedTrustedAppsListStateChanged',
@@ -418,6 +422,7 @@ const removeTrustedAppsFromPolicy = async (
       currentPolicyId,
       trustedApps
     );
+    await checkIfPolicyHasTrustedAppsAssigned({ getState, dispatch }, trustedAppsService);
 
     dispatch({
       type: 'policyDetailsTrustedAppsRemoveListStateChanged',

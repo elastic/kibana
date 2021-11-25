@@ -16,7 +16,7 @@ import {
 } from '../../../../../components/artifact_card_grid';
 import { usePolicyDetailsSelector, usePolicyDetailsNavigateCallback } from '../../policy_hooks';
 import {
-  doesPolicyHaveTrustedApps,
+  doesPolicyHaveTrustedAppsAssignedList,
   getCurrentArtifactsLocation,
   getPolicyTrustedAppList,
   getPolicyTrustedAppListError,
@@ -56,7 +56,9 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
     const { getAppUrl } = useAppUrl();
     const { isPlatinumPlus } = useEndpointPrivileges();
     const policyId = usePolicyDetailsSelector(policyIdFromParams);
-    const hasTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
+    const hasTrustedAppsAssignedList = usePolicyDetailsSelector(
+      doesPolicyHaveTrustedAppsAssignedList
+    );
     const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
     const isTrustedAppExistsCheckLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
     const defaultFilter = usePolicyDetailsSelector(getCurrentPolicyArtifactsFilter);
@@ -232,8 +234,8 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
     }, [toasts, trustedAppsApiError]);
 
     const displayLoader = useMemo(
-      () => hasTrustedApps.loading || isTrustedAppExistsCheckLoading,
-      [hasTrustedApps.loading, isTrustedAppExistsCheckLoading]
+      () => hasTrustedAppsAssignedList.loading || isTrustedAppExistsCheckLoading,
+      [hasTrustedAppsAssignedList.loading, isTrustedAppExistsCheckLoading]
     );
 
     const loader = (

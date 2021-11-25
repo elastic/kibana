@@ -105,8 +105,8 @@ describe('when rendering the PolicyTrustedAppsList', () => {
           })
         : Promise.resolve();
 
-      const checkTrustedAppDataExistsReceived = waitForLoadedState
-        ? waitForAction('policyArtifactsDeosAnyTrustedAppExists', {
+      const checkTrustedAppDataAssignedReceived = waitForLoadedState
+        ? waitForAction('policyArtifactsHasTrustedApps', {
             validate({ payload }) {
               return isLoadedResourceState(payload);
             },
@@ -115,7 +115,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
 
       renderResult = appTestContext.render(<PolicyTrustedAppsList {...componentRenderProps} />);
       await trustedAppDataReceived;
-      await checkTrustedAppDataExistsReceived;
+      await checkTrustedAppDataAssignedReceived;
 
       return renderResult;
     };

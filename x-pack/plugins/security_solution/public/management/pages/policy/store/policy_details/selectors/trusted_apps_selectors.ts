@@ -33,7 +33,7 @@ import {
 import { getCurrentArtifactsLocation } from './policy_common_selectors';
 import { ServerApiError } from '../../../../../../common/types';
 
-export const doesPolicyHaveTrustedApps = (
+export const doesPolicyHaveTrustedAppsAssignedList = (
   state: PolicyDetailsState
 ): { loading: boolean; hasTrustedApps: boolean } => {
   return {
@@ -220,9 +220,22 @@ export const getTrustedAppsAllPoliciesById: PolicyDetailsSelector<
   }, {}) as Immutable<Record<string, Immutable<PolicyData>>>;
 });
 
-export const getHasTrustedApps: PolicyDetailsSelector<boolean> = (state) =>
-  isLoadedResourceState(state.artifacts.hasTrustedApps) &&
-  !!state.artifacts.hasTrustedApps.data.total;
+export const getHasTrustedApps: PolicyDetailsSelector<boolean> = (state) => {
+  return (
+    (isLoadedResourceState(state.artifacts.hasTrustedApps) &&
+      !!state.artifacts.hasTrustedApps.data.total) ||
+    (isLoadingResourceState(state.artifacts.hasTrustedApps) &&
+      !!state.artifacts.hasTrustedApps.previousState &&
+      isLoadedResourceState(state.artifacts.hasTrustedApps.previousState) &&
+      !!state.artifacts.hasTrustedApps.previousState.data.total)
+  );
+};
+
+export const getIsLoadedHasTrustedApps: PolicyDetailsSelector<boolean> = (state) =>
+  isLoadedResourceState(state.artifacts.hasTrustedApps) ||
+  (isLoadingResourceState(state.artifacts.hasTrustedApps) &&
+    !!state.artifacts.hasTrustedApps.previousState &&
+    isLoadedResourceState(state.artifacts.hasTrustedApps.previousState));
 
 export const getHasTrustedAppsIsLoading: PolicyDetailsSelector<boolean> = (state) =>
   isLoadingResourceState(state.artifacts.hasTrustedApps);
