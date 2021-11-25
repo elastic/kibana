@@ -2011,6 +2011,50 @@ describe('successful migrations', () => {
       const alert = getMockData({}, true);
       expect(migration800(alert, migrationContext)).toEqual(alert);
     });
+
+    test('add threatIndicatorPath default value to threat match rules if missing', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        { params: { type: 'threat_match' }, alertTypeId: 'siem.signals' },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        'threatintel.indicator'
+      );
+    });
+
+    test('doesnt change threatIndicatorPath value in threat match rules if value is present', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        {
+          params: { type: 'threat_match', threatIndicatorPath: 'custom.indicator.path' },
+          alertTypeId: 'siem.signals',
+        },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        'custom.indicator.path'
+      );
+    });
+
+    test('doesnt change threatIndicatorPath value in other rules', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData({ params: { type: 'eql' }, alertTypeId: 'siem.signals' }, true);
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        undefined
+      );
+    });
+
+    test('doesnt change threatIndicatorPath value if not a siem.signals rule', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        { params: { type: 'threat_match' }, alertTypeId: 'not.siem.signals' },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        undefined
+      );
+    });
   });
 });
 
