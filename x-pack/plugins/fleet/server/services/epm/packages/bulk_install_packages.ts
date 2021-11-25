@@ -9,7 +9,6 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
 
 import type { InstallResult } from '../../../types';
 
@@ -31,7 +30,6 @@ export async function bulkInstallPackages({
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
   const installSource = 'registry';
-  await installIndexPatterns(savedObjectsClient);
 
   const packagesResults = await Promise.allSettled(
     packagesToInstall.map((pkg) => {
@@ -73,7 +71,6 @@ export async function bulkInstallPackages({
           esClient,
           pkgkey: Registry.pkgToPkgKey(pkgKeyProps),
           installSource,
-          skipIndexPatternCreation: true,
           force,
         });
         if (installResult.error) {

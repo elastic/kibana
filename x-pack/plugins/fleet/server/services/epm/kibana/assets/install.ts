@@ -20,7 +20,7 @@ import { getAsset, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { AssetType, AssetReference, AssetParts } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
-import { indexPatternTypes } from '../index_pattern/install';
+import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
 import { appContextService } from '../../../../services';
 
 const validKibanaAssetTypes = new Set(Object.values(KibanaAssetType));
@@ -97,9 +97,14 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
+  // As we use `import` to create our saved objects, we have to install
+  // their references (the index patterns) at the same time
+  // to prevent a reference error
+  const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
+
   const installedAssets = await installKibanaSavedObjects({
     savedObjectsClient,
-    kibanaAssets: assetsToInstall,
+    kibanaAssets: [...indexPatternSavedObjects, ...assetsToInstall],
   });
 
   return installedAssets;

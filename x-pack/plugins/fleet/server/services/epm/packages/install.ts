@@ -39,7 +39,6 @@ import * as Registry from '../registry';
 import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
 
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
@@ -441,23 +440,16 @@ async function installPackageByUpload({
   }
 }
 
-export type InstallPackageParams = {
-  skipIndexPatternCreation?: boolean;
-} & (
+export type InstallPackageParams =
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
-  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
-);
+  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams);
 
 export async function installPackage(args: InstallPackageParams) {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
   const logger = appContextService.getLogger();
-  const { savedObjectsClient, esClient, skipIndexPatternCreation = false } = args;
-
-  if (!skipIndexPatternCreation) {
-    await installIndexPatterns(savedObjectsClient);
-  }
+  const { savedObjectsClient, esClient } = args;
 
   if (args.installSource === 'registry') {
     const { pkgkey, force } = args;

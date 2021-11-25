@@ -7,8 +7,6 @@
 
 import type { SavedObjectsClientContract } from 'src/core/server';
 
-import { createListStream } from '@kbn/utils';
-
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { appContextService } from '../../../../services';
 import { getPackageSavedObjects } from '../../packages/get';
@@ -16,40 +14,16 @@ const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
 export const indexPatternTypes = Object.values(dataTypes);
 
-export async function installIndexPatterns(savedObjectsClient: SavedObjectsClientContract) {
-  const logger = appContextService.getLogger();
-
-  const indexPatterns = indexPatternTypes.map((indexPatternType) => `${indexPatternType}-*`);
-  logger.debug(`creating index patterns ${indexPatterns}`);
-  const kibanaIndexPatterns = indexPatterns.map((indexPattern) => ({
-    id: indexPattern,
+export function getIndexPatternSavedObjects() {
+  return indexPatternTypes.map((indexPatternType) => ({
+    id: `${indexPatternType}-*`,
     type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
     attributes: {
-      title: indexPattern,
+      title: `${indexPatternType}-*`,
       timeFieldName: '@timestamp',
       allowNoIndex: true,
     },
   }));
-
-  const savedObjectsImporter = appContextService
-    .getSavedObjects()
-    .createImporter(savedObjectsClient);
-
-  const { successResults, errors } = await savedObjectsImporter.import({
-    overwrite: true,
-    readStream: createListStream(kibanaIndexPatterns),
-    createNewCopies: false,
-  });
-
-  if (errors?.length) {
-    throw new Error(
-      `Encountered ${errors.length} creating index patterns: ${JSON.stringify(
-        errors.map(({ id, error }) => ({ id, error })) // discard other fields
-      )}`
-    );
-  }
-
-  return successResults || [];
 }
 
 export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjectsClientContract) {
