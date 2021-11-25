@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { getListPath } from '../../services/navigation';
@@ -55,6 +55,16 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
     services.breadcrumbs.setBreadcrumbs('create');
   }, [services]);
 
+  const formDefaultValue = useMemo(() => {
+    if (sourcePipeline) {
+      return sourcePipeline;
+    }
+
+    if (history.location.state?.sourcePipeline) {
+      return history.location.state.sourcePipeline as Pipeline;
+    }
+  }, [sourcePipeline, history]);
+
   return (
     <>
       <EuiPageHeader
@@ -87,7 +97,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       <EuiSpacer size="l" />
 
       <PipelineForm
-        defaultValue={sourcePipeline}
+        defaultValue={formDefaultValue}
         onSave={onSave}
         onCancel={onCancel}
         isSaving={isSaving}

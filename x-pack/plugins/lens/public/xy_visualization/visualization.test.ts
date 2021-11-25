@@ -16,6 +16,7 @@ import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { Datatable } from 'src/plugins/expressions';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 function exampleState(): State {
   return {
@@ -40,6 +41,8 @@ const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
+  useLegacyTimeAxis: false,
+  kibanaTheme: themeServiceMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
@@ -781,13 +784,12 @@ describe('xy_visualization', () => {
         const state = getStateWithBaseReferenceLine();
         state.layers[0].accessors = [];
         state.layers[1].yConfig = undefined;
-
         expect(
           xyVisualization.getConfiguration({
             state: getStateWithBaseReferenceLine(),
             frame,
             layerId: 'referenceLine',
-          }).supportStaticValue
+          }).groups[0].supportStaticValue
         ).toBeTruthy();
       });
 

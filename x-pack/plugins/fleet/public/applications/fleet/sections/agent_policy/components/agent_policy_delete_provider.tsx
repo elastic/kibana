@@ -8,9 +8,9 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENTS_PREFIX } from '../../../constants';
 import { sendDeleteAgentPolicy, useStartServices, useConfig, sendRequest } from '../../../hooks';
 
 interface Props {
@@ -98,7 +98,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
       path: `/api/fleet/agents`,
       method: 'get',
       query: {
-        kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id : ${agentPolicyToCheck}`,
+        kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyToCheck}`,
       },
     });
     setAgentsCount(data?.total || 0);

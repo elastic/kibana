@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiText, EuiSpacer, EuiLink, EuiCodeBlock, EuiButtonGroup } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { EnrollmentAPIKey } from '../../../types';
@@ -38,9 +38,9 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
 
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
-  const linuxMacCommand = `sudo ./elastic-agent install -f ${enrollArgs}`;
+  const linuxMacCommand = `sudo ./elastic-agent install ${enrollArgs}`;
 
-  const windowsCommand = `.\\elastic-agent.exe install -f ${enrollArgs}`;
+  const windowsCommand = `.\\elastic-agent.exe install ${enrollArgs}`;
 
   return (
     <>

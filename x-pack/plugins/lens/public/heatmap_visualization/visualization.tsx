@@ -8,9 +8,11 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import type { OperationMetadata, Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
@@ -33,12 +35,13 @@ import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
 import { layerTypes } from '../../common';
 
-const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
-  defaultMessage: 'Heatmap',
+const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
+  defaultMessage: 'Magnitude',
 });
 
 interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
 }
 
 function getAxisName(axis: 'x' | 'y') {
@@ -95,6 +98,7 @@ function computePaletteParams(params: CustomPaletteParams) {
 
 export const getHeatmapVisualization = ({
   paletteService,
+  theme,
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
   id: LENS_HEATMAP_ID,
 
@@ -105,8 +109,9 @@ export const getHeatmapVisualization = ({
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heatmap',
       }),
-      groupLabel: groupLabelForBar,
+      groupLabel: groupLabelForHeatmap,
       showExperimentalBadge: true,
+      sortPriority: 1,
     },
   ],
 
@@ -257,18 +262,22 @@ export const getHeatmapVisualization = ({
 
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <HeatmapDimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <HeatmapDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <HeatmapToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <HeatmapToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },

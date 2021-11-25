@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiLink, EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const LOCAL_STORAGE_KEY_MSG_ACK = 'xpack.observability.alert.ack.experimental.message';
 
@@ -33,7 +33,7 @@ export function AlertsDisclaimer() {
     <>
       {!experimentalMsgAck && (
         <EuiCallOut
-          data-test-subj="o11y-experimental-disclaimer"
+          data-test-subj="o11yExperimentalDisclaimer"
           title={i18n.translate('xpack.observability.alertsDisclaimerTitle', {
             defaultMessage:
               'Alert history is currently an experimental feature within Observability',
@@ -56,7 +56,7 @@ export function AlertsDisclaimer() {
 
           <EuiSpacer size="l" />
           <EuiButton
-            data-test-subj="o11y-experimental-disclaimer-dismiss-btn"
+            data-test-subj="o11yExperimentalDisclaimerDismissBtn"
             color="warning"
             onClick={dismissMessage}
             tabIndex={0}

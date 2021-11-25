@@ -20,7 +20,7 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   Filter,
   FieldFilter,

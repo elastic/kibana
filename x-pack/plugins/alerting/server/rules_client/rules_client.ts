@@ -377,10 +377,11 @@ export class RulesClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleAlert(
+        scheduledTask = await this.scheduleRule(
           createdAlert.id,
           rawAlert.alertTypeId,
-          data.schedule
+          data.schedule,
+          true
         );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
@@ -449,8 +450,10 @@ export class RulesClient {
 
   public async resolve<Params extends AlertTypeParams = never>({
     id,
+    includeLegacyId,
   }: {
     id: string;
+    includeLegacyId?: boolean;
   }): Promise<ResolvedSanitizedRule<Params>> {
     const { saved_object: result, ...resolveResponse } =
       await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
@@ -482,7 +485,8 @@ export class RulesClient {
       result.id,
       result.attributes.alertTypeId,
       result.attributes,
-      result.references
+      result.references,
+      includeLegacyId
     );
 
     return {
@@ -1149,10 +1153,11 @@ export class RulesClient {
         );
         throw e;
       }
-      const scheduledTask = await this.scheduleAlert(
+      const scheduledTask = await this.scheduleRule(
         id,
         attributes.alertTypeId,
-        attributes.schedule as IntervalSchedule
+        attributes.schedule as IntervalSchedule,
+        false
       );
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
@@ -1200,44 +1205,51 @@ export class RulesClient {
     }
 
     if (this.eventLogger && attributes.scheduledTaskId) {
-      const { state } = taskInstanceToAlertTaskInstance(
-        await this.taskManager.get(attributes.scheduledTaskId),
-        attributes as unknown as SanitizedAlert
-      );
+      try {
+        const { state } = taskInstanceToAlertTaskInstance(
+          await this.taskManager.get(attributes.scheduledTaskId),
+          attributes as unknown as SanitizedAlert
+        );
 
-      const recoveredAlertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
-        state.alertInstances ?? {},
-        (rawAlertInstance) => new AlertInstance(rawAlertInstance)
-      );
-      const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
+        const recoveredAlertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
+          state.alertInstances ?? {},
+          (rawAlertInstance) => new AlertInstance(rawAlertInstance)
+        );
+        const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 
-      for (const instanceId of recoveredAlertInstanceIds) {
-        const { group: actionGroup, subgroup: actionSubgroup } =
-          recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
-        const instanceState = recoveredAlertInstances[instanceId].getState();
-        const message = `instance '${instanceId}' has recovered due to the rule was disabled`;
+        for (const instanceId of recoveredAlertInstanceIds) {
+          const { group: actionGroup, subgroup: actionSubgroup } =
+            recoveredAlertInstances[instanceId].getLastScheduledActions() ?? {};
+          const instanceState = recoveredAlertInstances[instanceId].getState();
+          const message = `instance '${instanceId}' has recovered due to the rule was disabled`;
 
-        const event = createAlertEventLogRecordObject({
-          ruleId: id,
-          ruleName: attributes.name,
-          ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
-          instanceId,
-          action: EVENT_LOG_ACTIONS.recoveredInstance,
-          message,
-          state: instanceState,
-          group: actionGroup,
-          subgroup: actionSubgroup,
-          namespace: this.namespace,
-          savedObjects: [
-            {
-              id,
-              type: 'alert',
-              typeId: attributes.alertTypeId,
-              relation: SAVED_OBJECT_REL_PRIMARY,
-            },
-          ],
-        });
-        this.eventLogger.logEvent(event);
+          const event = createAlertEventLogRecordObject({
+            ruleId: id,
+            ruleName: attributes.name,
+            ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
+            instanceId,
+            action: EVENT_LOG_ACTIONS.recoveredInstance,
+            message,
+            state: instanceState,
+            group: actionGroup,
+            subgroup: actionSubgroup,
+            namespace: this.namespace,
+            savedObjects: [
+              {
+                id,
+                type: 'alert',
+                typeId: attributes.alertTypeId,
+                relation: SAVED_OBJECT_REL_PRIMARY,
+              },
+            ],
+          });
+          this.eventLogger.logEvent(event);
+        }
+      } catch (error) {
+        // this should not block the rest of the disable process
+        this.logger.warn(
+          `rulesClient.disable('${id}') - Could not write recovery events - ${error.message}`
+        );
       }
     }
     try {
@@ -1563,9 +1575,15 @@ export class RulesClient {
     return this.spaceId;
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string, schedule: IntervalSchedule) {
-    return await this.taskManager.schedule({
-      taskType: `alerting:${alertTypeId}`,
+  private async scheduleRule(
+    id: string,
+    ruleTypeId: string,
+    schedule: IntervalSchedule,
+    throwOnConflict: boolean // whether to throw conflict errors or swallow them
+  ) {
+    const taskInstance = {
+      id, // use the same ID for task document as the rule
+      taskType: `alerting:${ruleTypeId}`,
       schedule,
       params: {
         alertId: id,
@@ -1577,7 +1595,15 @@ export class RulesClient {
         alertInstances: {},
       },
       scope: ['alerting'],
-    });
+    };
+    try {
+      return await this.taskManager.schedule(taskInstance);
+    } catch (err) {
+      if (err.statusCode === 409 && !throwOnConflict) {
+        return taskInstance;
+      }
+      throw err;
+    }
   }
 
   private injectReferencesIntoActions(
