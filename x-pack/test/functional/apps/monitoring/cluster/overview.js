@@ -196,6 +196,7 @@ export default function ({ getService, getPageObjects }) {
 
           expect(await testSubjects.exists('alertsBadge')).to.be(true);
           await PageObjects.timePicker.pauseAutoRefresh();
+          await setupMode.clickExitSetupModeBtn();
         });
       });
     });
