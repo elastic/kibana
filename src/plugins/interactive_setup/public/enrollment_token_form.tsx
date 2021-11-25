@@ -26,10 +26,11 @@ import React, { useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EnrollmentToken } from '../common';
 import { DocLink } from './doc_link';
+import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
@@ -260,7 +261,7 @@ export const EnrollmentTokenHelpPopover = () => {
           />
         </p>
         <EuiCodeBlock language="bash" paddingSize="m" isCopyable>
-          bin/elasticsearch-create-enrollment-token --scope kibana
+          {getCommandLineSnippet('elasticsearch-create-enrollment-token', '--scope kibana')}
         </EuiCodeBlock>
       </EuiText>
       <EuiPopoverFooter>

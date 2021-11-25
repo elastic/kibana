@@ -28,19 +28,32 @@ export function getSwitchIndexPatternAppState(
       )
     : currentColumns;
   const columns = nextColumns.length ? nextColumns : [];
+
   // when switching from an index pattern with timeField to an index pattern without timeField
   // filter out sorting by timeField in case it is set. index patterns without timeField don't
   // prepend this field in the table, so in legacy grid you would need to add this column to
   // remove sorting
-  const nextSort = getSortArray(currentSort, nextIndexPattern).filter((value) => {
+  let nextSort = getSortArray(currentSort, nextIndexPattern).filter((value) => {
     return nextIndexPattern.timeFieldName || value[0] !== currentIndexPattern.timeFieldName;
   });
+
+  if (nextIndexPattern.isTimeBased() && !nextSort.length) {
+    // set default sorting if it was not set
+    nextSort = [[nextIndexPattern.timeFieldName, sortDirection]];
+  } else if (
+    nextIndexPattern.isTimeBased() &&
+    currentIndexPattern.isTimeBased() &&
+    nextIndexPattern.timeFieldName !== currentIndexPattern.timeFieldName
+  ) {
+    // switch time fields
+    nextSort = nextSort.map((cur) =>
+      cur[0] === currentIndexPattern.timeFieldName ? [nextIndexPattern.timeFieldName, cur[1]] : cur
+    );
+  }
+
   return {
     index: nextIndexPattern.id,
     columns,
-    sort:
-      nextIndexPattern.timeFieldName && !nextSort.length
-        ? [[nextIndexPattern.timeFieldName, sortDirection]]
-        : nextSort,
+    sort: nextSort,
   };
 }
