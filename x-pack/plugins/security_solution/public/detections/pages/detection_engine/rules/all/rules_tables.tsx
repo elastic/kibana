@@ -308,11 +308,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       docLinks,
     ]);
 
-    // const monitoringColumns = useMemo(
-    //   () => getMonitoringColumns(navigateToApp, formatUrl, docLinks, loadingRuleIds),
-    //   [navigateToApp, formatUrl, docLinks, loadingRuleIds]
-    // );
-
     useEffect(() => {
       setRefreshRulesData(reFetchRules);
     }, [reFetchRules, setRefreshRulesData]);
