@@ -70,9 +70,6 @@ const optionsAreEqual = (optionsA: DashboardOptions, optionsB: DashboardOptions)
 };
 
 const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap): boolean => {
-  // console.log('Checking if panels are equal....');
-  // console.log('panelsA:', panelsA);
-  // console.log('panelsB:', panelsB);
   const embeddableIdsA = Object.keys(panelsA);
   const embeddableIdsB = Object.keys(panelsB);
   if (
@@ -83,15 +80,6 @@ const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap):
   }
   // embeddable ids are equal so let's compare individual panels.
   for (const id of embeddableIdsA) {
-    // console.log('---> old object: ', panelsA[id], '\n---> new object: ', panelsB[id]);
-    // console.log(
-    //   '---> old title: ',
-    //   panelsA[id].explicitInput.title,
-    //   '\n---> new title: ',
-    //   panelsB[id].explicitInput.title
-    // );
-
-    // debugger;
     const obj = commonDiff<DashboardPanelState>(
       panelsA[id] as unknown as DashboardDiffCommon,
       panelsB[id] as unknown as DashboardDiffCommon,
@@ -101,18 +89,20 @@ const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap):
       Object.keys(obj).length > 0 ||
       !explicitInputIsEqual(panelsA[id].explicitInput, panelsB[id].explicitInput)
     ) {
-      // console.log('Panels are not equal.');
-      // console.log('---> Result of commmonDiff:', obj);
       return false;
     }
   }
-  // hidePanelTitles
-  // title
-
-  // console.log('Panels are equal.');
   return true;
 };
 
+/**
+ * Need to compare properties of explicitInput *directly* in order to handle special comparisons for 'title'
+ * and 'hidePanelTitles.' For example, if some object 'obj1' has 'obj1[title] = undefined' and some other
+ * object `obj2' simply does not have the key `title,' we want obj1 to still equal obj2 - in normal comparisons
+ * without this special case, `obj1 != obj2.'
+ * @param originalInput
+ * @param newInput
+ */
 const explicitInputIsEqual = (
   originalInput: EmbeddableInput,
   newInput: EmbeddableInput
@@ -156,18 +146,8 @@ const commonDiff = <T>(
     (key) => !omitKeys.includes(key)
   );
   keys.forEach((key) => {
-    // if (key === 'explicitInput') debugger;
     if (key === undefined) return;
     if (!_.isEqual(originalObj[key], newObj[key])) {
-      // console.log(`Values at ${key} are not equal:`);
-      // console.log('---> Old:', originalObj[key]);
-      // console.log('-------> Title: ', originalObj[key].title);
-      // console.log('--------> Stringify: ', JSON.stringify(originalObj[key]));
-      // console.log('---> New:', newObj[key]);
-      // console.log('--------> Stringify: ', JSON.stringify(newObj[key]));
-      // console.log('---> Diffs:', difference(originalObj[key], newObj[key]));
-      // console.log('-------> Title: ', newObj[key].title);
-
       (differences as { [key: string]: unknown })[key] = newObj[key];
     }
   });
