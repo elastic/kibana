@@ -11,7 +11,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMServerLibs } from '../lib/lib';
 import { DynamicSettings, DynamicSettingsType } from '../../common/runtime_types';
 import { UMRestApiRouteFactory } from '.';
-import { savedObjectsAdapter } from '../lib/saved_objects';
+import { savedObjectsAdapter } from '../lib/saved_objects/saved_objects';
 import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
