@@ -1144,8 +1144,9 @@ describe('terms', () => {
         />
       );
 
+      // get inner instance
       expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field"]').first().prop('options')
+        instance.find('[data-test-subj="indexPattern-dimension-field-0"]').at(1).prop('options')
       ).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -1182,10 +1183,9 @@ describe('terms', () => {
 
       instance = instance.update();
 
-      // The value "6" is computed as the 4th input, but the top (React) component, therefore the 7th entry.
-      // Mind that for each "data-test-subj" there are two tags rendered: the React one and the html rendered one
+      // Get the inner instance with the data-test-subj
       expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field"]').at(6).prop('options')
+        instance.find('[data-test-subj="indexPattern-dimension-field-3"]').at(1).prop('options')
       ).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
