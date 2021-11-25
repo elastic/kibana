@@ -70,13 +70,14 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
 
     const dashboard = embeddable.getRoot() as DashboardContainer;
     const panelToReplace = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
+
     if (!panelToReplace) {
       throw new PanelNotFoundError();
     }
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: { ...newInput },
+      explicitInput: { ...newInput, title: embeddable.getTitle() },
     };
     dashboard.replacePanel(panelToReplace, newPanel, true);
 
