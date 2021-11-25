@@ -29,7 +29,7 @@ const isJSONContentType = (contentType?: string) =>
   Boolean(contentType && contentType.indexOf('application/json') >= 0);
 
 const isMapboxVectorTile = (contentType?: string) =>
-  Boolean(contentType && contentType.indexOf('application/vnd.mapbox-vector-tile') >= 0);
+  contentType?.includes('application/vnd.mapbox-vector-tile') ?? false;
 
 /**
  * Best effort expand literal strings
