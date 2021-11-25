@@ -22,6 +22,8 @@ import {
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 const throttlingFormatter: Formatter = (fields) => {
+  if (!fields[ConfigKeys.IS_THROTTLING_ENABLED]) return 'false';
+
   const getThrottlingValue = (v: string | undefined, suffix: 'd' | 'u' | 'l') =>
     v !== '' && v !== undefined ? `${v}${suffix}` : null;
 
@@ -44,6 +46,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKeys.SOURCE_INLINE]: (fields) => stringToJsonFormatter(fields[ConfigKeys.SOURCE_INLINE]),
   [ConfigKeys.PARAMS]: null,
   [ConfigKeys.SCREENSHOTS]: null,
+  [ConfigKeys.IS_THROTTLING_ENABLED]: null,
   [ConfigKeys.DOWNLOAD_SPEED]: null,
   [ConfigKeys.UPLOAD_SPEED]: null,
   [ConfigKeys.LATENCY]: null,

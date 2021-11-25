@@ -181,7 +181,7 @@ describe('<CustomFields />', () => {
   });
 
   it('handles switching monitor type', () => {
-    const { getByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
+    const { getByText, queryByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
       <WrappedComponent />
     );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
@@ -200,7 +200,11 @@ describe('<CustomFields />', () => {
     expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
     // expect tls options to be available for TCP
-    expect(queryByLabelText('Enable TLS configuration')).toBeInTheDocument();
+    // here we must getByText because EUI will generate duplicate aria-labelledby
+    // values within the test-env generator used, and that will conflict with other
+    // automatically generated labels. See:
+    // https://github.com/elastic/eui/blob/91b416dcd51e116edb2cb4a2cac4c306512e28c7/src/services/accessibility/html_id_generator.testenv.ts#L12
+    expect(queryByText(/Enable TLS configuration/)).toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
     let advancedOptionsButton = getByText('Advanced TCP options');
@@ -214,8 +218,8 @@ describe('<CustomFields />', () => {
     // expect ICMP fields to be in the DOM
     expect(getByLabelText('Wait in seconds')).toBeInTheDocument();
 
-    // expect tls options not be available for ICMP
-    expect(queryByLabelText('Enable TLS configuration')).not.toBeInTheDocument();
+    // expect tls options not to be available for ICMP
+    expect(queryByText(/Enable TLS configuration/)).not.toBeInTheDocument();
 
     // expect TCP fields not to be in the DOM
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
@@ -234,7 +238,7 @@ describe('<CustomFields />', () => {
 
     // expect tls options to be available for browser
     expect(queryByLabelText('Proxy Zip URL')).toBeInTheDocument();
-    expect(queryByLabelText('Enable TLS configuration for Zip URL')).toBeInTheDocument();
+    expect(queryByText(/Enable TLS configuration for Zip URL/)).toBeInTheDocument();
 
     // ensure at least one browser advanced option is present
     advancedOptionsButton = getByText('Advanced Browser options');

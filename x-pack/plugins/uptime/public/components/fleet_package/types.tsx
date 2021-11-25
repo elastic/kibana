@@ -116,6 +116,7 @@ export enum ConfigKeys {
   TAGS = 'tags',
   TIMEOUT = 'timeout',
   THROTTLING_CONFIG = 'throttling.config',
+  IS_THROTTLING_ENABLED = 'throttling.is_enabled',
   DOWNLOAD_SPEED = 'throttling.download_speed',
   UPLOAD_SPEED = 'throttling.upload_speed',
   LATENCY = 'throttling.latency',
@@ -221,6 +222,7 @@ export interface IBrowserAdvancedFields {
   [ConfigKeys.JOURNEY_FILTERS_MATCH]: string;
   [ConfigKeys.JOURNEY_FILTERS_TAGS]: string[];
   [ConfigKeys.IGNORE_HTTPS_ERRORS]: boolean;
+  [ConfigKeys.IS_THROTTLING_ENABLED]: boolean;
   [ConfigKeys.DOWNLOAD_SPEED]: string;
   [ConfigKeys.UPLOAD_SPEED]: string;
   [ConfigKeys.LATENCY]: string;
