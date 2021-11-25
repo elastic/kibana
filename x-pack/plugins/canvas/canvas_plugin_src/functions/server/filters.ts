@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { ExpressionValueFilter } from 'src/plugins/expressions';
-import { Ast, fromExpression } from '@kbn/interpreter/common';
+import {
+  ExpressionValueFilter,
+  ExpressionAstExpression,
+  ExpressionAstFunction,
+} from 'src/plugins/expressions';
+import { fromExpression } from '@kbn/interpreter/common';
 import { buildFiltersFunction } from '../../../common/functions';
 import type { FiltersFunction } from '../../../common/functions';
 
@@ -16,9 +20,15 @@ const filtersFn = (): ExpressionValueFilter => ({
 });
 
 const migrations: FiltersFunction['migrations'] = {
-  '8.1.0': (ast: Ast): Ast => {
-    const newExpression = 'kibana | selectFilter';
-    const newAst = fromExpression(newExpression);
+  '8.1.0': (ast: ExpressionAstFunction): ExpressionAstFunction | ExpressionAstExpression => {
+    const SELECT_FILTERS = 'selectFilter';
+    const newExpression = `kibana | ${SELECT_FILTERS}`;
+    const newAst: ExpressionAstExpression = fromExpression(newExpression);
+    const selectFiltersAstIndex = newAst.chain.findIndex(
+      ({ function: fnName }) => fnName === SELECT_FILTERS
+    );
+    const selectFilterAst = newAst.chain[selectFiltersAstIndex];
+    newAst.chain.splice(selectFiltersAstIndex, 1, { ...selectFilterAst, arguments: ast.arguments });
     return newAst;
   },
 };
