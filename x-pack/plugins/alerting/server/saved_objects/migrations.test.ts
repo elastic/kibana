@@ -651,6 +651,35 @@ describe('successful migrations', () => {
     });
   });
 
+  describe('7.12.0', () => {
+    test('Migrates incorrect action group spelling for metrics inventory threshold rules', () => {
+      const migration712 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.12.0'];
+
+      const actions = [
+        {
+          group: 'metrics.invenotry_threshold.fired',
+          params: {
+            level: 'info',
+            message:
+              '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
+          },
+          actionRef: 'action_0',
+          actionTypeId: '.server-log',
+        },
+      ];
+
+      const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+
+      expect(migration712(alert, migrationContext)).toMatchObject({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
+        },
+      });
+    });
+  });
+
   describe('7.13.0', () => {
     test('security solution alerts get migrated and remove null values', () => {
       const migration713 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
