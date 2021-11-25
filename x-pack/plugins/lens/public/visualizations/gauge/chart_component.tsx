@@ -27,7 +27,7 @@ import {
 } from '../../../common/expressions/gauge_chart';
 import type { FormatFactory } from '../../../common';
 
-type GaugeRenderProps = GaugeExpressionProps & {
+export type GaugeRenderProps = GaugeExpressionProps & {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
@@ -137,7 +137,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   args,
   formatFactory,
   chartsThemeService,
-  paletteService,
 }) => {
   const {
     shape: subtype,
@@ -153,17 +152,19 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     ticksPosition,
   } = args;
 
-  const chartTheme = chartsThemeService.useChartsTheme();
-  const table = Object.values(data.tables)[0];
-  const chartData = table.rows.filter((v) => typeof v[metricAccessor!] === 'number');
-
   if (!metricAccessor) {
     return <VisualizationContainer className="lnsGaugeExpression__container" />;
   }
-  const accessors = { maxAccessor, minAccessor, goalAccessor, metricAccessor };
 
+  const chartTheme = chartsThemeService.useChartsTheme();
+
+  const table = Object.values(data.tables)[0];
+  const metricColumn = table.columns.find((col) => col.id === metricAccessor);
+
+  const chartData = table.rows.filter((v) => typeof v[metricAccessor!] === 'number');
   const row = chartData?.[0];
-  const metricValue = getValueFromAccessor('metricAccessor', row, accessors);
+
+  const metricValue = getValueFromAccessor('metricAccessor', row, args);
 
   const icon =
     subtype === GaugeShapes.horizontalBullet
@@ -174,9 +175,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     return <EmptyPlaceholder icon={icon} />;
   }
 
-  const goal = getValueFromAccessor('goalAccessor', row, accessors);
-  const min = getMinValue(row, accessors);
-  const max = getMaxValue(row, accessors);
+  const goal = getValueFromAccessor('goalAccessor', row, args);
+  const min = getMinValue(row, args);
+  const max = getMaxValue(row, args);
 
   if (min === max) {
     return (
@@ -197,7 +198,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     ? shiftAndNormalizeStops(args.palette?.params as CustomPaletteState, { min, max })
     : [min, max];
 
-  const metricColumn = table.columns.find((col) => col.id === metricAccessor);
   const formatter = formatFactory(
     metricColumn?.meta?.params?.params
       ? metricColumn?.meta?.params
