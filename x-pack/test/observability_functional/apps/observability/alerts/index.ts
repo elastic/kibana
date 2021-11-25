@@ -247,7 +247,7 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
-        it.only('Exist and display expected values', async () => {
+        it('Exist and display expected values', async () => {
           const subjToValueMap: { [key: string]: number } = {
             statRuleCount: 254,
             statDisabled: 120,
