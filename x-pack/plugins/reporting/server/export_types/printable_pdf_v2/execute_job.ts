@@ -16,6 +16,7 @@ import {
   getConditionalHeaders,
   omitBlockedHeaders,
   getCustomLogo,
+  REPORTING_TRANSACTION_TYPE,
 } from '../common';
 import { generatePdfObservableFactory } from './lib/generate_pdf';
 import { TaskPayloadPDFV2 } from './types';
@@ -27,8 +28,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
 
     return async function runTask(jobId, job, cancellationToken, stream) {
       const jobLogger = parentLogger.clone([PDF_JOB_TYPE_V2, 'execute-job', jobId]);
-      const apmTrans = apm.startTransaction('reporting execute_job pdf_v2', 'reporting');
-      const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+      const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;
 
       const generatePdfObservable = await generatePdfObservableFactory(reporting);
@@ -44,7 +45,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
           const { browserTimezone, layout, title, locatorParams } = job;
           apmGetAssets?.end();
 
-          apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
+          apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
           return generatePdfObservable(
             jobLogger,
             job,

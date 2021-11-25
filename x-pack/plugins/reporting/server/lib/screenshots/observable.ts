@@ -18,6 +18,7 @@ import {
   ScreenshotObservableOpts,
   ScreenshotResults,
 } from './';
+import { REPORTING_TRANSACTION_TYPE } from '../../common';
 import { ScreenshotObservableHandler } from './observable_handler';
 
 export type { ElementPosition, ElementsPositionAndAttribute, ScreenshotResults };
@@ -46,8 +47,8 @@ export function getScreenshots$(
   browserDriverFactory: HeadlessChromiumDriverFactory,
   opts: ScreenshotObservableOpts
 ): Rx.Observable<ScreenshotResults[]> {
-  const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
-  const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
+  const apmTrans = apm.startTransaction('screenshot-pipeline', REPORTING_TRANSACTION_TYPE);
+  const apmCreatePage = apmTrans?.startSpan('create-page', 'wait');
   const { browserTimezone, logger } = opts;
 
   return browserDriverFactory.createPage({ browserTimezone }, logger).pipe(

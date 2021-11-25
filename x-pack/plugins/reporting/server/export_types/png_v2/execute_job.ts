@@ -16,6 +16,7 @@ import {
   getConditionalHeaders,
   omitBlockedHeaders,
   generatePngObservableFactory,
+  REPORTING_TRANSACTION_TYPE,
 } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 import { TaskPayloadPNGV2 } from './types';
@@ -26,8 +27,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
     const encryptionKey = config.get('encryptionKey');
 
     return async function runTask(jobId, job, cancellationToken, stream) {
-      const apmTrans = apm.startTransaction('reporting execute_job pngV2', 'reporting');
-      const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+      const apmTrans = apm.startTransaction('execute-job-png-v2', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePng: { end: () => void } | null | undefined;
 
       const generatePngObservable = await generatePngObservableFactory(reporting);
@@ -42,7 +43,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
 
           apmGetAssets?.end();
 
-          apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
+          apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
           return generatePngObservable(
             jobLogger,
             [url, locatorParams],

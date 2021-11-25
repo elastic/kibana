@@ -17,6 +17,7 @@ import {
   getFullUrls,
   omitBlockedHeaders,
   generatePngObservableFactory,
+  REPORTING_TRANSACTION_TYPE,
 } from '../../common';
 import { TaskPayloadPNG } from '../types';
 
@@ -26,8 +27,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
     const encryptionKey = config.get('encryptionKey');
 
     return async function runTask(jobId, job, cancellationToken, stream) {
-      const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
-      const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+      const apmTrans = apm.startTransaction('execute-job-png', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePng: { end: () => void } | null | undefined;
 
       const generatePngObservable = await generatePngObservableFactory(reporting);
@@ -41,7 +42,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
           const hashUrl = urls[0];
           if (apmGetAssets) apmGetAssets.end();
 
-          apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
+          apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
           return generatePngObservable(
             jobLogger,
             hashUrl,

@@ -15,6 +15,8 @@ import { LayoutParams, LayoutSelectorDictionary, PreserveLayout } from '../../li
 import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
 import { ConditionalHeaders } from '../common';
 
+export const REPORTING_TRANSACTION_TYPE = 'reporting';
+
 export async function generatePngObservableFactory(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const captureConfig = config.get('capture');
@@ -27,8 +29,8 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams & { selectors?: Partial<LayoutSelectorDictionary> }
   ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
-    const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
-    const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
+    const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
+    const apmLayout = apmTrans?.startSpan('create-layout', 'setup');
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
@@ -36,7 +38,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
 
     if (apmLayout) apmLayout.end();
 
-    const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
+    const apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', 'setup');
     let apmBuffer: typeof apm.currentSpan;
     const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
@@ -47,7 +49,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     }).pipe(
       tap(() => {
         apmScreenshots?.end();
-        apmBuffer = apmTrans?.startSpan('get_buffer', 'output') ?? null;
+        apmBuffer = apmTrans?.startSpan('get-buffer', 'output') ?? null;
       }),
       map((results: ScreenshotResults[]) => ({
         buffer: results[0].screenshots[0].data,

@@ -6,6 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { REPORTING_TRANSACTION_TYPE } from '../../common';
 
 interface PdfTracker {
   setByteLength: (byteLength: number) => void;
@@ -32,7 +33,7 @@ interface ApmSpan {
 }
 
 export function getTracker(): PdfTracker {
-  const apmTrans = apm.startTransaction('reporting generate_pdf', 'reporting');
+  const apmTrans = apm.startTransaction('generate-pdf', REPORTING_TRANSACTION_TYPE);
 
   let apmLayout: ApmSpan | null = null;
   let apmScreenshots: ApmSpan | null = null;
@@ -43,43 +44,43 @@ export function getTracker(): PdfTracker {
 
   return {
     startLayout() {
-      apmLayout = apmTrans?.startSpan('create_layout', SPANTYPE_SETUP) || null;
+      apmLayout = apmTrans?.startSpan('create-layout', SPANTYPE_SETUP) || null;
     },
     endLayout() {
       if (apmLayout) apmLayout.end();
     },
     startScreenshots() {
-      apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', SPANTYPE_SETUP) || null;
+      apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
     },
     endScreenshots() {
       if (apmScreenshots) apmScreenshots.end();
     },
     startSetup() {
-      apmSetup = apmTrans?.startSpan('setup_pdf', SPANTYPE_SETUP) || null;
+      apmSetup = apmTrans?.startSpan('setup-pdf', SPANTYPE_SETUP) || null;
     },
     endSetup() {
       if (apmSetup) apmSetup.end();
     },
     startAddImage() {
-      apmAddImage = apmTrans?.startSpan('add_pdf_image', SPANTYPE_OUTPUT) || null;
+      apmAddImage = apmTrans?.startSpan('add-pdf-image', SPANTYPE_OUTPUT) || null;
     },
     endAddImage() {
       if (apmAddImage) apmAddImage.end();
     },
     startCompile() {
-      apmCompilePdf = apmTrans?.startSpan('compile_pdf', SPANTYPE_OUTPUT) || null;
+      apmCompilePdf = apmTrans?.startSpan('compile-pdf', SPANTYPE_OUTPUT) || null;
     },
     endCompile() {
       if (apmCompilePdf) apmCompilePdf.end();
     },
     startGetBuffer() {
-      apmGetBuffer = apmTrans?.startSpan('get_buffer', SPANTYPE_OUTPUT) || null;
+      apmGetBuffer = apmTrans?.startSpan('get-buffer', SPANTYPE_OUTPUT) || null;
     },
     endGetBuffer() {
       if (apmGetBuffer) apmGetBuffer.end();
     },
     setByteLength(byteLength: number) {
-      apmTrans?.setLabel('byte_length', byteLength, false);
+      apmTrans?.setLabel('byte-length', byteLength, false);
     },
     end() {
       if (apmTrans) apmTrans.end();
