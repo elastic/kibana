@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { AlertStatus } from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+
 import { AlertStatusFilterButton } from '../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
@@ -37,11 +39,16 @@ export interface TopAlert {
   link?: string;
   active: boolean;
 }
-
+const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 const NO_INDEX_NAMES: string[] = [];
 const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
-const ALERT_STATUS_REGEX =
-  /\s*and\s*kibana\.alert\.status\s*:\s*".+?"|kibana\.alert\.status\s*:\s*".+?"/gm;
+const BASE_ALERT_REGEX = new RegExp(`\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*"(.*?|\\*?)"`);
+const ALERT_STATUS_REGEX = new RegExp(
+  `\\s*and\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*".+?"|${regExpEscape(
+    ALERT_STATUS
+  )}\\s*:\\s*".+?"`,
+  'gm'
+);
 
 function AlertsPage() {
   const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
@@ -127,7 +134,7 @@ function AlertsPage() {
   );
 
   const syncAlertStatusFilterStatus = (query: string) => {
-    const [, alertStatus] = /\s*kibana\.alert\.status\s*:\s*"(.*?)"/.exec(query) || [];
+    const [, alertStatus] = BASE_ALERT_REGEX.exec(query) || [];
     if (!alertStatus) {
       setAlertFilterStatus('');
       return;
@@ -145,6 +152,7 @@ function AlertsPage() {
       if (kuery === '') {
         output = query;
       } else {
+        // console.log(ALERT_STATUS_REGEX);
         const queryWithoutAlertFilter = kuery.replace(ALERT_STATUS_REGEX, '');
         output = `${queryWithoutAlertFilter} and ${query}`;
       }
