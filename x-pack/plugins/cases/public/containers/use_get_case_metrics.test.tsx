@@ -6,6 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { CaseMetricsFeature } from '../../common';
 import { useGetCaseMetrics, UseGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase, basicCaseMetrics } from './mock';
 import * as api from './api';
@@ -15,6 +16,8 @@ jest.mock('../common/lib/kibana');
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
+  const features: CaseMetricsFeature[] = ['alertsCount'];
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -23,7 +26,7 @@ describe('useGetCaseMetrics', () => {
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id)
+        useGetCaseMetrics(basicCase.id, features)
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -36,21 +39,21 @@ describe('useGetCaseMetrics', () => {
   });
 
   it('calls getCaseMetrics with correct arguments', async () => {
-    const spyOnResolveCase = jest.spyOn(api, 'getCaseMetrics');
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
     await act(async () => {
       const { waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id)
+        useGetCaseMetrics(basicCase.id, features)
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(spyOnResolveCase).toBeCalledWith(basicCase.id, abortCtrl.signal);
+      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
     });
   });
 
   it('fetch case metrics', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id)
+        useGetCaseMetrics(basicCase.id, features)
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -64,22 +67,22 @@ describe('useGetCaseMetrics', () => {
   });
 
   it('refetch case metrics', async () => {
-    const spyOnResolveCase = jest.spyOn(api, 'getCaseMetrics');
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id)
+        useGetCaseMetrics(basicCase.id, features)
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.fetchCaseMetrics();
-      expect(spyOnResolveCase).toHaveBeenCalledTimes(2);
+      expect(spyOnGetCaseMetrics).toHaveBeenCalledTimes(2);
     });
   });
 
   it('set isLoading to true when refetching case metrics', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id)
+        useGetCaseMetrics(basicCase.id, features)
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -92,7 +95,7 @@ describe('useGetCaseMetrics', () => {
   it('set isLoading to false when refetching case metrics "silent"ly', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id)
+        useGetCaseMetrics(basicCase.id, features)
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -103,14 +106,14 @@ describe('useGetCaseMetrics', () => {
   });
 
   it('unhappy path', async () => {
-    const spyOnResolveCase = jest.spyOn(api, 'getCaseMetrics');
-    spyOnResolveCase.mockImplementation(() => {
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
+    spyOnGetCaseMetrics.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id)
+        useGetCaseMetrics(basicCase.id, features)
       );
       await waitForNextUpdate();
       await waitForNextUpdate();

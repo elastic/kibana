@@ -40,11 +40,8 @@ export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
  */
 export type CaseViewRefreshPropInterface = null | {
   /**
-   * Refreshes the all of the user actions/comments in the view's timeline
-   * (note: this also triggers a silent `refreshCase()`)
+   * Refreshes the case its metrics and user actions/comments in the view's timeline
    */
-  refreshUserActionsAndComments: () => Promise<void>;
-  /** Refreshes the Case information only */
   refreshCase: () => Promise<void>;
 };
 
@@ -151,6 +148,7 @@ export interface AllCases extends CasesStatus {
 }
 
 export type CaseMetrics = MetricsResponse;
+export type CaseMetricsFeature = keyof MetricsResponse;
 
 export enum SortFieldCase {
   createdAt = 'createdAt',

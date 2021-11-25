@@ -51,6 +51,7 @@ import {
   BulkUpdateStatus,
   Case,
   CaseMetrics,
+  CaseMetricsFeature,
   CasesStatus,
   FetchCasesProps,
   SortFieldCase,
@@ -161,12 +162,17 @@ export const getReporters = async (signal: AbortSignal, owner: string[]): Promis
   return response ?? [];
 };
 
-export const getCaseMetrics = async (caseId: string, signal: AbortSignal): Promise<CaseMetrics> => {
+export const getCaseMetrics = async (
+  caseId: string,
+  features: CaseMetricsFeature[],
+  signal: AbortSignal
+): Promise<CaseMetrics> => {
   const response = await KibanaServices.get().http.fetch<MetricsResponse>(
     getCaseDetailsMetricsUrl(caseId),
     {
       method: 'GET',
       signal,
+      query: { features: JSON.stringify(features) },
     }
   );
   return decodeCaseMetricsResponse(response) as CaseMetrics;
