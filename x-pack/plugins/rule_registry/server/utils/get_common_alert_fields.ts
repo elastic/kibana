@@ -6,8 +6,6 @@
  */
 
 import { Values } from '@kbn/utility-types';
-import { AlertExecutorOptions } from '../../../alerting/server';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_INSTANCE_ID,
   ALERT_UUID,
@@ -20,7 +18,10 @@ import {
   SPACE_IDS,
   TAGS,
   TIMESTAMP,
-} from '../../common/technical_rule_data_field_names';
+} from '@kbn/rule-data-utils/technical_field_names';
+
+import { AlertExecutorOptions } from '../../../alerting/server';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 
 const commonAlertFieldNames = [
   ALERT_RULE_CATEGORY,
