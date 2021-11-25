@@ -352,14 +352,15 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
           });
         });
       }
-
-      (x as string[]).forEach((v) => {
-        points.push({
-          row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
-          column: xAxisColumnIndex,
-          value: v,
+      if (xAxisColumn) {
+        (x as string[]).forEach((v) => {
+          points.push({
+            row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
+            column: xAxisColumnIndex,
+            value: v,
+          });
         });
-      });
+      }
 
       const context: FilterEvent['data'] = {
         data: points.map((point) => ({

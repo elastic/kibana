@@ -14,7 +14,6 @@ import {
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 
 import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
-// import { VisParams, visType } from './expression_renderers';
 import {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
