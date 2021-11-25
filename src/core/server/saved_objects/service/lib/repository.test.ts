@@ -3375,14 +3375,6 @@ describe('SavedObjectsRepository', () => {
         await test({ type: '', namespaces: ['some-ns'], typeToNamespacesMap: new Map() });
       });
 
-      it(`throws when searchFields is defined but not an array`, async () => {
-        await expect(
-          // @ts-expect-error searchFields is an array
-          savedObjectsRepository.find({ type, searchFields: 'string' })
-        ).rejects.toThrowError('options.searchFields must be an array');
-        expect(client.search).not.toHaveBeenCalled();
-      });
-
       it(`throws when fields is defined but not an array`, async () => {
         // @ts-expect-error fields is an array
         await expect(savedObjectsRepository.find({ type, fields: 'string' })).rejects.toThrowError(
