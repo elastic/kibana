@@ -45,5 +45,4 @@ const scenario: Scenario = async ({ target, writeTarget, logLevel }) => {
   };
 };
 
-// eslint-disable-next-line import/no-default-export
 export default scenario;
