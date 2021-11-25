@@ -13,6 +13,8 @@ export class KibanaStats extends Serializable<StackMonitoringFields> {
   timestamp(timestamp: number) {
     super.timestamp(timestamp);
     this.fields['kibana_stats.timestamp'] = new Date(timestamp).toISOString();
+    this.fields['kibana_stats.response_times.max'] = 250;
+    this.fields['kibana_stats.kibana.status'] = 'green';
     return this;
   }
 

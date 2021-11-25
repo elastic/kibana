@@ -17,6 +17,7 @@ export class Cluster extends Entity<StackMonitoringFields> {
     return new Kibana({
       cluster_uuid: this.fields.cluster_uuid,
       'kibana_stats.kibana.name': name,
+      'kibana_stats.kibana.uuid': generateShortId(),
       'kibana_stats.kibana.index': index,
       type: 'kibana_stats',
     });

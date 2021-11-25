@@ -19,8 +19,11 @@ export type StackMonitoringFields = Fields &
     'license.status': string;
 
     'kibana_stats.kibana.name': string;
+    'kibana_stats.kibana.uuid': string;
+    'kibana_stats.kibana.status': string;
     'kibana_stats.kibana.index': string;
     'kibana_stats.requests.disconnects': number;
     'kibana_stats.requests.total': number;
     'kibana_stats.timestamp': string;
+    'kibana_stats.response_times.max': number;
   }>;
