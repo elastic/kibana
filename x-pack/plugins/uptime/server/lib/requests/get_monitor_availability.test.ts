@@ -198,6 +198,11 @@ describe('monitor availability', () => {
               "bool": Object {
                 "filter": Array [
                   Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-2w",
@@ -374,6 +379,11 @@ describe('monitor availability', () => {
             "query": Object {
               "bool": Object {
                 "filter": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
                   Object {
                     "range": Object {
                       "@timestamp": Object {
@@ -689,6 +699,11 @@ describe('monitor availability', () => {
               "bool": Object {
                 "filter": Array [
                   Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-3M",
@@ -786,6 +801,11 @@ describe('monitor availability', () => {
               "query": Object {
                 "bool": Object {
                   "filter": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "summary",
+                      },
+                    },
                     Object {
                       "range": Object {
                         "@timestamp": Object {
@@ -905,6 +925,11 @@ describe('monitor availability', () => {
             "query": Object {
               "bool": Object {
                 "filter": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
                   Object {
                     "range": Object {
                       "@timestamp": Object {
