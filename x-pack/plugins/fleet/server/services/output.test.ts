@@ -95,6 +95,7 @@ function getMockedSoClient(
     if (
       options?.defaultOutputMonitoringId &&
       findOptions.searchFields &&
+      Array.isArray(findOptions.searchFields) &&
       findOptions.searchFields.includes('is_default_monitoring') &&
       findOptions.search === 'true'
     ) {
@@ -117,6 +118,7 @@ function getMockedSoClient(
     if (
       options?.defaultOutputId &&
       findOptions.searchFields &&
+      Array.isArray(findOptions.searchFields) &&
       findOptions.searchFields.includes('is_default') &&
       findOptions.search === 'true'
     ) {
