@@ -102,7 +102,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       const filters = JSON.parse(content);
 
-      return filters.and.filter((f: any) => f.filterType === 'time');
+      return filters.filters.filter((f: any) => f.query?.range);
     },
 
     async getMatchFiltersFromDebug() {
