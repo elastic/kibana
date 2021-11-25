@@ -17,7 +17,8 @@ import React, { memo } from 'react';
 import { Rule, Rules, RulesSortingFields } from '../../../containers/detection_engine/rules/types';
 import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
 import {
-  RulesColumns,
+  TableRow,
+  TableColumn,
   RuleStatusRowItemType,
 } from '../../../pages/detection_engine/rules/all/columns';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
@@ -31,18 +32,19 @@ export interface SortingType {
 }
 
 interface AllRulesTablesProps {
-  euiBasicTableSelectionProps: EuiTableSelectionType<Rule | RuleStatusRowItemType>;
+  euiBasicTableSelectionProps: EuiTableSelectionType<TableRow>;
   hasPermissions: boolean;
-  monitoringColumns: Array<EuiBasicTableColumn<RuleStatusRowItemType>>;
+  monitoringColumns: TableColumn[];
   pagination: {
     pageIndex: number;
     pageSize: number;
     totalItemCount: number;
     pageSizeOptions: number[];
   };
-  rules: Rules;
-  rulesColumns: RulesColumns[];
-  rulesStatuses: RuleStatusRowItemType[];
+  items: TableRow[];
+  // rules: Rules;
+  rulesColumns: TableColumn[];
+  // rulesStatuses: RuleStatusRowItemType[];
   sorting: SortingType;
   tableOnChangeCallback: ({ page, sort }: EuiBasicTableOnChange) => void;
   tableRef?: React.MutableRefObject<EuiBasicTable | null>;
@@ -58,9 +60,8 @@ export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
   hasPermissions,
   monitoringColumns,
   pagination,
-  rules,
+  items,
   rulesColumns,
-  rulesStatuses,
   sorting,
   tableOnChangeCallback,
   tableRef,
@@ -73,32 +74,44 @@ export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
     onChange: tableOnChangeCallback,
     pagination,
     ref: tableRef,
+    itemId: 'id',
+    items,
+    selection,
   };
-  return (
-    <>
-      {selectedTab === AllRulesTabs.rules && (
-        <EuiBasicTable
-          data-test-subj="rules-table"
-          columns={rulesColumns}
-          itemId="id"
-          items={rules ?? []}
-          sorting={sorting}
-          selection={selection as EuiTableSelectionType<Rule>}
-          {...commonProps}
-        />
-      )}
-      {selectedTab === AllRulesTabs.monitoring && (
-        <EuiBasicTable
-          data-test-subj="monitoring-table"
-          columns={monitoringColumns}
-          itemId="id"
-          items={rulesStatuses}
-          selection={selection as EuiTableSelectionType<RuleStatusRowItemType>}
-          {...commonProps}
-        />
-      )}
-    </>
-  );
+  const props =
+    selectedTab === AllRulesTabs.rules
+      ? {
+          dataTestSubj: 'rules-table',
+          columns: rulesColumns,
+          sorting,
+        }
+      : { dataTestSubj: 'monitoring-table', columns: monitoringColumns };
+  return <EuiBasicTable {...commonProps} {...props} />;
+  // return (
+  //   <>
+  //     {selectedTab === AllRulesTabs.rules && (
+  //       <EuiBasicTable
+  //         data-test-subj="rules-table"
+  //         columns={rulesColumns}
+  //         itemId="id"
+  //         items={rules ?? []}
+  //         sorting={sorting}
+  //         selection={selection as EuiTableSelectionType<Rule>}
+  //         {...commonProps}
+  //       />
+  //     )}
+  //     {selectedTab === AllRulesTabs.monitoring && (
+  //       <EuiBasicTable
+  //         data-test-subj="monitoring-table"
+  //         columns={monitoringColumns}
+  //         itemId="id"
+  //         items={rulesStatuses}
+  //         selection={selection as EuiTableSelectionType<RuleStatusRowItemType>}
+  //         {...commonProps}
+  //       />
+  //     )}
+  //   </>
+  // );
 };
 
 export const AllRulesTables = memo(AllRulesTablesComponent);

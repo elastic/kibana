@@ -38,7 +38,7 @@ import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
-import { getColumns, getMonitoringColumns, RuleStatusRowItemType } from './columns';
+import { getRulesColumns, getMonitoringColumns, TableRow } from './columns';
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -266,7 +266,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     );
 
     const [rulesColumns, monitoringColumns] = useMemo(() => {
-      const commonProps = {
+      const props = {
         dispatch,
         formatUrl,
         hasMlPermissions,
@@ -278,20 +278,13 @@ export const RulesTables = React.memo<RulesTableProps>(
             : [],
         navigateToApp,
         hasReadActionsPrivileges: hasActionsPrivileges,
+        dispatchToaster,
+        history,
+        reFetchRules,
+        refetchPrePackagedRulesStatus,
+        docLinks,
       };
-      return [
-        getColumns({
-          ...commonProps,
-          dispatchToaster,
-          history,
-          reFetchRules,
-          refetchPrePackagedRulesStatus,
-        }),
-        getMonitoringColumns({
-          ...commonProps,
-          docLinks,
-        }),
-      ];
+      return [getRulesColumns(props), getMonitoringColumns(props)];
     }, [
       dispatch,
       dispatchToaster,
@@ -336,9 +329,8 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, selectedRuleIds);
 
     const euiBasicTableSelectionProps = useMemo(
-      <T extends RuleStatusRowItemType | Rule>() => ({
+      <T extends TableRow>() => ({
         selectable: (item: T) => !loadingRuleIds.includes(item.id),
-        initialSelected: selectedRuleIds.map((id) => ({ id })) as T[],
         onSelectionChange: (selected: T[]) => {
           /**
            * EuiBasicTable doesn't provide declarative API to control selected rows.
@@ -356,7 +348,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           }
         },
       }),
-      [selectedRuleIds, loadingRuleIds, dispatch]
+      [loadingRuleIds, dispatch]
     );
 
     const toggleSelectAll = useCallback(() => {
@@ -455,12 +447,12 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     // update rules statuses with rules to avoid having stale rule object in ruleStatus
     // happens because ruleStatuses retrieved asyncronously from _find_statuses API
-    const ruleStatusesItems = useMemo(() => {
+    const items = useMemo(() => {
       const rulesMap = new Map(rules.map((item) => [item.id, item]));
 
       return rulesStatuses.map((ruleStatus) => ({
         ...ruleStatus,
-        rule: rulesMap.get(ruleStatus.id) ?? ruleStatus.rule,
+        ...(rulesMap.get(ruleStatus.id) ?? ruleStatus.rule),
       }));
     }, [rulesStatuses, rules]);
 
@@ -558,9 +550,8 @@ export const RulesTables = React.memo<RulesTableProps>(
               hasPermissions={hasPermissions}
               monitoringColumns={monitoringColumns}
               pagination={paginationMemo}
-              rules={rules}
               rulesColumns={rulesColumns}
-              rulesStatuses={ruleStatusesItems}
+              items={items}
               sorting={sorting}
               tableOnChangeCallback={tableOnChangeCallback}
               tableRef={tableRef}

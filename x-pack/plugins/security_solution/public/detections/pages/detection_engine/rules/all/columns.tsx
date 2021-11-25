@@ -48,6 +48,13 @@ import {
 } from '../../../../../../common/constants';
 import { DocLinksStart, NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 
+type FormatUrl = (path: string) => string;
+type HasReadActionsPrivileges =
+  | boolean
+  | Readonly<{
+      [x: string]: boolean;
+    }>;
+
 export const getActions = (
   dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
@@ -55,11 +62,7 @@ export const getActions = (
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
   reFetchRules: () => Promise<void>,
   refetchPrePackagedRulesStatus: () => Promise<void>,
-  actionsPrivileges:
-    | boolean
-    | Readonly<{
-        [x: string]: boolean;
-      }>
+  actionsPrivileges: HasReadActionsPrivileges
 ) => [
   {
     'data-test-subj': 'editRuleAction',
@@ -72,8 +75,8 @@ export const getActions = (
       i18n.EDIT_RULE_SETTINGS
     ),
     icon: 'controlsHorizontal',
-    onClick: (rowItem: Rule) => editRuleAction(rowItem.id, navigateToApp),
-    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
+    onClick: (rowItem: TableRow) => editRuleAction(rowItem.id, navigateToApp),
+    enabled: (rowItem: TableRow) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
     'data-test-subj': 'duplicateRuleAction',
@@ -86,8 +89,8 @@ export const getActions = (
     ) : (
       i18n.DUPLICATE_RULE
     ),
-    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
-    onClick: async (rowItem: Rule) => {
+    enabled: (rowItem: TableRow) => canEditRuleWithActions(rowItem, actionsPrivileges),
+    onClick: async (rowItem: TableRow) => {
       const createdRules = await duplicateRulesAction(
         [rowItem],
         [rowItem.id],
@@ -120,24 +123,16 @@ export const getActions = (
   },
 ];
 
-export type RuleRowItem = RuleStatus & Rule;
-
 export type RuleStatusRowItemType = RuleStatus & {
   name: string;
   id: string;
   rule: Rule;
 };
 
-export type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
-export type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
-type FormatUrl = (path: string) => string;
-type HasReadActionsPrivileges =
-  | boolean
-  | Readonly<{
-      [x: string]: boolean;
-    }>;
+export type TableRow = RuleStatus & Rule;
+export type TableColumn = EuiBasicTableColumn<TableRow> | EuiTableActionsColumnType<TableRow>;
 
-interface CommonColumnsProps {
+interface GetColumnsProps {
   dispatch: React.Dispatch<RulesTableAction>;
   formatUrl: FormatUrl;
   hasMlPermissions: boolean;
@@ -145,35 +140,23 @@ interface CommonColumnsProps {
   loadingRuleIds: string[];
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   hasReadActionsPrivileges: HasReadActionsPrivileges;
-}
-interface GetColumns extends CommonColumnsProps {
   dispatchToaster: Dispatch<ActionToaster>;
   history: H.History;
   reFetchRules: () => Promise<void>;
   refetchPrePackagedRulesStatus: () => Promise<void>;
+  docLinks: DocLinksStart;
 }
 
-interface EnableSwitcherProps
-  extends Pick<
-    CommonColumnsProps,
-    | 'hasMlPermissions'
-    | 'hasReadActionsPrivileges'
-    | 'hasPermissions'
-    | 'loadingRuleIds'
-    | 'dispatch'
-  > {
-  rule: Rule;
-}
-
-const EnableSwitcher = ({
-  rule,
-  dispatch,
+const getColumnEnabled = ({
   hasMlPermissions,
   hasReadActionsPrivileges,
+  dispatch,
   hasPermissions,
   loadingRuleIds,
-}: EnableSwitcherProps) => {
-  return (
+}: GetColumnsProps): TableColumn => ({
+  field: 'enabled',
+  name: i18n.COLUMN_ACTIVATE,
+  render: (_, rule: TableRow) => (
     <EuiToolTip
       position="top"
       content={getToolTipContent(rule, hasMlPermissions, hasReadActionsPrivileges)}
@@ -191,23 +174,42 @@ const EnableSwitcher = ({
         isLoading={loadingRuleIds.includes(rule.id)}
       />
     </EuiToolTip>
-  );
-};
+  ),
+  width: '95px',
+  sortable: true,
+});
 
-export const getColumns = ({
+const getActionsColumns = ({
+  hasPermissions,
+  hasReadActionsPrivileges,
   dispatch,
   dispatchToaster,
-  formatUrl,
   history,
-  hasMlPermissions,
-  hasPermissions,
-  loadingRuleIds,
   navigateToApp,
   reFetchRules,
   refetchPrePackagedRulesStatus,
-  hasReadActionsPrivileges,
-}: GetColumns): RulesColumns[] => {
-  const cols: RulesColumns[] = [
+}: GetColumnsProps): TableColumn[] =>
+  hasPermissions
+    ? [
+        {
+          actions: getActions(
+            dispatch,
+            dispatchToaster,
+            history,
+            navigateToApp,
+            reFetchRules,
+            refetchPrePackagedRulesStatus,
+            hasReadActionsPrivileges
+          ),
+          width: '40px',
+        } as EuiTableActionsColumnType<TableRow>,
+      ]
+    : [];
+
+export const getRulesColumns = (columnsProps: GetColumnsProps): TableColumn[] => {
+  const { formatUrl, navigateToApp } = columnsProps;
+
+  const cols: TableColumn[] = [
     {
       field: 'name',
       name: i18n.COLUMN_RULE,
@@ -337,62 +339,19 @@ export const getColumns = ({
       width: '65px',
       truncateText: true,
     },
-    {
-      align: 'center',
-      field: 'enabled',
-      name: i18n.COLUMN_ACTIVATE,
-      render: (_, item: Rule) => (
-        <EnableSwitcher
-          rule={item}
-          hasMlPermissions={hasMlPermissions}
-          hasPermissions={hasPermissions}
-          hasReadActionsPrivileges={hasReadActionsPrivileges}
-          loadingRuleIds={loadingRuleIds}
-          dispatch={dispatch}
-        />
-      ),
-      sortable: true,
-      width: '95px',
-      truncateText: true,
-    },
-  ];
-  const actions: RulesColumns[] = [
-    {
-      actions: getActions(
-        dispatch,
-        dispatchToaster,
-        history,
-        navigateToApp,
-        reFetchRules,
-        refetchPrePackagedRulesStatus,
-        hasReadActionsPrivileges
-      ),
-      width: '40px',
-    } as EuiTableActionsColumnType<Rule>,
+    getColumnEnabled(columnsProps),
   ];
 
-  return hasPermissions ? [...cols, ...actions] : cols;
+  return [...cols, ...getActionsColumns(columnsProps)];
 };
 
-interface GetMonitoringColumns extends CommonColumnsProps {
-  docLinks: DocLinksStart;
-}
-
-export const getMonitoringColumns = ({
-  docLinks,
-  dispatch,
-  formatUrl,
-  hasMlPermissions,
-  hasPermissions,
-  loadingRuleIds,
-  navigateToApp,
-  hasReadActionsPrivileges,
-}: GetMonitoringColumns): RulesStatusesColumns[] => {
-  const cols: RulesStatusesColumns[] = [
+export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn[] => {
+  const { docLinks, formatUrl, navigateToApp } = columnsProps;
+  const cols: TableColumn[] = [
     {
       field: 'name',
       name: i18n.COLUMN_RULE,
-      render: (value: RuleStatus['current_status']['status'], item: RuleStatusRowItemType) => {
+      render: (value: RuleStatus['current_status']['status'], item: TableRow) => {
         return (
           <EuiToolTip content={value} anchorClassName="eui-textTruncate">
             <LinkAnchor
@@ -509,22 +468,8 @@ export const getMonitoringColumns = ({
       width: '18%',
       truncateText: true,
     },
-    {
-      field: 'activate',
-      name: i18n.COLUMN_ACTIVATE,
-      render: (_, item) => (
-        <EnableSwitcher
-          rule={item.rule}
-          hasMlPermissions={hasMlPermissions}
-          hasPermissions={hasPermissions}
-          hasReadActionsPrivileges={hasReadActionsPrivileges}
-          loadingRuleIds={loadingRuleIds}
-          dispatch={dispatch}
-        />
-      ),
-      width: '95px',
-    },
+    getColumnEnabled(columnsProps),
   ];
 
-  return cols;
+  return [...cols, ...getActionsColumns(columnsProps)];
 };
