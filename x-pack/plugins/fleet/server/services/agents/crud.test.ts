@@ -133,9 +133,9 @@ describe('Agents CRUD test', () => {
       });
     });
 
-    it('should return upgradeable from one page when total is more than max size', async () => {
+    it('should return upgradeable from one page when total is more than limit', async () => {
       searchMock.mockImplementationOnce(() =>
-        Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 5001))
+        Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001))
       );
       const result = await getAgentsByKuery(esClientMock, {
         showUpgradeable: true,
@@ -156,7 +156,7 @@ describe('Agents CRUD test', () => {
         ],
         page: 1,
         perPage: 5,
-        total: 5001,
+        total: 10001,
       });
     });
 

@@ -143,14 +143,12 @@ export async function getAgentsByKuery(
   if (showUpgradeable) {
     // fixing a bug where upgradeable filter was not returning right results https://github.com/elastic/kibana/issues/117329
     // query all agents, then filter upgradeable, and return the requested page and correct total
-    // if there are more than MAX_SIZE agents, the logic falls back to same as before
-    const MAX_SIZE = 5000; // choosing a high size to cover most scenarios
-    if (total < MAX_SIZE) {
-      const response = await queryAgents(0, MAX_SIZE);
-      agents = response.body.hits.hits.map(searchHitToAgent);
-      agents = agents.filter((agent) =>
-        isAgentUpgradeable(agent, appContextService.getKibanaVersion())
-      );
+    // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
+    if (total < SO_SEARCH_LIMIT) {
+      const response = await queryAgents(0, SO_SEARCH_LIMIT);
+      agents = response.body.hits.hits
+        .map(searchHitToAgent)
+        .filter((agent) => isAgentUpgradeable(agent, appContextService.getKibanaVersion()));
       total = agents.length;
       const start = (page - 1) * perPage;
       agents = agents.slice(start, start + perPage);
