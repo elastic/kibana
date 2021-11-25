@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';

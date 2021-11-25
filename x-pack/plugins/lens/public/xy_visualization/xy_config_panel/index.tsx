@@ -591,8 +591,9 @@ export function DimensionEditor(
   // const paletteStore = new SavedObjectPaletteStore(savedObjectsClient);
   const isHorizontal = isHorizontalChart(state.layers);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-  const [libraryPalettes, setLibraryPalettes] =
-    useState<Array<PaletteOutput<CustomPaletteParams>>>();
+  const [libraryPalettes, setLibraryPalettes] = useState<Array<PaletteOutput<CustomPaletteParams>>>(
+    []
+  );
 
   useEffect(() => {
     const getPalettesFromLibrary = () => {
@@ -637,13 +638,19 @@ export function DimensionEditor(
   const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
     const paletteToSave = {
       ...palette,
+      title,
       params: {
         ...palette.params,
         title,
       },
     };
     paletteStore.save(paletteToSave).then((response) => {
-      // console.dir(response);
+      const savedPalette = {
+        type: response.type,
+        name: response.name,
+        params: response.params,
+      } as PaletteOutput<CustomPaletteParams>;
+      setLibraryPalettes([...libraryPalettes, savedPalette]);
     });
   };
 

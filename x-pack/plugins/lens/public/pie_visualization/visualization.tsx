@@ -8,8 +8,10 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type {
   Visualization,
   OperationMetadata,
@@ -60,8 +62,10 @@ const applyPaletteToColumnConfig = (
 
 export const getPieVisualization = ({
   paletteService,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
 
@@ -232,9 +236,11 @@ export const getPieVisualization = ({
   },
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <DimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -260,9 +266,11 @@ export const getPieVisualization = ({
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <PieToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <PieToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },

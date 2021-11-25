@@ -79,7 +79,7 @@ export function PalettePicker({
   libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
-  setPalette: (palette: PaletteOutput) => void;
+  setPalette: (palette: PaletteOutput & { isSavedToLibrary?: boolean }) => void;
   showCustomPalette?: boolean;
   showDynamicColorOnly?: boolean;
 }) {
@@ -123,9 +123,11 @@ export function PalettePicker({
       compressed
       palettes={palettesToShow}
       onChange={(newPalette) => {
+        const isSavedToLibrary = libraryPalettes?.some((p) => p.params?.title === newPalette);
         setPalette({
           type: 'palette',
           name: newPalette,
+          isSavedToLibrary,
         });
       }}
       valueOfSelected={activePalette?.name || defaultPaletteParams.name}

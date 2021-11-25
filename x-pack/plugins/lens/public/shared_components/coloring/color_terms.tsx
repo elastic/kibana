@@ -97,6 +97,7 @@ export const ColorTerms = ({
                 <EuiFlexItem>
                   <EuiFieldText
                     compressed
+                    disabled
                     data-test-subj={`${dataTestPrefix}_dynamicColoring_term_value_${index}`}
                     value={term}
                     onChange={({ target }) => {

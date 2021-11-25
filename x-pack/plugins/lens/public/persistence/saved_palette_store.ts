@@ -14,6 +14,7 @@ import { PALETTE_DOC_TYPE, CustomPaletteParams } from '../../common';
 
 export interface PaletteDocument {
   savedObjectId?: string;
+  title?: string;
   name?: string;
   type?: string;
   params?: CustomPaletteParams;
@@ -38,8 +39,6 @@ export class SavedObjectPaletteStore implements SavedPaletteStore {
 
   save = async (palette: PaletteDocument) => {
     const { type, ...rest } = palette;
-    // TODO: SavedObjectAttributes should support this kind of object,
-    // remove this workaround when SavedObjectAttributes is updated.
     const attributes = rest as CustomPaletteParams as SavedObjectAttributes;
 
     const result = await this.client.create(PALETTE_DOC_TYPE, attributes, {

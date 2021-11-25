@@ -74,12 +74,19 @@ export function CustomizableTermsPalette({
             activePalette={selectedPalette}
             setPalette={(newPalette) => {
               const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
+              const isSavedToLibrary = newPalette.isSavedToLibrary ?? false;
               const newParams: CustomPaletteParams = {
                 ...selectedPalette?.params,
                 name: newPalette.name,
               };
 
               if (isNewPaletteCustom) {
+                newParams.steps = colorTerms.length;
+              } else if (isSavedToLibrary) {
+                const savedPalette = libraryPalettes?.find(
+                  (p) => p.params?.title === newPalette.name
+                );
+                newParams.colorTerms = savedPalette?.params?.colorTerms;
                 newParams.steps = colorTerms.length;
               } else {
                 const newColors = palettes.get(newPalette?.name).getCategoricalColors(terms.length);
@@ -93,6 +100,7 @@ export function CustomizableTermsPalette({
 
               setPalette({
                 ...newPalette,
+                name: isSavedToLibrary ? CUSTOM_PALETTE : newPalette.name,
                 params: newParams,
               });
             }}
