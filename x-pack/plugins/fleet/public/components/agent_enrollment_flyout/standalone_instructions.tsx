@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { safeDump } from 'js-yaml';
 
 import {
@@ -186,10 +186,10 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicy, agentPol
     );
 
   const steps = [
-    DownloadStep(),
     !agentPolicy
       ? AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId, excludeFleetServer: true })
       : undefined,
+    DownloadStep(false),
     {
       title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigureAgentTitle', {
         defaultMessage: 'Configure the agent',

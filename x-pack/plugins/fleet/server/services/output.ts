@@ -11,6 +11,7 @@ import uuid from 'uuid/v5';
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT } from '../../common';
+import { OutputUnauthorizedError } from '../errors';
 
 import { appContextService } from './app_context';
 
@@ -192,6 +193,8 @@ class OutputService {
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
+      sortField: 'is_default',
+      sortOrder: 'desc',
     });
 
     return {
@@ -222,10 +225,19 @@ class OutputService {
     const originalOutput = await this.get(soClient, id);
 
     if (originalOutput.is_preconfigured && !fromPreconfiguration) {
-      throw new Error(
+      throw new OutputUnauthorizedError(
         `Preconfigured output ${id} cannot be deleted outside of kibana config file.`
       );
     }
+
+    if (originalOutput.is_default && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(`Default output ${id} cannot be deleted.`);
+    }
+
+    if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
+    }
+
     return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
@@ -240,7 +252,7 @@ class OutputService {
     const originalOutput = await this.get(soClient, id);
 
     if (originalOutput.is_preconfigured && !fromPreconfiguration) {
-      throw new Error(
+      throw new OutputUnauthorizedError(
         `Preconfigured output ${id} cannot be updated outside of kibana config file.`
       );
     }

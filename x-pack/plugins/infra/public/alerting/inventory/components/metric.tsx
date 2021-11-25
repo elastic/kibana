@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import {
   EuiExpression,
@@ -186,7 +186,7 @@ export const MetricExpression = ({
           onClick={() => {
             setPopoverOpen(true);
           }}
-          color={errors.metric?.length ? 'danger' : 'secondary'}
+          color={errors.metric?.length ? 'danger' : 'success'}
         />
       }
       isOpen={popoverOpen}

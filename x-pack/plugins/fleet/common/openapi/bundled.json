@@ -1603,6 +1603,115 @@
         ]
       }
     },
+    "/package_policies/upgrade": {
+      "post": {
+        "summary": "Package policy - Upgrade",
+        "operationId": "upgrade-package-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packagePolicyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "packagePolicyIds"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "success": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "success"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/package_policies/upgrade/dryrun": {
+      "post": {
+        "summary": "Package policy - Upgrade Dry run",
+        "operationId": "upgrade-package-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packagePolicyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "packageVersion": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "packagePolicyIds"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hasErrors": {
+                      "type": "boolean"
+                    },
+                    "diff": {
+                      "schema": null,
+                      "$ref": "#/components/schemas/upgrade_diff"
+                    },
+                    "required": [
+                      "hasErrors"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/package_policies/{packagePolicyId}": {
       "get": {
         "summary": "Package policy - Info",
@@ -1716,6 +1825,74 @@
           }
         },
         "operationId": "get-outputs"
+      },
+      "post": {
+        "summary": "Outputs",
+        "description": "Create a new output",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "elasticsearch"
+                    ]
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_default_monitoring": {
+                    "type": "boolean"
+                  },
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ca_sha256": {
+                    "type": "string"
+                  },
+                  "config_yaml": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "type"
+                ]
+              }
+            }
+          }
+        },
+        "operationId": "post-outputs"
       }
     },
     "/outputs/{outputId}": {
@@ -1754,6 +1931,35 @@
           "required": true
         }
       ],
+      "delete": {
+        "summary": "Output - Delete",
+        "operationId": "delete-output",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
       "put": {
         "summary": "Output - Update",
         "operationId": "update-output",
@@ -1763,19 +1969,38 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "hosts": {
+                  "name": {
                     "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "elasticsearch"
+                    ]
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_default_monitoring": {
+                    "type": "boolean"
+                  },
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   },
                   "ca_sha256": {
                     "type": "string"
                   },
-                  "config": {
-                    "type": "object"
-                  },
                   "config_yaml": {
                     "type": "string"
                   }
-                }
+                },
+                "required": [
+                  "name",
+                  "type"
+                ]
               }
             }
           }
@@ -2626,6 +2851,11 @@
           "created_at"
         ]
       },
+      "upgrade_diff": {
+        "title": "Package policy Upgrade dryrun",
+        "type": "array",
+        "items": {}
+      },
       "update_package_policy": {
         "title": "Update package policy",
         "allOf": [
@@ -2650,6 +2880,9 @@
             "type": "string"
           },
           "is_default": {
+            "type": "boolean"
+          },
+          "is_default_monitoring": {
             "type": "boolean"
           },
           "name": {
