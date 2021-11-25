@@ -98,8 +98,6 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
           setRuleStatuses(
             rules.map((rule) => ({
               id: rule.id,
-              activate: rule.enabled,
-              name: rule.name,
               ...ruleStatusesResponse[rule.id],
               rule,
             }))

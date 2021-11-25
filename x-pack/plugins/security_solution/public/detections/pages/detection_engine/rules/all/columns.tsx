@@ -55,6 +55,11 @@ type HasReadActionsPrivileges =
       [x: string]: boolean;
     }>;
 
+export type TableRow = RuleStatus & Rule;
+export type TableColumn = EuiBasicTableColumn<TableRow> | EuiTableActionsColumnType<TableRow>;
+
+const extractRuleFromRow = ({ current_status: _, failures, ...rule }: TableRow): Rule => rule;
+
 export const getActions = (
   dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
@@ -76,7 +81,8 @@ export const getActions = (
     ),
     icon: 'controlsHorizontal',
     onClick: (rowItem: TableRow) => editRuleAction(rowItem.id, navigateToApp),
-    enabled: (rowItem: TableRow) => canEditRuleWithActions(rowItem, actionsPrivileges),
+    enabled: (rowItem: TableRow) =>
+      canEditRuleWithActions(extractRuleFromRow(rowItem), actionsPrivileges),
   },
   {
     'data-test-subj': 'duplicateRuleAction',
@@ -92,7 +98,7 @@ export const getActions = (
     enabled: (rowItem: TableRow) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: TableRow) => {
       const createdRules = await duplicateRulesAction(
-        [rowItem],
+        [extractRuleFromRow(rowItem)],
         [rowItem.id],
         dispatch,
         dispatchToaster
@@ -124,13 +130,9 @@ export const getActions = (
 ];
 
 export type RuleStatusRowItemType = RuleStatus & {
-  name: string;
   id: string;
   rule: Rule;
 };
-
-export type TableRow = RuleStatus & Rule;
-export type TableColumn = EuiBasicTableColumn<TableRow> | EuiTableActionsColumnType<TableRow>;
 
 interface GetColumnsProps {
   dispatch: React.Dispatch<RulesTableAction>;
