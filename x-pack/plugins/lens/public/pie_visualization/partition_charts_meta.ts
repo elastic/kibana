@@ -24,17 +24,20 @@ interface PartitionChartMeta {
   label: string;
   partitionType: PartitionLayout;
   groupLabel: string;
-  categoryOptions: Array<{
-    value: SharedPieLayerState['categoryDisplay'];
-    inputDisplay: string;
-  }>;
-  numberOptions: Array<{
-    value: SharedPieLayerState['numberDisplay'];
-    inputDisplay: string;
-  }>;
   maxBuckets: number;
   isExperimental?: boolean;
   requiredMinDimensionCount?: number;
+  toolbarPopover: {
+    isDisabled?: boolean;
+    categoryOptions: Array<{
+      value: SharedPieLayerState['categoryDisplay'];
+      inputDisplay: string;
+    }>;
+    numberOptions: Array<{
+      value: SharedPieLayerState['numberDisplay'];
+      inputDisplay: string;
+    }>;
+  };
   legend: {
     flat?: boolean;
     showValues?: boolean;
@@ -46,7 +49,7 @@ const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
   defaultMessage: 'Proportion',
 });
 
-const categoryOptions: PartitionChartMeta['categoryOptions'] = [
+const categoryOptions: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
   {
     value: 'default',
     inputDisplay: i18n.translate('xpack.lens.pieChart.showCategoriesLabel', {
@@ -67,7 +70,7 @@ const categoryOptions: PartitionChartMeta['categoryOptions'] = [
   },
 ];
 
-const categoryOptionsTreemap: PartitionChartMeta['categoryOptions'] = [
+const categoryOptionsTreemap: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
   {
     value: 'default',
     inputDisplay: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
@@ -82,7 +85,7 @@ const categoryOptionsTreemap: PartitionChartMeta['categoryOptions'] = [
   },
 ];
 
-const numberOptions: PartitionChartMeta['numberOptions'] = [
+const numberOptions: PartitionChartMeta['toolbarPopover']['numberOptions'] = [
   {
     value: 'hidden',
     inputDisplay: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
@@ -111,9 +114,11 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     }),
     partitionType: PartitionLayout.sunburst,
     groupLabel,
-    categoryOptions,
-    numberOptions,
     maxBuckets: 3,
+    toolbarPopover: {
+      categoryOptions,
+      numberOptions,
+    },
     legend: {
       getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
     },
@@ -125,9 +130,11 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     }),
     partitionType: PartitionLayout.sunburst,
     groupLabel,
-    categoryOptions,
-    numberOptions,
     maxBuckets: 3,
+    toolbarPopover: {
+      categoryOptions,
+      numberOptions,
+    },
     legend: {
       getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
     },
@@ -139,9 +146,11 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     }),
     partitionType: PartitionLayout.treemap,
     groupLabel,
-    categoryOptions: categoryOptionsTreemap,
-    numberOptions,
     maxBuckets: 2,
+    toolbarPopover: {
+      categoryOptions: categoryOptionsTreemap,
+      numberOptions,
+    },
     legend: {
       getShowLegendDefault: () => false,
     },
@@ -153,14 +162,16 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     }),
     partitionType: PartitionLayout.mosaic,
     groupLabel,
-    categoryOptions: [],
-    numberOptions,
     maxBuckets: 2,
     isExperimental: true,
-    requiredMinDimensionCount: 2,
+    toolbarPopover: {
+      categoryOptions: [],
+      numberOptions,
+    },
     legend: {
       getShowLegendDefault: () => false,
     },
+    requiredMinDimensionCount: 2,
   },
   waffle: {
     icon: LensIconChartWaffle,
@@ -169,10 +180,13 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     }),
     partitionType: PartitionLayout.waffle,
     groupLabel,
-    categoryOptions: [],
-    numberOptions: [],
     maxBuckets: 1,
     isExperimental: true,
+    toolbarPopover: {
+      isDisabled: true,
+      categoryOptions: [],
+      numberOptions: [],
+    },
     legend: {
       flat: true,
       showValues: true,

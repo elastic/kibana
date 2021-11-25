@@ -58,7 +58,11 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   if (!layer) {
     return null;
   }
-  const { categoryOptions, numberOptions } = PartitionChartsMeta[state.shape];
+  const {
+    categoryOptions,
+    numberOptions,
+    isDisabled: isToolbarPopoverDisabled,
+  } = PartitionChartsMeta[state.shape].toolbarPopover;
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
@@ -66,6 +70,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
         })}
+        isDisabled={Boolean(isToolbarPopoverDisabled)}
         type="labels"
         groupPosition="left"
         buttonDataTestSubj="lnsLabelsButton"
