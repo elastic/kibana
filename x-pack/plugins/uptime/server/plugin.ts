@@ -24,7 +24,7 @@ import {
 import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
-import { UptimeConfig } from './config';
+import { UptimeConfig } from '../common/config';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -34,7 +34,7 @@ export class Plugin implements PluginType {
   private logger?: Logger;
   private server?: UptimeCoreSetup;
 
-  constructor(_initializerContext: PluginInitializerContext) {
+  constructor(_initializerContext: PluginInitializerContext<UptimeConfig>) {
     this.initContext = _initializerContext;
   }
 

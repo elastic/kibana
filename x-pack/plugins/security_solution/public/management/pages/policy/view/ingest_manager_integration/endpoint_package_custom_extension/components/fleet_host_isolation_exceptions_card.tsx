@@ -7,7 +7,7 @@
 
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import {
