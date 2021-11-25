@@ -31,17 +31,17 @@ const ConfigRecordSchema = schema.recordOf(
 const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  namespace: NamespaceSchema,
-  policy_id: schema.string(),
-  enabled: schema.boolean(),
+  namespace: schema.maybe(NamespaceSchema),
+  policy_id: schema.maybe(schema.string()),
+  enabled: schema.maybe(schema.boolean()),
   package: schema.maybe(
     schema.object({
       name: schema.string(),
-      title: schema.string(),
+      title: schema.maybe(schema.string()),
       version: schema.string(),
     })
   ),
-  output_id: schema.string(),
+  output_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(
     schema.object({
       type: schema.string(),
@@ -58,35 +58,37 @@ const PackagePolicyBaseSchema = {
           })
         )
       ),
-      streams: schema.arrayOf(
-        schema.object({
-          id: schema.maybe(schema.string()), // BWC < 7.11
-          enabled: schema.boolean(),
-          keep_enabled: schema.maybe(schema.boolean()),
-          data_stream: schema.object({
-            dataset: schema.string(),
-            type: schema.string(),
-            elasticsearch: schema.maybe(
-              schema.object({
-                privileges: schema.maybe(
-                  schema.object({
-                    indices: schema.maybe(schema.arrayOf(schema.string())),
-                  })
-                ),
-              })
+      streams: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            id: schema.maybe(schema.string()), // BWC < 7.11
+            enabled: schema.boolean(),
+            keep_enabled: schema.maybe(schema.boolean()),
+            data_stream: schema.object({
+              dataset: schema.string(),
+              type: schema.string(),
+              elasticsearch: schema.maybe(
+                schema.object({
+                  privileges: schema.maybe(
+                    schema.object({
+                      indices: schema.maybe(schema.arrayOf(schema.string())),
+                    })
+                  ),
+                })
+              ),
+            }),
+            vars: schema.maybe(ConfigRecordSchema),
+            config: schema.maybe(
+              schema.recordOf(
+                schema.string(),
+                schema.object({
+                  type: schema.maybe(schema.string()),
+                  value: schema.maybe(schema.any()),
+                })
+              )
             ),
-          }),
-          vars: schema.maybe(ConfigRecordSchema),
-          config: schema.maybe(
-            schema.recordOf(
-              schema.string(),
-              schema.object({
-                type: schema.maybe(schema.string()),
-                value: schema.maybe(schema.any()),
-              })
-            )
-          ),
-        })
+          })
+        )
       ),
     })
   ),

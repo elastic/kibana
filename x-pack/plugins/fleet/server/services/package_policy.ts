@@ -710,6 +710,50 @@ class PackagePolicyService {
     }
   }
 
+  public async enrichPolicyWithDefaultsFromPackage(
+    soClient: SavedObjectsClientContract,
+    newPolicy: NewPackagePolicy
+  ): Promise<NewPackagePolicy> {
+    let newPackagePolicy: NewPackagePolicy = newPolicy;
+    if (newPolicy.package) {
+      const newPP = await this.buildPackagePolicyFromPackage(soClient, newPolicy.package.name);
+      if (newPP) {
+        if (newPolicy.package.version !== newPP.package?.version) {
+          throw new Error(
+            `Package version ${newPolicy.package.version} is not installed, cannot create policy`
+          );
+        }
+        const inputs = newPolicy.inputs.map((input) => {
+          const defaultInput = newPP.inputs.find((i) => i.type === input.type);
+          return {
+            ...defaultInput,
+            enabled: input.enabled,
+            type: input.type,
+            // to propagate "enabled: false" to streams
+            streams: defaultInput?.streams?.map((stream) => ({
+              ...stream,
+              enabled: input.enabled,
+            })),
+          };
+        });
+        newPackagePolicy = {
+          ...newPP,
+          name: newPolicy.name,
+          namespace: newPolicy.namespace ?? 'default',
+          description: newPolicy.description ?? '',
+          enabled: newPolicy.enabled ?? true,
+          policy_id:
+            newPolicy.policy_id ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient)),
+          output_id: newPolicy.output_id ?? '',
+          // does newPolicy always have all inputs?
+          inputs: newPolicy.inputs[0].streams ? newPolicy.inputs : inputs,
+          vars: newPolicy.vars || newPP.vars,
+        };
+      }
+    }
+    return newPackagePolicy;
+  }
+
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string

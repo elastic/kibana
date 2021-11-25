@@ -23,6 +23,7 @@ import type {
 import type {
   CreatePackagePolicyResponse,
   DeletePackagePoliciesResponse,
+  NewPackagePolicy,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '../../../common';
@@ -89,9 +90,14 @@ export const createPackagePolicyHandler: RequestHandler<
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
   try {
+    const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+      soClient,
+      newPolicy as NewPackagePolicy
+    );
+
     const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
-      newPolicy,
+      newPackagePolicy,
       context,
       request
     );
