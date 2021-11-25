@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { IndexPattern } from 'src/plugins/data/public';
 import {
   getIndexPatternSelectComponent,

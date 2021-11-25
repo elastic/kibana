@@ -36,11 +36,12 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-utils",
-  "@npm//elastic-apm-node",
+  "@npm//@elastic/apm-rum",
   "@npm//@types/jest",
   "@npm//@types/js-yaml",
   "@npm//@types/lodash",
   "@npm//@types/node",
+  "@npm//elastic-apm-node",
 ]
 
 jsts_transpiler(
