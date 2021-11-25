@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
-} from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery, kqlQuery } from '../../../../observability/server';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../../lib/helpers/setup_request';
-import { getTransaction } from '../transactions/get_transaction';
+} from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { getTransaction } from '../../transactions/get_transaction';
+import { Setup } from '../../../lib/helpers/setup_request';
 
 export async function getErrorGroupSample({
   environment,
