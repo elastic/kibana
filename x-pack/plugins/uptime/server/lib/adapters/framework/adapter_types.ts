@@ -24,6 +24,7 @@ import { UptimeESClient } from '../../lib';
 import type { UptimeRouter } from '../../../types';
 import { SecurityPluginStart } from '../../../../../security/server';
 import { CloudSetup } from '../../../../../cloud/server';
+import { FleetStartContract } from '../../../../../fleet/server';
 import { UptimeConfig } from '../../../../common/config';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
@@ -41,7 +42,8 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 export interface UptimeCoreSetup {
   router: UptimeRouter;
   config: UptimeConfig;
-  cloud: CloudSetup;
+  cloud?: CloudSetup;
+  fleet: FleetStartContract;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
