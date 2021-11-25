@@ -61,6 +61,7 @@ export interface UptimeCorePluginsSetup {
 
 export interface UptimeCorePluginsStart {
   security: SecurityPluginStart;
+  fleet: FleetStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
