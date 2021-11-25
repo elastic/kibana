@@ -20,6 +20,7 @@ import {
 
 import type { Field } from '../types';
 import { euiFlyoutClassname } from '../constants';
+import type { RuntimeFieldSubField } from '../shared_imports';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
@@ -70,6 +71,7 @@ const FieldEditorFlyoutContentComponent = ({
   const { indexPattern } = useFieldEditorContext();
   const {
     panel: { isVisible: isPanelVisible },
+    fieldsInScript,
   } = useFieldPreviewContext();
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
@@ -97,8 +99,44 @@ const FieldEditorFlyoutContentComponent = ({
     return !isFormModified;
   }, [isFormModified]);
 
+  const addSubfieldsToField = useCallback(
+    (_field: Field): Field => {
+      const { name, type, script, format } = _field;
+
+      // This is a **temporary hack** to create the subfields.
+      // It will be replaced by a UI where the user will set the type and format
+      // of each subField.
+      if (type === 'composite' && fieldsInScript.length > 0) {
+        const fields = fieldsInScript.reduce<Record<string, RuntimeFieldSubField>>(
+          (acc, subFieldName) => {
+            const subField: RuntimeFieldSubField = {
+              type: 'keyword' as const,
+              format,
+            };
+
+            acc[subFieldName] = subField;
+            return acc;
+          },
+          {}
+        );
+
+        const updatedField: Field = {
+          name,
+          type,
+          script,
+          fields,
+        };
+
+        return updatedField;
+      }
+
+      return _field;
+    },
+    [fieldsInScript]
+  );
+
   const onClickSave = useCallback(async () => {
-    const { isValid, data } = await submit();
+    const { isValid, data: updatedField } = await submit();
 
     if (!isMounted.current) {
       // User has closed the flyout meanwhile submitting the form
@@ -106,8 +144,8 @@ const FieldEditorFlyoutContentComponent = ({
     }
 
     if (isValid) {
-      const nameChange = field?.name !== data.name;
-      const typeChange = field?.type !== data.type;
+      const nameChange = field?.name !== updatedField.name;
+      const typeChange = field?.type !== updatedField.type;
 
       if (isEditingExistingField && (nameChange || typeChange)) {
         setModalVisibility({
@@ -115,10 +153,10 @@ const FieldEditorFlyoutContentComponent = ({
           confirmChangeNameOrType: true,
         });
       } else {
-        onSave(data);
+        onSave(addSubfieldsToField(updatedField));
       }
     }
-  }, [onSave, submit, field, isEditingExistingField]);
+  }, [onSave, submit, field, isEditingExistingField, addSubfieldsToField]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();
@@ -134,8 +172,8 @@ const FieldEditorFlyoutContentComponent = ({
         <SaveFieldTypeOrNameChangedModal
           fieldName={field?.name!}
           onConfirm={async () => {
-            const { data } = await submit();
-            onSave(data);
+            const { data: updatedField } = await submit();
+            onSave(addSubfieldsToField(updatedField));
           }}
           onCancel={() => {
             setModalVisibility(defaultModalVisibility);

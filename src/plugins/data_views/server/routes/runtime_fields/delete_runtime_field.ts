@@ -50,14 +50,10 @@ export const registerDeleteRuntimeFieldRoute = (
       const name = req.params.name;
 
       const indexPattern = await indexPatternsService.get(id);
-      const field = indexPattern.fields.getByName(name);
+      const runtimeField = indexPattern.getRuntimeField(name);
 
-      if (!field) {
+      if (!runtimeField) {
         throw new ErrorIndexPatternFieldNotFound(id, name);
-      }
-
-      if (!field.runtimeField) {
-        throw new Error('Only runtime fields can be deleted.');
       }
 
       indexPattern.removeRuntimeField(name);

@@ -9,19 +9,29 @@
 import { i18n } from '@kbn/i18n';
 
 import { ValidationFunc, FieldConfig } from '../../shared_imports';
-import { Field } from '../../types';
+import type { Field } from '../../types';
+import type { Context } from '../field_editor_context';
 import { schema } from './form_schema';
 import type { Props } from './field_editor';
 
 const createNameNotAllowedValidator =
-  (namesNotAllowed: string[]): ValidationFunc<{}, string, string> =>
+  (namesNotAllowed: Context['namesNotAllowed']): ValidationFunc<{}, string, string> =>
   ({ value }) => {
-    if (namesNotAllowed.includes(value)) {
+    if (namesNotAllowed.fields.includes(value)) {
       return {
         message: i18n.translate(
           'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
           {
             defaultMessage: 'A field with this name already exists.',
+          }
+        ),
+      };
+    } else if (namesNotAllowed.runtimeComposites.includes(value)) {
+      return {
+        message: i18n.translate(
+          'indexPatternFieldEditor.editor.runtimeFieldsEditor.existCompositeNamesValidationErrorMessage',
+          {
+            defaultMessage: 'A runtime composite with this name already exists.',
           }
         ),
       };
@@ -36,7 +46,7 @@ const createNameNotAllowedValidator =
  * @param field Initial value of the form
  */
 export const getNameFieldConfig = (
-  namesNotAllowed?: string[],
+  namesNotAllowed?: Context['namesNotAllowed'],
   field?: Props['field']
 ): FieldConfig<string, Field> => {
   const nameFieldConfig = schema.name as FieldConfig<string, Field>;
@@ -45,15 +55,18 @@ export const getNameFieldConfig = (
     return nameFieldConfig;
   }
 
+  const filterOutCurrentFieldName = (name: string) => name !== field?.name;
+
   // Add validation to not allow duplicates
   return {
     ...nameFieldConfig!,
     validations: [
       ...(nameFieldConfig.validations ?? []),
       {
-        validator: createNameNotAllowedValidator(
-          namesNotAllowed.filter((name) => name !== field?.name)
-        ),
+        validator: createNameNotAllowedValidator({
+          fields: namesNotAllowed.fields.filter(filterOutCurrentFieldName),
+          runtimeComposites: namesNotAllowed.runtimeComposites.filter(filterOutCurrentFieldName),
+        }),
       },
     ],
   };

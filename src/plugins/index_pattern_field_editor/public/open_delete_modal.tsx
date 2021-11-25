@@ -38,6 +38,18 @@ interface Dependencies {
 export const getFieldDeleteModalOpener =
   ({ core, indexPatternService, usageCollection }: Dependencies) =>
   (options: OpenFieldDeleteModalOptions): CloseEditor => {
+    if (typeof options.fieldName === 'string') {
+      const fieldToDelete = options.ctx.indexPattern.getFieldByName(options.fieldName);
+      const doesBelongToCompositeField = fieldToDelete?.runtimeField?.type === 'composite';
+
+      if (doesBelongToCompositeField) {
+        console.log( // eslint-disable-line
+          'TODO: display a modal to indicate that this field needs to be deleted through its parent.'
+        );
+        return () => undefined;
+      }
+    }
+
     const { overlays, notifications } = core;
 
     let overlayRef: OverlayRef | null = null;

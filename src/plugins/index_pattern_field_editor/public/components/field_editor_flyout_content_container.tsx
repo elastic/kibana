@@ -19,7 +19,7 @@ import {
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
-import { getRuntimeFieldValidator, getLinks, ApiService } from '../lib';
+import { getLinks, ApiService } from '../lib';
 import {
   FieldEditorFlyoutContent,
   Props as FieldEditorFlyoutContentProps,
@@ -109,11 +109,6 @@ export const FieldEditorFlyoutContentContainer = ({
 
     return existing;
   }, [fields, field]);
-
-  const validateRuntimeField = useMemo(() => getRuntimeFieldValidator(indexPattern.title, search), [
-    search,
-    indexPattern,
-  ]);
 
   const services = useMemo(
     () => ({
@@ -234,7 +229,6 @@ export const FieldEditorFlyoutContentContainer = ({
           onCancel={onCancel}
           onMounted={onMounted}
           field={field}
-          runtimeFieldValidator={validateRuntimeField}
           isSavingField={isSaving}
         />
       </FieldPreviewProvider>

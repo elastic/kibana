@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { DataViewField } from '../../../common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
@@ -52,20 +53,36 @@ export const registerGetRuntimeFieldRoute = (
 
       const indexPattern = await indexPatternsService.get(id);
 
-      const field = indexPattern.fields.getByName(name);
+      const runtimeField = indexPattern.getRuntimeField(name);
 
-      if (!field) {
+      if (!runtimeField) {
         throw new ErrorIndexPatternFieldNotFound(id, name);
       }
 
-      if (!field.runtimeField) {
-        throw new Error('Only runtime fields can be retrieved.');
+      // Access the data view fields created for the runtime field
+      let dataViewFields: DataViewField[];
+
+      if (runtimeField.type === 'composite') {
+        // For "composite" runtime fields we need to look at the "fields"
+        dataViewFields = Object.keys(runtimeField.fields!)
+          .map((subFieldName) => {
+            const fullName = `${name}.${subFieldName}`;
+            return indexPattern.fields.getByName(fullName);
+          })
+          .filter(Boolean) as DataViewField[];
+      } else {
+        dataViewFields = [indexPattern.fields.getByName(name)].filter(Boolean) as DataViewField[];
       }
 
       return res.ok({
         body: {
-          field: field.toSpec(),
-          runtimeField: indexPattern.getRuntimeField(name),
+          // New API for 7.16 & 8.x. Return an Array of DataViewFields for the runtime field
+          fields: dataViewFields,
+          // @deprecated
+          // To avoid creating a breaking change in 7.16 we continue to support
+          // the old "field" in the response
+          field: dataViewFields[0].toSpec(),
+          runtimeField,
         },
       });
     })

@@ -24,8 +24,7 @@ export async function setFullTimeRange(
   indexPattern: IndexPattern,
   query?: Query
 ): Promise<GetTimeFieldRangeResponse> {
-  const runtimeMappings = indexPattern.getComputedFields()
-    .runtimeFields as estypes.MappingRuntimeFields;
+  const runtimeMappings = indexPattern.getRuntimeMappings() as estypes.MappingRuntimeFields;
   const resp = await getTimeFieldRange({
     index: indexPattern.title,
     timeFieldName: indexPattern.timeFieldName,

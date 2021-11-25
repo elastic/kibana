@@ -108,6 +108,8 @@ export interface Context {
       React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>
     >;
   };
+  /** List of fields detected in the Painless script */
+  fieldsInScript: string[];
 }
 
 export type PainlessExecuteContext =

@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RuntimeField } from '../../../common';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpecSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
@@ -59,19 +60,18 @@ export const registerCreateRuntimeFieldRoute = (
         throw new Error(`Field [name = ${name}] already exists.`);
       }
 
-      indexPattern.addRuntimeField(name, runtimeField);
-
-      const addedField = indexPattern.fields.getByName(name);
-      if (!addedField) throw new Error(`Could not create a field [name = ${name}].`);
+      const createdFields = indexPattern.addRuntimeField(name, runtimeField as RuntimeField);
 
       await indexPatternsService.updateSavedObject(indexPattern);
 
-      const savedField = indexPattern.fields.getByName(name);
-      if (!savedField) throw new Error(`Could not create a field [name = ${name}].`);
-
       return res.ok({
         body: {
-          field: savedField.toSpec(),
+          // New API for 7.16 & 8.x. Return an Array of DataViewFields created
+          fields: createdFields.map((f) => f.toSpec()),
+          // @deprecated
+          // To avoid creating a breaking change in 7.16 we continue to support
+          // the old "field" in the response
+          field: createdFields[0].toSpec(),
           index_pattern: indexPattern.toSpec(),
         },
       });

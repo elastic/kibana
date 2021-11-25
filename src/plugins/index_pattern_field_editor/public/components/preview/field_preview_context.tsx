@@ -105,6 +105,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     isValid: boolean;
     message: string | null;
   }>({ isValidating: false, isValid: true, message: null });
+  /** Array of fields detected in the script (returned by the _execute API) */
+  const [fieldsInScript, setFieldsInScript] = useState<string[]>([]);
 
   const { documents, currentIdx } = clusterData;
   const currentDocument: EsDocument | undefined = documents[currentIdx];
@@ -302,6 +304,53 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [indexPattern, search]
   );
 
+  const updateSingleFieldPreview = useCallback(
+    (fieldName: string, values: unknown[]) => {
+      const [value] = values;
+      const formattedValue = valueFormatter(value);
+
+      setPreviewResponse({
+        fields: [{ key: fieldName, value, formattedValue }],
+        error: null,
+      });
+    },
+    [valueFormatter]
+  );
+
+  const updateCompositeFieldPreview = useCallback(
+    (compositeName: string | null, compositeValues: Record<string, unknown[]>) => {
+      if (typeof compositeValues !== 'object') {
+        return;
+      }
+
+      const updatedFieldsInScript: string[] = [];
+
+      const fields = Object.entries(compositeValues).map(([key, values]) => {
+        // The Painless _execute API returns the composite field values under a map.
+        // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
+        const { 1: fieldName } = key.split('composite_field.');
+        updatedFieldsInScript.push(fieldName);
+
+        const [value] = values;
+        const formattedValue = valueFormatter(value);
+
+        return {
+          key: `${compositeName ?? ''}.${fieldName}`,
+          value,
+          formattedValue,
+        };
+      });
+
+      setPreviewResponse({
+        fields,
+        error: null,
+      });
+
+      setFieldsInScript(updatedFieldsInScript);
+    },
+    [valueFormatter]
+  );
+
   const updatePreview = useCallback(async () => {
     if (scriptEditorValidation.isValidating) {
       return;
@@ -356,13 +405,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
           error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error) },
         });
       } else {
-        const [value] = values;
-        const formattedValue = valueFormatter(value);
-
-        setPreviewResponse({
-          fields: [{ key: name!, value, formattedValue }],
-          error: null,
-        });
+        if (!Array.isArray(values)) {
+          updateCompositeFieldPreview(name, values);
+          return;
+        }
+        updateSingleFieldPreview(name!, values);
       }
     }
 
@@ -376,10 +423,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     currentDocId,
     getFieldPreview,
     notifications.toasts,
-    valueFormatter,
     allParamsDefined,
     scriptEditorValidation,
     hasSomeParamsChanged,
+    updateSingleFieldPreview,
+    updateCompositeFieldPreview,
   ]);
 
   const goToNextDoc = useCallback(() => {
@@ -456,6 +504,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       validation: {
         setScriptEditorValidation,
       },
+      fieldsInScript,
     }),
     [
       previewResponse,
@@ -478,6 +527,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       from,
       reset,
       pinnedFields,
+      fieldsInScript,
     ]
   );
 
@@ -524,24 +574,62 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [currentDocument, updateParams]);
 
   /**
-   * Whenever the name or the format changes we immediately update the preview
+   * Whenever the name changes we immediately update the preview
    */
   useEffect(() => {
     setPreviewResponse((prev) => {
-      const {
-        fields: { 0: field },
-      } = prev;
+      const { fields } = prev;
 
-      const nextValue =
-        script === null && Boolean(document)
-          ? get(document, name ?? '') // When there is no script we read the value from _source
-          : field?.value;
+      let updatedFields: Context['fields'] = fields.map((field) => {
+        let key = name ?? '';
 
-      const formattedValue = valueFormatter(nextValue);
+        if (type === 'composite') {
+          const { 1: fieldName } = field.key.split('.');
+          key = `${name ?? ''}.${fieldName}`;
+        }
+
+        return {
+          ...field,
+          key,
+        };
+      });
+
+      // If the user has entered a name but not yet any script we will display
+      // the field in the preview with just the name
+      if (updatedFields.length === 0 && name !== null) {
+        updatedFields = [{ key: name, value: undefined, formattedValue: undefined }];
+      }
 
       return {
         ...prev,
-        fields: [{ ...field, key: name ?? '', value: nextValue, formattedValue }],
+        fields: updatedFields,
+      };
+    });
+  }, [name, type]);
+
+  /**
+   * Whenever the format changes we immediately update the preview
+   */
+  useEffect(() => {
+    setPreviewResponse((prev) => {
+      const { fields } = prev;
+
+      return {
+        ...prev,
+        fields: fields.map((field) => {
+          const nextValue =
+            script === null && Boolean(document)
+              ? get(document, name ?? '') // When there is no script we try to read the value from _source
+              : field?.value;
+
+          const formattedValue = valueFormatter(nextValue);
+
+          return {
+            ...field,
+            value: nextValue,
+            formattedValue,
+          };
+        }),
       };
     });
   }, [name, script, document, valueFormatter]);

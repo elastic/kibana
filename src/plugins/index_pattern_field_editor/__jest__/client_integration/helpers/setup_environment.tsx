@@ -110,7 +110,7 @@ export const WithFieldEditorDependencies =
       uiSettings: uiSettingsServiceMock.createStartContract(),
       fieldTypeToProcess: 'runtime',
       existingConcreteFields: [],
-      namesNotAllowed: [],
+      namesNotAllowed: { fields: [], runtimeComposites: [] },
       links: {
         runtimePainless: 'https://elastic.co',
       },

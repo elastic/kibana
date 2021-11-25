@@ -72,5 +72,27 @@ export const runtimeFieldSpec = {
       source: schema.string(),
     })
   ),
+  fields: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        type: runtimeFieldSpecTypeSchema,
+        format: schema.maybe(serializedFieldFormatSchema),
+        customLabel: schema.maybe(schema.string()),
+        popularity: schema.maybe(
+          schema.number({
+            min: 0,
+          })
+        ),
+      })
+    )
+  ),
+  format: schema.maybe(serializedFieldFormatSchema),
+  customLabel: schema.maybe(schema.string()),
+  popularity: schema.maybe(
+    schema.number({
+      min: 0,
+    })
+  ),
 };
 export const runtimeFieldSpecSchema = schema.object(runtimeFieldSpec);

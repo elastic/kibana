@@ -14,7 +14,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '..';
 
 import { createDataViewCache } from '.';
-import type { RuntimeField } from '../types';
+import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './data_view';
 import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_data_view';
 import {
@@ -453,20 +453,35 @@ export class DataViewsService {
         spec.fieldAttrs
       );
 
+      const addRuntimeFieldToSpecFields = (
+        name: string,
+        fieldType: RuntimeType,
+        runtimeField: RuntimeFieldSpec
+      ) => {
+        spec.fields![name] = {
+          name,
+          type: castEsToKbnFieldTypeName(fieldType),
+          runtimeField,
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+          customLabel: spec.fieldAttrs?.[name]?.customLabel,
+          count: spec.fieldAttrs?.[name]?.count,
+        };
+      };
+
       // CREATE RUNTIME FIELDS
-      for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
+      for (const [name, runtimeField] of Object.entries(runtimeFieldMap || {})) {
         // do not create runtime field if mapped field exists
-        if (!spec.fields[key]) {
-          spec.fields[key] = {
-            name: key,
-            type: castEsToKbnFieldTypeName(value.type),
-            runtimeField: value,
-            aggregatable: true,
-            searchable: true,
-            readFromDocValues: false,
-            customLabel: spec.fieldAttrs?.[key]?.customLabel,
-            count: spec.fieldAttrs?.[key]?.count,
-          };
+        if (!spec.fields[name]) {
+          // For composite runtime field we add the subFields, **not** the composite
+          if (runtimeField.type === 'composite') {
+            Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
+              addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField);
+            });
+          } else {
+            addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
+          }
         }
       }
     } catch (err) {
