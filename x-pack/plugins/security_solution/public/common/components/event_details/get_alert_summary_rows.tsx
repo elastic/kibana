@@ -10,7 +10,6 @@ import { getOr, find, isEmpty } from 'lodash/fp';
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
-  ALERTS_HEADERS_RULE,
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
@@ -22,7 +21,6 @@ import {
 import {
   AGENT_STATUS_FIELD_NAME,
   IP_FIELD_TYPE,
-  SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
 import { getEnrichedFieldInfo, SummaryRow } from './helpers';
@@ -34,11 +32,6 @@ import { EventCode } from '../../../../common/ecs/event';
 
 const defaultDisplayFields: EventSummaryField[] = [
   { id: 'kibana.alert.workflow_status', label: SIGNAL_STATUS },
-  {
-    id: SIGNAL_RULE_NAME_FIELD_NAME,
-    linkField: 'kibana.alert.rule.uuid',
-    label: ALERTS_HEADERS_RULE,
-  },
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
