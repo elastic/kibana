@@ -13,15 +13,18 @@
  */
 
 import { getEsHosts } from './get_es_hosts';
+import { CloudSetup } from '../../../../cloud/server';
 
 describe('getEsHostsTest', () => {
+  const cloudSetup = {
+    cloudId:
+      'TLS_Test:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJDI0ZDYwY2NjYmZjODRhZmZhNGRjYTQ3M2M2YjFlZDgwJGUxMjkyY2YzMTczZTRkNTViZDViM2NlNzYyZDg1NzY3',
+    isCloudEnabled: true,
+  } as CloudSetup;
+
   it('should return expected host in cloud', function () {
     const esHosts = getEsHosts({
-      cloud: {
-        cloudId:
-          'TLS_Test:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJDI0ZDYwY2NjYmZjODRhZmZhNGRjYTQ3M2M2YjFlZDgwJGUxMjkyY2YzMTczZTRkNTViZDViM2NlNzYyZDg1NzY3',
-        isCloudEnabled: true,
-      },
+      cloud: cloudSetup,
     });
 
     expect(esHosts).toEqual([
@@ -44,11 +47,7 @@ describe('getEsHostsTest', () => {
   });
   it('should return cloud hosts when both config and cloud are present', function () {
     const esHosts = getEsHosts({
-      cloud: {
-        cloudId:
-          'TLS_Test:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJDI0ZDYwY2NjYmZjODRhZmZhNGRjYTQ3M2M2YjFlZDgwJGUxMjkyY2YzMTczZTRkNTViZDViM2NlNzYyZDg1NzY3',
-        isCloudEnabled: true,
-      },
+      cloud: cloudSetup,
       config: {
         unsafe: {
           service: {
