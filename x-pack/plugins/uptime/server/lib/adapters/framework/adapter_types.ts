@@ -22,9 +22,9 @@ import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
 import { UptimeESClient } from '../../lib';
 import type { UptimeRouter } from '../../../types';
-import { UptimeConfig } from '../../../config';
 import { SecurityPluginStart } from '../../../../../security/server';
 import { CloudSetup } from '../../../../../cloud/server';
+import { UptimeConfig } from '../../../../common/config';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: {

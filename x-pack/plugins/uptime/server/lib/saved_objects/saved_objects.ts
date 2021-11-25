@@ -14,7 +14,7 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_ob
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
-import { UptimeConfig } from '../../config';
+import { UptimeConfig } from '../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
 import { syntheticsMonitor } from './synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';

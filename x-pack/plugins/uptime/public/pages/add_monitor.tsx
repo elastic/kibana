@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { AddSource } from './add_source';
-export { AddSourceList } from './add_source_list';
-export { GitHubApp } from './github_app';
+import React from 'react';
+
+export const AddMonitorPage: React.FC = () => {
+  return null;
+};
