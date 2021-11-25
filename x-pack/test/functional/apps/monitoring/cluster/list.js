@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
-  const supertest = getService('supertest');
+  const alertsService = getService('monitoringAlerts');
   const browser = getService('browser');
 
   describe('Cluster listing', () => {
@@ -166,16 +166,7 @@ export default function ({ getService, getPageObjects }) {
       after(async () => {
         await tearDown();
 
-        const apiResponse = await supertest.get('/api/alerts/_find?per_page=20');
-        const monitoringAlerts = apiResponse.body.data.filter(
-          ({ consumer }) => consumer === 'monitoring'
-        );
-
-        await Promise.all(
-          monitoringAlerts.map(async (alert) =>
-            supertest.delete(`/api/alerts/alert/${alert.id}`).set('kbn-xsrf', 'true').expect(204)
-          )
-        );
+        await alertsService.deleteAlerts();
 
         await browser.clearLocalStorage();
       });
