@@ -135,10 +135,13 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    stopModelAllocation(modelId: string) {
+    stopModelAllocation(modelId: string, options: { force: boolean } = { force: false }) {
+      const force = options?.force;
+
       return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_stop`,
         method: 'POST',
+        query: { force },
       });
     },
   };
