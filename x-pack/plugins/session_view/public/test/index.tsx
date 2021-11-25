@@ -13,11 +13,10 @@ import { Router } from 'react-router-dom';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import { I18nProvider } from '@kbn/i18n/react';
-import { coreMock } from '../../../../../src/core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 

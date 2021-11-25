@@ -7,8 +7,8 @@
 
 import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
-import { sessionViewProcessEventsMock } from '../../../common/schemas/responses/session_view_process_events.mock';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock';
+import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionView } from './index';
 
 describe('SessionView component', () => {
