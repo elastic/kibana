@@ -11,6 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { VersionMismatchPage } from '../shared/version_mismatch';
 import { rerender } from '../test_helpers';
 
 import { ErrorConnecting } from './components/error_connecting';
@@ -38,6 +39,7 @@ describe('EnterpriseSearch', () => {
     });
     const wrapper = shallow(<EnterpriseSearch />);
 
+    expect(wrapper.find(VersionMismatchPage)).toHaveLength(0);
     expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
     expect(wrapper.find(ProductSelector)).toHaveLength(0);
 
@@ -47,7 +49,22 @@ describe('EnterpriseSearch', () => {
     });
     rerender(wrapper);
 
+    expect(wrapper.find(VersionMismatchPage)).toHaveLength(0);
     expect(wrapper.find(ErrorConnecting)).toHaveLength(0);
     expect(wrapper.find(ProductSelector)).toHaveLength(1);
+  });
+
+  it('renders the version error message if versions mismatch and the host is configured', () => {
+    setMockValues({
+      errorConnecting: false,
+      config: { host: 'localhost' },
+    });
+    const wrapper = shallow(
+      <EnterpriseSearch enterpriseSearchVersion="7.15.0" kibanaVersion="7.16.0" />
+    );
+
+    expect(wrapper.find(VersionMismatchPage)).toHaveLength(1);
+    expect(wrapper.find(ErrorConnecting)).toHaveLength(0);
+    expect(wrapper.find(ProductSelector)).toHaveLength(0);
   });
 });

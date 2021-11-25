@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiText,
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -384,8 +385,28 @@ export function LayerPanel(
           </header>
 
           {groups.map((group, groupIndex) => {
-            const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
+            let isMissing = false;
 
+            if (!isEmptyLayer) {
+              if (group.requiredMinDimensionCount) {
+                isMissing = group.accessors.length < group.requiredMinDimensionCount;
+              } else if (group.required) {
+                isMissing = group.accessors.length === 0;
+              }
+            }
+
+            const isMissingError = group.requiredMinDimensionCount
+              ? i18n.translate('xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel', {
+                  defaultMessage: 'Requires {requiredMinDimensionCount} fields',
+                  values: {
+                    requiredMinDimensionCount: group.requiredMinDimensionCount,
+                  },
+                })
+              : i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
+                  defaultMessage: 'Requires field',
+                });
+
+            const isOptional = !group.required;
             return (
               <EuiFormRow
                 className="lnsLayerPanel__row"
@@ -410,16 +431,19 @@ export function LayerPanel(
                     )}
                   </>
                 }
+                labelAppend={
+                  isOptional ? (
+                    <EuiText color="subdued" size="xs" data-test-subj="lnsGroup_optional">
+                      {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
+                        defaultMessage: 'Optional',
+                      })}
+                    </EuiText>
+                  ) : null
+                }
                 labelType="legend"
                 key={group.groupId}
                 isInvalid={isMissing}
-                error={
-                  isMissing
-                    ? i18n.translate('xpack.lens.editorFrame.requiredDimensionWarningLabel', {
-                        defaultMessage: 'Required dimension',
-                      })
-                    : []
-                }
+                error={isMissing ? isMissingError : []}
               >
                 <>
                   {group.accessors.length ? (
