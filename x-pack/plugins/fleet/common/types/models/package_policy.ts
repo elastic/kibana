@@ -47,7 +47,7 @@ export interface NewPackagePolicyInput {
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
-  streams?: NewPackagePolicyInputStream[];
+  streams: NewPackagePolicyInputStream[];
 }
 
 export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {
@@ -58,10 +58,10 @@ export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams
 export interface NewPackagePolicy {
   name: string;
   description?: string;
-  namespace?: string;
-  enabled?: boolean;
-  policy_id?: string;
-  output_id?: string;
+  namespace: string;
+  enabled: boolean;
+  policy_id: string;
+  output_id: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
