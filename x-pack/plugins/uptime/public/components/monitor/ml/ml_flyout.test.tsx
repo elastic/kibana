@@ -40,6 +40,7 @@ describe('ML Flyout component', () => {
       isApmAvailable: true,
       isInfraAvailable: true,
       isLogsAvailable: true,
+      config: {},
     };
     const { findByText, findAllByText } = render(
       <UptimeSettingsContext.Provider value={value}>
@@ -66,6 +67,7 @@ describe('ML Flyout component', () => {
       isApmAvailable: true,
       isInfraAvailable: true,
       isLogsAvailable: true,
+      config: {},
     };
     const { queryByText } = render(
       <UptimeSettingsContext.Provider value={value}>
