@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import concat from 'concat-stream';
 import _ from 'lodash';
 import path from 'path';
-import Printer from 'pdfmake';
+import pdfmake from 'pdfmake';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import { LayoutInstance } from '../../../lib/layouts';
 import { getDocOptions, REPORTING_TABLE_LAYOUT } from './get_doc_options';
@@ -25,12 +25,13 @@ export class PdfMaker {
   private _logo: string | undefined;
   private _title: string;
   private _content: Content[];
-  private _printer: Printer;
+  // private _printer: Printer;
   private _pdfDoc: PDFKit.PDFDocument | undefined;
+  private fonts: any;
 
   constructor(layout: LayoutInstance, logo: string | undefined) {
     const fontPath = (filename: string) => path.resolve(assetPath, 'fonts', filename);
-    const fonts = {
+    this.fonts = {
       Roboto: {
         normal: fontPath('roboto/Roboto-Regular.ttf'),
         bold: fontPath('roboto/Roboto-Medium.ttf'),
@@ -45,12 +46,13 @@ export class PdfMaker {
         bolditalics: fontPath('noto/NotoSansCJKtc-Medium.ttf'),
       },
     };
+    pdfmake.setFonts(this.fonts);
 
     this._layout = layout;
     this._logo = logo;
     this._title = '';
     this._content = [];
-    this._printer = new Printer(fonts);
+    // this._printer = new Printer(fonts);
   }
 
   _addContents(contents: Content[]) {
@@ -124,37 +126,48 @@ export class PdfMaker {
     this._title = title;
   }
 
-  generate() {
+  async generate() {
     const docTemplate = _.assign(
       getTemplate(this._layout, this._logo, this._title, tableBorderWidth, assetPath),
       {
         content: this._content,
       }
     );
-    this._pdfDoc = this._printer.createPdfKitDocument(docTemplate, getDocOptions(tableBorderWidth));
+    this._pdfDoc = await pdfmake.createPdf(docTemplate, getDocOptions(tableBorderWidth));
     return this;
   }
 
   getBuffer(): Promise<Buffer | null> {
-    return new Promise((resolve, reject) => {
-      if (!this._pdfDoc) {
-        throw new Error(
-          i18n.translate(
-            'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
-            {
-              defaultMessage: 'Document stream has not been generated',
-            }
-          )
-        );
-      }
+    if (!this._pdfDoc) {
+      throw new Error(
+        i18n.translate(
+          'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
+          {
+            defaultMessage: 'Document stream has not been generated',
+          }
+        )
+      );
+    }
+    return this._pdfDoc.getBuffer();
+    // return new Promise((resolve, reject) => {
+    //   if (!this._pdfDoc) {
+    //     throw new Error(
+    //       i18n.translate(
+    //         'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
+    //         {
+    //           defaultMessage: 'Document stream has not been generated',
+    //         }
+    //       )
+    //     );
+    //   }
 
-      const concatStream = concat(function (pdfBuffer: Buffer) {
-        resolve(pdfBuffer);
-      });
+    //   const concatStream = concat(function (pdfBuffer: Buffer) {
+    //     resolve(pdfBuffer);
+    //   });
 
-      this._pdfDoc.on('error', reject);
-      this._pdfDoc.pipe(concatStream);
-      this._pdfDoc.end();
-    });
+    //   // this._pdfDoc.on('error', reject);
+    //   this._pdfDoc.pipe(concatStream);
+    //   this._pdfDoc.end();
+    // });
   }
 }

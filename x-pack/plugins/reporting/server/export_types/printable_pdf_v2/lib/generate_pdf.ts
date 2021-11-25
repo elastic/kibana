@@ -94,8 +94,8 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
         let buffer: Buffer | null = null;
         try {
           tracker.startCompile();
-          logger.debug(`Compiling PDF using "${layout.id}" layout...`);
-          pdfOutput.generate();
+          logger.info(`Compiling PDF using "${layout.id}" layout...`);
+          await pdfOutput.generate();
           tracker.endCompile();
 
           tracker.startGetBuffer();
