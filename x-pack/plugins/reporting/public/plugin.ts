@@ -18,6 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
+import type { ScreenshottingSetup } from '../../screenshotting/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
@@ -73,6 +74,7 @@ export interface ReportingPublicPluginSetupDendencies {
   management: ManagementSetup;
   licensing: LicensingPluginSetup;
   uiActions: UiActionsSetup;
+  screenshotting: ScreenshottingSetup;
   share: SharePluginSetup;
 }
 

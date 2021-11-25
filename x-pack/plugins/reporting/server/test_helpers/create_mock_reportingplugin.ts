@@ -17,6 +17,8 @@ import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createMockScreenshottingStart } from '../../../screenshotting/server/mock';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
@@ -51,7 +53,6 @@ export const createMockPluginStart = (
     : createMockReportingStore();
 
   return {
-    browserDriverFactory: startMock.browserDriverFactory,
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
@@ -62,6 +63,7 @@ export const createMockPluginStart = (
       ensureScheduled: jest.fn(),
     } as any,
     logger: createMockLevelLogger(),
+    screenshotting: startMock.screenshotting || createMockScreenshottingStart(),
     ...startMock,
   };
 };
