@@ -44,9 +44,9 @@ const NO_INDEX_NAMES: string[] = [];
 const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
 const BASE_ALERT_REGEX = new RegExp(`\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*"(.*?|\\*?)"`);
 const ALERT_STATUS_REGEX = new RegExp(
-  `\\s*and\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*".+?"|${regExpEscape(
+  `\\s*and\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*(".+?"|\\*?)|${regExpEscape(
     ALERT_STATUS
-  )}\\s*:\\s*".+?"`,
+  )}\\s*:\\s*(".+?"|\\*?)`,
   'gm'
 );
 
