@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { FC, useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFormRow, formatDate } from '@elastic/eui';
 import { useDashboardTable } from './use_dashboards_table';
 import { AddToDashboardControl } from './add_to_dashboard_controls';

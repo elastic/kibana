@@ -8,7 +8,7 @@
 import React, { useEffect, useState, Fragment, FC, useMemo, useCallback } from 'react';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 
 import {

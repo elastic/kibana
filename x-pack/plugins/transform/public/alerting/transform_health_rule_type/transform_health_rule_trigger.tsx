@@ -7,7 +7,7 @@
 
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';

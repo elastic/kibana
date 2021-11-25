@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor } from '@elastic/eui';
 import { LearnMoreLink } from '../../learn_more_link';
 import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
