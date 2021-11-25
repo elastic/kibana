@@ -16,3 +16,20 @@ export interface FieldsData {
   type: string;
   isObjectArray: boolean;
 }
+
+export interface EnrichedFieldInfo {
+  data: FieldsData | EventFieldsData;
+  eventId: string;
+  fieldFromBrowserField?: BrowserField;
+  timelineId: string;
+  values: string[] | null | undefined;
+  linkValue?: string;
+}
+
+export interface EventSummaryField {
+  id: string;
+  label?: string;
+  linkField?: string;
+  fieldType?: string;
+  overrideField?: string;
+}
