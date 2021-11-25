@@ -96,11 +96,11 @@ export class RuleDataService implements IRuleDataService {
   constructor(private readonly options: ConstructorOptions) {
     this.indicesByBaseName = new Map();
     this.indicesByFeatureId = new Map();
-
     this.resourceInstaller = new ResourceInstaller({
       getResourceName: (name) => this.getResourceName(name),
       getClusterClient: options.getClusterClient,
       logger: options.logger,
+      disabledRegistrationContexts: options.disabledRegistrationContexts,
       isWriteEnabled: options.isWriteEnabled,
     });
 

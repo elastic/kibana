@@ -28,6 +28,7 @@ interface ConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
+  disabledRegistrationContexts: string[];
 }
 
 export class ResourceInstaller {
@@ -39,9 +40,11 @@ export class ResourceInstaller {
   ): Promise<void> {
     try {
       const installResources = async (): Promise<void> => {
-        const { logger, isWriteEnabled } = this.options;
-
-        if (!isWriteEnabled) {
+        const { logger, isWriteEnabled, disabledRegistrationContexts } = this.options;
+        const isResourceDisabled = disabledRegistrationContexts.some((registrationContext) =>
+          resources.includes(registrationContext)
+        );
+        if (!isWriteEnabled || isResourceDisabled) {
           logger.info(`Write is disabled; not installing ${resources}`);
           return;
         }
@@ -113,7 +116,6 @@ export class ResourceInstaller {
   public async installIndexLevelResources(indexInfo: IndexInfo): Promise<void> {
     await this.installWithTimeout(`resources for index ${indexInfo.baseName}`, async () => {
       const { componentTemplates, ilmPolicy } = indexInfo.indexOptions;
-
       if (ilmPolicy != null) {
         await this.createOrUpdateLifecyclePolicy({
           name: indexInfo.getIlmPolicyName(),
