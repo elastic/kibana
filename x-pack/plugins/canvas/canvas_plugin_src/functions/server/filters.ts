@@ -6,6 +6,7 @@
  */
 
 import { ExpressionValueFilter } from 'src/plugins/expressions';
+import { Ast, fromExpression } from '@kbn/interpreter/common';
 import { buildFiltersFunction } from '../../../common/functions';
 import type { FiltersFunction } from '../../../common/functions';
 
@@ -15,8 +16,10 @@ const filtersFn = (): ExpressionValueFilter => ({
 });
 
 const migrations: FiltersFunction['migrations'] = {
-  '8.1.0': (state) => {
-    return state;
+  '8.1.0': (ast: Ast): Ast => {
+    const newExpression = 'kibana | selectFilter';
+    const newAst = fromExpression(newExpression);
+    return newAst;
   },
 };
 

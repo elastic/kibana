@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Ast, fromExpression } from '@kbn/interpreter/common';
+import { Ast, fromExpression, toExpression } from '@kbn/interpreter/common';
 import { Serializable } from '@kbn/utility-types';
 import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { mapValues } from 'lodash';
+import { flowRight, mapValues } from 'lodash';
 import {
   MigrateFunction,
   MigrateFunctionsObject,
@@ -23,10 +23,19 @@ type ToSerializable<Type> = {
     : Serializable;
 };
 
-const getAst = (expression: string): ToSerializable<Ast> => fromExpression(expression);
+type ExprAst = ToSerializable<Ast>;
+
+const toAst = (expression: string): ExprAst => fromExpression(expression);
+const fromAst = (ast: Ast): string => toExpression(ast);
+
+const migrateExpr = (expr: string, migrateFn: MigrateFunction<ExprAst, ExprAst>) =>
+  flowRight<string[], ExprAst, ExprAst, string>(fromAst, migrateFn, toAst)(expr);
 
 const migrateExpressionsAndFilters =
-  (migrate: MigrateFunction, version: string): SavedObjectMigrationFn<WorkpadAttributes> =>
+  (
+    migrate: MigrateFunction<ExprAst, ExprAst>,
+    version: string
+  ): SavedObjectMigrationFn<WorkpadAttributes> =>
   (doc: SavedObjectUnsanitizedDoc<WorkpadAttributes>) => {
     if (typeof doc.attributes !== 'object' || doc.attributes === null) {
       return doc;
@@ -37,8 +46,8 @@ const migrateExpressionsAndFilters =
       const { elements } = page;
       const newElements = elements.map(({ filter, expression, ...element }) => ({
         ...element,
-        filter: filter ? migrate(getAst(filter)) : filter,
-        expression: expression ? migrate(getAst(expression)) : expression,
+        filter: filter ? migrateExpr(filter, migrate) : filter,
+        expression: expression ? migrateExpr(expression, migrate) : expression,
       }));
       return { ...page, elements: newElements };
     });
