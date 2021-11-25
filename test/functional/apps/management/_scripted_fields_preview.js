@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
-  describe('scripted fields preview', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/118981
+  describe.skip('scripted fields preview', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await PageObjects.settings.navigateTo();
