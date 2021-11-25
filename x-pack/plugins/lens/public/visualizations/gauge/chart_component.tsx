@@ -215,15 +215,16 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         tickValueFormatter={({ value: tickValue }) => formatter.convert(tickValue)}
         bands={ranges}
         ticks={getTicks(ticksPosition, [min, max], ranges)}
-        bandFillColor={(val) => {
-          if (colorMode === 'none') {
-            return `rgb(255,255,255, 0)`;
-          }
-          const index = ranges && ranges.indexOf(val.value) - 1;
-          return index !== undefined && colors && index >= 0
-            ? colors[index]
-            : 'rgb(255,255,255, 0)';
-        }}
+        bandFillColor={
+          colorMode === 'palette'
+            ? (val) => {
+                const index = ranges && ranges.indexOf(val.value) - 1;
+                return index !== undefined && colors && index >= 0
+                  ? colors[index]
+                  : 'rgb(255,255,255, 0)';
+              }
+            : undefined
+        }
         labelMajor={getTitle(visTitleMode, visTitle, metricColumn?.name)}
         labelMinor={subtitle ? subtitle + '  ' : ''}
       />
