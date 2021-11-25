@@ -8,6 +8,7 @@
 export { CustomizablePalette } from './palette_configuration';
 export { PalettePanelContainer } from './palette_panel_container';
 export { CustomizableTermsPalette } from './customizable_terms_palette';
+export { SavePaletteModal } from './save_palette_modal';
 export { CustomStops } from './color_stops';
 export { ColorTerms } from './color_terms';
 export * from './utils';

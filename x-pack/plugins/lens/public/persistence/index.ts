@@ -7,3 +7,4 @@
 
 export * from './saved_object_store';
 export * from './filter_references';
+export * from './saved_palette_store';

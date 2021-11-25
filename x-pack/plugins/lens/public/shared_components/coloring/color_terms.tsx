@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFieldText,
@@ -15,10 +15,10 @@ import {
   EuiSpacer,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { DEFAULT_COLOR } from './constants';
 import { isValidColor } from './utils';
 import { TooltipWrapper, useDebouncedValue } from '../index';
 import type { CustomPaletteParamsConfig } from '../../../common';
+import { SavePaletteModal } from './save_palette_modal';
 
 export interface ColorTerm {
   color: string;
@@ -33,15 +33,19 @@ function areColorsValid(colorTerms: Array<{ color: string; term: string }>) {
 export interface ColorTermsProps {
   colorTerms: ColorTerm[];
   onChange: (colorTerms: ColorTerm[]) => void;
+  savePalette: (title: string) => void;
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   'data-test-prefix': string;
 }
 export const ColorTerms = ({
   onChange,
   paletteConfiguration,
+  savePalette,
   colorTerms,
   ['data-test-prefix']: dataTestPrefix,
 }: ColorTermsProps) => {
+  const [isSavePaletteModalOpen, setSavePaletteModalOpen] = useState(false);
+
   const onChangeWithValidation = useCallback(
     (newColorTerms: Array<{ color: string; term: string }>) => {
       if (areColorsValid(newColorTerms)) {
@@ -66,6 +70,14 @@ export const ColorTerms = ({
   });
   const shouldDisableAdd = Boolean(
     paletteConfiguration?.maxSteps && localColorTerms.length >= paletteConfiguration?.maxSteps
+  );
+
+  const onPaletteSave = useCallback(
+    (title: string) => {
+      setSavePaletteModalOpen(false);
+      savePalette(title);
+    },
+    [savePalette]
   );
 
   return (
@@ -154,33 +166,27 @@ export const ColorTerms = ({
         delay="regular"
       >
         <EuiButtonEmpty
-          data-test-subj={`${dataTestPrefix}_dynamicColoring_addStop`}
-          iconType="plusInCircle"
+          data-test-subj={`${dataTestPrefix}_dynamicColoring_savePalette`}
+          iconType="save"
           color="primary"
-          aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorTerm', {
-            defaultMessage: 'Add color term',
+          aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
+            defaultMessage: 'Save palette',
           })}
           size="xs"
           isDisabled={shouldDisableAdd}
           flush="left"
           onClick={() => {
-            const newColorTerms = [...localColorTerms];
-            const length = newColorTerms.length;
-            const prevColor = localColorTerms[length - 1].color || DEFAULT_COLOR;
-            const newTerm = '';
-            newColorTerms.push({
-              color: prevColor,
-              term: newTerm,
-              id: idGeneratorFn(),
-            });
-            setLocalColorTerms(newColorTerms);
+            setSavePaletteModalOpen(true);
           }}
         >
-          {i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
-            defaultMessage: 'Add color term',
+          {i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
+            defaultMessage: 'Save palette',
           })}
         </EuiButtonEmpty>
       </TooltipWrapper>
+      {isSavePaletteModalOpen && (
+        <SavePaletteModal onCancel={() => setSavePaletteModalOpen(false)} onSave={onPaletteSave} />
+      )}
     </>
   );
 };

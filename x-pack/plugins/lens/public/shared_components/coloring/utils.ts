@@ -179,6 +179,25 @@ export function reverseTermsPalette(paletteColorRepresentation: ColorTerm[] = []
     .reverse();
 }
 
+export const getTermsPaletteColors = (
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  paletteService: PaletteRegistry,
+  terms: string[]
+) => {
+  let colors;
+  if (activePalette.name !== CUSTOM_PALETTE) {
+    colors = paletteService.get(activePalette.name).getCategoricalColors(terms.length);
+  } else {
+    const termsColors = activePalette.params?.colorTerms?.map((colorTerm) => colorTerm.color);
+    colors = paletteService.get(activePalette.name).getCategoricalColors(terms.length, {
+      terms,
+      colors: termsColors,
+      gradient: true,
+    });
+  }
+  return activePalette.params?.reverse ? colors.reverse() : colors;
+};
+
 export function mergePaletteParams(
   activePalette: PaletteOutput<CustomPaletteParams>,
   newParams: CustomPaletteParams

@@ -50,6 +50,31 @@ export function setupSavedObjects(core: CoreSetup) {
   });
 
   core.savedObjects.registerType({
+    name: 'palette',
+    hidden: false,
+    namespaceType: 'multiple-isolated',
+    management: {
+      icon: 'lensApp',
+      defaultSearchField: 'title',
+      importableAndExportable: true,
+      getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
+    },
+    mappings: {
+      properties: {
+        title: {
+          type: 'text',
+        },
+        name: {
+          type: 'text',
+        },
+        params: {
+          type: 'flattened',
+        },
+      },
+    },
+  });
+
+  core.savedObjects.registerType({
     name: 'lens-ui-telemetry',
     hidden: false,
     namespaceType: 'single',

@@ -11,7 +11,11 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from './palette_picker';
 import { CUSTOM_PALETTE } from './constants';
-import { reverseTermsPalette, getSwitchToCustomParamsForTermsPalette } from './utils';
+import {
+  reverseTermsPalette,
+  getSwitchToCustomParamsForTermsPalette,
+  getTermsPaletteColors,
+} from './utils';
 import { ColorTerms } from './color_terms';
 
 import type { CustomPaletteParams } from '../../../common';
@@ -20,42 +24,35 @@ export function CustomizableTermsPalette({
   palettes,
   activePalette,
   setPalette,
+  savePaletteToLibrary,
   terms,
 }: {
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
+  savePaletteToLibrary: (palette: PaletteOutput<CustomPaletteParams>, title: string) => void;
   terms: string[];
 }) {
   let selectedPalette = activePalette ?? {
     name: 'default',
     type: 'palette',
   };
-  let colorTerms = [];
-  if (selectedPalette.name !== CUSTOM_PALETTE) {
-    const colors = palettes.get(selectedPalette.name).getCategoricalColors(terms.length);
-    colorTerms = terms.map((term, i) => ({
-      color: colors[i],
-      term,
-    }));
-  } else {
-    const userColors = selectedPalette.params?.colorTerms?.map((colorTerm) => colorTerm.color);
-    const colors = palettes.get(selectedPalette.name).getCategoricalColors(terms.length, {
-      terms,
-      colors: userColors,
-      gradient: true,
-    });
-    colorTerms = terms.map((term, i) => ({
-      color: colors[i],
-      term,
-    }));
-  }
+  const colors = getTermsPaletteColors(selectedPalette, palettes, terms);
+  const colorTerms = terms.map((term, i) => ({
+    color: colors[i],
+    term,
+  }));
+
   selectedPalette = {
     ...selectedPalette,
     params: {
       ...selectedPalette.params,
       colorTerms,
     },
+  };
+
+  const savePalette = (title: string) => {
+    savePaletteToLibrary(selectedPalette, title);
   };
 
   return (
@@ -77,7 +74,6 @@ export function CustomizableTermsPalette({
               const newParams: CustomPaletteParams = {
                 ...selectedPalette?.params,
                 name: newPalette.name,
-                reverse: false, // restore the reverse flag
               };
 
               if (isNewPaletteCustom) {
@@ -138,9 +134,10 @@ export function CustomizableTermsPalette({
           }
         >
           <ColorTerms
-            paletteConfiguration={activePalette?.params}
+            paletteConfiguration={selectedPalette?.params}
             data-test-prefix="lnsPalettePanel"
             colorTerms={selectedPalette?.params?.colorTerms ?? colorTerms}
+            savePalette={savePalette}
             onChange={(newColorTerms) => {
               const newParams = getSwitchToCustomParamsForTermsPalette(palettes, selectedPalette, {
                 colorTerms: newColorTerms,

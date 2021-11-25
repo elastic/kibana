@@ -11,6 +11,7 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { SavedObjectsClientContract } from 'kibana/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { getSuggestions } from './xy_suggestions';
@@ -99,10 +100,12 @@ export const getXyVisualization = ({
   paletteService,
   fieldFormats,
   useLegacyTimeAxis,
+  savedObjectsClient,
 }: {
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -593,6 +596,7 @@ export const getXyVisualization = ({
           {...props}
           formatFactory={fieldFormats.deserialize}
           paletteService={paletteService}
+          savedObjectsClient={savedObjectsClient}
         />
       </I18nProvider>,
       domElement

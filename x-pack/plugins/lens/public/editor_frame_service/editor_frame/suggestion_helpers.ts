@@ -21,7 +21,7 @@ import {
   VisualizationMap,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
-import { LayerType, layerTypes } from '../../../common';
+import { LayerType, layerTypes, CustomPaletteParams } from '../../../common';
 import { getLayerType } from './config_panel/add_layer';
 import {
   LensDispatch,
@@ -74,7 +74,7 @@ export function getSuggestions({
   field?: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
   activeData?: Record<string, Datatable>;
-  mainPalette?: PaletteOutput;
+  mainPalette?: PaletteOutput<CustomPaletteParams>;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -199,7 +199,7 @@ function getVisualizationSuggestions(
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
   currentVisualizationState: unknown,
   subVisualizationId?: string,
-  mainPalette?: PaletteOutput
+  mainPalette?: PaletteOutput<CustomPaletteParams>
 ) {
   return visualization
     .getSuggestions({

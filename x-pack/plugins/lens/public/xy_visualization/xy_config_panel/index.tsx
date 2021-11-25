@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiColorPaletteDisplay,
 } from '@elastic/eui';
+import type { SavedObjectsClientContract } from 'kibana/public';
 import type { PaletteRegistry, PaletteOutput } from 'src/plugins/charts/public';
 import type {
   VisualizationLayerWidgetProps,
@@ -39,8 +40,7 @@ import {
   PalettePanelContainer,
   CustomizableTermsPalette,
   FIXED_PROGRESSION,
-  DEFAULT_COLOR_STEPS,
-  CUSTOM_PALETTE,
+  getTermsPaletteColors,
 } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { getAxesConfiguration, GroupsConfiguration } from '../axes_configuration';
@@ -49,6 +49,7 @@ import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
 import { TooltipWrapper } from '../../shared_components';
+import { SavedObjectPaletteStore } from '../../persistence';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -186,7 +187,9 @@ function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, sta
 }
 
 export const XyToolbar = memo(function XyToolbar(
-  props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
+  props: VisualizationToolbarProps<State> & {
+    useLegacyTimeAxis?: boolean;
+  }
 ) {
   const { state, setState, frame, useLegacyTimeAxis } = props;
 
@@ -570,28 +573,15 @@ export const XyToolbar = memo(function XyToolbar(
 
 export const idPrefix = htmlIdGenerator()();
 
-const getPaletteDisplayConfig = (
-  activePalette: PaletteOutput<CustomPaletteParams>,
-  paletteService: PaletteRegistry
-) => {
-  const currentPalette = paletteService.get(activePalette.name);
-  const colors =
-    activePalette.name !== CUSTOM_PALETTE
-      ? currentPalette.getCategoricalColors(
-          activePalette?.params?.steps || DEFAULT_COLOR_STEPS,
-          activePalette?.params
-        )
-      : (activePalette?.params?.colorTerms || []).map(({ color }) => color);
-  return activePalette.params?.reverse ? colors.reverse() : colors;
-};
-
 export function DimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
+    savedObjectsClient: SavedObjectsClientContract;
   }
 ) {
-  const { state, setState, layerId, accessor, activeData } = props;
+  const { state, setState, layerId, accessor, activeData, savedObjectsClient } = props;
+
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
   const isHorizontal = isHorizontalChart(state.layers);
@@ -604,7 +594,7 @@ export function DimensionEditor(
     name: 'default',
     type: 'palette',
   };
-  // move to utils
+  // compute terms
   const splitAccessor = layer.splitAccessor;
   const terms: string[] = [];
   if (splitAccessor) {
@@ -618,6 +608,24 @@ export function DimensionEditor(
       }
     });
   }
+  const paletteStore = new SavedObjectPaletteStore(savedObjectsClient);
+  const getPalettesFromLibrary = () => {
+    paletteStore.getAll().then((response) => {
+      // console.dir(response);
+    });
+  };
+
+  const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
+    const paletteToSave = {
+      ...palette,
+      title,
+    };
+    paletteStore.save(paletteToSave).then((response) => {
+      // console.dir(response);
+    });
+  };
+
+  getPalettesFromLibrary();
 
   if (props.groupId === 'breakdown') {
     return (
@@ -630,7 +638,7 @@ export function DimensionEditor(
         <EuiFlexItem>
           <EuiColorPaletteDisplay
             data-test-subj="lnsXY_dynamicColoring_palette"
-            palette={getPaletteDisplayConfig(activePalette, props.paletteService)}
+            palette={getTermsPaletteColors(activePalette, props.paletteService, terms)}
             type={FIXED_PROGRESSION}
             onClick={() => {
               setIsPaletteOpen(!isPaletteOpen);
@@ -666,6 +674,7 @@ export function DimensionEditor(
               setPalette={(newPalette) => {
                 setState(updateLayer(state, { ...layer, palette: newPalette }, index));
               }}
+              savePaletteToLibrary={savePaletteToLibrary}
             />
           </PalettePanelContainer>
         </EuiFlexItem>

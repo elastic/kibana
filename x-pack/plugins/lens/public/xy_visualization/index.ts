@@ -27,6 +27,9 @@ export class XyVisualization {
     { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
+      const services = await core.getStartServices();
+      const savedObjectsClient = services[0].savedObjects.client;
+
       const { getXyChartRenderer, getXyVisualization } = await import('../async_services');
       const [, { charts, fieldFormats }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
@@ -41,7 +44,12 @@ export class XyVisualization {
           useLegacyTimeAxis,
         })
       );
-      return getXyVisualization({ paletteService: palettes, fieldFormats, useLegacyTimeAxis });
+      return getXyVisualization({
+        paletteService: palettes,
+        fieldFormats,
+        useLegacyTimeAxis,
+        savedObjectsClient,
+      });
     });
   }
 }

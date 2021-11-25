@@ -18,7 +18,7 @@ import {
 } from '../types';
 import { State, XYState, visualizationTypes } from './types';
 import type { SeriesType, XYLayerConfig } from '../../common/expressions';
-import { layerTypes } from '../../common';
+import { layerTypes, CustomPaletteParams } from '../../common';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -96,7 +96,7 @@ function getSuggestionForColumns(
   keptLayerIds: string[],
   currentState?: State,
   seriesType?: SeriesType,
-  mainPalette?: PaletteOutput
+  mainPalette?: PaletteOutput<CustomPaletteParams>
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
 
@@ -225,7 +225,7 @@ function getSuggestionsForLayer({
   tableLabel?: string;
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
-  mainPalette?: PaletteOutput;
+  mainPalette?: PaletteOutput<CustomPaletteParams>;
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
@@ -485,7 +485,7 @@ function buildSuggestion({
   changeType: TableChangeType;
   keptLayerIds: string[];
   hide?: boolean;
-  mainPalette?: PaletteOutput;
+  mainPalette?: PaletteOutput<CustomPaletteParams>;
 }) {
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
     splitBy = xValue;

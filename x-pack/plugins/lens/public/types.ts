@@ -519,7 +519,7 @@ export interface SuggestionRequest<T = unknown> {
    * State is only passed if the visualization is active.
    */
   state?: T;
-  mainPalette?: PaletteOutput;
+  mainPalette?: PaletteOutput<CustomPaletteParams>;
   /**
    * The visualization needs to know which table is being suggested
    */
