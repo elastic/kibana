@@ -623,7 +623,7 @@ const getSavedTimeline = async (request: FrameworkRequest, timelineId: string) =
 const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const savedObjectsClient = request.context.core.savedObjects.client;
-  if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
+  if (Array.isArray(options.searchFields) && options.searchFields.includes('favorite.keySearch')) {
     options.search = `${options.search != null ? options.search : ''} ${
       userName != null ? convertStringToBase64(userName) : null
     }`;
