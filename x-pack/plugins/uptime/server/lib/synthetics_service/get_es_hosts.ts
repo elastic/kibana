@@ -13,8 +13,8 @@
  */
 
 import { CloudSetup } from '../../../../cloud/server';
-import { UptimeConfig } from '../../config';
 import { decodeCloudId } from '../../../../fleet/common';
+import { UptimeConfig } from '../../../common/config';
 
 export function getEsHosts({
   cloud,
