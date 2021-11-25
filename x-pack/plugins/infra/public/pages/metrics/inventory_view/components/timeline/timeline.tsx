@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { first, last } from 'lodash';
 import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';

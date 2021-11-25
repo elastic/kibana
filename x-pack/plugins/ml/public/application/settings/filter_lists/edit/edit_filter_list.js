@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { EditFilterListHeader } from './header';
