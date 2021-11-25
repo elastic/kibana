@@ -29,7 +29,7 @@ import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
-import { DocViewFilterFn, ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../inspector/public';
@@ -62,9 +62,11 @@ export function DiscoverLayout({
   indexPattern,
   indexPatternList,
   inspectorAdapters,
+  expandedDoc,
   navigateTo,
   onChangeIndexPattern,
   onUpdateQuery,
+  setExpandedDoc,
   savedSearchRefetch$,
   resetSavedSearch,
   savedSearchData$,
@@ -86,7 +88,6 @@ export function DiscoverLayout({
     spaces,
   } = services;
   const { main$, charts$, totalHits$ } = savedSearchData$;
-  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const viewMode = useMemo(() => {

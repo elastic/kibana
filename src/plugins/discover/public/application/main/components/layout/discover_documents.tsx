@@ -54,7 +54,7 @@ function DiscoverDocumentsComponent({
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  setExpandedDoc: (doc: ElasticSearchHit | undefined) => void;
+  setExpandedDoc: (doc?: ElasticSearchHit) => void;
   state: AppState;
   stateContainer: GetStateReturn;
 }) {

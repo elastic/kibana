@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ElasticSearchHit } from 'src/plugins/discover/public/services/doc_views/doc_views_types';
 import {
   IndexPattern,
   IndexPatternAttributes,
@@ -28,6 +29,8 @@ export interface DiscoverLayoutProps {
   onChangeIndexPattern: (id: string) => void;
   onUpdateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   resetSavedSearch: () => void;
+  expandedDoc?: ElasticSearchHit;
+  setExpandedDoc: (doc?: ElasticSearchHit) => void;
   savedSearch: SavedSearch;
   savedSearchData$: SavedSearchData;
   savedSearchRefetch$: DataRefetch$;

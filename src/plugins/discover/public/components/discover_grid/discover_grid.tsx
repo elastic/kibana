@@ -111,7 +111,7 @@ export interface DiscoverGridProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc: (doc: ElasticSearchHit | undefined) => void;
+  setExpandedDoc: (doc?: ElasticSearchHit) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
