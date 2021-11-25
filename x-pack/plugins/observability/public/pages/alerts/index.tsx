@@ -71,7 +71,10 @@ function AlertsPage() {
     workflowStatus,
     setWorkflowStatus,
   } = useAlertsPageStateContainer();
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const [alertStatsLoading, setAlertStatsLoading] = useState<boolean>(false);
   const [alertStats, setAlertStats] = useState<AlertStatsState>({
     isLoading: false,
@@ -110,7 +113,14 @@ function AlertsPage() {
         });
         setAlertStatsLoading(false);
       }
-    } catch (e) {}
+    } catch (_e) {
+      toasts.addDanger({
+        title: i18n.translate('xpack.observability.alerts.stats.loadError', {
+          defaultMessage: 'Unable to load rule stats',
+        }),
+      });
+      setAlertStatsLoading(false);
+    }
   }
 
   useEffect(() => {
