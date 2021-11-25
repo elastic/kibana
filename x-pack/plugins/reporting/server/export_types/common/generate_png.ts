@@ -65,7 +65,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
       })),
       tap(({ buffer }) => {
         logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
-        apmTrans?.setLabel('byte_length', buffer.byteLength, false);
+        apmTrans?.setLabel('byte-length', buffer.byteLength, false);
       }),
       finalize(() => {
         apmBuffer?.end();

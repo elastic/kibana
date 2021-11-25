@@ -49,7 +49,7 @@ import {
   TaskRunningInstance,
   TaskRunResult,
   TASK_MANAGER_TRANSACTION_TYPE,
-  TASK_MANAGER_TRANSATION_MARK_AS_RUNNING,
+  TASK_MANAGER_TRANSACTION_MARK_AS_RUNNING,
 } from './task_runner';
 
 type Opts = {
@@ -217,7 +217,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
         childOf: this.instance.task.traceparent,
       }
     );
-    apmTrans?.setLabels('task', this.taskType);
+    apmTrans?.setLabel('task', this.taskType);
 
     const modifiedContext = await this.beforeRun({
       taskInstance: asConcreteInstance(this.instance.task),
@@ -275,7 +275,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       TASK_MANAGER_TRANSACTION_MARK_AS_RUNNING,
       TASK_MANAGER_TRANSACTION_TYPE
     );
-    apmTrans?.setLabels('task', this.taskType);
+    apmTrans?.setLabel('task', this.taskType);
 
     const now = new Date();
     try {

@@ -29,6 +29,8 @@ interface StartDeps {
   application: InternalApplicationStart;
 }
 
+export const KIBANA_PLATFORM_TRANSACTION_TYPE = 'kibana-client';
+
 export class ApmSystem {
   private readonly enabled: boolean;
   private pageLoadTransaction?: Transaction;
@@ -71,10 +73,16 @@ export class ApmSystem {
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
         this.closePageLoadTransaction();
-        this.apm.startTransaction(`/app/${appId}`, 'route-change', {
-          managed: true,
-          canReuse: true,
-        });
+        const apmTran = this.apm.startTransaction(
+          'route-change',
+          KIBANA_PLATFORM_TRANSACTION_TYPE,
+          {
+            managed: true,
+            canReuse: true,
+          }
+        );
+
+        apmTran?.addLabels({ appId });
       }
     });
   }

@@ -288,7 +288,7 @@ export class TaskManagerRunner implements TaskRunner {
       }
     );
 
-    apmTrans?.setLabels('task', this.taskType);
+    apmTrans?.setLabel('task', this.taskType);
 
     const modifiedContext = await this.beforeRun({
       taskInstance: this.instance.task,
@@ -347,7 +347,7 @@ export class TaskManagerRunner implements TaskRunner {
       TASK_MANAGER_TRANSACTION_MARK_AS_RUNNING,
       TASK_MANAGER_TRANSACTION_TYPE
     );
-    apmTrans?.setLabels('task', this.taskType);
+    apmTrans?.setLabel('task', this.taskType);
 
     const now = new Date();
     try {

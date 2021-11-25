@@ -18,7 +18,7 @@ import {
   ScreenshotObservableOpts,
   ScreenshotResults,
 } from './';
-import { REPORTING_TRANSACTION_TYPE } from '../../common';
+import { REPORTING_TRANSACTION_TYPE } from '../../export_types/common';
 import { ScreenshotObservableHandler } from './observable_handler';
 
 export type { ElementPosition, ElementsPositionAndAttribute, ScreenshotResults };

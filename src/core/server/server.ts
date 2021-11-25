@@ -60,6 +60,8 @@ import { DiscoveredPlugins } from './plugins';
 const coreId = Symbol('core');
 const rootConfigPath = '';
 
+export const KIBANA_PLATFORM_TRANSACTION_TYPE = 'kibana-platform';
+
 export class Server {
   public readonly configService: ConfigService;
   private readonly capabilities: CapabilitiesService;
@@ -128,7 +130,10 @@ export class Server {
 
   public async preboot() {
     this.log.debug('prebooting server');
-    const prebootTransaction = apm.startTransaction('server_preboot', 'kibana_platform');
+    const prebootTransaction = apm.startTransaction(
+      'server-preboot',
+      KIBANA_PLATFORM_TRANSACTION_TYPE
+    );
 
     const environmentPreboot = await this.environment.preboot();
 
@@ -184,7 +189,7 @@ export class Server {
 
   public async setup() {
     this.log.debug('setting up server');
-    const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
+    const setupTransaction = apm.startTransaction('server-setup', KIBANA_PLATFORM_TRANSACTION_TYPE);
 
     const environmentSetup = this.environment.setup();
 
@@ -291,7 +296,7 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
-    const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
+    const startTransaction = apm.startTransaction('server-start', KIBANA_PLATFORM_TRANSACTION_TYPE);
 
     const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();
