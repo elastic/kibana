@@ -6,10 +6,7 @@
  */
 
 import * as React from 'react';
-import {
-  ExploratoryViewContextProvider,
-  ExploratoryViewPage,
-} from '../../../../observability/public';
+import { ExploratoryViewContextProvider, ExploratoryView } from '../../../../observability/public';
 import { getSecurityKPIConfig } from './kpi_over_time_config';
 import { RenderAppProps } from '../types';
 import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
@@ -44,7 +41,7 @@ export const SecurityExploratoryView = ({
       setHeaderActionMenu={setHeaderActionMenu}
       asPanel={false}
     >
-      <ExploratoryViewPage app={{ id: 'security', label: 'Security' }} />
+      <ExploratoryView app={{ id: 'security', label: 'Security' }} />
     </ExploratoryViewContextProvider>
   );
 };
