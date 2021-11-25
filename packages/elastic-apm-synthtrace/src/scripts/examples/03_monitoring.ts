@@ -6,29 +6,28 @@
  * Side Public License, v 1.
  */
 
+// Run with: node ./src/scripts/run ./src/scripts/examples/03_monitoring.ts --target=http://elastic:changeme@localhost:9200
+
 import { stackMonitoring, timerange } from '../../index';
 import { eventsToElasticsearchOutput } from '../../lib/utils/to_elasticsearch_output';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 
-const scenario: Scenario = async ({ target, writeTarget, logLevel }) => {
+const scenario: Scenario = async ({ target, logLevel }) => {
   const { logger } = getCommonServices({ target, logLevel });
-
-  if (!writeTarget) {
-    throw new Error('Write target is not defined');
-  }
 
   return {
     generate: ({ from, to }) => {
-      const kibanaStats = stackMonitoring.cluster('cluster-01').kibana('kibana-01').stats();
+      const clusterStats = stackMonitoring.cluster('test-cluster').stats();
+      const writeTarget = '.monitoring-es-7-synthtrace';
 
       const range = timerange(from, to);
       return range
-        .interval('30s')
+        .interval('10s')
         .rate(1)
         .flatMap((timestamp) => {
           const events = logger.perf('generating_sm_events', () => {
-            return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
+            return clusterStats.timestamp(timestamp).indices(115).serialize();
           });
 
           return logger.perf('sm_events_to_es_output', () => {

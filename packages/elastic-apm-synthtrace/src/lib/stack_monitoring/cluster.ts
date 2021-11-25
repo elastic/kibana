@@ -10,6 +10,7 @@ import { Entity } from '../entity';
 import { generateShortId } from '../utils/generate_id';
 import { Kibana } from './kibana';
 import { StackMonitoringFields } from './stack_monitoring_fields';
+import { ClusterStats } from './cluster_stats';
 
 export class Cluster extends Entity<StackMonitoringFields> {
   kibana(name: string, index: string = '.kibana') {
@@ -20,10 +21,17 @@ export class Cluster extends Entity<StackMonitoringFields> {
       type: 'kibana_stats',
     });
   }
+
+  stats() {
+    return new ClusterStats({
+      ...this.fields,
+    });
+  }
 }
 
-export function cluster() {
+export function cluster(name: string) {
   return new Cluster({
+    cluster_name: name,
     cluster_uuid: generateShortId(),
   });
 }

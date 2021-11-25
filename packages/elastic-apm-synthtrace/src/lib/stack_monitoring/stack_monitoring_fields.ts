@@ -10,8 +10,14 @@ import { Fields } from '../entity';
 
 export type StackMonitoringFields = Fields &
   Partial<{
+    cluster_name: string;
     cluster_uuid: string;
     type: string;
+
+    'cluster_stats.timestamp': string;
+    'cluster_stats.indices.count': number;
+    'license.status': string;
+
     'kibana_stats.kibana.name': string;
     'kibana_stats.kibana.index': string;
     'kibana_stats.requests.disconnects': number;
