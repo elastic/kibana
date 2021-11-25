@@ -309,7 +309,7 @@ export function createTestEsCluster<
      */
     getClient(): KibanaClient {
       return new Client({
-        node: this.getHostUrls()[0],
+        node: this.getHostUrls(),
         headers: { 'X-Opaque-Id': 'kbn-test-client' },
         ...(ssl && { ssl: { ca: Fs.readFileSync(CA_CERT_PATH), rejectUnauthorized: true } }),
       });
@@ -336,7 +336,9 @@ export function createTestEsCluster<
      * in this list.
      */
     getHostUrls(): string[] {
-      return this.ports.map((p) => format({ ...esTestConfig.getUrlParts(ssl), port: p }));
+      return this.ports.map((p) =>
+        format({ ...esTestConfig.getUrlParts(ssl), port: p, protocol: ssl ? 'https' : 'http' })
+      );
     }
   })() as EsTestCluster<Options>;
 }
