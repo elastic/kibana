@@ -68,7 +68,11 @@ function AgentKeysContent() {
     { showToastOnError: false }
   );
 
-  const { data, status } = useFetcher(
+  const {
+    data,
+    status,
+    refetch: refetchAgentKeys,
+  } = useFetcher(
     (callApmApi) => {
       if (areApiKeysEnabled || canManage) {
         return callApmApi({
@@ -172,7 +176,12 @@ function AgentKeysContent() {
   }
 
   if (agentKeys && !isEmpty(agentKeys)) {
-    return <AgentKeysTable agentKeys={agentKeys ?? []} />;
+    return (
+      <AgentKeysTable
+        agentKeys={agentKeys ?? []}
+        refetchAgentKeys={refetchAgentKeys}
+      />
+    );
   }
 
   return null;
