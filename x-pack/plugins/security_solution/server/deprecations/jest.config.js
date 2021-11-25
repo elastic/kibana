@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { getFixLogsStep } from './fix_logs_step';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/plugins/security_solution/server/deprecations'],
+};

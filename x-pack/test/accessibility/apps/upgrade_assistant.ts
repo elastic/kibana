@@ -52,8 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/115859
-  describe.skip('Upgrade Assistant', () => {
+  describe('Upgrade Assistant', () => {
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
 
@@ -84,6 +83,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
           return testSubjects.exists('overview');
         });
+      });
+
+      it('has no accessibility issues', async () => {
+        await a11y.testAppSnapshot();
+      });
+    });
+
+    describe('ES deprecations logs page', () => {
+      beforeEach(async () => {
+        await PageObjects.upgradeAssistant.navigateToEsDeprecationLogs();
       });
 
       it('with logs collection disabled', async () => {
@@ -122,7 +131,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
 
-      it('Index settings deprecation flyout', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/115859
+      it.skip('Index settings deprecation flyout', async () => {
         await PageObjects.upgradeAssistant.clickEsDeprecation(
           'indexSettings' // An index setting deprecation was added in the before() hook so should be guaranteed
         );

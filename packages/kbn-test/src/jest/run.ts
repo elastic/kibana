@@ -52,11 +52,12 @@ export function runJest(configName = 'jest.config.js') {
 
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/jest');
-  let cwd: string;
+
   let testFiles: string[];
 
+  const cwd: string = process.env.INIT_CWD || process.cwd();
+
   if (!argv.config) {
-    cwd = process.env.INIT_CWD || process.cwd();
     testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;

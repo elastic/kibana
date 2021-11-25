@@ -15,6 +15,7 @@ import {
   migratorInstanceMock,
   registerRoutesMock,
   typeRegistryInstanceMock,
+  deleteIndexTemplatesMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { RawPackageInfo } from '@kbn/config';
@@ -260,6 +261,29 @@ describe('SavedObjectsService', () => {
       await soService.setup(createSetupDeps());
       await soService.start(createStartDeps());
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
+    });
+
+    it('calls `deleteIndexTemplates` with the correct parameters', async () => {
+      const coreContext = createCoreContext({ skipMigration: false });
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+      const startDeps = createStartDeps();
+      await soService.start(startDeps);
+
+      expect(deleteIndexTemplatesMock).toHaveBeenCalledTimes(1);
+      expect(deleteIndexTemplatesMock).toHaveBeenCalledWith({
+        client: startDeps.elasticsearch.client.asInternalUser,
+        log: expect.any(Object),
+      });
+    });
+
+    it('does not call `deleteIndexTemplates` when `skipMigration` is true', async () => {
+      const coreContext = createCoreContext({ skipMigration: true });
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+      await soService.start(createStartDeps());
+
+      expect(deleteIndexTemplatesMock).not.toHaveBeenCalled();
     });
 
     it('calls KibanaMigrator with correct version', async () => {

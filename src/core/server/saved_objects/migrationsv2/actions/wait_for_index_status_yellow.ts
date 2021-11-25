@@ -40,13 +40,16 @@ export const waitForIndexStatusYellow =
   }: WaitForIndexStatusYellowParams): TaskEither.TaskEither<RetryableEsClientError, {}> =>
   () => {
     return client.cluster
-      .health({
-        index,
-        wait_for_status: 'yellow',
-        timeout,
-        // @ts-expect-error
-        return_200_for_cluster_health_timeout: true, // opt-in to the 8.0 breaking behaviour to prevent a deprecation log
-      })
+      .health(
+        {
+          index,
+          wait_for_status: 'yellow',
+          timeout,
+        },
+        // Don't reject on status code 408 so that we can handle the timeout
+        // explicitly and provide more context in the error message
+        { ignore: [408] }
+      )
       .then((res) => {
         if (res.body.timed_out === true) {
           return Either.left({
