@@ -8,5 +8,5 @@
     "githubTeam": "kibana-app-services"
   },
   "description": "A plugin that demonstrates field formats usage",
-  "requiredPlugins": ["developerExamples", "fieldFormats", "indexPatternFieldEditor", "data"]
+  "requiredPlugins": ["developerExamples", "fieldFormats", "dataViewFieldEditor", "data"]
 }

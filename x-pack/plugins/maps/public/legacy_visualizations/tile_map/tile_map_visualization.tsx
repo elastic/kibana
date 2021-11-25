@@ -19,7 +19,7 @@ interface Props {
   onInitialRenderComplete: () => void;
 }
 
-export function TileMapVisualization(props: Props) {
+function TileMapVisualization(props: Props) {
   const mapCenter = {
     lat: props.visConfig.mapCenter[0],
     lon: props.visConfig.mapCenter[1],
@@ -45,3 +45,7 @@ export function TileMapVisualization(props: Props) {
     />
   );
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export default TileMapVisualization;

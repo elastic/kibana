@@ -16,6 +16,7 @@ import {
   DYNAMIC_SETTINGS_DEFAULTS,
   API_URLS,
 } from '../../../../../plugins/uptime/common/constants';
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

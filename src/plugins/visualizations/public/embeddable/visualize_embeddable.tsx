@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IndexPattern,
@@ -38,7 +39,7 @@ import {
   ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getUiActions } from '../services';
+import { getExpressions, getTheme, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { SavedObjectAttributes } from '../../../../core/types';
@@ -305,9 +306,11 @@ export class VisualizeEmbeddable
     super.render(this.domNode);
 
     render(
-      <div className="visChart__spinner">
-        <EuiLoadingChart mono size="l" />
-      </div>,
+      <KibanaThemeProvider theme$={getTheme().theme$}>
+        <div className="visChart__spinner">
+          <EuiLoadingChart mono size="l" />
+        </div>
+      </KibanaThemeProvider>,
       this.domNode
     );
 

@@ -10,6 +10,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { RenderValue } from './vega_fn';
@@ -26,15 +27,17 @@ export const getVegaVisRenderer: (
     });
 
     render(
-      <VisualizationContainer handlers={handlers}>
-        <VegaVisComponent
-          deps={deps}
-          fireEvent={handlers.event}
-          renderComplete={handlers.done}
-          renderMode={handlers.getRenderMode()}
-          visData={visData}
-        />
-      </VisualizationContainer>,
+      <KibanaThemeProvider theme$={deps.core.theme.theme$}>
+        <VisualizationContainer handlers={handlers}>
+          <VegaVisComponent
+            deps={deps}
+            fireEvent={handlers.event}
+            renderComplete={handlers.done}
+            renderMode={handlers.getRenderMode()}
+            visData={visData}
+          />
+        </VisualizationContainer>
+      </KibanaThemeProvider>,
       domNode
     );
   },
