@@ -745,7 +745,6 @@ class PackagePolicyService {
           policy_id:
             newPolicy.policy_id ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient)),
           output_id: newPolicy.output_id ?? '',
-          // does newPolicy always have all inputs?
           inputs: newPolicy.inputs[0].streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
         };
