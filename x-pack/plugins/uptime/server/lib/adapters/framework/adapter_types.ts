@@ -12,12 +12,17 @@ import type {
   IScopedClusterClient,
 } from 'src/core/server';
 import { ObservabilityPluginSetup } from '../../../../../observability/server';
+import {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '../../../../../encrypted_saved_objects/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
 import { UptimeESClient } from '../../lib';
 import type { UptimeRouter } from '../../../types';
+import { SecurityPluginStart } from '../../../../../security/server';
 import { UptimeConfig } from '../../../../common/config';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
@@ -35,16 +40,23 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 export interface UptimeCoreSetup {
   router: UptimeRouter;
   config: UptimeConfig;
+  security: SecurityPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
-export interface UptimeCorePlugins {
+export interface UptimeCorePluginsSetup {
   features: PluginSetupContract;
   alerting: any;
-  elasticsearch: any;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+}
+
+export interface UptimeCorePluginsStart {
+  security: SecurityPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
 export interface UMBackendFrameworkAdapter {

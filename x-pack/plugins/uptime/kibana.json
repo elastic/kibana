@@ -14,13 +14,15 @@
   "requiredPlugins": [
     "alerting",
     "embeddable",
+    "encryptedSavedObjects",
     "inspector",
     "features",
     "licensing",
-    "triggersActionsUi",
-    "usageCollection",
+    "observability",
     "ruleRegistry",
-    "observability"
+    "security",
+    "triggersActionsUi",
+    "usageCollection"
   ],
   "server": true,
   "ui": true,
