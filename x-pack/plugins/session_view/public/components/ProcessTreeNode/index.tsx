@@ -15,7 +15,7 @@ import React, { useMemo, useRef, useLayoutEffect, useState, useEffect, MouseEven
 import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Process } from '../../hooks/use_process_tree';
-import { useStyles } from './styles';
+import { useStyles, ButtonType } from './styles';
 import { ProcessTreeAlerts } from '../ProcessTreeAlerts';
 
 interface ProcessDeps {
@@ -119,7 +119,7 @@ export function ProcessTreeNode({
     if (!isSessionLeader && process.children.length > 0) {
       buttons.push(
         <EuiButton
-          css={styles.getButtonStyle(styles.ButtonType.children)}
+          css={styles.getButtonStyle(ButtonType.children)}
           onClick={() => setChildrenExpanded(!childrenExpanded)}
         >
           <FormattedMessage
@@ -134,7 +134,7 @@ export function ProcessTreeNode({
     if (alerts.length) {
       buttons.push(
         <EuiButton
-          css={styles.getButtonStyle(styles.ButtonType.alerts)}
+          css={styles.getButtonStyle(ButtonType.alerts)}
           onClick={() => setAlertsExpanded(!alertsExpanded)}
         >
           <FormattedMessage id="xpack.sessionView.alerts" defaultMessage="Alerts" />
@@ -202,7 +202,7 @@ export function ProcessTreeNode({
 
     if (user.name === 'root' && user.id !== parent.user.id) {
       return (
-        <EuiButton css={styles.getButtonStyle(styles.ButtonType.userChanged)}>
+        <EuiButton css={styles.getButtonStyle(ButtonType.userChanged)}>
           <FormattedMessage
             id="xpack.sessionView.execUserChange"
             defaultMessage="Root escalation"
