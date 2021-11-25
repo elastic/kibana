@@ -9,7 +9,7 @@ import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types'
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import { getCurrentLocation } from '../store/selector';
@@ -133,6 +133,15 @@ export const HostIsolationExceptionsList = () => {
     setItemToDelete(null);
   };
 
+  const handleCloseFlyout = useCallback(
+    () =>
+      navigateCallback({
+        show: undefined,
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
+
   return (
     <AdministrationListPage
       title={
@@ -167,7 +176,9 @@ export const HostIsolationExceptionsList = () => {
       }
       hideHeader={!hasDataToShow}
     >
-      {showFlyout && <HostIsolationExceptionsFormFlyout />}
+      {showFlyout && (
+        <HostIsolationExceptionsFormFlyout onCancel={handleCloseFlyout} id={location.id} />
+      )}
 
       {itemToDelete ? (
         <HostIsolationExceptionDeleteModal item={itemToDelete} onCancel={handleCloseDeleteDialog} />

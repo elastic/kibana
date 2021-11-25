@@ -21,10 +21,10 @@ import {
   getESQueryHostMetadataByFleetAgentIds,
   buildUnitedIndexQuery,
 } from '../../routes/metadata/query_builders';
-import { EndpointError } from '../../errors';
 import { HostMetadata } from '../../../../common/endpoint/types';
 import { Agent } from '../../../../../fleet/common';
 import { AgentPolicyServiceInterface } from '../../../../../fleet/server/services';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;
@@ -117,7 +117,12 @@ describe('EndpointMetadataService', () => {
     it('should throw wrapped error if es error', async () => {
       const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({});
       esClient.search.mockResolvedValue(esMockResponse);
-      const metadataListResponse = metadataService.getHostMetadataList(esClient);
+      const metadataListResponse = metadataService.getHostMetadataList(esClient, {
+        page: 0,
+        pageSize: 10,
+        kuery: '',
+        hostStatuses: [],
+      });
       await expect(metadataListResponse).rejects.toThrow(EndpointError);
     });
 
@@ -168,18 +173,16 @@ describe('EndpointMetadataService', () => {
         }
       );
 
-      const metadataListResponse = await metadataService.getHostMetadataList(esClient);
-      const unitedIndexQuery = await buildUnitedIndexQuery(
-        { page: 1, pageSize: 10, filters: {} },
-        packagePolicyIds
+      const queryOptions = { page: 1, pageSize: 10, kuery: '', hostStatuses: [] };
+      const metadataListResponse = await metadataService.getHostMetadataList(
+        esClient,
+        queryOptions
       );
+      const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, packagePolicyIds);
 
       expect(esClient.search).toBeCalledWith(unitedIndexQuery);
       expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), agentPolicyIds);
       expect(metadataListResponse).toEqual({
-        pageSize: 10,
-        page: 1,
-        total: 1,
         data: [
           {
             metadata: endpointMetadataDoc,
@@ -202,6 +205,7 @@ describe('EndpointMetadataService', () => {
             },
           },
         ],
+        total: 1,
       });
     });
   });

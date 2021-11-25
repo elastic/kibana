@@ -5,18 +5,28 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n-react';
+import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { ColorMode } from '../../../../../src/plugins/charts/common';
+import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
-import type { MetricState } from '../../common/expressions';
+import type { MetricConfig, MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
+import { CUSTOM_PALETTE, getStopsForFixedMode, shiftPalette } from '../shared_components';
+import { MetricDimensionEditor } from './dimension_editor';
 
 const toExpression = (
+  paletteService: PaletteRegistry,
   state: MetricState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  attributes?: { mode?: 'reduced' | 'full'; title?: string; description?: string }
+  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>
 ): Ast | null => {
   if (!state.accessor) {
     return null;
@@ -24,6 +34,22 @@ const toExpression = (
 
   const [datasource] = Object.values(datasourceLayers);
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
+
+  const stops = state.palette?.params?.stops || [];
+  const isCustomPalette = state.palette?.params?.name === CUSTOM_PALETTE;
+
+  const paletteParams = {
+    ...state.palette?.params,
+    colors: stops.map(({ color }) => color),
+    stops:
+      isCustomPalette || state.palette?.params?.rangeMax == null
+        ? stops.map(({ stop }) => stop)
+        : shiftPalette(
+            stops,
+            Math.max(state.palette?.params?.rangeMax, ...stops.map(({ stop }) => stop))
+          ).map(({ stop }) => stop),
+    reverse: false,
+  };
 
   return {
     type: 'expression',
@@ -34,16 +60,26 @@ const toExpression = (
         arguments: {
           title: [attributes?.title || ''],
           description: [attributes?.description || ''],
-          metricTitle: [(operation && operation.label) || ''],
+          metricTitle: [operation?.label || ''],
           accessor: [state.accessor],
           mode: [attributes?.mode || 'full'],
+          colorMode: [state?.colorMode || ColorMode.None],
+          palette:
+            state?.colorMode && state?.colorMode !== ColorMode.None
+              ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
+              : [],
         },
       },
     ],
   };
 };
-
-export const metricVisualization: Visualization<MetricState> = {
+export const getMetricVisualization = ({
+  paletteService,
+  theme,
+}: {
+  paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
+}): Visualization<MetricState> => ({
   id: 'lnsMetric',
 
   visualizationTypes: [
@@ -97,15 +133,30 @@ export const metricVisualization: Visualization<MetricState> = {
   },
 
   getConfiguration(props) {
+    const hasColoring = props.state.palette != null;
+    const stops = props.state.palette?.params?.stops || [];
     return {
       groups: [
         {
           groupId: 'metric',
           groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
           layerId: props.state.layerId,
-          accessors: props.state.accessor ? [{ columnId: props.state.accessor }] : [],
+          accessors: props.state.accessor
+            ? [
+                {
+                  columnId: props.state.accessor,
+                  triggerIcon: hasColoring ? 'colorBy' : undefined,
+                  palette: hasColoring
+                    ? props.state.palette?.params?.name === CUSTOM_PALETTE
+                      ? getStopsForFixedMode(stops, props.state.palette?.params.colorStops)
+                      : stops.map(({ color }) => color)
+                    : undefined,
+                },
+              ]
+            : [],
           supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+          enableDimensionEditor: true,
           required: true,
         },
       ],
@@ -129,20 +180,32 @@ export const metricVisualization: Visualization<MetricState> = {
     }
   },
 
-  toExpression,
+  toExpression: (state, datasourceLayers, attributes) =>
+    toExpression(paletteService, state, datasourceLayers, { ...attributes }),
   toPreviewExpression: (state, datasourceLayers) =>
-    toExpression(state, datasourceLayers, { mode: 'reduced' }),
+    toExpression(paletteService, state, datasourceLayers, { mode: 'reduced' }),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };
   },
 
   removeDimension({ prevState }) {
-    return { ...prevState, accessor: undefined };
+    return { ...prevState, accessor: undefined, colorMode: ColorMode.None, palette: undefined };
+  },
+
+  renderDimensionEditor(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <MetricDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   getErrorMessages(state) {
     // Is it possible to break it?
     return undefined;
   },
-};
+});

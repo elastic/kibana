@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -101,7 +101,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         <EuiButton
           key="reloadButton"
           iconType="refresh"
-          color="secondary"
+          color="success"
           data-test-subj="reloadButton"
           onClick={onReloadClick}
         >

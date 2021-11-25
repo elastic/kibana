@@ -8,6 +8,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
+import 'react-ace';
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
 import 'brace/mode/json';
@@ -34,7 +35,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
 import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
