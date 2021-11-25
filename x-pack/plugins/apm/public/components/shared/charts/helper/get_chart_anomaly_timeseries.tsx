@@ -24,7 +24,12 @@ export function getChartAnomalyTimeseries({
 }: {
   anomalyTimeseries?: ServiceAnomalyTimeseries;
   theme: EuiTheme;
-}): { boundaries: APMChartSpec[]; scores: APMChartSpec[] } | undefined {
+}):
+  | {
+      boundaries: APMChartSpec[];
+      scores: APMChartSpec[];
+    }
+  | undefined {
   if (!anomalyTimeseries) {
     return undefined;
   }
@@ -33,7 +38,7 @@ export function getChartAnomalyTimeseries({
     {
       title: 'model plot',
       type: 'area',
-      fit: Fit.None,
+      fit: Fit.Lookahead,
       hideLegend: true,
       hideTooltipValue: true,
       areaSeriesStyle: {
@@ -61,6 +66,28 @@ export function getChartAnomalyTimeseries({
   const scores: APMChartSpec[] = severities.map(({ severity, threshold }) => {
     const color = getSeverityColor(threshold);
 
+    const style = {
+      line: {
+        opacity: 0,
+      },
+      area: {
+        fill: color,
+      },
+      point: {
+        visible: true,
+        opacity: 0.75,
+        radius: 3,
+        strokeWidth: 1,
+        fill: color,
+        stroke: rgba(0, 0, 0, 0.1),
+      },
+    };
+
+    const data = anomalyTimeseries.anomalies.map((anomaly) => ({
+      ...anomaly,
+      y: getSeverity(anomaly.y ?? 0).id === severity ? anomaly.actual : null,
+    }));
+
     return {
       title: i18n.translate('xpack.apm.anomalyScore', {
         defaultMessage:
@@ -70,27 +97,9 @@ export function getChartAnomalyTimeseries({
         },
       }),
       type: 'line',
-      groupId: 'anomalies',
       hideLegend: true,
-      lineSeriesStyle: {
-        line: {
-          opacity: 0,
-        },
-        point: {
-          visible: true,
-          opacity: 1,
-          radius: 4,
-          strokeWidth: 2,
-          shape: 'plus' as const,
-        },
-      },
-      data: anomalyTimeseries.anomalies.map((anomaly) => ({
-        ...anomaly,
-        y:
-          getSeverity(anomaly.y ?? 0).id === severity
-            ? Math.floor(anomaly.y ?? 0)
-            : null,
-      })),
+      lineSeriesStyle: style,
+      data,
       color,
     };
   });

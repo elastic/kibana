@@ -66,6 +66,7 @@ export function getTransactionMetrics(events: Fields[]) {
 
     return {
       ...metricset.key,
+      'metricset.name': 'transaction',
       'transaction.duration.histogram': sortAndCompressHistogram(histogram),
       _doc_count: metricset.events.length,
     };

@@ -17,6 +17,6 @@ export function getAnomalyResultBucketSize({
   return getBucketSize({
     start,
     end,
-    minBucketSize: 15 * 60,
+    numBuckets: 100,
   });
 }

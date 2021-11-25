@@ -60,6 +60,11 @@ export class BaseSpan extends Serializable {
     return this;
   }
 
+  outcome(outcome: 'success' | 'failure' | 'unknown') {
+    this.fields['event.outcome'] = outcome;
+    return this;
+  }
+
   serialize(): Fields[] {
     return [this.fields, ...this._children.flatMap((child) => child.serialize())];
   }

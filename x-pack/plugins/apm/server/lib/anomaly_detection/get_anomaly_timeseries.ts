@@ -50,6 +50,10 @@ export async function getAnomalyTimeseries({
     mlSetup.anomalyDetectors
   );
 
+  if (!mlJobs.length) {
+    return [];
+  }
+
   const anomaliesResponse = await anomalySearch(
     mlSetup.mlSystem.mlAnomalySearch,
     {
@@ -113,9 +117,16 @@ export async function getAnomalyTimeseries({
                   },
                 },
                 aggs: {
-                  max_anomaly_score: {
-                    max: {
-                      field: 'record_score',
+                  top_anomaly: {
+                    top_metrics: {
+                      metrics: asMutableArray([
+                        { field: 'record_score' },
+                        { field: 'actual' },
+                      ] as const),
+                      size: 1,
+                      sort: {
+                        record_score: 'desc',
+                      },
                     },
                   },
                   model_lower: {
@@ -170,7 +181,18 @@ export async function getAnomalyTimeseries({
         version: Number(job.custom_settings!.job_tags!.apm_ml_version),
         anomalies: bucket.timeseries.buckets.map((dateBucket) => ({
           x: dateBucket.key as number,
-          y: divide(dateBucket.max_anomaly_score.value, divider),
+          y:
+            (dateBucket.top_anomaly.top[0]?.metrics.record_score as
+              | number
+              | null
+              | undefined) ?? null,
+          actual: divide(
+            (dateBucket.top_anomaly.top[0]?.metrics.actual as
+              | number
+              | null
+              | undefined) ?? null,
+            divider
+          ),
         })),
         bounds: bucket.timeseries.buckets.map((dateBucket) => ({
           x: dateBucket.key as number,

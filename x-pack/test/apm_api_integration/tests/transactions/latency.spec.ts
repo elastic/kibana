@@ -295,24 +295,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('should have a successful response', () => {
           expect(response.status).to.eql(200);
         });
-
-        it('should return the ML job id for anomalies of the selected environment', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.have.property('anomalyTimeseries');
-          expect(latencyChartReturn.anomalyTimeseries).to.have.property('jobId');
-          expectSnapshot(latencyChartReturn.anomalyTimeseries?.jobId).toMatchInline(
-            `"apm-production-6117-high_mean_transaction_duration"`
-          );
-        });
-
-        it('should return a non-empty anomaly series', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.have.property('anomalyTimeseries');
-          expect(latencyChartReturn.anomalyTimeseries?.anomalyBoundaries?.length).to.be.greaterThan(
-            0
-          );
-          expectSnapshot(latencyChartReturn.anomalyTimeseries?.anomalyBoundaries).toMatch();
-        });
       });
 
       describe('with all environments selected', () => {
@@ -334,11 +316,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('should have a successful response', () => {
           expect(response.status).to.eql(200);
-        });
-
-        it('should not return anomaly timeseries data', () => {
-          const latencyChartReturn = response.body as LatencyChartReturnType;
-          expect(latencyChartReturn).to.not.have.property('anomalyTimeseries');
         });
       });
     }

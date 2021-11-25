@@ -48,6 +48,11 @@ import { getServicesDetailedStatistics } from './get_services_detailed_statistic
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
+import {
+  UnknownMLCapabilitiesError,
+  InsufficientMLCapabilities,
+  MLPrivilegesUninitialized,
+} from '../../../../ml/server';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -962,16 +967,29 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
       query: { start, end, transactionType },
     } = resources.params;
 
-    return {
-      allAnomalyTimeseries: await getAnomalyTimeseries({
+    try {
+      const allAnomalyTimeseries = await getAnomalyTimeseries({
         serviceName,
         transactionType,
         start,
         end,
         mlSetup: setup.ml,
         logger: resources.logger,
-      }),
-    };
+      });
+
+      return {
+        allAnomalyTimeseries,
+      };
+    } catch (error) {
+      if (
+        error instanceof UnknownMLCapabilitiesError ||
+        error instanceof InsufficientMLCapabilities ||
+        error instanceof MLPrivilegesUninitialized
+      ) {
+        throw Boom.forbidden(error.message);
+      }
+      throw error;
+    }
   },
 });
 

@@ -31,11 +31,7 @@ import {
   useChartTheme,
 } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import {
-  Coordinate,
-  RectCoordinate,
-  TimeSeries,
-} from '../../../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
@@ -159,28 +155,12 @@ export function TimeseriesChart({
           gridLine={{ visible: false }}
         />
         <Axis
-          id="x-axis-anomalies"
-          groupId="anomalies"
-          position={Position.Top}
-          showOverlappingTicks
-          tickFormat={xFormatter}
-          hide
-          gridLine={{ visible: false }}
-        />
-        <Axis
           domain={yDomain}
           id="y-axis"
           ticks={3}
           position={Position.Left}
           tickFormat={yTickFormat ? yTickFormat : yLabelFormat}
           labelFormat={yLabelFormat}
-        />
-        <Axis
-          domain={{ min: 0, max: 100 }}
-          id="y-axis-anomalies"
-          groupId="anomalies"
-          hide
-          gridLine={{ visible: false }}
         />
 
         {showAnnotations && (
