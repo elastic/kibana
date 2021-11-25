@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { first } from 'lodash';
 import { ENVIRONMENT_ALL } from '../environment_filter_values';
 import { Environment } from '../environment_rt';
 import { ApmMlDetectorType } from './apm_ml_detectors';
@@ -28,17 +27,14 @@ export function getPreferredServiceAnomalyTimeseries({
     (serie) => serie.type === detectorType
   );
 
-  if (environment === ENVIRONMENT_ALL.value) {
-    return environments.length === 1
-      ? seriesForType.find((serie) => serie.environment === first(environments))
-      : undefined;
-  }
+  const preferredEnvironment =
+    environment === ENVIRONMENT_ALL.value && environments.length === 1
+      ? environments[0]
+      : environment;
 
-  const preferred = seriesForType.find(
-    (serie) => serie.environment === environment
+  return seriesForType.find(
+    (serie) =>
+      serie.environment === preferredEnvironment &&
+      (fallbackToTransactions ? serie.version <= 2 : serie.version >= 3)
   );
-
-  return (!fallbackToTransactions && preferred?.version) ?? 0 >= 3
-    ? preferred
-    : undefined;
 }
