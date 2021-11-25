@@ -43,22 +43,18 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
 
       // Double check that the filter has the correct time range and default filter value
       const startingMatchFilters = await PageObjects.canvas.getMatchFiltersFromDebug();
-      expect(
-        startingMatchFilters[0].query.term.project !== null &&
-          typeof startingMatchFilters[0].query.term.project === 'object'
-      ).to.equal(true);
-      expect(startingMatchFilters[0].query.term.project?.value).to.equal('apm');
+      const projectQuery = startingMatchFilters[0].query.term.project;
+      expect(projectQuery !== null && typeof projectQuery === 'object').to.equal(true);
+      expect(projectQuery?.value).to.equal('apm');
 
       // Change dropdown value
       await testSubjects.selectValue('canvasDropdownFilter__select', 'beats');
 
       await retry.try(async () => {
         const matchFilters = await PageObjects.canvas.getMatchFiltersFromDebug();
-        expect(
-          matchFilters[0].query.term.project !== null &&
-            typeof matchFilters[0].query.term.project === 'object'
-        ).to.equal(true);
-        expect(matchFilters[0].query.term.project?.value).to.equal('beats');
+        const newProjectQuery = matchFilters[0].query.term.project;
+        expect(newProjectQuery !== null && typeof newProjectQuery === 'object').to.equal(true);
+        expect(newProjectQuery?.value).to.equal('beats');
       });
     });
 
