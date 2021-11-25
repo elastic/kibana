@@ -40,6 +40,7 @@ import { IngestManagerError } from '../errors';
 
 import {
   overridePackageInputs,
+  updatePackageInputs,
   packagePolicyService,
   _applyIndexPrivileges,
 } from './package_policy';
@@ -1172,7 +1173,7 @@ describe('Package policy service', () => {
 
   describe('overridePackageInputs', () => {
     describe('when variable is already defined', () => {
-      it('preserves original variable value without overwriting', () => {
+      it('override original variable value', () => {
         const basePackagePolicy: NewPackagePolicy = {
           name: 'base-package-policy',
           description: 'Base Package Policy',
@@ -1249,6 +1250,775 @@ describe('Package policy service', () => {
         ];
 
         const result = overridePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+        expect(result.inputs[0]?.vars?.path.value).toEqual('/var/log/new-logfile.log');
+      });
+    });
+
+    describe('when variable is undefined in original object', () => {
+      it('adds the variable definition to the resulting object', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          output_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                    {
+                      name: 'path_2',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            policy_template: 'template_1',
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+              path_2: {
+                type: 'text',
+                value: '/var/log/custom.log',
+              },
+            },
+          },
+        ];
+
+        const result = overridePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+
+        expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
+      });
+    });
+
+    describe('when variable is undefined in original object and policy_template is undefined', () => {
+      it('adds the variable definition to the resulting object', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          output_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                    {
+                      name: 'path_2',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            policy_template: undefined, // preconfigured input overrides don't have a policy_template
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+              path_2: {
+                type: 'text',
+                value: '/var/log/custom.log',
+              },
+            },
+          },
+        ];
+
+        const result = overridePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+
+        expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
+      });
+    });
+
+    describe('when an input of the same type exists under multiple policy templates', () => {
+      it('adds variable definitions to the proper streams', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          output_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              policy_template: 'template_2',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+              ],
+            },
+            {
+              name: 'template_2',
+              title: 'Template 2',
+              description: 'Template 2',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_1',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_2',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template2-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+        ];
+
+        const result = overridePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+
+        expect(result.inputs).toHaveLength(2);
+
+        const template1Input = result.inputs.find(
+          (input) => input.policy_template === 'template_1'
+        );
+        const template2Input = result.inputs.find(
+          (input) => input.policy_template === 'template_2'
+        );
+
+        expect(template1Input).toBeDefined();
+        expect(template2Input).toBeDefined();
+
+        expect(template1Input?.streams[0].vars?.log_file_path.value).toBe(
+          '/var/log/template1-logfile.log'
+        );
+
+        expect(template2Input?.streams[0].vars?.log_file_path.value).toBe(
+          '/var/log/template2-logfile.log'
+        );
+      });
+    });
+
+    describe('when an input or stream is disabled on the original policy object', () => {
+      it('remains disabled on the resulting policy object', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          output_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: false,
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile2',
+                  },
+                  vars: {
+                    log_file_path_2: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'logs_2',
+              policy_template: 'template_1',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              policy_template: 'template_2',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+                {
+                  type: 'logs_2',
+                  title: 'Log 2',
+                  description: 'Log Input 2',
+                  vars: [],
+                },
+              ],
+            },
+            {
+              name: 'template_2',
+              title: 'Template 2',
+              description: 'Template 2',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_1',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile.log',
+                  },
+                },
+              },
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile2',
+                },
+                vars: {
+                  log_file_path_2: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile2.log',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_2',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template2-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+        ];
+
+        const result = overridePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+
+        const template1Inputs = result.inputs.filter(
+          (input) => input.policy_template === 'template_1'
+        );
+
+        const template2Inputs = result.inputs.filter(
+          (input) => input.policy_template === 'template_2'
+        );
+
+        expect(template1Inputs).toHaveLength(2);
+        expect(template2Inputs).toHaveLength(1);
+
+        const logsInput = template1Inputs?.find((input) => input.type === 'logs');
+        expect(logsInput?.enabled).toBe(false);
+
+        const logfileStream = logsInput?.streams.find(
+          (stream) => stream.data_stream.type === 'logfile'
+        );
+
+        expect(logfileStream?.enabled).toBe(false);
+      });
+    });
+
+    describe('when a datastream is deleted from an input', () => {
+      it('it remove the non existing datastream', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          output_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'dataset.test123', type: 'log' },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+            },
+          },
+        ];
+
+        const result = overridePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+        expect(result.inputs[0]?.vars?.path.value).toEqual('/var/log/new-logfile.log');
+      });
+    });
+  });
+
+  describe('updatePackageInputs', () => {
+    describe('when variable is already defined', () => {
+      it('preserves original variable value without overwriting', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          output_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+            },
+          },
+        ];
+
+        const result = updatePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1346,7 +2116,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = updatePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1445,7 +2215,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = updatePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1598,7 +2368,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = updatePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1819,7 +2589,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = updatePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1932,7 +2702,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = updatePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
