@@ -6,10 +6,11 @@
   "id": "uptime",
   "kibanaVersion": "kibana",
   "optionalPlugins": [
+    "cloud",
     "data",
+    "fleet",
     "home",
     "ml",
-    "fleet"
   ],
   "requiredPlugins": [
     "alerting",
