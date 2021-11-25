@@ -79,7 +79,7 @@ module.exports = {
             node.type === esTypes.FunctionExpression ||
             node.type === esTypes.ArrowFunctionExpression
           ) {
-            return traverse.STOP;
+            return traverse.SKIP;
           }
 
           if (

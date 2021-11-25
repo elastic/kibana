@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { CoreTheme } from 'kibana/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { ActionConnector } from '../../state/alerts/alerts';
 
-export const simpleAlertEnabled = (defaultActions: ActionConnector[]) => {
+export const simpleAlertEnabled = (
+  defaultActions: ActionConnector[],
+  theme$: Observable<CoreTheme>
+) => {
   return {
     title: i18n.translate('xpack.uptime.overview.alerts.enabled.success', {
       defaultMessage: 'Rule successfully enabled ',
@@ -23,7 +28,8 @@ export const simpleAlertEnabled = (defaultActions: ActionConnector[]) => {
         values={{
           actionConnectors: <strong>{defaultActions.map(({ name }) => name).join(', ')}</strong>,
         }}
-      />
+      />,
+      { theme$ }
     ),
   };
 };
