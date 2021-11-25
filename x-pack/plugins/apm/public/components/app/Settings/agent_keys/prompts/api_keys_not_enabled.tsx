@@ -27,7 +27,6 @@ export function ApiKeysNotEnabled() {
           )}
         </h2>
       }
-      color="danger"
       iconType="alert"
       body={
         <p>

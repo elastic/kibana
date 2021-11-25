@@ -97,7 +97,6 @@ function AgentKeysContent() {
     if (isLoading) {
       return (
         <EuiEmptyPrompt
-          color="subdued"
           icon={<EuiLoadingSpinner size="xl" />}
           titleSize="xs"
           title={
@@ -118,7 +117,6 @@ function AgentKeysContent() {
       return (
         <EuiEmptyPrompt
           iconType="alert"
-          color="danger"
           title={
             <h2>
               {i18n.translate(

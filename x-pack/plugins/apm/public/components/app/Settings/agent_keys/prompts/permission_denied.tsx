@@ -13,7 +13,6 @@ export function PermissionDenied() {
   return (
     <EuiEmptyPrompt
       iconType="securityApp"
-      color="danger"
       title={
         <h2>
           {i18n.translate(
