@@ -72,6 +72,9 @@ jest.mock(
         ),
         upgrade: jest.fn(),
         getUpgradeDryRunDiff: jest.fn(),
+        enrichPolicyWithDefaultsFromPackage: jest
+          .fn()
+          .mockImplementation((soClient, newPolicy) => newPolicy),
       },
     };
   }
