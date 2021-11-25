@@ -162,6 +162,7 @@ export class WrappedSetupModeRenderer extends React.Component {
                     iconSide="right"
                     size="s"
                     onClick={() => toggleSetupMode(false)}
+                    data-test-subj="exitSetupModeBtn"
                   >
                     {i18n.translate('xpack.monitoring.setupMode.exit', {
                       defaultMessage: `Exit setup mode`,

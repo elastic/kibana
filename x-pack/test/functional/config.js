@@ -213,6 +213,11 @@ export default async function ({ readConfigFile }) {
     },
     security: {
       roles: {
+        test_monitoring: {
+          elasticsearch: {
+            cluster: ['monitor'],
+          },
+        },
         test_logstash_reader: {
           elasticsearch: {
             cluster: [],

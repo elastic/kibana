@@ -3,9 +3,9 @@
 exports[`EnterButton should render properly 1`] = `
 <div
   className="monSetupModeEnterButton__buttonWrapper"
-  data-test-subj="monitoringSetupModeBtn"
 >
   <EuiButton
+    data-test-subj="monitoringSetupModeBtn"
     iconSide="right"
     iconType="flag"
     isLoading={false}

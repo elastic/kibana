@@ -89,6 +89,7 @@ const showDisabledWatcherClusterAlertsError = () => {
         })}
       </p>
     ),
+    'data-test-subj': 'alertsCreatedToast',
   });
 };
 
