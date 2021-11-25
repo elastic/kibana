@@ -5,20 +5,33 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import { QueryObserverResult, useQuery } from 'react-query';
+import { useQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
+import { useKibana } from 'src/plugins/kibana_react/public';
 import { ProcessEvent } from '../../hooks/use_process_tree';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { ProcessEventResults, getSessionViewProcessEvents } from './service';
+import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
 
-export const useFetchSessionViewProcessEvents = (
-  sessionEntityId: string
-): QueryObserverResult<ProcessEventResults, Error> => {
+interface ProcessEventResults {
+  events: {
+    hits: any[];
+    total: number;
+  };
+  alerts: {
+    hits: any[];
+    total: number;
+  };
+}
+
+export const useFetchSessionViewProcessEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
 
   return useQuery<ProcessEventResults, Error>(['sessionViewProcessEvents', sessionEntityId], () =>
-    getSessionViewProcessEvents({ http, sessionEntityId })
+    http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
+      query: {
+        sessionEntityId,
+      },
+    })
   );
 };
 

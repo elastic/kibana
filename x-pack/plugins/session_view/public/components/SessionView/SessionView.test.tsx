@@ -9,25 +9,19 @@ import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { sessionViewProcessEventsMock } from '../../../common/schemas/responses/session_view_process_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock';
-import { getSessionViewProcessEvents } from './service';
 import { SessionView } from './index';
-
-jest.mock('./service');
-
-const getSessionViewProcessEventsMock = getSessionViewProcessEvents as jest.Mock;
 
 describe('SessionView component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
+  let mockedApi: AppContextTestRender['coreStart']['http']['get'];
 
-  const waitForApiCall = () => {
-    return waitFor(() => expect(getSessionViewProcessEventsMock).toHaveBeenCalled());
-  };
+  const waitForApiCall = () => waitFor(() => expect(mockedApi).toHaveBeenCalled());
 
   beforeEach(() => {
-    getSessionViewProcessEventsMock.mockClear();
     mockedContext = createAppRootMockRenderer();
+    mockedApi = mockedContext.coreStart.http.get;
     render = () =>
       (renderResult = mockedContext.render(<SessionView sessionEntityId="test-entity-id" />));
   });
@@ -35,7 +29,7 @@ describe('SessionView component', () => {
   describe('When SessionView is mounted', () => {
     describe('And no data exists', () => {
       beforeEach(async () => {
-        getSessionViewProcessEventsMock.mockReturnValue({
+        mockedApi.mockResolvedValue({
           events: {
             hits: [],
             total: 0,
@@ -62,16 +56,14 @@ describe('SessionView component', () => {
 
     describe('And data exists', () => {
       beforeEach(async () => {
-        getSessionViewProcessEventsMock.mockImplementation(sessionViewProcessEventsMock);
+        mockedApi.mockResolvedValue(sessionViewProcessEventsMock);
       });
 
       it('should show loading indicator while retrieving data and hide it when it gets it', async () => {
         let releaseApiResponse: (value?: unknown) => void;
 
         // make the request wait
-        getSessionViewProcessEventsMock.mockReturnValue(
-          new Promise((resolve) => (releaseApiResponse = resolve))
-        );
+        mockedApi.mockReturnValue(new Promise((resolve) => (releaseApiResponse = resolve)));
         render();
         await waitForApiCall();
 
@@ -79,7 +71,7 @@ describe('SessionView component', () => {
         expect(renderResult.getByTestId('sectionLoading')).toBeTruthy();
 
         // release the request
-        releaseApiResponse!(getSessionViewProcessEventsMock());
+        releaseApiResponse!(mockedApi);
 
         //  check the loader is gone
         await waitForElementToBeRemoved(renderResult.getByTestId('sectionLoading'));
