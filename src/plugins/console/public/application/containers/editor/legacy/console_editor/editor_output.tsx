@@ -28,6 +28,9 @@ import { applyCurrentSettings } from './apply_editor_settings';
 const isJSONContentType = (contentType?: string) =>
   Boolean(contentType && contentType.indexOf('application/json') >= 0);
 
+const isMapboxVectorTile = (contentType?: string) =>
+  Boolean(contentType && contentType.indexOf('application/vnd.mapbox-vector-tile') >= 0);
+
 /**
  * Best effort expand literal strings
  */
@@ -85,7 +88,7 @@ function EditorOutputUI() {
             if (readOnlySettings.tripleQuotes && isJSONContentType(contentType)) {
               return safeExpandLiteralStrings(value as string);
             }
-            if (contentType.includes('application/vnd.mapbox-vector-tile')) {
+            if (isMapboxVectorTile(contentType)) {
               return i18n.translate('console.outputCannotPreviewBinaryData', {
                 defaultMessage: 'Cannot preview binary data.',
               });
