@@ -18,7 +18,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup } from '../../../lib/helpers/setup_request';
 
-export async function getServiceErrorGroupDetailedStatistics({
+export async function getErrorGroupDetailedStatistics({
   kuery,
   serviceName,
   setup,
@@ -106,7 +106,7 @@ export async function getServiceErrorGroupDetailedStatistics({
   });
 }
 
-export async function getServiceErrorGroupPeriods({
+export async function getErrorGroupPeriods({
   kuery,
   serviceName,
   setup,
@@ -141,7 +141,7 @@ export async function getServiceErrorGroupPeriods({
     groupIds,
   };
 
-  const currentPeriodPromise = getServiceErrorGroupDetailedStatistics({
+  const currentPeriodPromise = getErrorGroupDetailedStatistics({
     ...commonProps,
     start,
     end,
@@ -149,7 +149,7 @@ export async function getServiceErrorGroupPeriods({
 
   const previousPeriodPromise =
     comparisonStart && comparisonEnd
-      ? getServiceErrorGroupDetailedStatistics({
+      ? getErrorGroupDetailedStatistics({
           ...commonProps,
           start: comparisonStart,
           end: comparisonEnd,

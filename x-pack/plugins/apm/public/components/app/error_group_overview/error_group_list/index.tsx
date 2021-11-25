@@ -11,9 +11,9 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { asInteger } from '../../../../../common/utils/formatters';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -24,6 +24,7 @@ import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -48,14 +49,23 @@ const Culprit = euiStyled.div`
 `;
 
 type ErrorGroupItem =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors'>['errorGroups'][0];
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['errorGroups'][0];
+type ErrorGroupDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 interface Props {
-  items: ErrorGroupItem[];
+  mainStatistics: ErrorGroupItem[];
   serviceName: string;
+  detailedStatistics: ErrorGroupDetailedStatistics;
+  comparisonEnabled?: boolean;
 }
 
-function ErrorGroupList({ items, serviceName }: Props) {
+function ErrorGroupList({
+  mainStatistics,
+  serviceName,
+  detailedStatistics,
+  comparisonEnabled,
+}: Props) {
   const { urlParams } = useLegacyUrlParams();
 
   const columns = useMemo(() => {
@@ -132,13 +142,13 @@ function ErrorGroupList({ items, serviceName }: Props) {
             <MessageAndCulpritCell>
               <EuiToolTip
                 id="error-message-tooltip"
-                content={item.message || NOT_AVAILABLE_LABEL}
+                content={item.name || NOT_AVAILABLE_LABEL}
               >
                 <MessageLink
                   serviceName={serviceName}
                   errorGroupId={item.groupId}
                 >
-                  {item.message || NOT_AVAILABLE_LABEL}
+                  {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
               <br />
@@ -167,46 +177,64 @@ function ErrorGroupList({ items, serviceName }: Props) {
           ),
       },
       {
-        name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
-          defaultMessage: 'Occurrences',
+        field: 'lastSeen',
+        sortable: true,
+        name: i18n.translate('xpack.apm.errorsTable.lastSeenColumnLabel', {
+          defaultMessage: 'Last seen',
         }),
-        field: 'occurrenceCount',
-        sortable: true,
-        dataType: 'number',
-        render: (_, { occurrenceCount }) =>
-          occurrenceCount
-            ? numeral(occurrenceCount).format('0.[0]a')
-            : NOT_AVAILABLE_LABEL,
-      },
-      {
-        field: 'latestOccurrenceAt',
-        sortable: true,
-        name: i18n.translate(
-          'xpack.apm.errorsTable.latestOccurrenceColumnLabel',
-          {
-            defaultMessage: 'Latest occurrence',
-          }
-        ),
         align: RIGHT_ALIGNMENT,
-        render: (_, { latestOccurrenceAt }) =>
-          latestOccurrenceAt ? (
-            <TimestampTooltip time={latestOccurrenceAt} timeUnit="minutes" />
+        render: (_, { lastSeen }) =>
+          lastSeen ? (
+            <TimestampTooltip time={lastSeen} timeUnit="minutes" />
           ) : (
             NOT_AVAILABLE_LABEL
           ),
       },
+      {
+        field: 'occurrences',
+        name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
+          defaultMessage: 'Occurrences',
+        }),
+        sortable: true,
+        dataType: 'number',
+        align: RIGHT_ALIGNMENT,
+        render: (_, { occurrences, groupId }) => {
+          const currentPeriodTimeseries =
+            detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
+          const previousPeriodTimeseries =
+            detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
+          return (
+            <SparkPlot
+              color="euiColorVis7"
+              series={currentPeriodTimeseries}
+              valueLabel={i18n.translate(
+                'xpack.apm.serviceOveriew.errorsTableOccurrences',
+                {
+                  defaultMessage: `{occurrences} occ.`,
+                  values: {
+                    occurrences: asInteger(occurrences),
+                  },
+                }
+              )}
+              comparisonSeries={
+                comparisonEnabled ? previousPeriodTimeseries : undefined
+              }
+            />
+          );
+        },
+      },
     ] as Array<ITableColumn<ErrorGroupItem>>;
-  }, [serviceName, urlParams]);
+  }, [serviceName, urlParams, detailedStatistics, comparisonEnabled]);
 
   return (
     <ManagedTable
       noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
         defaultMessage: 'No errors found',
       })}
-      items={items}
+      items={mainStatistics}
       columns={columns}
       initialPageSize={25}
-      initialSortField="occurrenceCount"
+      initialSortField="occurrences"
       initialSortDirection="desc"
       sortItems={false}
     />

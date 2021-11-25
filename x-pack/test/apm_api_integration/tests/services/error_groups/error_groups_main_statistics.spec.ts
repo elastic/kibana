@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { generateData, config } from './generate_data';
 
 type ErrorGroupsMainStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -28,11 +28,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi(
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/error_groups/main_statistics'>['params']
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['params']
     >
   ) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/services/{serviceName}/error_groups/main_statistics`,
+      endpoint: `GET /internal/apm/services/{serviceName}/errors/groups/main_statistics`,
       params: {
         path: { serviceName, ...overrides?.path },
         query: {
@@ -54,8 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('handles empty state', async () => {
         const response = await callApi();
         expect(response.status).to.be(200);
-        expect(response.body.error_groups).to.empty();
-        expect(response.body.is_aggregation_accurate).to.eql(true);
+        expect(response.body.errorGroups).to.empty();
       });
     }
   );
@@ -81,8 +80,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns correct number of occurrences', () => {
-            expect(errorGroupMainStatistics.error_groups.length).to.equal(2);
-            expect(errorGroupMainStatistics.error_groups.map((error) => error.name).sort()).to.eql([
+            expect(errorGroupMainStatistics.errorGroups.length).to.equal(2);
+            expect(errorGroupMainStatistics.errorGroups.map((error) => error.name).sort()).to.eql([
               ERROR_NAME_1,
               ERROR_NAME_2,
             ]);
@@ -91,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           it('returns correct occurences', () => {
             const numberOfBuckets = 15;
             expect(
-              errorGroupMainStatistics.error_groups.map((error) => error.occurrences).sort()
+              errorGroupMainStatistics.errorGroups.map((error) => error.occurrences).sort()
             ).to.eql([
               PROD_LIST_ERROR_RATE * numberOfBuckets,
               PROD_ID_ERROR_RATE * numberOfBuckets,
@@ -99,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('has same last seen value as end date', () => {
-            errorGroupMainStatistics.error_groups.map((error) => {
+            errorGroupMainStatistics.errorGroups.map((error) => {
               expect(error.lastSeen).to.equal(moment(end).startOf('minute').valueOf());
             });
           });
