@@ -43,7 +43,8 @@ export class EditPanelAction implements Action<ActionContext> {
   constructor(
     private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
     private readonly application: ApplicationStart,
-    private readonly stateTransfer?: EmbeddableStateTransfer
+    private readonly stateTransfer?: EmbeddableStateTransfer,
+    private readonly getOriginatingPath?: () => string
   ) {
     if (this.application?.currentAppId$) {
       this.application.currentAppId$
@@ -104,15 +105,21 @@ export class EditPanelAction implements Action<ActionContext> {
   public getAppTarget({ embeddable }: ActionContext): NavigationContext | undefined {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
+
     if (app && path) {
       if (this.currentAppId) {
         const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
+
+        const originatingPath = this.getOriginatingPath?.();
+
         const state: EmbeddableEditorState = {
           originatingApp: this.currentAppId,
           valueInput: byValueMode ? this.getExplicitInput({ embeddable }) : undefined,
           embeddableId: embeddable.id,
           searchSessionId: embeddable.getInput().searchSessionId,
+          originatingPath,
         };
+
         return { app, path, state };
       }
       return { app, path };
