@@ -27,7 +27,6 @@ import {
   CommonAlertFilter,
   CommonAlertParams,
 } from '../../common/types/alerts';
-import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
