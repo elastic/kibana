@@ -35,3 +35,10 @@ export interface CaseViewPageProps extends CaseViewBaseProps {
   caseData: Case;
   updateCase: (newCase: Case) => void;
 }
+
+export interface OnUpdateFields {
+  key: keyof Case;
+  value: Case[keyof Case];
+  onSuccess?: () => void;
+  onError?: () => void;
+}

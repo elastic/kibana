@@ -37,7 +37,7 @@ import {
 } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseStringAsExternalService } from '../../common/user_actions';
-import { OnUpdateFields } from '../case_view';
+import type { OnUpdateFields } from '../case_view/types';
 import {
   getConnectorLabelTitle,
   getLabelTitle,

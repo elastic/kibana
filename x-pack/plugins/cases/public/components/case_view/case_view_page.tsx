@@ -46,14 +46,7 @@ import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { getAllowedMetricFeatures } from './helpers';
 import { CaseViewMetrics } from './case_view_metrics';
-import type { CaseViewPageProps } from './types';
-
-export interface OnUpdateFields {
-  key: keyof Case;
-  value: Case[keyof Case];
-  onSuccess?: () => void;
-  onError?: () => void;
-}
+import type { CaseViewPageProps, OnUpdateFields } from './types';
 
 const useOnUpdateField = ({
   caseData,
