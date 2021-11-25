@@ -83,7 +83,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.users.restoreDefaultTestUserRole();
       });
 
-      it('does not render case options in the overflow menu', async () => {
+      // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
+      it.skip('does not render case options in the overflow menu', async () => {
         await observability.alerts.common.openActionsMenuForRow(0);
         await retry.try(async () => {
           await observability.alerts.addToCase.missingAddToExistingCaseSelectorOrFail();
