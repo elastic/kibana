@@ -23,6 +23,7 @@ import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/se
 import { UptimeESClient } from '../../lib';
 import type { UptimeRouter } from '../../../types';
 import { SecurityPluginStart } from '../../../../../security/server';
+import { CloudSetup } from '../../../../../cloud/server';
 import { UptimeConfig } from '../../../../common/config';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
@@ -40,6 +41,7 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 export interface UptimeCoreSetup {
   router: UptimeRouter;
   config: UptimeConfig;
+  cloud: CloudSetup;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
@@ -50,6 +52,7 @@ export interface UptimeCorePluginsSetup {
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
+  cloud?: CloudSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
