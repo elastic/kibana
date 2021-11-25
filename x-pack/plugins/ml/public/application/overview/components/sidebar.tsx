@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana } from '../../contexts/kibana';
 const feedbackLink = 'https://www.elastic.co/community/';
 
