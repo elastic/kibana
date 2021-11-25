@@ -34,7 +34,6 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
-import { RuleStatus } from '../../../timelines/components/timeline/body/renderers/rule_status';
 
 const OverviewPanel = euiStyled(EuiPanel)`
   &&& {
@@ -200,12 +199,16 @@ export const OverviewCards = React.memo<Props>(
         {hasData(statusData) && (
           <EuiFlexItem>
             <OverviewCard title={SIGNAL_STATUS}>
-              <RuleStatus
+              <FormattedFieldValue
                 contextId={contextId}
                 eventId={eventId}
-                fieldName={statusData.data.field}
-                isDraggable={false}
                 value={statusData.values[0]}
+                fieldName={statusData.data.field}
+                linkValue={statusData.linkValue}
+                fieldType={statusData.data.type}
+                fieldFormat={statusData.data.format}
+                isDraggable={false}
+                truncate={false}
               />
             </OverviewCard>
           </EuiFlexItem>
