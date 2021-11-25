@@ -12,7 +12,6 @@ import {
   Plugin as PluginType,
   ISavedObjectsRepository,
   Logger,
-  SavedObjectsClient,
 } from '../../../../src/core/server';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
@@ -26,7 +25,7 @@ import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_obj
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from '../common/config';
-import { installSyntheticsIndexTemplates } from './rest_api/synthetics_service/install_index_templates';
+import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -35,6 +34,7 @@ export class Plugin implements PluginType {
   private initContext: PluginInitializerContext;
   private logger: Logger;
   private server?: UptimeCoreSetup;
+  private syntheticService?: SyntheticsService;
 
   constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
     this.initContext = initializerContext;
@@ -61,6 +61,10 @@ export class Plugin implements PluginType {
         },
       ],
     });
+
+    if (this.server?.config?.unsafe?.service.enabled) {
+      this.syntheticService = new SyntheticsService(this.logger, this.server);
+    }
 
     this.server = {
       config,
@@ -91,23 +95,7 @@ export class Plugin implements PluginType {
     }
 
     if (this.server?.config?.unsafe?.service.enabled) {
-      const esClient = core.elasticsearch.client.asInternalUser;
-      installSyntheticsIndexTemplates({
-        esClient,
-        server: this.server,
-        savedObjectsClient: new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-      }).then(
-        (result) => {
-          if (result.name === 'synthetics' && result.install_status === 'installed') {
-            this.logger.info('Installed synthetics index templates');
-          } else if (result.name === 'synthetics' && result.install_status === 'install_failed') {
-            this.logger.warn('Failed to install synthetics index templates');
-          }
-        },
-        () => {
-          this.logger.warn('Failed to install synthetics index templates');
-        }
-      );
+      this.syntheticService?.setupTemplate(core);
     }
   }
 
