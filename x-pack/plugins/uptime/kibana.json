@@ -10,7 +10,7 @@
     "data",
     "fleet",
     "home",
-    "ml",
+    "ml"
   ],
   "requiredPlugins": [
     "alerting",
