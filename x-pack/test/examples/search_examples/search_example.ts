@@ -16,12 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
 
-  describe('Search session example', () => {
+  describe('Search example', () => {
     const appId = 'searchExamples';
 
     before(async function () {
       await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
-      await comboBox.set('indexPatternSelector', 'logstash-*');
+      await comboBox.setCustom('indexPatternSelector', 'logstash-*');
       await comboBox.set('searchBucketField', 'geo.src');
       await comboBox.set('searchMetricField', 'memory');
       await PageObjects.timePicker.setAbsoluteRange(
