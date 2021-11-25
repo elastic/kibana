@@ -12,7 +12,7 @@ import {
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
-import { UptimeConfig } from '../../config';
+import { UptimeConfig } from '../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
 import { syntheticsMonitor } from './synthetics_monitor';
 
@@ -28,7 +28,7 @@ export const registerUptimeSavedObjects = (
 ) => {
   savedObjectsService.registerType(umDynamicSettings);
 
-  if (config?.unsafe.service.enabled) {
+  if (config?.unsafe?.service.enabled) {
     savedObjectsService.registerType(syntheticsMonitor);
   }
 };
