@@ -182,6 +182,7 @@ function AlertsPage() {
             })}
             color="primary"
             titleSize="xs"
+            data-test-subj="statRuleCount"
           />,
           <EuiStat
             title={120}
@@ -190,6 +191,7 @@ function AlertsPage() {
             })}
             color="primary"
             titleSize="xs"
+            data-test-subj="statDisabled"
           />,
           <EuiStat
             title={0}
@@ -198,6 +200,7 @@ function AlertsPage() {
             })}
             color="primary"
             titleSize="xs"
+            data-test-subj="statMuted"
           />,
           <EuiStat
             title={3}
@@ -206,6 +209,7 @@ function AlertsPage() {
             })}
             color="primary"
             titleSize="xs"
+            data-test-subj="statErrors"
           />,
           <Divider />,
           <EuiButtonEmpty href={manageRulesHref}>

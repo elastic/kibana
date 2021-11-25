@@ -236,6 +236,30 @@ export default ({ getService }: FtrProviderContext) => {
           expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
         });
       });
+
+      describe('Stat counters', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await observability.alerts.common.navigateToTimeWithData();
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        });
+
+        it.only('Exist and display expected values', async () => {
+          const subjToValueMap: { [key: string]: number } = {
+            statRuleCount: 254,
+            statDisabled: 120,
+            statMuted: 0,
+            statErrors: 3,
+          };
+          asyncForEach(Object.keys(subjToValueMap), async (subject: string) => {
+            const value = await observability.alerts.common.getAlertStatValue(subject);
+            expect(value).to.be(subjToValueMap[subject]);
+          });
+        });
+      });
     });
   });
 };

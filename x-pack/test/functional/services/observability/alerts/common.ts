@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { chunk } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
@@ -32,6 +33,7 @@ export function ObservabilityAlertsCommonProvider({
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
+  const log = getService('log');
   const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const toasts = getService('toasts');
@@ -242,6 +244,16 @@ export function ObservabilityAlertsCommonProvider({
     return actionsOverflowButtons[index] || null;
   };
 
+  const getAlertStatValue = async (testSubj: string) => {
+    const stat = await testSubjects.find(testSubj);
+    const title = await stat.findByCssSelector('.euiStat__title');
+    const count = await title.getVisibleText();
+    log.debug(`getAlertStatValue('${testSubj}') found '${count}'`);
+    const value = Number.parseInt(count, 10);
+    expect(Number.isNaN(value)).to.be(false);
+    return value;
+  };
+
   return {
     getQueryBar,
     clearQueryBar,
@@ -276,5 +288,6 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
+    getAlertStatValue,
   };
 }
