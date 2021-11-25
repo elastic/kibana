@@ -8,10 +8,12 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { validateExpression } from './validation';
-import { IndexThresholdAlertParams } from './types';
+import { DiscoverThresholdAlertParams } from './types';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 
-export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams> {
+export { DiscoverThresholdAlertParams } from './types';
+
+export function getAlertType(): AlertTypeModel<DiscoverThresholdAlertParams> {
   return {
     id: '.discover-threshold',
     description: i18n.translate('xpack.stackAlerts.threshold.ui.alertType.descriptionText', {

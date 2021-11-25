@@ -14,7 +14,7 @@ export interface Comparator {
   requiredValues: number;
 }
 
-export interface IndexThresholdAlertParams extends AlertTypeParams {
+export interface DiscoverThresholdAlertParams extends AlertTypeParams {
   thresholdComparator?: string;
   threshold: number[];
   timeWindowSize: number;

@@ -20,7 +20,10 @@ export class AlertingBuiltinsPlugin
     this.logger = ctx.logger.get();
   }
 
-  public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
+  public setup(
+    core: CoreSetup<StackAlertsStartDeps>,
+    { alerting, features, share }: StackAlertsDeps
+  ) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
 
     registerBuiltInAlertTypes({
@@ -29,6 +32,8 @@ export class AlertingBuiltinsPlugin
         .getStartServices()
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
       alerting,
+      share,
+      core,
     });
   }
 

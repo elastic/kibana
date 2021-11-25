@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
+import { CoreSetup } from 'kibana/server';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ParamsSchema } from './alert_type_params';
 import { ActionContext } from './action_context';
@@ -18,6 +19,7 @@ import {
   injectReferences,
 } from '../../../../../../src/plugins/data/common';
 import { AlertTypeParams } from '../../../../alerting/common';
+import { SharePluginSetup } from '../../../../../../src/plugins/share/server';
 
 export const ID = '.discover-threshold';
 export const ActionGroupId = 'threshold met';
@@ -28,6 +30,7 @@ export interface DiscoverThresholdParams extends AlertTypeParams {
   timeWindowSize: number;
   timeWindowUnit: string;
   searchSourceFields: SearchSourceFields;
+  urlTemplate?: string;
 }
 export type DiscoverThresholdExtractedParams = Omit<
   DiscoverThresholdParams,
@@ -45,7 +48,11 @@ export type DiscoverAlertType = AlertType<
   typeof ActionGroupId
 >;
 
-export function getAlertType(logger: Logger): DiscoverAlertType {
+export function getAlertType(
+  logger: Logger,
+  share: SharePluginSetup,
+  core: CoreSetup
+): DiscoverAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Discover threshold',
   });
@@ -130,6 +137,7 @@ export function getAlertType(logger: Logger): DiscoverAlertType {
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
         { name: 'conditions', description: actionVariableContextConditionsLabel },
+        { name: 'link', description: 'A link to see the records that triggered this alert' },
       ],
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
@@ -137,6 +145,7 @@ export function getAlertType(logger: Logger): DiscoverAlertType {
         { name: 'timeWindowSize', description: 'Time window size' },
         { name: 'timeWindowUnit', description: 'Time window unit' },
         { name: 'searchSourceFields', description: 'SearchSourceFields' },
+        { name: 'urlTemplate', description: 'Can contain a URL template' },
       ],
     },
     minimumLicenseRequired: 'basic',
@@ -166,7 +175,7 @@ export function getAlertType(logger: Logger): DiscoverAlertType {
       typeof ActionGroupId
     >
   ) {
-    const { name, services, params } = options;
+    const { name, services, params, alertId, state } = options;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -183,8 +192,14 @@ export function getAlertType(logger: Logger): DiscoverAlertType {
     try {
       const searchSourceClient = await services.searchSourceClient;
       const loadedSearchSource = await searchSourceClient.create(params.searchSourceFields);
+      const index = loadedSearchSource.getField('index');
+      const timeFieldName = index?.timeFieldName;
+      if (!timeFieldName) {
+        throw new Error('Invalid data view without timeFieldName');
+      }
+
       loadedSearchSource.setField('size', 0);
-      const filter = getTime(loadedSearchSource.getField('index'), {
+      const filter = getTime(index, {
         from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
         to: 'now',
       });
@@ -194,26 +209,50 @@ export function getAlertType(logger: Logger): DiscoverAlertType {
       const nrOfDocs = Number(docs.hits.total);
       const met = compareFn(nrOfDocs, params.threshold);
 
+      const link = (
+        params.urlTemplate ??
+        '{{basePath}}/app/discover#/viewAlert/{{alertId}}?from={{from}}&to={{to}}'
+      )
+        .replace('{{alertId}}', alertId)
+        .replace('{{basePath}}', core.http.basePath.publicBaseUrl ?? '')
+        .replace('{{from}}', filter?.query.range[timeFieldName].gte ?? '')
+        .replace('{{to}}', filter?.query.range[timeFieldName].lte ?? '');
+
       if (met) {
         const conditions = `${nrOfDocs} is ${getHumanReadableComparator(
           params.thresholdComparator
         )} ${params.threshold}`;
-        const instanceId = 'test';
-        const date = new Date().toISOString();
+
+        const timestamp = new Date().toISOString();
+        // just for testing
+        const instanceId = timestamp;
         const baseContext: ActionContext = {
           title: name,
           message: `${nrOfDocs} documents found (${conditions})`,
-          date,
+          date: timestamp,
           group: instanceId,
           value: Number(nrOfDocs),
           conditions,
+          link,
         };
 
         const alertInstance = options.services.alertInstanceFactory(instanceId);
+        // store the params we would need to recreate the query that led to this alert instance
+        alertInstance.replaceState({
+          latestTimestamp: timestamp,
+          lastSearchSource: params.searchSourceFields,
+          lastTimeRange: filter!.query.range,
+        });
         alertInstance.scheduleActions(ActionGroupId, baseContext);
+        return {
+          latestTimestamp: timestamp,
+          lastSearchSource: params.searchSourceFields,
+          lastTimeRange: filter!.query.range,
+        };
       }
     } catch (e) {
       logger.error(e);
     }
+    return state;
   }
 }

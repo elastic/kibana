@@ -8,4 +8,5 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { StackAlertsPublicPlugin } from './plugin';
 
+export type { DiscoverThresholdAlertParams } from './alert_types/discover_threshold';
 export const plugin = (ctx: PluginInitializerContext) => new StackAlertsPublicPlugin(ctx);

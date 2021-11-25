@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexThresholdAlertParams } from './types';
+import { DiscoverThresholdAlertParams } from './types';
 import { ValidationResult, builtInComparators } from '../../../../triggers_actions_ui/public';
 
-export const validateExpression = (alertParams: IndexThresholdAlertParams): ValidationResult => {
+export const validateExpression = (alertParams: DiscoverThresholdAlertParams): ValidationResult => {
   const { threshold, timeWindowSize, thresholdComparator } = alertParams;
   const validationResult = { errors: {} };
   const errors = {

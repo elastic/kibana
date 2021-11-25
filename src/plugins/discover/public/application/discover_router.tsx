@@ -17,6 +17,7 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { DiscoverMainProps } from './main/discover_main_route';
+import { ViewAlertRoute } from './view_alert';
 
 export const discoverRouter = (services: DiscoverServices, history: History) => {
   const mainRouteProps: DiscoverMainProps = {
@@ -46,6 +47,12 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
               children={<SingleDocRoute services={services} />}
             />
             <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
+            <Route
+              path="/viewAlert/:id"
+              render={(props) => (
+                <ViewAlertRoute {...mainRouteProps} id={String(props.match.params.id)} />
+              )}
+            />
             <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
             <NotFoundRoute services={services} />
           </Switch>

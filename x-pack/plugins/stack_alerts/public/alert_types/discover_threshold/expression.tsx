@@ -15,7 +15,7 @@ import {
   ForLastExpression,
   AlertTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
-import { IndexThresholdAlertParams } from './types';
+import { DiscoverThresholdAlertParams } from './types';
 import './expression.scss';
 import {
   Filter,
@@ -38,7 +38,7 @@ export const DEFAULT_VALUES = {
 const expressionFieldsWithValidation = ['threshold0', 'threshold1', 'timeWindowSize'];
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
+  AlertTypeParamsExpressionProps<DiscoverThresholdAlertParams>
 > = ({ alertParams, setAlertParams, setAlertProperty, errors, data }) => {
   const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit, searchSourceFields } =
     alertParams;
@@ -62,7 +62,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      alertParams[errorKey as keyof IndexThresholdAlertParams] !== undefined
+      alertParams[errorKey as keyof DiscoverThresholdAlertParams] !== undefined
   );
 
   const expressionErrorMessage = i18n.translate(

@@ -42,6 +42,7 @@ import { EmbeddableStart } from '../../embeddable/public';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '../../../../x-pack/plugins/triggers_actions_ui/public';
+import { DiscoverAppLocator } from './locator';
 
 export interface DiscoverServices {
   application: ApplicationStart;
@@ -72,12 +73,14 @@ export interface DiscoverServices {
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
+  locator: DiscoverAppLocator;
 }
 
 export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext
+  context: PluginInitializerContext,
+  locator: DiscoverAppLocator
 ): DiscoverServices {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
@@ -113,5 +116,6 @@ export function buildServices(
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
+    locator,
   };
 }

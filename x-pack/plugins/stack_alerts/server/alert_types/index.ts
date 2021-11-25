@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import { AlertingSetup, StackAlertsStartDeps } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerDiscoverThreshold } from './discover_threshold';
 import { register as registerGeoContainment } from './geo_containment';
 import { register as registerEsQuery } from './es_query';
+import { SharePluginSetup } from '../../../../../src/plugins/share/server';
 interface RegisterAlertTypesParams {
   logger: Logger;
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
   alerting: AlertingSetup;
+  share: SharePluginSetup;
+  core: CoreSetup;
 }
 
 export function registerBuiltInAlertTypes(params: RegisterAlertTypesParams) {

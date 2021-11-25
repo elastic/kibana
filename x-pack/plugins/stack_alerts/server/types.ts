@@ -15,11 +15,13 @@ export type {
   AlertExecutorOptions,
 } from '../../alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { SharePluginSetup } from '../../../../src/plugins/share/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {
   alerting: AlertingSetup;
   features: FeaturesPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface StackAlertsStartDeps {
