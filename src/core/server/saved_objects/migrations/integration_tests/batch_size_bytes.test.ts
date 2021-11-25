@@ -26,6 +26,7 @@ async function removeLogFile() {
   // ignore errors if it doesn't exist
   await fs.unlink(logFilePath).catch(() => void 0);
 }
+
 function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
   return a.type.localeCompare(b.type) || a.id.localeCompare(b.id);
 }
@@ -76,12 +77,12 @@ describe('migration v2', () => {
   afterEach(async () => {
     if (root) {
       await root.shutdown();
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     }
     if (esServer) {
       await esServer.stop();
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('completes the migration even when a full batch would exceed ES http.max_content_length', async () => {

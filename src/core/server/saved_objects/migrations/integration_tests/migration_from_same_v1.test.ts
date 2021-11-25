@@ -24,10 +24,12 @@ const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.
 const logFilePath = Path.join(__dirname, 'migration_from_same_v1.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
+
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
+
 const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
 
 function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
@@ -153,12 +155,12 @@ describe('migrating from the same Kibana version that used v1 migrations', () =>
   const stopServers = async () => {
     if (root) {
       await root.shutdown();
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     }
     if (esServer) {
       await esServer.stop();
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   };
 
   beforeAll(async () => {

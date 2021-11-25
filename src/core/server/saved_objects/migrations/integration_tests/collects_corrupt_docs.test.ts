@@ -32,12 +32,12 @@ describe('migration v2 with corrupt saved object documents', () => {
   afterAll(async () => {
     if (root) {
       await root.shutdown();
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     }
     if (esServer) {
       await esServer.stop();
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('collects corrupt saved object documents across batches', async () => {

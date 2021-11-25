@@ -89,12 +89,12 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
   const stopServers = async () => {
     if (root) {
       await root.shutdown();
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     }
     if (esServer) {
       await esServer.stop();
+      await new Promise((resolve) => setTimeout(resolve, 10000));
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   };
 
   const migratedIndex = `.kibana_${kibanaVersion}_001`;
