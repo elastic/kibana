@@ -319,7 +319,7 @@ describe('getDisallowedTermsMessage()', () => {
             {
               input: {
                 language: 'kuery',
-                query: 'source: "*" AND bytes: "*"',
+                query: 'source: * AND bytes: *',
               },
               label: `source: * ${MULTI_KEY_VISUAL_SEPARATOR} bytes: *`,
             },

@@ -504,6 +504,37 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.common.pressEnterKey();
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
+
+    /**
+     * Add new term to Top values/terms agg
+     * @param opts field to add
+     */
+    async addTermToAgg(field: string) {
+      const lastIndex = (
+        await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
+      ).length;
+      await testSubjects.click('indexPattern-terms-add-field');
+      // count the number of defined terms
+      const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
+      await comboBox.openOptionsList(target);
+      await comboBox.setElement(target, field);
+    },
+
+    async checkTermsAreNotAvailableToAgg(fields: string[]) {
+      const lastIndex = (
+        await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
+      ).length;
+      await testSubjects.click('indexPattern-terms-add-field');
+      // count the number of defined terms
+      const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
+      // await comboBox.openOptionsList(target);
+      for (const field of fields) {
+        await comboBox.setCustom(`indexPattern-dimension-field-${lastIndex}`, field);
+        await comboBox.openOptionsList(target);
+        await testSubjects.missingOrFail(`lns-fieldOption-${field}`);
+      }
+    },
+
     /**
      * Save the current Lens visualization.
      */

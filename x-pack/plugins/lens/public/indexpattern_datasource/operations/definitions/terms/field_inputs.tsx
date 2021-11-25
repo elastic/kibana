@@ -179,6 +179,7 @@ export function FieldInputs({
                         onFieldSelectChange(choice, index);
                       }}
                       isInvalid={shouldShowScriptedFieldError}
+                      data-test-subj={`indexPattern-dimension-field-${index}`}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

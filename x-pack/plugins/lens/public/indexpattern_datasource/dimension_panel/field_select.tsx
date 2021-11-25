@@ -43,6 +43,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   existingFields: IndexPatternPrivateState['existingFields'];
   fieldIsInvalid: boolean;
   markAllFieldsCompatible?: boolean;
+  'data-test-subj'?: string;
 }
 
 const DEFAULT_COMBOBOX_WIDTH = 305;
@@ -60,6 +61,7 @@ export function FieldSelect({
   existingFields,
   fieldIsInvalid,
   markAllFieldsCompatible,
+  ['data-test-subj']: dataTestSub,
   ...rest
 }: FieldSelectProps) {
   const memoizedFieldOptions = useMemo(() => {
@@ -197,7 +199,7 @@ export function FieldSelect({
         fullWidth
         compressed
         isClearable={false}
-        data-test-subj="indexPattern-dimension-field"
+        data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
         placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
           defaultMessage: 'Field',
         })}

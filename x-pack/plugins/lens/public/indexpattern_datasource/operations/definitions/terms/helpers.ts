@@ -46,7 +46,9 @@ export function getMultiTermsScriptedFieldErrorMessage(
 
 function getQueryForMultiTerms(fieldNames: string[], term: string) {
   const terms = term.split(fullSeparatorString);
-  return fieldNames.map((fieldName, i) => `${fieldName}: "${terms[i]}"`).join(' AND ');
+  return fieldNames
+    .map((fieldName, i) => `${fieldName}: ${terms[i] !== '*' ? `"${terms[i]}"` : terms[i]}`)
+    .join(' AND ');
 }
 
 function getQueryLabel(fieldNames: string[], term: string) {
