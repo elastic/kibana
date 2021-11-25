@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui
 
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
@@ -18,6 +18,7 @@ import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimefilterService } from '../../hooks/use_timefilter_service';
 import { callObservabilityApi } from '../../services/call_observability_api';
@@ -29,6 +30,15 @@ import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from 
 import './styles.scss';
 import { WorkflowStatusFilter } from './workflow_status_filter';
 import { AlertsDisclaimer } from './alerts_disclaimer';
+import { loadAlertAggregations } from '../../../../../plugins/triggers_actions_ui/public';
+
+interface AlertStatsState {
+  isLoading: boolean;
+  ruleCount: number;
+  disabled: number;
+  muted: number;
+  errors: number;
+}
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -61,6 +71,15 @@ function AlertsPage() {
     workflowStatus,
     setWorkflowStatus,
   } = useAlertsPageStateContainer();
+  const { http } = useKibana().services;
+  const [alertStatsLoading, setAlertStatsLoading] = useState<boolean>(false);
+  const [alertStats, setAlertStats] = useState<AlertStatsState>({
+    isLoading: false,
+    ruleCount: -1,
+    disabled: -1,
+    muted: -1,
+    errors: -1,
+  });
 
   useBreadcrumbs([
     {
@@ -69,6 +88,35 @@ function AlertsPage() {
       }),
     },
   ]);
+
+  async function loadAlertStats() {
+    setAlertStatsLoading(true);
+    try {
+      const alertsResponse = await loadAlertAggregations({
+        http,
+        page: { index: 0, size: 9999 },
+        searchText: undefined,
+        typesFilter: [],
+        actionTypesFilter: [],
+        alertStatusesFilter: [],
+        sort: undefined,
+      });
+      const status = alertsResponse?.alertExecutionStatus;
+      if (status) {
+        setAlertStats({
+          ...alertStats,
+          ruleCount: status.active,
+          errors: status.error,
+        });
+        setAlertStatsLoading(false);
+      }
+    } catch (e) {}
+  }
+
+  useEffect(() => {
+    loadAlertStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
@@ -176,39 +224,43 @@ function AlertsPage() {
         ),
         rightSideItems: [
           <EuiStat
-            title={254}
+            title={alertStats.ruleCount}
             description={i18n.translate('xpack.observability.alerts.stats.ruleCount', {
               defaultMessage: 'Rule count',
             })}
             color="primary"
             titleSize="xs"
+            isLoading={alertStatsLoading}
             data-test-subj="statRuleCount"
           />,
           <EuiStat
-            title={120}
+            title={alertStats.disabled}
             description={i18n.translate('xpack.observability.alerts.stats.disabled', {
               defaultMessage: 'Disabled',
             })}
             color="primary"
             titleSize="xs"
+            isLoading={alertStatsLoading}
             data-test-subj="statDisabled"
           />,
           <EuiStat
-            title={0}
+            title={alertStats.muted}
             description={i18n.translate('xpack.observability.alerts.stats.muted', {
               defaultMessage: 'Muted',
             })}
             color="primary"
             titleSize="xs"
+            isLoading={alertStatsLoading}
             data-test-subj="statMuted"
           />,
           <EuiStat
-            title={3}
+            title={alertStats.errors}
             description={i18n.translate('xpack.observability.alerts.stats.errors', {
               defaultMessage: 'Errors',
             })}
             color="primary"
             titleSize="xs"
+            isLoading={alertStatsLoading}
             data-test-subj="statErrors"
           />,
           <Divider />,

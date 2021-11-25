@@ -45,6 +45,7 @@ export function plugin() {
 
 export { Plugin };
 export * from './plugin';
+export { loadAlerts, loadAlertAggregations } from './application/lib/alert_api';
 
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 
