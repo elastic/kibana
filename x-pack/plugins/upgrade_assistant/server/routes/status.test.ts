@@ -49,9 +49,9 @@ describe('Status API', () => {
           {
             level: 'critical',
             message:
-              'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
+              'Model snapshot [1] for job [deprecation_check_job] has an obsolete minimum version [6.3.0].',
             details:
-              'model snapshot [%s] for job [%s] supports minimum version [%s] and needs to be at least [%s]',
+              'Delete model snapshot [1] or update it to 7.0.0 or greater.',
             url: 'doc_url',
             correctiveAction: {
               type: 'mlSnapshot',
