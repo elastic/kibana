@@ -158,10 +158,12 @@ export const initializeCanvas = async (
     ],
     content: (domNode) => {
       ReactDOM.render(
-        <HelpMenu
-          functionRegistry={expressions.getFunctions()}
-          notifyService={canvasServices.getServices().notify}
-        />,
+        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+          <HelpMenu
+            functionRegistry={expressions.getFunctions()}
+            notifyService={canvasServices.getServices().notify}
+          />
+        </KibanaThemeProvider>,
         domNode
       );
       return () => ReactDOM.unmountComponentAtNode(domNode);

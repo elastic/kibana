@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaThemeProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { StartInitializer } from '../../../plugin';
 import { RendererFactory } from '../../../../types';
 import { AdvancedFilter } from './component';
 import { RendererStrings } from '../../../../i18n';

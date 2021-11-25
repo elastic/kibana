@@ -7,6 +7,8 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { StartInitializer } from '../plugin';
 import { Datatable as DatatableComponent } from '../../public/components/datatable';
 import { RendererStrings } from '../../i18n';
 import { RendererFactory, Style, Datatable } from '../../types';
@@ -21,26 +23,31 @@ export interface TableArguments {
   datatable: Datatable;
 }
 
-export const table: RendererFactory<TableArguments> = () => ({
-  name: 'table',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render(domNode, config, handlers) {
-    const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
-    ReactDOM.render(
-      <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
-        <DatatableComponent
-          datatable={datatable}
-          perPage={perPage}
-          paginate={paginate}
-          showHeader={showHeader}
-        />
-      </div>,
-      domNode,
-      () => handlers.done()
-    );
+export const tableFactory: StartInitializer<RendererFactory<TableArguments>> = (core, plugins) => {
+  const { theme } = core;
+  return () => ({
+    name: 'table',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render(domNode, config, handlers) {
+      const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
+            <DatatableComponent
+              datatable={datatable}
+              perPage={perPage}
+              paginate={paginate}
+              showHeader={showHeader}
+            />
+          </div>
+        </KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-  },
-});
+      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    },
+  });
+};
