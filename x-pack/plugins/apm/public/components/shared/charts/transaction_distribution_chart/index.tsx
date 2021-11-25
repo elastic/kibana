@@ -42,6 +42,7 @@ import { ChartContainer } from '../chart_container';
 export interface TransactionDistributionChartData {
   id: string;
   histogram: HistogramItem[];
+  areaSeriesColor: string;
 }
 
 interface TransactionDistributionChartProps {
@@ -51,7 +52,6 @@ interface TransactionDistributionChartProps {
   markerValue: number;
   markerPercentile: number;
   onChartSelection?: BrushEndListener;
-  palette?: string[];
   selection?: [number, number];
   status: FETCH_STATUS;
 }
@@ -100,17 +100,11 @@ export function TransactionDistributionChart({
   markerValue,
   markerPercentile,
   onChartSelection,
-  palette,
   selection,
   status,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
-
-  const areaSeriesColors = palette ?? [
-    euiTheme.eui.euiColorVis1,
-    euiTheme.eui.euiColorVis2,
-  ];
 
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
@@ -265,7 +259,7 @@ export function TransactionDistributionChart({
               curve={CurveType.CURVE_STEP_AFTER}
               xAccessor="key"
               yAccessors={['doc_count']}
-              color={areaSeriesColors[i]}
+              color={d.areaSeriesColor}
               fit="lookahead"
               // To make the area appear without the orphaned points technique,
               // we changed the original data to replace values of 0 with 0.0001.

@@ -18,7 +18,6 @@ import {
   EuiTitle,
   EuiBetaBadge,
   EuiBadge,
-  EuiText,
   EuiToolTip,
   EuiSwitch,
   EuiIconTip,
@@ -27,7 +26,6 @@ import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_tabl
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useUiTracker } from '../../../../../observability/public';
 
@@ -48,18 +46,15 @@ import { CorrelationsTable } from './correlations_table';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { getOverallHistogram } from './utils/get_overall_histogram';
-import {
-  TransactionDistributionChart,
-  TransactionDistributionChartData,
-} from '../../shared/charts/transaction_distribution_chart';
+import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { useTransactionColors } from './use_transaction_colors';
 import { CorrelationsContextPopover } from './context_popover';
 import { OnAddFilter } from './context_popover/top_values';
 
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
+import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -67,7 +62,6 @@ export function FailedTransactionsCorrelations({
   onFilter: () => void;
 }) {
   const euiTheme = useTheme();
-  const transactionColors = useTransactionColors();
 
   const {
     core: { notifications },
@@ -427,35 +421,12 @@ export function FailedTransactionsCorrelations({
     correlationTerms.length < 1 &&
     (progress.loaded === 1 || !progress.isRunning);
 
-  const transactionDistributionChartData: TransactionDistributionChartData[] =
-    [];
-
-  if (Array.isArray(overallHistogram)) {
-    transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-        { defaultMessage: 'All transactions' }
-      ),
-      histogram: overallHistogram,
-    });
-  }
-
-  if (Array.isArray(response.errorHistogram)) {
-    transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.failedTransactionsLabel',
-        { defaultMessage: 'Failed transactions' }
-      ),
-      histogram: response.errorHistogram,
-    });
-  }
-
-  if (selectedTerm && Array.isArray(selectedTerm.histogram)) {
-    transactionDistributionChartData.push({
-      id: `${selectedTerm.fieldName}:${selectedTerm.fieldValue}`,
-      histogram: selectedTerm.histogram,
-    });
-  }
+  const transactionDistributionChartData = getTransactionDistributionChartData({
+    euiTheme,
+    allTransactionsHistogram: overallHistogram,
+    failedTransactionsHistogram: response.errorHistogram,
+    selectedTerm,
+  });
 
   return (
     <div data-test-subj="apmFailedTransactionsCorrelationsTabContent">
@@ -507,41 +478,6 @@ export function FailedTransactionsCorrelations({
         </EuiFlexItem>
       </EuiFlexItem>
 
-      {selectedTerm && (
-        <EuiText color="subdued" size="xs">
-          <FormattedMessage
-            id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartDescription"
-            defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {br}{allTransactions}, {failedTransactions} and {focusTransaction}."
-            values={{
-              br: <br />,
-              allTransactions: (
-                <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
-                  <FormattedMessage
-                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartAllTransactions"
-                    defaultMessage="all transactions"
-                  />
-                </span>
-              ),
-              failedTransactions: (
-                <span
-                  style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
-                >
-                  <FormattedMessage
-                    id="xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsChartFailedTransactions"
-                    defaultMessage="failed transactions"
-                  />
-                </span>
-              ),
-              focusTransaction: (
-                <span style={{ color: transactionColors.FOCUS_TRANSACTION }}>
-                  {selectedTerm?.fieldName}:{selectedTerm?.fieldValue}
-                </span>
-              ),
-            }}
-          />
-        </EuiText>
-      )}
-
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
@@ -549,11 +485,6 @@ export function FailedTransactionsCorrelations({
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
-        palette={[
-          transactionColors.ALL_TRANSACTIONS,
-          transactionColors.ALL_FAILED_TRANSACTIONS,
-          transactionColors.FOCUS_TRANSACTION,
-        ]}
         status={status}
       />
 

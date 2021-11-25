@@ -29,7 +29,6 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
-import { useTransactionColors } from '../../correlations/use_transaction_colors';
 
 import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
@@ -69,7 +68,6 @@ export function TransactionDistribution({
   selection,
   traceSamples,
 }: TransactionDistributionProps) {
-  const transactionColors = useTransactionColors();
   const { urlParams } = useLegacyUrlParams();
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
@@ -204,10 +202,6 @@ export function TransactionDistribution({
           markerValue={percentileThresholdValue ?? 0}
           onChartSelection={onTrackedChartSelection as BrushEndListener}
           hasData={hasData}
-          palette={[
-            transactionColors.ALL_TRANSACTIONS,
-            transactionColors.ALL_FAILED_TRANSACTIONS,
-          ]}
           selection={selection}
           status={status}
         />
