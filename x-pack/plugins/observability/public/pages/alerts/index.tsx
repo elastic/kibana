@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
@@ -36,6 +37,11 @@ export interface TopAlert {
   link?: string;
   active: boolean;
 }
+
+const Divider = euiStyled.div`
+  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  height: 100%;
+`;
 
 const NO_INDEX_NAMES: string[] = [];
 const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
@@ -169,12 +175,45 @@ function AlertsPage() {
           </>
         ),
         rightSideItems: [
+          <EuiStat
+            title={254}
+            description={i18n.translate('xpack.observability.alerts.stats.ruleCount', {
+              defaultMessage: 'Rule count',
+            })}
+            color="primary"
+            titleSize="xs"
+          />,
+          <EuiStat
+            title={120}
+            description={i18n.translate('xpack.observability.alerts.stats.disabled', {
+              defaultMessage: 'Disabled',
+            })}
+            color="primary"
+            titleSize="xs"
+          />,
+          <EuiStat
+            title={0}
+            description={i18n.translate('xpack.observability.alerts.stats.muted', {
+              defaultMessage: 'Muted',
+            })}
+            color="primary"
+            titleSize="xs"
+          />,
+          <EuiStat
+            title={3}
+            description={i18n.translate('xpack.observability.alerts.stats.errors', {
+              defaultMessage: 'Errors',
+            })}
+            color="primary"
+            titleSize="xs"
+          />,
+          <Divider />,
           <EuiButtonEmpty href={manageRulesHref}>
             {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
               defaultMessage: 'Manage Rules',
             })}
           </EuiButtonEmpty>,
-        ],
+        ].reverse(),
       }}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
