@@ -19,7 +19,7 @@ import { config, generateData } from './generate_data';
 import { getErrorGroupIds } from './get_error_group_ids';
 
 type ErrorGroupsDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -32,11 +32,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi(
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>['params']
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>['params']
     >
   ) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics`,
+      endpoint: `GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics`,
       params: {
         path: { serviceName, ...overrides?.path },
         query: {
