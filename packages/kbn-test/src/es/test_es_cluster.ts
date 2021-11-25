@@ -8,12 +8,13 @@
 
 import Path from 'path';
 import { format } from 'url';
+import Fs from 'fs';
 import del from 'del';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import type { ToolingLog } from '@kbn/dev-utils';
+import { CA_CERT_PATH, ToolingLog } from '@kbn/dev-utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
@@ -272,7 +273,7 @@ export function createTestEsCluster<
           'elasticsearch.http.request.x_opaque_id': string;
         }>(
           { index: '.logs-deprecation.elasticsearch-default', ignore_unavailable: true, size: 100 },
-          { ignore: [404] }
+          { ignore: [404] } // The index doesn't exist if there's no deprecation logs
         )
         .then((res) => {
           const deps = res.body.hits.hits
@@ -315,6 +316,7 @@ export function createTestEsCluster<
       return new Client({
         node: this.getHostUrls()[0],
         headers: { 'X-Opaque-Id': 'kbn-test-client' },
+        ...(ssl && { ssl: { ca: Fs.readFileSync(CA_CERT_PATH), rejectUnauthorized: true } }),
       });
     }
 
@@ -339,7 +341,7 @@ export function createTestEsCluster<
      * in this list.
      */
     getHostUrls(): string[] {
-      return this.ports.map((p) => format({ ...esTestConfig.getUrlParts(), port: p }));
+      return this.ports.map((p) => format({ ...esTestConfig.getUrlParts(ssl), port: p }));
     }
   })() as EsTestCluster<Options>;
 }
