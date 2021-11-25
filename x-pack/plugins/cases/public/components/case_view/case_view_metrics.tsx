@@ -70,19 +70,22 @@ const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
 );
 CaseViewMetricItems.displayName = 'CaseViewMetricItems';
 
-export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = ({ metrics, isLoading }) => {
-  const metricItems = useMetricItems(metrics);
-  return (
-    <EuiPanel hasShadow={false} hasBorder={true}>
-      <EuiFlexGroup gutterSize="xl">
-        {isLoading ? (
-          <EuiFlexItem>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-        ) : (
-          <CaseViewMetricItems metricItems={metricItems} />
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
+export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
+  ({ metrics, isLoading }) => {
+    const metricItems = useMetricItems(metrics);
+    return (
+      <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
+        <EuiFlexGroup gutterSize="xl">
+          {isLoading ? (
+            <EuiFlexItem>
+              <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />
+            </EuiFlexItem>
+          ) : (
+            <CaseViewMetricItems metricItems={metricItems} />
+          )}
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+);
+CaseViewMetrics.displayName = 'CaseViewMetrics';

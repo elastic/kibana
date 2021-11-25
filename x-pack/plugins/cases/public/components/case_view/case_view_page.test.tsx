@@ -58,7 +58,7 @@ export const caseClosedProps: CaseViewPageProps = {
   caseData: basicCaseClosed,
 };
 
-describe('CaseView ', () => {
+describe('CaseViewPage', () => {
   const updateCaseProperty = jest.fn();
   const fetchCaseUserActions = jest.fn();
   const pushCaseToExternalService = jest.fn();

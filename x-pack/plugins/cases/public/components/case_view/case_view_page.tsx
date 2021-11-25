@@ -370,7 +370,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText>
-                        <h4>{'Activity'}</h4>
+                        <h4>{i18n.ACTIVITY}</h4>
                         <EuiHorizontalRule margin="xs" />
                       </EuiText>
                     </EuiFlexItem>
@@ -455,5 +455,4 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     );
   }
 );
-
 CaseViewPage.displayName = 'CaseViewPage';

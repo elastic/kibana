@@ -115,7 +115,7 @@ export const caseData: Case = {
   },
 };
 
-describe('CaseView ', () => {
+describe('CaseView', () => {
   const updateCaseProperty = jest.fn();
   const fetchCaseUserActions = jest.fn();
   const fetchCase = jest.fn();

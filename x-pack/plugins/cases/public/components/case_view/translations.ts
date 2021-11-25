@@ -95,6 +95,10 @@ export const CASE_REFRESH = i18n.translate('xpack.cases.caseView.caseRefresh', {
   defaultMessage: 'Refresh case',
 });
 
+export const ACTIVITY = i18n.translate('xpack.cases.caseView.activity', {
+  defaultMessage: 'Activity',
+});
+
 export const EMAIL_SUBJECT = (caseTitle: string) =>
   i18n.translate('xpack.cases.caseView.emailSubject', {
     values: { caseTitle },
