@@ -25,7 +25,7 @@ import {
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from 'src/core/public';
