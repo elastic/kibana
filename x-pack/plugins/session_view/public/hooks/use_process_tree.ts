@@ -164,6 +164,12 @@ class ProcessImpl implements Process {
       ({ event }) => event.action === EventAction.exec || event.action === EventAction.fork
     );
 
+    const execs = execsForks.filter(({ event }) => event.action === EventAction.exec);
+
+    if (execs.length) {
+      return execs[execs.length - 1];
+    }
+
     if (execsForks.length === 0) {
       // eslint-disable-next-line no-debugger
       debugger;
@@ -249,7 +255,7 @@ export const useProcessTree = ({
       if (parentProcess) {
         process.parent = parentProcess; // handy for recursive operations (like auto expand)
 
-        if (!parentProcess.children.includes(process)) {
+        if (!parentProcess.children.includes(process) && parentProcess.id !== process.id) {
           if (backwardDirection) {
             parentProcess.children.unshift(process);
           } else {
