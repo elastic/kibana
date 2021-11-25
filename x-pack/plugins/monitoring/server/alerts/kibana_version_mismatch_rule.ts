@@ -69,7 +69,7 @@ export class KibanaVersionMismatchRule extends BaseRule {
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
     clusters: AlertCluster[],
-    availableCcs: string[]
+    availableCcs: boolean
   ): Promise<AlertData[]> {
     let kibanaIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_KIBANA);
     if (availableCcs) {

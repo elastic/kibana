@@ -60,7 +60,7 @@ export class MissingMonitoringDataRule extends BaseRule {
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
     clusters: AlertCluster[],
-    availableCcs: string[]
+    availableCcs: boolean
   ): Promise<AlertData[]> {
     let indexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN);
     if (availableCcs) {

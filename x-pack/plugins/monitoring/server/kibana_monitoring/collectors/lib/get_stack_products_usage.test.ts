@@ -15,7 +15,7 @@ describe('getStackProductsUsage', () => {
     },
   };
   const clusterUuid = '1abcde2';
-  const availableCcs: string[] = [];
+  const availableCcs = false;
   const callCluster = {
     search: jest.fn().mockImplementation(() => ({
       body: {
