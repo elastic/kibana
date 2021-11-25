@@ -32,6 +32,15 @@ describe('TelemetryEventsSender', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     sender = new TelemetryEventsSender(logger);
+    sender['fetchClusterInfo'] = jest.fn(async () => {
+      return {
+        cluster_uuid: '1',
+        cluster_name: 'name',
+        version: {
+          number: '8.0.0',
+        },
+      } as InfoResponse;
+    });
     sender.start(undefined, {
       elasticsearch: { client: { asInternalUser: { info: jest.fn(async () => ({})) } } },
     } as any);
@@ -76,7 +85,7 @@ describe('TelemetryEventsSender', () => {
 
       expect(sender['sendEvents']).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/fleet-upgrades',
-        undefined,
+        { cluster_name: 'name', cluster_uuid: '1', version: { number: '8.0.0' } },
         expect.anything()
       );
     });
@@ -112,16 +121,6 @@ describe('TelemetryEventsSender', () => {
           async () => new URL('https://telemetry.elastic.co/v3/send/snapshot')
         ),
       };
-
-      sender['fetchClusterInfo'] = jest.fn(async () => {
-        return {
-          cluster_uuid: '1',
-          cluster_name: 'name',
-          version: {
-            number: '8.0.0',
-          },
-        } as InfoResponse;
-      });
 
       const myChannelEvents = [{ 'event.kind': '1' }, { 'event.kind': '2' }];
       // @ts-ignore
