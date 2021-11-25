@@ -177,6 +177,7 @@ describe('useRuleStatus', () => {
                 status_date: 'mm/dd/yyyyTHH:MM:sssz',
               },
               failures: [],
+              rule: testRule,
               id: '12345678987654321',
               activate: true,
               name: 'Test rule',
