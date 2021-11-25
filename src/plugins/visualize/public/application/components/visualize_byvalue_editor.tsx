@@ -26,6 +26,7 @@ import { VisualizeConstants } from '../..';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
+  const [originatingPath, setOriginatingPath] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -39,8 +40,10 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       embeddableId: embeddableIdValue,
       valueInput: valueInputValue,
       searchSessionId,
+      originatingPath: pathValue,
     } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
 
+    setOriginatingPath(pathValue);
     setOriginatingApp(value);
     setValueInput(valueInputValue);
     setEmbeddableId(embeddableIdValue);
@@ -64,7 +67,8 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     eventEmitter,
     isChromeVisible,
     valueInput,
-    originatingApp
+    originatingApp,
+    originatingPath
   );
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
@@ -99,6 +103,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       isEmbeddableRendered={isEmbeddableRendered}
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
+      originatingPath={originatingPath}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}
       embeddableId={embeddableId}
