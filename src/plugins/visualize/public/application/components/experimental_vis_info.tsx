@@ -8,7 +8,7 @@
 
 import React, { memo } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const InfoComponent = () => {
   const title = (
