@@ -15,7 +15,7 @@ import { ClusterStats } from './cluster_stats';
 export class Cluster extends Entity<StackMonitoringFields> {
   kibana(name: string, index: string = '.kibana') {
     return new Kibana({
-      ...this.fields,
+      cluster_uuid: this.fields.cluster_uuid,
       'kibana_stats.kibana.name': name,
       'kibana_stats.kibana.index': index,
       type: 'kibana_stats',
