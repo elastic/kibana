@@ -11,7 +11,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiSpacer,
