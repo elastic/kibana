@@ -27,9 +27,14 @@ import {
   ALERTS_HEADERS_RISK_SCORE,
   ALERTS_HEADERS_RULE,
   ALERTS_HEADERS_SEVERITY,
+  SIGNAL_STATUS,
 } from '../../../detections/components/alerts_table/translations';
-import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import {
+  SIGNAL_RULE_NAME_FIELD_NAME,
+  SIGNAL_STATUS_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
+import { RuleStatus } from '../../../timelines/components/timeline/body/renderers/rule_status';
 
 const OverviewPanel = euiStyled(EuiPanel)`
   &&& {
@@ -132,6 +137,20 @@ interface Props {
 
 export const OverviewCards = React.memo<Props>(
   ({ browserFields, contextId, data, eventId, timelineId }) => {
+    const statusData = useMemo(() => {
+      const item = find({ field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' }, data);
+      return (
+        item &&
+        getEnrichedFieldInfo({
+          eventId,
+          contextId,
+          timelineId,
+          browserFields,
+          item,
+        })
+      );
+    }, [browserFields, contextId, data, eventId, timelineId]);
+
     const severityData = useMemo(() => {
       const item = find({ field: 'kibana.alert.rule.severity', category: 'kibana' }, data);
       return (
@@ -178,6 +197,20 @@ export const OverviewCards = React.memo<Props>(
 
     return (
       <EuiFlexGroup gutterSize="m">
+        {hasData(statusData) && (
+          <EuiFlexItem>
+            <OverviewCard title={SIGNAL_STATUS}>
+              <RuleStatus
+                contextId={contextId}
+                eventId={eventId}
+                fieldName={statusData.data.field}
+                isDraggable={false}
+                value={statusData.values[0]}
+              />
+            </OverviewCard>
+          </EuiFlexItem>
+        )}
+
         {hasData(severityData) && (
           <EuiFlexItem>
             <OverviewCardWithActions
