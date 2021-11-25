@@ -11,3 +11,6 @@ export { apm } from './lib/apm';
 export { stackMonitoring } from './lib/stack_monitoring';
 export { cleanWriteTargets } from './lib/utils/clean_write_targets';
 export { createLogger, LogLevel } from './lib/utils/create_logger';
+
+export type { Fields } from './lib/entity';
+export type { ApmException, ApmSynthtraceEsClient } from './lib/apm';

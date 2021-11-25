@@ -16,6 +16,8 @@ import { getBreakdownMetrics } from './utils/get_breakdown_metrics';
 import { getApmWriteTargets } from './utils/get_apm_write_targets';
 import { ApmSynthtraceEsClient } from './client/apm_synthtrace_es_client';
 
+import type { ApmException } from './apm_fields';
+
 export const apm = {
   service,
   browser,
@@ -28,3 +30,5 @@ export const apm = {
   getApmWriteTargets,
   ApmSynthtraceEsClient,
 };
+
+export type { ApmSynthtraceEsClient, ApmException };
