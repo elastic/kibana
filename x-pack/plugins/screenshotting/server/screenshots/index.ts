@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getScreenshots$ } from './observable';
+export { getScreenshots } from './observable';
 export type { ScreenshotOptions, ScreenshotResult } from './observable';

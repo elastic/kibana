@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import type {
   CoreSetup,
   CoreStart,
@@ -15,12 +17,18 @@ import type {
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { HeadlessChromiumDriverFactory, installBrowser } from './browsers';
 import { createConfig, ConfigType } from './config';
+import { getScreenshots, ScreenshotOptions } from './screenshots';
 
 interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;
 }
 
-export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
+export interface ScreenshottingStart {
+  diagnose: HeadlessChromiumDriverFactory['diagnose'];
+  getScreenshots(options: ScreenshotOptions): ReturnType<typeof getScreenshots>;
+}
+
+export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, SetupDeps> {
   private config: ConfigType;
   private logger: Logger;
   private screenshotMode!: ScreenshotModePluginSetup;
@@ -33,11 +41,6 @@ export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
 
   setup({}: CoreSetup, { screenshotMode }: SetupDeps) {
     this.screenshotMode = screenshotMode;
-
-    return {};
-  }
-
-  start({}: CoreStart) {
     this.browserDriverFactory = (async () => {
       try {
         const logger = this.logger.get('chromium');
@@ -46,10 +49,7 @@ export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
           installBrowser(logger),
         ]);
 
-        return new HeadlessChromiumDriverFactory(this.screenshotMode, logger, {
-          ...config,
-          binaryPath,
-        });
+        return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);
       } catch (error) {
         this.logger.error('Error in screenshotting setup, it may not function properly.');
 
@@ -58,6 +58,17 @@ export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
     })();
 
     return {};
+  }
+
+  start({}: CoreStart): ScreenshottingStart {
+    return {
+      diagnose: () =>
+        from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
+      getScreenshots: (options) =>
+        from(this.browserDriverFactory).pipe(
+          switchMap((factory) => getScreenshots(factory, this.logger.get('screenshot'), options))
+        ),
+    };
   }
 
   stop() {}

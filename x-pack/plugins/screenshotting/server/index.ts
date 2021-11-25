@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { ScreenshottingPlugin } from './plugin';
 
 export function plugin(...args: ConstructorParameters<typeof ScreenshottingPlugin>) {
   return new ScreenshottingPlugin(...args);
 }
+
+export { config } from './config';
+export { LayoutTypes } from './layouts';
+export type { Layout } from './layouts';
+export type { ScreenshottingStart } from './plugin';
+export type { ScreenshotOptions, ScreenshotResult } from './screenshots';

@@ -39,7 +39,7 @@ const DEFAULT_SETUP_RESULT = {
   timeRange: null,
 };
 
-export function getScreenshots$(
+export function getScreenshots(
   browserDriverFactory: HeadlessChromiumDriverFactory,
   logger: Logger,
   options: ScreenshotOptions
