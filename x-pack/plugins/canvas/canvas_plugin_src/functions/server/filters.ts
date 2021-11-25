@@ -14,6 +14,13 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { buildFiltersFunction } from '../../../common/functions';
 import type { FiltersFunction } from '../../../common/functions';
 
+/* 
+  Expression function `filters` can't be used on the server, because it is tightly coupled with the redux store. 
+  It is replaced with `kibana | selectFilter`.
+  
+  Current filters function definition is used only for the purpose of enabling migrations.
+  The function has to be registered on the server while the plugin's setup, to be able to run its migration.
+*/
 const filtersFn = (): ExpressionValueFilter => ({
   type: 'filter',
   and: [],
