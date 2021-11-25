@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiInMemoryTable,
@@ -14,8 +14,16 @@ import {
 } from '@elastic/eui';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { ApiKey } from '../../../../../../security/common/model';
+import { ConfirmDeleteModal } from './confirm_delete_modal';
 
-export function AgentKeysTable({ agentKeys }: { agentKeys: ApiKey[] }) {
+interface Props {
+  agentKeys: ApiKey[];
+  refetchAgentKeys: () => void;
+}
+
+export function AgentKeysTable({ agentKeys, refetchAgentKeys }: Props) {
+  const [agentKeyToBeDeleted, setAgentKeyToBeDeleted] = useState<ApiKey>();
+
   const columns: Array<EuiBasicTableColumn<ApiKey>> = [
     {
       field: 'name',
@@ -61,6 +69,28 @@ export function AgentKeysTable({ agentKeys }: { agentKeys: ApiKey[] }) {
         show: false,
       },
       render: (date: number) => <TimestampTooltip time={date} />,
+    },
+    {
+      actions: [
+        {
+          name: i18n.translate(
+            'xpack.apm.settings.agentKeys.table.deleteActionTitle',
+            {
+              defaultMessage: 'Delete',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.apm.settings.agentKeys.table.deleteActionDescription',
+            {
+              defaultMessage: 'Delete this agent key',
+            }
+          ),
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: (agentKey: ApiKey) => setAgentKeyToBeDeleted(agentKey),
+        },
+      ],
     },
   ];
 
@@ -109,18 +139,30 @@ export function AgentKeysTable({ agentKeys }: { agentKeys: ApiKey[] }) {
   };
 
   return (
-    <EuiInMemoryTable
-      tableCaption={i18n.translate(
-        'xpack.apm.settings.agentKeys.tableCaption',
-        {
-          defaultMessage: 'Agent keys',
-        }
+    <React.Fragment>
+      <EuiInMemoryTable
+        tableCaption={i18n.translate(
+          'xpack.apm.settings.agentKeys.tableCaption',
+          {
+            defaultMessage: 'Agent keys',
+          }
+        )}
+        items={agentKeys ?? []}
+        columns={columns}
+        pagination={true}
+        search={search}
+        sorting={true}
+      />
+      {agentKeyToBeDeleted && (
+        <ConfirmDeleteModal
+          onCancel={() => setAgentKeyToBeDeleted(undefined)}
+          agentKey={agentKeyToBeDeleted}
+          onConfirm={() => {
+            setAgentKeyToBeDeleted(undefined);
+            refetchAgentKeys();
+          }}
+        />
       )}
-      items={agentKeys ?? []}
-      columns={columns}
-      pagination={true}
-      search={search}
-      sorting={true}
-    />
+    </React.Fragment>
   );
 }

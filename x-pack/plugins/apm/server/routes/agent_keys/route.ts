@@ -7,10 +7,12 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { getAgentKeys } from './get_agent_keys';
 import { getAgentKeysPrivileges } from './get_agent_keys_privileges';
+import { invalidateAgentKey } from './invalidate_agent_key';
 
 const agentKeysRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys',
@@ -22,9 +24,7 @@ const agentKeysRoute = createApmServerRoute({
       context,
     });
 
-    return {
-      agentKeys,
-    };
+    return agentKeys;
   },
 });
 
@@ -52,9 +52,32 @@ const agentKeysPrivilegesRoute = createApmServerRoute({
   },
 });
 
+const invalidateAgentKeyRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/api_key/invalidate',
+  options: { tags: ['access:apm'] },
+  params: t.type({
+    body: t.type({ id: t.string }),
+  }),
+  handler: async (resources) => {
+    const { context, params } = resources;
+
+    const {
+      body: { id },
+    } = params;
+
+    const invalidatedKeys = await invalidateAgentKey({
+      context,
+      id,
+    });
+
+    return invalidatedKeys;
+  },
+});
+
 export const agentKeysRouteRepository = createApmServerRouteRepository()
   .add(agentKeysRoute)
-  .add(agentKeysPrivilegesRoute);
+  .add(agentKeysPrivilegesRoute)
+  .add(invalidateAgentKeyRoute);
 
 const SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.apiKeys.securityRequired',
